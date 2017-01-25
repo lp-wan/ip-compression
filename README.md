@@ -2,7 +2,7 @@
 
 This is the working area for the Working Group internet-draft, "".
 
-* [Editor's copy](https://lp-wan.github.io/ip-compression/)
+* [Editor's copy](https://lp-wan.github.io/ip-compression/)    [![Build Status](https://travis-ci.org/lp-wan/ip-compression.svg?branch=master)](https://travis-ci.org/lp-wan/ip-compression)
 * [Working Group Draft] (https://tools.ietf.org/html/draft-ietf-lpwan-ipv6-static-context-hc)
 * [Compare Working Group Draft and Editor's copy] (https://tools.ietf.org/rfcdiff?url1=https://tools.ietf.org/id/draft-ietf-lpwan-ipv6-static-context-hc.txt&url2=https://lp-wan.github.io/ip-compression/draft-ietf-lpwan-ipv6-static-context-hc.txt)
 
