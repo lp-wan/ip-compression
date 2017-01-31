@@ -21,7 +21,7 @@ author:
   email: ana@ackl.io
 - ins: L. Toutain
   name: Laurent Toutain
-  org: Institut MINES TELECOM ; TELECOM Bretagne
+  org: IMT-Atlantique
   street:
   - 2 rue de la Chataigneraie
   - CS 17607
