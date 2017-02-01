@@ -173,7 +173,7 @@ value (TV), a matching operator (MO) and a Compression/Decompression Function
  |                    Rule i                                       | |
 +----------------------------------------------------------------+ | |
 |                Rule 1                                          | | |
-|         +--------------+-------------------+-----------------+ | | |
+|+--------+--------------+-------------------+-----------------+ | | |
 | Field 1 | Target Value | Matching Operator | Comp/Decomp Fct | | | |
 |         +--------------+-------------------+-----------------+ | | |
 | Field 2 | Target Value | Matching Operator | Comp/Decomp Fct | | | |
