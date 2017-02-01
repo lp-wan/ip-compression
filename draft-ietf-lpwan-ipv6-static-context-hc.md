@@ -27,7 +27,7 @@ author:
   - CS 17607
   city: 35576 Cesson-Sevigne Cedex
   country: France
-  email: Laurent.Toutain@telecom-bretagne.eu
+  email: Laurent.Toutain@imt-atlantique.fr
 normative:
   rfc0768: 
   rfc4944: 
