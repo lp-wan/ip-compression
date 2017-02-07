@@ -278,21 +278,22 @@ address {
 
   <link href="#rfc.toc" rel="Contents"/>
 <link href="#rfc.section.1" rel="Chapter" title="1 Introduction"/>
-<link href="#rfc.section.2" rel="Chapter" title="2 Static Context Header Compression"/>
-<link href="#rfc.section.2.1" rel="Chapter" title="2.1 Simple Example"/>
-<link href="#rfc.section.2.2" rel="Chapter" title="2.2 Packet processing"/>
-<link href="#rfc.section.3" rel="Chapter" title="3 Matching operators"/>
-<link href="#rfc.section.4" rel="Chapter" title="4 Compression Decompression Functions (CDF)"/>
-<link href="#rfc.section.4.1" rel="Chapter" title="4.1 Compression Decompression Functions (CDF)"/>
-<link href="#rfc.section.4.1.1" rel="Chapter" title="4.1.1 not-sent"/>
-<link href="#rfc.section.4.1.2" rel="Chapter" title="4.1.2 value-sent"/>
-<link href="#rfc.section.4.1.3" rel="Chapter" title="4.1.3 LSB(length)"/>
-<link href="#rfc.section.4.1.4" rel="Chapter" title="4.1.4 ESiid-DID, LAiid-DID"/>
-<link href="#rfc.section.4.1.5" rel="Chapter" title="4.1.5 Compute-*"/>
-<link href="#rfc.section.5" rel="Chapter" title="5 Examples"/>
-<link href="#rfc.section.5.1" rel="Chapter" title="5.1 IPv6/UDP compression in a star topology"/>
-<link href="#rfc.section.6" rel="Chapter" title="6 Acknowledgements"/>
-<link href="#rfc.references" rel="Chapter" title="7 Normative References"/>
+<link href="#rfc.section.2" rel="Chapter" title="2 Vocabulary"/>
+<link href="#rfc.section.3" rel="Chapter" title="3 Static Context Header Compression"/>
+<link href="#rfc.section.3.1" rel="Chapter" title="3.1 Simple Example"/>
+<link href="#rfc.section.3.2" rel="Chapter" title="3.2 Packet processing"/>
+<link href="#rfc.section.4" rel="Chapter" title="4 Matching operators"/>
+<link href="#rfc.section.5" rel="Chapter" title="5 Compression Decompression Functions (CDF)"/>
+<link href="#rfc.section.5.1" rel="Chapter" title="5.1 Compression Decompression Functions (CDF)"/>
+<link href="#rfc.section.5.1.1" rel="Chapter" title="5.1.1 not-sent"/>
+<link href="#rfc.section.5.1.2" rel="Chapter" title="5.1.2 value-sent"/>
+<link href="#rfc.section.5.1.3" rel="Chapter" title="5.1.3 LSB(length)"/>
+<link href="#rfc.section.5.1.4" rel="Chapter" title="5.1.4 ESiid-DID, LAiid-DID"/>
+<link href="#rfc.section.5.1.5" rel="Chapter" title="5.1.5 Compute-*"/>
+<link href="#rfc.section.6" rel="Chapter" title="6 Examples"/>
+<link href="#rfc.section.6.1" rel="Chapter" title="6.1 IPv6/UDP compression in a star topology"/>
+<link href="#rfc.section.7" rel="Chapter" title="7 Acknowledgements"/>
+<link href="#rfc.references" rel="Chapter" title="8 Normative References"/>
 <link href="#rfc.authors" rel="Chapter"/>
 
 
@@ -301,7 +302,7 @@ address {
 
   <meta name="dct.creator" content="Minaburo, A. and L. Toutain" />
   <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-lpwan-ipv6-static-context-hc-latest" />
-  <meta name="dct.issued" scheme="ISO8601" content="2017-2-01" />
+  <meta name="dct.issued" scheme="ISO8601" content="2017-2-07" />
   <meta name="dct.abstract" content="This document describes a header compression scheme for IPv6, IPv6/UDP based on static contexts. This technique is especially tailored for LPWA networks and could be extended to other protocol stacks." />
   <meta name="description" content="This document describes a header compression scheme for IPv6, IPv6/UDP based on static contexts. This technique is especially tailored for LPWA networks and could be extended to other protocol stacks." />
 
@@ -325,12 +326,12 @@ address {
   <td class="right">L. Toutain</td>
 </tr>
 <tr>
-  <td class="left">Expires: August 5, 2017</td>
+  <td class="left">Expires: August 11, 2017</td>
   <td class="right">IMT-Atlantique</td>
 </tr>
 <tr>
   <td class="left"></td>
-  <td class="right">February 01, 2017</td>
+  <td class="right">February 07, 2017</td>
 </tr>
 
     	
@@ -344,16 +345,15 @@ address {
   <a href="#rfc.abstract">Abstract</a>
 </h1>
 <p>This document describes a header compression scheme for IPv6, IPv6/UDP based on static contexts. This technique is especially tailored for LPWA networks and could be extended to other protocol stacks.</p>
-<p>During the IETF history several compression mechanisms have been proposed.  First mechanisms, such as RoHC, are using a context to store header field values and send smaller incremental differences on the link. Values in the context evolve dynamically with information contained in the compressed header. The challenge is to maintain sender&#8217;s and receiver&#8217;s contexts synchronized even with packet losses. Based on the fact that IPv6 contains only static fields, 6LoWPAN developed an efficient context-free compression mechanisms, allowing better flexibility and performance.</p>
-<p>The Static Context Header Compression (SCHC) combines the advantages of RoHC context which offers a great level of flexibility in the processing of fields, and 6LoWPAN behavior to elide fields that are known from the other side.  Static context means that values in the context field do not change during the transmission, avoiding complex resynchronization mechanisms, incompatible with LPWA characteristics. In most of the cases, IPv6/UDP headers are reduced to a small  identifier.</p>
-<p>This document focuses on IPv6/UDP headers compression, but the mechanism can be applied to other protocols such as CoAP. It will be described in a separate document.</p>
+<p>The Static Context Header Compression (SCHC)  offers a great level of flexibility in the processing of fields.  Static context means that values in the context field do not change during the transmission, avoiding complex resynchronization mechanisms, incompatible with LPWA characteristics. In most of the cases, IPv6/UDP headers are reduced to a small identifier.</p>
+<p>This document describes the compression/decompression process and apply it to IPv6/UDP headers compression, Other protocols such as CoAP will be described in a separate document.</p>
 <h1 id="rfc.status">
   <a href="#rfc.status">Status of This Memo</a>
 </h1>
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at http://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on August 5, 2017.</p>
+<p>This Internet-Draft will expire on August 11, 2017.</p>
 <h1 id="rfc.copyrightnotice">
   <a href="#rfc.copyrightnotice">Copyright Notice</a>
 </h1>
@@ -361,7 +361,7 @@ address {
 <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (http://trustee.ietf.org/license-info) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.</p>
 <h1 id="rfc.section.1"><a href="#rfc.section.1">1.</a> <a href="#Introduction" id="Introduction">Introduction</a></h1>
 <p id="rfc.section.1.p.1">Headers compression is mandatory to bring the internet protocols to the node within a LPWA network <a href="#I-D.minaburo-lp-wan-gap-analysis">[I-D.minaburo-lp-wan-gap-analysis]</a>.</p>
-<p id="rfc.section.1.p.2">Nevertheless, LPWA networks offer good properties for an efficient header compression:</p>
+<p id="rfc.section.1.p.2">Some LPWA networks properties can be exploited for an efficient header compression:</p>
 <p/>
 
 <ul>
@@ -391,9 +391,17 @@ address {
 <p id="rfc.section.1.p.5">On the other hand, 6LoWPAN <a href="#RFC4944">[RFC4944]</a> is context-free based on the fact that IPv6, its extensions or UDP headers do not contain incremental fields. The compression mechanism described in <a href="#RFC6282">[RFC6282]</a> is based on sending a 2-byte bitmap, which describes how the header should be decompressed, either using some standard values or sending information after this bitmap. <a href="#RFC6282">[RFC6282]</a> also allows for UDP compression.</p>
 <p id="rfc.section.1.p.6">In the best case, when Hop limit is a standard value, flow label, DiffServ fields are set to 0 and Link Local addresses are used over a single hop network, the 6LoWPAN compressed header is reduced to 4 bytes. This compression ratio is possible because the IID are derived from the MAC addresses and the link local prefix is known from both sides.  In that  case, the IPv6 compression is 4 bytes and UDP compression is 2 bytes, which fills half of the payload of a SIGFOX frame, or more than 10% of a LoRaWAN payload (with spreading factor 12).</p>
 <p id="rfc.section.1.p.7">The Static Context Header Compression (SCHC) combines the advantages of RoHC context, which offers a great level of flexibility in the processing of fields, and 6LoWPAN behavior to elide fields that are known from the other side.  Static context means that values in the context field do not change during the transmission, avoiding complex resynchronization mechanisms, incompatible with LPWA characteristics. In most of the cases, IPv6/UDP headers are reduced to a small context identifier.</p>
-<h1 id="rfc.section.2"><a href="#rfc.section.2">2.</a> <a href="#static-context-header-compression" id="static-context-header-compression">Static Context Header Compression</a></h1>
-<p id="rfc.section.2.p.1">Static Context Header Compression (SCHC) avoids context synchronization, which is the most bandwidth-consuming operation in RoHC. Based on the fact that the nature of data flows is highly predictable in LPWA networks, a static context may be stored on the End-System (ES). The other end, the LPWA Compressor (LC) can learn the context through a provisioning protocol during the identification phase (for instance, as it learns the encryption key).</p>
-<p id="rfc.section.2.p.2">The context contains a list of rules (cf. <a href="#Fig-ctxt">Figure 2</a>). Each rule contains itself a list of field descriptions composed of a target value (TV), a matching operator (MO) and a Compression/Decompression Function (CDF).</p>
+<h1 id="rfc.section.2"><a href="#rfc.section.2">2.</a> <a href="#vocabulary" id="vocabulary">Vocabulary</a></h1>
+<p/>
+
+<ul>
+  <li>ES End System: Node connected to the LPWAN. ES may implement SCHC</li>
+  <li>LA LPWAN Application: Application sending/consuming data to/from the End System.</li>
+  <li>LC LPWAN Compressor: Process in the network compression/decompressing data. LC implement SCHC</li>
+</ul>
+<h1 id="rfc.section.3"><a href="#rfc.section.3">3.</a> <a href="#static-context-header-compression" id="static-context-header-compression">Static Context Header Compression</a></h1>
+<p id="rfc.section.3.p.1">Static Context Header Compression (SCHC) avoids context synchronization, which is the most bandwidth-consuming operation in RoHC. Based on the fact that the nature of data flows is highly predictable in LPWA networks, a static context may be stored on the End-System (ES). The other end, the LPWA Compressor (LC) can learn the context through a provisioning protocol during the identification phase (for instance, as it learns the encryption key).</p>
+<p id="rfc.section.3.p.2">The context contains a list of rules (cf. <a href="#Fig-ctxt">Figure 2</a>). Each rule contains itself a list of field descriptions composed of a target value (TV), a matching operator (MO) and a Compression/Decompression Function (CDF).</p>
 <div id="rfc.figure.2"/>
 <div id="Fig-ctxt"/>
 <pre>
@@ -416,12 +424,12 @@ address {
 +----------------------------------------------------------------+
 </pre>
 <p class="figure">Figure 2: Compression Decompression Context</p>
-<p id="rfc.section.2.p.3">The rule does not describe the compressed/decompressed packet format which must be known from the compressor/decompressor. The rule just describes the compression/decompression behavior for a field.</p>
-<p id="rfc.section.2.p.4">The main idea of the compression scheme is to send the rule number (or rule id) to the other end instead of known field values.</p>
-<p id="rfc.section.2.p.5">Matching a field with a value and header compression are related operations; If a field matches a rule  containing the value, it is not necessary to send it on the link. Since contexts are synchronized, reading the rule&#8217;s value is enough to reconstruct the field&#8217;s value at the other end.</p>
-<p id="rfc.section.2.p.6">On some other cases, the value need to be sent on the link to inform the other end. The field value may vary from one packet to another, therefore the field cannot be used to select the rule id.</p>
-<h1 id="rfc.section.2.1"><a href="#rfc.section.2.1">2.1.</a> <a href="#simple-example" id="simple-example">Simple Example</a></h1>
-<p id="rfc.section.2.1.p.1">A simple header is composed of 3 fields (F1, F2, F3). The compressor receives a packet containing respectively [F1:0x00, F2:0x1230, F3:0xABC0] in those fields. The Matching Operators (as defined in <a href="#chap-MO">Section 3</a>) allow to select Rule 5 as represented in <a href="#Fig-ex-ctxt">Figure 3</a>; F1 value is ignored and F2 and F3 packet field values are matched with those stored in the rule Target Values.</p>
+<p id="rfc.section.3.p.3">The rule does not describe the compressed/decompressed packet format which must be known from the compressor/decompressor. The rule just describes the compression/decompression behavior for a field.</p>
+<p id="rfc.section.3.p.4">The main idea of the compression scheme is to send the rule number (or rule id) to the other end instead of known field values.</p>
+<p id="rfc.section.3.p.5">Matching a field with a value and header compression are related operations; If a field matches a rule  containing the value, it is not necessary to send it on the link. Since contexts are synchronized, reading the rule&#8217;s value is enough to reconstruct the field&#8217;s value at the other end.</p>
+<p id="rfc.section.3.p.6">On some other cases, the value need to be sent on the link to inform the other end. The field value may vary from one packet to another, therefore the field cannot be used to select the rule id.</p>
+<h1 id="rfc.section.3.1"><a href="#rfc.section.3.1">3.1.</a> <a href="#simple-example" id="simple-example">Simple Example</a></h1>
+<p id="rfc.section.3.1.p.1">A simple header is composed of 3 fields (F1, F2, F3). The compressor receives a packet containing respectively [F1:0x00, F2:0x1230, F3:0xABC0] in those fields. The Matching Operators (as defined in <a href="#chap-MO">Section 4</a>) allow to select Rule 5 as represented in <a href="#Fig-ex-ctxt">Figure 3</a>; F1 value is ignored and F2 and F3 packet field values are matched with those stored in the rule Target Values.</p>
 <div id="rfc.figure.3"/>
 <div id="Fig-ex-ctxt"/>
 <pre>
@@ -436,10 +444,10 @@ address {
         +--------------+-------------------+-----------------+
 </pre>
 <p class="figure">Figure 3: Matching Rule</p>
-<p id="rfc.section.2.1.p.2">The Compression/Decompression Function (as defined in <a href="#chap-CDF">Section 4</a> describes how the fields are compressed. In this example, all the fields are elided and only the rule number has to be sent to the other end.</p>
-<p id="rfc.section.2.1.p.3">The decompressor receives the rule number and reconstructs the header using the values stored in the Target Value column.</p>
-<p id="rfc.section.2.1.p.4">Note that F1 value will be set to 0x00 by the decompressor, even if the original header field was carrying a different value.</p>
-<p id="rfc.section.2.1.p.5">To allow a range of values for field F2 and F3, the MSB() Matching Operator and LSB() Compression/Decompression Function can be used (as defined in <a href="#chap-MO">Section 3</a> and <a href="#chap-CDF">Section 4</a>). In that case the rule will be rewritten as defined in <a href="#Fig-ex-ctxt2">Figure 4</a>.</p>
+<p id="rfc.section.3.1.p.2">The Compression/Decompression Function (as defined in <a href="#chap-CDF">Section 5</a> describes how the fields are compressed. In this example, all the fields are elided and only the rule number has to be sent to the other end.</p>
+<p id="rfc.section.3.1.p.3">The decompressor receives the rule number and reconstructs the header using the values stored in the Target Value column.</p>
+<p id="rfc.section.3.1.p.4">Note that F1 value will be set to 0x00 by the decompressor, even if the original header field was carrying a different value.</p>
+<p id="rfc.section.3.1.p.5">To allow a range of values for field F2 and F3, the MSB() Matching Operator and LSB() Compression/Decompression Function can be used (as defined in <a href="#chap-MO">Section 4</a> and <a href="#chap-CDF">Section 5</a>). In that case the rule will be rewritten as defined in <a href="#Fig-ex-ctxt2">Figure 4</a>.</p>
 <div id="rfc.figure.4"/>
 <div id="Fig-ex-ctxt2"/>
 <pre>
@@ -454,9 +462,9 @@ address {
         +--------------+-------------------+-----------------+
 </pre>
 <p class="figure">Figure 4: Matching Rule</p>
-<p id="rfc.section.2.1.p.6">In that case, if a packet with the following header fields [F1:0x00, F2:0x1234, F3:0xABCD] arrives to the compressor, the new rule 5 will be selected and sent to the other end. The compressed header will be composed of the single byte [0x4D]. The decompressor receives the compressed header and follows the rule to reconstruct [0x00, 0x1234, 0xABCD] applying a OR operator between the target value stored in the rule and the compressed field value sent.</p>
-<h1 id="rfc.section.2.2"><a href="#rfc.section.2.2">2.2.</a> <a href="#packet-processing" id="packet-processing">Packet processing</a></h1>
-<p id="rfc.section.2.2.p.1">The compression/decompression process follows several steps:</p>
+<p id="rfc.section.3.1.p.6">In that case, if a packet with the following header fields [F1:0x00, F2:0x1234, F3:0xABCD] arrives to the compressor, the new rule 5 will be selected and sent to the other end. The compressed header will be composed of the single byte [0x4D]. The decompressor receives the compressed header and follows the rule to reconstruct [0x00, 0x1234, 0xABCD] applying a OR operator between the target value stored in the rule and the compressed field value sent.</p>
+<h1 id="rfc.section.3.2"><a href="#rfc.section.3.2">3.2.</a> <a href="#packet-processing" id="packet-processing">Packet processing</a></h1>
+<p id="rfc.section.3.2.p.1">The compression/decompression process follows several steps:</p>
 <p/>
 
 <ul>
@@ -464,9 +472,9 @@ address {
   <li>sending: The rule number is sent to the other end followed by data resulting from the field compression. The way the rule number is sent depends of the layer two technology and will be specified in a specific document. For exemple, it can either be included in a Layer 2 header or sent in the first byte of the L2 payload.</li>
   <li>decompression: The receiver identifies the  sender through its device-id (e.g. MAC address) and select the appropriate rule through the rule number.  It applies the compression decompression function to reconstruct the original header fields.</li>
 </ul>
-<h1 id="rfc.section.3"><a href="#rfc.section.3">3.</a> <a href="#chap-MO" id="chap-MO">Matching operators</a></h1>
-<p id="rfc.section.3.p.1">It may exist some intermediary cases, where part of the value may be used to select a field and a variable part has to be sent on the link. This is true for Least Significant Bits (LSB) where the most significant bit can be used to select a rule id and the least significant bits have to be sent on the link.</p>
-<p id="rfc.section.3.p.2">Several matching operators are defined:</p>
+<h1 id="rfc.section.4"><a href="#rfc.section.4">4.</a> <a href="#chap-MO" id="chap-MO">Matching operators</a></h1>
+<p id="rfc.section.4.p.1">It may exist some intermediary cases, where part of the value may be used to select a field and a variable part has to be sent on the link. This is true for Least Significant Bits (LSB) where the most significant bit can be used to select a rule id and the least significant bits have to be sent on the link.</p>
+<p id="rfc.section.4.p.2">Several matching operators are defined:</p>
 <p/>
 
 <ul>
@@ -474,8 +482,8 @@ address {
   <li>ignore: no check is done between a field value in a packet and a field value in the rule. The result is always true.</li>
   <li>MSB(length): a field value of length T in a packet matches with a field value in a rule if the most significant &#8220;length&#8221; bits are equal.</li>
 </ul>
-<h1 id="rfc.section.4"><a href="#rfc.section.4">4.</a> <a href="#chap-CDF" id="chap-CDF">Compression Decompression Functions (CDF)</a></h1>
-<p id="rfc.section.4.p.1">The Compression Decompression Functions (CDF) describe the action taken during the compression and inversely the action taken by the decompressor to restore the original value.</p>
+<h1 id="rfc.section.5"><a href="#rfc.section.5">5.</a> <a href="#chap-CDF" id="chap-CDF">Compression Decompression Functions (CDF)</a></h1>
+<p id="rfc.section.5.p.1">The Compression Decompression Functions (CDF) describe the action taken during the compression and inversely the action taken by the decompressor to restore the original value.</p>
 <div id="rfc.figure.5"/>
 <div id="Fig-function"/>
 <pre>
@@ -496,7 +504,7 @@ address {
 </pre>
 <p class="figure">Figure 5: Compression and Decompression Functions</p>
 <p><a href="#Fig-function">Figure 5</a> lists all the functions defined to compress and decompress a field. The first column gives the function&#8217;s name. The second and third columns outlines the compression/decompression process.</p>
-<p id="rfc.section.4.p.3">As with 6LoWPAN, the compression process may produce some data, where fields that were not compressed (or were partially compressed) will be sent in the order  of the original packet. Information added by the compression phase must be aligned on byte boundaries, but each individual compression function may generate any size.</p>
+<p id="rfc.section.5.p.3">As with 6LoWPAN, the compression process may produce some data, where fields that were not compressed (or were partially compressed) will be sent in the order  of the original packet. Information added by the compression phase must be aligned on byte boundaries, but each individual compression function may generate any size.</p>
 <div id="rfc.figure.6"/>
 <div id="Fig--possible-function"/>
 <pre>
@@ -544,17 +552,17 @@ address {
 </pre>
 <p class="figure">Figure 6: SCHC functions' example assignment for IPv6 and UDP</p>
 <p><a href="#Fig--possible-function">Figure 6</a> gives an example of function assignment to IPv6/UDP fields.</p>
-<h1 id="rfc.section.4.1"><a href="#rfc.section.4.1">4.1.</a> <a href="#compression-decompression-functions-cdf" id="compression-decompression-functions-cdf">Compression Decompression Functions (CDF)</a></h1>
-<h1 id="rfc.section.4.1.1"><a href="#rfc.section.4.1.1">4.1.1.</a> <a href="#not-sent" id="not-sent">not-sent</a></h1>
-<p id="rfc.section.4.1.1.p.1">The compressor do not sent the field value on the link. The decompressor restore the field value with the one stored in the matched rule.</p>
-<h1 id="rfc.section.4.1.2"><a href="#rfc.section.4.1.2">4.1.2.</a> <a href="#value-sent" id="value-sent">value-sent</a></h1>
-<p id="rfc.section.4.1.2.p.1">The compressor send the field value on the link, if the matching operator is &#8220;=&#8221;. Otherwise the matching operator indicates the information that will be sent on the link. For a LSB operator only the Least Significant Bits are sent.</p>
-<h1 id="rfc.section.4.1.3"><a href="#rfc.section.4.1.3">4.1.3.</a> <a href="#lsblength" id="lsblength">LSB(length)</a></h1>
-<p id="rfc.section.4.1.3.p.1">The compressor sends the &#8220;length&#8221; Least Significant Bits. The decompressor combines with a OR operator the value received with the Target Value.</p>
-<h1 id="rfc.section.4.1.4"><a href="#rfc.section.4.1.4">4.1.4.</a> <a href="#esiid-did-laiid-did" id="esiid-did-laiid-did">ESiid-DID, LAiid-DID</a></h1>
-<p id="rfc.section.4.1.4.p.1">These functions are used to process respectively the End System and the LA Device Identifier (DID).  The IID value is computed from device ID present in the Layer 2 header. The computation depends on the technology and the device ID  size.</p>
-<h1 id="rfc.section.4.1.5"><a href="#rfc.section.4.1.5">4.1.5.</a> <a href="#compute-" id="compute-">Compute-*</a></h1>
-<p id="rfc.section.4.1.5.p.1">These functions compute the field value based on received information. They are elided during the compression and reconstructed during the decompression.</p>
+<h1 id="rfc.section.5.1"><a href="#rfc.section.5.1">5.1.</a> <a href="#compression-decompression-functions-cdf" id="compression-decompression-functions-cdf">Compression Decompression Functions (CDF)</a></h1>
+<h1 id="rfc.section.5.1.1"><a href="#rfc.section.5.1.1">5.1.1.</a> <a href="#not-sent" id="not-sent">not-sent</a></h1>
+<p id="rfc.section.5.1.1.p.1">The compressor do not sent the field value on the link. The decompressor restore the field value with the one stored in the matched rule.</p>
+<h1 id="rfc.section.5.1.2"><a href="#rfc.section.5.1.2">5.1.2.</a> <a href="#value-sent" id="value-sent">value-sent</a></h1>
+<p id="rfc.section.5.1.2.p.1">The compressor send the field value on the link, if the matching operator is &#8220;=&#8221;. Otherwise the matching operator indicates the information that will be sent on the link. For a LSB operator only the Least Significant Bits are sent.</p>
+<h1 id="rfc.section.5.1.3"><a href="#rfc.section.5.1.3">5.1.3.</a> <a href="#lsblength" id="lsblength">LSB(length)</a></h1>
+<p id="rfc.section.5.1.3.p.1">The compressor sends the &#8220;length&#8221; Least Significant Bits. The decompressor combines with a OR operator the value received with the Target Value.</p>
+<h1 id="rfc.section.5.1.4"><a href="#rfc.section.5.1.4">5.1.4.</a> <a href="#esiid-did-laiid-did" id="esiid-did-laiid-did">ESiid-DID, LAiid-DID</a></h1>
+<p id="rfc.section.5.1.4.p.1">These functions are used to process respectively the End System and the LA Device Identifier (DID).  The IID value is computed from device ID present in the Layer 2 header. The computation depends on the technology and the device ID  size.</p>
+<h1 id="rfc.section.5.1.5"><a href="#rfc.section.5.1.5">5.1.5.</a> <a href="#compute-" id="compute-">Compute-*</a></h1>
+<p id="rfc.section.5.1.5.p.1">These functions compute the field value based on received information. They are elided during the compression and reconstructed during the decompression.</p>
 <p/>
 
 <ul>
@@ -562,10 +570,10 @@ address {
   <li>compute-udp-length: compute the IPv6 length field as described in <a href="#RFC0768">[RFC0768]</a>.</li>
   <li>compute-udp-checksum: compute the IPv6 length field as described in <a href="#RFC0768">[RFC0768]</a>.</li>
 </ul>
-<h1 id="rfc.section.5"><a href="#rfc.section.5">5.</a> <a href="#compressIPv6" id="compressIPv6">Examples</a></h1>
-<p id="rfc.section.5.p.1">This section gives some scenarios of the compression mechanism for IPv6/UDP.  The goal is to illustrate the SCHC behavior.</p>
-<h1 id="rfc.section.5.1"><a href="#rfc.section.5.1">5.1.</a> <a href="#ipv6udp-compression-in-a-star-topology" id="ipv6udp-compression-in-a-star-topology">IPv6/UDP compression in a star topology</a></h1>
-<p id="rfc.section.5.1.p.1">The most common case will be a LPWA end-system embeds some applications running over CoAP. In this example, the first flow is for the device management based on CoAP using Link Local addresses and UDP ports 123 and 124.  The second flow will be a CoAP server for measurements done by the end-system (using ports 5683) and Global Addresses alpha::IID/64 to beta::1/64.  The last flow is for legacy applications using different ports numbers, the destination is gamma::1/64.</p>
+<h1 id="rfc.section.6"><a href="#rfc.section.6">6.</a> <a href="#compressIPv6" id="compressIPv6">Examples</a></h1>
+<p id="rfc.section.6.p.1">This section gives some scenarios of the compression mechanism for IPv6/UDP.  The goal is to illustrate the SCHC behavior.</p>
+<h1 id="rfc.section.6.1"><a href="#rfc.section.6.1">6.1.</a> <a href="#ipv6udp-compression-in-a-star-topology" id="ipv6udp-compression-in-a-star-topology">IPv6/UDP compression in a star topology</a></h1>
+<p id="rfc.section.6.1.p.1">The most common case will be a LPWA end-system embeds some applications running over CoAP. In this example, the first flow is for the device management based on CoAP using Link Local addresses and UDP ports 123 and 124.  The second flow will be a CoAP server for measurements done by the end-system (using ports 5683) and Global Addresses alpha::IID/64 to beta::1/64.  The last flow is for legacy applications using different ports numbers, the destination is gamma::1/64.</p>
 <p><a href="#FigStack">Figure 7</a> presents the protocol stack for this end-system. IPv6 and UDP are represented with dotted lines since these protocols are compressed on the radio link.</p>
 <div id="rfc.figure.7"/>
 <div id="FigStack"/>
@@ -584,7 +592,7 @@ address {
 
 </pre>
 <p class="figure">Figure 7: Simplified Protocol Stack for LP-WAN</p>
-<p id="rfc.section.5.1.p.3">Note that in some LPWA technologies, only End Systems have a device ID.  Therefore it is necessary to define statically an IID for the Link Local address for the LPWA Compressor.</p>
+<p id="rfc.section.6.1.p.3">Note that in some LPWA technologies, only End Systems have a device ID.  Therefore it is necessary to define statically an IID for the Link Local address for the LPWA Compressor.</p>
 <div id="rfc.figure.8"/>
 <div id="Fig-fields"/>
 <pre>
@@ -654,12 +662,12 @@ address {
 
 </pre>
 <p class="figure">Figure 8: Context rules</p>
-<p id="rfc.section.5.1.p.4">All the fields described in the three rules <a href="#Fig-fields">Figure 8</a> are present in the IPv6 and UDP headers.  The ESDevice-ID value is found in the L2 header.</p>
-<p id="rfc.section.5.1.p.5">The second and third rules use global addresses. The way the ES learn the prefix is not in the scope of the document. One possible way is to use a management protocol to set up in both end rules the prefix used on the LPWA network.</p>
-<p id="rfc.section.5.1.p.6">The third rule compresses port numbers on 4 bits. This value is selected to maintain alignment on byte boundaries for the compressed header.</p>
-<h1 id="rfc.section.6"><a href="#rfc.section.6">6.</a> <a href="#acknowledgements" id="acknowledgements">Acknowledgements</a></h1>
-<p id="rfc.section.6.p.1">Thanks to Dominique Barthel, Arunprabhu Kandasamy, Antony Markovski, Alexander Pelov, Juan Carlos Zuniga for useful design consideration.</p>
-<h1 id="rfc.references"><a href="#rfc.references">7.</a> Normative References</h1>
+<p id="rfc.section.6.1.p.4">All the fields described in the three rules <a href="#Fig-fields">Figure 8</a> are present in the IPv6 and UDP headers.  The ESDevice-ID value is found in the L2 header.</p>
+<p id="rfc.section.6.1.p.5">The second and third rules use global addresses. The way the ES learn the prefix is not in the scope of the document. One possible way is to use a management protocol to set up in both end rules the prefix used on the LPWA network.</p>
+<p id="rfc.section.6.1.p.6">The third rule compresses port numbers on 4 bits. This value is selected to maintain alignment on byte boundaries for the compressed header.</p>
+<h1 id="rfc.section.7"><a href="#rfc.section.7">7.</a> <a href="#acknowledgements" id="acknowledgements">Acknowledgements</a></h1>
+<p id="rfc.section.7.p.1">Thanks to Dominique Barthel, Arunprabhu Kandasamy, Antony Markovski, Alexander Pelov, Juan Carlos Zuniga for useful design consideration.</p>
+<h1 id="rfc.references"><a href="#rfc.references">8.</a> Normative References</h1>
 <table>
   <tbody>
     <tr>
@@ -691,6 +699,12 @@ address {
         <b id="RFC4997">[RFC4997]</b>
       </td>
       <td class="top"><a>Finking, R.</a> and <a>G. Pelletier</a>, "<a href="http://tools.ietf.org/html/rfc4997">Formal Notation for RObust Header Compression (ROHC-FN)</a>", RFC 4997, DOI 10.17487/RFC4997, July 2007.</td>
+    </tr>
+    <tr>
+      <td class="reference">
+        <b id="RFC5795">[RFC5795]</b>
+      </td>
+      <td class="top"><a>Sandlund, K.</a>, <a>Pelletier, G.</a> and <a>L-E. Jonsson</a>, "<a href="http://tools.ietf.org/html/rfc5795">The RObust Header Compression (ROHC) Framework</a>", RFC 5795, DOI 10.17487/RFC5795, March 2010.</td>
     </tr>
     <tr>
       <td class="reference">
@@ -755,21 +769,22 @@ address {
   <ul class="toc">
 
   	<li>1.   <a href="#rfc.section.1">Introduction</a></li>
-<li>2.   <a href="#rfc.section.2">Static Context Header Compression</a></li>
-<ul><li>2.1.   <a href="#rfc.section.2.1">Simple Example</a></li>
-<li>2.2.   <a href="#rfc.section.2.2">Packet processing</a></li>
-</ul><li>3.   <a href="#rfc.section.3">Matching operators</a></li>
-<li>4.   <a href="#rfc.section.4">Compression Decompression Functions (CDF)</a></li>
-<ul><li>4.1.   <a href="#rfc.section.4.1">Compression Decompression Functions (CDF)</a></li>
-<ul><li>4.1.1.   <a href="#rfc.section.4.1.1">not-sent</a></li>
-<li>4.1.2.   <a href="#rfc.section.4.1.2">value-sent</a></li>
-<li>4.1.3.   <a href="#rfc.section.4.1.3">LSB(length)</a></li>
-<li>4.1.4.   <a href="#rfc.section.4.1.4">ESiid-DID, LAiid-DID</a></li>
-<li>4.1.5.   <a href="#rfc.section.4.1.5">Compute-*</a></li>
-</ul></ul><li>5.   <a href="#rfc.section.5">Examples</a></li>
-<ul><li>5.1.   <a href="#rfc.section.5.1">IPv6/UDP compression in a star topology</a></li>
-</ul><li>6.   <a href="#rfc.section.6">Acknowledgements</a></li>
-<li>7.   <a href="#rfc.references">Normative References</a></li>
+<li>2.   <a href="#rfc.section.2">Vocabulary</a></li>
+<li>3.   <a href="#rfc.section.3">Static Context Header Compression</a></li>
+<ul><li>3.1.   <a href="#rfc.section.3.1">Simple Example</a></li>
+<li>3.2.   <a href="#rfc.section.3.2">Packet processing</a></li>
+</ul><li>4.   <a href="#rfc.section.4">Matching operators</a></li>
+<li>5.   <a href="#rfc.section.5">Compression Decompression Functions (CDF)</a></li>
+<ul><li>5.1.   <a href="#rfc.section.5.1">Compression Decompression Functions (CDF)</a></li>
+<ul><li>5.1.1.   <a href="#rfc.section.5.1.1">not-sent</a></li>
+<li>5.1.2.   <a href="#rfc.section.5.1.2">value-sent</a></li>
+<li>5.1.3.   <a href="#rfc.section.5.1.3">LSB(length)</a></li>
+<li>5.1.4.   <a href="#rfc.section.5.1.4">ESiid-DID, LAiid-DID</a></li>
+<li>5.1.5.   <a href="#rfc.section.5.1.5">Compute-*</a></li>
+</ul></ul><li>6.   <a href="#rfc.section.6">Examples</a></li>
+<ul><li>6.1.   <a href="#rfc.section.6.1">IPv6/UDP compression in a star topology</a></li>
+</ul><li>7.   <a href="#rfc.section.7">Acknowledgements</a></li>
+<li>8.   <a href="#rfc.references">Normative References</a></li>
 <li><a href="#rfc.authors">Authors' Addresses</a></li>
 
 
