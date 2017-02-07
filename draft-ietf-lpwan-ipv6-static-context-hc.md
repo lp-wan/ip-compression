@@ -34,6 +34,7 @@ normative:
   rfc4997: 
   rfc6282: 
   rfc2460: 
+  rfc5795:
   I-D.minaburo-lp-wan-gap-analysis:
 
 --- abstract
@@ -42,29 +43,15 @@ This document describes a header compression scheme for IPv6, IPv6/UDP based
 on static contexts. This technique is especially tailored for LPWA networks
 and could be extended to other protocol stacks.
 
-
-During the IETF history several compression mechanisms have been proposed.
-First
-mechanisms, such as RoHC, are using a context to store header field values
-and send smaller incremental differences on the link. Values in the context
-evolve dynamically with information contained in the compressed header. The
-challenge is to maintain sender's and receiver's contexts synchronized even
-with packet losses. Based on the fact that IPv6 contains only static fields,
-6LoWPAN developed an efficient context-free compression mechanisms, allowing
-better flexibility and performance.
-
-
-The Static Context Header Compression (SCHC) combines the advantages of RoHC
-context which offers a great level of flexibility in the processing of fields,
-and 6LoWPAN behavior to elide fields that are known from the other side.
+The Static Context Header Compression (SCHC)  offers a great level of flexibility 
+in the processing of fields.
 Static context means that values in the context field do not change during
 the transmission, avoiding complex resynchronization mechanisms, incompatible
 with LPWA characteristics. In most of the cases, IPv6/UDP headers are reduced
-to a small  identifier.
+to a small identifier.
 
-
-This document focuses on IPv6/UDP headers compression, but the mechanism
-can be applied to other protocols such as CoAP. It will be described in a
+This document describes the compression/decompression process and apply it 
+to IPv6/UDP headers compression, Other protocols such as CoAP will be described in a
 separate document.
 
 --- middle
@@ -72,10 +59,9 @@ separate document.
 # Introduction {#Introduction}
 
 Headers compression is mandatory to bring the internet protocols to the node
-within a
-LPWA network {{I-D.minaburo-lp-wan-gap-analysis}}.
+within a LPWA network {{I-D.minaburo-lp-wan-gap-analysis}}. 
 
-Nevertheless, LPWA networks offer good properties for an efficient header
+Some LPWA networks properties can be exploited for an efficient header
 compression:
 
 * Topology is star oriented, therefore all the packets follows the same path.
@@ -149,6 +135,15 @@ Static context means that values in the context field do not change during
 the transmission, avoiding complex resynchronization mechanisms, incompatible
 with LPWA characteristics. In most of the cases, IPv6/UDP headers are reduced
 to a small context identifier.
+
+# Vocabulary
+
+* ES End System: Node connected to the LPWAN. ES may implement SCHC
+
+* LA LPWAN Application: Application sending/consuming data to/from the End System.
+
+* LC LPWAN Compressor: Process in the network compression/decompressing data. LC implement SCHC
+  
 
 
 # Static Context Header Compression
