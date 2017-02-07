@@ -76,61 +76,11 @@ compression:
   be easily installed.
 
 
-First mechanisms such as RoHC use a context to store header field values
-and send smaller
-incremental differences on the link. The first version of RoHC targeted IP/UDP/RTP
-stack.
-RoHCv2 extends the principle to any protocol and introduces a formal
-notation {{RFC4997}} describing the header and associating
-compression functions to each field.
-To be efficient the sender and the receiver must check that the context remains
-synchronized (i.e. contains the same values). Context synchronization
-imposes to periodically send a full header or at least dynamic fields. If
-fully compressed, the header can be compatible with LPWA constraints. However,
-the first exchanges or context resynchronisations impose to send uncompressed
-headers, which may be bigger than the original one. This will force the use
-of inefficient fragmentation mechanisms. For some LPWA technologies, duty
-cycle limits can also delay the resynchronization. {{fig-ROHC}} illustrates this behavior.
+F
 
-~~~~
-                    sync
-          ^         +-+         sync     sync             ^
-          | IPv6    | |         +-+       +-+             | IPv6
-          v         | |         | |       | |             v
-   +------------+   | +-+-+     | |       | |    +------------+
-   |       +--+ |   | | | |     | |       | |    | +--+       |
-   |       | c| |   | | | +-+-+-+ +-+-+-+-+ |    | | c|       |
-   |       | t| |   | | | | | | | | | | | | |    | | t|       |
-   |       | x| |   +-+-+-+-+-+-+-+-+-+-+-+-+    | | x|       |
-   |       | t| | <----------------------------> | | t|       |
-   |       +--+ |  header size of sent packets   | +--+       |
-   +------------+                                +------------+
-
-
-~~~~
-{: #fig-ROHC title='RoHC Compressed Header size evolution.'}
-
-
-On the other hand, 6LoWPAN {{RFC4944}} is context-free based on the
-fact that IPv6, its extensions or UDP headers do not contain
-incremental fields. The compression mechanism described in {{RFC6282}}
-is based on sending a 2-byte bitmap, which describes how the header
-should be decompressed, either using some standard values or sending
-information after this bitmap. {{RFC6282}} also allows for UDP
-compression.
-
-In the best case, when Hop limit is a standard value, flow label, DiffServ
-fields are set to 0 and Link Local addresses are used over a single hop network,
-the 6LoWPAN compressed header is reduced to 4 bytes. This compression ratio
-is possible because the IID are derived from the MAC addresses and the link
-local prefix is known from both sides.
-In that  case, the IPv6 compression is 4 bytes and UDP compression is 2 bytes,
-which fills half of the payload of a SIGFOX frame, or more than 10% of a
-LoRaWAN payload (with spreading factor 12).
-
-The Static Context Header Compression (SCHC) combines the advantages of RoHC
+The Static Context Header Compression (SCHC) combines the advantages of RoHC {(RFC5795})
 context, which offers a great level of flexibility in the processing of fields,
-and 6LoWPAN behavior to elide fields that are known from the other side.
+and 6LoWPAN {(RFC4944}) behavior to elide fields that are known from the other side.
 Static context means that values in the context field do not change during
 the transmission, avoiding complex resynchronization mechanisms, incompatible
 with LPWA characteristics. In most of the cases, IPv6/UDP headers are reduced
@@ -138,11 +88,18 @@ to a small context identifier.
 
 # Vocabulary
 
-* ES End System: Node connected to the LPWAN. ES may implement SCHC
+* Context: A set of rules used to compress/decompress headers
 
-* LA LPWAN Application: Application sending/consuming data to/from the End System.
+* ES End System: Node connected to the LPWAN. ES may implement SCHC.
 
-* LC LPWAN Compressor: Process in the network compression/decompressing data. LC implement SCHC
+* LA LPWAN Application: Application sending/consuming headers to/from the End System.
+
+* LC LPWAN Compressor: Process in the network compression/decompressing headers. LC implements SCHC.
+
+* Rule: A set of header field values.
+
+* Rule ID: An identifier for a rule, LC and ES share the same rule ID for a specific flow. Rule ID 
+  is sent on the LPWAN.
   
 
 
