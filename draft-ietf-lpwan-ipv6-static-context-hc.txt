@@ -94,16 +94,16 @@ Copyright Notice
       built-in applications.  Contrary to computers or smartphones, new
       applications cannot be easily installed.
 
-   F
-
    The Static Context Header Compression (SCHC) combines the advantages
-   of RoHC {(RFC5795}) context, which offers a great level of
-   flexibility in the processing of fields, and 6LoWPAN {(RFC4944})
+   of RoHC {(rfc5795}) context, which offers a great level of
+   flexibility in the processing of fields, and 6LoWPAN {(rfc4944})
    behavior to elide fields that are known from the other side.  Static
    context means that values in the context field do not change during
    the transmission, avoiding complex resynchronization mechanisms,
    incompatible with LPWA characteristics.  In most of the cases, IPv6/
    UDP headers are reduced to a small context identifier.
+
+
 
 
 
@@ -143,9 +143,9 @@ Internet-Draft                 LPWAN SCHC                  February 2017
    phase (for instance, as it learns the encryption key).
 
    The context contains a list of rules (cf.  Figure 1).  Each rule
-   contains itself a list of field descriptions composed of a target
-   value (TV), a matching operator (MO) and a Compression/Decompression
-   Function (CDF).
+   contains itself a list of field descriptions composed of a filed id
+   (FID), a target value (TV), a matching operator (MO) and a
+   Compression/Decompression Function (CDF).
 
 
 
@@ -177,22 +177,23 @@ Internet-Draft                 LPWAN SCHC                  February 2017
   +----------------------------------------------------------------+ | |
   |                Rule 1                                          | | |
   |+--------+--------------+-------------------+-----------------+ | | |
-  | Field 1 | Target Value | Matching Operator | Comp/Decomp Fct | | | |
-  |         +--------------+-------------------+-----------------+ | | |
-  | Field 2 | Target Value | Matching Operator | Comp/Decomp Fct | | | |
-  |         +--------------+-------------------+-----------------+ | | |
-  | ...     |    ...       | ...               | ...             | | | |
-  |         +--------------+-------------------+-----------------+ | |-+
-  | Field N | Target Value | Matching Operator | Comp/Decomp Fct | | |
-  |         +--------------+-------------------+-----------------+ |-+
+  ||Field 1 | Target Value | Matching Operator | Comp/Decomp Fct | | | |
+  |+--------+--------------+-------------------+-----------------+ | | |
+  ||Field 2 | Target Value | Matching Operator | Comp/Decomp Fct | | | |
+  |+--------+--------------+-------------------+-----------------+ | | |
+  ||...     |    ...       | ...               | ...             | | | |
+  |+--------+--------------+-------------------+-----------------+ | |-+
+  ||Field N | Target Value | Matching Operator | Comp/Decomp Fct | | |
+  |+--------+--------------+-------------------+-----------------+ |-+
   |                                                                |
   +----------------------------------------------------------------+
 
                 Figure 1: Compression Decompression Context
 
-   The rule does not describe the compressed/decompressed packet format
-   which must be known from the compressor/decompressor.  The rule just
-   describes the compression/decompression behavior for a field.
+   The rule does not describe the packet format which must be known from
+   the compressor/decompressor.  The packet may contain less fields than
+   a rule.  The rule just describes the compression/decompression
+   behavior for a field.
 
    The main idea of the compression scheme is to send the rule number
    (or rule id) to the other end instead of known field values.
@@ -205,18 +206,17 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
    On some other cases, the value need to be sent on the link to inform
    the other end.  The field value may vary from one packet to another,
-   therefore the field cannot be used to select the rule id.
+   therefore the field cannot be used to select the rule id.  These
+   values are sent in same order as the fields in the rule.
 
-3.1.  Simple Example
+3.1.  Rule id
+
+3.2.  Simple Example
 
    A simple header is composed of 3 fields (F1, F2, F3).  The compressor
    receives a packet containing respectively [F1:0x00, F2:0x1230,
    F3:0xABC0] in those fields.  The Matching Operators (as defined in
    Section 4) allow to select Rule 5 as represented in Figure 2; F1
-   value is ignored and F2 and F3 packet field values are matched with
-   those stored in the rule Target Values.
-
-
 
 
 
@@ -225,6 +225,9 @@ Minaburo & Toutain       Expires August 11, 2017                [Page 4]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
+
+   value is ignored and F2 and F3 packet field values are matched with
+   those stored in the rule Target Values.
 
                   Rule 5
              Target Value   Matching Operator   Comp/Decomp Fct
@@ -271,9 +274,6 @@ Internet-Draft                 LPWAN SCHC                  February 2017
    be selected and sent to the other end.  The compressed header will be
    composed of the single byte [0x4D].  The decompressor receives the
    compressed header and follows the rule to reconstruct [0x00, 0x1234,
-   0xABCD] applying a OR operator between the target value stored in the
-   rule and the compressed field value sent.
-
 
 
 
@@ -282,7 +282,10 @@ Minaburo & Toutain       Expires August 11, 2017                [Page 5]
 Internet-Draft                 LPWAN SCHC                  February 2017
 
 
-3.2.  Packet processing
+   0xABCD] applying a OR operator between the target value stored in the
+   rule and the compressed field value sent.
+
+3.3.  Packet processing
 
    The compression/decompression process follows several steps:
 
@@ -326,9 +329,6 @@ Internet-Draft                 LPWAN SCHC                  February 2017
    o  MSB(length): a field value of length T in a packet matches with a
       field value in a rule if the most significant "length" bits are
       equal.
-
-
-
 
 
 

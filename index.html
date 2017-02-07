@@ -280,8 +280,9 @@ address {
 <link href="#rfc.section.1" rel="Chapter" title="1 Introduction"/>
 <link href="#rfc.section.2" rel="Chapter" title="2 Vocabulary"/>
 <link href="#rfc.section.3" rel="Chapter" title="3 Static Context Header Compression"/>
-<link href="#rfc.section.3.1" rel="Chapter" title="3.1 Simple Example"/>
-<link href="#rfc.section.3.2" rel="Chapter" title="3.2 Packet processing"/>
+<link href="#rfc.section.3.1" rel="Chapter" title="3.1 Rule id"/>
+<link href="#rfc.section.3.2" rel="Chapter" title="3.2 Simple Example"/>
+<link href="#rfc.section.3.3" rel="Chapter" title="3.3 Packet processing"/>
 <link href="#rfc.section.4" rel="Chapter" title="4 Matching operators"/>
 <link href="#rfc.section.5" rel="Chapter" title="5 Compression Decompression Functions (CDF)"/>
 <link href="#rfc.section.5.1" rel="Chapter" title="5.1 Compression Decompression Functions (CDF)"/>
@@ -368,8 +369,7 @@ address {
   <li>Topology is star oriented, therefore all the packets follows the same path.  For the needs of this draft, the architecture can be summarized to End-Systems (ES) exchanging information with LPWAN Application Server (LA). The exchange goes trhough a single LPWA Compressor (LC). In most of the cases, End Systems and LC form a star topology. ESs and LC maintain a static context for compression.  Static context means that context information is not learned during the exchange.</li>
   <li>Traffic flows are mostly deterministic, since End-Systems embed built-in applications. Contrary to computers or smartphones, new applications cannot be easily installed.</li>
 </ul>
-<p id="rfc.section.1.p.4">F</p>
-<p id="rfc.section.1.p.5">The Static Context Header Compression (SCHC) combines the advantages of RoHC {(RFC5795}) context, which offers a great level of flexibility in the processing of fields, and 6LoWPAN {(RFC4944}) behavior to elide fields that are known from the other side.  Static context means that values in the context field do not change during the transmission, avoiding complex resynchronization mechanisms, incompatible with LPWA characteristics. In most of the cases, IPv6/UDP headers are reduced to a small context identifier.</p>
+<p id="rfc.section.1.p.4">The Static Context Header Compression (SCHC) combines the advantages of RoHC {(rfc5795}) context, which offers a great level of flexibility in the processing of fields, and 6LoWPAN {(rfc4944}) behavior to elide fields that are known from the other side.  Static context means that values in the context field do not change during the transmission, avoiding complex resynchronization mechanisms, incompatible with LPWA characteristics. In most of the cases, IPv6/UDP headers are reduced to a small context identifier.</p>
 <h1 id="rfc.section.2"><a href="#rfc.section.2">2.</a> <a href="#vocabulary" id="vocabulary">Vocabulary</a></h1>
 <p/>
 
@@ -383,7 +383,7 @@ address {
 </ul>
 <h1 id="rfc.section.3"><a href="#rfc.section.3">3.</a> <a href="#static-context-header-compression" id="static-context-header-compression">Static Context Header Compression</a></h1>
 <p id="rfc.section.3.p.1">Static Context Header Compression (SCHC) avoids context synchronization, which is the most bandwidth-consuming operation in RoHC. Based on the fact that the nature of data flows is highly predictable in LPWA networks, a static context may be stored on the End-System (ES). The other end, the LPWA Compressor (LC) can learn the context through a provisioning protocol during the identification phase (for instance, as it learns the encryption key).</p>
-<p id="rfc.section.3.p.2">The context contains a list of rules (cf. <a href="#Fig-ctxt">Figure 1</a>). Each rule contains itself a list of field descriptions composed of a target value (TV), a matching operator (MO) and a Compression/Decompression Function (CDF).</p>
+<p id="rfc.section.3.p.2">The context contains a list of rules (cf. <a href="#Fig-ctxt">Figure 1</a>). Each rule contains itself a list of field descriptions composed of a filed id (FID), a target value (TV), a matching operator (MO) and a Compression/Decompression Function (CDF).</p>
 <div id="rfc.figure.1"/>
 <div id="Fig-ctxt"/>
 <pre>
@@ -394,24 +394,25 @@ address {
 +----------------------------------------------------------------+ | |
 |                Rule 1                                          | | |
 |+--------+--------------+-------------------+-----------------+ | | |
-| Field 1 | Target Value | Matching Operator | Comp/Decomp Fct | | | |
-|         +--------------+-------------------+-----------------+ | | |
-| Field 2 | Target Value | Matching Operator | Comp/Decomp Fct | | | |
-|         +--------------+-------------------+-----------------+ | | |
-| ...     |    ...       | ...               | ...             | | | |
-|         +--------------+-------------------+-----------------+ | |-+
-| Field N | Target Value | Matching Operator | Comp/Decomp Fct | | |
-|         +--------------+-------------------+-----------------+ |-+
+||Field 1 | Target Value | Matching Operator | Comp/Decomp Fct | | | |
+|+--------+--------------+-------------------+-----------------+ | | |
+||Field 2 | Target Value | Matching Operator | Comp/Decomp Fct | | | |
+|+--------+--------------+-------------------+-----------------+ | | |
+||...     |    ...       | ...               | ...             | | | |
+|+--------+--------------+-------------------+-----------------+ | |-+
+||Field N | Target Value | Matching Operator | Comp/Decomp Fct | | |
+|+--------+--------------+-------------------+-----------------+ |-+
 |                                                                |
 +----------------------------------------------------------------+
 </pre>
 <p class="figure">Figure 1: Compression Decompression Context</p>
-<p id="rfc.section.3.p.3">The rule does not describe the compressed/decompressed packet format which must be known from the compressor/decompressor. The rule just describes the compression/decompression behavior for a field.</p>
+<p id="rfc.section.3.p.3">The rule does not describe the packet format which must be known from the compressor/decompressor. The packet may contain less fields than a rule. The rule just describes the compression/decompression behavior for a field.</p>
 <p id="rfc.section.3.p.4">The main idea of the compression scheme is to send the rule number (or rule id) to the other end instead of known field values.</p>
 <p id="rfc.section.3.p.5">Matching a field with a value and header compression are related operations; If a field matches a rule  containing the value, it is not necessary to send it on the link. Since contexts are synchronized, reading the rule&#8217;s value is enough to reconstruct the field&#8217;s value at the other end.</p>
-<p id="rfc.section.3.p.6">On some other cases, the value need to be sent on the link to inform the other end. The field value may vary from one packet to another, therefore the field cannot be used to select the rule id.</p>
-<h1 id="rfc.section.3.1"><a href="#rfc.section.3.1">3.1.</a> <a href="#simple-example" id="simple-example">Simple Example</a></h1>
-<p id="rfc.section.3.1.p.1">A simple header is composed of 3 fields (F1, F2, F3). The compressor receives a packet containing respectively [F1:0x00, F2:0x1230, F3:0xABC0] in those fields. The Matching Operators (as defined in <a href="#chap-MO">Section 4</a>) allow to select Rule 5 as represented in <a href="#Fig-ex-ctxt">Figure 2</a>; F1 value is ignored and F2 and F3 packet field values are matched with those stored in the rule Target Values.</p>
+<p id="rfc.section.3.p.6">On some other cases, the value need to be sent on the link to inform the other end. The field value may vary from one packet to another, therefore the field cannot be used to select the rule id. These values are sent in same order as the fields in the rule.</p>
+<h1 id="rfc.section.3.1"><a href="#rfc.section.3.1">3.1.</a> <a href="#rule-id" id="rule-id">Rule id</a></h1>
+<h1 id="rfc.section.3.2"><a href="#rfc.section.3.2">3.2.</a> <a href="#simple-example" id="simple-example">Simple Example</a></h1>
+<p id="rfc.section.3.2.p.1">A simple header is composed of 3 fields (F1, F2, F3). The compressor receives a packet containing respectively [F1:0x00, F2:0x1230, F3:0xABC0] in those fields. The Matching Operators (as defined in <a href="#chap-MO">Section 4</a>) allow to select Rule 5 as represented in <a href="#Fig-ex-ctxt">Figure 2</a>; F1 value is ignored and F2 and F3 packet field values are matched with those stored in the rule Target Values.</p>
 <div id="rfc.figure.2"/>
 <div id="Fig-ex-ctxt"/>
 <pre>
@@ -426,10 +427,10 @@ address {
         +--------------+-------------------+-----------------+
 </pre>
 <p class="figure">Figure 2: Matching Rule</p>
-<p id="rfc.section.3.1.p.2">The Compression/Decompression Function (as defined in <a href="#chap-CDF">Section 5</a> describes how the fields are compressed. In this example, all the fields are elided and only the rule number has to be sent to the other end.</p>
-<p id="rfc.section.3.1.p.3">The decompressor receives the rule number and reconstructs the header using the values stored in the Target Value column.</p>
-<p id="rfc.section.3.1.p.4">Note that F1 value will be set to 0x00 by the decompressor, even if the original header field was carrying a different value.</p>
-<p id="rfc.section.3.1.p.5">To allow a range of values for field F2 and F3, the MSB() Matching Operator and LSB() Compression/Decompression Function can be used (as defined in <a href="#chap-MO">Section 4</a> and <a href="#chap-CDF">Section 5</a>). In that case the rule will be rewritten as defined in <a href="#Fig-ex-ctxt2">Figure 3</a>.</p>
+<p id="rfc.section.3.2.p.2">The Compression/Decompression Function (as defined in <a href="#chap-CDF">Section 5</a> describes how the fields are compressed. In this example, all the fields are elided and only the rule number has to be sent to the other end.</p>
+<p id="rfc.section.3.2.p.3">The decompressor receives the rule number and reconstructs the header using the values stored in the Target Value column.</p>
+<p id="rfc.section.3.2.p.4">Note that F1 value will be set to 0x00 by the decompressor, even if the original header field was carrying a different value.</p>
+<p id="rfc.section.3.2.p.5">To allow a range of values for field F2 and F3, the MSB() Matching Operator and LSB() Compression/Decompression Function can be used (as defined in <a href="#chap-MO">Section 4</a> and <a href="#chap-CDF">Section 5</a>). In that case the rule will be rewritten as defined in <a href="#Fig-ex-ctxt2">Figure 3</a>.</p>
 <div id="rfc.figure.3"/>
 <div id="Fig-ex-ctxt2"/>
 <pre>
@@ -444,9 +445,9 @@ address {
         +--------------+-------------------+-----------------+
 </pre>
 <p class="figure">Figure 3: Matching Rule</p>
-<p id="rfc.section.3.1.p.6">In that case, if a packet with the following header fields [F1:0x00, F2:0x1234, F3:0xABCD] arrives to the compressor, the new rule 5 will be selected and sent to the other end. The compressed header will be composed of the single byte [0x4D]. The decompressor receives the compressed header and follows the rule to reconstruct [0x00, 0x1234, 0xABCD] applying a OR operator between the target value stored in the rule and the compressed field value sent.</p>
-<h1 id="rfc.section.3.2"><a href="#rfc.section.3.2">3.2.</a> <a href="#packet-processing" id="packet-processing">Packet processing</a></h1>
-<p id="rfc.section.3.2.p.1">The compression/decompression process follows several steps:</p>
+<p id="rfc.section.3.2.p.6">In that case, if a packet with the following header fields [F1:0x00, F2:0x1234, F3:0xABCD] arrives to the compressor, the new rule 5 will be selected and sent to the other end. The compressed header will be composed of the single byte [0x4D]. The decompressor receives the compressed header and follows the rule to reconstruct [0x00, 0x1234, 0xABCD] applying a OR operator between the target value stored in the rule and the compressed field value sent.</p>
+<h1 id="rfc.section.3.3"><a href="#rfc.section.3.3">3.3.</a> <a href="#packet-processing" id="packet-processing">Packet processing</a></h1>
+<p id="rfc.section.3.3.p.1">The compression/decompression process follows several steps:</p>
 <p/>
 
 <ul>
@@ -753,8 +754,9 @@ address {
   	<li>1.   <a href="#rfc.section.1">Introduction</a></li>
 <li>2.   <a href="#rfc.section.2">Vocabulary</a></li>
 <li>3.   <a href="#rfc.section.3">Static Context Header Compression</a></li>
-<ul><li>3.1.   <a href="#rfc.section.3.1">Simple Example</a></li>
-<li>3.2.   <a href="#rfc.section.3.2">Packet processing</a></li>
+<ul><li>3.1.   <a href="#rfc.section.3.1">Rule id</a></li>
+<li>3.2.   <a href="#rfc.section.3.2">Simple Example</a></li>
+<li>3.3.   <a href="#rfc.section.3.3">Packet processing</a></li>
 </ul><li>4.   <a href="#rfc.section.4">Matching operators</a></li>
 <li>5.   <a href="#rfc.section.5">Compression Decompression Functions (CDF)</a></li>
 <ul><li>5.1.   <a href="#rfc.section.5.1">Compression Decompression Functions (CDF)</a></li>
