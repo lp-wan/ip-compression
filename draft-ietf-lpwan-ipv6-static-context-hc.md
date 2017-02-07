@@ -75,9 +75,9 @@ compression:
   applications. Contrary to computers or smartphones, new applications cannot
   be easily installed.
 
-The Static Context Header Compression (SCHC) combines the advantages of RoHC { {rfc5795} }
+The Static Context Header Compression (SCHC) combines the advantages of RoHC {{rfc5795}}
 context, which offers a great level of flexibility in the processing of fields,
-and 6LoWPAN { {rfc4944} } behavior to elide fields that are known from the other side.
+and 6LoWPAN {{rfc4944}} behavior to elide fields that are known from the other side.
 Static context means that values in the context field do not change during
 the transmission, avoiding complex resynchronization mechanisms, incompatible
 with LPWA characteristics. In most of the cases, IPv6/UDP headers are reduced
