@@ -164,7 +164,7 @@ Some values in the rule id space may be reserved to other goal than header
 compression, for example fragmentation. 
 
 Rule id are specific to an ES. Two ES may use the same rule id for different
-header compression. The LC needs to combine the rule ID with the ES L2 address
+header compression. The LC needs to combine the rule id with the ES L2 address
 to find the appropriate rule.
 
 ## Simple Example
@@ -232,13 +232,14 @@ the target value stored in the rule and the compressed field value sent.
 
 The compression/decompression process follows several steps:
 
-* compression rule selection: the goal is to identify which rule will be used
-  to compress the headers. To each field is associated a matching rule for
+* compression rule selection: the goal is to identify which rule(s) will be used
+  to compress the headers. To each field is associated a matching operator for
   compression. Each header field's value is compared to the corresponding target
   value stored in the rule for that field using the matching operator. If all
-  the fields satisfied the matching operator,  the packet is processed using
-  this Compression Decompression Function functions. Otherwise the next rule
-  is tested. If no eligible rule is found, then the packet is dropped.
+  the fields in the packet's header satisfied the matching operator,  
+  the packet is processed using
+  this Compression Decompression Function. Otherwise the next rule
+  is tested. <EDIT>If no eligible rule is found, then the packet is dropped.<EDIT>
 
 * sending: The rule number is sent to the other end followed by data resulting
   from the field compression. The way the rule number is sent depends of the
@@ -294,6 +295,7 @@ the original value.
 |compute-UDP-checksum|elided       |compute UDP checksum      |
 |ESiid-DID           |elided       |build IID from L2 ES addr |
 |LAiid-DID           |elided       |build IID from L2 LA addr |
+|static-mapping      |send         |index on a table          |
 \--------------------+-------------+--------------------------/
 
 ~~~~
