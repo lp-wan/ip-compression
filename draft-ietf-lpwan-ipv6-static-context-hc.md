@@ -239,10 +239,11 @@ The compression/decompression process follows several steps:
   the fields in the packet's header satisfied the matching operator,  
   the packet is processed using
   this Compression Decompression Function. Otherwise the next rule
-  is tested. <EDIT>If no eligible rule is found, then the packet is dropped.<EDIT>
+  is tested. [EDIT]If no eligible rule is found, then the packet is dropped.[EDIT]
 
 * sending: The rule number is sent to the other end followed by data resulting
-  from the field compression. The way the rule number is sent depends of the
+  from the field compression. These data are sent in the rule order for the matching
+  fields. The way the rule number is sent depends of the
   layer two technology and will be specified in a specific document. For exemple,
   it can either be included in a Layer 2 header or sent in the first byte of
   the L2 payload.
@@ -250,7 +251,7 @@ The compression/decompression process follows several steps:
 * decompression: The receiver identifies the  sender through its device-id
   (e.g. MAC address) and select the appropriate rule through the rule number.
   It applies the compression decompression function to reconstruct the original
-  header fields.
+  header fields. Compute-\* CDFs must be applied after the other CDFs.
 
 
 
