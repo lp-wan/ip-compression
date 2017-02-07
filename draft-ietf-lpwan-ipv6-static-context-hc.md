@@ -75,12 +75,9 @@ compression:
   applications. Contrary to computers or smartphones, new applications cannot
   be easily installed.
 
-
-F
-
-The Static Context Header Compression (SCHC) combines the advantages of RoHC {(RFC5795})
+The Static Context Header Compression (SCHC) combines the advantages of RoHC {(rfc5795})
 context, which offers a great level of flexibility in the processing of fields,
-and 6LoWPAN {(RFC4944}) behavior to elide fields that are known from the other side.
+and 6LoWPAN {(rfc4944}) behavior to elide fields that are known from the other side.
 Static context means that values in the context field do not change during
 the transmission, avoiding complex resynchronization mechanisms, incompatible
 with LPWA characteristics. In most of the cases, IPv6/UDP headers are reduced
@@ -100,8 +97,6 @@ to a small context identifier.
 
 * Rule ID: An identifier for a rule, LC and ES share the same rule ID for a specific flow. Rule ID 
   is sent on the LPWAN.
-  
-
 
 # Static Context Header Compression
 
@@ -112,7 +107,8 @@ context may be stored on the End-System (ES). The other end, the LPWA Compressor
 (LC) can learn the context through a provisioning protocol during the identification
 phase (for instance, as it learns the encryption key).
 
-The context contains a list of rules (cf. {{Fig-ctxt}}). Each rule contains itself a list of field descriptions composed of a target
+The context contains a list of rules (cf. {{Fig-ctxt}}). Each rule contains 
+itself a list of field descriptions composed of a filed id (FID), a target
 value (TV), a matching operator (MO) and a Compression/Decompression Function
 (CDF).
 
@@ -126,22 +122,23 @@ value (TV), a matching operator (MO) and a Compression/Decompression Function
 +----------------------------------------------------------------+ | |
 |                Rule 1                                          | | |
 |+--------+--------------+-------------------+-----------------+ | | |
-| Field 1 | Target Value | Matching Operator | Comp/Decomp Fct | | | |
-|         +--------------+-------------------+-----------------+ | | |
-| Field 2 | Target Value | Matching Operator | Comp/Decomp Fct | | | |
-|         +--------------+-------------------+-----------------+ | | |
-| ...     |    ...       | ...               | ...             | | | |
-|         +--------------+-------------------+-----------------+ | |-+
-| Field N | Target Value | Matching Operator | Comp/Decomp Fct | | |
-|         +--------------+-------------------+-----------------+ |-+
+||Field 1 | Target Value | Matching Operator | Comp/Decomp Fct | | | |
+|+--------+--------------+-------------------+-----------------+ | | |
+||Field 2 | Target Value | Matching Operator | Comp/Decomp Fct | | | |
+|+--------+--------------+-------------------+-----------------+ | | |
+||...     |    ...       | ...               | ...             | | | |
+|+--------+--------------+-------------------+-----------------+ | |-+
+||Field N | Target Value | Matching Operator | Comp/Decomp Fct | | |
+|+--------+--------------+-------------------+-----------------+ |-+
 |                                                                |
 +----------------------------------------------------------------+
 ~~~~
 {: #Fig-ctxt title='Compression Decompression Context'}
 
 
-The rule does not describe the compressed/decompressed packet format which
-must be known from the compressor/decompressor. The rule just describes the
+The rule does not describe the packet format which
+must be known from the compressor/decompressor. The packet may contain less
+fields than a rule. The rule just describes the
 compression/decompression behavior for a field.
 
 The main idea of the compression scheme is to send the rule number (or rule
@@ -154,7 +151,10 @@ is enough to reconstruct the field's value at the other end.
 
 On some other cases, the value need to be sent on the link to inform the
 other end. The field value may vary from one packet to another, therefore
-the field cannot be used to select the rule id.
+the field cannot be used to select the rule id. These values are sent in 
+same order as the fields in the rule.
+
+## Rule id
 
 ## Simple Example
 
