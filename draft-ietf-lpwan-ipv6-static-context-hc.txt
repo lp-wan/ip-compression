@@ -94,18 +94,18 @@ Copyright Notice
       built-in applications.  Contrary to computers or smartphones, new
       applications cannot be easily installed.
 
-   First mechanisms such as RoHC use a context to store header field
-   values and send smaller incremental differences on the link.  The
-   first version of RoHC targeted IP/UDP/RTP stack.  RoHCv2 extends the
-   principle to any protocol and introduces a formal notation [RFC4997]
-   describing the header and associating compression functions to each
-   field.  To be efficient the sender and the receiver must check that
-   the context remains synchronized (i.e. contains the same values).
-   Context synchronization imposes to periodically send a full header or
-   at least dynamic fields.  If fully compressed, the header can be
-   compatible with LPWA constraints.  However, the first exchanges or
-   context resynchronisations impose to send uncompressed headers, which
-   may be bigger than the original one.  This will force the use of
+   F
+
+   The Static Context Header Compression (SCHC) combines the advantages
+   of RoHC {(RFC5795}) context, which offers a great level of
+   flexibility in the processing of fields, and 6LoWPAN {(RFC4944})
+   behavior to elide fields that are known from the other side.  Static
+   context means that values in the context field do not change during
+   the transmission, avoiding complex resynchronization mechanisms,
+   incompatible with LPWA characteristics.  In most of the cases, IPv6/
+   UDP headers are reduced to a small context identifier.
+
+
 
 
 
@@ -114,71 +114,23 @@ Minaburo & Toutain       Expires August 11, 2017                [Page 2]
 Internet-Draft                 LPWAN SCHC                  February 2017
 
 
-   inefficient fragmentation mechanisms.  For some LPWA technologies,
-   duty cycle limits can also delay the resynchronization.  Figure 1
-   illustrates this behavior.
-
-                       sync
-             ^         +-+         sync     sync             ^
-             | IPv6    | |         +-+       +-+             | IPv6
-             v         | |         | |       | |             v
-      +------------+   | +-+-+     | |       | |    +------------+
-      |       +--+ |   | | | |     | |       | |    | +--+       |
-      |       | c| |   | | | +-+-+-+ +-+-+-+-+ |    | | c|       |
-      |       | t| |   | | | | | | | | | | | | |    | | t|       |
-      |       | x| |   +-+-+-+-+-+-+-+-+-+-+-+-+    | | x|       |
-      |       | t| | <----------------------------> | | t|       |
-      |       +--+ |  header size of sent packets   | +--+       |
-      +------------+                                +------------+
-
-
-
-             Figure 1: RoHC Compressed Header size evolution.
-
-   On the other hand, 6LoWPAN [RFC4944] is context-free based on the
-   fact that IPv6, its extensions or UDP headers do not contain
-   incremental fields.  The compression mechanism described in [RFC6282]
-   is based on sending a 2-byte bitmap, which describes how the header
-   should be decompressed, either using some standard values or sending
-   information after this bitmap.  [RFC6282] also allows for UDP
-   compression.
-
-   In the best case, when Hop limit is a standard value, flow label,
-   DiffServ fields are set to 0 and Link Local addresses are used over a
-   single hop network, the 6LoWPAN compressed header is reduced to 4
-   bytes.  This compression ratio is possible because the IID are
-   derived from the MAC addresses and the link local prefix is known
-   from both sides.  In that case, the IPv6 compression is 4 bytes and
-   UDP compression is 2 bytes, which fills half of the payload of a
-   SIGFOX frame, or more than 10% of a LoRaWAN payload (with spreading
-   factor 12).
-
-   The Static Context Header Compression (SCHC) combines the advantages
-   of RoHC context, which offers a great level of flexibility in the
-   processing of fields, and 6LoWPAN behavior to elide fields that are
-   known from the other side.  Static context means that values in the
-   context field do not change during the transmission, avoiding complex
-   resynchronization mechanisms, incompatible with LPWA characteristics.
-   In most of the cases, IPv6/UDP headers are reduced to a small context
-   identifier.
-
-
-
-
-Minaburo & Toutain       Expires August 11, 2017                [Page 3]
-
-Internet-Draft                 LPWAN SCHC                  February 2017
-
-
 2.  Vocabulary
 
-   o  ES End System: Node connected to the LPWAN.  ES may implement SCHC
+   o  Context: A set of rules used to compress/decompress headers
 
-   o  LA LPWAN Application: Application sending/consuming data to/from
-      the End System.
+   o  ES End System: Node connected to the LPWAN.  ES may implement
+      SCHC.
+
+   o  LA LPWAN Application: Application sending/consuming headers to/
+      from the End System.
 
    o  LC LPWAN Compressor: Process in the network compression/
-      decompressing data.  LC implement SCHC
+      decompressing headers.  LC implements SCHC.
+
+   o  Rule: A set of header field values.
+
+   o  Rule ID: An identifier for a rule, LC and ES share the same rule
+      ID for a specific flow.  Rule ID is sent on the LPWAN.
 
 3.  Static Context Header Compression
 
@@ -190,10 +142,33 @@ Internet-Draft                 LPWAN SCHC                  February 2017
    the context through a provisioning protocol during the identification
    phase (for instance, as it learns the encryption key).
 
-   The context contains a list of rules (cf.  Figure 2).  Each rule
+   The context contains a list of rules (cf.  Figure 1).  Each rule
    contains itself a list of field descriptions composed of a target
    value (TV), a matching operator (MO) and a Compression/Decompression
    Function (CDF).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Minaburo & Toutain       Expires August 11, 2017                [Page 3]
+
+Internet-Draft                 LPWAN SCHC                  February 2017
+
 
     +------------------------------------------------------------------+
     |                      Rule N                                      |
@@ -213,18 +188,11 @@ Internet-Draft                 LPWAN SCHC                  February 2017
   |                                                                |
   +----------------------------------------------------------------+
 
-                Figure 2: Compression Decompression Context
+                Figure 1: Compression Decompression Context
 
    The rule does not describe the compressed/decompressed packet format
    which must be known from the compressor/decompressor.  The rule just
    describes the compression/decompression behavior for a field.
-
-
-
-Minaburo & Toutain       Expires August 11, 2017                [Page 4]
-
-Internet-Draft                 LPWAN SCHC                  February 2017
-
 
    The main idea of the compression scheme is to send the rule number
    (or rule id) to the other end instead of known field values.
@@ -244,9 +212,19 @@ Internet-Draft                 LPWAN SCHC                  February 2017
    A simple header is composed of 3 fields (F1, F2, F3).  The compressor
    receives a packet containing respectively [F1:0x00, F2:0x1230,
    F3:0xABC0] in those fields.  The Matching Operators (as defined in
-   Section 4) allow to select Rule 5 as represented in Figure 3; F1
+   Section 4) allow to select Rule 5 as represented in Figure 2; F1
    value is ignored and F2 and F3 packet field values are matched with
    those stored in the rule Target Values.
+
+
+
+
+
+
+Minaburo & Toutain       Expires August 11, 2017                [Page 4]
+
+Internet-Draft                 LPWAN SCHC                  February 2017
+
 
                   Rule 5
              Target Value   Matching Operator   Comp/Decomp Fct
@@ -258,7 +236,7 @@ Internet-Draft                 LPWAN SCHC                  February 2017
         F3 | 0xABC0       | Equal             | not-sent        |
            +--------------+-------------------+-----------------+
 
-                          Figure 3: Matching Rule
+                          Figure 2: Matching Rule
 
    The Compression/Decompression Function (as defined in Section 5
    describes how the fields are compressed.  In this example, all the
@@ -273,17 +251,8 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
    To allow a range of values for field F2 and F3, the MSB() Matching
    Operator and LSB() Compression/Decompression Function can be used (as
-
-
-
-
-Minaburo & Toutain       Expires August 11, 2017                [Page 5]
-
-Internet-Draft                 LPWAN SCHC                  February 2017
-
-
    defined in Section 4 and Section 5).  In that case the rule will be
-   rewritten as defined in Figure 4.
+   rewritten as defined in Figure 3.
 
                   Rule 5
              Target Value   Matching Operator   Comp/Decomp Fct
@@ -295,7 +264,7 @@ Internet-Draft                 LPWAN SCHC                  February 2017
         F3 | 0xABC0       | MSB(12)           | LSB(4)          |
            +--------------+-------------------+-----------------+
 
-                          Figure 4: Matching Rule
+                          Figure 3: Matching Rule
 
    In that case, if a packet with the following header fields [F1:0x00,
    F2:0x1234, F3:0xABCD] arrives to the compressor, the new rule 5 will
@@ -304,6 +273,14 @@ Internet-Draft                 LPWAN SCHC                  February 2017
    compressed header and follows the rule to reconstruct [0x00, 0x1234,
    0xABCD] applying a OR operator between the target value stored in the
    rule and the compressed field value sent.
+
+
+
+
+Minaburo & Toutain       Expires August 11, 2017                [Page 5]
+
+Internet-Draft                 LPWAN SCHC                  February 2017
+
 
 3.2.  Packet processing
 
@@ -330,14 +307,6 @@ Internet-Draft                 LPWAN SCHC                  February 2017
       through the rule number.  It applies the compression decompression
       function to reconstruct the original header fields.
 
-
-
-
-Minaburo & Toutain       Expires August 11, 2017                [Page 6]
-
-Internet-Draft                 LPWAN SCHC                  February 2017
-
-
 4.  Matching operators
 
    It may exist some intermediary cases, where part of the value may be
@@ -357,6 +326,17 @@ Internet-Draft                 LPWAN SCHC                  February 2017
    o  MSB(length): a field value of length T in a packet matches with a
       field value in a rule if the most significant "length" bits are
       equal.
+
+
+
+
+
+
+
+Minaburo & Toutain       Expires August 11, 2017                [Page 6]
+
+Internet-Draft                 LPWAN SCHC                  February 2017
+
 
 5.  Compression Decompression Functions (CDF)
 
@@ -379,20 +359,11 @@ Internet-Draft                 LPWAN SCHC                  February 2017
    \--------------------+-------------+--------------------------/
 
 
-             Figure 5: Compression and Decompression Functions
+             Figure 4: Compression and Decompression Functions
 
-   Figure 5 lists all the functions defined to compress and decompress a
+   Figure 4 lists all the functions defined to compress and decompress a
    field.  The first column gives the function's name.  The second and
    third columns outlines the compression/decompression process.
-
-
-
-
-
-Minaburo & Toutain       Expires August 11, 2017                [Page 7]
-
-Internet-Draft                 LPWAN SCHC                  February 2017
-
 
    As with 6LoWPAN, the compression process may produce some data, where
    fields that were not compressed (or were partially compressed) will
@@ -418,34 +389,7 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Minaburo & Toutain       Expires August 11, 2017                [Page 8]
+Minaburo & Toutain       Expires August 11, 2017                [Page 7]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
@@ -492,16 +436,16 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 |UDP Checksum  |compute-UDP-checksum|Dedicated fct to reconstruct value|
 +--------------+-------------------+-----------------------------------+
 
-       Figure 6: SCHC functions' example assignment for IPv6 and UDP
+       Figure 5: SCHC functions' example assignment for IPv6 and UDP
 
-   Figure 6 gives an example of function assignment to IPv6/UDP fields.
-
-
+   Figure 5 gives an example of function assignment to IPv6/UDP fields.
 
 
 
 
-Minaburo & Toutain       Expires August 11, 2017                [Page 9]
+
+
+Minaburo & Toutain       Expires August 11, 2017                [Page 8]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
@@ -557,7 +501,7 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
 
 
-Minaburo & Toutain       Expires August 11, 2017               [Page 10]
+Minaburo & Toutain       Expires August 11, 2017                [Page 9]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
@@ -573,7 +517,7 @@ Internet-Draft                 LPWAN SCHC                  February 2017
    applications using different ports numbers, the destination is
    gamma::1/64.
 
-   Figure 7 presents the protocol stack for this end-system.  IPv6 and
+   Figure 6 presents the protocol stack for this end-system.  IPv6 and
    UDP are represented with dotted lines since these protocols are
    compressed on the radio link.
 
@@ -590,7 +534,7 @@ Internet-Draft                 LPWAN SCHC                  February 2017
          End System or LPWA GW
 
 
-              Figure 7: Simplified Protocol Stack for LP-WAN
+              Figure 6: Simplified Protocol Stack for LP-WAN
 
    Note that in some LPWA technologies, only End Systems have a device
    ID.  Therefore it is necessary to define statically an IID for the
@@ -613,7 +557,7 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
 
 
-Minaburo & Toutain       Expires August 11, 2017               [Page 11]
+Minaburo & Toutain       Expires August 11, 2017               [Page 10]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
@@ -669,14 +613,14 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
 
 
-Minaburo & Toutain       Expires August 11, 2017               [Page 12]
+Minaburo & Toutain       Expires August 11, 2017               [Page 11]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
 
-                          Figure 8: Context rules
+                          Figure 7: Context rules
 
-   All the fields described in the three rules Figure 8 are present in
+   All the fields described in the three rules Figure 7 are present in
    the IPv6 and UDP headers.  The ESDevice-ID value is found in the L2
    header.
 
@@ -725,7 +669,7 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
 
 
-Minaburo & Toutain       Expires August 11, 2017               [Page 13]
+Minaburo & Toutain       Expires August 11, 2017               [Page 12]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
@@ -781,4 +725,4 @@ Authors' Addresses
 
 
 
-Minaburo & Toutain       Expires August 11, 2017               [Page 14]
+Minaburo & Toutain       Expires August 11, 2017               [Page 13]
