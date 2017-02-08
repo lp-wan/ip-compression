@@ -5,8 +5,8 @@
 lpwan Working Group                                          A. Minaburo
 Internet-Draft                                                    Acklio
 Intended status: Informational                                L. Toutain
-Expires: August 11, 2017                                  IMT-Atlantique
-                                                       February 07, 2017
+Expires: August 12, 2017                                  IMT-Atlantique
+                                                       February 08, 2017
 
 
     LPWAN Static Context Header Compression (SCHC) for IPv6 and UDP
@@ -44,7 +44,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on August 11, 2017.
+   This Internet-Draft will expire on August 12, 2017.
 
 
 
@@ -53,7 +53,7 @@ Status of This Memo
 
 
 
-Minaburo & Toutain       Expires August 11, 2017                [Page 1]
+Minaburo & Toutain       Expires August 12, 2017                [Page 1]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
@@ -109,7 +109,7 @@ Copyright Notice
 
 
 
-Minaburo & Toutain       Expires August 11, 2017                [Page 2]
+Minaburo & Toutain       Expires August 12, 2017                [Page 2]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
@@ -165,7 +165,7 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
 
 
-Minaburo & Toutain       Expires August 11, 2017                [Page 3]
+Minaburo & Toutain       Expires August 12, 2017                [Page 3]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
@@ -221,7 +221,7 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
 
 
-Minaburo & Toutain       Expires August 11, 2017                [Page 4]
+Minaburo & Toutain       Expires August 12, 2017                [Page 4]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
@@ -277,7 +277,7 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
 
 
-Minaburo & Toutain       Expires August 11, 2017                [Page 5]
+Minaburo & Toutain       Expires August 12, 2017                [Page 5]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
@@ -333,7 +333,7 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
 
 
-Minaburo & Toutain       Expires August 11, 2017                [Page 6]
+Minaburo & Toutain       Expires August 12, 2017                [Page 6]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
@@ -389,7 +389,7 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
 
 
-Minaburo & Toutain       Expires August 11, 2017                [Page 7]
+Minaburo & Toutain       Expires August 12, 2017                [Page 7]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
@@ -445,7 +445,7 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
 
 
-Minaburo & Toutain       Expires August 11, 2017                [Page 8]
+Minaburo & Toutain       Expires August 12, 2017                [Page 8]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
@@ -501,7 +501,7 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
 
 
-Minaburo & Toutain       Expires August 11, 2017                [Page 9]
+Minaburo & Toutain       Expires August 12, 2017                [Page 9]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
@@ -534,7 +534,13 @@ Internet-Draft                 LPWAN SCHC                  February 2017
    device ID present in the Layer 2 header.  The computation depends on
    the technology and the device ID size.
 
-5.1.5.  Compute-*
+5.1.5.  static-mapping
+
+   The goal of static-mapping is to reduce the size of a field by
+   allocating shorter value.  The mapping is known by both ends and
+   stored in a table in both end contexts.
+
+5.1.6.  Compute-*
 
    These functions compute the field value based on received
    information.  They are elided during the compression and
@@ -549,18 +555,17 @@ Internet-Draft                 LPWAN SCHC                  February 2017
    o  compute-udp-checksum: compute the IPv6 length field as described
       in [RFC0768].
 
+
+
+Minaburo & Toutain       Expires August 12, 2017               [Page 10]
+
+Internet-Draft                 LPWAN SCHC                  February 2017
+
+
 6.  Examples
 
    This section gives some scenarios of the compression mechanism for
    IPv6/UDP.  The goal is to illustrate the SCHC behavior.
-
-
-
-
-Minaburo & Toutain       Expires August 11, 2017               [Page 10]
-
-Internet-Draft                 LPWAN SCHC                  February 2017
-
 
 6.1.  IPv6/UDP compression in a star topology
 
@@ -605,19 +610,19 @@ Internet-Draft                 LPWAN SCHC                  February 2017
      |IPv6 Flow Label |0        | equal  | not-sent    ||      |
      |IPv6 Length     |         | ignore | comp-IPv6-l ||      |
      |IPv6 Next Header|17       | equal  | not-sent    ||      |
+
+
+
+Minaburo & Toutain       Expires August 12, 2017               [Page 11]
+
+Internet-Draft                 LPWAN SCHC                  February 2017
+
+
      |IPv6 Hop Limit  |255      | ignore | not-sent    ||      |
      |IPv6 ESprefix   |FE80::/64| equal  | not-sent    ||      |
      |IPv6 ESiid      |         | ignore | ESiid-DID   ||      |
      |IPv6 LCprefix   |FE80::/64| equal  | not-sent    ||      |
      |IPv6 LAiid      |::1      | equal  | not-sent    ||      |
-
-
-
-Minaburo & Toutain       Expires August 11, 2017               [Page 11]
-
-Internet-Draft                 LPWAN SCHC                  February 2017
-
-
      +================+=========+========+=============++======+
      |UDP ESport      |123      | equal  | not-sent    ||      |
      |UDP LAport      |124      | equal  | not-sent    ||      |
@@ -661,17 +666,20 @@ Internet-Draft                 LPWAN SCHC                  February 2017
      |IPv6 LAprefix   |gamma/64 | equal  | not-sent    ||      |
      |IPv6 LAiid      |::1000   | equal  | not-sent    ||      |
      +================+=========+========+=============++======+
+
+
+
+Minaburo & Toutain       Expires August 12, 2017               [Page 12]
+
+Internet-Draft                 LPWAN SCHC                  February 2017
+
+
      |UDP ESport      |8720     | MSB(12)| LSB(4)      || lsb  |
      |UDP LAport      |8720     | MSB(12)| LSB(4)      || lsb  |
      |UDP Length      |         | ignore | comp-UDP-l  ||      |
      |UDP checksum    |         | ignore | comp-UDP-c  ||      |
      +================+=========+========+=============++======+
 
-
-
-Minaburo & Toutain       Expires August 11, 2017               [Page 12]
-
-Internet-Draft                 LPWAN SCHC                  February 2017
 
 
                           Figure 7: Context rules
@@ -714,21 +722,18 @@ Internet-Draft                 LPWAN SCHC                  February 2017
               Networks", RFC 4944, DOI 10.17487/RFC4944, September 2007,
               <http://www.rfc-editor.org/info/rfc4944>.
 
+
+
+
+Minaburo & Toutain       Expires August 12, 2017               [Page 13]
+
+Internet-Draft                 LPWAN SCHC                  February 2017
+
+
    [RFC4997]  Finking, R. and G. Pelletier, "Formal Notation for RObust
               Header Compression (ROHC-FN)", RFC 4997,
               DOI 10.17487/RFC4997, July 2007,
               <http://www.rfc-editor.org/info/rfc4997>.
-
-
-
-
-
-
-
-Minaburo & Toutain       Expires August 11, 2017               [Page 13]
-
-Internet-Draft                 LPWAN SCHC                  February 2017
-
 
    [RFC5795]  Sandlund, K., Pelletier, G., and L-E. Jonsson, "The RObust
               Header Compression (ROHC) Framework", RFC 5795,
@@ -776,9 +781,4 @@ Authors' Addresses
 
 
 
-
-
-
-
-
-Minaburo & Toutain       Expires August 11, 2017               [Page 14]
+Minaburo & Toutain       Expires August 12, 2017               [Page 14]
