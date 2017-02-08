@@ -390,6 +390,12 @@ Device Identifier (DID).
 The IID value is computed from device ID present in the Layer 2 header. The
 computation depends on the technology and the device ID  size.
 
+### static-mapping
+
+The goal of static-mapping is to reduce the size of a field by allocating
+shorter value. The mapping is known by both ends and stored in a table in
+both end contexts. 
+
 
 ### Compute-\*
 
@@ -401,10 +407,6 @@ are elided during the compression and reconstructed during the decompression.
 * compute-udp-length: compute the IPv6 length field as described in {{RFC0768}}.
 
 * compute-udp-checksum: compute the IPv6 length field as described in {{RFC0768}}.
-
-
-
-
 
 # Examples {#compressIPv6}
 
