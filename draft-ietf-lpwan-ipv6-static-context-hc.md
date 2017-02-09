@@ -83,6 +83,8 @@ the transmission, avoiding complex resynchronization mechanisms, incompatible
 with LPWA characteristics. In most of the cases, IPv6/UDP headers are reduced
 to a small context identifier.
 
+The SCHC is indedependant of the LPWAN technology.
+
 # Vocabulary
 
 * CDF: Compression Decompression Function. Function used both to compress a field or to recover its original value in the decompression phase.
@@ -121,15 +123,21 @@ phase (for instance, as it learns the encryption key).
       |       UDP       |       
       |      IPv6       |        
       |                 |       +-----------+         
-      |      LC (rules) |       | LC (rules)|
+      |      LC (contxt)|       |LC (contxt)|
       +--------+--------+       +-----+-----+ 
                |                      |
-               +~ ~ LPWAN ~ ~ NS =====+
+               +~ ~ RG ==== NG =======+
 ~~~~
 {: #Fig-archi title='Architecture'}
 
-{{Fig-archi}} based on {{}} terminology represent the architecture for 
-compression/decompression. 
+{{Fig-archi}} based on {{I-D.ietf-lpwan-overview}} terminology represent the architecture for 
+compression/decompression. The Thing or End-System is running applications which produce UDP/IPv6
+flows. These flows are compressed by a LPWAN Compressor (LC) to reduce the headers size. Resulting
+information is send on a frame to the LPWAN Radio Network to a Radio Gateway (RG) which forward 
+the frame to a Network Gateway.
+The Network Gateway sends the data to a LC for decompression. They both share the same rules. The LC can be 
+located on the Network Gateway or in another places if a tunnel is established between the NG and the LC.
+This architecture forms a star topology.
 
 The context contains a list of rules (cf. {{Fig-ctxt}}). Each rule contains 
 itself a list of field descriptions composed of a filed id (FID), a target
@@ -159,9 +167,8 @@ value (TV), a matching operator (MO) and a Compression/Decompression Function
 {: #Fig-ctxt title='Compression Decompression Context'}
 
 
-The rule does not describe the packet format which
-must be known from the compressor/decompressor. The packet may contain less
-fields than a rule. The rule just describes the
+The rule does not describe the original packet format which
+must be known from the compressor/decompressor. The rule just describes the
 compression/decompression behavior for a field.
 
 The main idea of the compression scheme is to send the rule number (or rule
@@ -279,13 +286,10 @@ The compression/decompression process follows several steps:
   header fields. Compute-\* CDFs must be applied after the other CDFs.
 
 
-
-
 # Matching operators {#chap-MO}
 
-This document describes 3 basic matching operators. They are not typed and 
-can be applied indifferently to integer, string,... Other MO can be defined
-if they are known from both LC.
+This document describes 3 basic matching operators which must be known by both LC. They are 
+not typed and can be applied indifferently to integer, string,... 
 
 * equal: a field value in a packet matches with a field value in a rule if
   they are equal.
@@ -296,7 +300,8 @@ if they are known from both LC.
 * MSB(length): a field value of length T in a packet matches with a field value
   in a rule if the most significant "length" bits are equal.
 
-
+MO may need a list of parameters to proceed to the matching. For instance MSB requires the 
+number of bits to test.
 
 # Compression Decompression Functions (CDF) {#chap-CDF}
 
