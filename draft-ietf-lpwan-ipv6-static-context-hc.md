@@ -266,13 +266,9 @@ The compression/decompression process follows several steps:
 
 # Matching operators {#chap-MO}
 
-It may exist some intermediary cases, where part of the value may be used
-to select a field and a variable part has to be sent on the link. This is
-true for Least Significant Bits (LSB) where the most significant bit can
-be used to select a rule id and the least significant bits have to be sent
-on the link.
-
-Several matching operators are defined:
+This document describes 3 basic matching operators. They are not typed and 
+can be applied indifferently to integer, string,... Other MO can be defined
+if they are known from both LC.
 
 * equal: a field value in a packet matches with a field value in a rule if
   they are equal.
