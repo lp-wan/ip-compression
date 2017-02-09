@@ -36,7 +36,7 @@ normative:
   rfc2460: 
   rfc5795:
   I-D.minaburo-lp-wan-gap-analysis:
-  I-D.draft-ietf-lpwan-overview:
+  I-D.ietf-lpwan-overview:
 
 --- abstract
 
