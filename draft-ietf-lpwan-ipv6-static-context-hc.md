@@ -314,13 +314,13 @@ order  of the original packet. Information added by the compression phase
 must be aligned on byte boundaries, but each individual compression function
 may generate any size.
 
-### not-sent
+## not-sent
 
 The compressor do not sent the field value on the link. The decompressor
 restore the field value with the one stored in the matched rule.
 
 
-### value-sent
+## value-sent
 
 The compressor send the field value on the link, if the matching operator
 is "=". Otherwise the matching operator indicates the information that will
@@ -328,27 +328,27 @@ be sent on the link. For a LSB operator only the Least Significant Bits are
 sent.
 
 
-### LSB(length)
+## LSB(length)
 
 The compressor sends the "length" Least Significant Bits. The decompressor
 combines with a OR operator the value received with the Target Value.
 
 
-### ESiid-DID, LAiid-DID
+## ESiid-DID, LAiid-DID
 
 These functions are used to process respectively the End System and the LA
 Device Identifier (DID).
 The IID value is computed from device ID present in the Layer 2 header. The
 computation depends on the technology and the device ID  size.
 
-### static-mapping
+## static-mapping
 
 The goal of static-mapping is to reduce the size of a field by allocating
 shorter value. The mapping is known by both ends and stored in a table in
 both end contexts. 
 
 
-### Compute-\*
+## Compute-\*
 
 These functions compute the field value based on received information. They
 are elided during the compression and reconstructed during the decompression.
@@ -359,7 +359,7 @@ are elided during the compression and reconstructed during the decompression.
 
 * compute-udp-checksum: compute the IPv6 length field as described in {{RFC0768}}.
 
-# Application to IPv6 and UDP headers
+## Application to IPv6 and UDP headers
 
 ~~~~
 /--------------+-------------------+-----------------------------------\
