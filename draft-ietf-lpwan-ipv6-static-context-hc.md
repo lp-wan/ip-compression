@@ -36,6 +36,7 @@ normative:
   rfc2460: 
   rfc5795:
   I-D.minaburo-lp-wan-gap-analysis:
+  I-D.draft-ietf-lpwan-overview:
 
 --- abstract
 
@@ -67,8 +68,7 @@ compression:
 * Topology is star oriented, therefore all the packets follows the same path.
   For the needs of this draft, the architecture can be summarized to End-Systems
   (ES) exchanging information with LPWAN Application Server (LA). The exchange
-  goes trhough a single LPWA Compressor (LC). In most of the cases, End Systems
-  and LC form a star topology. ESs and LC maintain a static context for compression.
+  goes through a LPWA Compressors (LC). Both LC maintain a static context for compression.
   Static context means that context information is not learned during the exchange.
 
 * Traffic flows are mostly deterministic, since End-Systems embed built-in
@@ -93,7 +93,7 @@ to a small context identifier.
 
 * LA: LPWAN Application. Application sending/consuming headers to/from the End System.
 
-* LC: LPWAN Compressor. Process in the network compression/decompressing headers. LC implements SCHC.
+* LC: LPWAN Compressor. Process in the network compression/decompressing headers. LC uses SCHC rules to perfom compression decompression.
 
 * MO: Matching Operator. Operator used to compare a value contained in a field's header with a value contained in a rule.
 
@@ -113,11 +113,28 @@ context may be stored on the End-System (ES). The other end, the LPWA Compressor
 (LC) can learn the context through a provisioning protocol during the identification
 phase (for instance, as it learns the encryption key).
 
+~~~~
+           End-System
+      +-----------------+
+      | APP1  APP2 APP3 |           
+      |                 |        
+      |       UDP       |       
+      |      IPv6       |        
+      |                 |       +-----------+         
+      |      LC (rules) |       | LC (rules)|
+      +--------+--------+       +-----+-----+ 
+               |                      |
+               +~ ~ LPWAN ~ ~ NS =====+
+~~~~
+{: #Fig-archi title='Architecture'}
+
+{{Fig-archi}} based on {{}} terminology represent the architecture for 
+compression/decompression. 
+
 The context contains a list of rules (cf. {{Fig-ctxt}}). Each rule contains 
 itself a list of field descriptions composed of a filed id (FID), a target
 value (TV), a matching operator (MO) and a Compression/Decompression Function
 (CDF).
-
 
 
 ~~~~
