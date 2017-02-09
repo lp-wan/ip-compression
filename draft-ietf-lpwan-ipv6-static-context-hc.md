@@ -85,18 +85,24 @@ to a small context identifier.
 
 # Vocabulary
 
+* CDF: Compression Decompression Function. Function used both to compress a field or to recover its original value in the decompression phase.
+
 * Context: A set of rules used to compress/decompress headers
 
-* ES End System: Node connected to the LPWAN. ES may implement SCHC.
+* ES: End System. Node connected to the LPWAN. ES may implement SCHC.
 
-* LA LPWAN Application: Application sending/consuming headers to/from the End System.
+* LA: LPWAN Application. Application sending/consuming headers to/from the End System.
 
-* LC LPWAN Compressor: Process in the network compression/decompressing headers. LC implements SCHC.
+* LC: LPWAN Compressor. Process in the network compression/decompressing headers. LC implements SCHC.
+
+* MO: Matching Operator. Operator used to compare a value contained in a field's header with a value contained in a rule.
 
 * Rule: A set of header field values.
 
 * Rule ID: An identifier for a rule, LC and ES share the same rule ID for a specific flow. Rule ID 
   is sent on the LPWAN.
+  
+* TV: Target value. Value contained in the rule that will be matched with the value of an header field.
 
 # Static Context Header Compression
 
