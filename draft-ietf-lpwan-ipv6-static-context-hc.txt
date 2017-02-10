@@ -5,8 +5,8 @@
 lpwan Working Group                                          A. Minaburo
 Internet-Draft                                                    Acklio
 Intended status: Informational                                L. Toutain
-Expires: August 13, 2017                                  IMT-Atlantique
-                                                       February 09, 2017
+Expires: August 14, 2017                                  IMT-Atlantique
+                                                       February 10, 2017
 
 
     LPWAN Static Context Header Compression (SCHC) for IPv6 and UDP
@@ -44,7 +44,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on August 13, 2017.
+   This Internet-Draft will expire on August 14, 2017.
 
 
 
@@ -53,7 +53,7 @@ Status of This Memo
 
 
 
-Minaburo & Toutain       Expires August 13, 2017                [Page 1]
+Minaburo & Toutain       Expires August 14, 2017                [Page 1]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
@@ -109,7 +109,7 @@ Copyright Notice
 
 
 
-Minaburo & Toutain       Expires August 13, 2017                [Page 2]
+Minaburo & Toutain       Expires August 14, 2017                [Page 2]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
@@ -165,7 +165,7 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
 
 
-Minaburo & Toutain       Expires August 13, 2017                [Page 3]
+Minaburo & Toutain       Expires August 14, 2017                [Page 3]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
@@ -221,7 +221,7 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
 
 
-Minaburo & Toutain       Expires August 13, 2017                [Page 4]
+Minaburo & Toutain       Expires August 14, 2017                [Page 4]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
@@ -277,7 +277,7 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
 
 
-Minaburo & Toutain       Expires August 13, 2017                [Page 5]
+Minaburo & Toutain       Expires August 14, 2017                [Page 5]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
@@ -333,7 +333,7 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
 
 
-Minaburo & Toutain       Expires August 13, 2017                [Page 6]
+Minaburo & Toutain       Expires August 14, 2017                [Page 6]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
@@ -389,7 +389,7 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
 
 
-Minaburo & Toutain       Expires August 13, 2017                [Page 7]
+Minaburo & Toutain       Expires August 14, 2017                [Page 7]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
@@ -422,20 +422,20 @@ Internet-Draft                 LPWAN SCHC                  February 2017
    taken during the compression and inversely the action taken by the
    decompressor to restore the original value.
 
-   /--------------------+-------------+--------------------------\
-   | Function           | Compression | Decompression            |
-   |                    |             |                          |
-   +--------------------+-------------+--------------------------+
-   |not-sent            |elided       |use value stored in ctxt  |
-   |value-sent          |send         |build from received value |
-   |LSB(length)         |send LSB     |ctxt value OR rcvd value  |
-   |compute-IPv6-length |elided       |compute IPv6 length       |
-   |compute-UDP-length  |elided       |compute UDP length        |
-   |compute-UDP-checksum|elided       |compute UDP checksum      |
-   |ESiid-DID           |elided       |build IID from L2 ES addr |
-   |LAiid-DID           |elided       |build IID from L2 LA addr |
-   |static-mapping      |send         |index on a table          |
-   \--------------------+-------------+--------------------------/
+   /--------------------+-------------+---------------------------\
+   | Function           | Compression | Decompression             |
+   |                    |             |                           |
+   +--------------------+-------------+---------------------------+
+   |not-sent            |elided       |use value stored in ctxt   |
+   |value-sent          |send         |build from received value  |
+   |LSB(length)         |send LSB     |ctxt value OR rcvd value   |
+   |compute-IPv6-length |elided       |compute IPv6 length        |
+   |compute-UDP-length  |elided       |compute UDP length         |
+   |compute-UDP-checksum|elided       |compute UDP checksum       |
+   |ESiid-DID           |elided       |build IID from L2 ES addr  |
+   |LAiid-DID           |elided       |build IID from L2 LA addr  |
+   |static-mapping      |send index   |value form index on a table|
+   \--------------------+-------------+---------------------------/
 
 
              Figure 5: Compression and Decompression Functions
@@ -445,7 +445,7 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
 
 
-Minaburo & Toutain       Expires August 13, 2017                [Page 8]
+Minaburo & Toutain       Expires August 14, 2017                [Page 8]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
@@ -454,37 +454,71 @@ Internet-Draft                 LPWAN SCHC                  February 2017
    field.  The first column gives the function's name.  The second and
    third columns outlines the compression/decompression process.
 
-   As with 6LoWPAN, the compression process may produce some data, where
-   fields that were not compressed (or were partially compressed) will
-   be sent in the order of the original packet.  Information added by
-   the compression phase must be aligned on byte boundaries, but each
-   individual compression function may generate any size.
+   Compression is done in the rule order and send in that order in the
+   compressed message.  The receiver must be able to find the size of
+   each compressed field which can be given by the rule or send with the
+   data.
 
-5.1.  not-sent
+5.1.  not-sent CDF
 
-   The compressor do not sent the field value on the link.  The
-   decompressor restore the field value with the one stored in the
-   matched rule.
+   Not-sent function is generally used when the field value is specified
+   in the rule and therefore known by the both sides.  This function is
+   generally used with the "equal" MO.  If MO is "ignore", there is a
+   risk to have a decompressed field value different from the compressed
+   field.
 
-5.2.  value-sent
+   The compressor do not sent any value on the compressed header for
+   that field.
 
-   The compressor send the field value on the link, if the matching
-   operator is "=".  Otherwise the matching operator indicates the
-   information that will be sent on the link.  For a LSB operator only
-   the Least Significant Bits are sent.
+   The decompressor restores the field value with the target value
+   stored in the matched rule.
 
-5.3.  LSB(length)
+5.2.  value-sent CDF
+
+   Value-sent function is generally used when the field value is not
+   known by both end.  The value is sent in the compressed message
+   header.  Both ends must know the size of the field, either
+   implicitely or explicitely in the compressed header field.  This
+   function is generally used with the ignore MO.
+
+   The compressor sends the target value stored on the rule on the
+   compressed header message. , if the matching operator is "=".
+   Otherwise the matching operator indicates the information that will
+   be sent on the link.
+
+   For a LSB operator only the Least Significant Bits are sent.
+
+5.3.  LSB CDF
+
+   LSB function is used to send a fixed part of the packet field header
+   to the other end.  This function is used in conjuction with the "MSB"
+   MO
 
    The compressor sends the "length" Least Significant Bits.  The
    decompressor combines with a OR operator the value received with the
    Target Value.
 
-5.4.  ESiid-DID, LAiid-DID
+
+
+
+Minaburo & Toutain       Expires August 14, 2017                [Page 9]
+
+Internet-Draft                 LPWAN SCHC                  February 2017
+
+
+5.4.  ESiid-DID, LAiid-DID CDF
 
    These functions are used to process respectively the End System and
-   the LA Device Identifier (DID).  The IID value is computed from
-   device ID present in the Layer 2 header.  The computation depends on
-   the technology and the device ID size.
+   the LA Device Identifier (DID).
+
+   The IID value is computed from device ID present in the Layer 2
+   header.  The computation depends on the technology and the device ID
+   size.
+
+   [[NOTE: Behavoir must be more clearly defined.  Most technologies
+   have only a single L2 address corresponding the ESiid.  LoRaWAN has a
+   changing L2 address, SigFox is stable, but both also have a EUI-64
+   which could be better to used.]]
 
 5.5.  static-mapping
 
@@ -492,19 +526,13 @@ Internet-Draft                 LPWAN SCHC                  February 2017
    allocating shorter value.  The mapping is known by both ends and
    stored in a table in both end contexts.
 
+   [[NOTE: specify when the mapping is not found]]
+
 5.6.  Compute-*
 
    These functions compute the field value based on received
    information.  They are elided during the compression and
    reconstructed during the decompression.
-
-
-
-
-Minaburo & Toutain       Expires August 13, 2017                [Page 9]
-
-Internet-Draft                 LPWAN SCHC                  February 2017
-
 
    o  compute-ipv6-length: compute the IPv6 length field as described in
       [RFC2460].
@@ -515,7 +543,7 @@ Internet-Draft                 LPWAN SCHC                  February 2017
    o  compute-udp-checksum: compute the IPv6 length field as described
       in [RFC0768].
 
-5.7.  Application to IPv6 and UDP headers
+6.  Application to IPv6 and UDP headers
 
 
 
@@ -529,35 +557,7 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Minaburo & Toutain       Expires August 13, 2017               [Page 10]
+Minaburo & Toutain       Expires August 14, 2017               [Page 10]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
@@ -613,17 +613,17 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
 
 
-Minaburo & Toutain       Expires August 13, 2017               [Page 11]
+Minaburo & Toutain       Expires August 14, 2017               [Page 11]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
 
-6.  Examples
+7.  Examples
 
    This section gives some scenarios of the compression mechanism for
    IPv6/UDP.  The goal is to illustrate the SCHC behavior.
 
-6.1.  IPv6/UDP compression in a star topology
+7.1.  IPv6/UDP compression in a star topology
 
    The most common case will be a LPWA end-system embeds some
    applications running over CoAP.  In this example, the first flow is
@@ -669,7 +669,7 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
 
 
-Minaburo & Toutain       Expires August 13, 2017               [Page 12]
+Minaburo & Toutain       Expires August 14, 2017               [Page 12]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
@@ -725,7 +725,7 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
 
 
-Minaburo & Toutain       Expires August 13, 2017               [Page 13]
+Minaburo & Toutain       Expires August 14, 2017               [Page 13]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
@@ -753,12 +753,12 @@ Internet-Draft                 LPWAN SCHC                  February 2017
    selected to maintain alignment on byte boundaries for the compressed
    header.
 
-7.  Acknowledgements
+8.  Acknowledgements
 
    Thanks to Dominique Barthel, Arunprabhu Kandasamy, Antony Markovski,
    Alexander Pelov, Juan Carlos Zuniga for useful design consideration.
 
-8.  Normative References
+9.  Normative References
 
    [I-D.ietf-lpwan-overview]
               Farrell, S., "LPWAN Overview", draft-ietf-lpwan-
@@ -781,7 +781,7 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
 
 
-Minaburo & Toutain       Expires August 13, 2017               [Page 14]
+Minaburo & Toutain       Expires August 14, 2017               [Page 14]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
@@ -837,4 +837,4 @@ Authors' Addresses
 
 
 
-Minaburo & Toutain       Expires August 13, 2017               [Page 15]
+Minaburo & Toutain       Expires August 14, 2017               [Page 15]
