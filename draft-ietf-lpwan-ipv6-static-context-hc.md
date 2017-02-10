@@ -310,20 +310,20 @@ the compression and inversely the action taken by the decompressor to restore
 the original value.
 
 ~~~~
-/--------------------+-------------+--------------------------\
-| Function           | Compression | Decompression            |
-|                    |             |                          |
-+--------------------+-------------+--------------------------+
-|not-sent            |elided       |use value stored in ctxt  |
-|value-sent          |send         |build from received value |
-|LSB(length)         |send LSB     |ctxt value OR rcvd value  |
-|compute-IPv6-length |elided       |compute IPv6 length       |
-|compute-UDP-length  |elided       |compute UDP length        |
-|compute-UDP-checksum|elided       |compute UDP checksum      |
-|ESiid-DID           |elided       |build IID from L2 ES addr |
-|LAiid-DID           |elided       |build IID from L2 LA addr |
-|static-mapping      |send         |index on a table          |
-\--------------------+-------------+--------------------------/
+/--------------------+-------------+---------------------------\
+| Function           | Compression | Decompression             |
+|                    |             |                           |
++--------------------+-------------+---------------------------+
+|not-sent            |elided       |use value stored in ctxt   |
+|value-sent          |send         |build from received value  |
+|LSB(length)         |send LSB     |ctxt value OR rcvd value   |
+|compute-IPv6-length |elided       |compute IPv6 length        |
+|compute-UDP-length  |elided       |compute UDP length         |
+|compute-UDP-checksum|elided       |compute UDP checksum       |
+|ESiid-DID           |elided       |build IID from L2 ES addr  |
+|LAiid-DID           |elided       |build IID from L2 LA addr  |
+|static-mapping      |send index   |value form index on a table|
+\--------------------+-------------+---------------------------/
 
 ~~~~
 {: #Fig-function title='Compression and Decompression Functions'}
@@ -332,38 +332,57 @@ the original value.
 a field. The first column gives the function's name. The second and third
 columns outlines the compression/decompression process.
 
-As with 6LoWPAN, the compression process may produce some data, where fields
-that were not compressed (or were partially compressed) will be sent in the
-order  of the original packet. Information added by the compression phase
-must be aligned on byte boundaries, but each individual compression function
-may generate any size.
+Compression is done in the rule order and send in that order in the compressed
+message. The receiver must be able to find the size of each compressed field
+which can be given by the rule or send with the data.
 
-## not-sent
+## not-sent CDF
 
-The compressor do not sent the field value on the link. The decompressor
-restore the field value with the one stored in the matched rule.
+Not-sent function is generally used when the field value is specified in the rule and
+therefore known by the both sides. This function is generally used with the
+"equal" MO. If MO is "ignore", there is a risk to have a decompressed field
+value different from the compressed field.
 
+The compressor do not sent any value on the compressed header for that field.
 
-## value-sent
+The decompressor
+restores the field value with the target value stored in the matched rule.
 
-The compressor send the field value on the link, if the matching operator
+## value-sent CDF
+
+Value-sent function is generally used when the field value is not known by both end.
+The value is sent in the compressed message header. Both ends must know the
+size of the field, either implicitely or explicitely in the compressed header
+field. This function is generally used with the ignore MO.
+
+The compressor sends the target value stored on the rule on the compressed
+header message. , if the matching operator
 is "=". Otherwise the matching operator indicates the information that will
-be sent on the link. For a LSB operator only the Least Significant Bits are
+be sent on the link.
+
+For a LSB operator only the Least Significant Bits are
 sent.
 
+## LSB CDF
 
-## LSB(length)
+LSB function is used to send a fixed part of the packet field header to the other end.
+This function is used in conjuction with the "MSB" MO
 
 The compressor sends the "length" Least Significant Bits. The decompressor
 combines with a OR operator the value received with the Target Value.
 
 
-## ESiid-DID, LAiid-DID
+## ESiid-DID, LAiid-DID CDF
 
 These functions are used to process respectively the End System and the LA
 Device Identifier (DID).
+
 The IID value is computed from device ID present in the Layer 2 header. The
 computation depends on the technology and the device ID  size.
+
+[[NOTE: Behavoir must be more clearly defined. Most technologies have only
+a single L2 address corresponding the ESiid. LoRaWAN has a changing L2 address,
+SigFox is stable, but both also have a EUI-64 which could be better to used.]]
 
 ## static-mapping
 
@@ -371,6 +390,7 @@ The goal of static-mapping is to reduce the size of a field by allocating
 shorter value. The mapping is known by both ends and stored in a table in
 both end contexts. 
 
+[[NOTE: specify when the mapping is not found]] 
 
 ## Compute-\*
 
@@ -383,7 +403,7 @@ are elided during the compression and reconstructed during the decompression.
 
 * compute-udp-checksum: compute the IPv6 length field as described in {{RFC0768}}.
 
-## Application to IPv6 and UDP headers
+# Application to IPv6 and UDP headers
 
 ~~~~
 /--------------+-------------------+-----------------------------------\
