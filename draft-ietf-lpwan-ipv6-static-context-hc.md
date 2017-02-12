@@ -328,9 +328,9 @@ the original value.
 ~~~~
 {: #Fig-function title='Compression and Decompression Functions'}
 
-{{Fig-function}} lists all the functions defined to compress and decompress
+{{Fig-function}} sumarizes the functions defined to compress and decompress
 a field. The first column gives the function's name. The second and third
-columns outlines the compression/decompression process.
+columns outlines the compression/decompression behavior.
 
 Compression is done in the rule order and send in that order in the compressed
 message. The receiver must be able to find the size of each compressed field
