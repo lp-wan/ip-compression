@@ -292,6 +292,19 @@ address {
 <link href="#rfc.section.5.5" rel="Chapter" title="5.5 static-mapping"/>
 <link href="#rfc.section.5.6" rel="Chapter" title="5.6 Compute-*"/>
 <link href="#rfc.section.6" rel="Chapter" title="6 Application to IPv6 and UDP headers"/>
+<link href="#rfc.section.6.1" rel="Chapter" title="6.1 IPv6 version field"/>
+<link href="#rfc.section.6.2" rel="Chapter" title="6.2 IPv6 Traffic class field"/>
+<link href="#rfc.section.6.3" rel="Chapter" title="6.3 Flow label field"/>
+<link href="#rfc.section.6.4" rel="Chapter" title="6.4 Payload Length field"/>
+<link href="#rfc.section.6.5" rel="Chapter" title="6.5 Next Header field"/>
+<link href="#rfc.section.6.6" rel="Chapter" title="6.6 Hop Limit field"/>
+<link href="#rfc.section.6.7" rel="Chapter" title="6.7 IPv6 addresses fields"/>
+<link href="#rfc.section.6.7.1" rel="Chapter" title="6.7.1 IPv6 source and destination prefixes"/>
+<link href="#rfc.section.6.7.2" rel="Chapter" title="6.7.2 IPv6 source and destination IID"/>
+<link href="#rfc.section.6.8" rel="Chapter" title="6.8 IPv6 extensions"/>
+<link href="#rfc.section.6.9" rel="Chapter" title="6.9 UDP source and destination port"/>
+<link href="#rfc.section.6.10" rel="Chapter" title="6.10 UDP length field"/>
+<link href="#rfc.section.6.11" rel="Chapter" title="6.11 UDP Checksum field"/>
 <link href="#rfc.section.7" rel="Chapter" title="7 Examples"/>
 <link href="#rfc.section.7.1" rel="Chapter" title="7.1 IPv6/UDP compression in a star topology"/>
 <link href="#rfc.section.8" rel="Chapter" title="8 Acknowledgements"/>
@@ -542,59 +555,70 @@ address {
   <li>compute-udp-checksum: compute the IPv6 length field as described in <a href="#RFC0768">[RFC0768]</a>.</li>
 </ul>
 <h1 id="rfc.section.6"><a href="#rfc.section.6">6.</a> <a href="#application-to-ipv6-and-udp-headers" id="application-to-ipv6-and-udp-headers">Application to IPv6 and UDP headers</a></h1>
-<div id="rfc.figure.6"/>
-<div id="Fig--possible-function"/>
-<pre>
-/--------------+-------------------+-----------------------------------\
-| Field        |Comp Decomp Fct    | Behavior                          |
-+--------------+-------------------+-----------------------------------+
-|IPv6 version  |not-sent           |The value is not sent, but each    |
-|IPv6 DiffServ |                   |end agrees on a value, which can   |
-|IPv6 FL       |                   |be different from 0.               |
-|IPv6 NH       |value-sent         |Depending on the matching operator,|
-|              |                   |the entire field value is sent or  |
-|              |                   |an adjustment to the context value |
-+--------------+-------------------+-----------------------------------+
-|IPv6 Length   |compute-IPv6-length|Dedicated fct to reconstruct value |
-+--------------+-------------------+-----------------------------------+
-|IPv6 Hop Limit|not-sent+MO=ignore |The receiver takes the value stored|
-|              |                   |in the context. It may be different|
-|              |                   |from one originally sent, but in a |
-|              |                   |star topology, there is no risk of |
-|              |                   |loops                              |
-|              |not-sent+matching  |Receiver and sender agree on a     |
-|              |                   |specific value.                    |
-|              |value-sent         |Explicitly sent                    |
-+--------------+-------------------+-----------------------------------+
-|IPv6 ESPrefix |not-sent           |The 64 bit prefix is stored on     |
-|IPv6 LAPrefix |                   |the context                        |
-|              |value-sent         |Explicitly send 64 bits on the link|
-+--------------+-------------------+-----------------------------------+
-|IPv6 ESiid    |not-sent           |IID is not sent, but stored in the |
-|IPv6 LAiid    |                   |context                            |
-|              |ESiid-DID|LAiid-DID|IID is built from the ES/LA Dev. ID|
-|              |value-sent         |IID is explicitly sent on the link.|
-|              |                   |Size depends of the L2 technology  |
-+--------------+-------------------+-----------------------------------+
-|UDP ESport    |not-sent           |In the context                     |
-|UDP LAport    |value-sent         |Send the 2 bytes of the port number|
-|              |LSB(length)        |or least significant bits if MSB   |
-|              |                   |matching is specified in the       |
-|              |                   |matching operator.                 |
-+--------------+-------------------+-----------------------------------+
-|UDP length    |compute-UDP-length |Dedicated fct to reconstruct value |
-+--------------+-------------------+-----------------------------------+
-|UDP Checksum  |compute-UDP-checksum|Dedicated fct to reconstruct value|
-+--------------+-------------------+-----------------------------------+
-</pre>
-<p class="figure">Figure 6: SCHC functions' example assignment for IPv6 and UDP</p>
-<p><a href="#Fig--possible-function">Figure 6</a> gives an example of function assignment to IPv6/UDP fields.</p>
+<p id="rfc.section.6.p.1">This section lists the different IPv6 and UDP fields and how they can be compressed.</p>
+<h1 id="rfc.section.6.1"><a href="#rfc.section.6.1">6.1.</a> <a href="#ipv6-version-field" id="ipv6-version-field">IPv6 version field</a></h1>
+<p id="rfc.section.6.1.p.1">This field hold always the same value, therefore the TV is 6, the MO is &#8220;equal&#8221; and the CDF &#8220;not-sent&#8221;</p>
+<h1 id="rfc.section.6.2"><a href="#rfc.section.6.2">6.2.</a> <a href="#ipv6-traffic-class-field" id="ipv6-traffic-class-field">IPv6 Traffic class field</a></h1>
+<p id="rfc.section.6.2.p.1">If the DiffServ field identified by the rest of the rule do not vary and is known by both sides, the TV should contain this wellknown value, the MO should be &#8220;equal&#8221; and the CDF should be &#8220;not-sent.</p>
+<p id="rfc.section.6.2.p.2">If the DiffServ field identified by the rest of the rule vary during time or is not known by both sides:</p>
+<p/>
+
+<ul>
+  <li>TV is not set, MO is set to &#8220;ignore&#8221; and CDF is set to &#8220;value-sent&#8221;</li>
+  <li>TV contains a stable value, MO is MSB(X) and CDF is set to LSB(8-X)</li>
+</ul>
+<h1 id="rfc.section.6.3"><a href="#rfc.section.6.3">6.3.</a> <a href="#flow-label-field" id="flow-label-field">Flow label field</a></h1>
+<p id="rfc.section.6.3.p.1">If the Flow Label field identified by the rest of the rule do not vary and is known by both sides, the TV should contain this wellknown value, the MO should be &#8220;equal&#8221; and the CDF should be &#8220;not-sent.</p>
+<p id="rfc.section.6.3.p.2">If the Flow Label field identified by the rest of the rule vary during time or is not known by both sides:</p>
+<p/>
+
+<ul>
+  <li>TV is not set, MO is set to &#8220;ignore&#8221; and CDF is set to &#8220;value-sent&#8221;</li>
+  <li>TV contains a stable value, MO is MSB(X) and CDF is set to LSB(20-X)</li>
+</ul>
+<h1 id="rfc.section.6.4"><a href="#rfc.section.6.4">6.4.</a> <a href="#payload-length-field" id="payload-length-field">Payload Length field</a></h1>
+<p id="rfc.section.6.4.p.1">If the LPWAN technology do not add padding, this field can be elided for the transmission on the LPWAN network. The LC recompute the original payload length value. The TV is not set, the MO is set to &#8220;ignore&#8221; and the CDF is &#8220;compute-IPv6-length&#8221;.</p>
+<p id="rfc.section.6.4.p.2">if the payload is small, the TV can be set to 0x0000, the MO set to &#8220;MSB&#8221; and the CDF to &#8220;LSB&#8221;.</p>
+<p id="rfc.section.6.4.p.3">On other cases, the length must be sent and the CDF is replaced by &#8220;value-sent&#8221;.</p>
+<h1 id="rfc.section.6.5"><a href="#rfc.section.6.5">6.5.</a> <a href="#next-header-field" id="next-header-field">Next Header field</a></h1>
+<p id="rfc.section.6.5.p.1">If the Next Header field identified by the rest of the rule do not vary and is known by both sides, the TV should contain this Next Header value, the MO should be &#8220;equal&#8221; and the CDF should be &#8220;not-sent.</p>
+<p id="rfc.section.6.5.p.2">If the Flow Label field identified by the rest of the rule vary during time or is not known by both sides then TV is not set, MO is set to &#8220;ignore&#8221; and CDF is set to &#8220;value-sent&#8221;</p>
+<h1 id="rfc.section.6.6"><a href="#rfc.section.6.6">6.6.</a> <a href="#hop-limit-field" id="hop-limit-field">Hop Limit field</a></h1>
+<p id="rfc.section.6.6.p.1">The End System is generally a host and do not forward packets, therefore the Hop Limit value is constant. Therefore the TV is set with a default value, the MO is set to &#8220;equal&#8221; and the CDF is set to &#8220;not-sent&#8221;.</p>
+<p id="rfc.section.6.6.p.2">Otherwise the value is sent on the LPWAN: TV is not set, MO is set to ignore and CDF is set to &#8220;value-sent&#8221;.</p>
+<h1 id="rfc.section.6.7"><a href="#rfc.section.6.7">6.7.</a> <a href="#ipv6-addresses-fields" id="ipv6-addresses-fields">IPv6 addresses fields</a></h1>
+<p id="rfc.section.6.7.p.1">As in 6LoWPAN <a href="#RFC4944">[RFC4944]</a> IPv6 addresses are splited into two 64 bit long fields; one for the prefix and one for the Interface Identifier (IID). These fields should be compressed. To allow a single rule, these values are identified by their role (ES or LA) and not by their position in the frame (source or destination). The LC must be aware of the traffic direction (upstream, downstream) to select the appropriate field.</p>
+<h1 id="rfc.section.6.7.1"><a href="#rfc.section.6.7.1">6.7.1.</a> <a href="#ipv6-source-and-destination-prefixes" id="ipv6-source-and-destination-prefixes">IPv6 source and destination prefixes</a></h1>
+<p id="rfc.section.6.7.1.p.1">Both ends must be synchronized with the appropriate prefixes. For a specific flow, the source and destination prefixe can be unique and stored in the context. It can be either a link-local prefix or a global prefix. In that case, the TV for the source and destination prefixes contains the values, the MO is set to &#8220;equal&#8221; and the CDF is set to &#8220;not-sent&#8221;.</p>
+<p id="rfc.section.6.7.1.p.2">In case the rule allows several prefixes, the static mapping must be used. The different prefixes are listed in the TV associated with a short ID. The MO is set to &#8220;match-mapping&#8221; and the CDF is set to &#8220;mapping-sent&#8221;.</p>
+<p id="rfc.section.6.7.1.p.3">Otherwise the TV contains the prefix, the MO is set to &#8220;equal&#8221; and the CDF is set to value-sent.</p>
+<h1 id="rfc.section.6.7.2"><a href="#rfc.section.6.7.2">6.7.2.</a> <a href="#ipv6-source-and-destination-iid" id="ipv6-source-and-destination-iid">IPv6 source and destination IID</a></h1>
+<p id="rfc.section.6.7.2.p.1">If the ES or LA IID are based on a LPWAN address, then the IID can be reconstructed with information coming from the LPWAN header. In that case the TV is not set, the MO is set to &#8220;ignore&#8221; and the CDF is set to &#8220;ESiid-DID&#8221; or &#8220;LAiid-DID&#8221;. Note that the LPWAN technology is generally carrying a single device identifier corresponding to the ES. The LC may also not be aware of these values.</p>
+<p id="rfc.section.6.7.2.p.2">For privacy reasons or if the ES address is changing overt the time, it maybe better to use a static value. In that case, the TV contains the value, the MO operator is set to &#8220;equal&#8221; and the CDF is set to &#8220;not-sent&#8221;.</p>
+<p id="rfc.section.6.7.2.p.3">If several IID are possible, then the TV contains the list of possible IID, the MO is set to &#8220;match-mapping&#8221; and the CDF is set to &#8220;mapping-sent&#8221;.</p>
+<p id="rfc.section.6.7.2.p.4">Otherwise the variation of the IID may be reduced to few bytes. In that case, the TV is set to the stable part of the IID, the MO is set to MSB and the CDF is set to LSB.</p>
+<p id="rfc.section.6.7.2.p.5">Finally, the IID can be send on the LPWAN. In that case, the TV is not set, the MO is set to &#8220;ignore&#8221; and the CDF is set to &#8220;value-sent&#8221;.</p>
+<h1 id="rfc.section.6.8"><a href="#rfc.section.6.8">6.8.</a> <a href="#ipv6-extensions" id="ipv6-extensions">IPv6 extensions</a></h1>
+<p id="rfc.section.6.8.p.1">Currently no extensions rules are defined. They can be based on the MO and CDF described above.</p>
+<h1 id="rfc.section.6.9"><a href="#rfc.section.6.9">6.9.</a> <a href="#udp-source-and-destination-port" id="udp-source-and-destination-port">UDP source and destination port</a></h1>
+<p id="rfc.section.6.9.p.1">To allow a single rule, these values are identified by their role (ES or LA) and not by their position in the frame (source or destination). The LC must be aware of the traffic direction (upstream, downstream) to select the appropriate field. The following rules apply for ES and LA port numbers.</p>
+<p id="rfc.section.6.9.p.2">If both ends knows the port number, it can be elided. The TV contains the port number, the MO is set to &#8220;equal&#8221; and the CDF is set to &#8220;not-sent&#8221;.</p>
+<p id="rfc.section.6.9.p.3">If the port variation are on few bits, the TV contains the stable part of the port number, the MO is set to &#8220;MSB&#8221; and the CDF is set to &#8220;LSB&#8221;.</p>
+<p id="rfc.section.6.9.p.4">If some wellknown value are used, the the TV can contain the list of this values, the MO is set to &#8220;match-mapping&#8221; and the CDF is set to &#8220;mapping-sent&#8221;.</p>
+<p id="rfc.section.6.9.p.5">Otherwise the port number are sent on the LPWAN. The TV is not set, the MO is set to &#8220;ignore&#8221; and the CDF is set to &#8220;value-sent&#8221;.</p>
+<h1 id="rfc.section.6.10"><a href="#rfc.section.6.10">6.10.</a> <a href="#udp-length-field" id="udp-length-field">UDP length field</a></h1>
+<p id="rfc.section.6.10.p.1">If the LPWAN technology does not introduce padding, the UDP length can be computed from the received data. In that case the TV is not set, the MO is set to &#8220;ignore&#8221; and the CDF is set to &#8220;compute-UDP-length&#8221;.</p>
+<p id="rfc.section.6.10.p.2">if the payload is small, the TV can be set to 0x0000, the MO set to &#8220;MSB&#8221; and the CDF to &#8220;LSB&#8221;.</p>
+<p id="rfc.section.6.10.p.3">On other cases, the length must be sent and the CDF is replaced by &#8220;value-sent&#8221;.</p>
+<h1 id="rfc.section.6.11"><a href="#rfc.section.6.11">6.11.</a> <a href="#udp-checksum-field" id="udp-checksum-field">UDP Checksum field</a></h1>
+<p id="rfc.section.6.11.p.1">IPv6 mandate a checksum in protocol above IP. Nevertheless, if a more efficient mechanism such as L2 CRC or MIC is carried by or over the L2 (such as in the LPWAN fragmentation process (see XXXX)), the checksum transmission can be avoided.  In that case, the TV is not set, the MO is set to &#8220;ignore&#8221; and the CDF is set to &#8220;compute-UDP-checksum&#8221;.</p>
+<p id="rfc.section.6.11.p.2">In other cases the checksum must be explicitly sent. The TV is not set, the MO is set to &#8220;ignore&#8221; and the CDF is set to &#8220;value-sent&#8221;.</p>
 <h1 id="rfc.section.7"><a href="#rfc.section.7">7.</a> <a href="#compressIPv6" id="compressIPv6">Examples</a></h1>
 <p id="rfc.section.7.p.1">This section gives some scenarios of the compression mechanism for IPv6/UDP.  The goal is to illustrate the SCHC behavior.</p>
 <h1 id="rfc.section.7.1"><a href="#rfc.section.7.1">7.1.</a> <a href="#ipv6udp-compression-in-a-star-topology" id="ipv6udp-compression-in-a-star-topology">IPv6/UDP compression in a star topology</a></h1>
 <p id="rfc.section.7.1.p.1">The most common case will be a LPWA end-system embeds some applications running over CoAP. In this example, the first flow is for the device management based on CoAP using Link Local addresses and UDP ports 123 and 124.  The second flow will be a CoAP server for measurements done by the end-system (using ports 5683) and Global Addresses alpha::IID/64 to beta::1/64.  The last flow is for legacy applications using different ports numbers, the destination is gamma::1/64.</p>
-<p><a href="#FigStack">Figure 7</a> presents the protocol stack for this end-system. IPv6 and UDP are represented with dotted lines since these protocols are compressed on the radio link.</p>
-<div id="rfc.figure.7"/>
+<p><a href="#FigStack">Figure 6</a> presents the protocol stack for this end-system. IPv6 and UDP are represented with dotted lines since these protocols are compressed on the radio link.</p>
+<div id="rfc.figure.6"/>
 <div id="FigStack"/>
 <pre>
  Managment    Data
@@ -610,9 +634,9 @@ address {
       End System or LPWA GW
 
 </pre>
-<p class="figure">Figure 7: Simplified Protocol Stack for LP-WAN</p>
+<p class="figure">Figure 6: Simplified Protocol Stack for LP-WAN</p>
 <p id="rfc.section.7.1.p.3">Note that in some LPWA technologies, only End Systems have a device ID.  Therefore it is necessary to define statically an IID for the Link Local address for the LPWA Compressor.</p>
-<div id="rfc.figure.8"/>
+<div id="rfc.figure.7"/>
 <div id="Fig-fields"/>
 <pre>
   Rule 0
@@ -680,10 +704,10 @@ address {
 
 
 </pre>
-<p class="figure">Figure 8: Context rules</p>
-<p id="rfc.section.7.1.p.4">All the fields described in the three rules <a href="#Fig-fields">Figure 8</a> are present in the IPv6 and UDP headers.  The ESDevice-ID value is found in the L2 header.</p>
+<p class="figure">Figure 7: Context rules</p>
+<p id="rfc.section.7.1.p.4">All the fields described in the three rules <a href="#Fig-fields">Figure 7</a> are present in the IPv6 and UDP headers.  The ESDevice-ID value is found in the L2 header.</p>
 <p id="rfc.section.7.1.p.5">The second and third rules use global addresses. The way the ES learn the prefix is not in the scope of the document. One possible way is to use a management protocol to set up in both end rules the prefix used on the LPWA network.</p>
-<p id="rfc.section.7.1.p.6">The third rule compresses port numbers on 4 bits. This value is selected to maintain alignment on byte boundaries for the compressed header.</p>
+<p id="rfc.section.7.1.p.6">The third rule compresses port numbers on 4 bits.</p>
 <h1 id="rfc.section.8"><a href="#rfc.section.8">8.</a> <a href="#acknowledgements" id="acknowledgements">Acknowledgements</a></h1>
 <p id="rfc.section.8.p.1">Thanks to Dominique Barthel, Arunprabhu Kandasamy, Antony Markovski, Alexander Pelov, Juan Carlos Zuniga for useful design consideration.</p>
 <h1 id="rfc.references"><a href="#rfc.references">9.</a> Normative References</h1>
@@ -808,7 +832,20 @@ address {
 <li>5.5.   <a href="#rfc.section.5.5">static-mapping</a></li>
 <li>5.6.   <a href="#rfc.section.5.6">Compute-*</a></li>
 </ul><li>6.   <a href="#rfc.section.6">Application to IPv6 and UDP headers</a></li>
-<li>7.   <a href="#rfc.section.7">Examples</a></li>
+<ul><li>6.1.   <a href="#rfc.section.6.1">IPv6 version field</a></li>
+<li>6.2.   <a href="#rfc.section.6.2">IPv6 Traffic class field</a></li>
+<li>6.3.   <a href="#rfc.section.6.3">Flow label field</a></li>
+<li>6.4.   <a href="#rfc.section.6.4">Payload Length field</a></li>
+<li>6.5.   <a href="#rfc.section.6.5">Next Header field</a></li>
+<li>6.6.   <a href="#rfc.section.6.6">Hop Limit field</a></li>
+<li>6.7.   <a href="#rfc.section.6.7">IPv6 addresses fields</a></li>
+<ul><li>6.7.1.   <a href="#rfc.section.6.7.1">IPv6 source and destination prefixes</a></li>
+<li>6.7.2.   <a href="#rfc.section.6.7.2">IPv6 source and destination IID</a></li>
+</ul><li>6.8.   <a href="#rfc.section.6.8">IPv6 extensions</a></li>
+<li>6.9.   <a href="#rfc.section.6.9">UDP source and destination port</a></li>
+<li>6.10.   <a href="#rfc.section.6.10">UDP length field</a></li>
+<li>6.11.   <a href="#rfc.section.6.11">UDP Checksum field</a></li>
+</ul><li>7.   <a href="#rfc.section.7">Examples</a></li>
 <ul><li>7.1.   <a href="#rfc.section.7.1">IPv6/UDP compression in a star topology</a></li>
 </ul><li>8.   <a href="#rfc.section.8">Acknowledgements</a></li>
 <li>9.   <a href="#rfc.references">Normative References</a></li>
