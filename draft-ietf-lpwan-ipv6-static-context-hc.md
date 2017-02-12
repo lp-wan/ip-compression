@@ -297,6 +297,11 @@ not typed and can be applied indifferently to integer, string,...
 
 * MSB(length): a field value of length T in a packet matches with a field value
   in a rule if the most significant "length" bits are equal.
+  
+* match-mapping: The goal of mapping-sent is to reduce the size of a field by allocating
+  shorter value. The Target Value contains a list of pairs. Each pair is composed of
+  a value and short ID. This operator match if a field value is equal to one of the pair's
+  value.
 
 MO may need a list of parameters to proceed to the matching. For instance MSB requires the 
 number of bits to test.
@@ -320,7 +325,7 @@ the original value.
 |compute-UDP-checksum|elided       |compute UDP checksum       |
 |ESiid-DID           |elided       |build IID from L2 ES addr  |
 |LAiid-DID           |elided       |build IID from L2 LA addr  |
-|static-mapping      |send index   |value form index on a table|
+|mapping-sent        |send index   |value form index on a table|
 \--------------------+-------------+---------------------------/
 
 ~~~~
@@ -378,17 +383,10 @@ Device Identifier (DID).
 The IID value is computed from device ID present in the Layer 2 header. The
 computation depends on the technology and the device ID  size.
 
-[[NOTE: Behavoir must be more clearly defined. Most technologies have only
-a single L2 address corresponding the ESiid. LoRaWAN has a changing L2 address,
-SigFox is stable, but both also have a EUI-64 which could be better to used.]]
+## mapping-sent
 
-## static-mapping
-
-The goal of static-mapping is to reduce the size of a field by allocating
-shorter value. The mapping is known by both ends and stored in a table in
-both end contexts. 
-
-[[NOTE: specify when the mapping is not found]] 
+mathching-sent is used to send a smaller index associated to the field value
+in the Target Value. This function is used in conjuction with the "match-mapping" MO.
 
 ## Compute-\*
 
