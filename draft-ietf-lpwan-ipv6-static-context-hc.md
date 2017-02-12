@@ -405,52 +405,161 @@ are elided during the compression and reconstructed during the decompression.
 
 # Application to IPv6 and UDP headers
 
-~~~~
-/--------------+-------------------+-----------------------------------\
-| Field        |Comp Decomp Fct    | Behavior                          |
-+--------------+-------------------+-----------------------------------+
-|IPv6 version  |not-sent           |The value is not sent, but each    |
-|IPv6 DiffServ |                   |end agrees on a value, which can   |
-|IPv6 FL       |                   |be different from 0.               |
-|IPv6 NH       |value-sent         |Depending on the matching operator,|
-|              |                   |the entire field value is sent or  |
-|              |                   |an adjustment to the context value |
-+--------------+-------------------+-----------------------------------+
-|IPv6 Length   |compute-IPv6-length|Dedicated fct to reconstruct value |
-+--------------+-------------------+-----------------------------------+
-|IPv6 Hop Limit|not-sent+MO=ignore |The receiver takes the value stored|
-|              |                   |in the context. It may be different|
-|              |                   |from one originally sent, but in a |
-|              |                   |star topology, there is no risk of |
-|              |                   |loops                              |
-|              |not-sent+matching  |Receiver and sender agree on a     |
-|              |                   |specific value.                    |
-|              |value-sent         |Explicitly sent                    |
-+--------------+-------------------+-----------------------------------+
-|IPv6 ESPrefix |not-sent           |The 64 bit prefix is stored on     |
-|IPv6 LAPrefix |                   |the context                        |
-|              |value-sent         |Explicitly send 64 bits on the link|
-+--------------+-------------------+-----------------------------------+
-|IPv6 ESiid    |not-sent           |IID is not sent, but stored in the |
-|IPv6 LAiid    |                   |context                            |
-|              |ESiid-DID|LAiid-DID|IID is built from the ES/LA Dev. ID|
-|              |value-sent         |IID is explicitly sent on the link.|
-|              |                   |Size depends of the L2 technology  |
-+--------------+-------------------+-----------------------------------+
-|UDP ESport    |not-sent           |In the context                     |
-|UDP LAport    |value-sent         |Send the 2 bytes of the port number|
-|              |LSB(length)        |or least significant bits if MSB   |
-|              |                   |matching is specified in the       |
-|              |                   |matching operator.                 |
-+--------------+-------------------+-----------------------------------+
-|UDP length    |compute-UDP-length |Dedicated fct to reconstruct value |
-+--------------+-------------------+-----------------------------------+
-|UDP Checksum  |compute-UDP-checksum|Dedicated fct to reconstruct value|
-+--------------+-------------------+-----------------------------------+
-~~~~
-{: #Fig--possible-function title="SCHC functions' example assignment for IPv6 and UDP"}
+This section lists the different IPv6 and UDP fields and how they can be compressed.
 
-{{Fig--possible-function}} gives an example of function assignment to IPv6/UDP fields.
+## IPv6 version field
+
+This field hold always the same value, therefore the TV is 6, the MO is "equal" 
+and the CDF "not-sent"
+
+
+## IPv6 Traffic class field
+
+If the DiffServ field identified by the rest of the rule do not vary and is known 
+by both sides, the TV should contain this wellknown value, the MO should be "equal" 
+and the CDF should be "not-sent.
+
+If the DiffServ field identified by the rest of the rule vary during time or is not 
+known by both sides:
+
+* TV is not set, MO is set to "ignore" and CDF is set to "value-sent"
+
+* TV contains a stable value, MO is MSB(X) and CDF is set to LSB(8-X)
+
+## Flow label field
+
+If the Flow Label field identified by the rest of the rule do not vary and is known 
+by both sides, the TV should contain this wellknown value, the MO should be "equal" 
+and the CDF should be "not-sent.
+
+If the Flow Label field identified by the rest of the rule vary during time or is not 
+known by both sides:
+
+* TV is not set, MO is set to "ignore" and CDF is set to "value-sent"
+
+* TV contains a stable value, MO is MSB(X) and CDF is set to LSB(20-X)
+
+## Payload Length field
+
+If the LPWAN technology do not add padding, this field can be elided for the 
+transmission on the LPWAN network. The LC recompute the original payload length
+value. The TV is not set, the MO is set to "ignore" and the CDF is "compute-IPv6-length".
+
+if the payload is small, the TV can be set to 0x0000, the MO set to "MSB" and the
+CDF to "LSB". 
+
+On other cases, the length must be sent and the CDF is replaced by "value-sent".
+
+## Next Header field
+
+If the Next Header field identified by the rest of the rule do not vary and is known 
+by both sides, the TV should contain this Next Header value, the MO should be "equal" 
+and the CDF should be "not-sent.
+
+If the Flow Label field identified by the rest of the rule vary during time or is not 
+known by both sides then TV is not set, MO is set to "ignore" and CDF is set to 
+"value-sent"
+
+## Hop Limit field
+
+The End System is generally a host and do not forward packets, therefore the
+Hop Limit value is constant. Therefore the TV is set with a default value, the MO 
+is set to "equal" and the CDF is set to "not-sent".
+
+Otherwise the value is sent on the LPWAN: TV is not set, MO is set to ignore and 
+CDF is set to "value-sent".
+
+## IPv6 addresses fields
+
+As in 6LoWPAN {{RFC4944}} IPv6 addresses are splited into two 64 bit long fields; 
+one for the prefix and one for the Interface Identifier (IID). These fields should
+be compressed. To allow a single rule, these values are identified by their role 
+(ES or LA) and not by their position in the frame (source or destination). The LC
+must be aware of the traffic direction (upstream, downstream) to select the appropriate
+field.
+
+### IPv6 source and destination prefixes
+
+Both ends must be synchronized with the appropriate prefixes. For a specific flow, 
+the source and destination prefixe can be unique and stored in the context. It can 
+be either a link-local prefix or a global prefix. In that case, the TV for the 
+source and destination prefixes contains the values, the MO is set to "equal" and
+the CDF is set to "not-sent".
+
+In case the rule allows several prefixes, the static mapping must be used. The 
+different prefixes are listed in the TV associated with a short ID. The MO is set 
+to "match-mapping" and the CDF is set to "mapping-sent".
+
+Otherwise the TV contains the prefix, the MO is set to "equal" and the CDF is set to
+value-sent.
+
+### IPv6 source and destination IID
+
+If the ES or LA IID are based on a LPWAN address, then the IID can be reconstructed 
+with information coming from the LPWAN header. In that case the TV is not set, the MO 
+is set to "ignore" and the CDF is set to "ESiid-DID" or "LAiid-DID". Note that the 
+LPWAN technology is generally carrying a single device identifier corresponding
+to the ES. The LC may also not be aware of these values. 
+
+For privacy reasons or if the ES address is changing overt the time, it maybe better to
+use a static value. In that case, the TV contains the value, the MO operator is set to
+"equal" and the CDF is set to "not-sent". 
+
+If several IID are possible, then the TV contains the list of possible IID, the MO is 
+set to "match-mapping" and the CDF is set to "mapping-sent". 
+
+Otherwise the variation of the IID may be reduced to few bytes. In that case, the TV is
+set to the stable part of the IID, the MO is set to MSB and the CDF is set to LSB.
+
+Finally, the IID can be send on the LPWAN. In that case, the TV is not set, the MO is set
+to "ignore" and the CDF is set to "value-sent".
+
+## IPv6 extensions
+
+Currently no extensions rules are defined. They can be based on the MO and 
+CDF described above.
+
+## UDP source and destination port
+
+To allow a single rule, these values are identified by their role 
+(ES or LA) and not by their position in the frame (source or destination). The LC
+must be aware of the traffic direction (upstream, downstream) to select the appropriate
+field. The following rules apply for ES and LA port numbers.
+
+If both ends knows the port number, it can be elided. The TV contains the port number,
+the MO is set to "equal" and the CDF is set to "not-sent".
+
+If the port variation are on few bits, the TV contains the stable part of the port number,
+the MO is set to "MSB" and the CDF is set to "LSB".
+
+If some wellknown value are used, the the TV can contain the list of this values, the
+MO is set to "match-mapping" and the CDF is set to "mapping-sent".
+
+Otherwise the port number are sent on the LPWAN. The TV is not set, the MO is 
+set to "ignore" and the CDF is set to "value-sent".
+
+## UDP length field
+
+If the LPWAN technology does not introduce padding, the UDP length can be computed
+from the received data. In that case the TV is not set, the MO is set to "ignore" and
+the CDF is set to "compute-UDP-length".
+
+if the payload is small, the TV can be set to 0x0000, the MO set to "MSB" and the
+CDF to "LSB". 
+
+On other cases, the length must be sent and the CDF is replaced by "value-sent".
+
+## UDP Checksum field
+
+IPv6 mandate a checksum in protocol above IP. Nevertheless, if a more efficient
+mechanism such as L2 CRC or MIC is carried by or over the L2 (such as in the 
+LPWAN fragmentation process (see XXXX)), the checksum transmission can be avoided.
+In that case, the TV is not set, the MO is set to "ignore" and the CDF is set to
+"compute-UDP-checksum".
+
+In other cases the checksum must be explicitly sent. The TV is not set, the MO is set to
+"ignore" and the CDF is set to "value-sent".
+
 
 
 # Examples {#compressIPv6}
@@ -574,10 +683,7 @@ prefix is not in the scope of the document. One possible way is to use a
 management protocol to set up in both end rules the prefix used on the LPWA
 network.
 
-The third rule compresses port numbers on 4 bits. This value is selected
-to maintain alignment on byte boundaries for the compressed header.
-
-
+The third rule compresses port numbers on 4 bits. 
 
 # Acknowledgements
 
