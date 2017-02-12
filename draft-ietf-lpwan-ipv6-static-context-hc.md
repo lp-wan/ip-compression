@@ -514,7 +514,7 @@ to "ignore" and the CDF is set to "value-sent".
 
 ## IPv6 extensions
 
-Currently no extensions rules are defined. They can be based on the MO and 
+Currently no extension rules  are currently defined. They can be based on the MO and 
 CDF described above.
 
 ## UDP source and destination port
