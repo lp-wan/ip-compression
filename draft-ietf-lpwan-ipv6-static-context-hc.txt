@@ -413,6 +413,12 @@ Internet-Draft                 LPWAN SCHC                  February 2017
       field value in a rule if the most significant "length" bits are
       equal.
 
+   o  match-mapping: The goal of mapping-sent is to reduce the size of a
+      field by allocating shorter value.  The Target Value contains a
+      list of pairs.  Each pair is composed of a value and short ID.
+      This operator match if a field value is equal to one of the pair's
+      value.
+
    MO may need a list of parameters to proceed to the matching.  For
    instance MSB requires the number of bits to test.
 
@@ -421,6 +427,28 @@ Internet-Draft                 LPWAN SCHC                  February 2017
    The Compression Decompression Functions (CDF) describe the action
    taken during the compression and inversely the action taken by the
    decompressor to restore the original value.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Minaburo & Toutain       Expires August 16, 2017                [Page 8]
+
+Internet-Draft                 LPWAN SCHC                  February 2017
+
 
    /--------------------+-------------+---------------------------\
    | Function           | Compression | Decompression             |
@@ -434,21 +462,11 @@ Internet-Draft                 LPWAN SCHC                  February 2017
    |compute-UDP-checksum|elided       |compute UDP checksum       |
    |ESiid-DID           |elided       |build IID from L2 ES addr  |
    |LAiid-DID           |elided       |build IID from L2 LA addr  |
-   |static-mapping      |send index   |value form index on a table|
+   |mapping-sent        |send index   |value form index on a table|
    \--------------------+-------------+---------------------------/
 
 
              Figure 5: Compression and Decompression Functions
-
-
-
-
-
-
-Minaburo & Toutain       Expires August 16, 2017                [Page 8]
-
-Internet-Draft                 LPWAN SCHC                  February 2017
-
 
    Figure 5 sumarizes the functions defined to compress and decompress a
    field.  The first column gives the function's name.  The second and
@@ -481,6 +499,13 @@ Internet-Draft                 LPWAN SCHC                  February 2017
    implicitely or explicitely in the compressed header field.  This
    function is generally used with the ignore MO.
 
+
+
+Minaburo & Toutain       Expires August 16, 2017                [Page 9]
+
+Internet-Draft                 LPWAN SCHC                  February 2017
+
+
    The compressor sends the target value stored on the rule on the
    compressed header message. , if the matching operator is "=".
    Otherwise the matching operator indicates the information that will
@@ -498,14 +523,6 @@ Internet-Draft                 LPWAN SCHC                  February 2017
    decompressor combines with a OR operator the value received with the
    Target Value.
 
-
-
-
-Minaburo & Toutain       Expires August 16, 2017                [Page 9]
-
-Internet-Draft                 LPWAN SCHC                  February 2017
-
-
 5.4.  ESiid-DID, LAiid-DID CDF
 
    These functions are used to process respectively the End System and
@@ -515,18 +532,11 @@ Internet-Draft                 LPWAN SCHC                  February 2017
    header.  The computation depends on the technology and the device ID
    size.
 
-   [[NOTE: Behavoir must be more clearly defined.  Most technologies
-   have only a single L2 address corresponding the ESiid.  LoRaWAN has a
-   changing L2 address, SigFox is stable, but both also have a EUI-64
-   which could be better to used.]]
+5.5.  mapping-sent
 
-5.5.  static-mapping
-
-   The goal of static-mapping is to reduce the size of a field by
-   allocating shorter value.  The mapping is known by both ends and
-   stored in a table in both end contexts.
-
-   [[NOTE: specify when the mapping is not found]]
+   mathching-sent is used to send a smaller index associated to the
+   field value in the Target Value.  This function is used in conjuction
+   with the "match-mapping" MO.
 
 5.6.  Compute-*
 
@@ -543,6 +553,15 @@ Internet-Draft                 LPWAN SCHC                  February 2017
    o  compute-udp-checksum: compute the IPv6 length field as described
       in [RFC0768].
 
+
+
+
+
+Minaburo & Toutain       Expires August 16, 2017               [Page 10]
+
+Internet-Draft                 LPWAN SCHC                  February 2017
+
+
 6.  Application to IPv6 and UDP headers
 
    This section lists the different IPv6 and UDP fields and how they can
@@ -552,15 +571,6 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
    This field hold always the same value, therefore the TV is 6, the MO
    is "equal" and the CDF "not-sent"
-
-
-
-
-
-Minaburo & Toutain       Expires August 16, 2017               [Page 10]
-
-Internet-Draft                 LPWAN SCHC                  February 2017
-
 
 6.2.  IPv6 Traffic class field
 
@@ -599,6 +609,15 @@ Internet-Draft                 LPWAN SCHC                  February 2017
    original payload length value.  The TV is not set, the MO is set to
    "ignore" and the CDF is "compute-IPv6-length".
 
+
+
+
+
+Minaburo & Toutain       Expires August 16, 2017               [Page 11]
+
+Internet-Draft                 LPWAN SCHC                  February 2017
+
+
    if the payload is small, the TV can be set to 0x0000, the MO set to
    "MSB" and the CDF to "LSB".
 
@@ -609,15 +628,6 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
    If the Next Header field identified by the rest of the rule do not
    vary and is known by both sides, the TV should contain this Next
-
-
-
-
-Minaburo & Toutain       Expires August 16, 2017               [Page 11]
-
-Internet-Draft                 LPWAN SCHC                  February 2017
-
-
    Header value, the MO should be "equal" and the CDF should be "not-
    sent.
 
@@ -656,16 +666,6 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
    In case the rule allows several prefixes, the static mapping must be
    used.  The different prefixes are listed in the TV associated with a
-   short ID.  The MO is set to "match-mapping" and the CDF is set to
-   "mapping-sent".
-
-   Otherwise the TV contains the prefix, the MO is set to "equal" and
-   the CDF is set to value-sent.
-
-
-
-
-
 
 
 
@@ -673,6 +673,12 @@ Minaburo & Toutain       Expires August 16, 2017               [Page 12]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
+
+   short ID.  The MO is set to "match-mapping" and the CDF is set to
+   "mapping-sent".
+
+   Otherwise the TV contains the prefix, the MO is set to "equal" and
+   the CDF is set to value-sent.
 
 6.7.2.  IPv6 source and destination IID
 
@@ -717,18 +723,16 @@ Internet-Draft                 LPWAN SCHC                  February 2017
    contains the port number, the MO is set to "equal" and the CDF is set
    to "not-sent".
 
-   If the port variation are on few bits, the TV contains the stable
-   part of the port number, the MO is set to "MSB" and the CDF is set to
-   "LSB".
-
-
-
 
 
 Minaburo & Toutain       Expires August 16, 2017               [Page 13]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
+
+   If the port variation are on few bits, the TV contains the stable
+   part of the port number, the MO is set to "MSB" and the CDF is set to
+   "LSB".
 
    If some wellknown value are used, the the TV can contain the list of
    this values, the MO is set to "match-mapping" and the CDF is set to
@@ -774,10 +778,6 @@ Internet-Draft                 LPWAN SCHC                  February 2017
    for the device management based on CoAP using Link Local addresses
    and UDP ports 123 and 124.  The second flow will be a CoAP server for
    measurements done by the end-system (using ports 5683) and Global
-   Addresses alpha::IID/64 to beta::1/64.  The last flow is for legacy
-   applications using different ports numbers, the destination is
-   gamma::1/64.
-
 
 
 
@@ -785,6 +785,10 @@ Minaburo & Toutain       Expires August 16, 2017               [Page 14]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
+
+   Addresses alpha::IID/64 to beta::1/64.  The last flow is for legacy
+   applications using different ports numbers, the destination is
+   gamma::1/64.
 
    Figure 6 presents the protocol stack for this end-system.  IPv6 and
    UDP are represented with dotted lines since these protocols are
@@ -830,10 +834,6 @@ Internet-Draft                 LPWAN SCHC                  February 2017
      |UDP checksum    |         | ignore | comp-UDP-c  ||      |
      +================+=========+========+=============++======+
 
-     Rule 1
-     +----------------+---------+--------+-------------++------+
-     | Field          | Value   | Match  | Function    || Sent |
-     +----------------+---------+--------+-------------++------+
 
 
 
@@ -842,6 +842,10 @@ Minaburo & Toutain       Expires August 16, 2017               [Page 15]
 Internet-Draft                 LPWAN SCHC                  February 2017
 
 
+     Rule 1
+     +----------------+---------+--------+-------------++------+
+     | Field          | Value   | Match  | Function    || Sent |
+     +----------------+---------+--------+-------------++------+
      |IPv6 version    |6        | equal  | not-sent    ||      |
      |IPv6 DiffServ   |0        | equal  | not-sent    ||      |
      |IPv6 Flow Label |0        | equal  | not-sent    ||      |
@@ -884,12 +888,8 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
                           Figure 7: Context rules
 
-   All the fields described in the three rules Figure 7 are present in
-   the IPv6 and UDP headers.  The ESDevice-ID value is found in the L2
-   header.
 
-   The second and third rules use global addresses.  The way the ES
-   learn the prefix is not in the scope of the document.  One possible
+
 
 
 
@@ -898,6 +898,12 @@ Minaburo & Toutain       Expires August 16, 2017               [Page 16]
 Internet-Draft                 LPWAN SCHC                  February 2017
 
 
+   All the fields described in the three rules Figure 7 are present in
+   the IPv6 and UDP headers.  The ESDevice-ID value is found in the L2
+   header.
+
+   The second and third rules use global addresses.  The way the ES
+   learn the prefix is not in the scope of the document.  One possible
    way is to use a management protocol to set up in both end rules the
    prefix used on the LPWA network.
 
@@ -937,6 +943,17 @@ Internet-Draft                 LPWAN SCHC                  February 2017
               DOI 10.17487/RFC5795, March 2010,
               <http://www.rfc-editor.org/info/rfc5795>.
 
+
+
+
+
+
+
+Minaburo & Toutain       Expires August 16, 2017               [Page 17]
+
+Internet-Draft                 LPWAN SCHC                  February 2017
+
+
 Authors' Addresses
 
    Ana Minaburo
@@ -948,12 +965,6 @@ Authors' Addresses
    Email: ana@ackl.io
 
 
-
-Minaburo & Toutain       Expires August 16, 2017               [Page 17]
-
-Internet-Draft                 LPWAN SCHC                  February 2017
-
-
    Laurent Toutain
    IMT-Atlantique
    2 rue de la Chataigneraie
@@ -962,17 +973,6 @@ Internet-Draft                 LPWAN SCHC                  February 2017
    France
 
    Email: Laurent.Toutain@imt-atlantique.fr
-
-
-
-
-
-
-
-
-
-
-
 
 
 

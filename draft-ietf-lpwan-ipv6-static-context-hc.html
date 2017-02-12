@@ -289,7 +289,7 @@ address {
 <link href="#rfc.section.5.2" rel="Chapter" title="5.2 value-sent CDF"/>
 <link href="#rfc.section.5.3" rel="Chapter" title="5.3 LSB CDF"/>
 <link href="#rfc.section.5.4" rel="Chapter" title="5.4 ESiid-DID, LAiid-DID CDF"/>
-<link href="#rfc.section.5.5" rel="Chapter" title="5.5 static-mapping"/>
+<link href="#rfc.section.5.5" rel="Chapter" title="5.5 mapping-sent"/>
 <link href="#rfc.section.5.6" rel="Chapter" title="5.6 Compute-*"/>
 <link href="#rfc.section.6" rel="Chapter" title="6 Application to IPv6 and UDP headers"/>
 <link href="#rfc.section.6.1" rel="Chapter" title="6.1 IPv6 version field"/>
@@ -501,6 +501,7 @@ address {
   <li>equal: a field value in a packet matches with a field value in a rule if they are equal.</li>
   <li>ignore: no check is done between a field value in a packet and a field value in the rule. The result is always true.</li>
   <li>MSB(length): a field value of length T in a packet matches with a field value in a rule if the most significant &#8220;length&#8221; bits are equal.</li>
+  <li>match-mapping: The goal of mapping-sent is to reduce the size of a field by allocating shorter value. The Target Value contains a list of pairs. Each pair is composed of a value and short ID. This operator match if a field value is equal to one of the pair&#8217;s value.</li>
 </ul>
 <p id="rfc.section.4.p.3">MO may need a list of parameters to proceed to the matching. For instance MSB requires the number of bits to test.</p>
 <h1 id="rfc.section.5"><a href="#rfc.section.5">5.</a> <a href="#chap-CDF" id="chap-CDF">Compression Decompression Functions (CDF)</a></h1>
@@ -520,7 +521,7 @@ address {
 |compute-UDP-checksum|elided       |compute UDP checksum       |
 |ESiid-DID           |elided       |build IID from L2 ES addr  |
 |LAiid-DID           |elided       |build IID from L2 LA addr  |
-|static-mapping      |send index   |value form index on a table|
+|mapping-sent        |send index   |value form index on a table|
 \--------------------+-------------+---------------------------/
 
 </pre>
@@ -541,10 +542,8 @@ address {
 <h1 id="rfc.section.5.4"><a href="#rfc.section.5.4">5.4.</a> <a href="#esiid-did-laiid-did-cdf" id="esiid-did-laiid-did-cdf">ESiid-DID, LAiid-DID CDF</a></h1>
 <p id="rfc.section.5.4.p.1">These functions are used to process respectively the End System and the LA Device Identifier (DID).</p>
 <p id="rfc.section.5.4.p.2">The IID value is computed from device ID present in the Layer 2 header. The computation depends on the technology and the device ID  size.</p>
-<p id="rfc.section.5.4.p.3">[[NOTE: Behavoir must be more clearly defined. Most technologies have only a single L2 address corresponding the ESiid. LoRaWAN has a changing L2 address, SigFox is stable, but both also have a EUI-64 which could be better to used.]]</p>
-<h1 id="rfc.section.5.5"><a href="#rfc.section.5.5">5.5.</a> <a href="#static-mapping" id="static-mapping">static-mapping</a></h1>
-<p id="rfc.section.5.5.p.1">The goal of static-mapping is to reduce the size of a field by allocating shorter value. The mapping is known by both ends and stored in a table in both end contexts.</p>
-<p id="rfc.section.5.5.p.2">[[NOTE: specify when the mapping is not found]]</p>
+<h1 id="rfc.section.5.5"><a href="#rfc.section.5.5">5.5.</a> <a href="#mapping-sent" id="mapping-sent">mapping-sent</a></h1>
+<p id="rfc.section.5.5.p.1">mathching-sent is used to send a smaller index associated to the field value in the Target Value. This function is used in conjuction with the &#8220;match-mapping&#8221; MO.</p>
 <h1 id="rfc.section.5.6"><a href="#rfc.section.5.6">5.6.</a> <a href="#compute-" id="compute-">Compute-*</a></h1>
 <p id="rfc.section.5.6.p.1">These functions compute the field value based on received information. They are elided during the compression and reconstructed during the decompression.</p>
 <p/>
@@ -817,7 +816,7 @@ address {
 <li>5.2.   <a href="#rfc.section.5.2">value-sent CDF</a></li>
 <li>5.3.   <a href="#rfc.section.5.3">LSB CDF</a></li>
 <li>5.4.   <a href="#rfc.section.5.4">ESiid-DID, LAiid-DID CDF</a></li>
-<li>5.5.   <a href="#rfc.section.5.5">static-mapping</a></li>
+<li>5.5.   <a href="#rfc.section.5.5">mapping-sent</a></li>
 <li>5.6.   <a href="#rfc.section.5.6">Compute-*</a></li>
 </ul><li>6.   <a href="#rfc.section.6">Application to IPv6 and UDP headers</a></li>
 <ul><li>6.1.   <a href="#rfc.section.6.1">IPv6 version field</a></li>
