@@ -54,7 +54,7 @@ to IPv6/UDP headers compression, Other protocols such as CoAP will be described 
 separate document.
 
 --- middle
-
+ 
 # Introduction {#Introduction}
 
 Headers compression is mandatory to bring the internet protocols to the node
