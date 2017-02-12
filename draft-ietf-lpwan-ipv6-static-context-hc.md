@@ -31,7 +31,6 @@ author:
 normative:
   rfc0768: 
   rfc4944: 
-  rfc6282: 
   rfc2460: 
   rfc5795:
   I-D.minaburo-lp-wan-gap-analysis:
