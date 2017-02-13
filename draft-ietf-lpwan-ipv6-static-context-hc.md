@@ -683,15 +683,14 @@ it assumes that all fragments carrying the IPv6 packet were successfully deliver
 
 In Unreliable, fragments except the last one SHALL    
    contain the fragmentation header as defined in {{Fig-Unrel-NotLast}}.
-~~~~
 
+~~~~
                        <-----  R  ----->   
                        +----- ... -----+
                        |    Rule ID    |
                        +----- ... -----+
 ~~~~
-
-      {: #Fig-Unrel-NotLast title='Fragmentation Header for Fragments except the Last One in Unreliable'}
+{: #Fig-Unrel-NotLast title='Fragmentation Header for Fragments except the Last One in Unreliable'}
       
    The last fragment SHALL contain a fragmentation header that conforms to 
    the format shown in {{Fig-Unrel-Last}}.
@@ -763,7 +762,6 @@ In Reliable, fragments except the last one SHALL
                        |    Rule ID    |   CFN   |
                        +----- ... -----+-- ... --+
 ~~~~
-
 {: #Fig-Rel-NotLast title='Fragmentation Header for Fragments except the Last One in Reliable'}
 
    The last fragment SHALL contain a fragmentation header that conforms to 
@@ -777,7 +775,6 @@ In Reliable, fragments except the last one SHALL
                        |    Rule ID    |   CFN   |     MIC     |
                        +----- ... -----+-- ... --+---- ... ----+
 ~~~~
-
 {: #Fig-Rel-Last title='Fragmentation Header for the Last Fragment in Reliable'}
 
 
@@ -808,7 +805,6 @@ The format of a NACK is shown in {{Fig-NACK-Format}}:
                          |    Rule ID    |   bitmap    |
                          +-+-+-+-+-+-+-+-+----- ... ---+
 ~~~~
-
 {: #Fig-NACK-Format title='Format of a NACK'}
 
 
@@ -827,8 +823,8 @@ The format of a NACK is shown in {{Fig-NACK-Format}}:
    In this example, the IPv6 packet is carried by eleven fragments in total,
    therefore the bitmap in this example has a size of two bytes.
 
-                                                       1
- ~~~~
+~~~~
+                                                        1
                  <-----  R  ----> 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5
                   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
                   |    Rule ID    |1|0|1|1|1|1|1|1|0|1|1|X|X|X|X|X|
