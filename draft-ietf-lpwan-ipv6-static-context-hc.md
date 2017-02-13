@@ -130,18 +130,18 @@ context may be stored on the End-System (ES). The context must be stored in both
 also be learned by a provisionning protocol that is out of the scope of this draft.
 
 ~~~~
-           End-System                                              Appl Servers
-      +-----------------+                                    +-----------------+
-      | APP1  APP2 APP3 |                                    | APP1  APP2 APP3 |
-      |                 |                                    |                 |
-      |       UDP       |                                    |       UDP       | 
-      |      IPv6       |                                    |      IPv6       |   
-      |                 |                                    |                 |  
-      |      LC (contxt)|                                    |                 | 
-      +--------+--------+                                    +--------+--------+ 
-               |    +--+     +--+      +-----------+                  .
-               +~ ~ |RG| === |NG| ==== |LC (contxt)| .... Internet ....
-                    +--+     +--+      +-----+-----+
+     End-System                                              Appl Servers
++-----------------+                                    +-----------------+
+| APP1  APP2 APP3 |                                    | APP1  APP2 APP3 |
+|                 |                                    |                 |
+|       UDP       |                                    |       UDP       | 
+|      IPv6       |                                    |      IPv6       |   
+|                 |                                    |                 |  
+|      LC (contxt)|                                    |                 | 
++--------+--------+                                    +--------+--------+ 
+         |    +--+     +--+      +-----------+                  .
+         +~ ~ |RG| === |NG| ==== |LC (contxt)| .... Internet ....
+              +--+     +--+      +-----+-----+
 ~~~~
 {: #Fig-archi title='Architecture'}
 
