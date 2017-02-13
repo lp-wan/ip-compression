@@ -763,7 +763,7 @@ In Unreliable, fragments except the last one SHALL
                        |    Rule ID    |     MIC     |
                        +----- ... -----+---- ... ----+
 ~~~~
-      {: #Fig-Unrel-Last title='Fragmentation Header for the Last Fragment in Unreliable'} 
+{: #Fig-Unrel-Last title='Fragmentation Header for the Last Fragment in Unreliable'} 
 
 
    Rule ID:  In Unreliable, this field has a size of R bits. Rule ID SHALL      
@@ -825,7 +825,7 @@ In Reliable, fragments except the last one SHALL
                        +----- ... -----+-- ... --+
 ~~~~
 
-            {: #Fig-Rel-NotLast title='Fragmentation Header for Fragments except the Last One in Reliable'}
+{: #Fig-Rel-NotLast title='Fragmentation Header for Fragments except the Last One in Reliable'}
 
    The last fragment SHALL contain a fragmentation header that conforms to 
    the format shown in {{Fig-Rel-Last}}. The total size of this fragmentation 
@@ -839,7 +839,7 @@ In Reliable, fragments except the last one SHALL
                        +----- ... -----+-- ... --+---- ... ----+
 ~~~~
 
-            {: #Fig-Rel-Last title='Fragmentation Header for the Last Fragment in Reliable'}
+{: #Fig-Rel-Last title='Fragmentation Header for the Last Fragment in Reliable'}
 
 
    Rule ID: In Reliable, this field has a size of  R – N  bits in all 
@@ -870,7 +870,7 @@ The format of a NACK is shown in {{Fig-NACK-Format}}:
                          +-+-+-+-+-+-+-+-+----- ... ---+
 ~~~~
 
-                {: #Fig-NACK-Format title='Format of a NACK'}
+{: #Fig-NACK-Format title='Format of a NACK'}
 
 
   Rule ID: In all NACKs, Rule ID has a size of R bits and SHALL be set to  
@@ -895,7 +895,7 @@ The format of a NACK is shown in {{Fig-NACK-Format}}:
                   |    Rule ID    |1|0|1|1|1|1|1|1|0|1|1|X|X|X|X|X|
                   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 ~~~~
-               {: #Fig-Bitmap title='Example of the Bitmap in a NACK'}
+{: #Fig-Bitmap title='Example of the Bitmap in a NACK'}
 
 ### Sender behavior in Reliable
 
