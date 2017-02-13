@@ -23,8 +23,8 @@ author:
   name: Laurent Toutain
   org: IMT-Atlantique
   street:
-  2 rue de la Chataigneraie
-  CS 17607
+  - 2 rue de la Chataigneraie
+  - CS 17607
   city: 35576 Cesson-Sevigne Cedex
   country: France
   email: Laurent.Toutain@imt-atlantique.fr
@@ -32,8 +32,8 @@ author:
   name: Carles Gomez
   org: Universitat Politècnica de Catalunya
   street: 
-  C/Esteve Terradas, 7 
-  08860 Castelldefels
+  - C/Esteve Terradas, 7 
+  - 08860 Castelldefels
   country: Spain
   email: carlesgo@entel.upc.edu
 normative:
@@ -44,7 +44,7 @@ normative:
 informative:  
   I-D.minaburo-lp-wan-gap-analysis:
   I-D.ietf-lpwan-overview:
- <!-- HHWH -->
+
 --- abstract
 
 This document describes a header compression scheme for IPv6, IPv6/UDP based
@@ -744,21 +744,25 @@ it assumes that all fragments carrying the IPv6 packet were successfully deliver
 
 In Unreliable, fragments except the last one SHALL    
    contain the fragmentation header as defined in {{Fig-Unrel-NotLast}}.
+~~~~
 
                        <-----  R  ----->   
                        +----- ... -----+
                        |    Rule ID    |
                        +----- ... -----+
+~~~~
 
       {: #Fig-Unrel-NotLast title='Fragmentation Header for Fragments except the Last One in Unreliable'}
       
    The last fragment SHALL contain a fragmentation header that conforms to 
    the format shown in {{Fig-Unrel-Last}}.
  
+~~~~
                        <-----  R  ----> <---- M ----->                   
                        +----- ... -----+---- ... ----+
                        |    Rule ID    |     MIC     |
                        +----- ... -----+---- ... ----+
+~~~~
       {: #Fig-Unrel-Last title='Fragmentation Header for the Last Fragment in Unreliable'} 
 
 
@@ -813,23 +817,27 @@ The recipient of link fragments SHALL use (1) the sender's L2 source
 In Reliable, fragments except the last one SHALL    
    contain the fragmentation header as defined in {{Fig-Rel-NotLast}}. The total size of this fragmentation header is R bits.
 
+~~~~
                        <----------- R ----------->    
                                         <-- N  -->   
                        +----- ... -----+-- ... --+
                        |    Rule ID    |   CFN   |
                        +----- ... -----+-- ... --+
+~~~~
 
             {: #Fig-Rel-NotLast title='Fragmentation Header for Fragments except the Last One in Reliable'}
 
    The last fragment SHALL contain a fragmentation header that conforms to 
    the format shown in {{Fig-Rel-Last}}. The total size of this fragmentation 
    header is R+M bits.
- 
+
+~~~~
                        <----------- R ---------->
                                         <-- N --> <---- M ----->                   
                        +----- ... -----+-- ... --+---- ... ----+
                        |    Rule ID    |   CFN   |     MIC     |
                        +----- ... -----+-- ... --+---- ... ----+
+~~~~
 
             {: #Fig-Rel-Last title='Fragmentation Header for the Last Fragment in Reliable'}
 
@@ -855,10 +863,12 @@ In Reliable, fragments except the last one SHALL
 
 The format of a NACK is shown in {{Fig-NACK-Format}}:
 
+~~~~
                           <-----  R  ---->
                          +-+-+-+-+-+-+-+-+----- ... ---+
                          |    Rule ID    |   bitmap    |
                          +-+-+-+-+-+-+-+-+----- ... ---+
+~~~~
 
                 {: #Fig-NACK-Format title='Format of a NACK'}
 
@@ -879,11 +889,12 @@ The format of a NACK is shown in {{Fig-NACK-Format}}:
    therefore the bitmap in this example has a size of two bytes.
 
                                                        1
-                  <-----  R  ----> 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5
+ ~~~~
+                 <-----  R  ----> 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5
                   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
                   |    Rule ID    |1|0|1|1|1|1|1|1|0|1|1|X|X|X|X|X|
                   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
+~~~~
                {: #Fig-Bitmap title='Example of the Bitmap in a NACK'}
 
 ### Sender behavior in Reliable
@@ -988,11 +999,11 @@ integrity check indicate that the reassembled IPv6 datagram does
 not match the original IPv6 datagram (prior to fragmentation), then two 
 situations can happen:
 
-     o  If the number of NACKs sent by the receiver has reached 
+*  If the number of NACKs sent by the receiver has reached 
         MAX_NACKS_PER_IPv6_PACKET, all partially reassembled fragment payloads 
         MUST be discarded. 
 
-     o  If the number of NACKs sent by the receiver is less than 
+*  If the number of NACKs sent by the receiver is less than 
         MAX_NACKS_PER_IPv6_PACKET, the fragment receiver creates and transmits a 
         NACK to the fragment sender. The NACK includes a bitmap that indicates 
         currently successful or unsuccessful receipt for each one of the 
