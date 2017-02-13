@@ -8,7 +8,7 @@ pi:
   sortrefs: 'yes'
   strict: 'yes'
   compact: 'yes'
-title: LPWAN Static Context Header Compression (SCHC) for IPv6 and UDP
+title: LPWAN Static Context Header Compression (SCHC) and fragmentation for IPv6 and UDP
 abbrev: LPWAN SCHC
 wg: lpwan Working Group
 author:
@@ -23,23 +23,32 @@ author:
   name: Laurent Toutain
   org: IMT-Atlantique
   street:
-  - 2 rue de la Chataigneraie
-  - CS 17607
+  2 rue de la Chataigneraie
+  CS 17607
   city: 35576 Cesson-Sevigne Cedex
   country: France
   email: Laurent.Toutain@imt-atlantique.fr
+- ins: C. Gomez
+  name: Carles Gomez
+  org: Universitat Politècnica de Catalunya
+  street: 
+  C/Esteve Terradas, 7 
+  08860 Castelldefels
+  country: Spain
+  email: carlesgo@entel.upc.edu
 normative:
   rfc0768: 
   rfc4944: 
   rfc2460: 
   rfc5795:
+informative:  
   I-D.minaburo-lp-wan-gap-analysis:
   I-D.ietf-lpwan-overview:
-
+  HHWH 
 --- abstract
 
 This document describes a header compression scheme for IPv6, IPv6/UDP based
-on static contexts. This technique is especially tailored for LPWA networks
+on static contexts, and fragmentation functionality. These techniques are especially tailored for LPWA networks
 and could be extended to other protocol stacks.
 
 The Static Context Header Compression (SCHC)  offers a great level of flexibility 
@@ -77,7 +86,18 @@ the transmission, avoiding complex resynchronization mechanisms, incompatible
 with LPWA characteristics. In most of the cases, IPv6/UDP headers are reduced
 to a small context identifier.
 
-The SCHC is indedependant of the LPWAN technology.
+The SCHC is indedependent of the LPWAN technology.
+
+On the other hand, Low Power Wide Area Network (LPWAN) technologies are characterized,
+among others, by a very reduced data unit and/or payload size
+{{I-D.ietf-lpwan-overview}}.  However, some of these technologies
+do not support layer two fragmentation, therefore the only option for
+these to support IPv6 (and, in particular, its MTU requirement of
+1280 bytes {{RFC2460}}) is the use of a fragmentation mechanism at the
+adaptation layer below IPv6. This specification defines fragmentation 
+functionality to support the IPv6 MTU requirement over LPWAN 
+technologies.
+
 
 # Vocabulary
 
@@ -694,11 +714,358 @@ network.
 
 The third rule compresses port numbers on 4 bits. 
 
+# Fragmentation
+
+## Overview
+
+If an entire payload (e.g., IPv6) datagram fits within a single L2
+data unit, it is unfragmented and a fragmentation header is not
+needed.  If the datagram does not fit within a single L2 data unit,
+it SHALL be broken into fragments. 
+
+This specification defines two fragment delivery reliability options, 
+namely: Unreliable and Reliable. The same reliability option MUST be 
+used for all fragments of a packet.
+
+In Unreliable, the receiver SHALL NOT issue acknowledgments and the sender
+SHALL NOT perform fragment transmission retries.
+
+In Reliable, if the fragment receiver detects any missing fragments from the
+transported IPv6 packet, the receiver transmits one negative acknowledgment (NACK)
+which informs the sender about received and missing fragments from the IPv6 
+packet. Upon receipt of a NACK, the sender selectively retransmits the missing
+fragments. If all fragments carrying the IPv6 packet are successfully received,
+the receiver SHALL NOT send a NACK. If the sender does not receive a NACK, 
+it assumes that all fragments carrying the IPv6 packet were successfully delivered.
+
+## Unreliable
+### Fragmentation header formats for Unreliable
+
+In Unreliable, fragments except the last one SHALL    
+   contain the fragmentation header as defined in {{Fig-Unrel-NotLast}}.
+
+                       <-----  R  ----->   
+                       +----- ... -----+
+                       |    Rule ID    |
+                       +----- ... -----+
+
+      {: #Fig-Unrel-NotLast title='Fragmentation Header for Fragments except the Last One in Unreliable'}
+      
+   The last fragment SHALL contain a fragmentation header that conforms to 
+   the format shown in {{Fig-Unrel-Last}}.
+ 
+                       <-----  R  ----> <---- M ----->                   
+                       +----- ... -----+---- ... ----+
+                       |    Rule ID    |     MIC     |
+                       +----- ... -----+---- ... ----+
+      {: #Fig-Unrel-Last title='Fragmentation Header for the Last Fragment in Unreliable'} 
+
+
+   Rule ID:  In Unreliable, this field has a size of R bits. Rule ID SHALL      
+      be set to TBD_UNREL_A in fragments, except the last one, to 
+      signal that the carried payload is a fragment, and that Unreliable 
+      fragment delivery MUST be used. In the 
+      last fragment, Rule ID SHALL be set to TBD_UNREL_B to identify the 
+      fragment as the last one, and to signal that Unreliable fragment 
+      delivery MUST be used.
+
+   MIC: This field, of size M bits, is computed by the sender over the  
+      complete IPv6 packet before fragmentation by using the TBD algorithm.
+
+### Receiver and sender behavior for Unreliable
+
+The recipient of link fragments SHALL use (1) the sender's L2 source
+   address (if present), (2) the destination's L2 address (if present), and
+   (3) Rule ID to identify all the fragments that belong to a given 
+   datagram. The fragment receiver SHALL use Rule ID to determine 
+   whether the fragment has to be handled as per the rules of Unreliable or 
+   Reliable fragment delivery.
+
+   Upon receipt of a link fragment, the recipient starts constructing
+   the original unfragmented packet.  It uses the order 
+   of arrival of each fragment to determine the location of the individual 
+   fragments within the original unfragmented packet.  For example, it may 
+   place the data payload of the fragments within a payload datagram 
+   reassembly buffer at the location determined from the order of arrival 
+   and the fragment payload sizes.  Note that the size of the reassembly buffer
+   cannot be determined from fragmentation headers. 
+
+   If a fragment recipient disassociates from its L2 network, the
+   recipient MUST discard all link fragments of all partially
+   reassembled payload datagrams, and fragment senders MUST discard all
+   not yet transmitted link fragments of all partially transmitted
+   payload (e.g., IPv6) datagrams.  Similarly, when a node first
+   receives a fragment of a packet, it starts a reassembly timer.
+   When this time expires, if the entire packet has not been
+   reassembled, the existing fragments MUST be discarded and the
+   reassembly state MUST be flushed.  The reassembly timeout MUST be set
+   to a maximum of TBD seconds).
+
+   Once the recipient has received the last fragment, it checks for the 
+   integrity of the reassembled IPv6 datagram, based on the MIC received. 
+   If the integrity check indicates that the reassembled IPv6 datagram does 
+   not match the original IPv6 datagram (prior to fragmentation), the 
+   reassembled IPv6 datagram MUST be discarded.
+
+## Reliable
+### Fragmentation header formats for Reliable
+In Reliable, fragments except the last one SHALL    
+   contain the fragmentation header as defined in {{Fig-Rel-NotLast}}. The total size of this fragmentation header is R bits.
+
+                       <----------- R ----------->    
+                                        <-- N  -->   
+                       +----- ... -----+-- ... --+
+                       |    Rule ID    |   CFN   |
+                       +----- ... -----+-- ... --+
+
+            {: #Fig-Rel-NotLast title='Fragmentation Header for Fragments except the Last One in Reliable'}
+
+   The last fragment SHALL contain a fragmentation header that conforms to 
+   the format shown in {{Fig-Rel-Last}}. The total size of this fragmentation 
+   header is R+M bits.
+ 
+                       <----------- R ---------->
+                                        <-- N --> <---- M ----->                   
+                       +----- ... -----+-- ... --+---- ... ----+
+                       |    Rule ID    |   CFN   |     MIC     |
+                       +----- ... -----+-- ... --+---- ... ----+
+
+            {: #Fig-Rel-Last title='Fragmentation Header for the Last Fragment in Reliable'}
+
+
+   Rule ID: In Reliable, this field has a size of  R – N  bits in all 
+      fragments, and it SHALL be set to TBD_REL to signal that 
+      the carried payload is a fragment, and that Reliable fragment 
+      delivery MUST be used. 
+
+   CFN:  CFN stands for Compressed Fragment Number. The size of the CFN 
+      field is N bits. This field is an unsigned integer that carries a 
+      non-absolute fragment number. 
+      The CFN SHALL be set sequentially starting from 0 for the first 
+      fragment, and SHALL wrap from 2^N - 2 back to 0. The CFN for the 
+      last fragment has all bits set to 1.
+
+   MIC:  MIC stands for Message Integrity Check. This field has a size of M 
+      bits. It is computed by 
+      the sender over the complete IPv6 packet before fragmentation by 
+      using the TBD algorithm.
+
+### NACK format
+
+The format of a NACK is shown in {{Fig-NACK-Format}}:
+
+                          <-----  R  ---->
+                         +-+-+-+-+-+-+-+-+----- ... ---+
+                         |    Rule ID    |   bitmap    |
+                         +-+-+-+-+-+-+-+-+----- ... ---+
+
+                {: #Fig-NACK-Format title='Format of a NACK'}
+
+
+  Rule ID: In all NACKs, Rule ID has a size of R bits and SHALL be set to  
+      TBD_NACK to signal that the message is a NACK.
+
+  bitmap:  the bitmap field of a NACK has a size equal to 
+   Ceiling(Number_of_Fragments/8) octets, where 
+   Number_of_Fragments denotes the number of fragments that carry the IPv6 
+   packet. The bitmap is a sequence of bits, where the n-th bit signals 
+   whether the n-th fragment transmitted has been correctly received (n-th 
+   bit set to 1) or not (n-th bit set to 0). 
+   
+   {{Fig-Bitmap}} shows an example of a NACK, where the bitmap indicates that 
+   the second and the ninth fragments have not been correctly received. 
+   In this example, the IPv6 packet is carried by eleven fragments in total,
+   therefore the bitmap in this example has a size of two bytes.
+
+                                                       1
+                  <-----  R  ----> 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5
+                  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                  |    Rule ID    |1|0|1|1|1|1|1|1|0|1|1|X|X|X|X|X|
+                  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+               {: #Fig-Bitmap title='Example of the Bitmap in a NACK'}
+
+### Sender behavior in Reliable
+
+In Reliable, a sender MUST store a copy of the fragments 
+that will be sent to carry an IPv6 packet. The memory resources to store 
+those fragments SHALL be released as per the rules described below. 
+
+After transmission of all fragments that carry an IPv6 packet, the 
+sender waits for NACK_WAIT seconds for a possible incoming NACK. To this 
+end, after the last fragment has been transmitted, the sender 
+initializes a timer to NACK_WAIT seconds. If a NACK is not received 
+during the NACK_WAIT interval, the sender MUST assume successful delivery
+of all fragments and release the memory resources used to store the fragments. 
+
+If a NACK is received before expiration of the NACK wait timer, the fragment 
+sender processes the bitmap included in the NACK in order to determine which 
+fragments need to be resent. Since the bitmap size is a multiple of eight bits, 
+the fragment sender only takes into consideration the first F bitmap bits, where 
+F denotes the number of fragments sent, and it MUST ignore the remaining bits in
+the bitmap. 
+
+Once the fragments that need to be resent have been identified, the sender 
+renumbers these fragments, so that their CFN fields define a new sequence of
+fragment numbers, which SHALL be set sequentially starting from 0 for the first
+fragment, and SHALL wrap from 2^N - 2 back to 0. For example, if three fragments
+have to be resent, and with N=3, their CFNs will be set to 0, 1, and 7, respectively,
+regardless of their original CFN values. After fragment renumbering, the fragments 
+are resent. 
+
+After the transmission of the last retransmitted fragment, if the number of NACKs 
+received during the current IPv6 packet transmission is less than 
+MAX_NACKS_PER_IPv6_PACKET, the sender initializes a timer to NACK_WAIT seconds 
+to listen for a possible incoming NACK. In that case, if a NACK is not received 
+during the NACK_WAIT interval, the sender MUST assume successful delivery of all
+the fragments and release the memory resources used to store the fragments. 
+If a NACK is received before expiration of the NACK_WAIT timer, the fragment 
+sender processes the NACK by following the same approach as for the first NACK 
+received, and performs a new round of fragment retransmissions by iterating the
+procedure described for the first round of fragment retransmissions.  
+
+When the number of fragment retransmission rounds completed by the fragment sender
+equals MAX_NACKS_PER_IPv6_PACKET, the sender MUST NOT perform any further fragment
+retransmissions for the current IPv6 packet, and it MUST release the memory 
+resources used to store the fragments for the current IPv6 packet.
+
+If a fragment sender disassociates from its L2 network, it MUST discard 
+all not yet transmitted link fragments of all partially transmitted
+payload (e.g., IPv6) datagrams. 
+
+### Receiver behavior in Reliable
+
+The recipient of link fragments SHALL use (1) the sender's L2 
+Source address (if present), (2) the destination's L2 address (if 
+present), and (3) Rule ID and CFN to identify all the fragments that 
+belong to a given datagram. The fragment receiver SHALL use 
+Rule ID to determine whether the fragment has to be handled as per the 
+rules of Unreliable or Reliable fragment delivery.   
+
+Upon receipt of a link fragment, the recipient starts constructing
+the original unfragmented packet.  It uses the CFN field and the order 
+of arrival of each fragment to determine the location of the individual 
+fragments within the original unfragmented packet.  For example, it may 
+place the data payload within a payload datagram reassembly buffer at 
+the location determined from the CFN, the received fragment payload 
+sizes and the order of arrival.  Note that the size of the reassembly 
+buffer cannot be determined from fragmentation headers, and if non-
+continguous frame sequences are received, it is not always possible to 
+determine the size of the missing fragment(s).
+
+When a node first receives a fragment of a packet, it starts a reassembly timer.
+When this time expires, if the entire packet has not been
+reassembled, the existing fragments MUST be discarded and the
+reassembly state MUST be flushed.  The reassembly timeout MUST be set
+to a maximum of TBD seconds).
+
+Once the recipient of fragments has received the last fragment, if 
+the sequence of received fragments CFNs (except the special one used for 
+the last fragment) is composed of consecutive values, the fragment 
+receiver checks for the integrity of the reassembled IPv6 datagram, 
+based on the MIC received. 
+If the sequence of received fragments CFNs or the integrity check 
+indicate that the reassembled IPv6 datagram does 
+not match the original IPv6 datagram (prior to fragmentation), the 
+recipient creates and transmits a NACK to the fragment sender. The NACK 
+includes a bitmap that indicates successful or unsuccessful receipt for 
+each one of the fragments that carry the IPv6 packet. 
+
+After transmission of the NACK, and before expiration of the reassembly 
+timeout, if the fragment recipient receives further (retransmitted) fragments, 
+it uses the CFN and the order of arrival of each fragment to place the 
+corresponding payload in its correct location in the reassembly 
+buffer. Otherwise, the fragment recipient MUST NOT resend the last 
+transmitted NACK. 
+
+When the number of received retransmitted fragments equals the number of 
+missing fragments, and after placing the fragment payloads in their 
+correct location in the reassembly buffer, the fragment receiver 
+performs a new integrity check of the reassembled IPv6 datagram based on 
+the MIC received.  If the sequence of received fragments CFNs or the 
+integrity check indicate that the reassembled IPv6 datagram does 
+not match the original IPv6 datagram (prior to fragmentation), then two 
+situations can happen:
+
+     o  If the number of NACKs sent by the receiver has reached 
+        MAX_NACKS_PER_IPv6_PACKET, all partially reassembled fragment payloads 
+        MUST be discarded. 
+
+     o  If the number of NACKs sent by the receiver is less than 
+        MAX_NACKS_PER_IPv6_PACKET, the fragment receiver creates and transmits a 
+        NACK to the fragment sender. The NACK includes a bitmap that indicates 
+        currently successful or unsuccessful receipt for each one of the 
+        fragments that carry the IPv6 packet. The fragment recipient then 
+        iterates the operations after transmission of a NACK described in this 
+        section as long as the number of NACKs sent is less than 
+        MAX_NACKS_PER_IPv6_PACKET.
+
+If a fragment recipient disassociates from its L2 network, the
+recipient MUST discard all link fragments of all partially
+reassembled payload datagrams.
+
+# Security considerations
+
+## Security considerations for header compression
+TBD
+
+## Security considerations for fragmentation
+This subsection describes potential attacks to LPWAN fragmentation 
+and proposes countermeasures, based on existing analysis of attacks
+to 6LoWPAN fragmentation {HHWH}.
+
+A node can perform a buffer reservation attack by sending a first
+fragment to a target.  Then, the receiver will reserve buffer space
+for the whole packet on the basis of the datagram size announced in
+that first fragment.  Other incoming fragmented packets will be
+dropped while the reassembly buffer is occupied during the reassembly
+timeout.  Once that timeout expires, the attacker can repeat the same
+procedure, and iterate, thus creating a denial of service attack.
+The (low) cost to mount this attack is linear with the number of
+buffers at the target node.  However, the cost for an attacker can be
+increased if individual fragments of multiple packets can be stored
+in the reassembly buffer.  To further increase the attack cost, the
+reassembly buffer can be split into fragment-sized buffer slots.
+Once a packet is complete, it is processed normally.  If buffer
+overload occurs, a receiver can discard packets based on the sender
+behavior, which may help identify which fragments have been sent by
+an attacker.
+
+In another type of attack, the malicious node is required to have
+overhearing capabilities.  If an attacker can overhear a fragment, it
+can send a spoofed duplicate (e.g. with random payload) to the
+destination.  A receiver cannot distinguish legitimate from spoofed
+fragments.  Therefore, the original IPv6 packet will be considered
+corrupt and will be dropped.  To protect resource-constrained nodes
+from this attack, it has been proposed to establish a binding among
+the fragments to be transmitted by a node, by applying content-
+chaining to the different fragments, based on cryptographic hash
+functionality.  The aim of this technique is to allow a receiver to
+identify illegitimate fragments.
+
+Further attacks may involve sending overlapped fragments (i.e.
+comprising some overlapping parts of the original datagram) or
+announcing a datagram size in the first fragment that does not
+reflect the actual amount of data carried by the fragments.
+Implementers should make sure that correct operation is not affected
+by such events.
+
 # Acknowledgements
 
 Thanks to Dominique Barthel, Arunprabhu Kandasamy, Antony Markovski, Alexander
 Pelov, Juan Carlos Zuniga for useful design
 consideration.
+
+In the fragmentation section, the authors have reused parts of text
+available in section 5.3 of RFC 4944, and would like to thank the
+authors of RFC 4944.
+
+Carles Gomez has been funded in part by the Spanish Government
+(Ministerio de Educacion, Cultura y Deporte) through the Jose
+Castillejo grant CAS15/00336, and by the ERDF and the Spanish Government 
+through project TEC2016-79988-P.  Part of his contribution to this work
+has been carried out during his stay as a visiting scholar at the
+Computer Laboratory of the University of Cambridge.
 
 
 --- back
