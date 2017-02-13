@@ -225,68 +225,7 @@ Rule ids are specific to an ES. Two ES may use the same rule id for different
 header compression. The LC needs to combine the rule id with the ES L2 address
 to find the appropriate rule.
 
-<!--
-## Simple Example
-
-A simple header is composed of 3 fields (F1, F2, F3). The compressor receives
-a packet containing respectively [F1:0x00, F2:0x1230, F3:0xABC0] in those
-fields. The Matching Operators (as defined in {{chap-MO}}) allow to
-select Rule 5 as represented in {{Fig-ex-ctxt}}; F1 value is ignored
-and F2 and F3 packet field values are matched with
-those stored in the rule Target Values.
-
-~~~~
-               Rule 5
-          Target Value   Matching Operator   Comp/Decomp Fct
-        +--------------+-------------------+-----------------+
-     F1 | 0x00         | Ignore            | not-sent        |
-        +--------------+-------------------+-----------------+
-     F2 | 0x1230       | Equal             | not-sent        |
-        +--------------+-------------------+-----------------+
-     F3 | 0xABC0       | Equal             | not-sent        |
-        +--------------+-------------------+-----------------+
-~~~~
-{: #Fig-ex-ctxt title='Matching Rule'}
-
-
-The Compression/Decompression Function (as defined in {{chap-CDF}}
-describes how the fields are compressed. In this example, all the
-fields are elided and only the rule number has to be sent to the other
-end.
-
-The decompressor receives the rule number and reconstructs the header using
-the values stored in the Target Value column.
-
-Note that F1 value will be set to 0x00 by the decompressor, even if the original
-header field was carrying a different value.
-
-To allow a range of values for field F2 and F3, the MSB() Matching
-Operator and LSB() Compression/Decompression Function can be used (as
-defined in {{chap-MO}} and {{chap-CDF}}). In that case the rule will
-be rewritten as defined in {{Fig-ex-ctxt2}}.
-
-~~~~
-               Rule 5
-          Target Value   Matching Operator   Comp/Decomp Fct
-        +--------------+-------------------+-----------------+
-     F1 | 0x00         | Ignore            | not-sent        |
-        +--------------+-------------------+-----------------+
-     F2 | 0x1230       | MSB(12)           | LSB(4)          |
-        +--------------+-------------------+-----------------+
-     F3 | 0xABC0       | MSB(12)           | LSB(4)          |
-        +--------------+-------------------+-----------------+
-~~~~
-{: #Fig-ex-ctxt2 title='Matching Rule'}
-
-
-In that case, if a packet with the following header fields [F1:0x00, F2:0x1234,
-F3:0xABCD] arrives to the compressor, the new rule 5 will be selected and
-sent to the other end. The compressed header will be composed of the single
-byte [0x4D]. The decompressor receives the compressed header and follows
-the rule to reconstruct [0x00, 0x1234, 0xABCD] applying a OR operator between
-the target value stored in the rule and the compressed field value sent.
-
--->
+<
 
 ## Packet processing
 
