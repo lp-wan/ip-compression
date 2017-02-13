@@ -225,8 +225,6 @@ Rule ids are specific to an ES. Two ES may use the same rule id for different
 header compression. The LC needs to combine the rule id with the ES L2 address
 to find the appropriate rule.
 
-<
-
 ## Packet processing
 
 The compression/decompression process follows several steps:
