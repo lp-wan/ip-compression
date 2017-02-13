@@ -716,6 +716,7 @@ The third rule compresses port numbers on 4 bits.
 
 # Fragmentation
 
+
 ## Overview
 
 If an entire payload (e.g., IPv6) datagram fits within a single L2
