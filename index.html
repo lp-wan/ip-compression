@@ -5,7 +5,7 @@
 <head profile="http://www.w3.org/2006/03/hcard http://dublincore.org/documents/2008/08/04/dc-html/">
   <meta http-equiv="Content-Type" content="text/html; charset=us-ascii" />
 
-  <title>LPWAN Static Context Header Compression (SCHC) for IPv6 and UDP</title>
+  <title>LPWAN Static Context Header Compression (SCHC) and fragmentation for IPv6 and UDP</title>
 
   
 <style type="text/css">/*<![CDATA[*/
@@ -281,8 +281,7 @@ address {
 <link href="#rfc.section.2" rel="Chapter" title="2 Vocabulary"/>
 <link href="#rfc.section.3" rel="Chapter" title="3 Static Context Header Compression"/>
 <link href="#rfc.section.3.1" rel="Chapter" title="3.1 Rule id"/>
-<link href="#rfc.section.3.2" rel="Chapter" title="3.2 Simple Example"/>
-<link href="#rfc.section.3.3" rel="Chapter" title="3.3 Packet processing"/>
+<link href="#rfc.section.3.2" rel="Chapter" title="3.2 Packet processing"/>
 <link href="#rfc.section.4" rel="Chapter" title="4 Matching operators"/>
 <link href="#rfc.section.5" rel="Chapter" title="5 Compression Decompression Functions (CDF)"/>
 <link href="#rfc.section.5.1" rel="Chapter" title="5.1 not-sent CDF"/>
@@ -307,19 +306,32 @@ address {
 <link href="#rfc.section.6.11" rel="Chapter" title="6.11 UDP Checksum field"/>
 <link href="#rfc.section.7" rel="Chapter" title="7 Examples"/>
 <link href="#rfc.section.7.1" rel="Chapter" title="7.1 IPv6/UDP compression in a star topology"/>
-<link href="#rfc.section.8" rel="Chapter" title="8 Acknowledgements"/>
-<link href="#rfc.references" rel="Chapter" title="9 Normative References"/>
+<link href="#rfc.section.8" rel="Chapter" title="8 Fragmentation"/>
+<link href="#rfc.section.8.1" rel="Chapter" title="8.1 Overview"/>
+<link href="#rfc.section.8.2" rel="Chapter" title="8.2 Unreliable"/>
+<link href="#rfc.section.8.2.1" rel="Chapter" title="8.2.1 Receiver and sender behavior for Unreliable"/>
+<link href="#rfc.section.8.3" rel="Chapter" title="8.3 Reliable"/>
+<link href="#rfc.section.8.3.1" rel="Chapter" title="8.3.1 NACK format"/>
+<link href="#rfc.section.8.3.2" rel="Chapter" title="8.3.2 Sender behavior in Reliable"/>
+<link href="#rfc.section.8.3.3" rel="Chapter" title="8.3.3 Receiver behavior in Reliable"/>
+<link href="#rfc.section.9" rel="Chapter" title="9 Security considerations"/>
+<link href="#rfc.section.9.1" rel="Chapter" title="9.1 Security considerations for header compression"/>
+<link href="#rfc.section.9.2" rel="Chapter" title="9.2 Security considerations for fragmentation"/>
+<link href="#rfc.section.10" rel="Chapter" title="10 Acknowledgements"/>
+<link href="#rfc.references" rel="Chapter" title="11 References"/>
+<link href="#rfc.references.1" rel="Chapter" title="11.1 Normative References"/>
+<link href="#rfc.references.2" rel="Chapter" title="11.2 Informative References"/>
 <link href="#rfc.authors" rel="Chapter"/>
 
 
   <meta name="generator" content="xml2rfc version 2.5.2 - http://tools.ietf.org/tools/xml2rfc" />
   <link rel="schema.dct" href="http://purl.org/dc/terms/" />
 
-  <meta name="dct.creator" content="Minaburo, A. and L. Toutain" />
+  <meta name="dct.creator" content="Minaburo, A., Toutain, L., and C. Gomez" />
   <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-lpwan-ipv6-static-context-hc-latest" />
-  <meta name="dct.issued" scheme="ISO8601" content="2017-2-12" />
-  <meta name="dct.abstract" content="This document describes a header compression scheme for IPv6, IPv6/UDP based on static contexts. This technique is especially tailored for LPWA networks and could be extended to other protocol stacks." />
-  <meta name="description" content="This document describes a header compression scheme for IPv6, IPv6/UDP based on static contexts. This technique is especially tailored for LPWA networks and could be extended to other protocol stacks." />
+  <meta name="dct.issued" scheme="ISO8601" content="2017-2-13" />
+  <meta name="dct.abstract" content="This document describes a header compression scheme for IPv6, IPv6/UDP based on static contexts, and fragmentation functionality. These techniques are especially tailored for LPWA networks and could be extended to other protocol stacks." />
+  <meta name="description" content="This document describes a header compression scheme for IPv6, IPv6/UDP based on static contexts, and fragmentation functionality. These techniques are especially tailored for LPWA networks and could be extended to other protocol stacks." />
 
 </head>
 
@@ -341,50 +353,59 @@ address {
   <td class="right">L. Toutain</td>
 </tr>
 <tr>
-  <td class="left">Expires: August 16, 2017</td>
+  <td class="left">Expires: August 17, 2017</td>
   <td class="right">IMT-Atlantique</td>
 </tr>
 <tr>
   <td class="left"></td>
-  <td class="right">February 12, 2017</td>
+  <td class="right">C. Gomez</td>
+</tr>
+<tr>
+  <td class="left"></td>
+  <td class="right">Universitat Polit&#232;cnica de Catalunya</td>
+</tr>
+<tr>
+  <td class="left"></td>
+  <td class="right">February 13, 2017</td>
 </tr>
 
     	
     </tbody>
   </table>
 
-  <p class="title">LPWAN Static Context Header Compression (SCHC) for IPv6 and UDP<br />
+  <p class="title">LPWAN Static Context Header Compression (SCHC) and fragmentation for IPv6 and UDP<br />
   <span class="filename">draft-ietf-lpwan-ipv6-static-context-hc-latest</span></p>
   
   <h1 id="rfc.abstract">
   <a href="#rfc.abstract">Abstract</a>
 </h1>
-<p>This document describes a header compression scheme for IPv6, IPv6/UDP based on static contexts. This technique is especially tailored for LPWA networks and could be extended to other protocol stacks.</p>
-<p>The Static Context Header Compression (SCHC)  offers a great level of flexibility in the processing of fields.  Static context means that values in the context field do not change during the transmission, avoiding complex resynchronization mechanisms, incompatible with LPWA characteristics. In most of the cases, IPv6/UDP headers are reduced to a small identifier.</p>
-<p>This document describes the compression/decompression process and apply it to IPv6/UDP headers compression, Other protocols such as CoAP will be described in a separate document.</p>
+<p>This document describes a header compression scheme for IPv6, IPv6/UDP based on static contexts, and fragmentation functionality. These techniques are especially tailored for LPWA networks and could be extended to other protocol stacks.</p>
+<p>The Static Context Header Compression (SCHC)  offers a great level of flexibility in the processing of fields.  Static context means that values in the context describing field values do not change during the transmission, avoiding complex resynchronization mechanisms, incompatible with LPWA characteristics. In most of the cases, IPv6/UDP headers are reduced to a small identifier.</p>
+<p>This document describes the generic compression/decompression process and apply it to IPv6/UDP headers. Other protocols such as CoAP will be described in a separate document.</p>
 <h1 id="rfc.status">
   <a href="#rfc.status">Status of This Memo</a>
 </h1>
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at http://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on August 16, 2017.</p>
+<p>This Internet-Draft will expire on August 17, 2017.</p>
 <h1 id="rfc.copyrightnotice">
   <a href="#rfc.copyrightnotice">Copyright Notice</a>
 </h1>
 <p>Copyright (c) 2017 IETF Trust and the persons identified as the document authors.  All rights reserved.</p>
 <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (http://trustee.ietf.org/license-info) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.</p>
 <h1 id="rfc.section.1"><a href="#rfc.section.1">1.</a> <a href="#Introduction" id="Introduction">Introduction</a></h1>
-<p id="rfc.section.1.p.1">Headers compression is mandatory to bring the internet protocols to the node within a LPWA network <a href="#I-D.minaburo-lp-wan-gap-analysis">[I-D.minaburo-lp-wan-gap-analysis]</a>.</p>
+<p id="rfc.section.1.p.1">Header compression is mandatory to bring the internet connectivity to the node within a LPWA network <a href="#I-D.minaburo-lp-wan-gap-analysis">[I-D.minaburo-lp-wan-gap-analysis]</a>.</p>
 <p id="rfc.section.1.p.2">Some LPWA networks properties can be exploited for an efficient header compression:</p>
 <p/>
 
 <ul>
-  <li>Topology is star oriented, therefore all the packets follows the same path.  For the needs of this draft, the architecture can be summarized to End-Systems (ES) exchanging information with LPWAN Application Server (LA). The exchange goes through a LPWA Compressors (LC). Both LC maintain a static context for compression.  Static context means that context information is not learned during the exchange.</li>
+  <li>Topology is star oriented, therefore all the packets follows the same path.  For the needs of this draft, the architecture can be summarized to Things or End-Systems (ES) exchanging information with LPWAN Application Server (LA) through a Network Gateway (NG).</li>
   <li>Traffic flows are mostly deterministic, since End-Systems embed built-in applications. Contrary to computers or smartphones, new applications cannot be easily installed.</li>
 </ul>
-<p id="rfc.section.1.p.4">The Static Context Header Compression (SCHC) combines the advantages of RoHC <a href="#RFC5795">[RFC5795]</a> context, which offers a great level of flexibility in the processing of fields, and 6LoWPAN <a href="#RFC4944">[RFC4944]</a> behavior to elide fields that are known from the other side.  Static context means that values in the context field do not change during the transmission, avoiding complex resynchronization mechanisms, incompatible with LPWA characteristics. In most of the cases, IPv6/UDP headers are reduced to a small context identifier.</p>
-<p id="rfc.section.1.p.5">The SCHC is indedependant of the LPWAN technology.</p>
+<p id="rfc.section.1.p.4">The Static Context Header Compression (SCHC) is defined for this environment.  Static context means that values in the context field do not change during the transmission, avoiding complex resynchronization mechanisms, incompatible with LPWA characteristics. In most of the cases, IPv6/UDP headers are reduced to a small context identifier.</p>
+<p id="rfc.section.1.p.5">The SCHC is indedependent of the LPWAN technology.</p>
+<p id="rfc.section.1.p.6">On the other hand, Low Power Wide Area Network (LPWAN) technologies are characterized, among others, by a very reduced data unit and/or payload size <a href="#I-D.ietf-lpwan-overview">[I-D.ietf-lpwan-overview]</a>.  However, some of these technologies do not support layer two fragmentation, therefore the only option for these to support IPv6 (and, in particular, its MTU requirement of 1280 bytes <a href="#RFC2460">[RFC2460]</a>) is the use of a fragmentation mechanism at the adaptation layer below IPv6. This specification defines fragmentation functionality to support the IPv6 MTU requirement over LPWAN technologies.</p>
 <h1 id="rfc.section.2"><a href="#rfc.section.2">2.</a> <a href="#vocabulary" id="vocabulary">Vocabulary</a></h1>
 <p/>
 
@@ -393,32 +414,34 @@ address {
   <li>Context: A set of rules used to compress/decompress headers</li>
   <li>ES: End System. Node connected to the LPWAN. ES may implement SCHC.</li>
   <li>LA: LPWAN Application. Application sending/consuming headers to/from the End System.</li>
-  <li>LC: LPWAN Compressor. Process in the network compression/decompressing headers. LC uses SCHC rules to perfom compression decompression.</li>
+  <li>LC: LPWAN Compressor/Decompressor. Process in the network compression/decompressing headers. LC uses SCHC rules to perfom compression and decompression.</li>
   <li>MO: Matching Operator. Operator used to compare a value contained in a field&#8217;s header with a value contained in a rule.</li>
   <li>Rule: A set of header field values.</li>
   <li>Rule ID: An identifier for a rule, LC and ES share the same rule ID for a specific flow. Rule ID is sent on the LPWAN.</li>
   <li>TV: Target value. Value contained in the rule that will be matched with the value of an header field.</li>
 </ul>
 <h1 id="rfc.section.3"><a href="#rfc.section.3">3.</a> <a href="#static-context-header-compression" id="static-context-header-compression">Static Context Header Compression</a></h1>
-<p id="rfc.section.3.p.1">Static Context Header Compression (SCHC) avoids context synchronization, which is the most bandwidth-consuming operation in RoHC. Based on the fact that the nature of data flows is highly predictable in LPWA networks, a static context may be stored on the End-System (ES). The other end, the LPWA Compressor (LC) can learn the context through a provisioning protocol during the identification phase (for instance, as it learns the encryption key).</p>
+<p id="rfc.section.3.p.1">Static Context Header Compression (SCHC) avoids context synchronization, which is the most bandwidth-consuming operation in other header compression mechanisms such as RoHC. Based on the fact that the nature of data flows is highly predictable in LPWA networks, a static context may be stored on the End-System (ES). The context must be stored in both ends. It can also be learned by a provisionning protocol that is out of the scope of this draft.</p>
 <div id="rfc.figure.1"/>
 <div id="Fig-archi"/>
 <pre>
-           End-System
-      +-----------------+
-      | APP1  APP2 APP3 |           
-      |                 |        
-      |       UDP       |       
-      |      IPv6       |        
-      |                 |       +-----------+         
-      |      LC (contxt)|       |LC (contxt)|
-      +--------+--------+       +-----+-----+ 
-               |                      |
-               +~ ~ RG ==== NG =======+
+           End-System                                              Appl Servers
+      +-----------------+                                       +-----------------+
+      | APP1  APP2 APP3 |                                       | APP1  APP2 APP3 |
+      |                 |                                       |                 |
+      |       UDP       |                                       |       UDP       | 
+      |      IPv6       |                                       |      IPv6       |   
+      |                 |                                       |                 |  
+      |      LC (contxt)|                                       |                 | 
+      +--------+--------+                                       +--------+--------+ 
+               |    +--+     +--+         +-----------+                  .
+               +~ ~ |RG| === |NG| ======= |LC (contxt)| .... Internet ....
+                    +--+     +--+         +-----+-----+
 </pre>
 <p class="figure">Figure 1: Architecture</p>
-<p><a href="#Fig-archi">Figure 1</a> based on <a href="#I-D.ietf-lpwan-overview">[I-D.ietf-lpwan-overview]</a> terminology represent the architecture for compression/decompression. The Thing or End-System is running applications which produce UDP/IPv6 flows. These flows are compressed by a LPWAN Compressor (LC) to reduce the headers size. Resulting information is send on a frame to the LPWAN Radio Network to a Radio Gateway (RG) which forward the frame to a Network Gateway.  The Network Gateway sends the data to a LC for decompression. They both share the same rules. The LC can be located on the Network Gateway or in another places if a tunnel is established between the NG and the LC.  This architecture forms a star topology.</p>
-<p id="rfc.section.3.p.3">The context contains a list of rules (cf. <a href="#Fig-ctxt">Figure 2</a>). Each rule contains itself a list of field descriptions composed of a filed id (FID), a target value (TV), a matching operator (MO) and a Compression/Decompression Function (CDF).</p>
+<p><a href="#Fig-archi">Figure 1</a> based on <a href="#I-D.ietf-lpwan-overview">[I-D.ietf-lpwan-overview]</a> terminology represent the architecture for compression/decompression. The Thing or End-System is running applications which produce UDP/IPv6 flows. These flows are compressed by a LPWAN Compressor (LC) to reduce the headers size. Resulting information is send on a frame to the LPWAN Radio Network to a Radio Gateway (RG) which forward the frame to a Network Gateway.  The Network Gateway sends the data to a LC for decompression. They both share the same rules. The LC can be located on the Network Gateway or in another places if a tunnel is established between the NG and the LC.  This architecture forms a star topology. After decompression the packet can be sent on the Internet to one or several Application Servers (LA).</p>
+<p id="rfc.section.3.p.3">The principle is exactly the same in the other direction.</p>
+<p id="rfc.section.3.p.4">The context contains a list of rules (cf. <a href="#Fig-ctxt">Figure 2</a>). Each rule contains itself a list of field descriptions composed of a filed id (FID), a target value (TV), a matching operator (MO) and a Compression/Decompression Function (CDF).</p>
 <div id="rfc.figure.2"/>
 <div id="Fig-ctxt"/>
 <pre>
@@ -441,60 +464,33 @@ address {
 +----------------------------------------------------------------+
 </pre>
 <p class="figure">Figure 2: Compression Decompression Context</p>
-<p id="rfc.section.3.p.4">The rule does not describe the original packet format which must be known from the compressor/decompressor. The rule just describes the compression/decompression behavior for a field.</p>
-<p id="rfc.section.3.p.5">The main idea of the compression scheme is to send the rule number (or rule id) to the other end instead of known field values.</p>
-<p id="rfc.section.3.p.6">Matching a field with a value and header compression are related operations; If a field matches a rule containing the value, it is not necessary to send it on the link. Since contexts are synchronized, reading the rule&#8217;s value is enough to reconstruct the field&#8217;s value at the other end.</p>
-<p id="rfc.section.3.p.7">On some other cases, the value need to be sent on the link to inform the other end. The field value may vary from one packet to another, therefore the field cannot be used to select the rule id. These values are sent in same order as the fields in the rule which defines the structure of the compress header.</p>
-<h1 id="rfc.section.3.1"><a href="#rfc.section.3.1">3.1.</a> <a href="#rule-id" id="rule-id">Rule id</a></h1>
-<p id="rfc.section.3.1.p.1">Rule id are sent between both compression/decompression element. The size of the rule id is not specified on this document and can vary regarding the LPWAN technology, the number of flows,&#8230;</p>
-<p id="rfc.section.3.1.p.2">Some values in the rule id space may be reserved to other goal than header compression, for example fragmentation.</p>
-<p id="rfc.section.3.1.p.3">Rule id are specific to an ES. Two ES may use the same rule id for different header compression. The LC needs to combine the rule id with the ES L2 address to find the appropriate rule.</p>
-<h1 id="rfc.section.3.2"><a href="#rfc.section.3.2">3.2.</a> <a href="#simple-example" id="simple-example">Simple Example</a></h1>
-<p id="rfc.section.3.2.p.1">A simple header is composed of 3 fields (F1, F2, F3). The compressor receives a packet containing respectively [F1:0x00, F2:0x1230, F3:0xABC0] in those fields. The Matching Operators (as defined in <a href="#chap-MO">Section 4</a>) allow to select Rule 5 as represented in <a href="#Fig-ex-ctxt">Figure 3</a>; F1 value is ignored and F2 and F3 packet field values are matched with those stored in the rule Target Values.</p>
-<div id="rfc.figure.3"/>
-<div id="Fig-ex-ctxt"/>
-<pre>
-               Rule 5
-          Target Value   Matching Operator   Comp/Decomp Fct
-        +--------------+-------------------+-----------------+
-     F1 | 0x00         | Ignore            | not-sent        |
-        +--------------+-------------------+-----------------+
-     F2 | 0x1230       | Equal             | not-sent        |
-        +--------------+-------------------+-----------------+
-     F3 | 0xABC0       | Equal             | not-sent        |
-        +--------------+-------------------+-----------------+
-</pre>
-<p class="figure">Figure 3: Matching Rule</p>
-<p id="rfc.section.3.2.p.2">The Compression/Decompression Function (as defined in <a href="#chap-CDF">Section 5</a> describes how the fields are compressed. In this example, all the fields are elided and only the rule number has to be sent to the other end.</p>
-<p id="rfc.section.3.2.p.3">The decompressor receives the rule number and reconstructs the header using the values stored in the Target Value column.</p>
-<p id="rfc.section.3.2.p.4">Note that F1 value will be set to 0x00 by the decompressor, even if the original header field was carrying a different value.</p>
-<p id="rfc.section.3.2.p.5">To allow a range of values for field F2 and F3, the MSB() Matching Operator and LSB() Compression/Decompression Function can be used (as defined in <a href="#chap-MO">Section 4</a> and <a href="#chap-CDF">Section 5</a>). In that case the rule will be rewritten as defined in <a href="#Fig-ex-ctxt2">Figure 4</a>.</p>
-<div id="rfc.figure.4"/>
-<div id="Fig-ex-ctxt2"/>
-<pre>
-               Rule 5
-          Target Value   Matching Operator   Comp/Decomp Fct
-        +--------------+-------------------+-----------------+
-     F1 | 0x00         | Ignore            | not-sent        |
-        +--------------+-------------------+-----------------+
-     F2 | 0x1230       | MSB(12)           | LSB(4)          |
-        +--------------+-------------------+-----------------+
-     F3 | 0xABC0       | MSB(12)           | LSB(4)          |
-        +--------------+-------------------+-----------------+
-</pre>
-<p class="figure">Figure 4: Matching Rule</p>
-<p id="rfc.section.3.2.p.6">In that case, if a packet with the following header fields [F1:0x00, F2:0x1234, F3:0xABCD] arrives to the compressor, the new rule 5 will be selected and sent to the other end. The compressed header will be composed of the single byte [0x4D]. The decompressor receives the compressed header and follows the rule to reconstruct [0x00, 0x1234, 0xABCD] applying a OR operator between the target value stored in the rule and the compressed field value sent.</p>
-<h1 id="rfc.section.3.3"><a href="#rfc.section.3.3">3.3.</a> <a href="#packet-processing" id="packet-processing">Packet processing</a></h1>
-<p id="rfc.section.3.3.p.1">The compression/decompression process follows several steps:</p>
+<p id="rfc.section.3.p.5">The rule does not describe the original packet format which must be known from the compressor/decompressor. The rule just describes the compression/decompression behavior for a field. In the rule, it is recommanded to describe the header field in the same order they appear in the packet.</p>
+<p id="rfc.section.3.p.6">The main idea of the compression scheme is to send the rule number (or rule id) to the other end instead of known field values. When a value is known by both ends, it is not necessary to sent it on the LPWAN.</p>
+<p id="rfc.section.3.p.7">The field description is composed of different entries:</p>
 <p/>
 
 <ul>
-  <li>compression rule selection: the goal is to identify which rule(s) will be used to compress the headers. To each field is associated a matching operator for compression. Each header field&#8217;s value is compared to the corresponding target value stored in the rule for that field using the matching operator. If all the fields in the packet&#8217;s header satisfied the all the matching operators of a rule,  the packet is processed using Compression Decompression Function associated with the fields. Otherwise the next rule is tested. [EDIT]If no eligible rule is found, then the packet is dropped.[EDIT]</li>
-  <li>sending: The rule number is sent to the other end followed by data resulting from the field compression. These data are sent in the rule order for the matching fields. The way the rule number is sent depends of the layer two technology and will be specified in a specific document. For exemple, it can either be included in a Layer 2 header or sent in the first byte of the L2 payload.</li>
+  <li>A Field ID or FID is a unique value to define the field.</li>
+  <li>A Target Value or TV is the value used to make the comparison between the packet field. The Target Value can be of any type (integer, strings,..).  It can be a single value or a more complex structure (array, list,&#8230;). It can be considered as a CBOR structure.</li>
+  <li>A Matching Operator or MO is the operator used to make the comparison between the field value and the Target Value. The Matching Operator may require some parameters, which can be considered as a CBOR structure. MO is only used during the compression phase.</li>
+  <li>A Compression Decompression Function or CDF is used to describe the compression and the decompression process. The CDF may require some parameters, which can be considered as a CBOR structure.</li>
+</ul>
+<h1 id="rfc.section.3.1"><a href="#rfc.section.3.1">3.1.</a> <a href="#rule-id" id="rule-id">Rule id</a></h1>
+<p id="rfc.section.3.1.p.1">Rule id are sent between both compression/decompression elements. The size of the rule id is not specified on this document and can vary regarding the LPWAN technology, the number of flows,&#8230;</p>
+<p id="rfc.section.3.1.p.2">Some values in the rule id space may be reserved to other goal than header compression, for example fragmentation.</p>
+<p id="rfc.section.3.1.p.3">Rule ids are specific to an ES. Two ES may use the same rule id for different header compression. The LC needs to combine the rule id with the ES L2 address to find the appropriate rule.</p>
+<p id="rfc.section.3.1.p.4">&lt;</p>
+<h1 id="rfc.section.3.2"><a href="#rfc.section.3.2">3.2.</a> <a href="#packet-processing" id="packet-processing">Packet processing</a></h1>
+<p id="rfc.section.3.2.p.1">The compression/decompression process follows several steps:</p>
+<p/>
+
+<ul>
+  <li>compression rule selection: the goal is to identify which rule(s) will be used to compress the headers.  Each field is associated to a matching operator for compression. Each header field&#8217;s value is compared to the corresponding target value stored in the rule for that field using the matching operator. If all the fields in the packet&#8217;s header satisfied  all the matching operators of a rule,  the packet is processed using Compression Decompression Function associated with the fields. Otherwise the next rule is tested. If no eligible rule is found, then the packet is sent without compression using fragmentation procedure.</li>
+  <li>sending: The rule number is sent to the other end followed by data resulting from the  compression. These data are sent in the rule order for the matching fields. The way the rule number is sent depends on the layer two technology and will be specified in a specific document. For exemple, it can either be included in a Layer 2 header or sent in the first byte of the L2 payload.</li>
   <li>decompression: The receiver identifies the  sender through its device-id (e.g. MAC address) and select the appropriate rule through the rule number. This rule gives the compressed header format and associate these values to header fields.  It applies the compression decompression function to reconstruct the original header fields. Compute-* CDFs must be applied after the other CDFs.</li>
 </ul>
 <h1 id="rfc.section.4"><a href="#rfc.section.4">4.</a> <a href="#chap-MO" id="chap-MO">Matching operators</a></h1>
-<p id="rfc.section.4.p.1">This document describes 3 basic matching operators which must be known by both LC. They are not typed and can be applied indifferently to integer, string,&#8230;</p>
+<p id="rfc.section.4.p.1">This document describes basic matching operators which must be known by both LC. They are not typed and can be applied indifferently to integer, string,&#8230;</p>
 <p/>
 
 <ul>
@@ -505,8 +501,8 @@ address {
 </ul>
 <p id="rfc.section.4.p.3">MO may need a list of parameters to proceed to the matching. For instance MSB requires the number of bits to test.</p>
 <h1 id="rfc.section.5"><a href="#rfc.section.5">5.</a> <a href="#chap-CDF" id="chap-CDF">Compression Decompression Functions (CDF)</a></h1>
-<p id="rfc.section.5.p.1">The Compression Decompression Functions (CDF) describe the action taken during the compression and inversely the action taken by the decompressor to restore the original value.</p>
-<div id="rfc.figure.5"/>
+<p id="rfc.section.5.p.1">The Compression Decompression Functions (CDF) describes the action taken during the compression and inversely the action taken by the decompressor to restore the original value.</p>
+<div id="rfc.figure.3"/>
 <div id="Fig-function"/>
 <pre>
 /--------------------+-------------+---------------------------\
@@ -525,17 +521,16 @@ address {
 \--------------------+-------------+---------------------------/
 
 </pre>
-<p class="figure">Figure 5: Compression and Decompression Functions</p>
-<p><a href="#Fig-function">Figure 5</a> sumarizes the functions defined to compress and decompress a field. The first column gives the function&#8217;s name. The second and third columns outlines the compression/decompression behavior.</p>
+<p class="figure">Figure 3: Compression and Decompression Functions</p>
+<p><a href="#Fig-function">Figure 3</a> sumarizes the functions defined to compress and decompress a field. The first column gives the function&#8217;s name. The second and third columns outlines the compression/decompression behavior.</p>
 <p id="rfc.section.5.p.3">Compression is done in the rule order and send in that order in the compressed message. The receiver must be able to find the size of each compressed field which can be given by the rule or send with the data.</p>
 <h1 id="rfc.section.5.1"><a href="#rfc.section.5.1">5.1.</a> <a href="#not-sent-cdf" id="not-sent-cdf">not-sent CDF</a></h1>
 <p id="rfc.section.5.1.p.1">Not-sent function is generally used when the field value is specified in the rule and therefore known by the both sides. This function is generally used with the &#8220;equal&#8221; MO. If MO is &#8220;ignore&#8221;, there is a risk to have a decompressed field value different from the compressed field.</p>
 <p id="rfc.section.5.1.p.2">The compressor do not sent any value on the compressed header for that field.</p>
 <p id="rfc.section.5.1.p.3">The decompressor restores the field value with the target value stored in the matched rule.</p>
 <h1 id="rfc.section.5.2"><a href="#rfc.section.5.2">5.2.</a> <a href="#value-sent-cdf" id="value-sent-cdf">value-sent CDF</a></h1>
-<p id="rfc.section.5.2.p.1">Value-sent function is generally used when the field value is not known by both end.  The value is sent in the compressed message header. Both ends must know the size of the field, either implicitely or explicitely in the compressed header field. This function is generally used with the ignore MO.</p>
-<p id="rfc.section.5.2.p.2">The compressor sends the target value stored on the rule on the compressed header message. , if the matching operator is &#8220;=&#8221;. Otherwise the matching operator indicates the information that will be sent on the link.</p>
-<p id="rfc.section.5.2.p.3">For a LSB operator only the Least Significant Bits are sent.</p>
+<p id="rfc.section.5.2.p.1">Value-sent function is generally used when the field value is not known by both end.  The value is sent in the compressed message header. Both ends must know the size of the field, either implicitely (the size is known by both sides) or explicitely in the compressed header field by indicating the length. This function is generally used with the &#8220;ignore&#8221; MO.</p>
+<p id="rfc.section.5.2.p.2">The compressor sends the Target Value stored on the rule in the compressed header message. The decompressor restores the field value with the one received from the LPWAN</p>
 <h1 id="rfc.section.5.3"><a href="#rfc.section.5.3">5.3.</a> <a href="#lsb-cdf" id="lsb-cdf">LSB CDF</a></h1>
 <p id="rfc.section.5.3.p.1">LSB function is used to send a fixed part of the packet field header to the other end.  This function is used in conjuction with the &#8220;MSB&#8221; MO</p>
 <p id="rfc.section.5.3.p.2">The compressor sends the &#8220;length&#8221; Least Significant Bits. The decompressor combines with a OR operator the value received with the Target Value.</p>
@@ -543,7 +538,8 @@ address {
 <p id="rfc.section.5.4.p.1">These functions are used to process respectively the End System and the LA Device Identifier (DID).</p>
 <p id="rfc.section.5.4.p.2">The IID value is computed from device ID present in the Layer 2 header. The computation depends on the technology and the device ID  size.</p>
 <h1 id="rfc.section.5.5"><a href="#rfc.section.5.5">5.5.</a> <a href="#mapping-sent" id="mapping-sent">mapping-sent</a></h1>
-<p id="rfc.section.5.5.p.1">mathching-sent is used to send a smaller index associated to the field value in the Target Value. This function is used in conjuction with the &#8220;match-mapping&#8221; MO.</p>
+<p id="rfc.section.5.5.p.1">mapping-sent is used to send a smaller index associated to the field value in the Target Value. This function is used in conjuction with the &#8220;match-mapping&#8221; MO.</p>
+<p id="rfc.section.5.5.p.2">The compressor looks in the TV to find the field value and send the corresponding index.  The decompressor uses this index to restore the field value.</p>
 <h1 id="rfc.section.5.6"><a href="#rfc.section.5.6">5.6.</a> <a href="#compute-" id="compute-">Compute-*</a></h1>
 <p id="rfc.section.5.6.p.1">These functions compute the field value based on received information. They are elided during the compression and reconstructed during the decompression.</p>
 <p/>
@@ -576,14 +572,14 @@ address {
   <li>TV contains a stable value, MO is MSB(X) and CDF is set to LSB(20-X)</li>
 </ul>
 <h1 id="rfc.section.6.4"><a href="#rfc.section.6.4">6.4.</a> <a href="#payload-length-field" id="payload-length-field">Payload Length field</a></h1>
-<p id="rfc.section.6.4.p.1">If the LPWAN technology do not add padding, this field can be elided for the transmission on the LPWAN network. The LC recompute the original payload length value. The TV is not set, the MO is set to &#8220;ignore&#8221; and the CDF is &#8220;compute-IPv6-length&#8221;.</p>
-<p id="rfc.section.6.4.p.2">if the payload is small, the TV can be set to 0x0000, the MO set to &#8220;MSB&#8221; and the CDF to &#8220;LSB&#8221;.</p>
+<p id="rfc.section.6.4.p.1">If the LPWAN technology does not add padding, this field can be elided for the transmission on the LPWAN network. The LC recompute the original payload length value. The TV is not set, the MO is set to &#8220;ignore&#8221; and the CDF is &#8220;compute-IPv6-length&#8221;.</p>
+<p id="rfc.section.6.4.p.2">If the payload is small, the TV can be set to 0x0000, the MO set to &#8220;MSB (16-s)&#8221; and the CDF to &#8220;LSB (s)&#8221;. The s parameter depends of the maximum packet length.</p>
 <p id="rfc.section.6.4.p.3">On other cases, the length must be sent and the CDF is replaced by &#8220;value-sent&#8221;.</p>
 <h1 id="rfc.section.6.5"><a href="#rfc.section.6.5">6.5.</a> <a href="#next-header-field" id="next-header-field">Next Header field</a></h1>
 <p id="rfc.section.6.5.p.1">If the Next Header field identified by the rest of the rule do not vary and is known by both sides, the TV should contain this Next Header value, the MO should be &#8220;equal&#8221; and the CDF should be &#8220;not-sent.</p>
 <p id="rfc.section.6.5.p.2">If the Flow Label field identified by the rest of the rule vary during time or is not known by both sides then TV is not set, MO is set to &#8220;ignore&#8221; and CDF is set to &#8220;value-sent&#8221;</p>
 <h1 id="rfc.section.6.6"><a href="#rfc.section.6.6">6.6.</a> <a href="#hop-limit-field" id="hop-limit-field">Hop Limit field</a></h1>
-<p id="rfc.section.6.6.p.1">The End System is generally a host and do not forward packets, therefore the Hop Limit value is constant. Therefore the TV is set with a default value, the MO is set to &#8220;equal&#8221; and the CDF is set to &#8220;not-sent&#8221;.</p>
+<p id="rfc.section.6.6.p.1">The End System is generally a host and does not forward packets, therefore the Hop Limit value is constant. Therefore the TV is set with a default value, the MO is set to &#8220;equal&#8221; and the CDF is set to &#8220;not-sent&#8221;.</p>
 <p id="rfc.section.6.6.p.2">Otherwise the value is sent on the LPWAN: TV is not set, MO is set to ignore and CDF is set to &#8220;value-sent&#8221;.</p>
 <h1 id="rfc.section.6.7"><a href="#rfc.section.6.7">6.7.</a> <a href="#ipv6-addresses-fields" id="ipv6-addresses-fields">IPv6 addresses fields</a></h1>
 <p id="rfc.section.6.7.p.1">As in 6LoWPAN <a href="#RFC4944">[RFC4944]</a> IPv6 addresses are splited into two 64 bit long fields; one for the prefix and one for the Interface Identifier (IID). These fields should be compressed. To allow a single rule, these values are identified by their role (ES or LA) and not by their position in the frame (source or destination). The LC must be aware of the traffic direction (upstream, downstream) to select the appropriate field.</p>
@@ -603,7 +599,7 @@ address {
 <p id="rfc.section.6.9.p.1">To allow a single rule, these values are identified by their role (ES or LA) and not by their position in the frame (source or destination). The LC must be aware of the traffic direction (upstream, downstream) to select the appropriate field. The following rules apply for ES and LA port numbers.</p>
 <p id="rfc.section.6.9.p.2">If both ends knows the port number, it can be elided. The TV contains the port number, the MO is set to &#8220;equal&#8221; and the CDF is set to &#8220;not-sent&#8221;.</p>
 <p id="rfc.section.6.9.p.3">If the port variation are on few bits, the TV contains the stable part of the port number, the MO is set to &#8220;MSB&#8221; and the CDF is set to &#8220;LSB&#8221;.</p>
-<p id="rfc.section.6.9.p.4">If some wellknown value are used, the the TV can contain the list of this values, the MO is set to &#8220;match-mapping&#8221; and the CDF is set to &#8220;mapping-sent&#8221;.</p>
+<p id="rfc.section.6.9.p.4">If some wellknown values are used,  the TV can contain the list of this values, the MO is set to &#8220;match-mapping&#8221; and the CDF is set to &#8220;mapping-sent&#8221;.</p>
 <p id="rfc.section.6.9.p.5">Otherwise the port number are sent on the LPWAN. The TV is not set, the MO is set to &#8220;ignore&#8221; and the CDF is set to &#8220;value-sent&#8221;.</p>
 <h1 id="rfc.section.6.10"><a href="#rfc.section.6.10">6.10.</a> <a href="#udp-length-field" id="udp-length-field">UDP length field</a></h1>
 <p id="rfc.section.6.10.p.1">If the LPWAN technology does not introduce padding, the UDP length can be computed from the received data. In that case the TV is not set, the MO is set to &#8220;ignore&#8221; and the CDF is set to &#8220;compute-UDP-length&#8221;.</p>
@@ -616,8 +612,8 @@ address {
 <p id="rfc.section.7.p.1">This section gives some scenarios of the compression mechanism for IPv6/UDP.  The goal is to illustrate the SCHC behavior.</p>
 <h1 id="rfc.section.7.1"><a href="#rfc.section.7.1">7.1.</a> <a href="#ipv6udp-compression-in-a-star-topology" id="ipv6udp-compression-in-a-star-topology">IPv6/UDP compression in a star topology</a></h1>
 <p id="rfc.section.7.1.p.1">The most common case will be a LPWA end-system embeds some applications running over CoAP. In this example, the first flow is for the device management based on CoAP using Link Local addresses and UDP ports 123 and 124.  The second flow will be a CoAP server for measurements done by the end-system (using ports 5683) and Global Addresses alpha::IID/64 to beta::1/64.  The last flow is for legacy applications using different ports numbers, the destination is gamma::1/64.</p>
-<p><a href="#FigStack">Figure 6</a> presents the protocol stack for this end-system. IPv6 and UDP are represented with dotted lines since these protocols are compressed on the radio link.</p>
-<div id="rfc.figure.6"/>
+<p><a href="#FigStack">Figure 4</a> presents the protocol stack for this end-system. IPv6 and UDP are represented with dotted lines since these protocols are compressed on the radio link.</p>
+<div id="rfc.figure.4"/>
 <div id="FigStack"/>
 <pre>
  Managment    Data
@@ -633,9 +629,9 @@ address {
       End System or LPWA GW
 
 </pre>
-<p class="figure">Figure 6: Simplified Protocol Stack for LP-WAN</p>
+<p class="figure">Figure 4: Simplified Protocol Stack for LP-WAN</p>
 <p id="rfc.section.7.1.p.3">Note that in some LPWA technologies, only End Systems have a device ID.  Therefore it is necessary to define statically an IID for the Link Local address for the LPWA Compressor.</p>
-<div id="rfc.figure.7"/>
+<div id="rfc.figure.5"/>
 <div id="Fig-fields"/>
 <pre>
   Rule 0
@@ -703,27 +699,133 @@ address {
 
 
 </pre>
-<p class="figure">Figure 7: Context rules</p>
-<p id="rfc.section.7.1.p.4">All the fields described in the three rules <a href="#Fig-fields">Figure 7</a> are present in the IPv6 and UDP headers.  The ESDevice-ID value is found in the L2 header.</p>
+<p class="figure">Figure 5: Context rules</p>
+<p id="rfc.section.7.1.p.4">All the fields described in the three rules <a href="#Fig-fields">Figure 5</a> are present in the IPv6 and UDP headers.  The ESDevice-ID value is found in the L2 header.</p>
 <p id="rfc.section.7.1.p.5">The second and third rules use global addresses. The way the ES learn the prefix is not in the scope of the document. One possible way is to use a management protocol to set up in both end rules the prefix used on the LPWA network.</p>
 <p id="rfc.section.7.1.p.6">The third rule compresses port numbers on 4 bits.</p>
-<h1 id="rfc.section.8"><a href="#rfc.section.8">8.</a> <a href="#acknowledgements" id="acknowledgements">Acknowledgements</a></h1>
-<p id="rfc.section.8.p.1">Thanks to Dominique Barthel, Arunprabhu Kandasamy, Antony Markovski, Alexander Pelov, Juan Carlos Zuniga for useful design consideration.</p>
-<h1 id="rfc.references"><a href="#rfc.references">9.</a> Normative References</h1>
+<h1 id="rfc.section.8"><a href="#rfc.section.8">8.</a> <a href="#fragmentation" id="fragmentation">Fragmentation</a></h1>
+<h1 id="rfc.section.8.1"><a href="#rfc.section.8.1">8.1.</a> <a href="#overview" id="overview">Overview</a></h1>
+<p id="rfc.section.8.1.p.1">If an entire payload (e.g., IPv6) datagram fits within a single L2 data unit, it is unfragmented and a fragmentation header is not needed.  If the datagram does not fit within a single L2 data unit, it SHALL be broken into fragments.</p>
+<p id="rfc.section.8.1.p.2">This specification defines two fragment delivery reliability options, namely: Unreliable and Reliable. The same reliability option MUST be used for all fragments of a packet.</p>
+<p id="rfc.section.8.1.p.3">In Unreliable, the receiver SHALL NOT issue acknowledgments and the sender SHALL NOT perform fragment transmission retries.</p>
+<p id="rfc.section.8.1.p.4">In Reliable, if the fragment receiver detects any missing fragments from the transported IPv6 packet, the receiver transmits one negative acknowledgment (NACK) which informs the sender about received and missing fragments from the IPv6 packet. Upon receipt of a NACK, the sender selectively retransmits the missing fragments. If all fragments carrying the IPv6 packet are successfully received, the receiver SHALL NOT send a NACK. If the sender does not receive a NACK, it assumes that all fragments carrying the IPv6 packet were successfully delivered.</p>
+<h1 id="rfc.section.8.2"><a href="#rfc.section.8.2">8.2.</a> <a href="#unreliable" id="unreliable">Unreliable</a></h1>
+<p id="rfc.section.8.2.p.1">### Fragmentation header formats for Unreliable</p>
+<p id="rfc.section.8.2.p.2">In Unreliable, fragments except the last one SHALL  <br/> contain the fragmentation header as defined in <a href="#Fig-Unrel-NotLast">Figure 6</a>.</p>
+<div id="rfc.figure.6"/>
+<div id="Fig-Unrel-NotLast"/>
+<pre>
+                       &lt;-----  R  -----&gt;   
+                       +----- ... -----+
+                       |    Rule ID    |
+                       +----- ... -----+
+</pre>
+<p class="figure">Figure 6: Fragmentation Header for Fragments except the Last One in Unreliable</p>
+<p id="rfc.section.8.2.p.3">The last fragment SHALL contain a fragmentation header that conforms to the format shown in <a href="#Fig-Unrel-Last">Figure 7</a>.</p>
+<div id="rfc.figure.7"/>
+<div id="Fig-Unrel-Last"/>
+<pre>
+                       &lt;-----  R  ----&gt; &lt;---- M -----&gt;                   
+                       +----- ... -----+---- ... ----+
+                       |    Rule ID    |     MIC     |
+                       +----- ... -----+---- ... ----+
+</pre>
+<p class="figure">Figure 7: Fragmentation Header for the Last Fragment in Unreliable</p>
+<p id="rfc.section.8.2.p.4">Rule ID:  In Unreliable, this field has a size of R bits. Rule ID SHALL    <br/> be set to TBD_UNREL_A in fragments, except the last one, to signal that the carried payload is a fragment, and that Unreliable fragment delivery MUST be used. In the last fragment, Rule ID SHALL be set to TBD_UNREL_B to identify the fragment as the last one, and to signal that Unreliable fragment delivery MUST be used.</p>
+<p id="rfc.section.8.2.p.5">MIC: This field, of size M bits, is computed by the sender over the<br/> complete IPv6 packet before fragmentation by using the TBD algorithm.</p>
+<h1 id="rfc.section.8.2.1"><a href="#rfc.section.8.2.1">8.2.1.</a> <a href="#receiver-and-sender-behavior-for-unreliable" id="receiver-and-sender-behavior-for-unreliable">Receiver and sender behavior for Unreliable</a></h1>
+<p id="rfc.section.8.2.1.p.1">The recipient of link fragments SHALL use (1) the sender&#8217;s L2 source address (if present), (2) the destination&#8217;s L2 address (if present), and (3) Rule ID to identify all the fragments that belong to a given datagram. The fragment receiver SHALL use Rule ID to determine whether the fragment has to be handled as per the rules of Unreliable or Reliable fragment delivery.</p>
+<p id="rfc.section.8.2.1.p.2">Upon receipt of a link fragment, the recipient starts constructing the original unfragmented packet.  It uses the order of arrival of each fragment to determine the location of the individual fragments within the original unfragmented packet.  For example, it may place the data payload of the fragments within a payload datagram reassembly buffer at the location determined from the order of arrival and the fragment payload sizes.  Note that the size of the reassembly buffer cannot be determined from fragmentation headers.</p>
+<p id="rfc.section.8.2.1.p.3">If a fragment recipient disassociates from its L2 network, the recipient MUST discard all link fragments of all partially reassembled payload datagrams, and fragment senders MUST discard all not yet transmitted link fragments of all partially transmitted payload (e.g., IPv6) datagrams.  Similarly, when a node first receives a fragment of a packet, it starts a reassembly timer.  When this time expires, if the entire packet has not been reassembled, the existing fragments MUST be discarded and the reassembly state MUST be flushed.  The reassembly timeout MUST be set to a maximum of TBD seconds).</p>
+<p id="rfc.section.8.2.1.p.4">Once the recipient has received the last fragment, it checks for the integrity of the reassembled IPv6 datagram, based on the MIC received.  If the integrity check indicates that the reassembled IPv6 datagram does not match the original IPv6 datagram (prior to fragmentation), the reassembled IPv6 datagram MUST be discarded.</p>
+<h1 id="rfc.section.8.3"><a href="#rfc.section.8.3">8.3.</a> <a href="#reliable" id="reliable">Reliable</a></h1>
+<p id="rfc.section.8.3.p.1">### Fragmentation header formats for Reliable In Reliable, fragments except the last one SHALL  <br/> contain the fragmentation header as defined in <a href="#Fig-Rel-NotLast">Figure 8</a>. The total size of this fragmentation header is R bits.</p>
+<div id="rfc.figure.8"/>
+<div id="Fig-Rel-NotLast"/>
+<pre>
+                       &lt;----------- R -----------&gt;    
+                                        &lt;-- N  --&gt;   
+                       +----- ... -----+-- ... --+
+                       |    Rule ID    |   CFN   |
+                       +----- ... -----+-- ... --+
+</pre>
+<p class="figure">Figure 8: Fragmentation Header for Fragments except the Last One in Reliable</p>
+<p id="rfc.section.8.3.p.2">The last fragment SHALL contain a fragmentation header that conforms to the format shown in <a href="#Fig-Rel-Last">Figure 9</a>. The total size of this fragmentation header is R+M bits.</p>
+<div id="rfc.figure.9"/>
+<div id="Fig-Rel-Last"/>
+<pre>
+                       &lt;----------- R ----------&gt;
+                                        &lt;-- N --&gt; &lt;---- M -----&gt;                   
+                       +----- ... -----+-- ... --+---- ... ----+
+                       |    Rule ID    |   CFN   |     MIC     |
+                       +----- ... -----+-- ... --+---- ... ----+
+</pre>
+<p class="figure">Figure 9: Fragmentation Header for the Last Fragment in Reliable</p>
+<p id="rfc.section.8.3.p.3">Rule ID: In Reliable, this field has a size of  R &#8211; N  bits in all fragments, and it SHALL be set to TBD_REL to signal that the carried payload is a fragment, and that Reliable fragment delivery MUST be used.</p>
+<p id="rfc.section.8.3.p.4">CFN:  CFN stands for Compressed Fragment Number. The size of the CFN field is N bits. This field is an unsigned integer that carries a non-absolute fragment number.  The CFN SHALL be set sequentially starting from 0 for the first fragment, and SHALL wrap from 2^N - 2 back to 0. The CFN for the last fragment has all bits set to 1.</p>
+<p id="rfc.section.8.3.p.5">MIC:  MIC stands for Message Integrity Check. This field has a size of M bits. It is computed by the sender over the complete IPv6 packet before fragmentation by using the TBD algorithm.</p>
+<h1 id="rfc.section.8.3.1"><a href="#rfc.section.8.3.1">8.3.1.</a> <a href="#nack-format" id="nack-format">NACK format</a></h1>
+<p id="rfc.section.8.3.1.p.1">The format of a NACK is shown in <a href="#Fig-NACK-Format">Figure 10</a>:</p>
+<div id="rfc.figure.10"/>
+<div id="Fig-NACK-Format"/>
+<pre>
+                          &lt;-----  R  ----&gt;
+                         +-+-+-+-+-+-+-+-+----- ... ---+
+                         |    Rule ID    |   bitmap    |
+                         +-+-+-+-+-+-+-+-+----- ... ---+
+</pre>
+<p class="figure">Figure 10: Format of a NACK</p>
+<p id="rfc.section.8.3.1.p.2">Rule ID: In all NACKs, Rule ID has a size of R bits and SHALL be set to<br/> TBD_NACK to signal that the message is a NACK.</p>
+<p id="rfc.section.8.3.1.p.3">bitmap:  the bitmap field of a NACK has a size equal to Ceiling(Number_of_Fragments/8) octets, where Number_of_Fragments denotes the number of fragments that carry the IPv6 packet. The bitmap is a sequence of bits, where the n-th bit signals whether the n-th fragment transmitted has been correctly received (n-th bit set to 1) or not (n-th bit set to 0).</p>
+<p><a href="#Fig-Bitmap">Figure 11</a> shows an example of a NACK, where the bitmap indicates that the second and the ninth fragments have not been correctly received.  In this example, the IPv6 packet is carried by eleven fragments in total, therefore the bitmap in this example has a size of two bytes.</p>
+<div id="rfc.figure.11"/>
+<div id="Fig-Bitmap"/>
+<pre>
+                                                        1
+                 &lt;-----  R  ----&gt; 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5
+                  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                  |    Rule ID    |1|0|1|1|1|1|1|1|0|1|1|X|X|X|X|X|
+                  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+</pre>
+<p class="figure">Figure 11: Example of the Bitmap in a NACK</p>
+<h1 id="rfc.section.8.3.2"><a href="#rfc.section.8.3.2">8.3.2.</a> <a href="#sender-behavior-in-reliable" id="sender-behavior-in-reliable">Sender behavior in Reliable</a></h1>
+<p id="rfc.section.8.3.2.p.1">In Reliable, a sender MUST store a copy of the fragments that will be sent to carry an IPv6 packet. The memory resources to store those fragments SHALL be released as per the rules described below.</p>
+<p id="rfc.section.8.3.2.p.2">After transmission of all fragments that carry an IPv6 packet, the sender waits for NACK_WAIT seconds for a possible incoming NACK. To this end, after the last fragment has been transmitted, the sender initializes a timer to NACK_WAIT seconds. If a NACK is not received during the NACK_WAIT interval, the sender MUST assume successful delivery of all fragments and release the memory resources used to store the fragments.</p>
+<p id="rfc.section.8.3.2.p.3">If a NACK is received before expiration of the NACK wait timer, the fragment sender processes the bitmap included in the NACK in order to determine which fragments need to be resent. Since the bitmap size is a multiple of eight bits, the fragment sender only takes into consideration the first F bitmap bits, where F denotes the number of fragments sent, and it MUST ignore the remaining bits in the bitmap.</p>
+<p id="rfc.section.8.3.2.p.4">Once the fragments that need to be resent have been identified, the sender renumbers these fragments, so that their CFN fields define a new sequence of fragment numbers, which SHALL be set sequentially starting from 0 for the first fragment, and SHALL wrap from 2^N - 2 back to 0. For example, if three fragments have to be resent, and with N=3, their CFNs will be set to 0, 1, and 7, respectively, regardless of their original CFN values. After fragment renumbering, the fragments are resent.</p>
+<p id="rfc.section.8.3.2.p.5">After the transmission of the last retransmitted fragment, if the number of NACKs received during the current IPv6 packet transmission is less than MAX_NACKS_PER_IPv6_PACKET, the sender initializes a timer to NACK_WAIT seconds to listen for a possible incoming NACK. In that case, if a NACK is not received during the NACK_WAIT interval, the sender MUST assume successful delivery of all the fragments and release the memory resources used to store the fragments.  If a NACK is received before expiration of the NACK_WAIT timer, the fragment sender processes the NACK by following the same approach as for the first NACK received, and performs a new round of fragment retransmissions by iterating the procedure described for the first round of fragment retransmissions.</p>
+<p id="rfc.section.8.3.2.p.6">When the number of fragment retransmission rounds completed by the fragment sender equals MAX_NACKS_PER_IPv6_PACKET, the sender MUST NOT perform any further fragment retransmissions for the current IPv6 packet, and it MUST release the memory resources used to store the fragments for the current IPv6 packet.</p>
+<p id="rfc.section.8.3.2.p.7">If a fragment sender disassociates from its L2 network, it MUST discard all not yet transmitted link fragments of all partially transmitted payload (e.g., IPv6) datagrams.</p>
+<h1 id="rfc.section.8.3.3"><a href="#rfc.section.8.3.3">8.3.3.</a> <a href="#receiver-behavior-in-reliable" id="receiver-behavior-in-reliable">Receiver behavior in Reliable</a></h1>
+<p id="rfc.section.8.3.3.p.1">The recipient of link fragments SHALL use (1) the sender&#8217;s L2 Source address (if present), (2) the destination&#8217;s L2 address (if present), and (3) Rule ID and CFN to identify all the fragments that belong to a given datagram. The fragment receiver SHALL use Rule ID to determine whether the fragment has to be handled as per the rules of Unreliable or Reliable fragment delivery.</p>
+<p id="rfc.section.8.3.3.p.2">Upon receipt of a link fragment, the recipient starts constructing the original unfragmented packet.  It uses the CFN field and the order of arrival of each fragment to determine the location of the individual fragments within the original unfragmented packet.  For example, it may place the data payload within a payload datagram reassembly buffer at the location determined from the CFN, the received fragment payload sizes and the order of arrival.  Note that the size of the reassembly buffer cannot be determined from fragmentation headers, and if non- continguous frame sequences are received, it is not always possible to determine the size of the missing fragment(s).</p>
+<p id="rfc.section.8.3.3.p.3">When a node first receives a fragment of a packet, it starts a reassembly timer.  When this time expires, if the entire packet has not been reassembled, the existing fragments MUST be discarded and the reassembly state MUST be flushed.  The reassembly timeout MUST be set to a maximum of TBD seconds).</p>
+<p id="rfc.section.8.3.3.p.4">Once the recipient of fragments has received the last fragment, if the sequence of received fragments CFNs (except the special one used for the last fragment) is composed of consecutive values, the fragment receiver checks for the integrity of the reassembled IPv6 datagram, based on the MIC received.  If the sequence of received fragments CFNs or the integrity check indicate that the reassembled IPv6 datagram does not match the original IPv6 datagram (prior to fragmentation), the recipient creates and transmits a NACK to the fragment sender. The NACK includes a bitmap that indicates successful or unsuccessful receipt for each one of the fragments that carry the IPv6 packet.</p>
+<p id="rfc.section.8.3.3.p.5">After transmission of the NACK, and before expiration of the reassembly timeout, if the fragment recipient receives further (retransmitted) fragments, it uses the CFN and the order of arrival of each fragment to place the corresponding payload in its correct location in the reassembly buffer. Otherwise, the fragment recipient MUST NOT resend the last transmitted NACK.</p>
+<p id="rfc.section.8.3.3.p.6">When the number of received retransmitted fragments equals the number of missing fragments, and after placing the fragment payloads in their correct location in the reassembly buffer, the fragment receiver performs a new integrity check of the reassembled IPv6 datagram based on the MIC received.  If the sequence of received fragments CFNs or the integrity check indicate that the reassembled IPv6 datagram does not match the original IPv6 datagram (prior to fragmentation), then two situations can happen:</p>
+<p/>
+
+<ul>
+  <li>If the number of NACKs sent by the receiver has reached MAX_NACKS_PER_IPv6_PACKET, all partially reassembled fragment payloads MUST be discarded.</li>
+  <li>If the number of NACKs sent by the receiver is less than MAX_NACKS_PER_IPv6_PACKET, the fragment receiver creates and transmits a NACK to the fragment sender. The NACK includes a bitmap that indicates currently successful or unsuccessful receipt for each one of the fragments that carry the IPv6 packet. The fragment recipient then iterates the operations after transmission of a NACK described in this section as long as the number of NACKs sent is less than MAX_NACKS_PER_IPv6_PACKET.</li>
+</ul>
+<p id="rfc.section.8.3.3.p.8">If a fragment recipient disassociates from its L2 network, the recipient MUST discard all link fragments of all partially reassembled payload datagrams.</p>
+<h1 id="rfc.section.9"><a href="#rfc.section.9">9.</a> <a href="#security-considerations" id="security-considerations">Security considerations</a></h1>
+<h1 id="rfc.section.9.1"><a href="#rfc.section.9.1">9.1.</a> <a href="#security-considerations-for-header-compression" id="security-considerations-for-header-compression">Security considerations for header compression</a></h1>
+<p id="rfc.section.9.1.p.1">TBD</p>
+<h1 id="rfc.section.9.2"><a href="#rfc.section.9.2">9.2.</a> <a href="#security-considerations-for-fragmentation" id="security-considerations-for-fragmentation">Security considerations for fragmentation</a></h1>
+<p id="rfc.section.9.2.p.1">This subsection describes potential attacks to LPWAN fragmentation and proposes countermeasures, based on existing analysis of attacks to 6LoWPAN fragmentation {HHWH}.</p>
+<p id="rfc.section.9.2.p.2">A node can perform a buffer reservation attack by sending a first fragment to a target.  Then, the receiver will reserve buffer space for the whole packet on the basis of the datagram size announced in that first fragment.  Other incoming fragmented packets will be dropped while the reassembly buffer is occupied during the reassembly timeout.  Once that timeout expires, the attacker can repeat the same procedure, and iterate, thus creating a denial of service attack.  The (low) cost to mount this attack is linear with the number of buffers at the target node.  However, the cost for an attacker can be increased if individual fragments of multiple packets can be stored in the reassembly buffer.  To further increase the attack cost, the reassembly buffer can be split into fragment-sized buffer slots.  Once a packet is complete, it is processed normally.  If buffer overload occurs, a receiver can discard packets based on the sender behavior, which may help identify which fragments have been sent by an attacker.</p>
+<p id="rfc.section.9.2.p.3">In another type of attack, the malicious node is required to have overhearing capabilities.  If an attacker can overhear a fragment, it can send a spoofed duplicate (e.g. with random payload) to the destination.  A receiver cannot distinguish legitimate from spoofed fragments.  Therefore, the original IPv6 packet will be considered corrupt and will be dropped.  To protect resource-constrained nodes from this attack, it has been proposed to establish a binding among the fragments to be transmitted by a node, by applying content- chaining to the different fragments, based on cryptographic hash functionality.  The aim of this technique is to allow a receiver to identify illegitimate fragments.</p>
+<p id="rfc.section.9.2.p.4">Further attacks may involve sending overlapped fragments (i.e.  comprising some overlapping parts of the original datagram) or announcing a datagram size in the first fragment that does not reflect the actual amount of data carried by the fragments.  Implementers should make sure that correct operation is not affected by such events.</p>
+<h1 id="rfc.section.10"><a href="#rfc.section.10">10.</a> <a href="#acknowledgements" id="acknowledgements">Acknowledgements</a></h1>
+<p id="rfc.section.10.p.1">Thanks to Dominique Barthel, Arunprabhu Kandasamy, Antony Markovski, Alexander Pelov, Juan Carlos Zuniga for useful design consideration.</p>
+<p id="rfc.section.10.p.2">In the fragmentation section, the authors have reused parts of text available in section 5.3 of RFC 4944, and would like to thank the authors of RFC 4944.</p>
+<p id="rfc.section.10.p.3">Carles Gomez has been funded in part by the Spanish Government (Ministerio de Educacion, Cultura y Deporte) through the Jose Castillejo grant CAS15/00336, and by the ERDF and the Spanish Government through project TEC2016-79988-P.  Part of his contribution to this work has been carried out during his stay as a visiting scholar at the Computer Laboratory of the University of Cambridge.</p>
+<h1 id="rfc.references"><a href="#rfc.references">11.</a> References</h1>
+<h1 id="rfc.references.1"><a href="#rfc.references.1">11.1.</a> Normative References</h1>
 <table>
   <tbody>
-    <tr>
-      <td class="reference">
-        <b id="I-D.ietf-lpwan-overview">[I-D.ietf-lpwan-overview]</b>
-      </td>
-      <td class="top"><a>Farrell, S.</a>, "<a href="http://tools.ietf.org/html/draft-ietf-lpwan-overview-00">LPWAN Overview</a>", Internet-Draft draft-ietf-lpwan-overview-00, December 2016.</td>
-    </tr>
-    <tr>
-      <td class="reference">
-        <b id="I-D.minaburo-lp-wan-gap-analysis">[I-D.minaburo-lp-wan-gap-analysis]</b>
-      </td>
-      <td class="top"><a>Minaburo, A.</a>, <a>Pelov, A.</a> and <a>L. Toutain</a>, "<a href="http://tools.ietf.org/html/draft-minaburo-lp-wan-gap-analysis-01">LP-WAN GAP Analysis</a>", Internet-Draft draft-minaburo-lp-wan-gap-analysis-01, February 2016.</td>
-    </tr>
     <tr>
       <td class="reference">
         <b id="RFC0768">[RFC0768]</b>
@@ -747,6 +849,23 @@ address {
         <b id="RFC5795">[RFC5795]</b>
       </td>
       <td class="top"><a>Sandlund, K.</a>, <a>Pelletier, G.</a> and <a>L-E. Jonsson</a>, "<a href="http://tools.ietf.org/html/rfc5795">The RObust Header Compression (ROHC) Framework</a>", RFC 5795, DOI 10.17487/RFC5795, March 2010.</td>
+    </tr>
+  </tbody>
+</table>
+<h1 id="rfc.references.2"><a href="#rfc.references.2">11.2.</a> Informative References</h1>
+<table>
+  <tbody>
+    <tr>
+      <td class="reference">
+        <b id="I-D.ietf-lpwan-overview">[I-D.ietf-lpwan-overview]</b>
+      </td>
+      <td class="top"><a>Farrell, S.</a>, "<a href="http://tools.ietf.org/html/draft-ietf-lpwan-overview-00">LPWAN Overview</a>", Internet-Draft draft-ietf-lpwan-overview-00, December 2016.</td>
+    </tr>
+    <tr>
+      <td class="reference">
+        <b id="I-D.minaburo-lp-wan-gap-analysis">[I-D.minaburo-lp-wan-gap-analysis]</b>
+      </td>
+      <td class="top"><a>Minaburo, A.</a>, <a>Pelov, A.</a> and <a>L. Toutain</a>, "<a href="http://tools.ietf.org/html/draft-minaburo-lp-wan-gap-analysis-01">LP-WAN GAP Analysis</a>", Internet-Draft draft-minaburo-lp-wan-gap-analysis-01, February 2016.</td>
     </tr>
   </tbody>
 </table>
@@ -798,6 +917,29 @@ address {
 	<span class="vcardline">EMail: <a href="mailto:Laurent.Toutain@imt-atlantique.fr">Laurent.Toutain@imt-atlantique.fr</a></span>
 
   </address>
+</div><div class="avoidbreak">
+  <address class="vcard">
+	<span class="vcardline">
+	  <span class="fn">Carles Gomez</span> 
+	  <span class="n hidden">
+		<span class="family-name">Gomez</span>
+	  </span>
+	</span>
+	<span class="org vcardline">Universitat Polit&#232;cnica de Catalunya</span>
+	<span class="adr">
+	  <span class="vcardline">C/Esteve Terradas, 7</span>
+<span class="vcardline">08860 Castelldefels</span>
+
+	  <span class="vcardline">
+		<span class="locality"></span> 
+		<span class="region"></span>
+		<span class="code"></span>
+	  </span>
+	  <span class="country-name vcardline">Spain</span>
+	</span>
+	<span class="vcardline">EMail: <a href="mailto:carlesgo@entel.upc.edu">carlesgo@entel.upc.edu</a></span>
+
+  </address>
 </div>
   
   <hr class="noprint" />
@@ -808,8 +950,7 @@ address {
 <li>2.   <a href="#rfc.section.2">Vocabulary</a></li>
 <li>3.   <a href="#rfc.section.3">Static Context Header Compression</a></li>
 <ul><li>3.1.   <a href="#rfc.section.3.1">Rule id</a></li>
-<li>3.2.   <a href="#rfc.section.3.2">Simple Example</a></li>
-<li>3.3.   <a href="#rfc.section.3.3">Packet processing</a></li>
+<li>3.2.   <a href="#rfc.section.3.2">Packet processing</a></li>
 </ul><li>4.   <a href="#rfc.section.4">Matching operators</a></li>
 <li>5.   <a href="#rfc.section.5">Compression Decompression Functions (CDF)</a></li>
 <ul><li>5.1.   <a href="#rfc.section.5.1">not-sent CDF</a></li>
@@ -834,9 +975,22 @@ address {
 <li>6.11.   <a href="#rfc.section.6.11">UDP Checksum field</a></li>
 </ul><li>7.   <a href="#rfc.section.7">Examples</a></li>
 <ul><li>7.1.   <a href="#rfc.section.7.1">IPv6/UDP compression in a star topology</a></li>
-</ul><li>8.   <a href="#rfc.section.8">Acknowledgements</a></li>
-<li>9.   <a href="#rfc.references">Normative References</a></li>
-<li><a href="#rfc.authors">Authors' Addresses</a></li>
+</ul><li>8.   <a href="#rfc.section.8">Fragmentation</a></li>
+<ul><li>8.1.   <a href="#rfc.section.8.1">Overview</a></li>
+<li>8.2.   <a href="#rfc.section.8.2">Unreliable</a></li>
+<ul><li>8.2.1.   <a href="#rfc.section.8.2.1">Receiver and sender behavior for Unreliable</a></li>
+</ul><li>8.3.   <a href="#rfc.section.8.3">Reliable</a></li>
+<ul><li>8.3.1.   <a href="#rfc.section.8.3.1">NACK format</a></li>
+<li>8.3.2.   <a href="#rfc.section.8.3.2">Sender behavior in Reliable</a></li>
+<li>8.3.3.   <a href="#rfc.section.8.3.3">Receiver behavior in Reliable</a></li>
+</ul></ul><li>9.   <a href="#rfc.section.9">Security considerations</a></li>
+<ul><li>9.1.   <a href="#rfc.section.9.1">Security considerations for header compression</a></li>
+<li>9.2.   <a href="#rfc.section.9.2">Security considerations for fragmentation</a></li>
+</ul><li>10.   <a href="#rfc.section.10">Acknowledgements</a></li>
+<li>11.   <a href="#rfc.references">References</a></li>
+<ul><li>11.1.   <a href="#rfc.references.1">Normative References</a></li>
+<li>11.2.   <a href="#rfc.references.2">Informative References</a></li>
+</ul><li><a href="#rfc.authors">Authors' Addresses</a></li>
 
 
   </ul>

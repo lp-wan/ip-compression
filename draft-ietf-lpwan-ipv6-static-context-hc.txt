@@ -5,29 +5,33 @@
 lpwan Working Group                                          A. Minaburo
 Internet-Draft                                                    Acklio
 Intended status: Informational                                L. Toutain
-Expires: August 16, 2017                                  IMT-Atlantique
-                                                       February 12, 2017
+Expires: August 17, 2017                                  IMT-Atlantique
+                                                                C. Gomez
+                                    Universitat Politecnica de Catalunya
+                                                       February 13, 2017
 
 
-    LPWAN Static Context Header Compression (SCHC) for IPv6 and UDP
+  LPWAN Static Context Header Compression (SCHC) and fragmentation for
+                              IPv6 and UDP
              draft-ietf-lpwan-ipv6-static-context-hc-latest
 
 Abstract
 
    This document describes a header compression scheme for IPv6, IPv6/
-   UDP based on static contexts.  This technique is especially tailored
-   for LPWA networks and could be extended to other protocol stacks.
+   UDP based on static contexts, and fragmentation functionality.  These
+   techniques are especially tailored for LPWA networks and could be
+   extended to other protocol stacks.
 
    The Static Context Header Compression (SCHC) offers a great level of
    flexibility in the processing of fields.  Static context means that
-   values in the context field do not change during the transmission,
-   avoiding complex resynchronization mechanisms, incompatible with LPWA
-   characteristics.  In most of the cases, IPv6/UDP headers are reduced
-   to a small identifier.
+   values in the context describing field values do not change during
+   the transmission, avoiding complex resynchronization mechanisms,
+   incompatible with LPWA characteristics.  In most of the cases, IPv6/
+   UDP headers are reduced to a small identifier.
 
-   This document describes the compression/decompression process and
-   apply it to IPv6/UDP headers compression, Other protocols such as
-   CoAP will be described in a separate document.
+   This document describes the generic compression/decompression process
+   and apply it to IPv6/UDP headers.  Other protocols such as CoAP will
+   be described in a separate document.
 
 Status of This Memo
 
@@ -44,16 +48,12 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on August 16, 2017.
+   This Internet-Draft will expire on August 17, 2017.
 
 
 
 
-
-
-
-
-Minaburo & Toutain       Expires August 16, 2017                [Page 1]
+Minaburo, et al.         Expires August 17, 2017                [Page 1]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
@@ -75,7 +75,7 @@ Copyright Notice
 
 1.  Introduction
 
-   Headers compression is mandatory to bring the internet protocols to
+   Header compression is mandatory to bring the internet connectivity to
    the node within a LPWA network [I-D.minaburo-lp-wan-gap-analysis].
 
    Some LPWA networks properties can be exploited for an efficient
@@ -83,36 +83,39 @@ Copyright Notice
 
    o  Topology is star oriented, therefore all the packets follows the
       same path.  For the needs of this draft, the architecture can be
-      summarized to End-Systems (ES) exchanging information with LPWAN
-      Application Server (LA).  The exchange goes through a LPWA
-      Compressors (LC).  Both LC maintain a static context for
-      compression.  Static context means that context information is not
-      learned during the exchange.
+      summarized to Things or End-Systems (ES) exchanging information
+      with LPWAN Application Server (LA) through a Network Gateway (NG).
 
    o  Traffic flows are mostly deterministic, since End-Systems embed
       built-in applications.  Contrary to computers or smartphones, new
       applications cannot be easily installed.
 
-   The Static Context Header Compression (SCHC) combines the advantages
-   of RoHC [RFC5795] context, which offers a great level of flexibility
-   in the processing of fields, and 6LoWPAN [RFC4944] behavior to elide
-   fields that are known from the other side.  Static context means that
-   values in the context field do not change during the transmission,
-   avoiding complex resynchronization mechanisms, incompatible with LPWA
-   characteristics.  In most of the cases, IPv6/UDP headers are reduced
-   to a small context identifier.
+   The Static Context Header Compression (SCHC) is defined for this
+   environment.  Static context means that values in the context field
+   do not change during the transmission, avoiding complex
+   resynchronization mechanisms, incompatible with LPWA characteristics.
+   In most of the cases, IPv6/UDP headers are reduced to a small context
+   identifier.
 
-   The SCHC is indedependant of the LPWAN technology.
+   The SCHC is indedependent of the LPWAN technology.
+
+   On the other hand, Low Power Wide Area Network (LPWAN) technologies
+   are characterized, among others, by a very reduced data unit and/or
+   payload size [I-D.ietf-lpwan-overview].  However, some of these
+   technologies do not support layer two fragmentation, therefore the
+   only option for these to support IPv6 (and, in particular, its MTU
+   requirement of 1280 bytes [RFC2460]) is the use of a fragmentation
+   mechanism at the adaptation layer below IPv6.  This specification
 
 
 
-
-
-
-Minaburo & Toutain       Expires August 16, 2017                [Page 2]
+Minaburo, et al.         Expires August 17, 2017                [Page 2]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
+
+   defines fragmentation functionality to support the IPv6 MTU
+   requirement over LPWAN technologies.
 
 2.  Vocabulary
 
@@ -128,9 +131,9 @@ Internet-Draft                 LPWAN SCHC                  February 2017
    o  LA: LPWAN Application.  Application sending/consuming headers to/
       from the End System.
 
-   o  LC: LPWAN Compressor.  Process in the network compression/
-      decompressing headers.  LC uses SCHC rules to perfom compression
-      decompression.
+   o  LC: LPWAN Compressor/Decompressor.  Process in the network
+      compression/decompressing headers.  LC uses SCHC rules to perfom
+      compression and decompression.
 
    o  MO: Matching Operator.  Operator used to compare a value contained
       in a field's header with a value contained in a rule.
@@ -147,11 +150,11 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
    Static Context Header Compression (SCHC) avoids context
    synchronization, which is the most bandwidth-consuming operation in
-   RoHC.  Based on the fact that the nature of data flows is highly
-   predictable in LPWA networks, a static context may be stored on the
-   End-System (ES).  The other end, the LPWA Compressor (LC) can learn
-   the context through a provisioning protocol during the identification
-   phase (for instance, as it learns the encryption key).
+   other header compression mechanisms such as RoHC.  Based on the fact
+   that the nature of data flows is highly predictable in LPWA networks,
+   a static context may be stored on the End-System (ES).  The context
+   must be stored in both ends.  It can also be learned by a
+   provisionning protocol that is out of the scope of this draft.
 
 
 
@@ -162,25 +165,23 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
 
 
-
-
-
-Minaburo & Toutain       Expires August 16, 2017                [Page 3]
+Minaburo, et al.         Expires August 17, 2017                [Page 3]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
 
-              End-System
-         +-----------------+
-         | APP1  APP2 APP3 |
-         |                 |
-         |       UDP       |
-         |      IPv6       |
-         |                 |       +-----------+
-         |      LC (contxt)|       |LC (contxt)|
-         +--------+--------+       +-----+-----+
-                  |                      |
-                  +~ ~ RG ==== NG =======+
+           End-System                                              Appl Servers
+      +-----------------+                                       +-----------------+
+      | APP1  APP2 APP3 |                                       | APP1  APP2 APP3 |
+      |                 |                                       |                 |
+      |       UDP       |                                       |       UDP       |
+      |      IPv6       |                                       |      IPv6       |
+      |                 |                                       |                 |
+      |      LC (contxt)|                                       |                 |
+      +--------+--------+                                       +--------+--------+
+               |    +--+     +--+         +-----------+                  .
+               +~ ~ |RG| === |NG| ======= |LC (contxt)| .... Internet ....
+                    +--+     +--+         +-----+-----+
 
                           Figure 1: Architecture
 
@@ -193,7 +194,11 @@ Internet-Draft                 LPWAN SCHC                  February 2017
    The Network Gateway sends the data to a LC for decompression.  They
    both share the same rules.  The LC can be located on the Network
    Gateway or in another places if a tunnel is established between the
-   NG and the LC.  This architecture forms a star topology.
+   NG and the LC.  This architecture forms a star topology.  After
+   decompression the packet can be sent on the Internet to one or
+   several Application Servers (LA).
+
+   The principle is exactly the same in the other direction.
 
    The context contains a list of rules (cf.  Figure 2).  Each rule
    contains itself a list of field descriptions composed of a filed id
@@ -216,12 +221,7 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
 
 
-
-
-
-
-
-Minaburo & Toutain       Expires August 16, 2017                [Page 4]
+Minaburo, et al.         Expires August 17, 2017                [Page 4]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
@@ -248,136 +248,80 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
    The rule does not describe the original packet format which must be
    known from the compressor/decompressor.  The rule just describes the
-   compression/decompression behavior for a field.
+   compression/decompression behavior for a field.  In the rule, it is
+   recommanded to describe the header field in the same order they
+   appear in the packet.
 
    The main idea of the compression scheme is to send the rule number
-   (or rule id) to the other end instead of known field values.
+   (or rule id) to the other end instead of known field values.  When a
+   value is known by both ends, it is not necessary to sent it on the
+   LPWAN.
 
-   Matching a field with a value and header compression are related
-   operations; If a field matches a rule containing the value, it is not
-   necessary to send it on the link.  Since contexts are synchronized,
-   reading the rule's value is enough to reconstruct the field's value
-   at the other end.
+   The field description is composed of different entries:
 
-   On some other cases, the value need to be sent on the link to inform
-   the other end.  The field value may vary from one packet to another,
-   therefore the field cannot be used to select the rule id.  These
-   values are sent in same order as the fields in the rule which defines
-   the structure of the compress header.
+   o  A Field ID or FID is a unique value to define the field.
+
+   o  A Target Value or TV is the value used to make the comparison
+      between the packet field.  The Target Value can be of any type
+      (integer, strings,..).  It can be a single value or a more complex
+      structure (array, list,...).  It can be considered as a CBOR
+      structure.
+
+   o  A Matching Operator or MO is the operator used to make the
+      comparison between the field value and the Target Value.  The
+      Matching Operator may require some parameters, which can be
+      considered as a CBOR structure.  MO is only used during the
+      compression phase.
+
+
+
+
+
+Minaburo, et al.         Expires August 17, 2017                [Page 5]
+
+Internet-Draft                 LPWAN SCHC                  February 2017
+
+
+   o  A Compression Decompression Function or CDF is used to describe
+      the compression and the decompression process.  The CDF may
+      require some parameters, which can be considered as a CBOR
+      structure.
 
 3.1.  Rule id
 
-   Rule id are sent between both compression/decompression element.  The
-   size of the rule id is not specified on this document and can vary
-   regarding the LPWAN technology, the number of flows,...
+   Rule id are sent between both compression/decompression elements.
+   The size of the rule id is not specified on this document and can
+   vary regarding the LPWAN technology, the number of flows,...
 
    Some values in the rule id space may be reserved to other goal than
    header compression, for example fragmentation.
 
-
-
-
-Minaburo & Toutain       Expires August 16, 2017                [Page 5]
-
-Internet-Draft                 LPWAN SCHC                  February 2017
-
-
-   Rule id are specific to an ES.  Two ES may use the same rule id for
+   Rule ids are specific to an ES.  Two ES may use the same rule id for
    different header compression.  The LC needs to combine the rule id
    with the ES L2 address to find the appropriate rule.
 
-3.2.  Simple Example
+   <
 
-   A simple header is composed of 3 fields (F1, F2, F3).  The compressor
-   receives a packet containing respectively [F1:0x00, F2:0x1230,
-   F3:0xABC0] in those fields.  The Matching Operators (as defined in
-   Section 4) allow to select Rule 5 as represented in Figure 3; F1
-   value is ignored and F2 and F3 packet field values are matched with
-   those stored in the rule Target Values.
-
-                  Rule 5
-             Target Value   Matching Operator   Comp/Decomp Fct
-           +--------------+-------------------+-----------------+
-        F1 | 0x00         | Ignore            | not-sent        |
-           +--------------+-------------------+-----------------+
-        F2 | 0x1230       | Equal             | not-sent        |
-           +--------------+-------------------+-----------------+
-        F3 | 0xABC0       | Equal             | not-sent        |
-           +--------------+-------------------+-----------------+
-
-                          Figure 3: Matching Rule
-
-   The Compression/Decompression Function (as defined in Section 5
-   describes how the fields are compressed.  In this example, all the
-   fields are elided and only the rule number has to be sent to the
-   other end.
-
-   The decompressor receives the rule number and reconstructs the header
-   using the values stored in the Target Value column.
-
-   Note that F1 value will be set to 0x00 by the decompressor, even if
-   the original header field was carrying a different value.
-
-   To allow a range of values for field F2 and F3, the MSB() Matching
-   Operator and LSB() Compression/Decompression Function can be used (as
-   defined in Section 4 and Section 5).  In that case the rule will be
-   rewritten as defined in Figure 4.
-
-
-
-
-
-
-
-
-
-
-
-Minaburo & Toutain       Expires August 16, 2017                [Page 6]
-
-Internet-Draft                 LPWAN SCHC                  February 2017
-
-
-                  Rule 5
-             Target Value   Matching Operator   Comp/Decomp Fct
-           +--------------+-------------------+-----------------+
-        F1 | 0x00         | Ignore            | not-sent        |
-           +--------------+-------------------+-----------------+
-        F2 | 0x1230       | MSB(12)           | LSB(4)          |
-           +--------------+-------------------+-----------------+
-        F3 | 0xABC0       | MSB(12)           | LSB(4)          |
-           +--------------+-------------------+-----------------+
-
-                          Figure 4: Matching Rule
-
-   In that case, if a packet with the following header fields [F1:0x00,
-   F2:0x1234, F3:0xABCD] arrives to the compressor, the new rule 5 will
-   be selected and sent to the other end.  The compressed header will be
-   composed of the single byte [0x4D].  The decompressor receives the
-   compressed header and follows the rule to reconstruct [0x00, 0x1234,
-   0xABCD] applying a OR operator between the target value stored in the
-   rule and the compressed field value sent.
-
-3.3.  Packet processing
+3.2.  Packet processing
 
    The compression/decompression process follows several steps:
 
    o  compression rule selection: the goal is to identify which rule(s)
-      will be used to compress the headers.  To each field is associated
+      will be used to compress the headers.  Each field is associated to
       a matching operator for compression.  Each header field's value is
       compared to the corresponding target value stored in the rule for
       that field using the matching operator.  If all the fields in the
-      packet's header satisfied the all the matching operators of a
-      rule, the packet is processed using Compression Decompression
-      Function associated with the fields.  Otherwise the next rule is
-      tested.  [EDIT]If no eligible rule is found, then the packet is
-      dropped.[EDIT]
+      packet's header satisfied all the matching operators of a rule,
+      the packet is processed using Compression Decompression Function
+      associated with the fields.  Otherwise the next rule is tested.
+      If no eligible rule is found, then the packet is sent without
+      compression using fragmentation procedure.
 
    o  sending: The rule number is sent to the other end followed by data
-      resulting from the field compression.  These data are sent in the
-      rule order for the matching fields.  The way the rule number is
-      sent depends of the layer two technology and will be specified in
-      a specific document.  For exemple, it can either be included in a
+      resulting from the compression.  These data are sent in the rule
+      order for the matching fields.  The way the rule number is sent
+      depends on the layer two technology and will be specified in a
+      specific document.  For exemple, it can either be included in a
       Layer 2 header or sent in the first byte of the L2 payload.
 
    o  decompression: The receiver identifies the sender through its
@@ -389,7 +333,7 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
 
 
-Minaburo & Toutain       Expires August 16, 2017                [Page 7]
+Minaburo, et al.         Expires August 17, 2017                [Page 6]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
@@ -399,9 +343,9 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
 4.  Matching operators
 
-   This document describes 3 basic matching operators which must be
-   known by both LC.  They are not typed and can be applied
-   indifferently to integer, string,...
+   This document describes basic matching operators which must be known
+   by both LC.  They are not typed and can be applied indifferently to
+   integer, string,...
 
    o  equal: a field value in a packet matches with a field value in a
       rule if they are equal.
@@ -424,7 +368,7 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
 5.  Compression Decompression Functions (CDF)
 
-   The Compression Decompression Functions (CDF) describe the action
+   The Compression Decompression Functions (CDF) describes the action
    taken during the compression and inversely the action taken by the
    decompressor to restore the original value.
 
@@ -445,7 +389,7 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
 
 
-Minaburo & Toutain       Expires August 16, 2017                [Page 8]
+Minaburo, et al.         Expires August 17, 2017                [Page 7]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
@@ -466,9 +410,9 @@ Internet-Draft                 LPWAN SCHC                  February 2017
    \--------------------+-------------+---------------------------/
 
 
-             Figure 5: Compression and Decompression Functions
+             Figure 3: Compression and Decompression Functions
 
-   Figure 5 sumarizes the functions defined to compress and decompress a
+   Figure 3 sumarizes the functions defined to compress and decompress a
    field.  The first column gives the function's name.  The second and
    third columns outlines the compression/decompression behavior.
 
@@ -496,22 +440,22 @@ Internet-Draft                 LPWAN SCHC                  February 2017
    Value-sent function is generally used when the field value is not
    known by both end.  The value is sent in the compressed message
    header.  Both ends must know the size of the field, either
-   implicitely or explicitely in the compressed header field.  This
-   function is generally used with the ignore MO.
+   implicitely (the size is known by both sides) or explicitely in the
 
 
 
-Minaburo & Toutain       Expires August 16, 2017                [Page 9]
+
+Minaburo, et al.         Expires August 17, 2017                [Page 8]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
 
-   The compressor sends the target value stored on the rule on the
-   compressed header message. , if the matching operator is "=".
-   Otherwise the matching operator indicates the information that will
-   be sent on the link.
+   compressed header field by indicating the length.  This function is
+   generally used with the "ignore" MO.
 
-   For a LSB operator only the Least Significant Bits are sent.
+   The compressor sends the Target Value stored on the rule in the
+   compressed header message.  The decompressor restores the field value
+   with the one received from the LPWAN
 
 5.3.  LSB CDF
 
@@ -534,9 +478,13 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
 5.5.  mapping-sent
 
-   mathching-sent is used to send a smaller index associated to the
-   field value in the Target Value.  This function is used in conjuction
-   with the "match-mapping" MO.
+   mapping-sent is used to send a smaller index associated to the field
+   value in the Target Value.  This function is used in conjuction with
+   the "match-mapping" MO.
+
+   The compressor looks in the TV to find the field value and send the
+   corresponding index.  The decompressor uses this index to restore the
+   field value.
 
 5.6.  Compute-*
 
@@ -550,17 +498,16 @@ Internet-Draft                 LPWAN SCHC                  February 2017
    o  compute-udp-length: compute the IPv6 length field as described in
       [RFC0768].
 
-   o  compute-udp-checksum: compute the IPv6 length field as described
-      in [RFC0768].
 
 
 
-
-
-Minaburo & Toutain       Expires August 16, 2017               [Page 10]
+Minaburo, et al.         Expires August 17, 2017                [Page 9]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
+
+   o  compute-udp-checksum: compute the IPv6 length field as described
+      in [RFC0768].
 
 6.  Application to IPv6 and UDP headers
 
@@ -604,22 +551,23 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
 6.4.  Payload Length field
 
-   If the LPWAN technology do not add padding, this field can be elided
-   for the transmission on the LPWAN network.  The LC recompute the
-   original payload length value.  The TV is not set, the MO is set to
-   "ignore" and the CDF is "compute-IPv6-length".
+   If the LPWAN technology does not add padding, this field can be
+   elided for the transmission on the LPWAN network.  The LC recompute
 
 
 
 
-
-Minaburo & Toutain       Expires August 16, 2017               [Page 11]
+Minaburo, et al.         Expires August 17, 2017               [Page 10]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
 
-   if the payload is small, the TV can be set to 0x0000, the MO set to
-   "MSB" and the CDF to "LSB".
+   the original payload length value.  The TV is not set, the MO is set
+   to "ignore" and the CDF is "compute-IPv6-length".
+
+   If the payload is small, the TV can be set to 0x0000, the MO set to
+   "MSB (16-s)" and the CDF to "LSB (s)".  The s parameter depends of
+   the maximum packet length.
 
    On other cases, the length must be sent and the CDF is replaced by
    "value-sent".
@@ -637,7 +585,7 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
 6.6.  Hop Limit field
 
-   The End System is generally a host and do not forward packets,
+   The End System is generally a host and does not forward packets,
    therefore the Hop Limit value is constant.  Therefore the TV is set
    with a default value, the MO is set to "equal" and the CDF is set to
    "not-sent".
@@ -661,19 +609,20 @@ Internet-Draft                 LPWAN SCHC                  February 2017
    specific flow, the source and destination prefixe can be unique and
    stored in the context.  It can be either a link-local prefix or a
    global prefix.  In that case, the TV for the source and destination
+
+
+
+
+Minaburo, et al.         Expires August 17, 2017               [Page 11]
+
+Internet-Draft                 LPWAN SCHC                  February 2017
+
+
    prefixes contains the values, the MO is set to "equal" and the CDF is
    set to "not-sent".
 
    In case the rule allows several prefixes, the static mapping must be
    used.  The different prefixes are listed in the TV associated with a
-
-
-
-Minaburo & Toutain       Expires August 16, 2017               [Page 12]
-
-Internet-Draft                 LPWAN SCHC                  February 2017
-
-
    short ID.  The MO is set to "match-mapping" and the CDF is set to
    "mapping-sent".
 
@@ -716,6 +665,15 @@ Internet-Draft                 LPWAN SCHC                  February 2017
    To allow a single rule, these values are identified by their role (ES
    or LA) and not by their position in the frame (source or
    destination).  The LC must be aware of the traffic direction
+
+
+
+
+Minaburo, et al.         Expires August 17, 2017               [Page 12]
+
+Internet-Draft                 LPWAN SCHC                  February 2017
+
+
    (upstream, downstream) to select the appropriate field.  The
    following rules apply for ES and LA port numbers.
 
@@ -723,18 +681,11 @@ Internet-Draft                 LPWAN SCHC                  February 2017
    contains the port number, the MO is set to "equal" and the CDF is set
    to "not-sent".
 
-
-
-Minaburo & Toutain       Expires August 16, 2017               [Page 13]
-
-Internet-Draft                 LPWAN SCHC                  February 2017
-
-
    If the port variation are on few bits, the TV contains the stable
    part of the port number, the MO is set to "MSB" and the CDF is set to
    "LSB".
 
-   If some wellknown value are used, the the TV can contain the list of
+   If some wellknown values are used, the TV can contain the list of
    this values, the MO is set to "match-mapping" and the CDF is set to
    "mapping-sent".
 
@@ -771,6 +722,14 @@ Internet-Draft                 LPWAN SCHC                  February 2017
    This section gives some scenarios of the compression mechanism for
    IPv6/UDP.  The goal is to illustrate the SCHC behavior.
 
+
+
+
+Minaburo, et al.         Expires August 17, 2017               [Page 13]
+
+Internet-Draft                 LPWAN SCHC                  February 2017
+
+
 7.1.  IPv6/UDP compression in a star topology
 
    The most common case will be a LPWA end-system embeds some
@@ -778,19 +737,11 @@ Internet-Draft                 LPWAN SCHC                  February 2017
    for the device management based on CoAP using Link Local addresses
    and UDP ports 123 and 124.  The second flow will be a CoAP server for
    measurements done by the end-system (using ports 5683) and Global
-
-
-
-Minaburo & Toutain       Expires August 16, 2017               [Page 14]
-
-Internet-Draft                 LPWAN SCHC                  February 2017
-
-
    Addresses alpha::IID/64 to beta::1/64.  The last flow is for legacy
    applications using different ports numbers, the destination is
    gamma::1/64.
 
-   Figure 6 presents the protocol stack for this end-system.  IPv6 and
+   Figure 4 presents the protocol stack for this end-system.  IPv6 and
    UDP are represented with dotted lines since these protocols are
    compressed on the radio link.
 
@@ -807,7 +758,7 @@ Internet-Draft                 LPWAN SCHC                  February 2017
          End System or LPWA GW
 
 
-              Figure 6: Simplified Protocol Stack for LP-WAN
+              Figure 4: Simplified Protocol Stack for LP-WAN
 
    Note that in some LPWA technologies, only End Systems have a device
    ID.  Therefore it is necessary to define statically an IID for the
@@ -827,20 +778,20 @@ Internet-Draft                 LPWAN SCHC                  February 2017
      |IPv6 ESiid      |         | ignore | ESiid-DID   ||      |
      |IPv6 LCprefix   |FE80::/64| equal  | not-sent    ||      |
      |IPv6 LAiid      |::1      | equal  | not-sent    ||      |
+
+
+
+Minaburo, et al.         Expires August 17, 2017               [Page 14]
+
+Internet-Draft                 LPWAN SCHC                  February 2017
+
+
      +================+=========+========+=============++======+
      |UDP ESport      |123      | equal  | not-sent    ||      |
      |UDP LAport      |124      | equal  | not-sent    ||      |
      |UDP Length      |         | ignore | comp-UDP-l  ||      |
      |UDP checksum    |         | ignore | comp-UDP-c  ||      |
      +================+=========+========+=============++======+
-
-
-
-
-Minaburo & Toutain       Expires August 16, 2017               [Page 15]
-
-Internet-Draft                 LPWAN SCHC                  February 2017
-
 
      Rule 1
      +----------------+---------+--------+-------------++------+
@@ -886,19 +837,14 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
 
 
-                          Figure 7: Context rules
-
-
-
-
-
-
-Minaburo & Toutain       Expires August 16, 2017               [Page 16]
+Minaburo, et al.         Expires August 17, 2017               [Page 15]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
 
-   All the fields described in the three rules Figure 7 are present in
+                          Figure 5: Context rules
+
+   All the fields described in the three rules Figure 5 are present in
    the IPv6 and UDP headers.  The ESDevice-ID value is found in the L2
    header.
 
@@ -909,21 +855,444 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
    The third rule compresses port numbers on 4 bits.
 
-8.  Acknowledgements
+8.  Fragmentation
+
+8.1.  Overview
+
+   If an entire payload (e.g., IPv6) datagram fits within a single L2
+   data unit, it is unfragmented and a fragmentation header is not
+   needed.  If the datagram does not fit within a single L2 data unit,
+   it SHALL be broken into fragments.
+
+   This specification defines two fragment delivery reliability options,
+   namely: Unreliable and Reliable.  The same reliability option MUST be
+   used for all fragments of a packet.
+
+   In Unreliable, the receiver SHALL NOT issue acknowledgments and the
+   sender SHALL NOT perform fragment transmission retries.
+
+   In Reliable, if the fragment receiver detects any missing fragments
+   from the transported IPv6 packet, the receiver transmits one negative
+   acknowledgment (NACK) which informs the sender about received and
+   missing fragments from the IPv6 packet.  Upon receipt of a NACK, the
+   sender selectively retransmits the missing fragments.  If all
+   fragments carrying the IPv6 packet are successfully received, the
+   receiver SHALL NOT send a NACK.  If the sender does not receive a
+   NACK, it assumes that all fragments carrying the IPv6 packet were
+   successfully delivered.
+
+8.2.  Unreliable
+
+   ### Fragmentation header formats for Unreliable
+
+   In Unreliable, fragments except the last one SHALL
+   contain the fragmentation header as defined in Figure 6.
+
+
+
+
+
+
+Minaburo, et al.         Expires August 17, 2017               [Page 16]
+
+Internet-Draft                 LPWAN SCHC                  February 2017
+
+
+                          <-----  R  ----->
+                          +----- ... -----+
+                          |    Rule ID    |
+                          +----- ... -----+
+
+    Figure 6: Fragmentation Header for Fragments except the Last One in
+                                Unreliable
+
+   The last fragment SHALL contain a fragmentation header that conforms
+   to the format shown in Figure 7.
+
+                          <-----  R  ----> <---- M ----->
+                          +----- ... -----+---- ... ----+
+                          |    Rule ID    |     MIC     |
+                          +----- ... -----+---- ... ----+
+
+    Figure 7: Fragmentation Header for the Last Fragment in Unreliable
+
+   Rule ID: In Unreliable, this field has a size of R bits.  Rule ID
+   SHALL
+   be set to TBD_UNREL_A in fragments, except the last one, to signal
+   that the carried payload is a fragment, and that Unreliable fragment
+   delivery MUST be used.  In the last fragment, Rule ID SHALL be set to
+   TBD_UNREL_B to identify the fragment as the last one, and to signal
+   that Unreliable fragment delivery MUST be used.
+
+   MIC: This field, of size M bits, is computed by the sender over the
+   complete IPv6 packet before fragmentation by using the TBD algorithm.
+
+8.2.1.  Receiver and sender behavior for Unreliable
+
+   The recipient of link fragments SHALL use (1) the sender's L2 source
+   address (if present), (2) the destination's L2 address (if present),
+   and (3) Rule ID to identify all the fragments that belong to a given
+   datagram.  The fragment receiver SHALL use Rule ID to determine
+   whether the fragment has to be handled as per the rules of Unreliable
+   or Reliable fragment delivery.
+
+   Upon receipt of a link fragment, the recipient starts constructing
+   the original unfragmented packet.  It uses the order of arrival of
+   each fragment to determine the location of the individual fragments
+   within the original unfragmented packet.  For example, it may place
+   the data payload of the fragments within a payload datagram
+   reassembly buffer at the location determined from the order of
+   arrival and the fragment payload sizes.  Note that the size of the
+   reassembly buffer cannot be determined from fragmentation headers.
+
+
+
+
+
+Minaburo, et al.         Expires August 17, 2017               [Page 17]
+
+Internet-Draft                 LPWAN SCHC                  February 2017
+
+
+   If a fragment recipient disassociates from its L2 network, the
+   recipient MUST discard all link fragments of all partially
+   reassembled payload datagrams, and fragment senders MUST discard all
+   not yet transmitted link fragments of all partially transmitted
+   payload (e.g., IPv6) datagrams.  Similarly, when a node first
+   receives a fragment of a packet, it starts a reassembly timer.  When
+   this time expires, if the entire packet has not been reassembled, the
+   existing fragments MUST be discarded and the reassembly state MUST be
+   flushed.  The reassembly timeout MUST be set to a maximum of TBD
+   seconds).
+
+   Once the recipient has received the last fragment, it checks for the
+   integrity of the reassembled IPv6 datagram, based on the MIC
+   received.  If the integrity check indicates that the reassembled IPv6
+   datagram does not match the original IPv6 datagram (prior to
+   fragmentation), the reassembled IPv6 datagram MUST be discarded.
+
+8.3.  Reliable
+
+   ### Fragmentation header formats for Reliable In Reliable, fragments
+   except the last one SHALL
+   contain the fragmentation header as defined in Figure 8.  The total
+   size of this fragmentation header is R bits.
+
+                          <----------- R ----------->
+                                           <-- N  -->
+                          +----- ... -----+-- ... --+
+                          |    Rule ID    |   CFN   |
+                          +----- ... -----+-- ... --+
+
+    Figure 8: Fragmentation Header for Fragments except the Last One in
+                                 Reliable
+
+   The last fragment SHALL contain a fragmentation header that conforms
+   to the format shown in Figure 9.  The total size of this
+   fragmentation header is R+M bits.
+
+                          <----------- R ---------->
+                                           <-- N --> <---- M ----->
+                          +----- ... -----+-- ... --+---- ... ----+
+                          |    Rule ID    |   CFN   |     MIC     |
+                          +----- ... -----+-- ... --+---- ... ----+
+
+     Figure 9: Fragmentation Header for the Last Fragment in Reliable
+
+   Rule ID: In Reliable, this field has a size of R - N bits in all
+   fragments, and it SHALL be set to TBD_REL to signal that the carried
+
+
+
+
+Minaburo, et al.         Expires August 17, 2017               [Page 18]
+
+Internet-Draft                 LPWAN SCHC                  February 2017
+
+
+   payload is a fragment, and that Reliable fragment delivery MUST be
+   used.
+
+   CFN: CFN stands for Compressed Fragment Number.  The size of the CFN
+   field is N bits.  This field is an unsigned integer that carries a
+   non-absolute fragment number.  The CFN SHALL be set sequentially
+   starting from 0 for the first fragment, and SHALL wrap from 2^N - 2
+   back to 0.  The CFN for the last fragment has all bits set to 1.
+
+   MIC: MIC stands for Message Integrity Check.  This field has a size
+   of M bits.  It is computed by the sender over the complete IPv6
+   packet before fragmentation by using the TBD algorithm.
+
+8.3.1.  NACK format
+
+   The format of a NACK is shown in Figure 10:
+
+                             <-----  R  ---->
+                            +-+-+-+-+-+-+-+-+----- ... ---+
+                            |    Rule ID    |   bitmap    |
+                            +-+-+-+-+-+-+-+-+----- ... ---+
+
+                        Figure 10: Format of a NACK
+
+   Rule ID: In all NACKs, Rule ID has a size of R bits and SHALL be set
+   to
+   TBD_NACK to signal that the message is a NACK.
+
+   bitmap: the bitmap field of a NACK has a size equal to
+   Ceiling(Number_of_Fragments/8) octets, where Number_of_Fragments
+   denotes the number of fragments that carry the IPv6 packet.  The
+   bitmap is a sequence of bits, where the n-th bit signals whether the
+   n-th fragment transmitted has been correctly received (n-th bit set
+   to 1) or not (n-th bit set to 0).
+
+   Figure 11 shows an example of a NACK, where the bitmap indicates that
+   the second and the ninth fragments have not been correctly received.
+   In this example, the IPv6 packet is carried by eleven fragments in
+   total, therefore the bitmap in this example has a size of two bytes.
+
+                                                           1
+                    <-----  R  ----> 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5
+                     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                     |    Rule ID    |1|0|1|1|1|1|1|1|0|1|1|X|X|X|X|X|
+                     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+                Figure 11: Example of the Bitmap in a NACK
+
+
+
+
+Minaburo, et al.         Expires August 17, 2017               [Page 19]
+
+Internet-Draft                 LPWAN SCHC                  February 2017
+
+
+8.3.2.  Sender behavior in Reliable
+
+   In Reliable, a sender MUST store a copy of the fragments that will be
+   sent to carry an IPv6 packet.  The memory resources to store those
+   fragments SHALL be released as per the rules described below.
+
+   After transmission of all fragments that carry an IPv6 packet, the
+   sender waits for NACK_WAIT seconds for a possible incoming NACK.  To
+   this end, after the last fragment has been transmitted, the sender
+   initializes a timer to NACK_WAIT seconds.  If a NACK is not received
+   during the NACK_WAIT interval, the sender MUST assume successful
+   delivery of all fragments and release the memory resources used to
+   store the fragments.
+
+   If a NACK is received before expiration of the NACK wait timer, the
+   fragment sender processes the bitmap included in the NACK in order to
+   determine which fragments need to be resent.  Since the bitmap size
+   is a multiple of eight bits, the fragment sender only takes into
+   consideration the first F bitmap bits, where F denotes the number of
+   fragments sent, and it MUST ignore the remaining bits in the bitmap.
+
+   Once the fragments that need to be resent have been identified, the
+   sender renumbers these fragments, so that their CFN fields define a
+   new sequence of fragment numbers, which SHALL be set sequentially
+   starting from 0 for the first fragment, and SHALL wrap from 2^N - 2
+   back to 0.  For example, if three fragments have to be resent, and
+   with N=3, their CFNs will be set to 0, 1, and 7, respectively,
+   regardless of their original CFN values.  After fragment renumbering,
+   the fragments are resent.
+
+   After the transmission of the last retransmitted fragment, if the
+   number of NACKs received during the current IPv6 packet transmission
+   is less than MAX_NACKS_PER_IPv6_PACKET, the sender initializes a
+   timer to NACK_WAIT seconds to listen for a possible incoming NACK.
+   In that case, if a NACK is not received during the NACK_WAIT
+   interval, the sender MUST assume successful delivery of all the
+   fragments and release the memory resources used to store the
+   fragments.  If a NACK is received before expiration of the NACK_WAIT
+   timer, the fragment sender processes the NACK by following the same
+   approach as for the first NACK received, and performs a new round of
+   fragment retransmissions by iterating the procedure described for the
+   first round of fragment retransmissions.
+
+   When the number of fragment retransmission rounds completed by the
+   fragment sender equals MAX_NACKS_PER_IPv6_PACKET, the sender MUST NOT
+   perform any further fragment retransmissions for the current IPv6
+   packet, and it MUST release the memory resources used to store the
+   fragments for the current IPv6 packet.
+
+
+
+Minaburo, et al.         Expires August 17, 2017               [Page 20]
+
+Internet-Draft                 LPWAN SCHC                  February 2017
+
+
+   If a fragment sender disassociates from its L2 network, it MUST
+   discard all not yet transmitted link fragments of all partially
+   transmitted payload (e.g., IPv6) datagrams.
+
+8.3.3.  Receiver behavior in Reliable
+
+   The recipient of link fragments SHALL use (1) the sender's L2 Source
+   address (if present), (2) the destination's L2 address (if present),
+   and (3) Rule ID and CFN to identify all the fragments that belong to
+   a given datagram.  The fragment receiver SHALL use Rule ID to
+   determine whether the fragment has to be handled as per the rules of
+   Unreliable or Reliable fragment delivery.
+
+   Upon receipt of a link fragment, the recipient starts constructing
+   the original unfragmented packet.  It uses the CFN field and the
+   order of arrival of each fragment to determine the location of the
+   individual fragments within the original unfragmented packet.  For
+   example, it may place the data payload within a payload datagram
+   reassembly buffer at the location determined from the CFN, the
+   received fragment payload sizes and the order of arrival.  Note that
+   the size of the reassembly buffer cannot be determined from
+   fragmentation headers, and if non- continguous frame sequences are
+   received, it is not always possible to determine the size of the
+   missing fragment(s).
+
+   When a node first receives a fragment of a packet, it starts a
+   reassembly timer.  When this time expires, if the entire packet has
+   not been reassembled, the existing fragments MUST be discarded and
+   the reassembly state MUST be flushed.  The reassembly timeout MUST be
+   set to a maximum of TBD seconds).
+
+   Once the recipient of fragments has received the last fragment, if
+   the sequence of received fragments CFNs (except the special one used
+   for the last fragment) is composed of consecutive values, the
+   fragment receiver checks for the integrity of the reassembled IPv6
+   datagram, based on the MIC received.  If the sequence of received
+   fragments CFNs or the integrity check indicate that the reassembled
+   IPv6 datagram does not match the original IPv6 datagram (prior to
+   fragmentation), the recipient creates and transmits a NACK to the
+   fragment sender.  The NACK includes a bitmap that indicates
+   successful or unsuccessful receipt for each one of the fragments that
+   carry the IPv6 packet.
+
+   After transmission of the NACK, and before expiration of the
+   reassembly timeout, if the fragment recipient receives further
+   (retransmitted) fragments, it uses the CFN and the order of arrival
+   of each fragment to place the corresponding payload in its correct
+
+
+
+
+Minaburo, et al.         Expires August 17, 2017               [Page 21]
+
+Internet-Draft                 LPWAN SCHC                  February 2017
+
+
+   location in the reassembly buffer.  Otherwise, the fragment recipient
+   MUST NOT resend the last transmitted NACK.
+
+   When the number of received retransmitted fragments equals the number
+   of missing fragments, and after placing the fragment payloads in
+   their correct location in the reassembly buffer, the fragment
+   receiver performs a new integrity check of the reassembled IPv6
+   datagram based on the MIC received.  If the sequence of received
+   fragments CFNs or the integrity check indicate that the reassembled
+   IPv6 datagram does not match the original IPv6 datagram (prior to
+   fragmentation), then two situations can happen:
+
+   o  If the number of NACKs sent by the receiver has reached
+      MAX_NACKS_PER_IPv6_PACKET, all partially reassembled fragment
+      payloads MUST be discarded.
+
+   o  If the number of NACKs sent by the receiver is less than
+      MAX_NACKS_PER_IPv6_PACKET, the fragment receiver creates and
+      transmits a NACK to the fragment sender.  The NACK includes a
+      bitmap that indicates currently successful or unsuccessful receipt
+      for each one of the fragments that carry the IPv6 packet.  The
+      fragment recipient then iterates the operations after transmission
+      of a NACK described in this section as long as the number of NACKs
+      sent is less than MAX_NACKS_PER_IPv6_PACKET.
+
+   If a fragment recipient disassociates from its L2 network, the
+   recipient MUST discard all link fragments of all partially
+   reassembled payload datagrams.
+
+9.  Security considerations
+
+9.1.  Security considerations for header compression
+
+   TBD
+
+9.2.  Security considerations for fragmentation
+
+   This subsection describes potential attacks to LPWAN fragmentation
+   and proposes countermeasures, based on existing analysis of attacks
+   to 6LoWPAN fragmentation {HHWH}.
+
+   A node can perform a buffer reservation attack by sending a first
+   fragment to a target.  Then, the receiver will reserve buffer space
+   for the whole packet on the basis of the datagram size announced in
+   that first fragment.  Other incoming fragmented packets will be
+   dropped while the reassembly buffer is occupied during the reassembly
+   timeout.  Once that timeout expires, the attacker can repeat the same
+   procedure, and iterate, thus creating a denial of service attack.
+
+
+
+Minaburo, et al.         Expires August 17, 2017               [Page 22]
+
+Internet-Draft                 LPWAN SCHC                  February 2017
+
+
+   The (low) cost to mount this attack is linear with the number of
+   buffers at the target node.  However, the cost for an attacker can be
+   increased if individual fragments of multiple packets can be stored
+   in the reassembly buffer.  To further increase the attack cost, the
+   reassembly buffer can be split into fragment-sized buffer slots.
+   Once a packet is complete, it is processed normally.  If buffer
+   overload occurs, a receiver can discard packets based on the sender
+   behavior, which may help identify which fragments have been sent by
+   an attacker.
+
+   In another type of attack, the malicious node is required to have
+   overhearing capabilities.  If an attacker can overhear a fragment, it
+   can send a spoofed duplicate (e.g. with random payload) to the
+   destination.  A receiver cannot distinguish legitimate from spoofed
+   fragments.  Therefore, the original IPv6 packet will be considered
+   corrupt and will be dropped.  To protect resource-constrained nodes
+   from this attack, it has been proposed to establish a binding among
+   the fragments to be transmitted by a node, by applying content-
+   chaining to the different fragments, based on cryptographic hash
+   functionality.  The aim of this technique is to allow a receiver to
+   identify illegitimate fragments.
+
+   Further attacks may involve sending overlapped fragments (i.e.
+   comprising some overlapping parts of the original datagram) or
+   announcing a datagram size in the first fragment that does not
+   reflect the actual amount of data carried by the fragments.
+   Implementers should make sure that correct operation is not affected
+   by such events.
+
+10.  Acknowledgements
 
    Thanks to Dominique Barthel, Arunprabhu Kandasamy, Antony Markovski,
    Alexander Pelov, Juan Carlos Zuniga for useful design consideration.
 
-9.  Normative References
+   In the fragmentation section, the authors have reused parts of text
+   available in section 5.3 of RFC 4944, and would like to thank the
+   authors of RFC 4944.
 
-   [I-D.ietf-lpwan-overview]
-              Farrell, S., "LPWAN Overview", draft-ietf-lpwan-
-              overview-00 (work in progress), December 2016.
+   Carles Gomez has been funded in part by the Spanish Government
+   (Ministerio de Educacion, Cultura y Deporte) through the Jose
+   Castillejo grant CAS15/00336, and by the ERDF and the Spanish
+   Government through project TEC2016-79988-P.  Part of his contribution
+   to this work has been carried out during his stay as a visiting
+   scholar at the Computer Laboratory of the University of Cambridge.
 
-   [I-D.minaburo-lp-wan-gap-analysis]
-              Minaburo, A., Pelov, A., and L. Toutain, "LP-WAN GAP
-              Analysis", draft-minaburo-lp-wan-gap-analysis-01 (work in
-              progress), February 2016.
+
+
+
+
+
+
+Minaburo, et al.         Expires August 17, 2017               [Page 23]
+
+Internet-Draft                 LPWAN SCHC                  February 2017
+
+
+11.  References
+
+11.1.  Normative References
 
    [RFC0768]  Postel, J., "User Datagram Protocol", STD 6, RFC 768,
               DOI 10.17487/RFC0768, August 1980,
@@ -943,16 +1312,16 @@ Internet-Draft                 LPWAN SCHC                  February 2017
               DOI 10.17487/RFC5795, March 2010,
               <http://www.rfc-editor.org/info/rfc5795>.
 
+11.2.  Informative References
 
+   [I-D.ietf-lpwan-overview]
+              Farrell, S., "LPWAN Overview", draft-ietf-lpwan-
+              overview-00 (work in progress), December 2016.
 
-
-
-
-
-Minaburo & Toutain       Expires August 16, 2017               [Page 17]
-
-Internet-Draft                 LPWAN SCHC                  February 2017
-
+   [I-D.minaburo-lp-wan-gap-analysis]
+              Minaburo, A., Pelov, A., and L. Toutain, "LP-WAN GAP
+              Analysis", draft-minaburo-lp-wan-gap-analysis-01 (work in
+              progress), February 2016.
 
 Authors' Addresses
 
@@ -965,6 +1334,18 @@ Authors' Addresses
    Email: ana@ackl.io
 
 
+
+
+
+
+
+
+
+Minaburo, et al.         Expires August 17, 2017               [Page 24]
+
+Internet-Draft                 LPWAN SCHC                  February 2017
+
+
    Laurent Toutain
    IMT-Atlantique
    2 rue de la Chataigneraie
@@ -975,6 +1356,13 @@ Authors' Addresses
    Email: Laurent.Toutain@imt-atlantique.fr
 
 
+   Carles Gomez
+   Universitat Politecnica de Catalunya
+   C/Esteve Terradas, 7
+   08860 Castelldefels
+   Spain
+
+   Email: carlesgo@entel.upc.edu
 
 
 
@@ -1005,4 +1393,8 @@ Authors' Addresses
 
 
 
-Minaburo & Toutain       Expires August 16, 2017               [Page 18]
+
+
+
+
+Minaburo, et al.         Expires August 17, 2017               [Page 25]
