@@ -44,7 +44,7 @@ normative:
 informative:  
   I-D.minaburo-lp-wan-gap-analysis:
   I-D.ietf-lpwan-overview:
-  HHWH 
+ <!-- HHWH -->
 --- abstract
 
 This document describes a header compression scheme for IPv6, IPv6/UDP based
