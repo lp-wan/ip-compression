@@ -131,17 +131,17 @@ also be learned by a provisionning protocol that is out of the scope of this dra
 
 ~~~~
            End-System                                              Appl Servers
-      +-----------------+                                       +-----------------+
-      | APP1  APP2 APP3 |                                       | APP1  APP2 APP3 |
-      |                 |                                       |                 |
-      |       UDP       |                                       |       UDP       | 
-      |      IPv6       |                                       |      IPv6       |   
-      |                 |                                       |                 |  
-      |      LC (contxt)|                                       |                 | 
-      +--------+--------+                                       +--------+--------+ 
-               |    +--+     +--+         +-----------+                  .
-               +~ ~ |RG| === |NG| ======= |LC (contxt)| .... Internet ....
-                    +--+     +--+         +-----+-----+
+      +-----------------+                                    +-----------------+
+      | APP1  APP2 APP3 |                                    | APP1  APP2 APP3 |
+      |                 |                                    |                 |
+      |       UDP       |                                    |       UDP       | 
+      |      IPv6       |                                    |      IPv6       |   
+      |                 |                                    |                 |  
+      |      LC (contxt)|                                    |                 | 
+      +--------+--------+                                    +--------+--------+ 
+               |    +--+     +--+      +-----------+                  .
+               +~ ~ |RG| === |NG| ==== |LC (contxt)| .... Internet ....
+                    +--+     +--+      +-----+-----+
 ~~~~
 {: #Fig-archi title='Architecture'}
 
