@@ -651,7 +651,6 @@ The third rule compresses port numbers on 4 bits.
 
 # Fragmentation
 
-
 ## Overview
 
 If an entire payload (e.g., IPv6) datagram fits within a single L2
@@ -674,42 +673,69 @@ fragments. If all fragments carrying the IPv6 packet are successfully received,
 the receiver SHALL NOT send a NACK. If the sender does not receive a NACK, 
 it assumes that all fragments carrying the IPv6 packet were successfully delivered.
 
-## Unreliable
-### Fragmentation header formats for Unreliable
+## Fragment format
 
-In Unreliable, fragments except the last one SHALL    
-   contain the fragmentation header as defined in {{Fig-Unrel-NotLast}}.
-
-~~~~
-                       <-----  R  ----->   
-                       +----- ... -----+
-                       |    Rule ID    |
-                       +----- ... -----+
-~~~~
-{: #Fig-Unrel-NotLast title='Fragmentation Header for Fragments except the Last One in Unreliable'}
+   A fragment comprises a fragmentation header and a fragment payload, and conforms
+   to the format shown in {{Fig-FragFormat}}. The fragment payload carries a subset of the
+   IPv6 packet after header compression. A fragment is the payload in the
+   L2 protocol data unit (PDU).
       
+~~~~   
+      +---------------+-----------------------+
+      | Fragm. Header |   Fragment payload    |
+      +---------------+-----------------------+
+~~~~
+{: #Fig-FragFormat title='Fragment format.'}
+
+## Fragmentation header formats
+
+Fragments except the last one SHALL    
+   contain the fragmentation header as defined in {{Fig-NotLast}}. The total size of this fragmentation header is R bits.
+
+~~~~
+                       <----------- R ----------->    
+                                        <-- N  -->   
+                       +----- ... -----+-- ... --+
+                       |    Rule ID    |   CFN   |
+                       +----- ... -----+-- ... --+
+~~~~
+{: #Fig-NotLast title='Fragmentation Header for Fragments except the Last One'}
+
    The last fragment SHALL contain a fragmentation header that conforms to 
-   the format shown in {{Fig-Unrel-Last}}.
- 
+   the format shown in {{Fig-Last}}. The total size of this fragmentation 
+   header is R+M bits.
+
 ~~~~
-                       <-----  R  ----> <---- M ----->                   
-                       +----- ... -----+---- ... ----+
-                       |    Rule ID    |     MIC     |
-                       +----- ... -----+---- ... ----+
+                       <----------- R ---------->
+                                        <-- N --> <---- M ----->                   
+                       +----- ... -----+-- ... --+---- ... ----+
+                       |    Rule ID    |  11..1  |     MIC     |
+                       +----- ... -----+-- ... --+---- ... ----+
 ~~~~
-{: #Fig-Unrel-Last title='Fragmentation Header for the Last Fragment in Unreliable'} 
+{: #Fig-Last title='Fragmentation Header for the Last Fragment'}
 
 
-   Rule ID:  In Unreliable, this field has a size of R bits. Rule ID SHALL      
-      be set to TBD_UNREL_A in fragments, except the last one, to 
-      signal that the carried payload is a fragment, and that Unreliable 
-      fragment delivery MUST be used. In the 
-      last fragment, Rule ID SHALL be set to TBD_UNREL_B to identify the 
-      fragment as the last one, and to signal that Unreliable fragment 
-      delivery MUST be used.
+   Rule ID: this field has a size of  R – N  bits in all 
+      fragments. Rule ID SHALL be set to one of the following values:
+      a) TBD_UNREL_A: for Unreliable, when the fragment is not the last one;
+      b) TBD_UNREL_B: for Unreliable, when the fragment is the last one;
+      c) TBD_REL_A: for Reliable, when the fragment is not the last one;
+      d) TBD_REL_B: for Reliable, when the fragment is the last one.
 
-   MIC: This field, of size M bits, is computed by the sender over the  
-      complete IPv6 packet before fragmentation by using the TBD algorithm.
+   CFN:  CFN stands for Compressed Fragment Number. The size of the CFN 
+      field is N bits. This field is an unsigned integer that carries a 
+      non-absolute fragment number. 
+      The CFN SHALL be set sequentially decreasing from 2^N - 2 for the first 
+      fragment, and SHALL wrap from 0 back to 2^N - 2. The CFN for the 
+      last fragment has all bits set to 1.
+      In Unreliable, N=1. In Reliable, N >= 3.
+
+   MIC:  MIC stands for Message Integrity Check. This field has a size of M 
+      bits. It is computed by 
+      the sender over the complete IPv6 packet before fragmentation by 
+      using the TBD algorithm.
+
+## Unreliable
 
 ### Receiver and sender behavior for Unreliable
 
@@ -726,8 +752,8 @@ The recipient of link fragments SHALL use (1) the sender's L2 source
    fragments within the original unfragmented packet.  For example, it may 
    place the data payload of the fragments within a payload datagram 
    reassembly buffer at the location determined from the order of arrival 
-   and the fragment payload sizes.  Note that the size of the reassembly buffer
-   cannot be determined from fragmentation headers. 
+   and the fragment payload sizes.  Note that the size of the original, unfragmented 
+   IPv6 packet cannot be determined from fragmentation headers 
 
    If a fragment recipient disassociates from its L2 network, the
    recipient MUST discard all link fragments of all partially
@@ -747,49 +773,6 @@ The recipient of link fragments SHALL use (1) the sender's L2 source
    reassembled IPv6 datagram MUST be discarded.
 
 ## Reliable
-### Fragmentation header formats for Reliable
-In Reliable, fragments except the last one SHALL    
-   contain the fragmentation header as defined in {{Fig-Rel-NotLast}}. The total size of this fragmentation header is R bits.
-
-~~~~
-                       <----------- R ----------->    
-                                        <-- N  -->   
-                       +----- ... -----+-- ... --+
-                       |    Rule ID    |   CFN   |
-                       +----- ... -----+-- ... --+
-~~~~
-{: #Fig-Rel-NotLast title='Fragmentation Header for Fragments except the Last One in Reliable'}
-
-   The last fragment SHALL contain a fragmentation header that conforms to 
-   the format shown in {{Fig-Rel-Last}}. The total size of this fragmentation 
-   header is R+M bits.
-
-~~~~
-                       <----------- R ---------->
-                                        <-- N --> <---- M ----->                   
-                       +----- ... -----+-- ... --+---- ... ----+
-                       |    Rule ID    |   CFN   |     MIC     |
-                       +----- ... -----+-- ... --+---- ... ----+
-~~~~
-{: #Fig-Rel-Last title='Fragmentation Header for the Last Fragment in Reliable'}
-
-
-   Rule ID: In Reliable, this field has a size of  R – N  bits in all 
-      fragments, and it SHALL be set to TBD_REL to signal that 
-      the carried payload is a fragment, and that Reliable fragment 
-      delivery MUST be used. 
-
-   CFN:  CFN stands for Compressed Fragment Number. The size of the CFN 
-      field is N bits. This field is an unsigned integer that carries a 
-      non-absolute fragment number. 
-      The CFN SHALL be set sequentially starting from 0 for the first 
-      fragment, and SHALL wrap from 2^N - 2 back to 0. The CFN for the 
-      last fragment has all bits set to 1.
-
-   MIC:  MIC stands for Message Integrity Check. This field has a size of M 
-      bits. It is computed by 
-      the sender over the complete IPv6 packet before fragmentation by 
-      using the TBD algorithm.
 
 ### NACK format
 
@@ -812,18 +795,20 @@ The format of a NACK is shown in {{Fig-NACK-Format}}:
    Number_of_Fragments denotes the number of fragments that carry the IPv6 
    packet. The bitmap is a sequence of bits, where the n-th bit signals 
    whether the n-th fragment transmitted has been correctly received (n-th 
-   bit set to 1) or not (n-th bit set to 0). 
+   bit set to 1) or not (n-th bit set to 0). Remaining bits with bit order
+   greater than the number of fragments sent (as determined by the receiver) are
+   set to 0.
    
    {{Fig-Bitmap}} shows an example of a NACK, where the bitmap indicates that 
    the second and the ninth fragments have not been correctly received. 
    In this example, the IPv6 packet is carried by eleven fragments in total,
-   therefore the bitmap in this example has a size of two bytes.
+   therefore the bitmap in this example has a size of two bytes. 
 
 ~~~~
-                                                        1
-                 <-----  R  ----> 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5
+                                                       1
+                  <-----  R  ----> 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5
                   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                  |    Rule ID    |1|0|1|1|1|1|1|1|0|1|1|X|X|X|X|X|
+                  |    Rule ID    |1|0|1|1|1|1|1|1|0|1|1|0|0|0|0|0|
                   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 ~~~~
 {: #Fig-Bitmap title='Example of the Bitmap in a NACK'}
@@ -886,13 +871,13 @@ Rule ID to determine whether the fragment has to be handled as per the
 rules of Unreliable or Reliable fragment delivery.   
 
 Upon receipt of a link fragment, the recipient starts constructing
-the original unfragmented packet.  It uses the CFN field and the order 
+the original, unfragmented packet.  It uses the CFN field and the order 
 of arrival of each fragment to determine the location of the individual 
 fragments within the original unfragmented packet.  For example, it may 
 place the data payload within a payload datagram reassembly buffer at 
 the location determined from the CFN, the received fragment payload 
-sizes and the order of arrival.  Note that the size of the reassembly 
-buffer cannot be determined from fragmentation headers, and if non-
+sizes and the order of arrival.  Note that the size of the original, unfragmented 
+IPv6 packet cannot be determined from fragmentation headers, and if non-
 continguous frame sequences are received, it is not always possible to 
 determine the size of the missing fragment(s).
 
@@ -987,11 +972,9 @@ functionality.  The aim of this technique is to allow a receiver to
 identify illegitimate fragments.
 
 Further attacks may involve sending overlapped fragments (i.e.
-comprising some overlapping parts of the original datagram) or
-announcing a datagram size in the first fragment that does not
-reflect the actual amount of data carried by the fragments.
+comprising some overlapping parts of the original IPv6 datagram).
 Implementers should make sure that correct operation is not affected
-by such events.
+by such event.
 
 # Acknowledgements
 
@@ -1009,6 +992,27 @@ Castillejo grant CAS15/00336, and by the ERDF and the Spanish Government
 through project TEC2016-79988-P.  Part of his contribution to this work
 has been carried out during his stay as a visiting scholar at the
 Computer Laboratory of the University of Cambridge.
+
+# Appendix A. Protocol Constants
+
+The recommended values of R, N and M for LoRaWAN and Sigfox are shown in {{Fig-AppendixTable}}.
+
+~~~~
+                      +--------+---------+---------+
+                      |   R    |    N    |    M    |
+           +----------+--------+---------+---------+
+           | LoRaWAN  |  TBD   |   TBD   |   TBD   |
+           +----------+--------+---------+---------+
+           | Sigfox   |  TBD   |   TBD   |   TBD   |
+           +----------+--------+---------+---------+
+~~~~
+{: #Fig-AppendixTable title='Fragmentation header field sizes'}
+
+Recommended values for other protocol constants are shown next:
+
+  MAX_NACKS_PER_IPv6_PACKET		TBD
+
+  NACK_WAIT      		         	TBD  seconds
 
 
 --- back
