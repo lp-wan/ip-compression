@@ -653,22 +653,36 @@ The third rule compresses port numbers on 4 bits.
 
 ## Overview
 
+Fragmentation in LPWAN is mandatory to satisfy the IPv6 MTU requirement. 
+In fact, the L2 data unit maximum payload in LPWAN technologies typically 
+varies from tens to hundreds of bytes. 
 If an entire payload (e.g., IPv6) datagram fits within a single L2
 data unit, it is unfragmented and a fragmentation header is not
 needed.  If the datagram does not fit within a single L2 data unit,
 it SHALL be broken into fragments. 
 
-This specification defines two fragment delivery reliability options, 
+On the other hand, LPWAN technologies impose some strict limitations on traffic; 
+therefore it is desirable to enable optional fragment retransmission, while 
+a single fragment loss should not lead to retransmitting the full datagram. 
+To preserve energy, Things (a.k.a. End Systems) are sleeping most of the time 
+and may receive data during a short period after transmission. 
+
+This specification defines two main fragment delivery reliability options, 
 namely: Unreliable and Reliable. The same reliability option MUST be 
 used for all fragments of a packet.
 
 In Unreliable, the receiver SHALL NOT issue acknowledgments and the sender
 SHALL NOT perform fragment transmission retries.
 
-In Reliable, if the fragment receiver detects any missing fragments from the
+In Reliable, two suboptions are defined, namely: packet mode and window mode. 
+In packet mode, if the fragment receiver detects missing fragments from the
 transported IPv6 packet, the receiver transmits one negative acknowledgment (NACK)
-which informs the sender about received and missing fragments from the IPv6 
-packet. Upon receipt of a NACK, the sender selectively retransmits the missing
+after reception of the last fragment, which informs the sender about received and 
+missing fragments from the IPv6 packet. In window mode, the NACK is sent after a
+window of fragments have been sent, if missing fragments are detected within the window.
+A window of fragments is a subset of the fragments needed to carry an IPv6 packet.
+
+Upon receipt of a NACK, the sender selectively retransmits the missing
 fragments. If all fragments carrying the IPv6 packet are successfully received,
 the receiver SHALL NOT send a NACK. If the sender does not receive a NACK, 
 it assumes that all fragments carrying the IPv6 packet were successfully delivered.
@@ -716,11 +730,11 @@ Fragments except the last one SHALL
 
 
    Rule ID: this field has a size of  R – N  bits in all 
-      fragments. Rule ID SHALL be set to one of the following values:
-      a) TBD_UNREL_A: for Unreliable, when the fragment is not the last one;
-      b) TBD_UNREL_B: for Unreliable, when the fragment is the last one;
-      c) TBD_REL_A: for Reliable, when the fragment is not the last one;
-      d) TBD_REL_B: for Reliable, when the fragment is the last one.
+      fragments. For Reliable, Rule ID SHALL be set to one of the following values:
+      a) TBD_REL_WIN_A: for Reliable, window mode, when the fragment is not the last one;
+      b) TBD_REL_WIN_B: for Reliable, window mode, when the fragment is the last one.
+      c) TBD_REL_PCK_A: for Reliable, packet mode, when the fragment is not the last one.
+      d) TBD_REL_PCK_B: for Reliable, packet mode, when the fragment is the last one.
 
    CFN:  CFN stands for Compressed Fragment Number. The size of the CFN 
       field is N bits. This field is an unsigned integer that carries a 
