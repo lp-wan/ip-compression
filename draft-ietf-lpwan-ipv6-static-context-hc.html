@@ -312,10 +312,16 @@ address {
 <link href="#rfc.section.8.3" rel="Chapter" title="8.3 Fragmentation header formats"/>
 <link href="#rfc.section.8.4" rel="Chapter" title="8.4 Unreliable"/>
 <link href="#rfc.section.8.4.1" rel="Chapter" title="8.4.1 Receiver and sender behavior for Unreliable"/>
+<link href="#rfc.section.8.4.2" rel="Chapter" title="8.4.2 Example"/>
 <link href="#rfc.section.8.5" rel="Chapter" title="8.5 Reliable"/>
 <link href="#rfc.section.8.5.1" rel="Chapter" title="8.5.1 NACK format"/>
 <link href="#rfc.section.8.5.2" rel="Chapter" title="8.5.2 Sender behavior in Reliable"/>
 <link href="#rfc.section.8.5.3" rel="Chapter" title="8.5.3 Receiver behavior in Reliable"/>
+<link href="#rfc.section.8.5.4" rel="Chapter" title="8.5.4 Examples"/>
+<link href="#rfc.section.8.6" rel="Chapter" title="8.6 Further examples of reliable fragment delivery mechanisms (for discussion)"/>
+<link href="#rfc.section.8.6.1" rel="Chapter" title="8.6.1 Reliable, window mode, NACK-oriented"/>
+<link href="#rfc.section.8.6.2" rel="Chapter" title="8.6.2 Reliable, packet mode, ACK-oriented"/>
+<link href="#rfc.section.8.6.3" rel="Chapter" title="8.6.3 Reliable, window mode, ACK-oriented"/>
 <link href="#rfc.section.9" rel="Chapter" title="9 Security considerations"/>
 <link href="#rfc.section.9.1" rel="Chapter" title="9.1 Security considerations for header compression"/>
 <link href="#rfc.section.9.2" rel="Chapter" title="9.2 Security considerations for fragmentation"/>
@@ -711,8 +717,9 @@ address {
 <p id="rfc.section.8.1.p.2">On the other hand, LPWAN technologies impose some strict limitations on traffic; therefore it is desirable to enable optional fragment retransmission, while a single fragment loss should not lead to retransmitting the full datagram.  To preserve energy, Things (a.k.a. End Systems) are sleeping most of the time and may receive data during a short period after transmission.</p>
 <p id="rfc.section.8.1.p.3">This specification defines two main fragment delivery reliability options, namely: Unreliable and Reliable. The same reliability option MUST be used for all fragments of a packet.</p>
 <p id="rfc.section.8.1.p.4">In Unreliable, the receiver SHALL NOT issue acknowledgments and the sender SHALL NOT perform fragment transmission retries.</p>
-<p id="rfc.section.8.1.p.5">In Reliable, two suboptions are defined, namely: packet mode and window mode.  In packet mode, if the fragment receiver detects missing fragments from the transported IPv6 packet, the receiver transmits one negative acknowledgment (NACK) after reception of the last fragment, which informs the sender about received and missing fragments from the IPv6 packet. In window mode, the NACK is sent after a window of fragments have been sent, if missing fragments are detected within the window.  A window of fragments is a subset of the fragments needed to carry an IPv6 packet.</p>
+<p id="rfc.section.8.1.p.5">In Reliable, there exist two suboptions, namely: packet mode and window mode.  In packet mode, if the fragment receiver detects missing fragments from the transported IPv6 packet, the receiver transmits one negative acknowledgment (NACK) after reception of the last fragment, which informs the sender about received and missing fragments from the IPv6 packet. In window mode, the NACK is sent after a window of fragments have been sent, if missing fragments are detected within the window.  A window of fragments is a subset of the fragments needed to carry an IPv6 packet.</p>
 <p id="rfc.section.8.1.p.6">Upon receipt of a NACK, the sender selectively retransmits the missing fragments. If all fragments carrying the IPv6 packet are successfully received, the receiver SHALL NOT send a NACK. If the sender does not receive a NACK, it assumes that all fragments carrying the IPv6 packet were successfully delivered.</p>
+<p id="rfc.section.8.1.p.7">[[Note: this version of the draft specification illustrates several options for fragment delivery reliability for further discussion; while in this version details for packet mode, NACK-oriented fragment reliable delivery are provided, the reliable fragment delivery option(s) to be specified will be decided based on WG feedback.]]</p>
 <h1 id="rfc.section.8.2"><a href="#rfc.section.8.2">8.2.</a> <a href="#fragment-format" id="fragment-format">Fragment format</a></h1>
 <p id="rfc.section.8.2.p.1">A fragment comprises a fragmentation header and a fragment payload, and conforms to the format shown in <a href="#Fig-FragFormat">Figure 6</a>. The fragment payload carries a subset of the IPv6 packet after header compression. A fragment is the payload in the L2 protocol data unit (PDU).</p>
 <div id="rfc.figure.6"/>
@@ -747,7 +754,7 @@ address {
 </pre>
 <p class="figure">Figure 8: Fragmentation Header for the Last Fragment</p>
 <p id="rfc.section.8.3.p.3">Rule ID: this field has a size of  R &#8211; N  bits in all fragments. For Reliable, Rule ID SHALL be set to one of the following values: a) TBD_REL_WIN_A: for Reliable, window mode, when the fragment is not the last one; b) TBD_REL_WIN_B: for Reliable, window mode, when the fragment is the last one.  c) TBD_REL_PCK_A: for Reliable, packet mode, when the fragment is not the last one.  d) TBD_REL_PCK_B: for Reliable, packet mode, when the fragment is the last one.</p>
-<p id="rfc.section.8.3.p.4">CFN:  CFN stands for Compressed Fragment Number. The size of the CFN field is N bits. This field is an unsigned integer that carries a non-absolute fragment number.  The CFN SHALL be set sequentially decreasing from 2^N - 2 for the first fragment, and SHALL wrap from 0 back to 2^N - 2. The CFN for the last fragment has all bits set to 1.  In Unreliable, N=1. In Reliable, N &gt;= 3.</p>
+<p id="rfc.section.8.3.p.4">CFN:  CFN stands for Compressed Fragment Number. The size of the CFN field is N bits. In Unreliable, N=1. In Reliable, N &gt;= 3.  This field is an unsigned integer that carries a non-absolute fragment number.  The CFN SHALL be set sequentially decreasing from 2^N - 2 for the first fragment, and SHALL wrap from 0 back to 2^N - 2. The CFN for the last fragment has all bits set to 1. Note that, by this definition, the CFN value of 2^N - 1 is only used to identify a fragment as the last fragment carrying a subset of the IPv6 packet being transported, and thus the CFN does not strictly correspond to the N least significant bits of the actual absolute fragment number.</p>
 <p id="rfc.section.8.3.p.5">MIC:  MIC stands for Message Integrity Check. This field has a size of M bits. It is computed by the sender over the complete IPv6 packet before fragmentation by using the TBD algorithm.</p>
 <h1 id="rfc.section.8.4"><a href="#rfc.section.8.4">8.4.</a> <a href="#unreliable" id="unreliable">Unreliable</a></h1>
 <h1 id="rfc.section.8.4.1"><a href="#rfc.section.8.4.1">8.4.1.</a> <a href="#receiver-and-sender-behavior-for-unreliable" id="receiver-and-sender-behavior-for-unreliable">Receiver and sender behavior for Unreliable</a></h1>
@@ -755,10 +762,29 @@ address {
 <p id="rfc.section.8.4.1.p.2">Upon receipt of a link fragment, the recipient starts constructing the original unfragmented packet.  It uses the order of arrival of each fragment to determine the location of the individual fragments within the original unfragmented packet.  For example, it may place the data payload of the fragments within a payload datagram reassembly buffer at the location determined from the order of arrival and the fragment payload sizes.  Note that the size of the original, unfragmented IPv6 packet cannot be determined from fragmentation headers</p>
 <p id="rfc.section.8.4.1.p.3">If a fragment recipient disassociates from its L2 network, the recipient MUST discard all link fragments of all partially reassembled payload datagrams, and fragment senders MUST discard all not yet transmitted link fragments of all partially transmitted payload (e.g., IPv6) datagrams.  Similarly, when a node first receives a fragment of a packet, it starts a reassembly timer.  When this time expires, if the entire packet has not been reassembled, the existing fragments MUST be discarded and the reassembly state MUST be flushed.  The reassembly timeout MUST be set to a maximum of TBD seconds).</p>
 <p id="rfc.section.8.4.1.p.4">Once the recipient has received the last fragment, it checks for the integrity of the reassembled IPv6 datagram, based on the MIC received.  If the integrity check indicates that the reassembled IPv6 datagram does not match the original IPv6 datagram (prior to fragmentation), the reassembled IPv6 datagram MUST be discarded.</p>
+<h1 id="rfc.section.8.4.2"><a href="#rfc.section.8.4.2">8.4.2.</a> <a href="#example" id="example">Example</a></h1>
+<p><a href="#Fig-Example-Unreliable">Figure 9</a> illustrates the transmission of an IPv6 packet that needs 11 fragments in Unreliable.</p>
+<div id="rfc.figure.9"/>
+<div id="Fig-Example-Unreliable"/>
+<pre>
+        Sender               Receiver
+          |-------CFN=0--------&gt;|
+          |-------CFN=0--------&gt;|
+          |-------CFN=0--------&gt;|
+          |-------CFN=0--------&gt;|
+          |-------CFN=0--------&gt;|
+          |-------CFN=0--------&gt;|
+          |-------CFN=0--------&gt;|
+          |-------CFN=0--------&gt;|
+          |-------CFN=0--------&gt;|
+          |-------CFN=0--------&gt;|
+          |-------CFN=1--------&gt;|MIC checked =&gt;
+</pre>
+<p class="figure">Figure 9: Transmission of an IPv6 packet carried by 11 fragments in Unreliable</p>
 <h1 id="rfc.section.8.5"><a href="#rfc.section.8.5">8.5.</a> <a href="#reliable" id="reliable">Reliable</a></h1>
 <h1 id="rfc.section.8.5.1"><a href="#rfc.section.8.5.1">8.5.1.</a> <a href="#nack-format" id="nack-format">NACK format</a></h1>
-<p id="rfc.section.8.5.1.p.1">The format of a NACK is shown in <a href="#Fig-NACK-Format">Figure 9</a>:</p>
-<div id="rfc.figure.9"/>
+<p id="rfc.section.8.5.1.p.1">The format of a NACK is shown in <a href="#Fig-NACK-Format">Figure 10</a>:</p>
+<div id="rfc.figure.10"/>
 <div id="Fig-NACK-Format"/>
 <pre>
                           &lt;-----  R  ----&gt;
@@ -766,11 +792,11 @@ address {
                          |    Rule ID    |   bitmap    |
                          +-+-+-+-+-+-+-+-+----- ... ---+
 </pre>
-<p class="figure">Figure 9: Format of a NACK</p>
+<p class="figure">Figure 10: Format of a NACK</p>
 <p id="rfc.section.8.5.1.p.2">Rule ID: In all NACKs, Rule ID has a size of R bits and SHALL be set to<br/> TBD_NACK to signal that the message is a NACK.</p>
 <p id="rfc.section.8.5.1.p.3">bitmap:  the bitmap field of a NACK has a size equal to Ceiling(Number_of_Fragments/8) octets, where Number_of_Fragments denotes the number of fragments that carry the IPv6 packet. The bitmap is a sequence of bits, where the n-th bit signals whether the n-th fragment transmitted has been correctly received (n-th bit set to 1) or not (n-th bit set to 0). Remaining bits with bit order greater than the number of fragments sent (as determined by the receiver) are set to 0.</p>
-<p><a href="#Fig-Bitmap">Figure 10</a> shows an example of a NACK, where the bitmap indicates that the second and the ninth fragments have not been correctly received.  In this example, the IPv6 packet is carried by eleven fragments in total, therefore the bitmap in this example has a size of two bytes.</p>
-<div id="rfc.figure.10"/>
+<p><a href="#Fig-Bitmap">Figure 11</a> shows an example of a NACK, where the bitmap indicates that the second and the ninth fragments have not been correctly received.  In this example, the IPv6 packet is carried by eleven fragments in total, therefore the bitmap in this example has a size of two bytes.</p>
+<div id="rfc.figure.11"/>
 <div id="Fig-Bitmap"/>
 <pre>
                                                        1
@@ -779,7 +805,7 @@ address {
                   |    Rule ID    |1|0|1|1|1|1|1|1|0|1|1|0|0|0|0|0|
                   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 </pre>
-<p class="figure">Figure 10: Example of the Bitmap in a NACK</p>
+<p class="figure">Figure 11: Example of the Bitmap in a NACK</p>
 <h1 id="rfc.section.8.5.2"><a href="#rfc.section.8.5.2">8.5.2.</a> <a href="#sender-behavior-in-reliable" id="sender-behavior-in-reliable">Sender behavior in Reliable</a></h1>
 <p id="rfc.section.8.5.2.p.1">In Reliable, a sender MUST store a copy of the fragments that will be sent to carry an IPv6 packet. The memory resources to store those fragments SHALL be released as per the rules described below.</p>
 <p id="rfc.section.8.5.2.p.2">After transmission of all fragments that carry an IPv6 packet, the sender waits for NACK_WAIT seconds for a possible incoming NACK. To this end, after the last fragment has been transmitted, the sender initializes a timer to NACK_WAIT seconds. If a NACK is not received during the NACK_WAIT interval, the sender MUST assume successful delivery of all fragments and release the memory resources used to store the fragments.</p>
@@ -802,6 +828,174 @@ address {
   <li>If the number of NACKs sent by the receiver is less than MAX_NACKS_PER_IPv6_PACKET, the fragment receiver creates and transmits a NACK to the fragment sender. The NACK includes a bitmap that indicates currently successful or unsuccessful receipt for each one of the fragments that carry the IPv6 packet. The fragment recipient then iterates the operations after transmission of a NACK described in this section as long as the number of NACKs sent is less than MAX_NACKS_PER_IPv6_PACKET.</li>
 </ul>
 <p id="rfc.section.8.5.3.p.8">If a fragment recipient disassociates from its L2 network, the recipient MUST discard all link fragments of all partially reassembled payload datagrams.</p>
+<h1 id="rfc.section.8.5.4"><a href="#rfc.section.8.5.4">8.5.4.</a> <a href="#examples" id="examples">Examples</a></h1>
+<p><a href="#Fig-Example-Rel-NoLoss">Figure 12</a> illustrates the transmission of an IPv6 packet that needs 11 fragments in Reliable, for N=3, without losses.</p>
+<div id="rfc.figure.12"/>
+<div id="Fig-Example-Rel-NoLoss"/>
+<pre>
+        Sender               Receiver
+          |-------CFN=6--------&gt;|
+          |-------CFN=5--------&gt;|
+          |-------CFN=4--------&gt;|
+          |-------CFN=3--------&gt;|
+          |-------CFN=2--------&gt;|
+          |-------CFN=1--------&gt;|
+          |-------CFN=0--------&gt;|
+          |-------CFN=6--------&gt;|
+          |-------CFN=5--------&gt;|
+          |-------CFN=4--------&gt;|
+          |-------CFN=7--------&gt;|MIC checked =&gt;
+       (no NACK)  
+</pre>
+<p class="figure">Figure 12: Transmission of an IPv6 packet carried by 11 fragments in Reliable; no losses.</p>
+<p><a href="#Fig-Example-Rel-Loss">Figure 13</a> illustrates the transmission of an IPv6 packet that needs 11 fragments in Reliable, for N=3, with three losses. Fragment renumbering is applied to retransmitted fragments.  The receiver knows that retransmitted fragments, (a), (b) and (c) in the figure, correspond to the missing fragments, (a), (b) and (c), respectively.</p>
+<div id="rfc.figure.13"/>
+<div id="Fig-Example-Rel-Loss"/>
+<pre>
+        Sender               Receiver
+          |-------CFN=6--------&gt;|
+          |-------CFN=5--------&gt;|
+       (a)|-------CFN=4---X----&gt;|
+          |-------CFN=3--------&gt;|
+       (b)|-------CFN=2---X----&gt;|
+          |-------CFN=1--------&gt;|
+          |-------CFN=0--------&gt;|
+          |-------CFN=6--------&gt;|
+          |-------CFN=5--------&gt;|
+       (c)|-------CFN=4---X----&gt;|
+          |-------CFN=7--------&gt;|MIC checked =&gt;
+          |&lt;-------NACK---------|Bitmap:1101011110100000
+       (a)|-------CFN=6--------&gt;|
+       (b)|-------CFN=5--------&gt;|
+       (c)|-------CFN=7--------&gt;|MIC checked =&gt; 
+       (no NACK)   
+</pre>
+<p class="figure">Figure 13: Transmission of an IPv6 packet carried by 11 fragments in Reliable; three losses.</p>
+<h1 id="rfc.section.8.6"><a href="#rfc.section.8.6">8.6.</a> <a href="#further-examples-of-reliable-fragment-delivery-mechanisms-for-discussion" id="further-examples-of-reliable-fragment-delivery-mechanisms-for-discussion">Further examples of reliable fragment delivery mechanisms (for discussion)</a></h1>
+<p id="rfc.section.8.6.p.1">[[Note: this subsection illustrates several options for fragment delivery reliability for further discussion; while the previous subsection provides details for packet mode, NACK-oriented fragment reliable delivery are provided, the reliable fragment delivery option(s) to be specified will be decided based on WG feedback.]]</p>
+<h1 id="rfc.section.8.6.1"><a href="#rfc.section.8.6.1">8.6.1.</a> <a href="#reliable-window-mode-nack-oriented" id="reliable-window-mode-nack-oriented">Reliable, window mode, NACK-oriented</a></h1>
+<p><a href="#Fig-Example-Rel-Window-NACK-Loss">Figure 14</a> illustrates the transmission of an IPv6 packet that needs 11 fragments in Reliable, window mode, for N=3, with three losses. Receiver feedback is NACK-oriented.</p>
+<div id="rfc.figure.14"/>
+<div id="Fig-Example-Rel-Window-NACK-Loss"/>
+<pre>
+        Sender               Receiver
+          |-------CFN=6--------&gt;|
+          |-------CFN=5--------&gt;|
+          |-------CFN=4---X----&gt;|
+          |-------CFN=3--------&gt;|
+          |-------CFN=2---X----&gt;|
+          |-------CFN=1--------&gt;|
+          |-------CFN=0--------&gt;|
+          |&lt;-------NACK---------|Bitmap:11010110
+          |-------CFN=4--------&gt;|
+          |-------CFN=2--------&gt;|   
+      (no NACK)     
+          |-------CFN=6--------&gt;|
+          |-------CFN=5--------&gt;|
+          |-------CFN=4---X----&gt;|
+          |-------CFN=7--------&gt;|MIC checked =&gt;
+          |&lt;-------NACK---------|Bitmap:11010000
+          |-------CFN=4--------&gt;|MIC checked =&gt;
+      (no NACK)    
+</pre>
+<p class="figure">Figure 14: Transmission of an IPv6 packet carried by 11 fragments in Reliable, window mode; three losses.</p>
+<h1 id="rfc.section.8.6.2"><a href="#rfc.section.8.6.2">8.6.2.</a> <a href="#reliable-packet-mode-ack-oriented" id="reliable-packet-mode-ack-oriented">Reliable, packet mode, ACK-oriented</a></h1>
+<p><a href="#Fig-Example-Rel-Packet-ACK-NoLoss">Figure 15</a> illustrates the transmission of an IPv6 packet that needs 11 fragments in Reliable, packet mode, for N=3, without losses. Receiver feedback is positive-ACK-oriented.</p>
+<div id="rfc.figure.15"/>
+<div id="Fig-Example-Rel-Packet-ACK-NoLoss"/>
+<pre>
+        Sender               Receiver
+          |-------CFN=6--------&gt;|
+          |-------CFN=5--------&gt;|
+          |-------CFN=4--------&gt;|
+          |-------CFN=3--------&gt;|
+          |-------CFN=2--------&gt;|
+          |-------CFN=1--------&gt;|
+          |-------CFN=0--------&gt;|
+          |-------CFN=6--------&gt;|
+          |-------CFN=5--------&gt;|   
+          |-------CFN=4--------&gt;|
+          |-------CFN=7--------&gt;|MIC checked =&gt;
+          |&lt;-------ACK----------|no bitmap
+        (End)    
+      
+</pre>
+<p class="figure">Figure 15: Transmission of an IPv6 packet carried by 11 fragments in Reliable, packet mode, positive-ACK-oriented; no losses.</p>
+<p><a href="#Fig-Example-Rel-Packet-ACK-Loss">Figure 16</a> illustrates the transmission of an IPv6 packet that needs 11 fragments in Reliable, packet mode, for N=3, with three losses. Receiver feedback is positive-ACK-oriented.</p>
+<div id="rfc.figure.16"/>
+<div id="Fig-Example-Rel-Packet-ACK-Loss"/>
+<pre>
+        Sender               Receiver
+          |-------CFN=6--------&gt;|
+          |-------CFN=5--------&gt;|
+       (a)|-------CFN=4---X----&gt;|
+          |-------CFN=3--------&gt;|
+       (b)|-------CFN=2---X----&gt;|
+          |-------CFN=1--------&gt;|
+          |-------CFN=0--------&gt;|
+          |-------CFN=6--------&gt;|
+          |-------CFN=5--------&gt;|   
+       (c)|-------CFN=4---X----&gt;|
+          |-------CFN=7--------&gt;|MIC checked =&gt;
+          |&lt;-------ACK----------|bitmap:1101011110100000
+       (a)|-------CFN=6--------&gt;|
+       (b)|-------CFN=5--------&gt;|
+       (c)|-------CFN=7--------&gt;|MIC checked =&gt;
+          |&lt;-------ACK----------|no bitmap
+        (End)    
+      
+</pre>
+<p class="figure">Figure 16: Transmission of an IPv6 packet carried by 11 fragments in Reliable, packet mode, positive-ACK-oriented; with three losses.</p>
+<h1 id="rfc.section.8.6.3"><a href="#rfc.section.8.6.3">8.6.3.</a> <a href="#reliable-window-mode-ack-oriented" id="reliable-window-mode-ack-oriented">Reliable, window mode, ACK-oriented</a></h1>
+<p><a href="#Fig-Example-Rel-Window-ACK-NoLoss">Figure 17</a> illustrates the transmission of an IPv6 packet that needs 11 fragments in Reliable, packet mode, for N=3, without losses. Receiver feedback is positive-ACK-oriented.</p>
+<div id="rfc.figure.17"/>
+<div id="Fig-Example-Rel-Window-ACK-NoLoss"/>
+<pre>
+        Sender               Receiver
+          |-------CFN=6--------&gt;|
+          |-------CFN=5--------&gt;|
+          |-------CFN=4--------&gt;|
+          |-------CFN=3--------&gt;|
+          |-------CFN=2--------&gt;|
+          |-------CFN=1--------&gt;|
+          |-------CFN=0--------&gt;|
+          |&lt;-------ACK----------|no bitmap
+          |-------CFN=6--------&gt;|
+          |-------CFN=5--------&gt;|   
+          |-------CFN=4--------&gt;|
+          |-------CFN=7--------&gt;|MIC checked =&gt;
+          |&lt;-------ACK----------|no bitmap
+        (End)    
+      
+</pre>
+<p class="figure">Figure 17: Transmission of an IPv6 packet carried by 11 fragments in Reliable, window mode, positive-ACK-oriented; no losses.</p>
+<p><a href="#Fig-Example-Rel-Window-ACK-Loss">Figure 18</a> illustrates the transmission of an IPv6 packet that needs 11 fragments in Reliable, packet mode, for N=3, with three losses. Receiver feedback is positive-ACK-oriented.</p>
+<div id="rfc.figure.18"/>
+<div id="Fig-Example-Rel-Window-ACK-Loss"/>
+<pre>
+        Sender               Receiver
+          |-------CFN=6--------&gt;|
+          |-------CFN=5--------&gt;|
+          |-------CFN=4---X----&gt;|
+          |-------CFN=3--------&gt;|
+          |-------CFN=2---X----&gt;|
+          |-------CFN=1--------&gt;|
+          |-------CFN=0--------&gt;|
+          |&lt;-------ACK----------|bitmap:11010110
+          |-------CFN=4--------&gt;|
+          |-------CFN=2--------&gt;|
+          |&lt;-------ACK----------|no bitmap
+          |-------CFN=6--------&gt;|
+          |-------CFN=5--------&gt;|   
+          |-------CFN=4---X----&gt;|
+          |-------CFN=7--------&gt;|MIC checked =&gt;
+          |&lt;-------ACK----------|bitmap:11010000
+          |-------CFN=4--------&gt;|MIC checked =&gt;
+          |&lt;-------ACK----------|no bitmap
+        (End)    
+      
+</pre>
+<p class="figure">Figure 18: Transmission of an IPv6 packet carried by 11 fragments in Reliable, window mode, positive-ACK-oriented; with three losses.</p>
 <h1 id="rfc.section.9"><a href="#rfc.section.9">9.</a> <a href="#security-considerations" id="security-considerations">Security considerations</a></h1>
 <h1 id="rfc.section.9.1"><a href="#rfc.section.9.1">9.1.</a> <a href="#security-considerations-for-header-compression" id="security-considerations-for-header-compression">Security considerations for header compression</a></h1>
 <p id="rfc.section.9.1.p.1">TBD</p>
@@ -815,8 +1009,8 @@ address {
 <p id="rfc.section.10.p.2">In the fragmentation section, the authors have reused parts of text available in section 5.3 of RFC 4944, and would like to thank the authors of RFC 4944.</p>
 <p id="rfc.section.10.p.3">Carles Gomez has been funded in part by the Spanish Government (Ministerio de Educacion, Cultura y Deporte) through the Jose Castillejo grant CAS15/00336, and by the ERDF and the Spanish Government through project TEC2016-79988-P.  Part of his contribution to this work has been carried out during his stay as a visiting scholar at the Computer Laboratory of the University of Cambridge.</p>
 <h1 id="rfc.section.11"><a href="#rfc.section.11">11.</a> <a href="#appendix-a-protocol-constants" id="appendix-a-protocol-constants">Appendix A. Protocol Constants</a></h1>
-<p id="rfc.section.11.p.1">The recommended values of R, N and M for LoRaWAN and Sigfox are shown in <a href="#Fig-AppendixTable">Figure 11</a>.</p>
-<div id="rfc.figure.11"/>
+<p id="rfc.section.11.p.1">The recommended values of R, N and M for LoRaWAN and Sigfox are shown in <a href="#Fig-AppendixTable">Figure 19</a>.</p>
+<div id="rfc.figure.19"/>
 <div id="Fig-AppendixTable"/>
 <pre>
                       +--------+---------+---------+
@@ -827,7 +1021,7 @@ address {
            | Sigfox   |  TBD   |   TBD   |   TBD   |
            +----------+--------+---------+---------+
 </pre>
-<p class="figure">Figure 11: Fragmentation header field sizes</p>
+<p class="figure">Figure 19: Fragmentation header field sizes</p>
 <p id="rfc.section.11.p.2">Recommended values for other protocol constants are shown next:</p>
 <p id="rfc.section.11.p.3">MAX_NACKS_PER_IPv6_PACKET             TBD</p>
 <p id="rfc.section.11.p.4">NACK_WAIT                                     TBD  seconds</p>
@@ -990,10 +1184,16 @@ address {
 <li>8.3.   <a href="#rfc.section.8.3">Fragmentation header formats</a></li>
 <li>8.4.   <a href="#rfc.section.8.4">Unreliable</a></li>
 <ul><li>8.4.1.   <a href="#rfc.section.8.4.1">Receiver and sender behavior for Unreliable</a></li>
+<li>8.4.2.   <a href="#rfc.section.8.4.2">Example</a></li>
 </ul><li>8.5.   <a href="#rfc.section.8.5">Reliable</a></li>
 <ul><li>8.5.1.   <a href="#rfc.section.8.5.1">NACK format</a></li>
 <li>8.5.2.   <a href="#rfc.section.8.5.2">Sender behavior in Reliable</a></li>
 <li>8.5.3.   <a href="#rfc.section.8.5.3">Receiver behavior in Reliable</a></li>
+<li>8.5.4.   <a href="#rfc.section.8.5.4">Examples</a></li>
+</ul><li>8.6.   <a href="#rfc.section.8.6">Further examples of reliable fragment delivery mechanisms (for discussion)</a></li>
+<ul><li>8.6.1.   <a href="#rfc.section.8.6.1">Reliable, window mode, NACK-oriented</a></li>
+<li>8.6.2.   <a href="#rfc.section.8.6.2">Reliable, packet mode, ACK-oriented</a></li>
+<li>8.6.3.   <a href="#rfc.section.8.6.3">Reliable, window mode, ACK-oriented</a></li>
 </ul></ul><li>9.   <a href="#rfc.section.9">Security considerations</a></li>
 <ul><li>9.1.   <a href="#rfc.section.9.1">Security considerations for header compression</a></li>
 <li>9.2.   <a href="#rfc.section.9.2">Security considerations for fragmentation</a></li>
