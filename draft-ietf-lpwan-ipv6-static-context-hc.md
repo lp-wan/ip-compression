@@ -992,7 +992,7 @@ by such event.
 
 # Acknowledgements
 
-Thanks to Dominique Barthel, arsten Bormann, Arunprabhu Kandasamy, Antony Markovski, Alexander
+Thanks to Dominique Barthel, Carsten Bormann, Arunprabhu Kandasamy, Antony Markovski, Alexander
 Pelov, Pascal Thubert, Juan Carlos Zuniga for useful design
 consideration.
 
