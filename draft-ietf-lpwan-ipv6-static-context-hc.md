@@ -992,8 +992,8 @@ by such event.
 
 # Acknowledgements
 
-Thanks to Dominique Barthel, Arunprabhu Kandasamy, Antony Markovski, Alexander
-Pelov, Juan Carlos Zuniga for useful design
+Thanks to Dominique Barthel, arsten Bormann, Arunprabhu Kandasamy, Antony Markovski, Alexander
+Pelov, Pascal Thubert, Juan Carlos Zuniga for useful design
 consideration.
 
 In the fragmentation section, the authors have reused parts of text
