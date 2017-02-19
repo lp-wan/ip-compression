@@ -977,6 +977,7 @@ reassembled payload datagrams.
 ### Examples
 {{Fig-Example-Rel-NoLoss}} illustrates the transmission of an IPv6 packet that needs 11 fragments
 in Reliable, for N=3, without losses.
+
 ~~~~       
         Sender               Receiver
           |-------CFN=6-------->|
@@ -998,6 +999,7 @@ in Reliable, for N=3, without losses.
 in Reliable, for N=3, with three losses. Fragment renumbering is applied to retransmitted fragments.
 The receiver knows that retransmitted fragments, (a), (b) and (c) in the figure, correspond to 
 the missing fragments, (a), (b) and (c), respectively.
+
 ~~~~       
         Sender               Receiver
           |-------CFN=6-------->|
@@ -1030,6 +1032,7 @@ to be specified will be decided based on WG feedback.\]\]
 
 {{Fig-Example-Rel-Window-NACK-Loss}} illustrates the transmission of an IPv6 packet that needs 11 fragments
 in Reliable, window mode, for N=3, with three losses. Receiver feedback is NACK-oriented.
+
 ~~~~       
         Sender               Receiver
           |-------CFN=6-------->|
@@ -1057,6 +1060,7 @@ in Reliable, window mode, for N=3, with three losses. Receiver feedback is NACK-
 
 {{Fig-Example-Rel-Packet-ACK-NoLoss}} illustrates the transmission of an IPv6 packet that needs 11 fragments
 in Reliable, packet mode, for N=3, without losses. Receiver feedback is positive-ACK-oriented.
+
 ~~~~       
         Sender               Receiver
           |-------CFN=6-------->|
@@ -1078,6 +1082,7 @@ in Reliable, packet mode, for N=3, without losses. Receiver feedback is positive
 
 {{Fig-Example-Rel-Packet-ACK-Loss}} illustrates the transmission of an IPv6 packet that needs 11 fragments
 in Reliable, packet mode, for N=3, with three losses. Receiver feedback is positive-ACK-oriented.
+
 ~~~~       
         Sender               Receiver
           |-------CFN=6-------->|
@@ -1105,6 +1110,7 @@ in Reliable, packet mode, for N=3, with three losses. Receiver feedback is posit
 
 {{Fig-Example-Rel-Window-ACK-NoLoss}} illustrates the transmission of an IPv6 packet that needs 11 fragments
 in Reliable, packet mode, for N=3, without losses. Receiver feedback is positive-ACK-oriented.
+
 ~~~~       
         Sender               Receiver
           |-------CFN=6-------->|
@@ -1127,6 +1133,7 @@ in Reliable, packet mode, for N=3, without losses. Receiver feedback is positive
 
 {{Fig-Example-Rel-Window-ACK-Loss}} illustrates the transmission of an IPv6 packet that needs 11 fragments
 in Reliable, packet mode, for N=3, with three losses. Receiver feedback is positive-ACK-oriented.
+
 ~~~~       
         Sender               Receiver
           |-------CFN=6-------->|
