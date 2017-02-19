@@ -797,6 +797,7 @@ The recipient of link fragments SHALL use (1) the sender's L2 source
 ### Example
 {{Fig-Example-Unreliable}} illustrates the transmission of an IPv6 packet that needs 11 fragments
 in Unreliable.
+
 ~~~~       
         Sender               Receiver
           |-------CFN=0-------->|
