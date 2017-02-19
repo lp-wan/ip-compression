@@ -687,10 +687,10 @@ fragments. If all fragments carrying the IPv6 packet are successfully received,
 the receiver SHALL NOT send a NACK. If the sender does not receive a NACK, 
 it assumes that all fragments carrying the IPv6 packet were successfully delivered.
 
-[[Note: this version of the draft specification illustrates several options for 
+\[\[Note: this version of the draft specification illustrates several options for 
 fragment delivery reliability for further discussion; while in this version details 
 for packet mode, NACK-oriented fragment reliable delivery are provided,
-the reliable fragment delivery option(s) to be specified will be decided based on WG feedback.]]
+the reliable fragment delivery option(s) to be specified will be decided based on WG feedback.\]\]
 
 ## Fragment format
 
@@ -1020,10 +1020,10 @@ the missing fragments, (a), (b) and (c), respectively.
 
 ## Further examples of reliable fragment delivery mechanisms (for discussion)
 
-[[Note: this subsection illustrates several options for fragment delivery reliability
+\[\[Note: this subsection illustrates several options for fragment delivery reliability
 for further discussion; while the previous subsection provides details for packet mode, NACK-oriented 
 fragment reliable delivery are provided, the reliable fragment delivery option(s) 
-to be specified will be decided based on WG feedback.]]
+to be specified will be decided based on WG feedback.\]\]
 
 ### Reliable, window mode, NACK-oriented
 
