@@ -332,7 +332,7 @@ address {
 
   <meta name="dct.creator" content="Minaburo, A., Toutain, L., and C. Gomez" />
   <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-lpwan-ipv6-static-context-hc-latest" />
-  <meta name="dct.issued" scheme="ISO8601" content="2017-2-16" />
+  <meta name="dct.issued" scheme="ISO8601" content="2017-2-19" />
   <meta name="dct.abstract" content="This document describes a header compression scheme and fragmentation functionality for IPv6/UDP protocols. These techniques are especially tailored for LPWA networks and could be extended to other protocol stacks." />
   <meta name="description" content="This document describes a header compression scheme and fragmentation functionality for IPv6/UDP protocols. These techniques are especially tailored for LPWA networks and could be extended to other protocol stacks." />
 
@@ -356,7 +356,7 @@ address {
   <td class="right">L. Toutain</td>
 </tr>
 <tr>
-  <td class="left">Expires: August 20, 2017</td>
+  <td class="left">Expires: August 23, 2017</td>
   <td class="right">IMT-Atlantique</td>
 </tr>
 <tr>
@@ -369,7 +369,7 @@ address {
 </tr>
 <tr>
   <td class="left"></td>
-  <td class="right">February 16, 2017</td>
+  <td class="right">February 19, 2017</td>
 </tr>
 
     	
@@ -391,7 +391,7 @@ address {
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at http://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on August 20, 2017.</p>
+<p>This Internet-Draft will expire on August 23, 2017.</p>
 <h1 id="rfc.copyrightnotice">
   <a href="#rfc.copyrightnotice">Copyright Notice</a>
 </h1>
@@ -707,10 +707,12 @@ address {
 <p id="rfc.section.7.1.p.6">The third rule compresses port numbers on 4 bits.</p>
 <h1 id="rfc.section.8"><a href="#rfc.section.8">8.</a> <a href="#fragmentation" id="fragmentation">Fragmentation</a></h1>
 <h1 id="rfc.section.8.1"><a href="#rfc.section.8.1">8.1.</a> <a href="#overview" id="overview">Overview</a></h1>
-<p id="rfc.section.8.1.p.1">If an entire payload (e.g., IPv6) datagram fits within a single L2 data unit, it is unfragmented and a fragmentation header is not needed.  If the datagram does not fit within a single L2 data unit, it SHALL be broken into fragments.</p>
-<p id="rfc.section.8.1.p.2">This specification defines two fragment delivery reliability options, namely: Unreliable and Reliable. The same reliability option MUST be used for all fragments of a packet.</p>
-<p id="rfc.section.8.1.p.3">In Unreliable, the receiver SHALL NOT issue acknowledgments and the sender SHALL NOT perform fragment transmission retries.</p>
-<p id="rfc.section.8.1.p.4">In Reliable, if the fragment receiver detects any missing fragments from the transported IPv6 packet, the receiver transmits one negative acknowledgment (NACK) which informs the sender about received and missing fragments from the IPv6 packet. Upon receipt of a NACK, the sender selectively retransmits the missing fragments. If all fragments carrying the IPv6 packet are successfully received, the receiver SHALL NOT send a NACK. If the sender does not receive a NACK, it assumes that all fragments carrying the IPv6 packet were successfully delivered.</p>
+<p id="rfc.section.8.1.p.1">Fragmentation in LPWAN is mandatory to satisfy the IPv6 MTU requirement.  In fact, the L2 data unit maximum payload in LPWAN technologies typically varies from tens to hundreds of bytes.  If an entire payload (e.g., IPv6) datagram fits within a single L2 data unit, it is unfragmented and a fragmentation header is not needed.  If the datagram does not fit within a single L2 data unit, it SHALL be broken into fragments.</p>
+<p id="rfc.section.8.1.p.2">On the other hand, LPWAN technologies impose some strict limitations on traffic; therefore it is desirable to enable optional fragment retransmission, while a single fragment loss should not lead to retransmitting the full datagram.  To preserve energy, Things (a.k.a. End Systems) are sleeping most of the time and may receive data during a short period after transmission.</p>
+<p id="rfc.section.8.1.p.3">This specification defines two main fragment delivery reliability options, namely: Unreliable and Reliable. The same reliability option MUST be used for all fragments of a packet.</p>
+<p id="rfc.section.8.1.p.4">In Unreliable, the receiver SHALL NOT issue acknowledgments and the sender SHALL NOT perform fragment transmission retries.</p>
+<p id="rfc.section.8.1.p.5">In Reliable, two suboptions are defined, namely: packet mode and window mode.  In packet mode, if the fragment receiver detects missing fragments from the transported IPv6 packet, the receiver transmits one negative acknowledgment (NACK) after reception of the last fragment, which informs the sender about received and missing fragments from the IPv6 packet. In window mode, the NACK is sent after a window of fragments have been sent, if missing fragments are detected within the window.  A window of fragments is a subset of the fragments needed to carry an IPv6 packet.</p>
+<p id="rfc.section.8.1.p.6">Upon receipt of a NACK, the sender selectively retransmits the missing fragments. If all fragments carrying the IPv6 packet are successfully received, the receiver SHALL NOT send a NACK. If the sender does not receive a NACK, it assumes that all fragments carrying the IPv6 packet were successfully delivered.</p>
 <h1 id="rfc.section.8.2"><a href="#rfc.section.8.2">8.2.</a> <a href="#fragment-format" id="fragment-format">Fragment format</a></h1>
 <p id="rfc.section.8.2.p.1">A fragment comprises a fragmentation header and a fragment payload, and conforms to the format shown in <a href="#Fig-FragFormat">Figure 6</a>. The fragment payload carries a subset of the IPv6 packet after header compression. A fragment is the payload in the L2 protocol data unit (PDU).</p>
 <div id="rfc.figure.6"/>
@@ -744,7 +746,7 @@ address {
                        +----- ... -----+-- ... --+---- ... ----+
 </pre>
 <p class="figure">Figure 8: Fragmentation Header for the Last Fragment</p>
-<p id="rfc.section.8.3.p.3">Rule ID: this field has a size of  R &#8211; N  bits in all fragments. Rule ID SHALL be set to one of the following values: a) TBD_UNREL_A: for Unreliable, when the fragment is not the last one; b) TBD_UNREL_B: for Unreliable, when the fragment is the last one; c) TBD_REL_A: for Reliable, when the fragment is not the last one; d) TBD_REL_B: for Reliable, when the fragment is the last one.</p>
+<p id="rfc.section.8.3.p.3">Rule ID: this field has a size of  R &#8211; N  bits in all fragments. For Reliable, Rule ID SHALL be set to one of the following values: a) TBD_REL_WIN_A: for Reliable, window mode, when the fragment is not the last one; b) TBD_REL_WIN_B: for Reliable, window mode, when the fragment is the last one.  c) TBD_REL_PCK_A: for Reliable, packet mode, when the fragment is not the last one.  d) TBD_REL_PCK_B: for Reliable, packet mode, when the fragment is the last one.</p>
 <p id="rfc.section.8.3.p.4">CFN:  CFN stands for Compressed Fragment Number. The size of the CFN field is N bits. This field is an unsigned integer that carries a non-absolute fragment number.  The CFN SHALL be set sequentially decreasing from 2^N - 2 for the first fragment, and SHALL wrap from 0 back to 2^N - 2. The CFN for the last fragment has all bits set to 1.  In Unreliable, N=1. In Reliable, N &gt;= 3.</p>
 <p id="rfc.section.8.3.p.5">MIC:  MIC stands for Message Integrity Check. This field has a size of M bits. It is computed by the sender over the complete IPv6 packet before fragmentation by using the TBD algorithm.</p>
 <h1 id="rfc.section.8.4"><a href="#rfc.section.8.4">8.4.</a> <a href="#unreliable" id="unreliable">Unreliable</a></h1>
