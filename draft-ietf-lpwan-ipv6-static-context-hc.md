@@ -1031,7 +1031,8 @@ to be specified will be decided based on WG feedback.\]\]
 ### Reliable, window mode, NACK-oriented
 
 {{Fig-Example-Rel-Window-NACK-Loss}} illustrates the transmission of an IPv6 packet that needs 11 fragments
-in Reliable, window mode, for N=3, with three losses. Receiver feedback is NACK-oriented.
+in Reliable, window mode, for N=3, with three losses. Receiver feedback is NACK-oriented. Note: in window mode,
+an additional bit will be needed to number windows.
 
 ~~~~       
         Sender               Receiver
@@ -1109,7 +1110,8 @@ in Reliable, packet mode, for N=3, with three losses. Receiver feedback is posit
 ### Reliable, window mode, ACK-oriented
 
 {{Fig-Example-Rel-Window-ACK-NoLoss}} illustrates the transmission of an IPv6 packet that needs 11 fragments
-in Reliable, packet mode, for N=3, without losses. Receiver feedback is positive-ACK-oriented.
+in Reliable, window mode, for N=3, without losses. Receiver feedback is positive-ACK-oriented. Note: in window mode,
+an additional bit will be needed to number windows.
 
 ~~~~       
         Sender               Receiver
@@ -1132,7 +1134,8 @@ in Reliable, packet mode, for N=3, without losses. Receiver feedback is positive
 {: #Fig-Example-Rel-Window-ACK-NoLoss title='Transmission of an IPv6 packet carried by 11 fragments in Reliable, window mode, positive-ACK-oriented; no losses.'}
 
 {{Fig-Example-Rel-Window-ACK-Loss}} illustrates the transmission of an IPv6 packet that needs 11 fragments
-in Reliable, packet mode, for N=3, with three losses. Receiver feedback is positive-ACK-oriented.
+in Reliable, window mode, for N=3, with three losses. Receiver feedback is positive-ACK-oriented. Note: in window mode,
+an additional bit will be needed to number windows.
 
 ~~~~       
         Sender               Receiver
