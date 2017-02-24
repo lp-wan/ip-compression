@@ -5,10 +5,10 @@
 lpwan Working Group                                          A. Minaburo
 Internet-Draft                                                    Acklio
 Intended status: Informational                                L. Toutain
-Expires: August 24, 2017                                  IMT-Atlantique
+Expires: August 28, 2017                                  IMT-Atlantique
                                                                 C. Gomez
                                     Universitat Politecnica de Catalunya
-                                                       February 20, 2017
+                                                       February 24, 2017
 
 
   LPWAN Static Context Header Compression (SCHC) and fragmentation for
@@ -48,12 +48,12 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on August 24, 2017.
+   This Internet-Draft will expire on August 28, 2017.
 
 
 
 
-Minaburo, et al.         Expires August 24, 2017                [Page 1]
+Minaburo, et al.         Expires August 28, 2017                [Page 1]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
@@ -109,7 +109,7 @@ Copyright Notice
 
 
 
-Minaburo, et al.         Expires August 24, 2017                [Page 2]
+Minaburo, et al.         Expires August 28, 2017                [Page 2]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
@@ -165,7 +165,7 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
 
 
-Minaburo, et al.         Expires August 24, 2017                [Page 3]
+Minaburo, et al.         Expires August 28, 2017                [Page 3]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
@@ -221,7 +221,7 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
 
 
-Minaburo, et al.         Expires August 24, 2017                [Page 4]
+Minaburo, et al.         Expires August 28, 2017                [Page 4]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
@@ -277,7 +277,7 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
 
 
-Minaburo, et al.         Expires August 24, 2017                [Page 5]
+Minaburo, et al.         Expires August 28, 2017                [Page 5]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
@@ -333,7 +333,7 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
 
 
-Minaburo, et al.         Expires August 24, 2017                [Page 6]
+Minaburo, et al.         Expires August 28, 2017                [Page 6]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
@@ -389,7 +389,7 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
 
 
-Minaburo, et al.         Expires August 24, 2017                [Page 7]
+Minaburo, et al.         Expires August 28, 2017                [Page 7]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
@@ -401,8 +401,7 @@ Internet-Draft                 LPWAN SCHC                  February 2017
    |not-sent            |elided       |use value stored in ctxt   |
    |value-sent          |send         |build from received value  |
    |LSB(length)         |send LSB     |ctxt value OR rcvd value   |
-   |compute-IPv6-length |elided       |compute IPv6 length        |
-   |compute-UDP-length  |elided       |compute UDP length         |
+   |compute-length      |elided       |compute length             |
    |compute-UDP-checksum|elided       |compute UDP checksum       |
    |ESiid-DID           |elided       |build IID from L2 ES addr  |
    |LAiid-DID           |elided       |build IID from L2 LA addr  |
@@ -441,17 +440,15 @@ Internet-Draft                 LPWAN SCHC                  February 2017
    known by both end.  The value is sent in the compressed message
    header.  Both ends must know the size of the field, either
    implicitely (the size is known by both sides) or explicitely in the
+   compressed header field by indicating the length.  This function is
+   generally used with the "ignore" MO.
 
 
 
-
-Minaburo, et al.         Expires August 24, 2017                [Page 8]
+Minaburo, et al.         Expires August 28, 2017                [Page 8]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
-
-   compressed header field by indicating the length.  This function is
-   generally used with the "ignore" MO.
 
    The compressor sends the Target Value stored on the rule in the
    compressed header message.  The decompressor restores the field value
@@ -492,22 +489,22 @@ Internet-Draft                 LPWAN SCHC                  February 2017
    information.  They are elided during the compression and
    reconstructed during the decompression.
 
-   o  compute-ipv6-length: compute the IPv6 length field as described in
-      [RFC2460].
-
-   o  compute-udp-length: compute the IPv6 length field as described in
-      [RFC0768].
-
-
-
-
-Minaburo, et al.         Expires August 24, 2017                [Page 9]
-
-Internet-Draft                 LPWAN SCHC                  February 2017
-
+   o  compute-length: compute the length assigned to this field.  For
+      instance, regarding the field ID, this CDF may be used to compute
+      IPv6 length or UDP length.
 
    o  compute-udp-checksum: compute the IPv6 length field as described
       in [RFC0768].
+
+
+
+
+
+
+Minaburo, et al.         Expires August 28, 2017                [Page 9]
+
+Internet-Draft                 LPWAN SCHC                  February 2017
+
 
 6.  Application to IPv6 and UDP headers
 
@@ -553,17 +550,17 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
    If the LPWAN technology does not add padding, this field can be
    elided for the transmission on the LPWAN network.  The LC recompute
+   the original payload length value.  The TV is not set, the MO is set
+   to "ignore" and the CDF is "compute-IPv6-length".
 
 
 
 
-Minaburo, et al.         Expires August 24, 2017               [Page 10]
+
+Minaburo, et al.         Expires August 28, 2017               [Page 10]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
-
-   the original payload length value.  The TV is not set, the MO is set
-   to "ignore" and the CDF is "compute-IPv6-length".
 
    If the payload is small, the TV can be set to 0x0000, the MO set to
    "MSB (16-s)" and the CDF to "LSB (s)".  The s parameter depends of
@@ -609,17 +606,17 @@ Internet-Draft                 LPWAN SCHC                  February 2017
    specific flow, the source and destination prefix can be unique and
    stored in the context.  It can be either a link-local prefix or a
    global prefix.  In that case, the TV for the source and destination
+   prefixes contains the values, the MO is set to "equal" and the CDF is
+   set to "not-sent".
 
 
 
 
-Minaburo, et al.         Expires August 24, 2017               [Page 11]
+
+Minaburo, et al.         Expires August 28, 2017               [Page 11]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
-
-   prefixes contains the values, the MO is set to "equal" and the CDF is
-   set to "not-sent".
 
    In case the rule allows several prefixes, the static mapping must be
    used.  The different prefixes are listed in the TV associated with a
@@ -665,17 +662,17 @@ Internet-Draft                 LPWAN SCHC                  February 2017
    To allow a single rule, these values are identified by their role (ES
    or LA) and not by their position in the frame (source or
    destination).  The LC must be aware of the traffic direction
+   (upstream, downstream) to select the appropriate field.  The
+   following rules apply for ES and LA port numbers.
 
 
 
 
-Minaburo, et al.         Expires August 24, 2017               [Page 12]
+
+Minaburo, et al.         Expires August 28, 2017               [Page 12]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
-
-   (upstream, downstream) to select the appropriate field.  The
-   following rules apply for ES and LA port numbers.
 
    If both ends knows the port number, it can be elided.  The TV
    contains the port number, the MO is set to "equal" and the CDF is set
@@ -725,7 +722,10 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
 
 
-Minaburo, et al.         Expires August 24, 2017               [Page 13]
+
+
+
+Minaburo, et al.         Expires August 28, 2017               [Page 13]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
@@ -781,7 +781,7 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
 
 
-Minaburo, et al.         Expires August 24, 2017               [Page 14]
+Minaburo, et al.         Expires August 28, 2017               [Page 14]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
@@ -837,7 +837,7 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
 
 
-Minaburo, et al.         Expires August 24, 2017               [Page 15]
+Minaburo, et al.         Expires August 28, 2017               [Page 15]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
@@ -893,7 +893,7 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
 
 
-Minaburo, et al.         Expires August 24, 2017               [Page 16]
+Minaburo, et al.         Expires August 28, 2017               [Page 16]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
@@ -949,7 +949,7 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
 
 
-Minaburo, et al.         Expires August 24, 2017               [Page 17]
+Minaburo, et al.         Expires August 28, 2017               [Page 17]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
@@ -1005,7 +1005,7 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
 
 
-Minaburo, et al.         Expires August 24, 2017               [Page 18]
+Minaburo, et al.         Expires August 28, 2017               [Page 18]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
@@ -1061,7 +1061,7 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
 
 
-Minaburo, et al.         Expires August 24, 2017               [Page 19]
+Minaburo, et al.         Expires August 28, 2017               [Page 19]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
@@ -1117,7 +1117,7 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
 
 
-Minaburo, et al.         Expires August 24, 2017               [Page 20]
+Minaburo, et al.         Expires August 28, 2017               [Page 20]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
@@ -1173,7 +1173,7 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
 
 
-Minaburo, et al.         Expires August 24, 2017               [Page 21]
+Minaburo, et al.         Expires August 28, 2017               [Page 21]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
@@ -1229,7 +1229,7 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
 
 
-Minaburo, et al.         Expires August 24, 2017               [Page 22]
+Minaburo, et al.         Expires August 28, 2017               [Page 22]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
@@ -1285,7 +1285,7 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
 
 
-Minaburo, et al.         Expires August 24, 2017               [Page 23]
+Minaburo, et al.         Expires August 28, 2017               [Page 23]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
@@ -1341,7 +1341,7 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
 
 
-Minaburo, et al.         Expires August 24, 2017               [Page 24]
+Minaburo, et al.         Expires August 28, 2017               [Page 24]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
@@ -1397,7 +1397,7 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
 
 
-Minaburo, et al.         Expires August 24, 2017               [Page 25]
+Minaburo, et al.         Expires August 28, 2017               [Page 25]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
@@ -1453,7 +1453,7 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
 
 
-Minaburo, et al.         Expires August 24, 2017               [Page 26]
+Minaburo, et al.         Expires August 28, 2017               [Page 26]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
@@ -1509,7 +1509,7 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
 
 
-Minaburo, et al.         Expires August 24, 2017               [Page 27]
+Minaburo, et al.         Expires August 28, 2017               [Page 27]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
@@ -1565,7 +1565,7 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
 
 
-Minaburo, et al.         Expires August 24, 2017               [Page 28]
+Minaburo, et al.         Expires August 28, 2017               [Page 28]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
@@ -1621,7 +1621,7 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
 
 
-Minaburo, et al.         Expires August 24, 2017               [Page 29]
+Minaburo, et al.         Expires August 28, 2017               [Page 29]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
@@ -1677,7 +1677,7 @@ Internet-Draft                 LPWAN SCHC                  February 2017
 
 
 
-Minaburo, et al.         Expires August 24, 2017               [Page 30]
+Minaburo, et al.         Expires August 28, 2017               [Page 30]
 
 Internet-Draft                 LPWAN SCHC                  February 2017
 
@@ -1733,4 +1733,4 @@ Authors' Addresses
 
 
 
-Minaburo, et al.         Expires August 24, 2017               [Page 31]
+Minaburo, et al.         Expires August 28, 2017               [Page 31]
