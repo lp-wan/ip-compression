@@ -289,8 +289,7 @@ the original value.
 |not-sent            |elided       |use value stored in ctxt   |
 |value-sent          |send         |build from received value  |
 |LSB(length)         |send LSB     |ctxt value OR rcvd value   |
-|compute-IPv6-length |elided       |compute IPv6 length        |
-|compute-UDP-length  |elided       |compute UDP length         |
+|compute-length      |elided       |compute length             |
 |compute-UDP-checksum|elided       |compute UDP checksum       |
 |ESiid-DID           |elided       |build IID from L2 ES addr  |
 |LAiid-DID           |elided       |build IID from L2 LA addr  |
@@ -363,9 +362,8 @@ The decompressor uses this index to restore the field value.
 These functions compute the field value based on received information. They
 are elided during the compression and reconstructed during the decompression.
 
-* compute-ipv6-length: compute the IPv6 length field as described in {{RFC2460}}.
-
-* compute-udp-length: compute the IPv6 length field as described in {{RFC0768}}.
+* compute-length: compute the length assigned to this field. For instance, regarding
+  the field ID, this CDF may be used to compute IPv6 length or UDP length.
 
 * compute-udp-checksum: compute the IPv6 length field as described in {{RFC0768}}.
 
