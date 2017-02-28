@@ -665,30 +665,35 @@ a single fragment loss should not lead to retransmitting the full datagram.
 To preserve energy, Things (a.k.a. End Systems) are sleeping most of the time 
 and may receive data during a short period after transmission. 
 
-This specification defines two main fragment delivery reliability options, 
+This specification enables two main fragment delivery reliability options, 
 namely: Unreliable and Reliable. The same reliability option MUST be 
 used for all fragments of a packet.
 
-In Unreliable, the receiver SHALL NOT issue acknowledgments and the sender
-SHALL NOT perform fragment transmission retries.
+In Unreliable, the receiver MUST NOT issue acknowledgments and the sender
+MUST NOT perform fragment transmission retries.
 
-In Reliable, there exist two suboptions, namely: packet mode and window mode. 
-In packet mode, if the fragment receiver detects missing fragments from the
-transported IPv6 packet, the receiver transmits one negative acknowledgment (NACK)
-after reception of the last fragment, which informs the sender about received and 
-missing fragments from the IPv6 packet. In window mode, the NACK is sent after a
-window of fragments have been sent, if missing fragments are detected within the window.
-A window of fragments is a subset of the fragments needed to carry an IPv6 packet.
+In Reliable, there exist two possible suboptions, namely: packet mode and window mode.
+In packet mode, the receiver may transmit one acknowledgment (ACK) after all fragments
+carrying an IPv6 packet have been transmitted. The ACK informs the sender about received
+and missing fragments from the IPv6 packet. In window mode, an ACK may be transmitted by 
+the fragment receiver after a window of fragments have been sent. A window of fragments is
+a subset of the fragments needed to carry an IPv6 packet. In this mode, the ACK informs the
+sender about received and missing fragments from the window of fragments. In either mode, 
+upon receipt of an ACK that informs about any lost fragments, the sender may retransmit the
+lost fragments. The maximum number of ACK and retransmission rounds is TBD. In Reliable, the
+same reliability suboption MUST be used for all fragments of a packet.
 
-Upon receipt of a NACK, the sender selectively retransmits the missing
-fragments. If all fragments carrying the IPv6 packet are successfully received,
-the receiver SHALL NOT send a NACK. If the sender does not receive a NACK, 
-it assumes that all fragments carrying the IPv6 packet were successfully delivered.
+Some LPWAN deployments may benefit from conditioning the creation and transmission of an ACK
+to the detection of at least one fragment loss (per-packet or per-window), thus leading to
+negative ACK (NACK)-oriented behavior, while not having such condition may be preferred for other scenarios.
 
-\[\[Note: this version of the draft specification illustrates several options for 
-fragment delivery reliability for further discussion; while in this version details 
-for packet mode, NACK-oriented fragment reliable delivery are provided,
-the reliable fragment delivery option(s) to be specified will be decided based on WG feedback.\]\]
+This document does not make any decision as to whether Unreliable or Reliable are used, or 
+whether in Reliable a fragment receiver generates ACKs per packet or per window, or whether
+the transmission of such ACKs is conditioned to the detection of fragment losses or not. 
+A complete specification of the receiver and sender behaviors that correspond to each 
+acknowledgment policy is also out of scope. Nevertheless, this document does provide 
+examples of the different reliability options described.
+
 
 ## Fragment format
 
@@ -733,66 +738,124 @@ Fragments except the last one SHALL
 
 
    Rule ID: this field has a size of  R – N  bits in all 
-      fragments. For Reliable, Rule ID SHALL be set to one of the following values:
-      a) TBD_REL_WIN_A: for Reliable, window mode, when the fragment is not the last one;
-      b) TBD_REL_WIN_B: for Reliable, window mode, when the fragment is the last one.
-      c) TBD_REL_PCK_A: for Reliable, packet mode, when the fragment is not the last one.
-      d) TBD_REL_PCK_B: for Reliable, packet mode, when the fragment is the last one.
+      fragments. Rule ID may be used to signal whether Unreliable or Reliable are in use, 
+      and within the latter, whether window mode or packet mode are used.
 
-   CFN:  CFN stands for Compressed Fragment Number. The size of the CFN 
-      field is N bits. In Unreliable, N=1. In Reliable, N >= 3. 
-      This field is an unsigned integer that carries a non-absolute fragment number. 
-      The CFN SHALL be set sequentially decreasing from 2^N - 2 for the first 
-      fragment, and SHALL wrap from 0 back to 2^N - 2. The CFN for the 
-      last fragment has all bits set to 1. Note that, by this definition, 
-      the CFN value of 2^N - 1 is only used to identify a fragment as 
-      the last fragment carrying a subset of the IPv6 packet being transported, 
-      and thus the CFN does not strictly correspond to the N least significant bits
-      of the actual absolute fragment number. 
+   CFN:  CFN: CFN stands for Compressed Fragment Number. The size of the CFN field is N bits. 
+      In Unreliable, N=1. For Reliable, N equal to or greater than 3 is recommended. This field
+      is an unsigned integer that carries a non-absolute fragment number. The CFN MUST be set 
+      sequentially decreasing from 2^N - 2 for the first fragment, and MUST wrap from 0 back to
+      2^N - 2. The CFN for the last fragment has all bits set to 1. Note that, by this definition,
+      the CFN value of 2^N - 1 is only used to identify a fragment as the last fragment carrying a
+      subset of the IPv6 packet being transported, and thus the CFN does not strictly correspond to
+      the N least significant bits of the actual absolute fragment number. 
 
    MIC:  MIC stands for Message Integrity Check. This field has a size of M 
       bits. It is computed by 
       the sender over the complete IPv6 packet before fragmentation by 
       using the TBD algorithm.
 
-## Unreliable
+## ACK format
 
-### Receiver and sender behavior for Unreliable
+The format of an ACK is shown in {{Fig-ACK-Format}}:
 
-The recipient of link fragments SHALL use (1) the sender's L2 source
-   address (if present), (2) the destination's L2 address (if present), and
-   (3) Rule ID to identify all the fragments that belong to a given 
-   datagram. The fragment receiver SHALL use Rule ID to determine 
-   whether the fragment has to be handled as per the rules of Unreliable or 
-   Reliable fragment delivery.
+~~~~
+                          <-----  R  ---->
+                         +-+-+-+-+-+-+-+-+----- ... ---+
+                         |    Rule ID    |   bitmap    |
+                         +-+-+-+-+-+-+-+-+----- ... ---+
+~~~~
+{: #Fig-ACK-Format title='Format of an ACK'}
 
-   Upon receipt of a link fragment, the recipient starts constructing
-   the original unfragmented packet.  It uses the order 
-   of arrival of each fragment to determine the location of the individual 
-   fragments within the original unfragmented packet.  For example, it may 
-   place the data payload of the fragments within a payload datagram 
-   reassembly buffer at the location determined from the order of arrival 
-   and the fragment payload sizes.  Note that the size of the original, unfragmented 
-   IPv6 packet cannot be determined from fragmentation headers 
 
-   If a fragment recipient disassociates from its L2 network, the
-   recipient MUST discard all link fragments of all partially
-   reassembled payload datagrams, and fragment senders MUST discard all
-   not yet transmitted link fragments of all partially transmitted
-   payload (e.g., IPv6) datagrams.  Similarly, when a node first
-   receives a fragment of a packet, it starts a reassembly timer.
-   When this time expires, if the entire packet has not been
-   reassembled, the existing fragments MUST be discarded and the
-   reassembly state MUST be flushed.  The reassembly timeout MUST be set
-   to a maximum of TBD seconds).
+  Rule ID: In all ACKs, Rule ID has a size of R bits and SHALL be set to
+   TBD_ACK to signal that the message is an ACK.
 
-   Once the recipient has received the last fragment, it checks for the 
-   integrity of the reassembled IPv6 datagram, based on the MIC received. 
-   If the integrity check indicates that the reassembled IPv6 datagram does 
-   not match the original IPv6 datagram (prior to fragmentation), the 
-   reassembled IPv6 datagram MUST be discarded.
+  bitmap:  size of the bitmap field of an ACK can be equal to 0 or  
+   Ceiling(Number_of_Fragments/8) octets, where Number_of_Fragments denotes
+   the number of fragments of a window (in window mode) or the number of fragments
+   that carry the IPv6 packet (in packet mode). The bitmap is a sequence of bits,
+   where the n-th bit signals whether the n-th fragment transmitted has been 
+   correctly received (n-th bit set to 1) or not (n-th bit set to 0). Remaining bits
+   with bit order greater than the number of fragments sent (as determined by 
+   the receiver) are set to 0. Absence of the bitmap in an ACK confirms correct
+   reception of all fragments to be acknowledged by means of the ACK.
+   
+   {{Fig-Bitmap}} shows an example of an ACK in packet mode, where the bitmap 
+   indicates that the second and the ninth fragments have not been correctly 
+   received. In this example, the IPv6 packet is carried by eleven fragments 
+   in total, therefore the bitmap in has a size of two bytes. 
 
-### Example
+~~~~
+                                                       1
+                  <-----  R  ----> 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5
+                  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                  |    Rule ID    |1|0|1|1|1|1|1|1|0|1|1|0|0|0|0|0|
+                  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+~~~~
+{: #Fig-Bitmap title='Example of the Bitmap in an ACK'}
+
+{{Fig-Bitmap-Win}} shows an example of an ACK in window mode (N=3), where the bitmap
+indicates that the second and the fifth fragments have not been correctly received. 
+~~~~                                                  
+                  <-----  R  ----> 0 1 2 3 4 5 6 7 
+                  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                  |    Rule ID    |1|0|1|1|0|1|1|1|                   
+                  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+~~~~
+{: #Fig-Bitmap-Win title='Example of the bitmap in an ACK (in window mode, for N=3)'}
+
+{{Fig-NoBitmap}} illustrates an ACK without bitmap.
+~~~~
+                  <-----  R  ----> 
+                  +-+-+-+-+-+-+-+-+
+                  |    Rule ID    | 
+                  +-+-+-+-+-+-+-+-+
+~~~~
+{: #Fig-NoBitmap title='Example of an ACK without bitmap'}
+
+## Baseline mechanism
+
+The recipient of link fragments SHALL use (1) the sender’s L2 source address (if present),
+(2) the destination’s L2 address (if present), and (3) Rule ID to identify all the fragments
+that belong to a given datagram. The fragment receiver SHALL determine the fragment delivery
+reliability option in use for the fragment based on the Rule ID field in that fragment.
+
+Upon receipt of a link fragment, the recipient starts constructing the original
+unfragmented packet. It uses the CFN and the order of arrival of each fragment to
+determine the location of the individual fragments within the original unfragmented packet.
+For example, it may place the data payload of the fragments within a payload datagram 
+reassembly buffer at the location determined from the CFN and order of arrival of the 
+fragments, and the fragment payload sizes. Note that the size of the original, unfragmented
+IPv6 packet cannot be determined from fragmentation headers.
+
+In Reliable, when a fragment with all CFN bits set to 0 is received, the recipient MAY transmit
+an ACK for the last window of fragments sent. Note that the first fragment of the window is 
+the one sent with CFN=2^N-2. 
+
+Once the recipient has received the last fragment, it checks for the integrity of the 
+reassembled IPv6 datagram, based on the MIC received. In Unreliable, if the integrity 
+check indicates that the reassembled IPv6 datagram does not match the original IPv6 datagram
+(prior to fragmentation), the reassembled IPv6 datagram MUST be discarded. In Reliable, upon
+receipt of the last fragment, the recipient MAY transmit an ACK for the last window of fragments
+sent (window mode) or for the whole set of fragments sent that carry a complete IPv6 packet 
+(packet mode). In Reliable, the sender retransmits any lost fragments reported in the ACK. A maximum
+of TBD iterations of ACK and fragment retransmission rounds are allowed per-window or per-IPv6-packet
+in window mode or in packet mode, respectively. A complete specification of the mechanisms needed to
+enable the above described fragment delivery reliability options is out of the scope of this document.
+
+If a fragment recipient disassociates from its L2 network, the recipient MUST discard 
+all link fragments of all partially reassembled payload datagrams, and fragment senders 
+MUST discard all not yet transmitted link fragments of all partially transmitted payload
+(e.g., IPv6) datagrams. Similarly, when a node first receives a fragment of a packet, it starts
+a reassembly timer. When this time expires, if the entire packet has not been reassembled, 
+the existing fragments MUST be discarded and the reassembly state MUST be flushed. The reassembly
+timeout MUST be set to a maximum of TBD seconds).
+
+## Examples
+This section provides examples of different fragment delivery reliability options possible 
+on the basis of this specification.
+
 {{Fig-Example-Unreliable}} illustrates the transmission of an IPv6 packet that needs 11 fragments
 in Unreliable.
 
@@ -812,169 +875,9 @@ in Unreliable.
 ~~~~
 {: #Fig-Example-Unreliable title='Transmission of an IPv6 packet carried by 11 fragments in Unreliable'}
 
-## Reliable
 
-### NACK format
-
-The format of a NACK is shown in {{Fig-NACK-Format}}:
-
-~~~~
-                          <-----  R  ---->
-                         +-+-+-+-+-+-+-+-+----- ... ---+
-                         |    Rule ID    |   bitmap    |
-                         +-+-+-+-+-+-+-+-+----- ... ---+
-~~~~
-{: #Fig-NACK-Format title='Format of a NACK'}
-
-
-  Rule ID: In all NACKs, Rule ID has a size of R bits and SHALL be set to  
-      TBD_NACK to signal that the message is a NACK.
-
-  bitmap:  the bitmap field of a NACK has a size equal to 
-   Ceiling(Number_of_Fragments/8) octets, where 
-   Number_of_Fragments denotes the number of fragments that carry the IPv6 
-   packet. The bitmap is a sequence of bits, where the n-th bit signals 
-   whether the n-th fragment transmitted has been correctly received (n-th 
-   bit set to 1) or not (n-th bit set to 0). Remaining bits with bit order
-   greater than the number of fragments sent (as determined by the receiver) are
-   set to 0.
-   
-   {{Fig-Bitmap}} shows an example of a NACK, where the bitmap indicates that 
-   the second and the ninth fragments have not been correctly received. 
-   In this example, the IPv6 packet is carried by eleven fragments in total,
-   therefore the bitmap in this example has a size of two bytes. 
-
-~~~~
-                                                       1
-                  <-----  R  ----> 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5
-                  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                  |    Rule ID    |1|0|1|1|1|1|1|1|0|1|1|0|0|0|0|0|
-                  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-~~~~
-{: #Fig-Bitmap title='Example of the Bitmap in a NACK'}
-
-### Sender behavior in Reliable
-
-In Reliable, a sender MUST store a copy of the fragments 
-that will be sent to carry an IPv6 packet. The memory resources to store 
-those fragments SHALL be released as per the rules described below. 
-
-After transmission of all fragments that carry an IPv6 packet, the 
-sender waits for NACK_WAIT seconds for a possible incoming NACK. To this 
-end, after the last fragment has been transmitted, the sender 
-initializes a timer to NACK_WAIT seconds. If a NACK is not received 
-during the NACK_WAIT interval, the sender MUST assume successful delivery
-of all fragments and release the memory resources used to store the fragments. 
-
-If a NACK is received before expiration of the NACK wait timer, the fragment 
-sender processes the bitmap included in the NACK in order to determine which 
-fragments need to be resent. Since the bitmap size is a multiple of eight bits, 
-the fragment sender only takes into consideration the first F bitmap bits, where 
-F denotes the number of fragments sent, and it MUST ignore the remaining bits in
-the bitmap. 
-
-Once the fragments that need to be resent have been identified, the sender 
-renumbers these fragments, so that their CFN fields define a new sequence of
-fragment numbers, which SHALL be set sequentially starting from 0 for the first
-fragment, and SHALL wrap from 2^N - 2 back to 0. For example, if three fragments
-have to be resent, and with N=3, their CFNs will be set to 0, 1, and 7, respectively,
-regardless of their original CFN values. After fragment renumbering, the fragments 
-are resent. 
-
-After the transmission of the last retransmitted fragment, if the number of NACKs 
-received during the current IPv6 packet transmission is less than 
-MAX_NACKS_PER_IPv6_PACKET, the sender initializes a timer to NACK_WAIT seconds 
-to listen for a possible incoming NACK. In that case, if a NACK is not received 
-during the NACK_WAIT interval, the sender MUST assume successful delivery of all
-the fragments and release the memory resources used to store the fragments. 
-If a NACK is received before expiration of the NACK_WAIT timer, the fragment 
-sender processes the NACK by following the same approach as for the first NACK 
-received, and performs a new round of fragment retransmissions by iterating the
-procedure described for the first round of fragment retransmissions.  
-
-When the number of fragment retransmission rounds completed by the fragment sender
-equals MAX_NACKS_PER_IPv6_PACKET, the sender MUST NOT perform any further fragment
-retransmissions for the current IPv6 packet, and it MUST release the memory 
-resources used to store the fragments for the current IPv6 packet.
-
-If a fragment sender disassociates from its L2 network, it MUST discard 
-all not yet transmitted link fragments of all partially transmitted
-payload (e.g., IPv6) datagrams. 
-
-### Receiver behavior in Reliable
-
-The recipient of link fragments SHALL use (1) the sender's L2 
-Source address (if present), (2) the destination's L2 address (if 
-present), and (3) Rule ID and CFN to identify all the fragments that 
-belong to a given datagram. The fragment receiver SHALL use 
-Rule ID to determine whether the fragment has to be handled as per the 
-rules of Unreliable or Reliable fragment delivery.   
-
-Upon receipt of a link fragment, the recipient starts constructing
-the original, unfragmented packet.  It uses the CFN field and the order 
-of arrival of each fragment to determine the location of the individual 
-fragments within the original unfragmented packet.  For example, it may 
-place the data payload within a payload datagram reassembly buffer at 
-the location determined from the CFN, the received fragment payload 
-sizes and the order of arrival.  Note that the size of the original, unfragmented 
-IPv6 packet cannot be determined from fragmentation headers, and if non-
-continguous frame sequences are received, it is not always possible to 
-determine the size of the missing fragment(s).
-
-When a node first receives a fragment of a packet, it starts a reassembly timer.
-When this time expires, if the entire packet has not been
-reassembled, the existing fragments MUST be discarded and the
-reassembly state MUST be flushed.  The reassembly timeout MUST be set
-to a maximum of TBD seconds).
-
-Once the recipient of fragments has received the last fragment, if 
-the sequence of received fragments CFNs (except the special one used for 
-the last fragment) is composed of consecutive values, the fragment 
-receiver checks for the integrity of the reassembled IPv6 datagram, 
-based on the MIC received. 
-If the sequence of received fragments CFNs or the integrity check 
-indicate that the reassembled IPv6 datagram does 
-not match the original IPv6 datagram (prior to fragmentation), the 
-recipient creates and transmits a NACK to the fragment sender. The NACK 
-includes a bitmap that indicates successful or unsuccessful receipt for 
-each one of the fragments that carry the IPv6 packet. 
-
-After transmission of the NACK, and before expiration of the reassembly 
-timeout, if the fragment recipient receives further (retransmitted) fragments, 
-it uses the CFN and the order of arrival of each fragment to place the 
-corresponding payload in its correct location in the reassembly 
-buffer. Otherwise, the fragment recipient MUST NOT resend the last 
-transmitted NACK. 
-
-When the number of received retransmitted fragments equals the number of 
-missing fragments, and after placing the fragment payloads in their 
-correct location in the reassembly buffer, the fragment receiver 
-performs a new integrity check of the reassembled IPv6 datagram based on 
-the MIC received.  If the sequence of received fragments CFNs or the 
-integrity check indicate that the reassembled IPv6 datagram does 
-not match the original IPv6 datagram (prior to fragmentation), then two 
-situations can happen:
-
-*  If the number of NACKs sent by the receiver has reached 
-        MAX_NACKS_PER_IPv6_PACKET, all partially reassembled fragment payloads 
-        MUST be discarded. 
-
-*  If the number of NACKs sent by the receiver is less than 
-        MAX_NACKS_PER_IPv6_PACKET, the fragment receiver creates and transmits a 
-        NACK to the fragment sender. The NACK includes a bitmap that indicates 
-        currently successful or unsuccessful receipt for each one of the 
-        fragments that carry the IPv6 packet. The fragment recipient then 
-        iterates the operations after transmission of a NACK described in this 
-        section as long as the number of NACKs sent is less than 
-        MAX_NACKS_PER_IPv6_PACKET.
-
-If a fragment recipient disassociates from its L2 network, the
-recipient MUST discard all link fragments of all partially
-reassembled payload datagrams.
-
-### Examples
 {{Fig-Example-Rel-NoLoss}} illustrates the transmission of an IPv6 packet that needs 11 fragments
-in Reliable, for N=3, without losses.
+in Reliable, for N=3, NACK-oriented packet mode, without losses.
 
 ~~~~       
         Sender               Receiver
@@ -991,42 +894,52 @@ in Reliable, for N=3, without losses.
           |-------CFN=7-------->|MIC checked =>
        (no NACK)  
 ~~~~
-{: #Fig-Example-Rel-NoLoss title='Transmission of an IPv6 packet carried by 11 fragments in Reliable; no losses.'}
+{: #Fig-Example-Rel-NoLoss title='Transmission of an IPv6 packet carried by 11 fragments in Reliable,
+for N=3, NACK-oriented packet mode; no losses.'}
 
 {{Fig-Example-Rel-Loss}} illustrates the transmission of an IPv6 packet that needs 11 fragments
-in Reliable, for N=3, with three losses. Fragment renumbering is applied to retransmitted fragments.
-The receiver knows that retransmitted fragments, (a), (b) and (c) in the figure, correspond to 
-the missing fragments, (a), (b) and (c), respectively.
+in Reliable, for N=3, NACK-oriented packet mode, with three losses. 
 
 ~~~~       
         Sender               Receiver
           |-------CFN=6-------->|
           |-------CFN=5-------->|
-       (a)|-------CFN=4---X---->|
+          |-------CFN=4---X---->|
           |-------CFN=3-------->|
-       (b)|-------CFN=2---X---->|
+          |-------CFN=2---X---->|
           |-------CFN=1-------->|
           |-------CFN=0-------->|
           |-------CFN=6-------->|
           |-------CFN=5-------->|
-       (c)|-------CFN=4---X---->|
+          |-------CFN=4---X---->|
           |-------CFN=7-------->|MIC checked =>
           |<-------NACK---------|Bitmap:1101011110100000
-       (a)|-------CFN=6-------->|
-       (b)|-------CFN=5-------->|
-       (c)|-------CFN=7-------->|MIC checked => 
+          |-------CFN=4-------->|
+          |-------CFN=2-------->|
+          |-------CFN=4-------->|MIC checked => 
        (no NACK)   
 ~~~~
-{: #Fig-Example-Rel-Loss title='Transmission of an IPv6 packet carried by 11 fragments in Reliable; three losses.'}
+{: #Fig-Example-Rel-Loss title='Transmission of an IPv6 packet carried by 11 fragments in Reliable, for N=3, NACK-oriented packet mode; three losses.'}
 
-## Further examples of reliable fragment delivery mechanisms (for discussion)
+{{Fig-Example-Win-NoLoss-NACK}} illustrates the transmission of an IPv6 packet that needs 11 fragments in Reliable, window mode, for N=3, without losses. Receiver feedback is NACK-oriented. Note: in window mode, an additional bit will be needed to number windows.
 
-\[\[Note: this subsection illustrates several options for fragment delivery reliability
-for further discussion; while the previous subsection provides details for packet mode, NACK-oriented 
-fragment reliable delivery are provided, the reliable fragment delivery option(s) 
-to be specified will be decided based on WG feedback.\]\]
-
-### Reliable, window mode, NACK-oriented
+~~~~
+        Sender               Receiver
+          |-------CFN=6-------->|
+          |-------CFN=5-------->|
+          |-------CFN=4-------->|
+          |-------CFN=3-------->|
+          |-------CFN=2-------->|
+          |-------CFN=1-------->|
+          |-------CFN=0-------->|
+      (no NACK)
+          |-------CFN=6-------->|
+          |-------CFN=5-------->|
+          |-------CFN=4-------->|
+          |-------CFN=7-------->|MIC checked =>
+      (no NACK)
+~~~~
+{: #Fig-Example-Win-NoLoss-NACK title='Transmission of an IPv6 packet carried by 11 fragments in Reliable, for N=3, NACK-oriented window mode; without losses.'}
 
 {{Fig-Example-Rel-Window-NACK-Loss}} illustrates the transmission of an IPv6 packet that needs 11 fragments
 in Reliable, window mode, for N=3, with three losses. Receiver feedback is NACK-oriented. Note: in window mode,
@@ -1053,9 +966,7 @@ an additional bit will be needed to number windows.
           |-------CFN=4-------->|MIC checked =>
       (no NACK)    
 ~~~~
-{: #Fig-Example-Rel-Window-NACK-Loss title='Transmission of an IPv6 packet carried by 11 fragments in Reliable, window mode; three losses.'}
-
-### Reliable, packet mode, ACK-oriented
+{: #Fig-Example-Rel-Window-NACK-Loss title='Transmission of an IPv6 packet carried by 11 fragments in Reliable,  for N=3, NACK-oriented window mode; three losses.'}
 
 {{Fig-Example-Rel-Packet-ACK-NoLoss}} illustrates the transmission of an IPv6 packet that needs 11 fragments
 in Reliable, packet mode, for N=3, without losses. Receiver feedback is positive-ACK-oriented.
@@ -1077,7 +988,7 @@ in Reliable, packet mode, for N=3, without losses. Receiver feedback is positive
         (End)    
       
 ~~~~
-{: #Fig-Example-Rel-Packet-ACK-NoLoss title='Transmission of an IPv6 packet carried by 11 fragments in Reliable, packet mode, positive-ACK-oriented; no losses.'}
+{: #Fig-Example-Rel-Packet-ACK-NoLoss title='Transmission of an IPv6 packet carried by 11 fragments in Reliable, for N=3, packet mode, positive-ACK-oriented; no losses.'}
 
 {{Fig-Example-Rel-Packet-ACK-Loss}} illustrates the transmission of an IPv6 packet that needs 11 fragments
 in Reliable, packet mode, for N=3, with three losses. Receiver feedback is positive-ACK-oriented.
@@ -1086,24 +997,24 @@ in Reliable, packet mode, for N=3, with three losses. Receiver feedback is posit
         Sender               Receiver
           |-------CFN=6-------->|
           |-------CFN=5-------->|
-       (a)|-------CFN=4---X---->|
+          |-------CFN=4---X---->|
           |-------CFN=3-------->|
-       (b)|-------CFN=2---X---->|
+          |-------CFN=2---X---->|
           |-------CFN=1-------->|
           |-------CFN=0-------->|
           |-------CFN=6-------->|
           |-------CFN=5-------->|   
-       (c)|-------CFN=4---X---->|
+          |-------CFN=4---X---->|
           |-------CFN=7-------->|MIC checked =>
           |<-------ACK----------|bitmap:1101011110100000
-       (a)|-------CFN=6-------->|
-       (b)|-------CFN=5-------->|
-       (c)|-------CFN=7-------->|MIC checked =>
+          |-------CFN=4-------->|
+          |-------CFN=2-------->|
+          |-------CFN=4-------->|MIC checked =>
           |<-------ACK----------|no bitmap
-        (End)    
+        (End)
       
 ~~~~
-{: #Fig-Example-Rel-Packet-ACK-Loss title='Transmission of an IPv6 packet carried by 11 fragments in Reliable, packet mode, positive-ACK-oriented; with three losses.'}
+{: #Fig-Example-Rel-Packet-ACK-Loss title='Transmission of an IPv6 packet carried by 11 fragments in Reliable, for N=3, packet mode, positive-ACK-oriented; with three losses.'}
 
 ### Reliable, window mode, ACK-oriented
 
@@ -1129,7 +1040,7 @@ an additional bit will be needed to number windows.
         (End)    
       
 ~~~~
-{: #Fig-Example-Rel-Window-ACK-NoLoss title='Transmission of an IPv6 packet carried by 11 fragments in Reliable, window mode, positive-ACK-oriented; no losses.'}
+{: #Fig-Example-Rel-Window-ACK-NoLoss title='Transmission of an IPv6 packet carried by 11 fragments in Reliable, for N=3, window mode, positive-ACK-oriented; no losses.'}
 
 {{Fig-Example-Rel-Window-ACK-Loss}} illustrates the transmission of an IPv6 packet that needs 11 fragments
 in Reliable, window mode, for N=3, with three losses. Receiver feedback is positive-ACK-oriented. Note: in window mode,
@@ -1158,7 +1069,7 @@ an additional bit will be needed to number windows.
         (End)    
       
 ~~~~
-{: #Fig-Example-Rel-Window-ACK-Loss title='Transmission of an IPv6 packet carried by 11 fragments in Reliable, window mode, positive-ACK-oriented; with three losses.'}
+{: #Fig-Example-Rel-Window-ACK-Loss title='Transmission of an IPv6 packet carried by 11 fragments in Reliable, for N=3, window mode, positive-ACK-oriented; with three losses.'}
 
 # Security considerations
 
@@ -1220,27 +1131,6 @@ Castillejo grant CAS15/00336, and by the ERDF and the Spanish Government
 through project TEC2016-79988-P.  Part of his contribution to this work
 has been carried out during his stay as a visiting scholar at the
 Computer Laboratory of the University of Cambridge.
-
-# Appendix A. Protocol Constants
-
-The recommended values of R, N and M for LoRaWAN and Sigfox are shown in {{Fig-AppendixTable}}.
-
-~~~~
-                      +--------+---------+---------+
-                      |   R    |    N    |    M    |
-           +----------+--------+---------+---------+
-           | LoRaWAN  |  TBD   |   TBD   |   TBD   |
-           +----------+--------+---------+---------+
-           | Sigfox   |  TBD   |   TBD   |   TBD   |
-           +----------+--------+---------+---------+
-~~~~
-{: #Fig-AppendixTable title='Fragmentation header field sizes'}
-
-Recommended values for other protocol constants are shown next:
-
-  MAX_NACKS_PER_IPv6_PACKET		TBD
-
-  NACK_WAIT      		         	TBD  seconds
 
 
 --- back
