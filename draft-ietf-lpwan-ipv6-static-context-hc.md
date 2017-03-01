@@ -807,6 +807,7 @@ The format of an ACK is shown in {{Fig-ACK-Format}}:
 
 {{Fig-Bitmap-Win}} shows an example of an ACK in window mode (N=3), where the bitmap
 indicates that the second and the fifth fragments have not been correctly received. 
+
 ~~~~                                                  
                   <-----  R  ----> 0 1 2 3 4 5 6 7 
                   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -816,6 +817,7 @@ indicates that the second and the fifth fragments have not been correctly receiv
 {: #Fig-Bitmap-Win title='Example of the bitmap in an ACK (in window mode, for N=3)'}
 
 {{Fig-NoBitmap}} illustrates an ACK without bitmap.
+
 ~~~~
                   <-----  R  ----> 
                   +-+-+-+-+-+-+-+-+
