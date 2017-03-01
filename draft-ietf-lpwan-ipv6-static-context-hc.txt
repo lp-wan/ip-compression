@@ -888,8 +888,8 @@ Internet-Draft                 LPWAN SCHC                     March 2017
    Systems) are sleeping most of the time and may receive data during a
    short period of time after transmission.
 
-
-
+   This specification enables two main fragment delivery reliability
+   options, namely: Unreliable and Reliable.  The same reliability
 
 
 
@@ -898,9 +898,11 @@ Minaburo, et al.        Expires September 2, 2017              [Page 16]
 Internet-Draft                 LPWAN SCHC                     March 2017
 
 
-   This specification enables two main fragment delivery reliability
-   options, namely: Unreliable and Reliable.  The same reliability
-   option MUST be used for all fragments of a packet.
+   option MUST be used for all fragments of a packet.  Note that the
+   fragment delivery reliability option to be used is not necessarily
+   tied to the particular characteristics of the underlying L2 LPWAN
+   technology (e.g.  Unreliable may be used on top of an L2 LPWAN
+   technology with symmetric characteristics for uplink and downlink).
 
    In Unreliable, the receiver MUST NOT issue acknowledgments and the
    sender MUST NOT perform fragment transmission retries.
@@ -942,8 +944,6 @@ Internet-Draft                 LPWAN SCHC                     March 2017
    carries a subset of either the IPv6 packet after header compression
    or an IPv6 packet which could not be compressed.  A fragment is the
    payload in the L2 protocol data unit (PDU).
-
-
 
 
 
@@ -995,13 +995,13 @@ Internet-Draft                 LPWAN SCHC                     March 2017
    greater than 3 is recommended.  This field is an unsigned integer
    that carries a non-absolute fragment number.  The CFN MUST be set
    sequentially decreasing from 2^N - 2 for the first fragment, and MUST
-   wrap from 0 back to 2^N - 2.  The CFN for the last fragment has all
-   bits set to 1.  Note that, by this definition, the CFN value of 2^N -
-   1 is only used to identify a fragment as the last fragment carrying a
-   subset of the IPv6 packet being transported, and thus the CFN does
-   not strictly correspond to the N least significant bits of the actual
-   absolute fragment number.
-
+   wrap from 0 back to 2^N - 2 (e.g. for N=3, the first fragment has
+   CFN=6, subsequent CFNs are set sequentially and in decreasing order,
+   and CFN will wrap from 0 back to 6).  The CFN for the last fragment
+   has all bits set to 1.  Note that, by this definition, the CFN value
+   of 2^N - 1 is only used to identify a fragment as the last fragment
+   carrying a subset of the IPv6 packet being transported, and thus the
+   CFN does not strictly correspond to the N least significant bits of
 
 
 
@@ -1010,9 +1010,15 @@ Minaburo, et al.        Expires September 2, 2017              [Page 18]
 Internet-Draft                 LPWAN SCHC                     March 2017
 
 
+   the actual absolute fragment number.  It is also important to note
+   that, for N=1, the last fragment of the packet will carry a CFN equal
+   to 1, while all previous fragments will carry a CFN of 0.
+
    MIC: MIC stands for Message Integrity Check.  This field has a size
    of M bits.  It is computed by the sender over the complete IPv6
-   packet before fragmentation by using the TBD algorithm.
+   packet before fragmentation by using the TBD algorithm.  The MIC
+   allows to check for errors in the reassembled IPv6 packet, while it
+   also enables compressing the UDP checksum by use of SCHC.
 
 8.4.  ACK format
 
@@ -1036,9 +1042,11 @@ Internet-Draft                 LPWAN SCHC                     March 2017
    n-th fragment transmitted has been correctly received (n-th bit set
    to 1) or not (n-th bit set to 0).  Remaining bits with bit order
    greater than the number of fragments sent (as determined by the
-   receiver) are set to 0.  Absence of the bitmap in an ACK confirms
-   correct reception of all fragments to be acknowledged by means of the
-   ACK.
+   receiver) are set to 0, except for the last bit in the bitmap, which
+   is set to 1 if the last fragment (carrying the MIC) has been
+   correctly received, and 0 otherwise.  Absence of the bitmap in an ACK
+   confirms correct reception of all fragments to be acknowledged by
+   means of the ACK.
 
    Figure 10 shows an example of an ACK in packet mode, where the bitmap
    indicates that the second and the ninth fragments have not been
@@ -1046,17 +1054,9 @@ Internet-Draft                 LPWAN SCHC                     March 2017
    eleven fragments in total, therefore the bitmap in has a size of two
    bytes.
 
-                                                          1
-                     <-----  R  ----> 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5
-                     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                     |    Rule ID    |1|0|1|1|1|1|1|1|0|1|1|0|0|0|0|0|
-                     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-                Figure 10: Example of the Bitmap in an ACK
 
-   Figure 11 shows an example of an ACK in window mode (N=3), where the
-   bitmap indicates that the second and the fifth fragments have not
-   been correctly received.
+
 
 
 
@@ -1065,6 +1065,18 @@ Minaburo, et al.        Expires September 2, 2017              [Page 19]
 
 Internet-Draft                 LPWAN SCHC                     March 2017
 
+
+                                                          1
+                     <-----  R  ----> 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5
+                     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                     |    Rule ID    |1|0|1|1|1|1|1|1|0|1|1|0|0|0|0|1|
+                     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+                Figure 10: Example of the Bitmap in an ACK
+
+   Figure 11 shows an example of an ACK in window mode (N=3), where the
+   bitmap indicates that the second and the fifth fragments have not
+   been correctly received.
 
                      <-----  R  ----> 0 1 2 3 4 5 6 7
                      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -1101,19 +1113,7 @@ Internet-Draft                 LPWAN SCHC                     March 2017
    that the size of the original, unfragmented IPv6 packet cannot be
    determined from fragmentation headers.
 
-   In Reliable, when a fragment with all CFN bits set to 0 is received,
-   the recipient MAY transmit an ACK for the last window of fragments
-   sent.  Note that the first fragment of the window is the one sent
-   with CFN=2^N-2.
 
-   Once the recipient has received the last fragment, it checks for the
-   integrity of the reassembled IPv6 datagram, based on the MIC
-   received.  In Unreliable, if the integrity check indicates that the
-   reassembled IPv6 datagram does not match the original IPv6 datagram
-   (prior to fragmentation), the reassembled IPv6 datagram MUST be
-   discarded.  In Reliable, upon receipt of the last fragment, the
-   recipient MAY transmit an ACK for the last window of fragments sent
-   (window mode) or for the whole set of fragments sent that carry a
 
 
 
@@ -1122,13 +1122,29 @@ Minaburo, et al.        Expires September 2, 2017              [Page 20]
 Internet-Draft                 LPWAN SCHC                     March 2017
 
 
-   complete IPv6 packet (packet mode).  In Reliable, the sender
-   retransmits any lost fragments reported in the ACK.  A maximum of TBD
-   iterations of ACK and fragment retransmission rounds are allowed per-
-   window or per-IPv6-packet in window mode or in packet mode,
-   respectively.  A complete specification of the mechanisms needed to
-   enable the above described fragment delivery reliability options is
-   out of the scope of this document.
+   In Reliable, when a fragment with all CFN bits set to 0 is received,
+   the recipient MAY transmit an ACK for the last window of fragments
+   sent.  Note that the first fragment of the window is the one sent
+   with CFN=2^N-2.  In window mode, the fragment with CFN=0 is
+   considered the last fragment of its window, except for the last
+   fragment (with all CFN bits set to 1).  The last fragment of a packet
+   is also the last fragment of the last window.
+
+   Once the recipient has received the last fragment, it checks for the
+   integrity of the reassembled IPv6 datagram, based on the MIC
+   received.  In Unreliable, if the integrity check indicates that the
+   reassembled IPv6 datagram does not match the original IPv6 datagram
+   (prior to fragmentation), the reassembled IPv6 datagram MUST be
+   discarded.  In Reliable, upon receipt of the last fragment (i.e. with
+   all CFN bits set to 1), the recipient MAY transmit an ACK for the
+   last window of fragments sent (window mode) or for the whole set of
+   fragments sent that carry a complete IPv6 packet (packet mode).  In
+   Reliable, the sender retransmits any lost fragments reported in the
+   ACK.  A maximum of TBD iterations of ACK and fragment retransmission
+   rounds are allowed per-window or per-IPv6-packet in window mode or in
+   packet mode, respectively.  A complete specification of the
+   mechanisms needed to enable the above described fragment delivery
+   reliability options is out of the scope of this document.
 
    If a fragment recipient disassociates from its L2 network, the
    recipient MUST discard all link fragments of all partially
@@ -1148,6 +1164,19 @@ Internet-Draft                 LPWAN SCHC                     March 2017
 
    Figure 13 illustrates the transmission of an IPv6 packet that needs
    11 fragments in Unreliable.
+
+
+
+
+
+
+
+
+
+Minaburo, et al.        Expires September 2, 2017              [Page 21]
+
+Internet-Draft                 LPWAN SCHC                     March 2017
+
 
            Sender               Receiver
              |-------CFN=0-------->|
@@ -1169,15 +1198,6 @@ Internet-Draft                 LPWAN SCHC                     March 2017
    11 fragments in Reliable, for N=3, NACK-oriented packet mode, without
    losses.
 
-
-
-
-
-Minaburo, et al.        Expires September 2, 2017              [Page 21]
-
-Internet-Draft                 LPWAN SCHC                     March 2017
-
-
            Sender               Receiver
              |-------CFN=6-------->|
              |-------CFN=5-------->|
@@ -1198,6 +1218,21 @@ Internet-Draft                 LPWAN SCHC                     March 2017
    Figure 15 illustrates the transmission of an IPv6 packet that needs
    11 fragments in Reliable, for N=3, NACK-oriented packet mode, with
    three losses.
+
+
+
+
+
+
+
+
+
+
+
+Minaburo, et al.        Expires September 2, 2017              [Page 22]
+
+Internet-Draft                 LPWAN SCHC                     March 2017
+
 
            Sender               Receiver
              |-------CFN=6-------->|
@@ -1225,15 +1260,6 @@ Internet-Draft                 LPWAN SCHC                     March 2017
    Receiver feedback is NACK-oriented.  Note: in window mode, an
    additional bit will be needed to number windows.
 
-
-
-
-
-Minaburo, et al.        Expires September 2, 2017              [Page 22]
-
-Internet-Draft                 LPWAN SCHC                     March 2017
-
-
            Sender               Receiver
              |-------CFN=6-------->|
              |-------CFN=5-------->|
@@ -1256,6 +1282,13 @@ Internet-Draft                 LPWAN SCHC                     March 2017
    11 fragments in Reliable, window mode, for N=3, with three losses.
    Receiver feedback is NACK-oriented.  Note: in window mode, an
    additional bit will be needed to number windows.
+
+
+
+Minaburo, et al.        Expires September 2, 2017              [Page 23]
+
+Internet-Draft                 LPWAN SCHC                     March 2017
+
 
            Sender               Receiver
              |-------CFN=6-------->|
@@ -1280,16 +1313,6 @@ Internet-Draft                 LPWAN SCHC                     March 2017
    Figure 17: Transmission of an IPv6 packet carried by 11 fragments in
         Reliable, for N=3, NACK-oriented window mode; three losses.
 
-
-
-
-
-
-Minaburo, et al.        Expires September 2, 2017              [Page 23]
-
-Internet-Draft                 LPWAN SCHC                     March 2017
-
-
    Figure 18 illustrates the transmission of an IPv6 packet that needs
    11 fragments in Reliable, packet mode, for N=3, without losses.
    Receiver feedback is positive-ACK-oriented.
@@ -1313,29 +1336,6 @@ Internet-Draft                 LPWAN SCHC                     March 2017
    Figure 18: Transmission of an IPv6 packet carried by 11 fragments in
      Reliable, for N=3, packet mode, positive-ACK-oriented; no losses.
 
-   Figure 19 illustrates the transmission of an IPv6 packet that needs
-   11 fragments in Reliable, packet mode, for N=3, with three losses.
-   Receiver feedback is positive-ACK-oriented.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -1345,6 +1345,10 @@ Minaburo, et al.        Expires September 2, 2017              [Page 24]
 
 Internet-Draft                 LPWAN SCHC                     March 2017
 
+
+   Figure 19 illustrates the transmission of an IPv6 packet that needs
+   11 fragments in Reliable, packet mode, for N=3, with three losses.
+   Receiver feedback is positive-ACK-oriented.
 
            Sender               Receiver
              |-------CFN=6-------->|
@@ -1376,10 +1380,6 @@ Internet-Draft                 LPWAN SCHC                     March 2017
    11 fragments in Reliable, window mode, for N=3, without losses.
    Receiver feedback is positive-ACK-oriented.  Note: in window mode, an
    additional bit will be needed to number windows.
-
-
-
-
 
 
 
