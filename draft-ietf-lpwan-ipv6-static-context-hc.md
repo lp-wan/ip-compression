@@ -677,7 +677,10 @@ and may receive data during a short period of time after transmission.
 
 This specification enables two main fragment delivery reliability options, 
 namely: Unreliable and Reliable. The same reliability option MUST be 
-used for all fragments of a packet.
+used for all fragments of a packet. Note that the fragment delivery reliability
+option to be used is not necessarily tied to the particular characteristics of the 
+underlying L2 LPWAN technology (e.g. Unreliable may be used on top of an L2 
+LPWAN technology with symmetric characteristics for uplink and downlink).
 
 In Unreliable, the receiver MUST NOT issue acknowledgments and the sender
 MUST NOT perform fragment transmission retries.
@@ -755,16 +758,19 @@ Fragments except the last one SHALL
       In Unreliable, N=1. For Reliable, N equal to or greater than 3 is recommended. This field
       is an unsigned integer that carries a non-absolute fragment number. The CFN MUST be set 
       sequentially decreasing from 2^N - 2 for the first fragment, and MUST wrap from 0 back to
-      2^N - 2. The CFN for the last fragment has all bits set to 1. Note that, by this definition,
-      the CFN value of 2^N - 1 is only used to identify a fragment as the last fragment carrying a
-      subset of the IPv6 packet being transported, and thus the CFN does not strictly correspond to
-      the N least significant bits of the actual absolute fragment number. 
+      2^N - 2 (e.g. for N=3, the first fragment has CFN=6, subsequent CFNs are set sequentially
+      and in decreasing order, and CFN will wrap from 0 back to 6). The CFN for the last fragment 
+      has all bits set to 1. Note that, by this definition, the CFN value of 2^N - 1 is only used 
+      to identify a fragment as the last fragment carrying a subset of the IPv6 packet being transported,
+      and thus the CFN does not strictly correspond to the N least significant bits of the actual 
+      absolute fragment number. It is also important to note that, for N=1, the last fragment 
+      of the packet will carry a CFN equal to 1, while all previous fragments will carry a CFN of 0. 
 
    MIC:  MIC stands for Message Integrity Check. This field has a size of M 
-      bits. It is computed by 
-      the sender over the complete IPv6 packet before fragmentation by 
-      using the TBD algorithm.
-
+      bits. It is computed by the sender over the complete IPv6 packet before fragmentation by 
+      using the TBD algorithm. The MIC allows to check for errors in the reassembled IPv6 packet, 
+      while it also enables compressing the UDP checksum by use of SCHC.
+            
 ## ACK format
 
 The format of an ACK is shown in {{Fig-ACK-Format}}:
@@ -788,8 +794,10 @@ The format of an ACK is shown in {{Fig-ACK-Format}}:
    where the n-th bit signals whether the n-th fragment transmitted has been 
    correctly received (n-th bit set to 1) or not (n-th bit set to 0). Remaining bits
    with bit order greater than the number of fragments sent (as determined by 
-   the receiver) are set to 0. Absence of the bitmap in an ACK confirms correct
-   reception of all fragments to be acknowledged by means of the ACK.
+   the receiver) are set to 0, except for the last bit in the bitmap, which is set to 1 
+   if the last fragment (carrying the MIC) has been correctly received, and 0 otherwise.
+   Absence of the bitmap in an ACK confirms correct reception of all fragments to be 
+   acknowledged by means of the ACK.  
    
    {{Fig-Bitmap}} shows an example of an ACK in packet mode, where the bitmap 
    indicates that the second and the ninth fragments have not been correctly 
@@ -800,7 +808,7 @@ The format of an ACK is shown in {{Fig-ACK-Format}}:
                                                        1
                   <-----  R  ----> 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5
                   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                  |    Rule ID    |1|0|1|1|1|1|1|1|0|1|1|0|0|0|0|0|
+                  |    Rule ID    |1|0|1|1|1|1|1|1|0|1|1|0|0|0|0|1|
                   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 ~~~~
 {: #Fig-Bitmap title='Example of the Bitmap in an ACK'}
@@ -843,14 +851,15 @@ IPv6 packet cannot be determined from fragmentation headers.
 
 In Reliable, when a fragment with all CFN bits set to 0 is received, the recipient MAY transmit
 an ACK for the last window of fragments sent. Note that the first fragment of the window is 
-the one sent with CFN=2^N-2. 
+the one sent with CFN=2^N-2. In window mode, the fragment with CFN=0 is considered the
+last fragment of its window, except for the last fragment (with all CFN bits set to 1). The last
+fragment of a packet is also the last fragment of the last window.
 
 Once the recipient has received the last fragment, it checks for the integrity of the 
 reassembled IPv6 datagram, based on the MIC received. In Unreliable, if the integrity 
 check indicates that the reassembled IPv6 datagram does not match the original IPv6 datagram
 (prior to fragmentation), the reassembled IPv6 datagram MUST be discarded. In Reliable, upon
-receipt of the last fragment, the recipient MAY transmit an ACK for the last window of fragments
-sent (window mode) or for the whole set of fragments sent that carry a complete IPv6 packet 
+receipt of the last fragment (i.e. with all CFN bits set to 1), the recipient MAY transmit an ACK for the last window of fragments sent (window mode) or for the whole set of fragments sent that carry a complete IPv6 packet 
 (packet mode). In Reliable, the sender retransmits any lost fragments reported in the ACK. A maximum
 of TBD iterations of ACK and fragment retransmission rounds are allowed per-window or per-IPv6-packet
 in window mode or in packet mode, respectively. A complete specification of the mechanisms needed to
