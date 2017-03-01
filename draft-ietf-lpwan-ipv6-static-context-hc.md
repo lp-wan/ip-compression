@@ -48,86 +48,88 @@ informative:
 --- abstract
 
 This document describes a header compression scheme and fragmentation functionality 
-for IPv6/UDP protocols. These techniques are especially tailored for LPWA networks
+for IPv6/UDP protocols. These techniques are especially tailored for LPWAN (Low Power Wide Area Network) networks
 and could be extended to other protocol stacks.
 
 The Static Context Header Compression (SCHC)  offers a great level of flexibility 
-when  processing the fields.
-Static context means that information stored in the context which describes field values do not change during
-the transmission, avoiding complex resynchronization mechanisms, incompatible
-with LPWA characteristics. In most of the cases, IPv6/UDP headers are reduced
+when  processing the header fields.
+Static context means that information stored in the context which, describes field values, does not change during
+the packet transmission, avoiding complex resynchronization mechanisms, incompatible
+with LPWAN characteristics. In most of the cases, IPv6/UDP headers are reduced
 to a small identifier.
 
-This document describes the generic compression/decompression process and apply it 
-to IPv6/UDP headers. Other protocols such as CoAP will be described in a
-separate document.
+This document describes the generic compression/decompression process and applies it 
+to IPv6/UDP headers. Similar mechanisms for other protocols such as CoAP will be described in a
+separate document. Moreover, this document specifies fragmentation and reassembly mechanims for SCHC compressed packets exceeding the L2 pdu size and for the case where the SCHC compression is not possible then the IPv6/UDP packet is sent. 
 
 --- middle
  
 # Introduction {#Introduction}
 
-Header compression is mandatory to bring the internet connectivity to the node
-within a LPWA network {{I-D.minaburo-lp-wan-gap-analysis}}. 
+Header compression is mandatory to efficiently bring Internet connectivity to the node
+within a LPWAN network {{I-D.minaburo-lp-wan-gap-analysis}}. 
 
-Some LPWA networks properties can be exploited for an efficient header
+Some LPWAN networks properties can be exploited for an efficient header
 compression:
 
-* Topology is star oriented, therefore all the packets follows the same path.
+* Topology is star oriented, therefore all the packets follow the same path.
   For the needs of this draft, the architecture can be summarized to Things or End-Systems
   (ES) exchanging information with LPWAN Application Server (LA) through a Network Gateway (NG). 
 
-* Traffic flows are mostly deterministic, since End-Systems embed built-in
+* Traffic flows are mostly known in advanced, since End-Systems embed built-in
   applications. Contrary to computers or smartphones, new applications cannot
   be easily installed.
 
 The Static Context Header Compression (SCHC) is defined for this environment.
-Static context means that values in the context field do not change during
-the transmission, avoiding complex resynchronization mechanisms, incompatible
-with LPWA characteristics. In most of the cases, IPv6/UDP headers are reduced
+SCHC uses a context where header information is kept in order, this context is 
+static the values on the header fields do not change during time, avoiding 
+complex resynchronization mechanisms, incompatible
+with LPWAN characteristics. In most of the cases, IPv6/UDP headers are reduced
 to a small context identifier.
 
-The SCHC is indedependent of the LPWAN technology.
+The SCHC header compression is indedependent of the specific LPWAN technology over which it will be used.
 
-On the other hand, Low Power Wide Area Network (LPWAN) technologies are characterized,
+On the other hand, LPWAN technologies are characterized,
 among others, by a very reduced data unit and/or payload size
 {{I-D.ietf-lpwan-overview}}.  However, some of these technologies
 do not support layer two fragmentation, therefore the only option for
-these to support IPv6 (and, in particular, its MTU requirement of
-1280 bytes {{RFC2460}}) is the use of a fragmentation mechanism at the
-adaptation layer below IPv6. This specification defines a fragmentation 
+these to support IPv6 when header compression is not possible (and, in particular, its MTU requirement of
+1280 bytes {{RFC2460}}) is the use of fragmentation mechanism at the
+adaptation layer below IPv6. This specification defines fragmentation 
 functionality to support the IPv6 MTU requirements over LPWAN 
 technologies.
 
 
 # Vocabulary
+This section defines the terminology and aconyms used in this document.
 
-* CDF: Compression Decompression Function. Function is used for both functionnalities to compress a field or to recover its original value in the decompression phase.
+* CDF: Compression/Decompression Function. A function that is used for both functionnalities to compress a header field or to recover its original value in the decompression phase.
 
 * Context: A set of rules used to compress/decompress headers
 
-* ES: End System. Node connected to the LPWAN. ES may implement SCHC.
+* ES: End System. Node connected to the LPWAN. An ES may implement SCHC.
 
-* LA: LPWAN Application. Application sending/consuming headers to/from the End System.
+* LA: LPWAN Application. An application sending/consuming IPv6 packets to/from the End System.
 
-* LC: LPWAN Compressor/Decompressor. Process in the network to achieve compression/decompressing headers. LC uses SCHC rules to perfom compression and decompression.
+* LC: LPWAN Compressor/Decompressor. A process in the network to achieve compression/decompressing headers. LC uses SCHC rules to perform compression and decompression.
 
-* MO: Matching Operator. Operator used to compare a value contained in a field's header with a value contained in a rule.
+* MO: Matching Operator. An operator used to compare a value contained in a header field with a value contained in a rule.
 
 * Rule: A set of header field values.
 
 * Rule ID: An identifier for a rule, LC and ES share the same rule ID for a specific flow. Rule ID 
   is sent on the LPWAN.
   
-* TV: Target value. Value contained in the rule that will be matched with the value of an header field.
+* TV: Target value. A value contained in the rule that will be matched with the value of a header field.
 
 # Static Context Header Compression
 
 Static Context Header Compression (SCHC) avoids context synchronization,
 which is the most bandwidth-consuming operation in other header compression mechanisms
 such as RoHC. Based on the fact
-that the nature of data flows is highly predictable in LPWA networks, a static
+that the nature of data flows is highly predictable in LPWAN networks, a static
 context may be stored on the End-System (ES). The context must be stored in both ends. It can 
-also be learned by a provisionning protocol that is out of the scope of this draft.
+also be learned by using a provisionning protocol that is out of the scope of this draft.
 
 ~~~~
      End-System                                           Appl Servers
@@ -145,20 +147,20 @@ also be learned by a provisionning protocol that is out of the scope of this dra
 ~~~~
 {: #Fig-archi title='Architecture'}
 
-{{Fig-archi}} based on {{I-D.ietf-lpwan-overview}} terminology represent the architecture for 
-compression/decompression. The Thing or End-System is running applications which produce UDP/IPv6
+{{Fig-archi}} based on {{I-D.ietf-lpwan-overview}} terminology represents the architecture for 
+compression/decompression. The Thing or End-System is running applications which produce IPv6 or IPv6/UDP
 flows. These flows are compressed by a LPWAN Compressor (LC) to reduce the headers size. Resulting
-information is sent on a frame to the LPWAN Radio Network to a Radio Gateway (RG) which forwards 
+information is sent on a layer two (L2) frame to the LPWAN Radio Network to a Radio Gateway (RG) which forwards 
 the frame to a Network Gateway.
 The Network Gateway sends the data to a LC for decompression which shares the same rules with the ES. The LC can be 
 located on the Network Gateway or in another places if a tunnel is established between the NG and the LC.
-This architecture forms a star topology. After decompression the packet can be sent on the Internet to one
-or several Application Servers (LA). 
+This architecture forms a star topology. After decompression, the packet can be sent on the Internet to one
+or several LPWAN Application Servers (LA). 
 
 The principle is exactly the same in the other direction.
 
 The context contains a list of rules (cf. {{Fig-ctxt}}). Each rule contains 
-itself a list of field descriptions composed of a filed id (FID), a target
+itself a list of fields descriptions composed of a field identifier (FID), a target
 value (TV), a matching operator (MO) and a Compression/Decompression Function
 (CDF).
 
@@ -187,42 +189,42 @@ value (TV), a matching operator (MO) and a Compression/Decompression Function
 
 The rule does not describe the original packet format which
 must be known from the compressor/decompressor. The rule just describes the
-compression/decompression behavior for a field. In the rule, it is recommanded
+compression/decompression behavior for the header fields. In the rule, it is recommended
 to describe the header field in the same order they appear in the packet.
 
-The main idea of the compression scheme is to send the rule number (or rule
-id) to the other end instead of known field values. When a value is known by both
-ends, it is not necessary to sent it on the LPWA network. 
+The main idea of the compression scheme is to send the rule id to the other end instead 
+of known field values. When a value is known by both
+ends, it is not necessary to send it on the LPWAN network. 
 
 The field description is composed of different entries:
 
-* A Field ID or FID is a unique value to define the field. 
+* A Field ID (FID) is a unique value to define the field. 
 
-* A Target Value or TV is the value used to make the comparison between 
-  the packet field. The Target Value can be of any type (integer, strings,..).
+* A Target Value (TV) is the value used to make the comparison with
+  the packet header field. The Target Value can be of any type (integer, strings,...).
   It can be a single value or a more complex structure (array, list,...). It can
   be considered as a CBOR structure.
 
-* A Matching Operator or MO is the operator used to make the comparison between 
+* A Matching Operator (MO) is the operator used to make the comparison between 
   the field value and the Target Value. The Matching Operator may require some 
   parameters, which can be considered as a CBOR structure. MO is only used during 
   the compression phase.
 
-* A Compression Decompression Function or CDF is used to describe the compression
+* A Compression Decompression Function (CDF) is used to describe the compression
   and the decompression process. The CDF may require some 
   parameters, which can be considered as a CBOR structure.
 
-## Rule id
+## Rule ID
 
-Rule ids are sent between both compression/decompression elements. The size 
-of the rule id is not specified on this document and can vary regarding the
+Rule IDs are sent between both compression/decompression elements. The size 
+of the rule ID is not specified in this document and can vary regarding the
 LPWAN technology, the number of flows,... 
 
-Some values in the rule id space may be reserved to other goal than header 
+Some values in the rule ID space may be reserved for goals other than header 
 compression, for example fragmentation. 
 
-Rule ids are specific to an ES. Two ES may use the same rule id for different
-header compression. The LC needs to combine the rule id with the ES L2 address
+Rule IDs are specific to an ES. Two ESs may use the same rule ID for different
+header compression. The LC needs to combine the rule ID with the ES L2 address
 to find the appropriate rule.
 
 ## Packet processing
@@ -236,27 +238,27 @@ The compression/decompression process follows several steps:
   the fields in the packet's header satisfied  all the matching operators of
   a rule,  the packet is processed using Compression Decompression Function associated
   with the fields. Otherwise the next rule
-  is tested. If no eligible rule is found, then the packet is sent without compression
-  using fragmentation procedure. 
+  is tested. If no eligible rule is found, then the packet is sent without compression,
+  which may require using the fragmentation procedure. 
 
-* sending: The rule number is sent to the other end followed by information resulting
-  from the compression of header fields. This information is sent in the rule order for the matching
-  fields. The way the rule number is sent depends on the
+* sending: The rule ID is sent to the other end followed by information resulting
+  from the compression of header fields. This information is sent in the order expressed in the rule for the matching
+  fields. The way the rule ID is sent depends on the
   layer two technology and will be specified in a specific document. For example,
   it can either be included in a Layer 2 header or sent in the first byte of
   the L2 payload.
 
 * decompression: The receiver identifies the  sender through its device-id
-  (e.g. MAC address) and select the appropriate rule through the rule number. This
-  rule gives the compressed header format and associate these values to header fields.
-  It applies the compression decompression function to reconstruct the original
-  header fields. Compute-\* CDFs must be applied after the other CDFs.
+  (e.g. MAC address) and selects the appropriate rule through the rule ID. This
+  rule gives the compressed header format and associates these values to header fields.
+  It applies the CDF function to reconstruct the original
+  header fields. CDF of Compute-\* must be applied after the other CDFs.
 
 
 # Matching operators {#chap-MO}
 
-This document describes basic matching operators which must be known by both LC. They are 
-not typed and can be applied indifferently to integer, string or any other type. 
+This document describes basic matching operators (MO)s which must be known by both LC, endpoints involved in the header compression/decompression. They are 
+not typed and can be applied indifferently to integer, string or any other type. The MOs and their definition are provided next:
 
 * equal: a field value in a packet matches with a field value in a rule if
   they are equal.
@@ -264,13 +266,13 @@ not typed and can be applied indifferently to integer, string or any other type.
 * ignore: no check is done between a field value in a packet and a field value
   in the rule. The result of the matching is always true.
 
-* MSB(length): a field value of length T in a packet matches with a field value
+* MSB(length): a field value of a size equal to "length" bits in a packet matches with a field value
   in a rule if the most significant "length" bits are equal.
   
 * match-mapping: The goal of mapping-sent is to reduce the size of a field by allocating
-  shorter value. The Target Value contains a list of pairs. Each pair is composed of
-  a value and short ID. This operator match if a field value is equal to one of the pair's
-  value.
+  a shorter value. The Target Value contains a list of pairs. Each pair is composed of
+  a value and a short ID. This operator matches if a field value is equal to one of the pairs'
+  values.
 
 Matching Operators may need a list of parameters to proceed to the matching. For instance MSB requires an
 integer indicating the number of bits to test.
@@ -278,7 +280,7 @@ integer indicating the number of bits to test.
 # Compression Decompression Functions (CDF) {#chap-CDF}
 
 The Compression Decompression Functions (CDF) describes the action taken during
-the compression and inversely the action taken by the decompressor to restore
+the compression of headers fields, and inversely, the action taken by the decompressor to restore
 the original value.
 
 ~~~~
@@ -293,7 +295,7 @@ the original value.
 |compute-UDP-checksum|elided       |compute UDP checksum       |
 |ESiid-DID           |elided       |build IID from L2 ES addr  |
 |LAiid-DID           |elided       |build IID from L2 LA addr  |
-|mapping-sent        |send index   |value form index on a table|
+|mapping-sent        |send index   |value from index on a table|
 \--------------------+-------------+---------------------------/
 
 ~~~~
@@ -305,24 +307,24 @@ columns outlines the compression/decompression behavior.
 
 Compression is done in the rule order and compressed values are sent in that order in the compressed
 message. The receiver must be able to find the size of each compressed field
-which can be given by the rule or send with the compressed header.
+which can be given by the rule or may be sent with the compressed header.
 
 ## not-sent CDF
 
 Not-sent function is generally used when the field value is specified in the rule and
-therefore known by the both sides. This function is generally used with the
+therefore known by the both Compressor and Decompressor. This function is generally used with the
 "equal" MO. If MO is "ignore", there is a risk to have a decompressed field
 value different from the compressed field.
 
-The compressor do not sent any value on the compressed header for that field.
+The compressor does not send any value on the compressed header for that field on which compression is applied.
 
 The decompressor
 restores the field value with the target value stored in the matched rule.
 
 ## value-sent CDF
 
-Value-sent function is generally used when the field value is not known by both end.
-The value is sent in the compressed message header. Both ends must know the
+The value-sent function is generally used when the field value is not known by both Compressor and Decompressor.
+The value is sent in the compressed message header. Both Compressor and Decompressor must know the
 size of the field, either implicitely (the size is known by both sides) 
 or explicitely in the compressed header
 field by indicating the length. This function is generally used with the "ignore" MO.
@@ -335,10 +337,10 @@ from the LPWAN
 ## LSB CDF
 
 LSB function is used to send a fixed part of the packet field header to the other end.
-This function is used in conjuction with the "MSB" MO
+This function is used together with the "MSB" MO
 
 The compressor sends the "length" Least Significant Bits. The decompressor
-combines with a OR operator the value received with the Target Value.
+combines with an OR operator the value received with the Target Value.
 
 
 ## ESiid-DID, LAiid-DID CDF
@@ -346,21 +348,21 @@ combines with a OR operator the value received with the Target Value.
 These functions are used to process respectively the End System and the LA
 Device Identifier (DID).
 
-The IID value is computed from device ID present in the Layer 2 header. The
+The IID value is computed from the device ID present in the Layer 2 header. The
 computation depends on the technology and the device ID  size.
 
 ## mapping-sent
 
 mapping-sent is used to send a smaller index associated to the field value
-in the Target Value. This function is used in conjuction with the "match-mapping" MO.
+in the Target Value. This function is used together with the "match-mapping" MO.
 
 The compressor looks in the TV to find the field value and send the corresponding index.
 The decompressor uses this index to restore the field value.
 
 ## Compute-\*
 
-These functions compute the field value based on received information. They
-are elided during the compression and reconstructed during the decompression.
+These functions are used by the decompressor to compute the compressed field value based on received information. 
+Compressed fields are elided during the compression and reconstructed during the decompression.
 
 * compute-length: compute the length assigned to this field. For instance, regarding
   the field ID, this CDF may be used to compute IPv6 length or UDP length.
@@ -369,22 +371,24 @@ are elided during the compression and reconstructed during the decompression.
 
 # Application to IPv6 and UDP headers
 
-This section lists the different IPv6 and UDP fields and how they can be compressed.
+This section lists the different IPv6 and UDP header fields and how they can be compressed.
 
 ## IPv6 version field
 
-This field hold always the same value, therefore the TV is 6, the MO is "equal" 
-and the CDF "not-sent"
+This field always holds the same value, therefore the TV is 6, the MO is "equal" 
+and the CDF "not-sent".
 
 
 ## IPv6 Traffic class field
 
 If the DiffServ field identified by the rest of the rule do not vary and is known 
 by both sides, the TV should contain this wellknown value, the MO should be "equal" 
-and the CDF should be "not-sent.
+and the CDF must be "not-sent.
 
-If the DiffServ field identified by the rest of the rule vary during time or is not 
-known by both sides:
+If the DiffServ field identified by the rest of the rule varies over time or is not 
+known by both sides, then there are two possibilities depending on the variability of the value, 
+the first one there is without compression and the original value is sent, or 
+the sencond where the values can be computed by sending only the LSB bits:
 
 * TV is not set, MO is set to "ignore" and CDF is set to "value-sent"
 
@@ -392,12 +396,14 @@ known by both sides:
 
 ## Flow label field
 
-If the Flow Label field identified by the rest of the rule do not vary and is known 
-by both sides, the TV should contain this wellknown value, the MO should be "equal" 
-and the CDF should be "not-sent.
+If the Flow Label field identified by the rest of the rule does not vary and is known 
+by both sides, the TV should contain this well-known value, the MO should be "equal" 
+and the CDF should be "not-sent".
 
 If the Flow Label field identified by the rest of the rule varies during time or is not 
-known by both sides:
+known by both sides, there are two possibilities dpending on the variability of the value,
+the first one is without compression and then the value is sent 
+and the second where only part of the value is sent and the decompressor needs to compute the original value:
 
 * TV is not set, MO is set to "ignore" and CDF is set to "value-sent"
 
@@ -410,24 +416,24 @@ transmission on the LPWAN network. The LC recompute the original payload length
 value. The TV is not set, the MO is set to "ignore" and the CDF is "compute-IPv6-length".
 
 If the payload is small, the TV can be set to 0x0000, the MO set to "MSB (16-s)" and the
-CDF to "LSB (s)". The s parameter depends of the maximum packet length.
+CDF to "LSB (s)". The 's' parameter depends on the maximum packet length.
 
-On other cases, the length must be sent and the CDF is replaced by "value-sent".
+On other cases, the payload length field must be sent and the CDF is replaced by "value-sent".
 
 ## Next Header field
 
-If the Next Header field identified by the rest of the rule do not vary and is known 
+If the Next Header field identified by the rest of the rule does not vary and is known 
 by both sides, the TV should contain this Next Header value, the MO should be "equal" 
-and the CDF should be "not-sent.
+and the CDF should be "not-sent".
 
 If the Next header  field identified by the rest of the rule varies during time or is not 
-known by both sides then TV is not set, MO is set to "ignore" and CDF is set to 
-"value-sent"
+known by both sides, then TV is not set, MO is set to "ignore" and CDF is set to 
+"value-sent".
 
 ## Hop Limit field
 
 The End System is generally a host and does not forward packets, therefore the
-Hop Limit value is constant. Therefore the TV is set with a default value, the MO 
+Hop Limit value is constant. So the TV is set with a default value, the MO 
 is set to "equal" and the CDF is set to "not-sent".
 
 Otherwise the value is sent on the LPWAN: TV is not set, MO is set to ignore and 
@@ -435,7 +441,7 @@ CDF is set to "value-sent".
 
 ## IPv6 addresses fields
 
-As in 6LoWPAN {{RFC4944}} IPv6 addresses are splited into two 64 bit long fields; 
+As in 6LoWPAN {{RFC4944}}, IPv6 addresses are split into two 64-bit long fields; 
 one for the prefix and one for the Interface Identifier (IID). These fields should
 be compressed. To allow a single rule, these values are identified by their role 
 (ES or LA) and not by their position in the frame (source or destination). The LC
@@ -450,7 +456,7 @@ be either a link-local prefix or a global prefix. In that case, the TV for the
 source and destination prefixes contains the values, the MO is set to "equal" and
 the CDF is set to "not-sent".
 
-In case the rule allows several prefixes, the static mapping must be used. The 
+In case the rule allows several prefixes, static mapping must be used. The 
 different prefixes are listed in the TV associated with a short ID. The MO is set 
 to "match-mapping" and the CDF is set to "mapping-sent".
 
@@ -460,32 +466,32 @@ value-sent.
 ### IPv6 source and destination IID
 
 If the ES or LA IID are based on an LPWAN address, then the IID can be reconstructed 
-with information coming from the LPWAN header. In that case the TV is not set, the MO 
+with information coming from the LPWAN header. In that case, the TV is not set, the MO 
 is set to "ignore" and the CDF is set to "ESiid-DID" or "LAiid-DID". Note that the 
 LPWAN technology is generally carrying a single device identifier corresponding
 to the ES. The LC may also not be aware of these values. 
 
-For privacy reasons or if the ES address is changing overt the time, it maybe better to
+For privacy reasons or if the ES address is changing over time, it maybe better to
 use a static value. In that case, the TV contains the value, the MO operator is set to
 "equal" and the CDF is set to "not-sent". 
 
-If several IID are possible, then the TV contains the list of possible IID, the MO is 
+If several IIDs are possible, then the TV contains the list of possible IID, the MO is 
 set to "match-mapping" and the CDF is set to "mapping-sent". 
 
-Otherwise the variation of the IID may be reduced to few bytes. In that case, the TV is
+Otherwise the value variation of the IID may be reduced to few bytes. In that case, the TV is
 set to the stable part of the IID, the MO is set to MSB and the CDF is set to LSB.
 
-Finally, the IID can be send on the LPWAN. In that case, the TV is not set, the MO is set
+Finally, the IID can be sent on the LPWAN. In that case, the TV is not set, the MO is set
 to "ignore" and the CDF is set to "value-sent".
 
 ## IPv6 extensions
 
-Currently no extension rules  are currently defined. They can be based on the MO and 
-CDF described above.
+No extension rules are currently defined. They can be based on the MOs and 
+CDFs described above.
 
 ## UDP source and destination port
 
-To allow a single rule, these values are identified by their role 
+To allow a single rule, the UDP port values are identified by their role 
 (ES or LA) and not by their position in the frame (source or destination). The LC
 must be aware of the traffic direction (upstream, downstream) to select the appropriate
 field. The following rules apply for ES and LA port numbers.
@@ -493,13 +499,13 @@ field. The following rules apply for ES and LA port numbers.
 If both ends knows the port number, it can be elided. The TV contains the port number,
 the MO is set to "equal" and the CDF is set to "not-sent".
 
-If the port variation are on few bits, the TV contains the stable part of the port number,
+If the port variation is on few bits, the TV contains the stable part of the port number,
 the MO is set to "MSB" and the CDF is set to "LSB".
 
-If some wellknown values are used,  the TV can contain the list of this values, the
+If some well-known values are used,  the TV can contain the list of this values, the
 MO is set to "match-mapping" and the CDF is set to "mapping-sent".
 
-Otherwise the port number are sent on the LPWAN. The TV is not set, the MO is 
+Otherwise the port numbers are sent on the LPWAN. The TV is not set, the MO is 
 set to "ignore" and the CDF is set to "value-sent".
 
 ## UDP length field
@@ -508,16 +514,16 @@ If the LPWAN technology does not introduce padding, the UDP length can be comput
 from the received data. In that case the TV is not set, the MO is set to "ignore" and
 the CDF is set to "compute-UDP-length".
 
-if the payload is small, the TV can be set to 0x0000, the MO set to "MSB" and the
+If the payload is small, the TV can be set to 0x0000, the MO set to "MSB" and the
 CDF to "LSB". 
 
 On other cases, the length must be sent and the CDF is replaced by "value-sent".
 
 ## UDP Checksum field
 
-IPv6 mandate a checksum in protocol above IP. Nevertheless, if a more efficient
+IPv6 mandates a checksum in the protocol above IP. Nevertheless, if a more efficient
 mechanism such as L2 CRC or MIC is carried by or over the L2 (such as in the 
-LPWAN fragmentation process (see XXXX)), the checksum transmission can be avoided.
+LPWAN fragmentation process (see XXXX)), the UDP checksum transmission can be avoided.
 In that case, the TV is not set, the MO is set to "ignore" and the CDF is set to
 "compute-UDP-checksum".
 
@@ -532,19 +538,19 @@ In other cases the checksum must be explicitly sent. The TV is not set, the MO i
 This section gives some scenarios of the compression mechanism for IPv6/UDP.
 The goal is to illustrate the SCHC behavior.
 
-## IPv6/UDP compression in a star topology
+## IPv6/UDP compression 
 
-The most common case will be a LPWA end-system embeds some applications running
-over
-CoAP. In this example, the first flow is for the device management based
+The most common case using the mechanisms defined in this document will be a 
+LPWAN end-system that embeds some applications running over
+CoAP. In this example, three flows are considered. The first flow is for the device management based
 on CoAP using
-Link Local addresses and UDP ports 123 and 124.
+Link Local IPv6 addresses and UDP ports 123 and 124 for ES and LA, respectively.
 The second flow will be a CoAP server for measurements done by the end-system
-(using ports 5683) and Global Addresses alpha::IID/64 to beta::1/64.
+(using ports 5683) and Global IPv6 Address prefixes alpha::IID/64 to beta::1/64.
 The last flow is for legacy applications using different ports numbers, the
-destination is gamma::1/64.
+destination IPv6 address prefix is gamma::1/64.
 
- {{FigStack}} presents the protocol stack for this end-system. IPv6 and UDP are represented
+ {{FigStack}} presents the protocol stack for this End-System. IPv6 and UDP are represented
 with dotted lines since these protocols are compressed on the radio link.
 
 ~~~~
@@ -556,6 +562,9 @@ with dotted lines since these protocols are compressed on the radio link.
 ................................
 .   IPv6   .  IPv6   .  IPv6   .
 +------------------------------+
+|    SCHC Header compression   |
+|      and fragmentation       |
++------------------------------+
 |      6LPWA L2 technologies   |
 +------------------------------+
       End System or LPWA GW
@@ -564,9 +573,9 @@ with dotted lines since these protocols are compressed on the radio link.
 {: #FigStack title='Simplified Protocol Stack for LP-WAN'}
 
 
-Note that in some LPWA technologies, only End Systems have a device ID.
-Therefore it is necessary to define statically an IID for the Link
-Local address for the LPWA Compressor.
+Note that in some LPWAN technologies, only the End Systems have a device ID.
+Therefore, when such technologie are used, it is necessary to define statically an IID for the Link
+Local address for the LPWAN compressor.
 
 
 
@@ -645,25 +654,26 @@ header.
 The second and third rules use global addresses. The way the ES learns the
 prefix is not in the scope of the document. 
 
-The third rule compresses port numbers on 4 bits. 
+The third rule compresses port numbers to 4 bits. 
 
 # Fragmentation
 
 ## Overview
 
-Fragmentation in LPWAN is mandatory to satisfy the IPv6 MTU requirement. 
-In fact, the L2 data unit maximum payload in LPWAN technologies typically 
-varies from tens to hundreds of bytes. 
-If an entire payload (e.g., IPv6) datagram fits within a single L2
-data unit, it is unfragmented and a fragmentation header is not
-needed.  If the datagram does not fit within a single L2 data unit,
+Fragmentation in LPWAN is mandatory and it is used if after the SCHC header compression the
+size of the packet is larger than the L2 data unit maximum payload or if the SCHC header compression
+is not able to compress the packet. In LPWAN technologies the
+L2 data unit size typically varies from tens to hundreds of bytes. 
+If the entire IPv6 datagram fits within a single L2
+data unit, the fragmentation mechanims is not used and the packet is sent unfragmented.  
+If the datagram does not fit within a single L2 data unit,
 it SHALL be broken into fragments. 
 
-On the other hand, LPWAN technologies impose some strict limitations on traffic; 
+Moreover, LPWAN technologies impose some strict limitations on traffic; 
 therefore it is desirable to enable optional fragment retransmission, while 
 a single fragment loss should not lead to retransmitting the full datagram. 
-To preserve energy, Things (a.k.a. End Systems) are sleeping most of the time 
-and may receive data during a short period after transmission. 
+To preserve energy, Things (End Systems) are sleeping most of the time 
+and may receive data during a short period of time after transmission. 
 
 This specification enables two main fragment delivery reliability options, 
 namely: Unreliable and Reliable. The same reliability option MUST be 
@@ -698,9 +708,9 @@ examples of the different reliability options described.
 ## Fragment format
 
    A fragment comprises a fragmentation header and a fragment payload, and conforms
-   to the format shown in {{Fig-FragFormat}}. The fragment payload carries a subset of the
-   IPv6 packet after header compression. A fragment is the payload in the
-   L2 protocol data unit (PDU).
+   to the format shown in {{Fig-FragFormat}}. The fragment payload carries a subset of either the
+   IPv6 packet after header compression or an IPv6 packet which could not be compressed. 
+   A fragment is the payload in the L2 protocol data unit (PDU).
       
 ~~~~   
       +---------------+-----------------------+
@@ -741,7 +751,7 @@ Fragments except the last one SHALL
       fragments. Rule ID may be used to signal whether Unreliable or Reliable are in use, 
       and within the latter, whether window mode or packet mode are used.
 
-   CFN:  CFN: CFN stands for Compressed Fragment Number. The size of the CFN field is N bits. 
+   CFN: CFN stands for Compressed Fragment Number. The size of the CFN field is N bits. 
       In Unreliable, N=1. For Reliable, N equal to or greater than 3 is recommended. This field
       is an unsigned integer that carries a non-absolute fragment number. The CFN MUST be set 
       sequentially decreasing from 2^N - 2 for the first fragment, and MUST wrap from 0 back to
@@ -816,12 +826,12 @@ indicates that the second and the fifth fragments have not been correctly receiv
 
 ## Baseline mechanism
 
-The recipient of link fragments SHALL use (1) the sender’s L2 source address (if present),
+The receiver of link fragments SHALL use (1) the sender’s L2 source address (if present),
 (2) the destination’s L2 address (if present), and (3) Rule ID to identify all the fragments
 that belong to a given datagram. The fragment receiver SHALL determine the fragment delivery
 reliability option in use for the fragment based on the Rule ID field in that fragment.
 
-Upon receipt of a link fragment, the recipient starts constructing the original
+Upon receipt of a link fragment, the receiver starts constructing the original
 unfragmented packet. It uses the CFN and the order of arrival of each fragment to
 determine the location of the individual fragments within the original unfragmented packet.
 For example, it may place the data payload of the fragments within a payload datagram 
