@@ -496,8 +496,8 @@ Internet-Draft                 LPWAN SCHC                     March 2017
       instance, regarding the field ID, this CDF may be used to compute
       IPv6 length or UDP length.
 
-   o  compute-udp-checksum: compute the IPv6 length field as described
-      in [RFC0768].
+
+
 
 
 
@@ -505,6 +505,10 @@ Minaburo, et al.        Expires September 3, 2017               [Page 9]
 
 Internet-Draft                 LPWAN SCHC                     March 2017
 
+
+   o  compute-checksum: compute a checksum from the information already
+      received by the LC.  This field may be used to compute UDP
+      checksum.
 
 6.  Application to IPv6 and UDP headers
 
@@ -551,16 +555,15 @@ Internet-Draft                 LPWAN SCHC                     March 2017
    o  TV is not set, MO is set to "ignore" and CDF is set to "value-
       sent"
 
-   o  TV contains a stable value, MO is MSB(X) and CDF is set to
-      LSB(20-X)
-
-
 
 
 Minaburo, et al.        Expires September 3, 2017              [Page 10]
 
 Internet-Draft                 LPWAN SCHC                     March 2017
 
+
+   o  TV contains a stable value, MO is MSB(X) and CDF is set to
+      LSB(20-X)
 
 6.4.  Payload Length field
 
@@ -606,9 +609,6 @@ Internet-Draft                 LPWAN SCHC                     March 2017
    position in the frame (source or destination).  The LC must be aware
    of the traffic direction (upstream, downstream) to select the
    appropriate field.
-
-
-
 
 
 
@@ -800,8 +800,8 @@ Internet-Draft                 LPWAN SCHC                     March 2017
      +================+=========+========+=============++======+
      |UDP ESport      |123      | equal  | not-sent    ||      |
      |UDP LAport      |124      | equal  | not-sent    ||      |
-     |UDP Length      |         | ignore | comp-UDP-l  ||      |
-     |UDP checksum    |         | ignore | comp-UDP-c  ||      |
+     |UDP Length      |         | ignore | comp-length ||      |
+     |UDP checksum    |         | ignore | comp-chk    ||      |
      +================+=========+========+=============++======+
 
      Rule 1
@@ -821,8 +821,8 @@ Internet-Draft                 LPWAN SCHC                     March 2017
      +================+=========+========+=============++======+
      |UDP ESport      |5683     | equal  | not-sent    ||      |
      |UDP LAport      |5683     | equal  | not-sent    ||      |
-     |UDP Length      |         | ignore | comp-UDP-l  ||      |
-     |UDP checksum    |         | ignore | comp-UDP-c  ||      |
+     |UDP Length      |         | ignore | comp-length ||      |
+     |UDP checksum    |         | ignore | comp-chk    ||      |
      +================+=========+========+=============++======+
 
      Rule 2
@@ -850,8 +850,8 @@ Internet-Draft                 LPWAN SCHC                     March 2017
      +================+=========+========+=============++======+
      |UDP ESport      |8720     | MSB(12)| LSB(4)      || lsb  |
      |UDP LAport      |8720     | MSB(12)| LSB(4)      || lsb  |
-     |UDP Length      |         | ignore | comp-UDP-l  ||      |
-     |UDP checksum    |         | ignore | comp-UDP-c  ||      |
+     |UDP Length      |         | ignore | comp-length ||      |
+     |UDP checksum    |         | ignore | comp-chk    ||      |
      +================+=========+========+=============++======+
 
 
