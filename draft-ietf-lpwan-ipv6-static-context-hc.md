@@ -37,7 +37,6 @@ author:
   country: Spain
   email: carlesgo@entel.upc.edu
 normative:
-  rfc0768: 
   rfc4944: 
   rfc2460: 
 informative:  
