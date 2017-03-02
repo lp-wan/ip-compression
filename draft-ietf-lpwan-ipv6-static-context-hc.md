@@ -366,7 +366,8 @@ Compressed fields are elided during the compression and reconstructed during the
 * compute-length: compute the length assigned to this field. For instance, regarding
   the field ID, this CDF may be used to compute IPv6 length or UDP length.
 
-* compute-udp-checksum: compute the IPv6 length field as described in {{RFC0768}}.
+* compute-checksum: compute a checksum from the information already received by the LC.
+  This field may be used to compute UDP checksum. 
 
 # Application to IPv6 and UDP headers
 
@@ -596,8 +597,8 @@ Local address for the LPWAN compressor.
   +================+=========+========+=============++======+
   |UDP ESport      |123      | equal  | not-sent    ||      |
   |UDP LAport      |124      | equal  | not-sent    ||      |
-  |UDP Length      |         | ignore | comp-UDP-l  ||      |
-  |UDP checksum    |         | ignore | comp-UDP-c  ||      |
+  |UDP Length      |         | ignore | comp-length ||      |
+  |UDP checksum    |         | ignore | comp-chk    ||      |
   +================+=========+========+=============++======+
 
   Rule 1
@@ -617,8 +618,8 @@ Local address for the LPWAN compressor.
   +================+=========+========+=============++======+
   |UDP ESport      |5683     | equal  | not-sent    ||      |
   |UDP LAport      |5683     | equal  | not-sent    ||      |
-  |UDP Length      |         | ignore | comp-UDP-l  ||      |
-  |UDP checksum    |         | ignore | comp-UDP-c  ||      |
+  |UDP Length      |         | ignore | comp-length ||      |
+  |UDP checksum    |         | ignore | comp-chk    ||      |
   +================+=========+========+=============++======+
 
   Rule 2
@@ -638,8 +639,8 @@ Local address for the LPWAN compressor.
   +================+=========+========+=============++======+
   |UDP ESport      |8720     | MSB(12)| LSB(4)      || lsb  |
   |UDP LAport      |8720     | MSB(12)| LSB(4)      || lsb  |
-  |UDP Length      |         | ignore | comp-UDP-l  ||      |
-  |UDP checksum    |         | ignore | comp-UDP-c  ||      |
+  |UDP Length      |         | ignore | comp-length ||      |
+  |UDP checksum    |         | ignore | comp-chk    ||      |
   +================+=========+========+=============++======+
 
 
