@@ -290,7 +290,7 @@ the original value.
 |value-sent          |send         |build from received value  |
 |LSB(length)         |send LSB     |ctxt value OR rcvd value   |
 |compute-length      |elided       |compute length             |
-|compute-UDP-checksum|elided       |compute UDP checksum       |
+|compute-checksum    |elided       |compute UDP checksum       |
 |ESiid-DID           |elided       |build IID from L2 ES addr  |
 |LAiid-DID           |elided       |build IID from L2 LA addr  |
 |mapping-sent        |send index   |value from index on a table|
