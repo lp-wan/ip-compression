@@ -659,12 +659,10 @@ The third rule compresses port numbers to 4 bits.
 
 ## Overview
 
-Fragmentation in LPWAN is mandatory and it is used if after the SCHC header compression the
-size of the packet is larger than the L2 data unit maximum payload or if the SCHC header compression
-is not able to compress the packet. In LPWAN technologies the
-L2 data unit size typically varies from tens to hundreds of bytes. 
+Fragmentation support in LPWAN is mandatory and it is used if, after SCHC header compression, 
+the size of the resulting packet is larger than the L2 data unit maximum payload. Fragmentation is also used if SCHC header compression has not been able to compress a packet that is larger than the L2 data unit maximum payload. In LPWAN technologies the L2 data unit size typically varies from tens to hundreds of bytes. 
 If the entire IPv6 datagram fits within a single L2
-data unit, the fragmentation mechanims is not used and the packet is sent unfragmented.  
+data unit, the fragmentation mechanism is not used and the packet is sent unfragmented.  
 If the datagram does not fit within a single L2 data unit,
 it SHALL be broken into fragments. 
 
@@ -674,34 +672,30 @@ a single fragment loss should not lead to retransmitting the full datagram.
 To preserve energy, Things (End Systems) are sleeping most of the time 
 and may receive data during a short period of time after transmission. 
 
-This specification enables two main fragment delivery reliability options, 
-namely: Unreliable and Reliable. The same reliability option MUST be 
-used for all fragments of a packet. Note that the fragment delivery reliability
+In order to adapt to the capabilities of various LPWAN technologies, 
+this specification allows for a gradation of fragment delivery reliability. 
+There are three main options: Unreliable (UnR) mode, Reliable per-Packet (RpP) mode and Reliable per-Window (RpW) mode.
+Additionally, the specification provides the option to withhold acknowledgments (ACK) in case of success, making effectively the ACK a Negative ACK (NACK). It is up to the underlying LPWAN technology to decide which setting to use and whether the same setting applies to all IPv6 packets. Note that the fragment delivery reliability
 option to be used is not necessarily tied to the particular characteristics of the 
-underlying L2 LPWAN technology (e.g. Unreliable may be used on top of an L2 
+underlying L2 LPWAN technology (e.g. UnR may be used on top of an L2 
 LPWAN technology with symmetric characteristics for uplink and downlink).
 
-In Unreliable, the receiver MUST NOT issue acknowledgments and the sender
-MUST NOT perform fragment transmission retries.
+The same reliability option MUST be used for all fragments of a packet. 
 
-In Reliable, there exist two possible suboptions, namely: packet mode and window mode.
-In packet mode, the receiver may transmit one acknowledgment (ACK) after all fragments
-carrying an IPv6 packet have been transmitted. The ACK informs the sender about received
-and missing fragments from the IPv6 packet. In window mode, an ACK may be transmitted by 
+In UnR mode, the receiver MUST NOT issue acknowledgments. In RpP mode, the receiver may transmit one acknowledgment (ACK) after all fragments carrying an IPv6 packet have been transmitted. The ACK informs the sender about received
+and missing fragments from the IPv6 packet. In RpW mode, an ACK may be transmitted by 
 the fragment receiver after a window of fragments have been sent. A window of fragments is
-a subset of the fragments needed to carry an IPv6 packet. In this mode, the ACK informs the
+a subset of the full set of fragments needed to carry an IPv6 packet. In this mode, the ACK informs the
 sender about received and missing fragments from the window of fragments. In either mode, 
 upon receipt of an ACK that informs about any lost fragments, the sender may retransmit the
-lost fragments. The maximum number of ACK and retransmission rounds is TBD. In Reliable, the
-same reliability suboption MUST be used for all fragments of a packet.
+lost fragments. The maximum number of ACK and retransmission rounds is TBD. 
 
 Some LPWAN deployments may benefit from conditioning the creation and transmission of an ACK
 to the detection of at least one fragment loss (per-packet or per-window), thus leading to
-negative ACK (NACK)-oriented behavior, while not having such condition may be preferred for other scenarios.
+NACK-oriented behavior, while not having such condition may be preferred for other scenarios.
 
-This document does not make any decision as to whether Unreliable or Reliable are used, or 
-whether in Reliable a fragment receiver generates ACKs per packet or per window, or whether
-the transmission of such ACKs is conditioned to the detection of fragment losses or not. 
+This document does not make any decision as to whether UnR, RpP or RpW modes are used, or 
+or whether the transmission of ACKs is conditioned to the detection of fragment losses or not. 
 A complete specification of the receiver and sender behaviors that correspond to each 
 acknowledgment policy is also out of scope. Nevertheless, this document does provide 
 examples of the different reliability options described.
@@ -725,6 +719,7 @@ examples of the different reliability options described.
 
 Fragments except the last one SHALL    
    contain the fragmentation header as defined in {{Fig-NotLast}}. The total size of this fragmentation header is R bits.
+   
 
 ~~~~
                        <----------- R ----------->    
@@ -737,7 +732,7 @@ Fragments except the last one SHALL
 
    The last fragment SHALL contain a fragmentation header that conforms to 
    the format shown in {{Fig-Last}}. The total size of this fragmentation 
-   header is R+M bits.
+   header is R+M bits. 
 
 ~~~~
                        <----------- R ---------->
@@ -750,11 +745,11 @@ Fragments except the last one SHALL
 
 
    Rule ID: this field has a size of  R – N  bits in all 
-      fragments. Rule ID may be used to signal whether Unreliable or Reliable are in use, 
+      fragments. Rule ID may be used to signal whether UnR, RpP or RpW mode is in use, 
       and within the latter, whether window mode or packet mode are used.
 
    CFN: CFN stands for Compressed Fragment Number. The size of the CFN field is N bits. 
-      In Unreliable, N=1. For Reliable, N equal to or greater than 3 is recommended. This field
+      In UnR mode, N=1. For RpP or RpW modes, N equal to or greater than 3 is recommended. This field
       is an unsigned integer that carries a non-absolute fragment number. The CFN MUST be set 
       sequentially decreasing from 2^N - 2 for the first fragment, and MUST wrap from 0 back to
       2^N - 2 (e.g. for N=3, the first fragment has CFN=6, subsequent CFNs are set sequentially
@@ -769,7 +764,10 @@ Fragments except the last one SHALL
       bits. It is computed by the sender over the complete IPv6 packet before fragmentation by 
       using the TBD algorithm. The MIC allows to check for errors in the reassembled IPv6 packet, 
       while it also enables compressing the UDP checksum by use of SCHC.
-            
+   
+   The values for R, N and M are not specified in this document, and have to be determined by the underlying
+   LPWAN technology.
+   
 ## ACK format
 
 The format of an ACK is shown in {{Fig-ACK-Format}}:
@@ -788,8 +786,8 @@ The format of an ACK is shown in {{Fig-ACK-Format}}:
 
   bitmap:  size of the bitmap field of an ACK can be equal to 0 or  
    Ceiling(Number_of_Fragments/8) octets, where Number_of_Fragments denotes
-   the number of fragments of a window (in window mode) or the number of fragments
-   that carry the IPv6 packet (in packet mode). The bitmap is a sequence of bits,
+   the number of fragments of a window (in RpW mode) or the number of fragments
+   that carry the IPv6 packet (in RpP mode). The bitmap is a sequence of bits,
    where the n-th bit signals whether the n-th fragment transmitted has been 
    correctly received (n-th bit set to 1) or not (n-th bit set to 0). Remaining bits
    with bit order greater than the number of fragments sent (as determined by 
@@ -801,7 +799,7 @@ The format of an ACK is shown in {{Fig-ACK-Format}}:
    {{Fig-Bitmap}} shows an example of an ACK in packet mode, where the bitmap 
    indicates that the second and the ninth fragments have not been correctly 
    received. In this example, the IPv6 packet is carried by eleven fragments 
-   in total, therefore the bitmap in has a size of two bytes. 
+   in total, therefore the bitmap has a size of two bytes. 
 
 ~~~~
                                                        1
@@ -812,7 +810,7 @@ The format of an ACK is shown in {{Fig-ACK-Format}}:
 ~~~~
 {: #Fig-Bitmap title='Example of the Bitmap in an ACK'}
 
-{{Fig-Bitmap-Win}} shows an example of an ACK in window mode (N=3), where the bitmap
+{{Fig-Bitmap-Win}} shows an example of an ACK in RpW (N=3), where the bitmap
 indicates that the second and the fifth fragments have not been correctly received. 
 
 ~~~~                                                  
@@ -821,7 +819,7 @@ indicates that the second and the fifth fragments have not been correctly receiv
                   |    Rule ID    |1|0|1|1|0|1|1|1|                   
                   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 ~~~~
-{: #Fig-Bitmap-Win title='Example of the bitmap in an ACK (in window mode, for N=3)'}
+{: #Fig-Bitmap-Win title='Example of the bitmap in an ACK (in RpW mode, for N=3)'}
 
 {{Fig-NoBitmap}} illustrates an ACK without bitmap.
 
@@ -848,20 +846,20 @@ reassembly buffer at the location determined from the CFN and order of arrival o
 fragments, and the fragment payload sizes. Note that the size of the original, unfragmented
 IPv6 packet cannot be determined from fragmentation headers.
 
-In Reliable, when a fragment with all CFN bits set to 0 is received, the recipient MAY transmit
+In RpW mode, when a fragment with all CFN bits set to 0 is received, the recipient MAY transmit
 an ACK for the last window of fragments sent. Note that the first fragment of the window is 
-the one sent with CFN=2^N-2. In window mode, the fragment with CFN=0 is considered the
-last fragment of its window, except for the last fragment (with all CFN bits set to 1). The last
-fragment of a packet is also the last fragment of the last window.
+the one sent with CFN=2^N-2. In RpW mode, the fragment with CFN=0 is considered the
+last fragment of its window, except for the last fragment of the whole packet (with all CFN bits set to 1), which is also the last fragment of the last window.
 
 Once the recipient has received the last fragment, it checks for the integrity of the 
-reassembled IPv6 datagram, based on the MIC received. In Unreliable, if the integrity 
+reassembled IPv6 datagram, based on the MIC received. In UnR mode, if the integrity 
 check indicates that the reassembled IPv6 datagram does not match the original IPv6 datagram
-(prior to fragmentation), the reassembled IPv6 datagram MUST be discarded. In Reliable, upon
-receipt of the last fragment (i.e. with all CFN bits set to 1), the recipient MAY transmit an ACK for the last window of fragments sent (window mode) or for the whole set of fragments sent that carry a complete IPv6 packet 
-(packet mode). In Reliable, the sender retransmits any lost fragments reported in the ACK. A maximum
+(prior to fragmentation), the reassembled IPv6 datagram MUST be discarded. In RpP or in RpW mode, upon
+receipt of the last fragment (i.e. with all CFN bits set to 1), the recipient MAY transmit an ACK for the whole set of fragments sent that carry the complete IPv6 packet.
+
+In RpP mode or in RpW mode, the sender retransmits any lost fragments reported in the ACK. A maximum
 of TBD iterations of ACK and fragment retransmission rounds are allowed per-window or per-IPv6-packet
-in window mode or in packet mode, respectively. A complete specification of the mechanisms needed to
+in RpP mode or in RpW mode, respectively. A complete specification of the mechanisms needed to
 enable the above described fragment delivery reliability options is out of the scope of this document.
 
 If a fragment recipient disassociates from its L2 network, the recipient MUST discard 
@@ -871,225 +869,6 @@ MUST discard all not yet transmitted link fragments of all partially transmitted
 a reassembly timer. When this time expires, if the entire packet has not been reassembled, 
 the existing fragments MUST be discarded and the reassembly state MUST be flushed. The reassembly
 timeout MUST be set to a maximum of TBD seconds).
-
-## Examples
-This section provides examples of different fragment delivery reliability options possible 
-on the basis of this specification.
-
-{{Fig-Example-Unreliable}} illustrates the transmission of an IPv6 packet that needs 11 fragments
-in Unreliable.
-
-~~~~       
-        Sender               Receiver
-          |-------CFN=0-------->|
-          |-------CFN=0-------->|
-          |-------CFN=0-------->|
-          |-------CFN=0-------->|
-          |-------CFN=0-------->|
-          |-------CFN=0-------->|
-          |-------CFN=0-------->|
-          |-------CFN=0-------->|
-          |-------CFN=0-------->|
-          |-------CFN=0-------->|
-          |-------CFN=1-------->|MIC checked =>
-~~~~
-{: #Fig-Example-Unreliable title='Transmission of an IPv6 packet carried by 11 fragments in Unreliable'}
-
-
-{{Fig-Example-Rel-NoLoss}} illustrates the transmission of an IPv6 packet that needs 11 fragments
-in Reliable, for N=3, NACK-oriented packet mode, without losses.
-
-~~~~       
-        Sender               Receiver
-          |-------CFN=6-------->|
-          |-------CFN=5-------->|
-          |-------CFN=4-------->|
-          |-------CFN=3-------->|
-          |-------CFN=2-------->|
-          |-------CFN=1-------->|
-          |-------CFN=0-------->|
-          |-------CFN=6-------->|
-          |-------CFN=5-------->|
-          |-------CFN=4-------->|
-          |-------CFN=7-------->|MIC checked =>
-       (no NACK)  
-~~~~
-{: #Fig-Example-Rel-NoLoss title='Transmission of an IPv6 packet carried by 11 fragments in Reliable,
-for N=3, NACK-oriented packet mode; no losses.'}
-
-{{Fig-Example-Rel-Loss}} illustrates the transmission of an IPv6 packet that needs 11 fragments
-in Reliable, for N=3, NACK-oriented packet mode, with three losses. 
-
-~~~~       
-        Sender               Receiver
-          |-------CFN=6-------->|
-          |-------CFN=5-------->|
-          |-------CFN=4---X---->|
-          |-------CFN=3-------->|
-          |-------CFN=2---X---->|
-          |-------CFN=1-------->|
-          |-------CFN=0-------->|
-          |-------CFN=6-------->|
-          |-------CFN=5-------->|
-          |-------CFN=4---X---->|
-          |-------CFN=7-------->|MIC checked =>
-          |<-------NACK---------|Bitmap:1101011110100000
-          |-------CFN=4-------->|
-          |-------CFN=2-------->|
-          |-------CFN=4-------->|MIC checked => 
-       (no NACK)   
-~~~~
-{: #Fig-Example-Rel-Loss title='Transmission of an IPv6 packet carried by 11 fragments in Reliable, for N=3, NACK-oriented packet mode; three losses.'}
-
-{{Fig-Example-Win-NoLoss-NACK}} illustrates the transmission of an IPv6 packet that needs 11 fragments in Reliable, window mode, for N=3, without losses. Receiver feedback is NACK-oriented. Note: in window mode, an additional bit will be needed to number windows.
-
-~~~~
-        Sender               Receiver
-          |-------CFN=6-------->|
-          |-------CFN=5-------->|
-          |-------CFN=4-------->|
-          |-------CFN=3-------->|
-          |-------CFN=2-------->|
-          |-------CFN=1-------->|
-          |-------CFN=0-------->|
-      (no NACK)
-          |-------CFN=6-------->|
-          |-------CFN=5-------->|
-          |-------CFN=4-------->|
-          |-------CFN=7-------->|MIC checked =>
-      (no NACK)
-~~~~
-{: #Fig-Example-Win-NoLoss-NACK title='Transmission of an IPv6 packet carried by 11 fragments in Reliable, for N=3, NACK-oriented window mode; without losses.'}
-
-{{Fig-Example-Rel-Window-NACK-Loss}} illustrates the transmission of an IPv6 packet that needs 11 fragments
-in Reliable, window mode, for N=3, with three losses. Receiver feedback is NACK-oriented. Note: in window mode,
-an additional bit will be needed to number windows.
-
-~~~~       
-        Sender               Receiver
-          |-------CFN=6-------->|
-          |-------CFN=5-------->|
-          |-------CFN=4---X---->|
-          |-------CFN=3-------->|
-          |-------CFN=2---X---->|
-          |-------CFN=1-------->|
-          |-------CFN=0-------->|
-          |<-------NACK---------|Bitmap:11010110
-          |-------CFN=4-------->|
-          |-------CFN=2-------->|   
-      (no NACK)     
-          |-------CFN=6-------->|
-          |-------CFN=5-------->|
-          |-------CFN=4---X---->|
-          |-------CFN=7-------->|MIC checked =>
-          |<-------NACK---------|Bitmap:11010000
-          |-------CFN=4-------->|MIC checked =>
-      (no NACK)    
-~~~~
-{: #Fig-Example-Rel-Window-NACK-Loss title='Transmission of an IPv6 packet carried by 11 fragments in Reliable,  for N=3, NACK-oriented window mode; three losses.'}
-
-{{Fig-Example-Rel-Packet-ACK-NoLoss}} illustrates the transmission of an IPv6 packet that needs 11 fragments
-in Reliable, packet mode, for N=3, without losses. Receiver feedback is positive-ACK-oriented.
-
-~~~~       
-        Sender               Receiver
-          |-------CFN=6-------->|
-          |-------CFN=5-------->|
-          |-------CFN=4-------->|
-          |-------CFN=3-------->|
-          |-------CFN=2-------->|
-          |-------CFN=1-------->|
-          |-------CFN=0-------->|
-          |-------CFN=6-------->|
-          |-------CFN=5-------->|   
-          |-------CFN=4-------->|
-          |-------CFN=7-------->|MIC checked =>
-          |<-------ACK----------|no bitmap
-        (End)    
-      
-~~~~
-{: #Fig-Example-Rel-Packet-ACK-NoLoss title='Transmission of an IPv6 packet carried by 11 fragments in Reliable, for N=3, packet mode, positive-ACK-oriented; no losses.'}
-
-{{Fig-Example-Rel-Packet-ACK-Loss}} illustrates the transmission of an IPv6 packet that needs 11 fragments
-in Reliable, packet mode, for N=3, with three losses. Receiver feedback is positive-ACK-oriented.
-
-~~~~       
-        Sender               Receiver
-          |-------CFN=6-------->|
-          |-------CFN=5-------->|
-          |-------CFN=4---X---->|
-          |-------CFN=3-------->|
-          |-------CFN=2---X---->|
-          |-------CFN=1-------->|
-          |-------CFN=0-------->|
-          |-------CFN=6-------->|
-          |-------CFN=5-------->|   
-          |-------CFN=4---X---->|
-          |-------CFN=7-------->|MIC checked =>
-          |<-------ACK----------|bitmap:1101011110100000
-          |-------CFN=4-------->|
-          |-------CFN=2-------->|
-          |-------CFN=4-------->|MIC checked =>
-          |<-------ACK----------|no bitmap
-        (End)
-      
-~~~~
-{: #Fig-Example-Rel-Packet-ACK-Loss title='Transmission of an IPv6 packet carried by 11 fragments in Reliable, for N=3, packet mode, positive-ACK-oriented; with three losses.'}
-
-### Reliable, window mode, ACK-oriented
-
-{{Fig-Example-Rel-Window-ACK-NoLoss}} illustrates the transmission of an IPv6 packet that needs 11 fragments
-in Reliable, window mode, for N=3, without losses. Receiver feedback is positive-ACK-oriented. Note: in window mode,
-an additional bit will be needed to number windows.
-
-~~~~       
-        Sender               Receiver
-          |-------CFN=6-------->|
-          |-------CFN=5-------->|
-          |-------CFN=4-------->|
-          |-------CFN=3-------->|
-          |-------CFN=2-------->|
-          |-------CFN=1-------->|
-          |-------CFN=0-------->|
-          |<-------ACK----------|no bitmap
-          |-------CFN=6-------->|
-          |-------CFN=5-------->|   
-          |-------CFN=4-------->|
-          |-------CFN=7-------->|MIC checked =>
-          |<-------ACK----------|no bitmap
-        (End)    
-      
-~~~~
-{: #Fig-Example-Rel-Window-ACK-NoLoss title='Transmission of an IPv6 packet carried by 11 fragments in Reliable, for N=3, window mode, positive-ACK-oriented; no losses.'}
-
-{{Fig-Example-Rel-Window-ACK-Loss}} illustrates the transmission of an IPv6 packet that needs 11 fragments
-in Reliable, window mode, for N=3, with three losses. Receiver feedback is positive-ACK-oriented. Note: in window mode,
-an additional bit will be needed to number windows.
-
-~~~~       
-        Sender               Receiver
-          |-------CFN=6-------->|
-          |-------CFN=5-------->|
-          |-------CFN=4---X---->|
-          |-------CFN=3-------->|
-          |-------CFN=2---X---->|
-          |-------CFN=1-------->|
-          |-------CFN=0-------->|
-          |<-------ACK----------|bitmap:11010110
-          |-------CFN=4-------->|
-          |-------CFN=2-------->|
-          |<-------ACK----------|no bitmap
-          |-------CFN=6-------->|
-          |-------CFN=5-------->|   
-          |-------CFN=4---X---->|
-          |-------CFN=7-------->|MIC checked =>
-          |<-------ACK----------|bitmap:11010000
-          |-------CFN=4-------->|MIC checked =>
-          |<-------ACK----------|no bitmap
-        (End)    
-      
-~~~~
-{: #Fig-Example-Rel-Window-ACK-Loss title='Transmission of an IPv6 packet carried by 11 fragments in Reliable, for N=3, window mode, positive-ACK-oriented; with three losses.'}
 
 # Security considerations
 
@@ -1138,19 +917,231 @@ by such event.
 # Acknowledgements
 
 Thanks to Dominique Barthel, Carsten Bormann, Arunprabhu Kandasamy, Antony Markovski, Alexander
-Pelov, Pascal Thubert, Juan Carlos Zuniga for useful design
-consideration.
+Pelov, Pascal Thubert, Juan Carlos Zuniga for useful design consideration. 
 
-In the fragmentation section, the authors have reused parts of text
-available in section 5.3 of RFC 4944, and would like to thank the
-authors of RFC 4944.
+--- back
 
+# Fragmentation examples
+This section provides examples of different fragment delivery reliability options possible 
+on the basis of this specification.
+
+{{Fig-Example-Unreliable}} illustrates the transmission of an IPv6 packet that needs 11 fragments
+in UnR mode.
+
+~~~~       
+        Sender               Receiver
+          |-------CFN=0-------->|
+          |-------CFN=0-------->|
+          |-------CFN=0-------->|
+          |-------CFN=0-------->|
+          |-------CFN=0-------->|
+          |-------CFN=0-------->|
+          |-------CFN=0-------->|
+          |-------CFN=0-------->|
+          |-------CFN=0-------->|
+          |-------CFN=0-------->|
+          |-------CFN=1-------->|MIC checked =>
+~~~~
+{: #Fig-Example-Unreliable title='Transmission of an IPv6 packet carried by 11 fragments in UnR mode'}
+
+
+{{Fig-Example-Rel-NoLoss}} illustrates the transmission of an IPv6 packet that needs 11 fragments
+in RpP mode, for N=3, NACK-oriented, without losses.
+
+~~~~       
+        Sender               Receiver
+          |-------CFN=6-------->|
+          |-------CFN=5-------->|
+          |-------CFN=4-------->|
+          |-------CFN=3-------->|
+          |-------CFN=2-------->|
+          |-------CFN=1-------->|
+          |-------CFN=0-------->|
+          |-------CFN=6-------->|
+          |-------CFN=5-------->|
+          |-------CFN=4-------->|
+          |-------CFN=7-------->|MIC checked =>
+       (no NACK)  
+~~~~
+{: #Fig-Example-Rel-NoLoss title='Transmission of an IPv6 packet carried by 11 fragments in RpP mode,
+for N=3, NACK-oriented; no losses.'}
+
+{{Fig-Example-Rel-Loss}} illustrates the transmission of an IPv6 packet that needs 11 fragments
+in RpP mode, for N=3, NACK-oriented, with three losses. 
+
+~~~~       
+        Sender               Receiver
+          |-------CFN=6-------->|
+          |-------CFN=5-------->|
+          |-------CFN=4---X---->|
+          |-------CFN=3-------->|
+          |-------CFN=2---X---->|
+          |-------CFN=1-------->|
+          |-------CFN=0-------->|
+          |-------CFN=6-------->|
+          |-------CFN=5-------->|
+          |-------CFN=4---X---->|
+          |-------CFN=7-------->|MIC checked =>
+          |<-------NACK---------|Bitmap:1101011110100001
+          |-------CFN=4-------->|
+          |-------CFN=2-------->|
+          |-------CFN=4-------->|MIC checked => 
+       (no NACK)   
+~~~~
+{: #Fig-Example-Rel-Loss title='Transmission of an IPv6 packet carried by 11 fragments in RpP mode, for N=3, NACK-oriented; three losses.'}
+
+{{Fig-Example-Win-NoLoss-NACK}} illustrates the transmission of an IPv6 packet that needs 11 fragments in RpW mode, for N=3, without losses. Receiver feedback is NACK-oriented. Note: in RpW mode, an additional bit will be needed to number windows.
+
+~~~~
+        Sender               Receiver
+          |-------CFN=6-------->|
+          |-------CFN=5-------->|
+          |-------CFN=4-------->|
+          |-------CFN=3-------->|
+          |-------CFN=2-------->|
+          |-------CFN=1-------->|
+          |-------CFN=0-------->|
+      (no NACK)
+          |-------CFN=6-------->|
+          |-------CFN=5-------->|
+          |-------CFN=4-------->|
+          |-------CFN=7-------->|MIC checked =>
+      (no NACK)
+~~~~
+{: #Fig-Example-Win-NoLoss-NACK title='Transmission of an IPv6 packet carried by 11 fragments in RpW mode, for N=3, NACK-oriented; without losses.'}
+
+{{Fig-Example-Rel-Window-NACK-Loss}} illustrates the transmission of an IPv6 packet that needs 11 fragments
+in RpW mode, for N=3, with three losses. Receiver feedback is NACK-oriented. Note: in RpW mode,
+an additional bit will be needed to number windows.
+
+~~~~       
+        Sender               Receiver
+          |-------CFN=6-------->|
+          |-------CFN=5-------->|
+          |-------CFN=4---X---->|
+          |-------CFN=3-------->|
+          |-------CFN=2---X---->|
+          |-------CFN=1-------->|
+          |-------CFN=0-------->|
+          |<-------NACK---------|Bitmap:11010111
+          |-------CFN=4-------->|
+          |-------CFN=2-------->|   
+      (no NACK)     
+          |-------CFN=6-------->|
+          |-------CFN=5-------->|
+          |-------CFN=4---X---->|
+          |-------CFN=7-------->|MIC checked =>
+          |<-------NACK---------|Bitmap:11010001
+          |-------CFN=4-------->|MIC checked =>
+      (no NACK)    
+~~~~
+{: #Fig-Example-Rel-Window-NACK-Loss title='Transmission of an IPv6 packet carried by 11 fragments in RpW, for N=3, NACK-oriented; three losses.'}
+
+{{Fig-Example-Rel-Packet-ACK-NoLoss}} illustrates the transmission of an IPv6 packet that needs 11 fragments
+in RpP mode, for N=3, without losses. Receiver feedback is positive-ACK-oriented.
+
+~~~~       
+        Sender               Receiver
+          |-------CFN=6-------->|
+          |-------CFN=5-------->|
+          |-------CFN=4-------->|
+          |-------CFN=3-------->|
+          |-------CFN=2-------->|
+          |-------CFN=1-------->|
+          |-------CFN=0-------->|
+          |-------CFN=6-------->|
+          |-------CFN=5-------->|   
+          |-------CFN=4-------->|
+          |-------CFN=7-------->|MIC checked =>
+          |<-------ACK----------|no bitmap
+        (End)    
+      
+~~~~
+{: #Fig-Example-Rel-Packet-ACK-NoLoss title='Transmission of an IPv6 packet carried by 11 fragments in RpP mode, for N=3, positive-ACK-oriented; no losses.'}
+
+{{Fig-Example-Rel-Packet-ACK-Loss}} illustrates the transmission of an IPv6 packet that needs 11 fragments
+in RpP mode, for N=3, with three losses. Receiver feedback is positive-ACK-oriented.
+
+~~~~       
+        Sender               Receiver
+          |-------CFN=6-------->|
+          |-------CFN=5-------->|
+          |-------CFN=4---X---->|
+          |-------CFN=3-------->|
+          |-------CFN=2---X---->|
+          |-------CFN=1-------->|
+          |-------CFN=0-------->|
+          |-------CFN=6-------->|
+          |-------CFN=5-------->|   
+          |-------CFN=4---X---->|
+          |-------CFN=7-------->|MIC checked =>
+          |<-------ACK----------|bitmap:1101011110100001
+          |-------CFN=4-------->|
+          |-------CFN=2-------->|
+          |-------CFN=4-------->|MIC checked =>
+          |<-------ACK----------|no bitmap
+        (End)
+      
+~~~~
+{: #Fig-Example-Rel-Packet-ACK-Loss title='Transmission of an IPv6 packet carried by 11 fragments in RpP, for N=3, positive-ACK-oriented; with three losses.'}
+
+{{Fig-Example-Rel-Window-ACK-NoLoss}} illustrates the transmission of an IPv6 packet that needs 11 fragments
+in RpW mode, for N=3, without losses. Receiver feedback is positive-ACK-oriented. Note: in RpW mode,
+an additional bit will be needed to number windows.
+
+~~~~       
+        Sender               Receiver
+          |-------CFN=6-------->|
+          |-------CFN=5-------->|
+          |-------CFN=4-------->|
+          |-------CFN=3-------->|
+          |-------CFN=2-------->|
+          |-------CFN=1-------->|
+          |-------CFN=0-------->|
+          |<-------ACK----------|no bitmap
+          |-------CFN=6-------->|
+          |-------CFN=5-------->|   
+          |-------CFN=4-------->|
+          |-------CFN=7-------->|MIC checked =>
+          |<-------ACK----------|no bitmap
+        (End)    
+      
+~~~~
+{: #Fig-Example-Rel-Window-ACK-NoLoss title='Transmission of an IPv6 packet carried by 11 fragments in RpW mode, for N=3, positive-ACK-oriented; no losses.'}
+
+{{Fig-Example-Rel-Window-ACK-Loss}} illustrates the transmission of an IPv6 packet that needs 11 fragments
+in RpW mode, for N=3, with three losses. Receiver feedback is positive-ACK-oriented. Note: in RpW mode,
+an additional bit will be needed to number windows.
+
+~~~~       
+        Sender               Receiver
+          |-------CFN=6-------->|
+          |-------CFN=5-------->|
+          |-------CFN=4---X---->|
+          |-------CFN=3-------->|
+          |-------CFN=2---X---->|
+          |-------CFN=1-------->|
+          |-------CFN=0-------->|
+          |<-------ACK----------|bitmap:11010111
+          |-------CFN=4-------->|
+          |-------CFN=2-------->|
+          |<-------ACK----------|no bitmap
+          |-------CFN=6-------->|
+          |-------CFN=5-------->|   
+          |-------CFN=4---X---->|
+          |-------CFN=7-------->|MIC checked =>
+          |<-------ACK----------|bitmap:11010001
+          |-------CFN=4-------->|MIC checked =>
+          |<-------ACK----------|no bitmap
+        (End)    
+      
+~~~~
+{: #Fig-Example-Rel-Window-ACK-Loss title='Transmission of an IPv6 packet carried by 11 fragments in RpW mode, for N=3, positive-ACK-oriented; with three losses.'}
+
+# Note
 Carles Gomez has been funded in part by the Spanish Government
 (Ministerio de Educacion, Cultura y Deporte) through the Jose
 Castillejo grant CAS15/00336, and by the ERDF and the Spanish Government 
 through project TEC2016-79988-P.  Part of his contribution to this work
 has been carried out during his stay as a visiting scholar at the
 Computer Laboratory of the University of Cambridge.
-
-
---- back
