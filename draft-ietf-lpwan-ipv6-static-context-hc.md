@@ -2,15 +2,13 @@
 stand_alone: true
 ipr: trust200902
 docname: draft-ietf-lpwan-ipv6-static-context-hc-01
-output: 
-  html_document:
-    toc: true # table of content true
 cat: info
 pi:
   symrefs: 'yes'
   sortrefs: 'yes'
   strict: 'yes'
   compact: 'yes'
+  toc: 'yes'
 title: LPWAN Static Context Header Compression (SCHC) and fragmentation for IPv6 and UDP
 abbrev: LPWAN SCHC
 wg: lpwan Working Group
@@ -77,13 +75,13 @@ compression:
   For the needs of this draft, the architecture can be summarized to Things or End-Systems
   (ES) exchanging information with LPWAN Application Server (LA) through a Network Gateway (NG). 
 
-* Traffic flows are mostly known in advanced, since End-Systems embed built-in
+* Traffic flows are mostly known in advance, since End-Systems embed built-in
   applications. Contrary to computers or smartphones, new applications cannot
   be easily installed.
 
 The Static Context Header Compression (SCHC) is defined for this environment.
 SCHC uses a context where header information is kept in order, this context is 
-static the values on the header fields do not change during time, avoiding 
+static (the values on the header fields do not change during time) avoiding 
 complex resynchronization mechanisms, incompatible
 with LPWAN characteristics. In most of the cases, IPv6/UDP headers are reduced
 to a small context identifier.
@@ -144,7 +142,7 @@ also be learned by using a provisionning protocol that is out of the scope of th
 +--------+--------+                                 +-------+-------+ 
          |   +--+     +--+     +-----------+                .
          +~~ |RG| === |NG| === |LC (contxt)| ... Internet ...
-             +--+     +--+     +-----+-----+
+             +--+     +--+     +-----------+
 ~~~~
 {: #Fig-archi title='Architecture'}
 
