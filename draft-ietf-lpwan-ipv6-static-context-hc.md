@@ -80,7 +80,7 @@ compression:
   be easily installed.
 
 The Static Context Header Compression (SCHC) is defined for this environment.
-SCHC uses a context where header information is kept in order, this context is 
+SCHC uses a context where header information is kept in order. This context is 
 static (the values on the header fields do not change during time) avoiding 
 complex resynchronization mechanisms, incompatible
 with LPWAN characteristics. In most of the cases, IPv6/UDP headers are reduced
@@ -150,7 +150,7 @@ also be learned by using a provisionning protocol that is out of the scope of th
 compression/decompression. The Thing or End-System is running applications which produce IPv6 or IPv6/UDP
 flows. These flows are compressed by a LPWAN Compressor (LC) to reduce the headers size. Resulting
 information is sent on a layer two (L2) frame to the LPWAN Radio Network to a Radio Gateway (RG) which forwards 
-the frame to a Network Gateway.
+the frame to a Network Gateway (NG).
 The Network Gateway sends the data to a LC for decompression which shares the same rules with the ES. The LC can be 
 located on the Network Gateway or in another places if a tunnel is established between the NG and the LC.
 This architecture forms a star topology. After decompression, the packet can be sent on the Internet to one
@@ -159,7 +159,7 @@ or several LPWAN Application Servers (LA).
 The principle is exactly the same in the other direction.
 
 The context contains a list of rules (cf. {{Fig-ctxt}}). Each rule contains 
-itself a list of fields descriptions composed of a field identifier (FID), a field position (FP), a target
+itself a list of fields descriptions composed of a field identifier (FID), a field position (FP), a direction indicator (DI), a target
 value (TV), a matching operator (MO) and a Compression/Decompression Function
 (CDF).
 
@@ -191,8 +191,8 @@ must be known from the compressor/decompressor. The rule just describes the
 compression/decompression behavior for the header fields. In the rule, it is recommended
 to describe the header field in the same order they appear in the packet.
 
-The rule describes the compressed header which are transmitted regarding their position
-in the rule. 
+On the other hand, the rule describes the compressed header which are transmitted regarding their position
+in the rul which is used for data serialization on the compressor side and data deserialization on the decompressor side.
 
 The main idea of the compression scheme is to send the rule id to the other end instead 
 of known field values. When a value is known by both
@@ -205,7 +205,7 @@ The field description is composed of different entries:
 * A Field Position (FP) indicating if several instances of the field exist in the 
   headers which one is targeted. 
   
-* A direction (D) indicating the packet direction. Three values are possible:
+* A direction indicator (DI) indicating the packet direction. Three values are possible:
 
   * upstream when the field or the value is only present in packets sent by the ES to the LA,
 
@@ -248,8 +248,9 @@ The compression/decompression process follows several steps:
   to compress the headers.  Each field is associated to a matching operator for
   compression. Each header field's value is compared to the corresponding target
   value stored in the rule for that field using the matching operator. This comparison 
-  includes the packet direction and the field position in the header. If all
-  the fields in the packet's header satisfy all the matching operators of
+  includes the direction indicator and the field position in the header. If all
+  the fields in the packet's header satisfy all the matching operators (excluding
+  unappropriate direction or position) of
   a rule,  the packet is processed using Compression Decompression Function associated
   with the fields. Otherwise the next rule
   is tested. If no eligible rule is found, then the packet is sent without compression,
@@ -266,13 +267,14 @@ The compression/decompression process follows several steps:
   (e.g. MAC address) and selects the appropriate rule through the rule ID. This
   rule gives the compressed header format and associates these values to header fields.
   It applies the CDF function to reconstruct the original
-  header fields. CDF of Compute-\* must be applied after the other CDFs.
+  header fields. The CDF order can be different of the order given by the rule. For instance
+  Compute-\* may be applied after the other CDFs.
 
 
 # Matching operators {#chap-MO}
 
 This document describes basic matching operators (MO)s which must be known by both LC, endpoints involved in the header compression/decompression. They are 
-not typed and can be applied indifferently to integer, string or any other type. The MOs and their definition are provided next:
+not typed and can be applied indifferently to integer, string or any other type. The MOs and their definitions are provided next:
 
 * equal: a field value in a packet matches with a field value in a rule if
   they are equal.
@@ -322,7 +324,7 @@ columns outlines the compression/decompression behavior.
 
 Compression is done in the rule order and compressed values are sent in that order in the compressed
 message. The receiver must be able to find the size of each compressed field
-which can be given by the rule or may be sent with the compressed header.
+which can be given by the rule or may be sent with the compressed header. 
 
 ## not-sent CDF
 
@@ -356,6 +358,11 @@ This function is used together with the "MSB" MO
 
 The compressor sends the "length" Least Significant Bits. The decompressor
 combines with an OR operator the value received with the Target Value.
+
+\[NOTE\] using a complementary length may cause some trouble with variable length field. For example
+a URI-query such as key=1234 may be matched by TV="key=" MO=MSB(32), but CDF = LSB(xxx) since the length is not known. 
+Should be better, either to specify again LSB(32) which means excluding the first 32 bits ?
+
 
 
 ## ESiid-DID, LAiid-DID CDF
