@@ -203,11 +203,11 @@ The field description is composed of different entries:
   
 * A direction (D) indicating the packet direction. Three values are possible:
 
-** upstream when sent by the ES to the LA,
+  * upstream when sent by the ES to the LA,
 
-** downstream when sent from the LA to the ES and 
+  * downstream when sent from the LA to the ES and 
 
-** bi-direction when sent upstream and downstream. 
+  * bi-direction when sent upstream and downstream. 
 
 * A Target Value (TV) is the value used to make the comparison with
   the packet header field. The Target Value can be of any type (integer, strings,...).
