@@ -255,6 +255,8 @@ The compression/decompression process follows several steps:
   with the fields. Otherwise the next rule
   is tested. If no eligible rule is found, then the packet is sent without compression,
   which may require using the fragmentation procedure. 
+  
+  In the downstrean direction, the rule is also used to find the device ID.
 
 * sending: The rule ID is sent to the other end followed by information resulting
   from the compression of header fields. This information is sent in the order expressed in the rule for the matching
@@ -269,6 +271,7 @@ The compression/decompression process follows several steps:
   It applies the CDF function to reconstruct the original
   header fields. The CDF order can be different of the order given by the rule. For instance
   Compute-\* may be applied after the other CDFs.
+
 
 
 # Matching operators {#chap-MO}
