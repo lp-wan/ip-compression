@@ -2,6 +2,9 @@
 stand_alone: true
 ipr: trust200902
 docname: draft-ietf-lpwan-ipv6-static-context-hc-01
+output: 
+  html_document:
+    toc: true # table of content true
 cat: info
 pi:
   symrefs: 'yes'
