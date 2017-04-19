@@ -158,29 +158,29 @@ or several LPWAN Application Servers (LA).
 The principle is exactly the same in the other direction.
 
 The context contains a list of rules (cf. {{Fig-ctxt}}). Each rule contains 
-itself a list of fields descriptions composed of a field identifier (FID), a target
+itself a list of fields descriptions composed of a field identifier (FID), a field position (FP), a target
 value (TV), a matching operator (MO) and a Compression/Decompression Function
 (CDF).
 
 
 ~~~~
-  +-----------------------------------------------------------------+
-  |                      Rule N                                     |
- +----------------------------------------------------------------+ |
- |                    Rule i                                      | |
-+---------------------------------------------------------------+ | |
-|                Rule 1                                         | | |
-|+--------+--------------+-------------------+-----------------+| | |
-||Field 1 | Target Value | Matching Operator | Comp/Decomp Fct || | |
-|+--------+--------------+-------------------+-----------------+| | |
-||Field 2 | Target Value | Matching Operator | Comp/Decomp Fct || | |
-|+--------+--------------+-------------------+-----------------+| | |
-||...     |    ...       | ...               | ...             || | |
-|+--------+--------------+-------------------+-----------------+| |-+
-||Field N | Target Value | Matching Operator | Comp/Decomp Fct || |
-|+--------+--------------+-------------------+-----------------+|-+
-|                                                               |
-+---------------------------------------------------------------+
+  /----------------------------------------------------------------\
+  |                      Rule N                                    |
+ /----------------------------------------------------------------\|
+ |                    Rule i                                      ||
+/----------------------------------------------------------------\||
+|                Rule 1                                          |||
+|+-------+---+---+------------+-----------------+---------------+|||
+||Field 1|Pos|Dir|Target Value|Matching Operator|Comp/Decomp Fct||||
+|+-------+---+---+------------+-----------------+---------------+|||
+||Field 2|Pos|Dir|Target Value|Matching Operator|Comp/Decomp Fct||||
+|+-------+---+---+------------+-----------------+---------------+|||
+||...    |...|...|   ...      | ...             | ...           ||||
+|+-------+---+---+------------+-----------------+---------------+||/
+||Field N|Pos|Dir|Target Value|Matching Operator|Comp/Decomp Fct|||
+|+-------+---+---+------------+-----------------+---------------+|/
+|                                                                |
+\----------------------------------------------------------------/
 ~~~~
 {: #Fig-ctxt title='Compression Decompression Context'}
 
@@ -197,6 +197,17 @@ ends, it is not necessary to send it on the LPWAN network.
 The field description is composed of different entries:
 
 * A Field ID (FID) is a unique value to define the field. 
+
+* A Field Position (FP) indicating if several instances of the field exist in the 
+  headers which one is targeted.
+  
+* A direction (D) indicating the packet direction. Three values are possible:
+
+** upstream when sent by the ES to the LA,
+
+** downstream when sent from the LA to the ES and 
+
+** bi-direction when sent upstream and downstream. 
 
 * A Target Value (TV) is the value used to make the comparison with
   the packet header field. The Target Value can be of any type (integer, strings,...).
