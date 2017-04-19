@@ -190,6 +190,9 @@ must be known from the compressor/decompressor. The rule just describes the
 compression/decompression behavior for the header fields. In the rule, it is recommended
 to describe the header field in the same order they appear in the packet.
 
+The rule describes the compressed header which are transmitted regarding their position
+in the rule. 
+
 The main idea of the compression scheme is to send the rule id to the other end instead 
 of known field values. When a value is known by both
 ends, it is not necessary to send it on the LPWAN network. 
@@ -199,15 +202,15 @@ The field description is composed of different entries:
 * A Field ID (FID) is a unique value to define the field. 
 
 * A Field Position (FP) indicating if several instances of the field exist in the 
-  headers which one is targeted.
+  headers which one is targeted. 
   
 * A direction (D) indicating the packet direction. Three values are possible:
 
-  * upstream when sent by the ES to the LA,
+  * upstream when only present in packets sent by the ES to the LA,
 
-  * downstream when sent from the LA to the ES and 
+  * downstream when only present in packet sent from the LA to the ES and 
 
-  * bi-direction when sent upstream and downstream. 
+  * bi-direction when sent either upstream or downstream. 
 
 * A Target Value (TV) is the value used to make the comparison with
   the packet header field. The Target Value can be of any type (integer, strings,...).
@@ -243,8 +246,9 @@ The compression/decompression process follows several steps:
 * compression rule selection: the goal is to identify which rule(s) will be used
   to compress the headers.  Each field is associated to a matching operator for
   compression. Each header field's value is compared to the corresponding target
-  value stored in the rule for that field using the matching operator. If all
-  the fields in the packet's header satisfied  all the matching operators of
+  value stored in the rule for that field using the matching operator. This comparison 
+  includes the packet direction and the field position in the header. If all
+  the fields in the packet's header satisfy all the matching operators of
   a rule,  the packet is processed using Compression Decompression Function associated
   with the fields. Otherwise the next rule
   is tested. If no eligible rule is found, then the packet is sent without compression,
@@ -280,10 +284,11 @@ not typed and can be applied indifferently to integer, string or any other type.
   
 * match-mapping: The goal of mapping-sent is to reduce the size of a field by allocating
   a shorter value. The Target Value contains a list of pairs. Each pair is composed of
-  a value and a short ID. This operator matches if a field value is equal to one of the pairs'
+  a value and a short ID (or index). This operator matches if a field value is equal to one of the pairs'
   values.
 
-Matching Operators may need a list of parameters to proceed to the matching. For instance MSB requires an
+Matching Operators and match-mapping needs a parameter to proceed to the matching. Match-mapping requires a list 
+of values associated to an index and MSB requires an
 integer indicating the number of bits to test.
 
 # Compression Decompression Functions (CDF) {#chap-CDF}
@@ -299,12 +304,12 @@ the original value.
 +--------------------+-------------+---------------------------+
 |not-sent            |elided       |use value stored in ctxt   |
 |value-sent          |send         |build from received value  |
+|mapping-sent        |send index   |value from index on a table|
 |LSB(length)         |send LSB     |ctxt value OR rcvd value   |
 |compute-length      |elided       |compute length             |
 |compute-checksum    |elided       |compute UDP checksum       |
 |ESiid-DID           |elided       |build IID from L2 ES addr  |
 |LAiid-DID           |elided       |build IID from L2 LA addr  |
-|mapping-sent        |send index   |value from index on a table|
 \--------------------+-------------+---------------------------/
 
 ~~~~
@@ -927,7 +932,7 @@ by such event.
 
 # Acknowledgements
 
-Thanks to Dominique Barthel, Carsten Bormann, Arunprabhu Kandasamy, Antony Markovski, Alexander
+Thanks to Dominique Barthel, Carsten Bormann, Philippe Clavier, Arunprabhu Kandasamy, Antony Markovski, Alexander
 Pelov, Pascal Thubert, Juan Carlos Zuniga for useful design consideration. 
 
 --- back
