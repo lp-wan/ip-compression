@@ -353,6 +353,13 @@ The compressor sends the Target Value stored on the rule in the compressed
 header message. The decompressor restores the field value with the one received 
 from the LPWAN 
 
+## mapping-sent
+
+mapping-sent is used to send a smaller index associated to the field value
+in the Target Value. This function is used together with the "match-mapping" MO.
+
+The compressor looks in the TV to find the field value and send the corresponding index.
+The decompressor uses this index to restore the field value.
 
 ## LSB CDF
 
@@ -366,23 +373,16 @@ combines with an OR operator the value received with the Target Value.
 a URI-query such as key=1234 may be matched by TV="key=" MO=MSB(32), but CDF = LSB(xxx) since the length is not known. 
 Should be better, either to specify again LSB(32) which means excluding the first 32 bits ?
 
-
-
 ## ESiid-DID, LAiid-DID CDF
 
 These functions are used to process respectively the End System and the LA
-Device Identifier (DID).
+Device Identifier (DID). LAiid-DID CDF is less common, since current LPWAN technologies
+frames contain a single address.
 
 The IID value is computed from the device ID present in the Layer 2 header. The
 computation depends on the technology and the device ID  size.
 
-## mapping-sent
-
-mapping-sent is used to send a smaller index associated to the field value
-in the Target Value. This function is used together with the "match-mapping" MO.
-
-The compressor looks in the TV to find the field value and send the corresponding index.
-The decompressor uses this index to restore the field value.
+In the downstream direction, these CDF are used to determine the L2 addresses used by the LPWAN.
 
 ## Compute-\*
 
@@ -403,7 +403,6 @@ This section lists the different IPv6 and UDP header fields and how they can be 
 
 This field always holds the same value, therefore the TV is 6, the MO is "equal" 
 and the CDF "not-sent".
-
 
 ## IPv6 Traffic class field
 
@@ -454,7 +453,7 @@ and the CDF should be "not-sent".
 
 If the Next header  field identified by the rest of the rule varies during time or is not 
 known by both sides, then TV is not set, MO is set to "ignore" and CDF is set to 
-"value-sent".
+"value-sent". A matching-list may also be used.
 
 ## Hop Limit field
 
@@ -464,6 +463,12 @@ is set to "equal" and the CDF is set to "not-sent".
 
 Otherwise the value is sent on the LPWAN: TV is not set, MO is set to ignore and 
 CDF is set to "value-sent".
+
+Note that the field behavior differs in upstream and downstream. In upstream, since there is 
+no IP forwarding between the ES and the LC, the value is relatively constant. On the
+other hand, the downstream value depends of Internet routing and may change more frequently.
+One solution could be to use the Direction Indicator (DI) to distinguish both directions to
+elide the field in the upstream direction and send the value in the downstream direction.
 
 ## IPv6 addresses fields
 
@@ -482,7 +487,7 @@ be either a link-local prefix or a global prefix. In that case, the TV for the
 source and destination prefixes contains the values, the MO is set to "equal" and
 the CDF is set to "not-sent".
 
-In case the rule allows several prefixes, static mapping must be used. The 
+In case the rule allows several prefixes, mapping-list must be used. The 
 different prefixes are listed in the TV associated with a short ID. The MO is set 
 to "match-mapping" and the CDF is set to "mapping-sent".
 
@@ -613,7 +618,7 @@ Local address for the LPWAN compressor.
   |IPv6 version    |6        | equal  | not-sent    ||      |
   |IPv6 DiffServ   |0        | equal  | not-sent    ||      |
   |IPv6 Flow Label |0        | equal  | not-sent    ||      |
-  |IPv6 Length     |         | ignore | comp-IPv6-l ||      |
+  |IPv6 Length     |         | ignore | comp-length ||      |
   |IPv6 Next Header|17       | equal  | not-sent    ||      |
   |IPv6 Hop Limit  |255      | ignore | not-sent    ||      |
   |IPv6 ESprefix   |FE80::/64| equal  | not-sent    ||      |
@@ -634,7 +639,7 @@ Local address for the LPWAN compressor.
   |IPv6 version    |6        | equal  | not-sent    ||      |
   |IPv6 DiffServ   |0        | equal  | not-sent    ||      |
   |IPv6 Flow Label |0        | equal  | not-sent    ||      |
-  |IPv6 Length     |         | ignore | comp-IPv6-l ||      |
+  |IPv6 Length     |         | ignore | comp-length ||      |
   |IPv6 Next Header|17       | equal  | not-sent    ||      |
   |IPv6 Hop Limit  |255      | ignore | not-sent    ||      |
   |IPv6 ESprefix   |alpha/64 | equal  | not-sent    ||      |
@@ -655,7 +660,7 @@ Local address for the LPWAN compressor.
   |IPv6 version    |6        | equal  | not-sent    ||      |
   |IPv6 DiffServ   |0        | equal  | not-sent    ||      |
   |IPv6 Flow Label |0        | equal  | not-sent    ||      |
-  |IPv6 Length     |         | ignore | comp-IPv6-l ||      |
+  |IPv6 Length     |         | ignore | comp-length ||      |
   |IPv6 Next Header|17       | equal  | not-sent    ||      |
   |IPv6 Hop Limit  |255      | ignore | not-sent    ||      |
   |IPv6 ESprefix   |alpha/64 | equal  | not-sent    ||      |
