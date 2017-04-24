@@ -361,6 +361,8 @@ in the Target Value. This function is used together with the "match-mapping" MO.
 The compressor looks in the TV to find the field value and send the corresponding index.
 The decompressor uses this index to restore the field value.
 
+The number of bit sent is the minimal number to code all the indexes.
+
 ## LSB CDF
 
 LSB function is used to send a fixed part of the packet field header to the other end.
