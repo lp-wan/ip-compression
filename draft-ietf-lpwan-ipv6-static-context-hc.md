@@ -364,14 +364,13 @@ The decompressor uses this index to restore the field value.
 ## LSB CDF
 
 LSB function is used to send a fixed part of the packet field header to the other end.
-This function is used together with the "MSB" MO
+This function is used together with the "MSB" MO. A length can be specified to indicate
+how many bits have to be sent. If not length is specified, the number of bit sent are the
+field length minus the bit length specified in the MSB MO.
 
 The compressor sends the "length" Least Significant Bits. The decompressor
 combines with an OR operator the value received with the Target Value.
 
-\[NOTE\] using a complementary length may cause some trouble with variable length field. For example
-a URI-query such as key=1234 may be matched by TV="key=" MO=MSB(32), but CDF = LSB(xxx) since the length is not known. 
-Should be better, either to specify again LSB(32) which means excluding the first 32 bits ?
 
 ## ESiid-DID, LAiid-DID CDF
 
