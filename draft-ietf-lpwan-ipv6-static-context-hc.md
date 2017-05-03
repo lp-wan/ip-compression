@@ -623,12 +623,12 @@ Local address for the SCHC C/D.
   |IPv6 Next Header|17       | equal  | not-sent    ||      |
   |IPv6 Hop Limit  |255      | ignore | not-sent    ||      |
   |IPv6 THGprefix  |FE80::/64| equal  | not-sent    ||      |
-  |IPv6 THGiid     |         | ignore | ESiid-DID   ||      |
+  |IPv6 THGiid     |         | ignore | THGiid-DID  ||      |
   |IPv6 APPprefix  |FE80::/64| equal  | not-sent    ||      |
   |IPv6 APPiid     |::1      | equal  | not-sent    ||      |
   +================+=========+========+=============++======+
-  |UDP ESport      |123      | equal  | not-sent    ||      |
-  |UDP LAport      |124      | equal  | not-sent    ||      |
+  |UDP THGport     |123      | equal  | not-sent    ||      |
+  |UDP APPport     |124      | equal  | not-sent    ||      |
   |UDP Length      |         | ignore | comp-length ||      |
   |UDP checksum    |         | ignore | comp-chk    ||      |
   +================+=========+========+=============++======+
@@ -644,12 +644,12 @@ Local address for the SCHC C/D.
   |IPv6 Next Header|17       | equal  | not-sent    ||      |
   |IPv6 Hop Limit  |255      | ignore | not-sent    ||      |
   |IPv6 THGprefix  |alpha/64 | equal  | not-sent    ||      |
-  |IPv6 THGiid     |         | ignore | ESiid-DID   ||      |
+  |IPv6 THGiid     |         | ignore | THGiid-DID  ||      |
   |IPv6 APPprefix  |beta/64  | equal  | not-sent    ||      |
   |IPv6 APPiid     |::1000   | equal  | not-sent    ||      |
   +================+=========+========+=============++======+
-  |UDP ESport      |5683     | equal  | not-sent    ||      |
-  |UDP LAport      |5683     | equal  | not-sent    ||      |
+  |UDP THGport     |5683     | equal  | not-sent    ||      |
+  |UDP APPport     |5683     | equal  | not-sent    ||      |
   |UDP Length      |         | ignore | comp-length ||      |
   |UDP checksum    |         | ignore | comp-chk    ||      |
   +================+=========+========+=============++======+
@@ -665,12 +665,12 @@ Local address for the SCHC C/D.
   |IPv6 Next Header|17       | equal  | not-sent    ||      |
   |IPv6 Hop Limit  |255      | ignore | not-sent    ||      |
   |IPv6 THGprefix  |alpha/64 | equal  | not-sent    ||      |
-  |IPv6 THGiid     |         | ignore | ESiid-DID   ||      |
+  |IPv6 THGiid     |         | ignore | THGiid-DID  ||      |
   |IPv6 APPprefix  |gamma/64 | equal  | not-sent    ||      |
   |IPv6 APPiid     |::1000   | equal  | not-sent    ||      |
   +================+=========+========+=============++======+
-  |UDP ESport      |8720     | MSB(12)| LSB(4)      || lsb  |
-  |UDP LAport      |8720     | MSB(12)| LSB(4)      || lsb  |
+  |UDP THGport     |8720     | MSB(12)| LSB(4)      || lsb  |
+  |UDP APPport     |8720     | MSB(12)| LSB(4)      || lsb  |
   |UDP Length      |         | ignore | comp-length ||      |
   |UDP checksum    |         | ignore | comp-chk    ||      |
   +================+=========+========+=============++======+
