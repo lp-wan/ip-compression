@@ -823,9 +823,8 @@ This section discusses the properties of each fragment delivery
 
 ## Fragmentation header formats
 
-Fragments except the last one SHALL    
-   contain the fragmentation header as defined in {{Fig-NotLast}}. The total size of this fragmentation header is R bits.
-   
+In any of the Window modes, fragments except the last one SHALL    
+   contain the fragmentation header as defined in {{Fig-NotLast}}. In any of the Packet modes, fragments (except the last one) that are transmitted for the first time SHALL contain the fragmentation header shown in {{Fig-NotLast}}. The total size of this fragmentation header is R bits.   
 
 ~~~~
                          <------------- R ------------>
@@ -835,6 +834,20 @@ Fragments except the last one SHALL
                          +---- ... ---+- ... -+- ... -+
 ~~~~
 {: #Fig-NotLast title='Fragmentation Header for Fragments except the Last One'}
+
+In any of the Packet modes, fragments (except the last one) that are retransmitted SHALL    
+   contain the fragmentation header as defined in {{Fig-NotLastRetry}}.    
+
+~~~~
+                         <------------- R ------------>
+                                       <- T -> <----- A ---->
+                         +---- ... ---+- ... -+----- ... ----+
+                         |   Rule ID  | DTag  |      AFN     |
+                         +---- ... ---+- ... -+----- ... ----+
+~~~~
+{: #Fig-NotLastRetry title='Fragmentation Header for Retransmitted Fragments (Except the Last One) in a Packet mode'}
+
+
 
    The last fragment SHALL contain a fragmentation header that conforms to 
    the format shown in {{Fig-Last}}. The total size of this fragmentation 
@@ -850,7 +863,7 @@ Fragments except the last one SHALL
 {: #Fig-Last title='Fragmentation Header for the Last Fragment'}
 
 
-   Rule ID: this field has a size of R - T - N bits in all fragments. The Rule ID in a fragment is set to a value that indicates that the data unit being carried is a fragment. This also allows to interleave non-fragmented IPv6 datagrams with fragments that carry a larger IPv6 datagram. Rule ID may be used to signal which reliability option is in use.
+   Rule ID: this field has a size of R - T - N bits in all fragments. The Rule ID in a fragment is set to a value that indicates that the data unit being carried is a fragment. This also allows to interleave non-fragmented IPv6 datagrams with fragments that carry a larger IPv6 datagram. Rule ID may be used to signal which reliability option is in use. In any of the Packet modes, Rule ID allows also to indicate whether the fragment is a first transmission or a retransmission.
    
    DTag: DTag stands for Datagram Tag. The size of the DTag field is T bits, 
    which may be set to a value greater than or equal to 0 bits. The DTag field in all fragments 
@@ -871,6 +884,8 @@ Fragments except the last one SHALL
       and thus the CFN does not strictly correspond to the N least significant bits of the actual 
       absolute fragment number. It is also important to note that, for N=1, the last fragment 
       of the packet will carry a CFN equal to 1, while all previous fragments will carry a CFN of 0. 
+
+   AFN: AFN stands for Absolute Fragment Number. This field has a size of A bits. 'A' may be greater than N. The AFN is an unsigned integer that carries the absolute fragment number that corresponds to a fragment from an IPv6 packet. The AFN MUST be set sequentially and in increasing order, starting from 0. 
 
    MIC:  MIC stands for Message Integrity Check. This field has a size of M 
       bits. It is computed by the sender over the complete IPv6 packet before fragmentation by 
@@ -922,11 +937,12 @@ The format of an ACK is shown in {{Fig-ACK-Format}}:
    in total, therefore the bitmap has a size of two bytes. 
 
 ~~~~
-                                                       1
-                  <-----  R  ----> 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5
-                  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                  |    Rule ID    |1|0|1|1|1|1|1|1|0|1|1|0|0|0|0|1|
-                  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                     <------  R  ------>                     1
+                                 <- T -> 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5
+                     +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                     |  Rule ID  | DTag |1|0|1|1|1|1|1|1|0|1|1|0|0|0|0|1|
+                     +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
 ~~~~
 {: #Fig-Bitmap title='Example of the Bitmap in an ACK'}
 
@@ -934,20 +950,24 @@ The format of an ACK is shown in {{Fig-ACK-Format}}:
 indicates that the second and the fifth fragments have not been correctly received. 
 
 ~~~~                                                  
-                  <-----  R  ----> 0 1 2 3 4 5 6 7 
-                  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                  |    Rule ID    |1|0|1|1|0|1|1|1|                   
-                  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                     <------  R  ------>
+                                 <- T -> 0 1 2 3 4 5 6 7
+                     +---- ... --+-... -+-+-+-+-+-+-+-+-+
+                     |  Rule ID  | DTag |1|0|1|1|0|1|1|1|
+                     +---- ... --+-... -+-+-+-+-+-+-+-+-+
+
 ~~~~
 {: #Fig-Bitmap-Win title='Example of the bitmap in an ACK (in Window mode, for N=3)'}
 
 {{Fig-NoBitmap}} illustrates an ACK without bitmap.
 
 ~~~~
-                  <-----  R  ----> 
-                  +-+-+-+-+-+-+-+-+
-                  |    Rule ID    | 
-                  +-+-+-+-+-+-+-+-+
+                     <------  R  ------>
+                                 <- T -> 
+                     +---- ... --+-... -+
+                     |  Rule ID  | DTag |
+                     +---- ... --+-... -+
+
 ~~~~
 {: #Fig-NoBitmap title='Example of an ACK without bitmap'}
 
@@ -970,8 +990,8 @@ fragments, and the fragment payload sizes. Note that the size of the original, u
 IPv6 packet cannot be determined from fragmentation headers.
 
 When ACK on error is used (for either Packet mode or Window mode), the 
-   fragment receiver starts a timer upon reception of the first fragment for
-   an IPv6 datagram. This timer is initialized to TBD, and it is reset every 
+   fragment receiver starts a timer (denoted "ACK on Error Timer") upon reception of the first fragment for
+   an IPv6 datagram. The initial value for this timer is not provided by this specification, and is expected to be defined in additional documents. This timer is reset every 
    time that a new fragment carrying data from the same IPv6 datagram is 
    received.  In Packet mode – ACK on error, upon timer expiration, if the 
    last fragment of the IPv6 datagram (i.e. carrying all CFN bits set to 1) 
@@ -1012,13 +1032,12 @@ When ACK on error is used (for either Packet mode or Window mode), the
    
 
    When ACK “Always” is used (in either Packet mode or Window mode), the 
-   fragment sender starts a timer after 
-   transmitting the last fragment of a fragmented IPv6 datagram. This timer 
-   is initialized to TBD. Upon expiration of the timer, if no ACK has been 
+   fragment sender starts a timer (denoted "ACK Always Timer") after 
+   transmitting the last fragment of a fragmented IPv6 datagram. The initial value for this timer is not provided by this specification, and is expected to be defined in additional documents. Upon expiration of the timer, if no ACK has been 
    received for this IPv6 datagram, the sender retransmits the last fragment, 
    and it reinitializes and restarts the timer. In Window mode – ACK 
-   “Always”, the fragment sender also starts a timer after transmitting the 
-   last fragment of a window. This timer is initialized to TBD. Upon 
+   “Always”, the fragment sender also starts the ACK Always Timer after transmitting the 
+   last fragment of a window. Upon 
    expiration of the timer, if no ACK has been 
    received for this window, the sender retransmits the last fragment, 
    and it reinitializes and restarts the timer. Note that retransmitting the 
@@ -1045,8 +1064,7 @@ all link fragments of all partially reassembled payload datagrams, and fragment 
 MUST discard all not yet transmitted link fragments of all partially transmitted payload
 (e.g., IPv6) datagrams. Similarly, when a node first receives a fragment of a packet, it starts
 a reassembly timer. When this time expires, if the entire packet has not been reassembled, 
-the existing fragments MUST be discarded and the reassembly state MUST be flushed. The reassembly
-timeout MUST be set to a maximum of TBD seconds).
+the existing fragments MUST be discarded and the reassembly state MUST be flushed. The value for this timer is not provided by this specification, and is expected to be defined in technology-specific profile documents.
 
 ## Aborting a fragmented IPv6 datagram transmission
 
@@ -1071,9 +1089,13 @@ For several reasons, a fragment sender or a fragment receiver may want to
   IPv6 datagram being transmitted, and MUST release any resources allocated 
   for the fragmented IPv6 datagram transmission being aborted.
 
-  [[TBD: aborting one specific transmission of a fragmented packet vs all on-
-  going fragmented packet transmissions (e.g. for interleaved fragmented 
-  packets).]]
+  A further Rule ID value may be used by an entity to signal abortion of all on-
+  going, possibly interleaved, fragmented IPv6 datagram transmissions.
+
+
+## Downlink fragment transmission
+
+In some LPWAN technologies, as part of energy-saving techniques, downlink transmission is only possible immediately after an uplink transmission. In order to avoid potentially high delay for fragmented IPv6 datagram transmission in the downlink, the fragment receiver MAY perform an uplink transmission as soon as possible after reception of a fragment that is not the last one. Such uplink transmission may be triggered by the L2 (e.g. an L2 ACK sent in response to a fragment encapsulated in a L2 frame that requires an L2 ACK) or it may be triggered from an upper layer.
 
 
 # Security considerations
@@ -1176,25 +1198,25 @@ for N=3, no losses.'}
 in Packet mode - ACK on error, for N=3, with three losses. 
 
 ~~~~       
-        Sender               Receiver
-          |-------CFN=6-------->|
-          |-------CFN=5-------->|
-          |-------CFN=4---X---->|
-          |-------CFN=3-------->|
-          |-------CFN=2---X---->|
-          |-------CFN=1-------->|
-          |-------CFN=0-------->|
-          |-------CFN=6-------->|
-          |-------CFN=5-------->|
-          |-------CFN=4---X---->|
-          |-------CFN=7-------->|MIC checked
-          |<-------ACK----------|Bitmap:1101011110100001
-          |-------CFN=6-------->|
-          |-------CFN=5-------->|
-          |-------CFN=4-------->|MIC checked => 
-       (no ACK)   
+         Sender               Receiver
+(AFN=0)    |-------CFN=6-------->|
+(AFN=1)    |-------CFN=5-------->|
+(AFN=2)    |-------CFN=4---X---->|
+(AFN=3)    |-------CFN=3-------->|
+(AFN=4)    |-------CFN=2---X---->|
+(AFN=5)    |-------CFN=1-------->|
+(AFN=6)    |-------CFN=0-------->|
+(AFN=7)    |-------CFN=6-------->|
+(AFN=8)    |-------CFN=5-------->|
+(AFN=9)    |-------CFN=4---X---->|
+           |-------CFN=7-------->|MIC checked
+           |<-------ACK----------|Bitmap:1101011110100001
+           |-------AFN=2-------->|
+           |-------AFN=4-------->|
+           |-------AFN=9-------->|MIC checked => 
+        (no ACK)   
 ~~~~
-{: #Fig-Example-Rel-Loss title='Transmission of an IPv6 packet carried by 11 fragments in Packet mode - ACK on error, for N=3,  three losses.'}
+{: #Fig-Example-Rel-Loss title='Transmission of an IPv6 packet carried by 11 fragments in Packet mode - ACK on error, for N=3,  three losses. In the figure, (AFN=x) indicates the AFN value computed by the sender for each fragment.'}
 
 {{Fig-Example-Win-NoLoss-NACK}} illustrates the transmission of an IPv6 packet that needs 11 fragments in Window mode - ACK on error, for N=3, without losses. Note: in Window mode, an additional bit will be needed to number windows.
 
@@ -1221,7 +1243,7 @@ in Window mode - ACK on error, for N=3, with three losses. Note: in Window mode,
 an additional bit will be needed to number windows.
 
 ~~~~       
-        Sender               Receiver
+         Sender               Receiver
           |-------CFN=6-------->|
           |-------CFN=5-------->|
           |-------CFN=4---X---->|
@@ -1270,21 +1292,21 @@ in Packet mode - ACK "Always", for N=3, with three losses.
 
 ~~~~       
         Sender               Receiver
-          |-------CFN=6-------->|
-          |-------CFN=5-------->|
-          |-------CFN=4---X---->|
-          |-------CFN=3-------->|
-          |-------CFN=2---X---->|
-          |-------CFN=1-------->|
-          |-------CFN=0-------->|
-          |-------CFN=6-------->|
-          |-------CFN=5-------->|   
-          |-------CFN=4---X---->|
+(AFN=0)   |-------CFN=6-------->|
+(AFN=1)   |-------CFN=5-------->|
+(AFN=2)   |-------CFN=4---X---->|
+(AFN=3)   |-------CFN=3-------->|
+(AFN=4)   |-------CFN=2---X---->|
+(AFN=5)   |-------CFN=1-------->|
+(AFN=6)   |-------CFN=0-------->|
+(AFN=7)   |-------CFN=6-------->|
+(AFN=8)   |-------CFN=5-------->|   
+(AFN=9)   |-------CFN=4---X---->|
           |-------CFN=7-------->|MIC checked
           |<-------ACK----------|bitmap:1101011110100001
-          |-------CFN=6-------->|
-          |-------CFN=5-------->|
-          |-------CFN=4-------->|MIC checked =>
+          |-------AFN=2-------->|
+          |-------AFN=4-------->|
+          |-------AFN=9-------->|MIC checked =>
           |<-------ACK----------|no bitmap
         (End)
       
