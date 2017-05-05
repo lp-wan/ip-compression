@@ -72,10 +72,10 @@ Some LPWAN networks properties can be exploited for an efficient header
 compression:
 
 * Topology is star oriented, therefore all the packets follow the same path.
-  For the needs of this draft, the architecture can be summarized to Things (THG)
-  exchanging information with LPWAN Application Server (APP) through a Network Gateway (LPWANG). 
+  For the needs of this draft, the architecture can be summarized to Devices (DEV)
+  exchanging information with LPWAN Application Server (APP) through a Network Gateway (NGW). 
 
-* Traffic flows are mostly known in advance, since Things embed built-in
+* Traffic flows are mostly known in advance, since devices embed built-in
   applications. Contrary to computers or smartphones, new applications cannot
   be easily installed.
 
@@ -106,9 +106,9 @@ This section defines the terminology and acronyms used in this document.
 
 * Context: A set of rules used to compress/decompress headers
 
-* THG: Thing. Node connected to the LPWAN. A THG may implement SCHC.
+* DEV: Device. Node connected to the LPWAN. A DEV may implement SCHC.
 
-* APP: LPWAN Application. An application sending/consuming IPv6 packets to/from the Thing.
+* APP: LPWAN Application. An application sending/consuming IPv6 packets to/from the Device.
 
 * SCHC C/D: LPWAN Compressor/Decompressor. A process in the network to achieve compression/decompressing headers. SCHC C/D uses SCHC rules to perform compression and decompression.
 
@@ -116,7 +116,7 @@ This section defines the terminology and acronyms used in this document.
 
 * Rule: A set of header field values.
 
-* Rule ID: An identifier for a rule, SCHC C/D and THG share the same rule ID for a specific flow. Rule ID 
+* Rule ID: An identifier for a rule, SCHC C/D and DEV share the same rule ID for a specific flow. Rule ID 
   is sent on the LPWAN.
   
 * TV: Target value. A value contained in the rule that will be matched with the value of a header field.
@@ -127,32 +127,34 @@ Static Context Header Compression (SCHC) avoids context synchronization,
 which is the most bandwidth-consuming operation in other header compression mechanisms
 such as RoHC. Based on the fact
 that the nature of data flows is highly predictable in LPWAN networks, a static
-context may be stored on the Thing (THG). The context must be stored in both ends. It can 
+context may be stored on the Device (DEV). The context must be stored in both ends. It can 
 also be learned by using a provisionning protocol that is out of the scope of this draft.
 
 ~~~~
-     THING                                                   Appl Servers
-+-----------------+                                       +---------------+
-| APP1  APP2 APP3 |                                       |APP1  APP2 APP3|
-|                 |                                       |               |
-|       UDP       |                                       |      UDP      | 
-|      IPv6       |                                       |     IPv6      |   
-|                 |                                       |               |  
-|SCHC C/D (contxt)|                                       |               | 
-+--------+--------+                                       +-------+-------+ 
-         |   +--+     +------+     +-----------------+                .
-         +~~ |RG| === |LPWANG| === |SCHC C/D (contxt)| ... Internet ...
-             +--+     +------+     +-----------------+
+     DEVICE                                             Appl Servers
++-----------------+                                  +---------------+
+| APP1  APP2 APP3 |                                  |APP1  APP2 APP3|
+|                 |                                  |               |
+|       UDP       |                                  |      UDP      | 
+|      IPv6       |                                  |     IPv6      |   
+|                 |                                  |               |  
+|    SCHC C/D     |                                  |               |  
+|    (context)    |                                  |               | 
++--------+--------+                                  +-------+-------+ 
+         |   +--+     +-----+     +---------+                .
+         +~~ |RG| === | NGW | === |SCHC C/D | ... Internet ...
+             +--+     +-----+     |(context)| 
+                                  +---------+
 ~~~~
 {: #Fig-archi title='Architecture'}
 
 {{Fig-archi}} based on {{I-D.ietf-lpwan-overview}} terminology represents the architecture for 
-compression/decompression. The Thing is running applications which produce IPv6 or IPv6/UDP
+compression/decompression. The Device is running applications which produce IPv6 or IPv6/UDP
 flows. These flows are compressed by an Static Context Header Compression Compressor/Decompressor (SCHC C/D) to reduce the headers size. Resulting
 information is sent on a layer two (L2) frame to the LPWAN Radio Network to a Radio Gateway (RG) which forwards 
-the frame to a LPWANetwork Gateway (LPWANG).
-The LPWANetwork Gateway sends the data to a SCHC C/D for decompression which shares the same rules with the THG. The SCHC C/D can be 
-located on the Network Gateway (NG) or in another places if a tunnel is established between the NG and the SCHC C/D.
+the frame to a Network Gateway (NGW).
+The NGW sends the data to a SCHC C/D for decompression which shares the same rules with the DEV. The SCHC C/D can be 
+located on the Network Gateway (NGW) or in another places if a tunnel is established between the NGW and the SCHC C/D.
 This architecture forms a star topology. After decompression, the packet can be sent on the Internet to one
 or several LPWAN Application Servers (APP). 
 
@@ -188,8 +190,7 @@ value (TV), a matching operator (MO) and a Compression/Decompression Action
 
 The rule does not describe the original packet format which
 must be known from the compressor/decompressor. The rule just describes the
-compression/decompression behavior for the header fields. In the rule, it is recommended
-to describe the header field in the same order they appear in the packet.
+compression/decompression behavior for the header fields. In the rule, the description of the header field must be done in the same order they appear in the packet.
 
 On the other hand, the rule describes the compressed header which are transmitted regarding their position
 in the rule which is used for data serialization on the compressor side and data deserialization on the decompressor side.
@@ -207,9 +208,9 @@ The field description is composed of different entries:
   
 * A direction indicator (DI) indicating the packet direction. Three values are possible:
 
-  * upstream when the field or the value is only present in packets sent by the THG to the APP,
+  * upstream when the field or the value is only present in packets sent by the DEV to the APP,
 
-  * downstream when the field or the value is only present in packet sent from the APP to the THG and 
+  * downstream when the field or the value is only present in packet sent from the APP to the DEV and 
 
   * bi-directional when the field or the value is present either upstream or downstream. 
 
@@ -236,8 +237,8 @@ LPWAN technology, the number of flows,...
 Some values in the rule ID space may be reserved for goals other than header 
 compression, for example fragmentation. 
 
-Rule IDs are specific to a THG. Two THGs may use the same rule ID for different
-header compression. The SCHC C/D needs to combine the rule ID with the THG L2 address
+Rule IDs are specific to a DEV. Two DEVs may use the same rule ID for different
+header compression. The SCHC C/D needs to combine the rule ID with the DEV L2 address
 to find the appropriate rule.
 
 ## Packet processing
@@ -263,7 +264,7 @@ The compression/decompression process follows several steps:
   fields. The way the rule ID is sent depends on the
   layer two technology and will be specified in a specific document. For example,
   it can either be included in a Layer 2 header or sent in the first byte of
-  the L2 payload.
+  the L2 payload. (cf. {{Fig-FormatPckt}})
 
 * decompression: The receiver identifies the  sender through its device-id
   (e.g. MAC address) and selects the appropriate rule through the rule ID. This
@@ -272,6 +273,14 @@ The compression/decompression process follows several steps:
   header fields. The CDA order can be different of the order given by the rule. For instance
   Compute-\* may be applied after the other CDAs.
 
+~~~~
+ 
++--- ... ---+-------------- ... --------------+
+|  Rule ID  |Compressed Hdr Fields information|
++--- ... ---+-------------- ... --------------+
+
+~~~~
+{: #Fig-FormatPckt title='LPWAN Compressed Format Packet'}
 
 
 # Matching operators {#chap-MO}
@@ -314,7 +323,7 @@ the original value.
 |LSB(length)         |send LSB     |ctxt value OR rcvd value    |
 |compute-length      |elided       |compute length              |
 |compute-checksum    |elided       |compute UDP checksum        |
-|THGiid-DID          |elided       |build IID from L2 THG addr  |
+|DEViid-DID          |elided       |build IID from L2 DEV addr  |
 |APPiid-DID          |elided       |build IID from L2 APP addr  |
 \--------------------+-------------+----------------------------/
 
@@ -374,9 +383,9 @@ The compressor sends the "length" Least Significant Bits. The decompressor
 combines with an OR operator the value received with the Target Value.
 
 
-## THGiid-DID, APPiid-DID CDA
+## DEViid-DID, APPiid-DID CDA
 
-These functions are used to process respectively the Thing and the Application
+These functions are used to process respectively the Device and the Application
 Device Identifier (DID). APPiid-DID CDA is less common, since current LPWAN technologies
 frames contain a single address.
 
@@ -452,7 +461,7 @@ If the Next Header field identified by the rest of the rule does not vary and is
 by both sides, the TV should contain this Next Header value, the MO should be "equal" 
 and the CDA should be "not-sent".
 
-If the Next header  field identified by the rest of the rule varies during time or is not 
+If the Next header field identified by the rest of the rule varies during time or is not 
 known by both sides, then TV is not set, MO is set to "ignore" and CDA is set to 
 "value-sent". A matching-list may also be used.
 
@@ -466,7 +475,7 @@ Otherwise the value is sent on the LPWAN: TV is not set, MO is set to ignore and
 CDA is set to "value-sent".
 
 Note that the field behavior differs in upstream and downstream. In upstream, since there is 
-no IP forwarding between the THG and the SCHC C/D, the value is relatively constant. On the
+no IP forwarding between the DEV and the SCHC C/D, the value is relatively constant. On the
 other hand, the downstream value depends of Internet routing and may change more frequently.
 One solution could be to use the Direction Indicator (DI) to distinguish both directions to
 elide the field in the upstream direction and send the value in the downstream direction.
@@ -476,7 +485,7 @@ elide the field in the upstream direction and send the value in the downstream d
 As in 6LoWPAN {{RFC4944}}, IPv6 addresses are split into two 64-bit long fields; 
 one for the prefix and one for the Interface Identifier (IID). These fields should
 be compressed. To allow a single rule, these values are identified by their role 
-(THG or APP) and not by their position in the frame (source or destination). The SCHC C/D
+(DEV or APP) and not by their position in the frame (source or destination). The SCHC C/D
 must be aware of the traffic direction (upstream, downstream) to select the appropriate
 field.
 
@@ -497,13 +506,13 @@ value-sent.
 
 ### IPv6 source and destination IID
 
-If the THG or APP IID are based on an LPWAN address, then the IID can be reconstructed 
+If the DEV or APP IID are based on an LPWAN address, then the IID can be reconstructed 
 with information coming from the LPWAN header. In that case, the TV is not set, the MO 
-is set to "ignore" and the CDA is set to "THGiid-DID" or "APPiid-DID". Note that the 
+is set to "ignore" and the CDA is set to "DEViid-DID" or "APPiid-DID". Note that the 
 LPWAN technology is generally carrying a single device identifier corresponding
-to the THG. The SCHC C/D may also not be aware of these values. 
+to the DEV. The SCHC C/D may also not be aware of these values. 
 
-For privacy reasons or if the THG address is changing over time, it maybe better to
+For privacy reasons or if the DEV address is changing over time, it maybe better to
 use a static value. In that case, the TV contains the value, the MO operator is set to
 "equal" and the CDA is set to "not-sent". 
 
@@ -524,9 +533,9 @@ CDAs described above.
 ## UDP source and destination port
 
 To allow a single rule, the UDP port values are identified by their role 
-(THG or APP) and not by their position in the frame (source or destination). The SCHC C/D
+(DEV or APP) and not by their position in the frame (source or destination). The SCHC C/D
 must be aware of the traffic direction (upstream, downstream) to select the appropriate
-field. The following rules apply for THG and APP port numbers.
+field. The following rules apply for DEV and APP port numbers.
 
 If both ends knows the port number, it can be elided. The TV contains the port number,
 the MO is set to "equal" and the CDA is set to "not-sent".
@@ -573,16 +582,16 @@ The goal is to illustrate the SCHC behavior.
 ## IPv6/UDP compression 
 
 The most common case using the mechanisms defined in this document will be a 
-LPWAN Thing that embeds some applications running over
+LPWAN DEV that embeds some applications running over
 CoAP. In this example, three flows are considered. The first flow is for the device management based
 on CoAP using
-Link Local IPv6 addresses and UDP ports 123 and 124 for THG and APP, respectively.
-The second flow will be a CoAP server for measurements done by the Thing
+Link Local IPv6 addresses and UDP ports 123 and 124 for DEV and APP, respectively.
+The second flow will be a CoAP server for measurements done by the Device
 (using ports 5683) and Global IPv6 Address prefixes alpha::IID/64 to beta::1/64.
 The last flow is for legacy applications using different ports numbers, the
 destination IPv6 address prefix is gamma::1/64.
 
- {{FigStack}} presents the protocol stack for this Thing. IPv6 and UDP are represented
+ {{FigStack}} presents the protocol stack for this Device. IPv6 and UDP are represented
 with dotted lines since these protocols are compressed on the radio link.
 
 ~~~~
@@ -597,15 +606,15 @@ with dotted lines since these protocols are compressed on the radio link.
 |    SCHC Header compression   |
 |      and fragmentation       |
 +------------------------------+
-|      LPWA L2 technologies   |
+|      LPWAN L2 technologies   |
 +------------------------------+
-      Thing or LPWANG
+         DEV or NGW
 
 ~~~~
 {: #FigStack title='Simplified Protocol Stack for LP-WAN'}
 
 
-Note that in some LPWAN technologies, only the Things have a device ID.
+Note that in some LPWAN technologies, only the DEVs have a device ID.
 Therefore, when such technologie are used, it is necessary to define statically an IID for the Link
 Local address for the SCHC C/D.
 
@@ -622,12 +631,12 @@ Local address for the SCHC C/D.
   |IPv6 Length     |         | ignore | comp-length ||      |
   |IPv6 Next Header|17       | equal  | not-sent    ||      |
   |IPv6 Hop Limit  |255      | ignore | not-sent    ||      |
-  |IPv6 THGprefix  |FE80::/64| equal  | not-sent    ||      |
-  |IPv6 THGiid     |         | ignore | THGiid-DID  ||      |
+  |IPv6 DEVprefix  |FE80::/64| equal  | not-sent    ||      |
+  |IPv6 DEViid     |         | ignore | DEViid-DID  ||      |
   |IPv6 APPprefix  |FE80::/64| equal  | not-sent    ||      |
   |IPv6 APPiid     |::1      | equal  | not-sent    ||      |
   +================+=========+========+=============++======+
-  |UDP THGport     |123      | equal  | not-sent    ||      |
+  |UDP DEVport     |123      | equal  | not-sent    ||      |
   |UDP APPport     |124      | equal  | not-sent    ||      |
   |UDP Length      |         | ignore | comp-length ||      |
   |UDP checksum    |         | ignore | comp-chk    ||      |
@@ -643,12 +652,12 @@ Local address for the SCHC C/D.
   |IPv6 Length     |         | ignore | comp-length ||      |
   |IPv6 Next Header|17       | equal  | not-sent    ||      |
   |IPv6 Hop Limit  |255      | ignore | not-sent    ||      |
-  |IPv6 THGprefix  |alpha/64 | equal  | not-sent    ||      |
-  |IPv6 THGiid     |         | ignore | THGiid-DID  ||      |
+  |IPv6 DEVprefix  |alpha/64 | equal  | not-sent    ||      |
+  |IPv6 DEViid     |         | ignore | DEViid-DID  ||      |
   |IPv6 APPprefix  |beta/64  | equal  | not-sent    ||      |
   |IPv6 APPiid     |::1000   | equal  | not-sent    ||      |
   +================+=========+========+=============++======+
-  |UDP THGport     |5683     | equal  | not-sent    ||      |
+  |UDP DEVport     |5683     | equal  | not-sent    ||      |
   |UDP APPport     |5683     | equal  | not-sent    ||      |
   |UDP Length      |         | ignore | comp-length ||      |
   |UDP checksum    |         | ignore | comp-chk    ||      |
@@ -664,12 +673,12 @@ Local address for the SCHC C/D.
   |IPv6 Length     |         | ignore | comp-length ||      |
   |IPv6 Next Header|17       | equal  | not-sent    ||      |
   |IPv6 Hop Limit  |255      | ignore | not-sent    ||      |
-  |IPv6 THGprefix  |alpha/64 | equal  | not-sent    ||      |
-  |IPv6 THGiid     |         | ignore | THGiid-DID  ||      |
+  |IPv6 DEVprefix  |alpha/64 | equal  | not-sent    ||      |
+  |IPv6 DEViid     |         | ignore | DEViid-DID  ||      |
   |IPv6 APPprefix  |gamma/64 | equal  | not-sent    ||      |
   |IPv6 APPiid     |::1000   | equal  | not-sent    ||      |
   +================+=========+========+=============++======+
-  |UDP THGport     |8720     | MSB(12)| LSB(4)      || lsb  |
+  |UDP DEVport     |8720     | MSB(12)| LSB(4)      || lsb  |
   |UDP APPport     |8720     | MSB(12)| LSB(4)      || lsb  |
   |UDP Length      |         | ignore | comp-length ||      |
   |UDP checksum    |         | ignore | comp-chk    ||      |
@@ -680,10 +689,10 @@ Local address for the SCHC C/D.
 {: #Fig-fields title='Context rules'}
 
 All the fields described in the three rules {{Fig-fields}} are present
-in the IPv6 and UDP headers.  The THGiid-DID value is found in the L2
+in the IPv6 and UDP headers.  The DEViid-DID value is found in the L2
 header.
 
-The second and third rules use global addresses. The way the THG learns the
+The second and third rules use global addresses. The way the DEV learns the
 prefix is not in the scope of the document. 
 
 The third rule compresses port numbers to 4 bits. 
@@ -1101,7 +1110,10 @@ In some LPWAN technologies, as part of energy-saving techniques, downlink transm
 # Security considerations
 
 ## Security considerations for header compression
-TBD
+SCHC does not change protocol behavior, but define a one to one mapping mechanism between an uncompressed header format and a compressed header format, therefore SCHC do not introduce new risks. 
+
+On the other hand the use of SCHC header compression reduces the redundancy of the header information, which may be used by some Man in the Middle attacks. A malicious header compressor may cause a construction of packets that do not match the original. 
+Such corruptions may be detected with the end-to-end authentication and integrity mechanisms which will not be affected by the compression. In case of Fragmentation, the SCHC compression uses a MIC in order to reduces this kind of events.
 
 ## Security considerations for fragmentation
 This subsection describes potential attacks to LPWAN fragmentation 
