@@ -801,17 +801,17 @@ This section discusses the properties of each fragment delivery
    use case for it at the time of the writing.
 
 ~~~~   
-                       +------------------------+------------------------+
-                       |      Packet mode       |       Window mode      |   
-     +-----------------+------------------------+------------------------+
-     |                 | + Low ACK overhead     |                        |
-     |  ACK on error   | - Long loss burst      |   (Use case unknown)   |
-     |                 | - No flow control      |                        |
-     +-----------------+------------------------+------------------------+       
-     |                 | + Moderate ACK overh.  | + Flow control         |                                
-     |  ACK “always”   | - Long loss burst      | + Long loss burst      |                      
-     |                 | - No flow control      | - Higher ACK overhead  |                          
-     +-----------------+------------------------+------------------------+
+                     +------------------------+------------------------+
+                     |      Packet mode       |       Window mode      |   
+   +-----------------+------------------------+------------------------+
+   |                 | + Low ACK overhead     |                        |
+   |  ACK on error   | - Long loss burst      |   (Use case unknown)   |
+   |                 | - No flow control      |                        |
+   +-----------------+------------------------+------------------------+       
+   |                 | + Moderate ACK overh.  | + Flow control         |                                
+   |  ACK “always”   | - Long loss burst      | + Long loss burst      |                      
+   |                 | - No flow control      | - Higher ACK overhead  |                          
+   +-----------------+------------------------+------------------------+
 
 ~~~~
 {: #Fig-ReliSummary title='Summary of fragment delivery options that provide receiver feedback, and their main advantages (+) and disadvantages (-).'}
@@ -962,11 +962,11 @@ The format of an ACK is shown in {{Fig-ACK-Format}}:
    in total, therefore the bitmap has a size of two bytes. 
 
 ~~~~
-                     <------  R  ------>                     1
-                                 <- T -> 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5
-                     +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                     |  Rule ID  | DTag |1|0|1|1|1|1|1|1|0|1|1|0|0|0|0|1|
-                     +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                    <------  R  ------>                     1
+                               <- T -> 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5
+                    +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                    |  Rule ID  | DTag |1|0|1|1|1|1|1|1|0|1|1|0|0|0|0|1|
+                    +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 ~~~~
 {: #Fig-Bitmap title='Example of the Bitmap in an ACK'}
@@ -975,11 +975,11 @@ The format of an ACK is shown in {{Fig-ACK-Format}}:
 indicates that the second and the fifth fragments have not been correctly received. 
 
 ~~~~                                                  
-                     <------  R  ------>
-                                 <- T -> 0 1 2 3 4 5 6 7
-                     +---- ... --+-... -+-+-+-+-+-+-+-+-+
-                     |  Rule ID  | DTag |1|0|1|1|0|1|1|1|
-                     +---- ... --+-... -+-+-+-+-+-+-+-+-+
+                    <------  R  ------>
+                                <- T -> 0 1 2 3 4 5 6 7
+                    +---- ... --+-... -+-+-+-+-+-+-+-+-+
+                    |  Rule ID  | DTag |1|0|1|1|0|1|1|1|
+                    +---- ... --+-... -+-+-+-+-+-+-+-+-+
 
 ~~~~
 {: #Fig-Bitmap-Win title='Example of the bitmap in an ACK (in Window mode, for N=3)'}
@@ -987,11 +987,11 @@ indicates that the second and the fifth fragments have not been correctly receiv
 {{Fig-NoBitmap}} illustrates an ACK without bitmap.
 
 ~~~~
-                     <------  R  ------>
-                                 <- T -> 
-                     +---- ... --+-... -+
-                     |  Rule ID  | DTag |
-                     +---- ... --+-... -+
+                    <------  R  ------>
+                                <- T -> 
+                    +---- ... --+-... -+
+                    |  Rule ID  | DTag |
+                    +---- ... --+-... -+
 
 ~~~~
 {: #Fig-NoBitmap title='Example of an ACK without bitmap'}
