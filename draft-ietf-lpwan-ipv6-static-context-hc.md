@@ -131,20 +131,20 @@ context may be stored on the Device (DEV). The context must be stored in both en
 also be learned by using a provisionning protocol that is out of the scope of this draft.
 
 ~~~~
-     DEVICE                                             Appl Servers
-+-----------------+                                  +---------------+
-| APP1  APP2 APP3 |                                  |APP1  APP2 APP3|
-|                 |                                  |               |
-|       UDP       |                                  |      UDP      | 
-|      IPv6       |                                  |     IPv6      |   
-|                 |                                  |               |  
-|    SCHC C/D     |                                  |               |  
-|    (context)    |                                  |               | 
-+--------+--------+                                  +-------+-------+ 
-         |   +--+     +-----+     +---------+                .
-         +~~ |RG| === | NGW | === |SCHC C/D | ... Internet ...
-             +--+     +-----+     |(context)| 
-                                  +---------+
+     DEVICE                                            Appl Servers
++---------------+                                  +---------------+
+| APP1 APP2 APP3|                                  |APP1  APP2 APP3|
+|               |                                  |               |
+|       UDP     |                                  |      UDP      | 
+|      IPv6     |                                  |     IPv6      |   
+|               |                                  |               |  
+|    SCHC C/D   |                                  |               |  
+|    (context)  |                                  |               | 
++--------+------+                                  +-------+-------+ 
+         |   +--+     +----+     +---------+               .
+         +~~ |RG| === |NGW | === |SCHC C/D |... Internet ...
+             +--+     +----+     |(context)| 
+                                 +---------+
 ~~~~
 {: #Fig-archi title='Architecture'}
 
@@ -801,17 +801,17 @@ This section discusses the properties of each fragment delivery
    use case for it at the time of the writing.
 
 ~~~~   
-                     +------------------------+------------------------+
-                     |      Packet mode       |       Window mode      |   
-   +-----------------+------------------------+------------------------+
-   |                 | + Low ACK overhead     |                        |
-   |  ACK on error   | - Long loss burst      |   (Use case unknown)   |
-   |                 | - No flow control      |                        |
-   +-----------------+------------------------+------------------------+       
-   |                 | + Moderate ACK overh.  | + Flow control         |                                
-   |  ACK “always”   | - Long loss burst      | + Long loss burst      |                      
-   |                 | - No flow control      | - Higher ACK overhead  |                          
-   +-----------------+------------------------+------------------------+
+                     +-----------------------+------------------------+
+                     |      Packet mode      |       Window mode      |   
+   +-----------------+-----------------------+------------------------+
+   |                 | + Low ACK overhead    |                        |
+   |  ACK on error   | - Long loss burst     |   (Use case unknown)   |
+   |                 | - No flow control     |                        |
+   +-----------------+-----------------------+------------------------+       
+   |                 | + Moderate ACK overh. | + Flow control         |                                
+   |  ACK “always”   | - Long loss burst     | + Long loss burst      |                      
+   |                 | - No flow control     | - Higher ACK overhead  |                          
+   +-----------------+-----------------------+------------------------+
 
 ~~~~
 {: #Fig-ReliSummary title='Summary of fragment delivery options that provide receiver feedback, and their main advantages (+) and disadvantages (-).'}
@@ -837,11 +837,11 @@ In any of the Window modes, fragments except the last one SHALL
    contain the fragmentation header as defined in {{Fig-NotLastWin}}. The total size of this fragmentation header is R bits. 
    
 ~~~~
-                         <------------ R ---------->
-                                   <--T--> 1 <--N-->
-                        +-- ... --+- ... -+-+- ... -+
-                        | Rule ID | DTag  |W|  CFN  |
-                        +-- ... --+- ... -+-+- ... -+
+             <------------ R ---------->
+                       <--T--> 1 <--N-->
+            +-- ... --+- ... -+-+- ... -+
+            | Rule ID | DTag  |W|  CFN  |
+            +-- ... --+- ... -+-+- ... -+
 
 ~~~~
 {: #Fig-NotLastWin title='Fragmentation Header for Fragments except the Last One, Window mode'}
@@ -850,11 +850,11 @@ In any of the Window modes, fragments except the last one SHALL
    In any of the Packet modes, fragments (except the last one) that are transmitted for the first time SHALL contain the fragmentation header shown in {{Fig-NotLast}}. The total size of this fragmentation header is R bits.   
 
 ~~~~
-                         <------------- R ------------>
-                                       <- T -> <- N ->
-                         +---- ... ---+- ... -+- ... -+
-                         |   Rule ID  | DTag  |  CFN  |
-                         +---- ... ---+- ... -+- ... -+
+           <------------- R ------------>
+                          <- T -> <- N ->
+           +---- ... ---+- ... -+- ... -+
+           |   Rule ID  | DTag  |  CFN  |
+           +---- ... ---+- ... -+- ... -+
 ~~~~
 {: #Fig-NotLast title='Fragmentation Header for Fragments except the Last One, in a Packet mode; first transmission attempt'}
 
@@ -862,11 +862,11 @@ In any of the Packet modes, fragments (except the last one) that are retransmitt
    contain the fragmentation header as defined in {{Fig-NotLastRetry}}.    
 
 ~~~~
-                         <------------- R ------------>
-                                       <- T -> <----- A ---->
-                         +---- ... ---+- ... -+----- ... ----+
-                         |   Rule ID  | DTag  |      AFN     |
-                         +---- ... ---+- ... -+----- ... ----+
+            <------------- R ------------>
+                          <- T -> <----- A ---->
+            +---- ... ---+- ... -+----- ... ----+
+            |   Rule ID  | DTag  |      AFN     |
+            +---- ... ---+- ... -+----- ... ----+
 ~~~~
 {: #Fig-NotLastRetry title='Fragmentation Header for Retransmitted Fragments (Except the Last One) in a Packet mode'}
 
@@ -877,11 +877,11 @@ In any of the Packet modes, fragments (except the last one) that are retransmitt
    header is R+M bits. 
 
 ~~~~
-                         <------------- R ------------>
-                                       <- T -> <- N -> <---- M ----->
-                         +---- ... ---+- ... -+- ... -+---- ... ----+
-                         |   Rule ID  | DTag  | 11..1 |     MIC     |
-                         +---- ... ---+- ... -+- ... -+---- ... ----+
+              <------------- R ------------>
+                            <- T -> <- N -> <---- M ----->
+              +---- ... ---+- ... -+- ... -+---- ... ----+
+              |   Rule ID  | DTag  | 11..1 |     MIC     |
+              +---- ... ---+- ... -+- ... -+---- ... ----+
 ~~~~
 {: #Fig-Last title='Fragmentation Header for the Last Fragment'}
 
@@ -925,11 +925,11 @@ In any of the Packet modes, fragments (except the last one) that are retransmitt
 The format of an ACK is shown in {{Fig-ACK-Format}}:
 
 ~~~~
-                          <-------  R  ------>
-                                       <- T ->  
-                          +---- ... --+-... -+----- ... ---+
-                          |  Rule ID  | DTag |   bitmap    |
-                          +---- ... --+-... -+----- ... ---+
+                <-------  R  ------>
+                             <- T ->  
+                +---- ... --+-... -+----- ... ---+
+                |  Rule ID  | DTag |   bitmap    |
+                +---- ... --+-... -+----- ... ---+
 ~~~~
 {: #Fig-ACK-Format title='Format of an ACK'}
 
@@ -962,11 +962,11 @@ The format of an ACK is shown in {{Fig-ACK-Format}}:
    in total, therefore the bitmap has a size of two bytes. 
 
 ~~~~
-                    <------  R  ------>                     1
-                               <- T -> 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5
-                    +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                    |  Rule ID  | DTag |1|0|1|1|1|1|1|1|0|1|1|0|0|0|0|1|
-                    +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+          <------  R  ------>                     1
+                      <- T -> 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5
+          +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+          |  Rule ID  | DTag |1|0|1|1|1|1|1|1|0|1|1|0|0|0|0|1|
+          +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 ~~~~
 {: #Fig-Bitmap title='Example of the Bitmap in an ACK'}
@@ -975,11 +975,11 @@ The format of an ACK is shown in {{Fig-ACK-Format}}:
 indicates that the second and the fifth fragments have not been correctly received. 
 
 ~~~~                                                  
-                    <------  R  ------>
-                                <- T -> 0 1 2 3 4 5 6 7
-                    +---- ... --+-... -+-+-+-+-+-+-+-+-+
-                    |  Rule ID  | DTag |1|0|1|1|0|1|1|1|
-                    +---- ... --+-... -+-+-+-+-+-+-+-+-+
+              <------  R  ------>
+                          <- T -> 0 1 2 3 4 5 6 7
+              +---- ... --+-... -+-+-+-+-+-+-+-+-+
+              |  Rule ID  | DTag |1|0|1|1|0|1|1|1|
+              +---- ... --+-... -+-+-+-+-+-+-+-+-+
 
 ~~~~
 {: #Fig-Bitmap-Win title='Example of the bitmap in an ACK (in Window mode, for N=3)'}
