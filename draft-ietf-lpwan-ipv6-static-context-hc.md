@@ -886,16 +886,16 @@ In any of the Packet modes, fragments (except the last one) that are retransmitt
 {: #Fig-Last title='Fragmentation Header for the Last Fragment'}
 
 
-   Rule ID: this field has a size of R - T - N - 1 bits in all fragments that are not the last one, when Window mode is used. In all other fragments, the Rule ID field has a size of R – T – N bits.  The Rule ID in a fragment is set to a value that indicates that the data unit being carried is a fragment. This also allows to interleave non-fragmented IPv6 datagrams with fragments that carry a larger IPv6 datagram. Rule ID may be used to signal which reliability option is in use. In any of the Packet modes, Rule ID is also used to indicate whether the fragment is a first transmission or a retransmission.
+* Rule ID: this field has a size of R - T - N - 1 bits in all fragments that are not the last one, when Window mode is used. In all other fragments, the Rule ID field has a size of R – T – N bits.  The Rule ID in a fragment is set to a value that indicates that the data unit being carried is a fragment. This also allows to interleave non-fragmented IPv6 datagrams with fragments that carry a larger IPv6 datagram. Rule ID may be used to signal which reliability option is in use. In any of the Packet modes, Rule ID is also used to indicate whether the fragment is a first transmission or a retransmission.
    
-   DTag: DTag stands for Datagram Tag. The size of the DTag field is T bits, 
+* DTag: DTag stands for Datagram Tag. The size of the DTag field is T bits, 
    which may be set to a value greater than or equal to 0 bits. The DTag field in all fragments 
    that carry the same IPv6 datagram MUST be set to the same value. The 
    DTag field allows to interleave fragments that correspond to different 
    IPv6 datagrams. DTag MUST be set sequentially increasing from 0 to 2^T - 1, 
    and MUST wrap back from 2^T - 1 to 0.
 
-   CFN: CFN stands for Compressed Fragment Number. The size of the CFN
+* CFN: CFN stands for Compressed Fragment Number. The size of the CFN
    field is N bits.  In the No ACK option, N=1.  For the rest of options,       
    N equal to or greater than 3 is recommended. This field
       is an unsigned integer that carries a non-absolute fragment number. The CFN MUST be set 
@@ -908,11 +908,11 @@ In any of the Packet modes, fragments (except the last one) that are retransmitt
       absolute fragment number. It is also important to note that, for N=1, the last fragment 
       of the packet will carry a CFN equal to 1, while all previous fragments will carry a CFN of 0. 
       
-      W: W is a 1-bit flag that is used in Window mode. Its purpose is avoiding possible ambiguity for the receiver that might arise under certain conditions. This flag carries the same value for all fragments of a window, and it is set to the other value for the next window. The initial value for this flag is 1.
+* W: W is a 1-bit flag that is used in Window mode. Its purpose is avoiding possible ambiguity for the receiver that might arise under certain conditions. This flag carries the same value for all fragments of a window, and it is set to the other value for the next window. The initial value for this flag is 1.
 
-   AFN: AFN stands for Absolute Fragment Number. This field has a size of A bits. 'A' may be greater than N. The AFN is an unsigned integer that carries the absolute fragment number that corresponds to a fragment from an IPv6 packet. The AFN MUST be set sequentially and in increasing order, starting from 0. 
+* AFN: AFN stands for Absolute Fragment Number. This field has a size of A bits. 'A' may be greater than N. The AFN is an unsigned integer that carries the absolute fragment number that corresponds to a fragment from an IPv6 packet. The AFN MUST be set sequentially and in increasing order, starting from 0. 
 
-   MIC:  MIC stands for Message Integrity Check. This field has a size of M 
+* MIC:  MIC stands for Message Integrity Check. This field has a size of M 
       bits. It is computed by the sender over the complete IPv6 packet before fragmentation by 
       using the TBD algorithm. The MIC allows to check for errors in the reassembled IPv6 packet, 
       while it also enables compressing the UDP checksum by use of SCHC.
