@@ -1228,49 +1228,48 @@ in Packet mode - ACK on error, for N=3, with three losses.
 ~~~~
 {: #Fig-Example-Rel-Loss title='Transmission of an IPv6 packet carried by 11 fragments in Packet mode - ACK on error, for N=3,  three losses. In the figure, (AFN=x) indicates the AFN value computed by the sender for each fragment.'}
 
-{{Fig-Example-Win-NoLoss-NACK}} illustrates the transmission of an IPv6 packet that needs 11 fragments in Window mode - ACK on error, for N=3, without losses. Note: in Window mode, an additional bit will be needed to number windows.
+{{Fig-Example-Win-NoLoss-NACK}} illustrates the transmission of an IPv6 packet that needs 11 fragments in Window mode - ACK on error, for N=3, without losses. 
 
 ~~~~
         Sender               Receiver
-          |-------CFN=6-------->|
-          |-------CFN=5-------->|
-          |-------CFN=4-------->|
-          |-------CFN=3-------->|
-          |-------CFN=2-------->|
-          |-------CFN=1-------->|
-          |-------CFN=0-------->|
+          |-----W=1, CFN=6----->|
+          |-----W=1, CFN=5----->|
+          |-----W=1, CFN=4----->|
+          |-----W=1, CFN=3----->|
+          |-----W=1, CFN=2----->|
+          |-----W=1, CFN=1----->|
+          |-----W=1, CFN=0----->|
       (no ACK)
-          |-------CFN=6-------->|
-          |-------CFN=5-------->|
-          |-------CFN=4-------->|
-          |-------CFN=7-------->|MIC checked =>
+          |-----W=0, CFN=6----->|
+          |-----W=0, CFN=5----->|
+          |-----W=0, CFN=4----->|
+          |-----W=0, CFN=7----->|MIC checked =>
       (no ACK)
 ~~~~
 {: #Fig-Example-Win-NoLoss-NACK title='Transmission of an IPv6 packet carried by 11 fragments in Window mode - ACK on error, for N=3, without losses.'}
 
 {{Fig-Example-Rel-Window-NACK-Loss}} illustrates the transmission of an IPv6 packet that needs 11 fragments
-in Window mode - ACK on error, for N=3, with three losses. Note: in Window mode,
-an additional bit will be needed to number windows.
+in Window mode - ACK on error, for N=3, with three losses. 
 
 ~~~~       
          Sender               Receiver
-          |-------CFN=6-------->|
-          |-------CFN=5-------->|
-          |-------CFN=4---X---->|
-          |-------CFN=3-------->|
-          |-------CFN=2---X---->|
-          |-------CFN=1-------->|
-          |-------CFN=0-------->|
+          |-----W=1, CFN=6----->|
+          |-----W=1, CFN=5----->|
+          |-----W=1, CFN=4--X-->|
+          |-----W=1, CFN=3----->|
+          |-----W=1, CFN=2--X-->|
+          |-----W=1, CFN=1----->|
+          |-----W=1, CFN=0----->|
           |<-------ACK----------|Bitmap:11010111
-          |-------CFN=4-------->|
-          |-------CFN=2-------->|   
+          |-----W=1, CFN=4----->|
+          |-----W=1, CFN=2----->|   
       (no ACK)     
-          |-------CFN=6-------->|
-          |-------CFN=5-------->|
-          |-------CFN=4---X---->|
-          |-------CFN=7-------->|MIC checked
+          |-----W=0, CFN=6----->|
+          |-----W=0, CFN=5----->|
+          |-----W=0, CFN=4--X-->|
+          |-----W=0, CFN=7----->|MIC checked
           |<-------ACK----------|Bitmap:11010001
-          |-------CFN=4-------->|MIC checked =>
+          |-----W=0, CFN=4----->|MIC checked =>
       (no ACK)    
 ~~~~
 {: #Fig-Example-Rel-Window-NACK-Loss title='Transmission of an IPv6 packet carried by 11 fragments in Window mode - ACK on error, for N=3, three losses.'}
@@ -1329,18 +1328,18 @@ an additional bit will be needed to number windows.
 
 ~~~~       
         Sender               Receiver
-          |-------CFN=6-------->|
-          |-------CFN=5-------->|
-          |-------CFN=4-------->|
-          |-------CFN=3-------->|
-          |-------CFN=2-------->|
-          |-------CFN=1-------->|
-          |-------CFN=0-------->|
+          |-----W=1, CFN=6----->|
+          |-----W=1, CFN=5----->|
+          |-----W=1, CFN=4----->|
+          |-----W=1, CFN=3----->|
+          |-----W=1, CFN=2----->|
+          |-----W=1, CFN=1----->|
+          |-----W=1, CFN=0----->|
           |<-------ACK----------|no bitmap
-          |-------CFN=6-------->|
-          |-------CFN=5-------->|   
-          |-------CFN=4-------->|
-          |-------CFN=7-------->|MIC checked =>
+          |-----W=0, CFN=6----->|
+          |-----W=0, CFN=5----->|   
+          |-----W=0, CFN=4----->|
+          |-----W=0, CFN=7----->|MIC checked =>
           |<-------ACK----------|no bitmap
         (End)    
       
@@ -1348,28 +1347,27 @@ an additional bit will be needed to number windows.
 {: #Fig-Example-Rel-Window-ACK-NoLoss title='Transmission of an IPv6 packet carried by 11 fragments in Window mode - ACK "Always", for N=3, no losses.'}
 
 {{Fig-Example-Rel-Window-ACK-Loss}} illustrates the transmission of an IPv6 packet that needs 11 fragments
-in Window mode - ACK "Always", for N=3, with three losses. Note: in Window mode,
-an additional bit will be needed to number windows.
+in Window mode - ACK "Always", for N=3, with three losses. 
 
 ~~~~       
         Sender               Receiver
-          |-------CFN=6-------->|
-          |-------CFN=5-------->|
-          |-------CFN=4---X---->|
-          |-------CFN=3-------->|
-          |-------CFN=2---X---->|
-          |-------CFN=1-------->|
-          |-------CFN=0-------->|
+          |-----W=1, CFN=6----->|
+          |-----W=1, CFN=5----->|
+          |-----W=1, CFN=4--X-->|
+          |-----W=1, CFN=3----->|
+          |-----W=1, CFN=2--X-->|
+          |-----W=1, CFN=1----->|
+          |-----W=1, CFN=0----->|
           |<-------ACK----------|bitmap:11010111
-          |-------CFN=4-------->|
-          |-------CFN=2-------->|
+          |-----W=1, CFN=4----->|
+          |-----W=1, CFN=2----->|
           |<-------ACK----------|no bitmap
-          |-------CFN=6-------->|
-          |-------CFN=5-------->|   
-          |-------CFN=4---X---->|
-          |-------CFN=7-------->|MIC checked
+          |-----W=0, CFN=6----->|
+          |-----W=0, CFN=5----->|   
+          |-----W=0, CFN=4--X-->|
+          |-----W=0, CFN=7----->|MIC checked
           |<-------ACK----------|bitmap:11010001
-          |-------CFN=4-------->|MIC checked =>
+          |-----W=0, CFN=4----->|MIC checked =>
           |<-------ACK----------|no bitmap
         (End)    
       
