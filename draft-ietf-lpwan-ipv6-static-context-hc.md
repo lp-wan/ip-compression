@@ -132,9 +132,11 @@ This section defines the terminology and acronyms used in this document.
 
 * APP-IID: Application Interface Identifier. Second part of the IPv6 address to identify the application interface
 
-* DL: Down Link direction for compression, from SCHC C/D to Dev
+* Dw: Down Link direction for compression, from SCHC C/D to Dev
 
-* UP: Up Link direction for compression, from Dev to SCHC C/D
+* Up: Up Link direction for compression, from Dev to SCHC C/D
+
+* Bi: Bidirectional, it can be used in both senses
 
 # Static Context Header Compression
 
@@ -226,11 +228,11 @@ The Context describes the header fields and its values with the following entrie
   
 * A direction indicator (DI) indicating the packet direction. Three values are possible:
 
-  * upstream (Up) when the field or the value is only present in packets sent by the Dev to the App,
+  * UP LINK (Up) when the field or the value is only present in packets sent by the Dev to the App,
 
-  * downstream (Dw) when the field or the value is only present in packet sent from the App to the Dev and 
+  * DOWN LINK (Dw) when the field or the value is only present in packet sent from the App to the Dev and 
 
-  * bi-directional (Bi) when the field or the value is present either upstream or downstream. 
+  * BIDIRECTIONAL (Bi) when the field or the value is present either upstream or downstream. 
 
 * A Target Value (TV) is the value used to make the comparison with
   the packet header field. The Target Value can be of any type (integer, strings,...).
