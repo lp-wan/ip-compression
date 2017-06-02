@@ -87,7 +87,7 @@ to a small context identifier.
 
 The SCHC header compression mechanism is independent of the specific LPWAN technology over which it will be used.
 
-Moreover, LPWAN technologies are characterized,
+Moreover, LPWAN technologies are also characterized,
 among others, by a very reduced data unit and/or payload size
 {{I-D.ietf-lpwan-overview}}.  However, some of these technologies
 do not support layer two fragmentation, therefore the only option for
@@ -106,7 +106,7 @@ This section defines the terminology and acronyms used in this document.
 
 * Context: A set of rules used to compress/decompress headers
 
-* Dev: Device. Node connected to the LPWAN. A DEV may implement SCHC.
+* Dev: Device. Node connected to the LPWAN. A Dev may implement SCHC.
 
 * App: LPWAN Application. An application sending/receiving IPv6 packets to/from the Device.
 
@@ -116,8 +116,7 @@ This section defines the terminology and acronyms used in this document.
 
 * Rule: A set of header field values.
 
-* Rule ID: An identifier for a rule, SCHC C/D and Dev share the same Rule ID for a specific flow. The Rule ID 
-  is sent on the LPWAN.
+* Rule ID: An identifier for a rule, SCHC C/D and Dev share the same Rule ID for a specific flow. 
   
 * TV: Target value. A value contained in the Rule that will be matched with the value of a header field.
 
@@ -127,14 +126,26 @@ This section defines the terminology and acronyms used in this document.
 
 * DI: Direction Indicator is a differentiator for matching in order to be able to have different values for both sides.
 
+* IID: Interface Identifier. See the IPv6 addressing architecture  {{I-D.RFC7136}}
+
+* Dev-IID: Device Interface Identifier. Second part of the IPv6 address to identify the device interface
+
+* APP-IID: Application Interface Identifier. Second part of the IPv6 address to identify the application interface
+
+* DL: Down Link direction for compression, from SCHC C/D to Dev
+
+* UP: Up Link direction for compression, from Dev to SCHC C/D
+
 # Static Context Header Compression
 
 Static Context Header Compression (SCHC) avoids context synchronization,
 which is the most bandwidth-consuming operation in other header compression mechanisms
-such as RoHC {{I-D.RFC3095}}. Based on the fact
+such as RoHC {{I-D.RFC5795}}. Based on the fact
 that the nature of data flows is highly predictable in LPWAN networks, a static
-context may be stored on the Device (Dev). The context must be stored in both ends. It can 
-also be learned by using a provisioning protocol that is out of the scope of this draft.
+context may be stored on the Device (Dev). The context must be stored in both ends, and it can 
+either be learned by a provisioning protocol or by out of band means or it can be pre-provosioned, etc. 
+The way the context is learned on both sides is out of the scope of this document.
+
 
 ~~~~
      Dev                                                 App
@@ -163,7 +174,13 @@ located on the Network Gateway (NGW) or in another place as long as a tunnel is 
 After decompression, the packet can be sent on the Internet to one
 or several LPWAN Application Servers (App). 
 
-The principle is exactly the same in the other direction.
+The SCHC C/D process is bidirectional, so the same principles can be applied in the other direction.
+
+## SCHC Rules
+
+The main idea of the SCHC compression scheme is to send the Rule id to the other end that match as much as possible the original packet values instead 
+of sending known field values. When a value is known by both
+ends, it is not necessary sent through the LPWAN network. 
 
 The context contains a list of rules (cf. {{Fig-ctxt}}). Each Rule contains 
 itself a list of fields descriptions composed of a field identifier (FID), a field position (FP), a direction indicator (DI), a target
@@ -172,23 +189,23 @@ value (TV), a matching operator (MO) and a Compression/Decompression Action
 
 
 ~~~~
-  /----------------------------------------------------------------\
-  |                      Rule N                                    |
- /----------------------------------------------------------------\|
- |                    Rule i                                      ||
-/----------------------------------------------------------------\||
-|  (FID)         Rule 1                                          |||
-|+-------+---+---+------------+-----------------+---------------+|||
-||Field 1|Pos|Dir|Target Value|Matching Operator|Comp/Decomp Act||||
-|+-------+---+---+------------+-----------------+---------------+|||
-||Field 2|Pos|Dir|Target Value|Matching Operator|Comp/Decomp Act||||
-|+-------+---+---+------------+-----------------+---------------+|||
-||...    |...|...|   ...      | ...             | ...           ||||
-|+-------+---+---+------------+-----------------+---------------+||/
-||Field N|Pos|Dir|Target Value|Matching Operator|Comp/Decomp Act|||
-|+-------+---+---+------------+-----------------+---------------+|/
-|                                                                |
-\----------------------------------------------------------------/
+  /--------------------------------------------------------------\
+  |                      Rule N                                  |
+ /--------------------------------------------------------------\|
+ |                    Rule i                                    ||
+/--------------------------------------------------------------\||
+|  (FID)         Rule 1                                        |||
+|+-------+--+--+------------+-----------------+---------------+|||
+||Field 1|FP|DI|Target Value|Matching Operator|Comp/Decomp Act||||
+|+-------+--+--+------------+-----------------+---------------+|||
+||Field 2|FP|DI|Target Value|Matching Operator|Comp/Decomp Act||||
+|+-------+--+--+------------+-----------------+---------------+|||
+||...    |..|..|   ...      | ...             | ...           ||||
+|+-------+--+--+------------+-----------------+---------------+||/
+||Field N|FP|DI|Target Value|Matching Operator|Comp/Decomp Act|||
+|+-------+--+--+------------+-----------------+---------------+|/
+|                                                              |
+\--------------------------------------------------------------/
 ~~~~
 {: #Fig-ctxt title='Compression/Decompression Context'}
 
@@ -197,27 +214,23 @@ The Rule does not describe the original packet format which
 must be known from the compressor/decompressor. The rule just describes the
 compression/decompression behavior for the header fields. In the rule, the description of the header field must be performed in the format packet order.
 
-On the other hand, the Rule describes the compressed header fields which are transmitted regarding their position
+The Rule describes also the compressed header fields which is transmitted regarding their position
 in the rule which is used for data serialization on the compressor side and data deserialization on the decompressor side.
-
-The main idea of the SCHC compression scheme is to send the Rule id to the other end that match as much as possible the original packet values instead 
-of sending known field values. When a value is known by both
-ends, it is not necessary to send it on the LPWAN network. 
 
 The Context describes the header fields and its values with the following entries:
 
 * A Field ID (FID) is a unique value to define the header field. In the context the name of the header field is not used, only the identifier.
 
 * A Field Position (FP) indicating if several instances of the field exist in the 
-  headers which one is targeted. 
+  headers which one is targeted. The default position is 1
   
 * A direction indicator (DI) indicating the packet direction. Three values are possible:
 
-  * upstream when the field or the value is only present in packets sent by the Dev to the App,
+  * upstream (Up) when the field or the value is only present in packets sent by the Dev to the App,
 
-  * downstream when the field or the value is only present in packet sent from the App to the Dev and 
+  * downstream (Dw) when the field or the value is only present in packet sent from the App to the Dev and 
 
-  * bi-directional when the field or the value is present either upstream or downstream. 
+  * bi-directional (Bi) when the field or the value is present either upstream or downstream. 
 
 * A Target Value (TV) is the value used to make the comparison with
   the packet header field. The Target Value can be of any type (integer, strings,...).
@@ -225,13 +238,12 @@ The Context describes the header fields and its values with the following entrie
   be considered as a CBOR structure.
 
 * A Matching Operator (MO) is the operator used to make the comparison between 
-  the field value and the Target Value. The Matching Operator may require some 
-  parameters, which can be considered as a CBOR structure. MO is only used during 
-  the compression phase.
+  the Field Value and the Target Value. The Matching Operator may require some 
+  parameters. MO is only used during the compression phase.
 
 * A Compression Decompression Action (CDA) is used to describe the compression
   and the decompression process. The CDA may require some 
-  parameters, which can be considered as a CBOR structure.
+  parameters, CDA are used in both compression and decompression phases. 
 
 ## Rule ID
 
@@ -240,10 +252,10 @@ of the Rule ID is not specified in this document, it is implementation-specific 
 LPWAN technology, the number of flows, among others. 
 
 Some values in the Rule ID space may be reserved for goals other than header 
-compression as fragmentation. 
+compression as fragmentation. (See {{#Frag}}). 
 
 Rule IDs are specific to a Dev. Two Devs may use the same Rule ID for different
-header compression. To identify the correct Rule ID, the SCHC C/D needs to combine the Rule ID with the Dev L2 address
+header compression. To identify the correct Rule ID, the SCHC C/D needs to combine the Rule ID with the Dev L2 identifier
 to find the appropriate Rule.
 
 ## Packet processing
@@ -251,30 +263,33 @@ to find the appropriate Rule.
 The compression/decompression process follows several steps:
 
 * compression Rule selection: The goal is to identify which Rule(s) will be used
-  to compress the headers.  Each field is associated to a matching operator for
-  compression. Each header field's value is compared to the corresponding target
-  value stored in the Rule for that field using the matching operator. If all
-  the fields in the packet's header satisfy all the matching operators, the DI and the FP of
-  a rule, the packet is processed using Compression Decompression Function associated
-  with the fields. Otherwise the next rule
-  is tested unless when the matching failure is given by the value in the DI and/or FP of the value, because in this case the field in the Rule should be excluded and the Rule can be used. The field in this case will be sent without compression. If no eligible rule is found, then the packet is sent without compression,
-  which may require using the fragmentation procedure. 
-  
-  In the downstrean direction, the rule is also used to find the device ID, as explained in section 5.5
+  to compress the packet's headers. When doing compression from DL to UL the SCHC C/D needs to find the 
+  correct Rule to use by identifying its Dev-ID and the Rule-ID. In the UL situation only the Rule-ID is used. 
+  The next step is to choose the fields by their direction, using the 
+  direction indicator (DI), so the fields that does not correspond to the DI will be excluded. 
+  Next, then fields are identified according to their field identifier (FID) and field position (FP). 
+  If the field position does not correspond then the Rule is not use and the SCHC take next Rule.
+  Once the DI and the FP correspond to the header information, each field's value is then compared to the corresponding 
+  target value (TV) stored in the Rule for that specific field using the matching operator (MO).
+  If all the fields in the packet's header satisfy all the matching operators (MOs) of a Rule (i.e. all results are True),
+  the fields of the header are then processed according to the Compression/Decompession Actions (CDAs) 
+  and a compressed header is obtained. Otherwise the next rule is tested. 
+  If no eligible rule is found, then the header must be sent without compression, in which case the fragmentation process 
+  must be required.
 
 * sending: The Rule ID is sent to the other end followed by information resulting
   from the compression of header fields. This information is sent in the order expressed in the Rule for the matching
-  fields. The way the Rule ID is sent depends on the
-  layer two technology and will be specified in a specific document. For example, for some technologies
-  it can either be included in a Layer 2 header or sent in the first byte of
-  the L2 payload. (cf. {{Fig-FormatPckt}}). Eventhough the definition of this is out of the scope of this draft.
+  fields. The way the Rule ID is sent depends on the specific LPWAN
+  layer two technology and will be specified in a specific document, and is out of the scope of this document. 
+  For example, it can be either included in a Layer 2 header or sent in the first byte of
+  the L2 payload. (cf. {{Fig-FormatPckt}}). 
 
-* decompression: The receiver identifies the sender through its device-id
+* decompression: In both directions, The receiver identifies the sender through its device-id
   (e.g. MAC address) and selects the appropriate Rule through the Rule ID. This
-  Rule gives the compressed header format and associated values to header fields.
+  Rule gives the compressed header format and associates these values to header fields.
   It applies the CDA action to reconstruct the original
-  header fields. The CDA order can be different of the order given by the Rule. For instance
-  Compute-\* may be applied after the other CDAs.
+  header fields. The CDA application order can be different of the order given by the Rule. For instance
+  Compute-\* may be applied at end, after the other CDAs.
 
 ~~~~
  
@@ -288,26 +303,21 @@ The compression/decompression process follows several steps:
 
 # Matching operators {#chap-MO}
 
-This section describes basic matching operators (MO)s which must be known by both SCHC C/D endpoints involved in the header compression/decompression. They are 
-not typed and can be applied indifferently to integer, string or any other type. The MOs and their definitions are provided next:
+Matching Operators (MOs) are functions used by both SCHC C/D endpoints involved in the header 
+compression/decompression. They are not typed and can be applied indifferently to integer, string 
+or any other data type. The result of the operation can either be True or False. MOs are defined as follows: 
 
-* equal: a field value in a packet matches with a target value in a Rule if
-  they are equal.
+* equal: A field value in a packet matches with a TV in a Rule if they are equal.
 
-* ignore: no check is done between a field value in a packet and a target value
+* ignore: No check is done between a field value in a packet and a TV
   in the Rule. The result of the matching is always true.
 
-* MSB(length): a field value of a size equal to "length" bits in a packet matches with a target value
-  in a Rule if the most significant "length" bits are equal.
+* MSB(length): A matching is obtained if the most significant bits of the length field value bits of the header are equal to the TV in the rule.
   
 * match-mapping: The goal of mapping-sent is to reduce the size of a field by allocating
-  a shorter value. The Target Value contains a list of pairs. Each pair is composed of
-  a value and a short ID (or index). This operator matches if a field value is equal to one of the pairs'
-  values. The field values duplicated must be avoided or if not the first occurence must be used.
-
-Matching Operators as match-mapping and MSB need a parameter to proceed to the matching. Match-mapping requires a list 
-of values associated to an index and MSB requires an
-integer indicating the number of bits to test.
+  a shorter value. The Target Value contains a list of values. Each value is idenfied by a short ID (or index). 
+  This operator matches if a field value is equal to one of those target values. The MSB Matching Operator needs a parameter 
+  to proceed to the matching, which indicates the number of bits to compare.
 
 # Compression Decompression Actions (CDA) {#chap-CDA}
 
@@ -323,23 +333,25 @@ the original value.
 |not-sent            |elided       |use value stored in ctxt    |
 |value-sent          |send         |build from received value   |
 |mapping-sent        |send index   |value from index on a table |
-|LSB(length)         |send LSB     |ctxt value OR rcvd value    |
+|LSB(length)         |send LSB     |TV OR received value        |
 |compute-length      |elided       |compute length              |
 |compute-checksum    |elided       |compute UDP checksum        |
-|DEViid-DID          |elided       |build IID from L2 DEV addr  |
-|APPiid-DID          |elided       |build IID from L2 APP addr  |
+|Deviid-DID          |elided       |build IID from L2 Dev addr  |
+|Appiid-DID          |elided       |build IID from L2 App addr  |
 \--------------------+-------------+----------------------------/
 
 ~~~~
 {: #Fig-function title='Compression and Decompression Functions'}
 
-{{Fig-function}} sumarizes the functions defined to compress and decompress
+{{Fig-function}} sumarizes the basics functions defined to compress and decompress
 a field. The first column gives the action's name. The second and third
 columns outlines the compression/decompression behavior.
 
 Compression is done in the rule order and compressed values are sent in that order in the compressed
 message. The receiver must be able to find the size of each compressed field
 which can be given by the rule or may be sent with the compressed header. 
+
+If a field is identified as variable, then its size is sent before the value. ????
 
 ## not-sent CDA
 
@@ -367,33 +379,33 @@ from the LPWAN
 
 ## mapping-sent
 
-mapping-sent is used to send a smaller index associated to the field value
+mapping-sent is used to send a smaller index associated to the list of values
 in the Target Value. This function is used together with the "match-mapping" MO.
 
 The compressor looks in the TV to find the field value and send the corresponding index.
 The decompressor uses this index to restore the field value.
 
-The number of bits sent is the minimal number to code all the indexes.
+The number of bits sent is the minimal size to code all the possible indexes.
 
 ## LSB CDA
 
-LSB action is used to send a fixed part of the packet field header to the other end.
-This action is used together with the "MSB" MO. A length can be specified to indicate
-how many bits have to be sent. If not length is specified, the number of bit sent are the
-field length minus the bit length specified in the MSB MO.
+LSB action is used to avoid sendind the fixed part of the packet field header to the other end.
+This action is used together with the "MSB" MO. A length can be specified in the rule to indicate
+how many bits have to be sent. If not length is specified, the number of bits sent are the
+field length minus the bits length specified in the MSB MO.
 
 The compressor sends the "length" Least Significant Bits. The decompressor
 combines with an OR operator the value received with the Target Value.
 
 
-## DEViid-DID, APPiid-DID CDA
+## DEViid, APPiid CDA
 
-These functions are used to process respectively the Device and the Application
-Device Identifier (DID) of the IPv6 addresses. APPiid-DID CDA is less common, since current LPWAN technologies
+These functions are used to process respectively the Dev and the App Interface Identifiers (Deviid and Appiid) of the 
+IPv6 addresses. Appiid CDA is less common, since current LPWAN technologies
 frames contain a single address.
 
-The IID value is computed from the Device ID present in the Layer 2 header. The
-computation depends on the technology and the Device ID size.
+The IID value can be computed from the Device ID present in the Layer 2 header. The
+computation is specific for each LPWAN technology and depends on the Device ID size.
 
 In the downstream direction, these CDA are used to determine the L2 addresses used by the LPWAN.
 
@@ -420,7 +432,7 @@ and the "CDA "not-sent"".
 ## IPv6 Traffic class field
 
 If the DiffServ field identified by the rest of the rule do not vary and is known 
-by both sides, the TV should contain this wellknown value, the MO should be "equal" 
+by both sides, the TV should contain this well-known value, the MO should be "equal" 
 and the CDA must be "not-sent.
 
 If the DiffServ field identified by the rest of the rule varies over time or is not 
@@ -439,7 +451,7 @@ by both sides, the TV should contain this well-known value, the MO should be "eq
 and the CDA should be "not-sent".
 
 If the Flow Label field identified by the rest of the rule varies during time or is not 
-known by both sides, there are two possibilities dpending on the variability of the value,
+known by both sides, there are two possibilities depending on the variability of the value,
 the first one is without compression and then the value is sent 
 and the second where only part of the value is sent and the decompressor needs to compute the original value:
 
@@ -511,7 +523,7 @@ value-sent.
 
 If the DEV or APP IID are based on an LPWAN address, then the IID can be reconstructed 
 with information coming from the LPWAN header. In that case, the TV is not set, the MO 
-is set to "ignore" and the CDA is set to "DEViid-DID" or "APPiid-DID". Note that the 
+is set to "ignore" and the CDA is set to "DEViid" or "APPiid". Note that the 
 LPWAN technology is generally carrying a single device identifier corresponding
 to the DEV. The SCHC C/D may also not be aware of these values. 
 
@@ -567,7 +579,7 @@ On other cases, the length must be sent and the CDA is replaced by "value-sent".
 
 IPv6 mandates a checksum in the protocol above IP. Nevertheless, if a more efficient
 mechanism such as L2 CRC or MIC is carried by or over the L2 (such as in the 
-LPWAN fragmentation process (see Section 8)), the UDP checksum transmission can be avoided.
+LPWAN fragmentation process (see section {{#Frag}})), the UDP checksum transmission can be avoided.
 In that case, the TV is not set, the MO is set to "ignore" and the CDA is set to
 "compute-UDP-checksum".
 
@@ -625,67 +637,67 @@ Local address for the SCHC C/D.
 
 ~~~~
   Rule 0
-  +----------------+---------+--------+-------------++------+
-  | Field          | Value   | Match  | Function    || Sent |
-  +----------------+---------+----------------------++------+
-  |IPv6 version    |6        | equal  | not-sent    ||      |
-  |IPv6 DiffServ   |0        | equal  | not-sent    ||      |
-  |IPv6 Flow Label |0        | equal  | not-sent    ||      |
-  |IPv6 Length     |         | ignore | comp-length ||      |
-  |IPv6 Next Header|17       | equal  | not-sent    ||      |
-  |IPv6 Hop Limit  |255      | ignore | not-sent    ||      |
-  |IPv6 DEVprefix  |FE80::/64| equal  | not-sent    ||      |
-  |IPv6 DEViid     |         | ignore | DEViid-DID  ||      |
-  |IPv6 APPprefix  |FE80::/64| equal  | not-sent    ||      |
-  |IPv6 APPiid     |::1      | equal  | not-sent    ||      |
-  +================+=========+========+=============++======+
-  |UDP DEVport     |123      | equal  | not-sent    ||      |
-  |UDP APPport     |124      | equal  | not-sent    ||      |
-  |UDP Length      |         | ignore | comp-length ||      |
-  |UDP checksum    |         | ignore | comp-chk    ||      |
-  +================+=========+========+=============++======+
+  +----------------+--+--+---------+--------+-------------++------+
+  | Field          |FP|DI| Value   | Match  | Function    || Sent |
+  +----------------+--+--+---------+----------------------++------+
+  |IPv6 version    |1 |Bi|6        | equal  | not-sent    ||      |
+  |IPv6 DiffServ   |1 |Bi|0        | equal  | not-sent    ||      |
+  |IPv6 Flow Label |1 |Bi|0        | equal  | not-sent    ||      |
+  |IPv6 Length     |1 |Bi|         | ignore | comp-length ||      |
+  |IPv6 Next Header|1 |Bi|17       | equal  | not-sent    ||      |
+  |IPv6 Hop Limit  |1 |Bi|255      | ignore | not-sent    ||      |
+  |IPv6 DEVprefix  |1 |Bi|FE80::/64| equal  | not-sent    ||      |
+  |IPv6 DEViid     |1 |Bi|         | ignore | DEViid-DID  ||      |
+  |IPv6 APPprefix  |1 |Bi|FE80::/64| equal  | not-sent    ||      |
+  |IPv6 APPiid     |1 |Bi|::1      | equal  | not-sent    ||      |
+  +================+==+==+=========+========+=============++======+
+  |UDP DEVport     |1 |Bi|123      | equal  | not-sent    ||      |
+  |UDP APPport     |1 |Bi|124      | equal  | not-sent    ||      |
+  |UDP Length      |1 |Bi|         | ignore | comp-length ||      |
+  |UDP checksum    |1 |Bi|         | ignore | comp-chk    ||      |
+  +================+==+==+=========+========+=============++======+
 
   Rule 1
-  +----------------+---------+--------+-------------++------+
-  | Field          | Value   | Match  | Function    || Sent |
-  +----------------+---------+--------+-------------++------+
-  |IPv6 version    |6        | equal  | not-sent    ||      |
-  |IPv6 DiffServ   |0        | equal  | not-sent    ||      |
-  |IPv6 Flow Label |0        | equal  | not-sent    ||      |
-  |IPv6 Length     |         | ignore | comp-length ||      |
-  |IPv6 Next Header|17       | equal  | not-sent    ||      |
-  |IPv6 Hop Limit  |255      | ignore | not-sent    ||      |
-  |IPv6 DEVprefix  |alpha/64 | equal  | not-sent    ||      |
-  |IPv6 DEViid     |         | ignore | DEViid-DID  ||      |
-  |IPv6 APPprefix  |beta/64  | equal  | not-sent    ||      |
-  |IPv6 APPiid     |::1000   | equal  | not-sent    ||      |
-  +================+=========+========+=============++======+
-  |UDP DEVport     |5683     | equal  | not-sent    ||      |
-  |UDP APPport     |5683     | equal  | not-sent    ||      |
-  |UDP Length      |         | ignore | comp-length ||      |
-  |UDP checksum    |         | ignore | comp-chk    ||      |
-  +================+=========+========+=============++======+
+  +----------------+--+--+---------+--------+-------------++------+
+  | Field          |FP|DI| Value   | Match  | Function    || Sent |
+  +----------------+--+--+---------+--------+-------------++------+
+  |IPv6 version    |1 |Bi|6        | equal  | not-sent    ||      |
+  |IPv6 DiffServ   |1 |Bi|0        | equal  | not-sent    ||      |
+  |IPv6 Flow Label |1 |Bi|0        | equal  | not-sent    ||      |
+  |IPv6 Length     |1 |Bi|         | ignore | comp-length ||      |
+  |IPv6 Next Header|1 |Bi|17       | equal  | not-sent    ||      |
+  |IPv6 Hop Limit  |1 |Bi|255      | ignore | not-sent    ||      |
+  |IPv6 DEVprefix  |1 |Bi|alpha/64 | equal  | not-sent    ||      |
+  |IPv6 DEViid     |1 |Bi|         | ignore | DEViid-DID  ||      |
+  |IPv6 APPprefix  |1 |Bi|beta/64  | equal  | not-sent    ||      |
+  |IPv6 APPiid     |1 |Bi|::1000   | equal  | not-sent    ||      |
+  +================+==+==+=========+========+=============++======+
+  |UDP DEVport     |1 |Bi|5683     | equal  | not-sent    ||      |
+  |UDP APPport     |1 |Bi|5683     | equal  | not-sent    ||      |
+  |UDP Length      |1 |Bi|         | ignore | comp-length ||      |
+  |UDP checksum    |1 |Bi|         | ignore | comp-chk    ||      |
+  +================+==+==+=========+========+=============++======+
 
   Rule 2
-  +----------------+---------+--------+-------------++------+
-  | Field          | Value   | Match  | Function    || Sent |
-  +----------------+---------+--------+-------------++------+
-  |IPv6 version    |6        | equal  | not-sent    ||      |
-  |IPv6 DiffServ   |0        | equal  | not-sent    ||      |
-  |IPv6 Flow Label |0        | equal  | not-sent    ||      |
-  |IPv6 Length     |         | ignore | comp-length ||      |
-  |IPv6 Next Header|17       | equal  | not-sent    ||      |
-  |IPv6 Hop Limit  |255      | ignore | not-sent    ||      |
-  |IPv6 DEVprefix  |alpha/64 | equal  | not-sent    ||      |
-  |IPv6 DEViid     |         | ignore | DEViid-DID  ||      |
-  |IPv6 APPprefix  |gamma/64 | equal  | not-sent    ||      |
-  |IPv6 APPiid     |::1000   | equal  | not-sent    ||      |
-  +================+=========+========+=============++======+
-  |UDP DEVport     |8720     | MSB(12)| LSB(4)      || lsb  |
-  |UDP APPport     |8720     | MSB(12)| LSB(4)      || lsb  |
-  |UDP Length      |         | ignore | comp-length ||      |
-  |UDP checksum    |         | ignore | comp-chk    ||      |
-  +================+=========+========+=============++======+
+  +----------------+--+--+---------+--------+-------------++------+
+  | Field          |FP|DI| Value   | Match  | Function    || Sent |
+  +----------------+--+--+---------+--------+-------------++------+
+  |IPv6 version    |1 |Bi|6        | equal  | not-sent    ||      |
+  |IPv6 DiffServ   |1 |Bi|0        | equal  | not-sent    ||      |
+  |IPv6 Flow Label |1 |Bi|0        | equal  | not-sent    ||      |
+  |IPv6 Length     |1 |Bi|         | ignore | comp-length ||      |
+  |IPv6 Next Header|1 |Bi|17       | equal  | not-sent    ||      |
+  |IPv6 Hop Limit  |1 |Bi|255      | ignore | not-sent    ||      |
+  |IPv6 DEVprefix  |1 |Bi|alpha/64 | equal  | not-sent    ||      |
+  |IPv6 DEViid     |1 |Bi|         | ignore | DEViid-DID  ||      |
+  |IPv6 APPprefix  |1 |Bi|gamma/64 | equal  | not-sent    ||      |
+  |IPv6 APPiid     |1 |Bi|::1000   | equal  | not-sent    ||      |
+  +================+==+==+=========+========+=============++======+
+  |UDP DEVport     |1 |Bi|8720     | MSB(12)| LSB(4)      || lsb  |
+  |UDP APPport     |1 |Bi|8720     | MSB(12)| LSB(4)      || lsb  |
+  |UDP Length      |1 |Bi|         | ignore | comp-length ||      |
+  |UDP checksum    |1 |Bi|         | ignore | comp-chk    ||      |
+  +================+==+==+=========+========+=============++======+
 
 
 ~~~~
@@ -700,7 +712,7 @@ prefix is not in the scope of the document.
 
 The third rule compresses port numbers to 4 bits. 
 
-# Fragmentation
+# Fragmentation {#Frag}
 
 ## Overview
 
