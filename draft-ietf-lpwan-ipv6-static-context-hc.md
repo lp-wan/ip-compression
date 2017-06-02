@@ -529,8 +529,8 @@ is set to "ignore" and the CDA is set to "DEViid" or "APPiid". Note that the
 LPWAN technology is generally carrying a single device identifier corresponding
 to the DEV. The SCHC C/D may also not be aware of these values. 
 
-For privacy reasons or if the DEV address is changing over time, it maybe better to
-use a static value. In that case, the TV contains the value, the MO operator is set to
+If the DEV address has a static value that is not derivated from the EUI-64, 
+then TV contains the value, the MO operator is set to
 "equal" and the CDA is set to "not-sent". 
 
 If several IIDs are possible, then the TV contains the list of possible IIDs, the MO is 
