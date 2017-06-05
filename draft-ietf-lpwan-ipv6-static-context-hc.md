@@ -932,6 +932,11 @@ In all Window mode options, the fragment sender retransmits any lost fragments r
 
 If a fragment recipient disassociates from its L2 network, the recipient MUST discard all link fragments of all partially reassembled payload datagrams, and fragment senders MUST discard all not yet transmitted link fragments of all partially transmitted payload (e.g., IPv6) datagrams. Similarly, when a node first receives a fragment of a packet, it starts a reassembly timer. When this time expires, if the entire packet has not been reassembled, the existing fragments MUST be discarded and the reassembly state MUST be flushed. The value for this timer is not provided by this specification, and is expected to be defined in technology-specific profile documents.
 
+## Supporting multiple window sizes
+
+For Window mode operation, implementers may opt to support a single window size or multiple window sizes. The latter, when feasible, may provide performance optimizations. For example, a large window size will be appropriate for IPv6 packets that need to be carried by a large number of fragments. However, when the number of fragments required to carry an IPv6 packet is low, a smaller window size may be sufficient to provide feedback on all fragments, while the bitmap will be shorter. If multiple window sizes are supported, the Rule ID will be used to signal the window size in use for a specific IPv6 packet transmission.    
+
+
 ## Aborting a fragmented IPv6 datagram transmission
 
 For several reasons, a fragment sender or a fragment receiver may want to abort the transmission of a fragmented IPv6 datagram.
