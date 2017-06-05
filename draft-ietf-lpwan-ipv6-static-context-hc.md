@@ -937,10 +937,6 @@ If a fragment recipient disassociates from its L2 network, the recipient MUST di
 
 ## Supporting multiple window sizes
 
-For Window mode operation, implementers may opt to support a single window size or multiple window sizes. The latter, when feasible, may provide performance optimizations. For example, a large window size will be appropriate for IPv6 packets that need to be carried by a large number of fragments. However, when the number of fragments required to carry an IPv6 packet is low, a smaller window size may be sufficient to provide feedback on all fragments, while the bitmap will be shorter. If multiple window sizes are supported, the Rule ID will be used to signal the window size in use for a specific IPv6 packet transmission.    
-
-## Supporting multiple window sizes
-
 For Window mode operation, implementers may opt to support a single window size or multiple window sizes. The latter, when feasible, may provide performance optimizations. For example, a large window size will be appropriate for IPv6 packets that need to be carried by a large number of fragments. However, when the number of fragments required to carry an IPv6 packet is low, a smaller window size may be sufficient to provide feedback on all fragments, while the bitmap will be shorter. If multiple window sizes are supported, the Rule ID may be used to signal the window size in use for a specific IPv6 packet transmission.
 
 ## Aborting a fragmented IPv6 datagram transmission
@@ -970,7 +966,7 @@ TBD
 ## Security considerations for fragmentation
 This subsection describes potential attacks to LPWAN fragmentation 
 and proposes countermeasures, based on existing analysis of attacks
-to 6LoWPAN fragmentation {HHWH}.
+to 6LoWPAN fragmentation.
 
 A node can perform a buffer reservation attack by sending a first
 fragment to a target.  Then, the receiver will reserve buffer space
