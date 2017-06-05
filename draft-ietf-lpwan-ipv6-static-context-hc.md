@@ -877,7 +877,7 @@ The format of an ACK is shown in {{Fig-ACK-Format}}:
 {: #Fig-ACK-Format title='Format of an ACK'}
 
 
-  Rule ID: In all ACKs, Rule ID has a size of R bits and SHALL signal that the message is an ACK.
+  Rule ID: In all ACKs, Rule ID has a size of R - T bits and SHALL signal that the message is an ACK.
    
   DTag: DTag has a size of T bits. DTag carries the same value as the DTag 
    field in the fragments carrying the IPv6 datagram for which this ACK is 
