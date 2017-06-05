@@ -1014,6 +1014,7 @@ Pelov, Pascal Thubert, Juan Carlos Zuniga and Diego Dujovne for useful design co
 This section provides examples of different fragment delivery reliability options possible on the basis of this specification.
 
 {{Fig-Example-Unreliable}} illustrates the transmission of an IPv6 packet that needs 11 fragments in the No ACK option.
+
         Sender               Receiver
           |-------CFN=0-------->|
           |-------CFN=0-------->|
@@ -1026,6 +1027,7 @@ This section provides examples of different fragment delivery reliability option
           |-------CFN=0-------->|
           |-------CFN=0-------->|
           |-------CFN=1-------->|MIC checked =>
+          
 {: #Fig-Example-Unreliable title='Transmission of an IPv6 packet carried by 11 fragments in the No ACK option'}
 
 {{Fig-Example-Win-NoLoss-NACK}} illustrates the transmission of an IPv6 packet that needs 11 fragments in Window mode - ACK on error, for N=3, without losses.
