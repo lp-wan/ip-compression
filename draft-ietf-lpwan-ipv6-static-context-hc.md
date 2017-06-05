@@ -857,15 +857,16 @@ In any of the Window mode options, fragments except the last one SHALL
 {: #Fig-Last title='Fragmentation Header for the Last Fragment'}
 
 
-* Rule ID: This field has a size of R - T - N - 1 bits in all fragments that are not the last one, when Window mode is used. In all other fragments, the Rule ID field has a size of R – T – N bits. 
+   * Rule ID: This field has a size of R - T - N - 1 bits in all fragments that are not the last one, when Window mode is used. In all other fragments, the Rule ID field has a size of R – T – N bits. 
    
-* DTag: The size of the DTag field is T bits, which may be set to a value greater than or equal to 0 bits. The DTag field in all fragments that carry the same IPv6 datagram MUST be set to the same value. DTag MUST be set sequentially increasing from 0 to 2^T - 1, and MUST wrap back from 2^T - 1 to 0.
+   * DTag: The size of the DTag field is T bits, which may be set to a value greater than or equal to 0 bits. The DTag field in all fragments that carry the same IPv6 datagram MUST be set to the same value. DTag MUST be set sequentially increasing from 0 to 2^T - 1, and MUST wrap back from 2^T - 1 to 0.
 
-* CFN: This field is an unsigned integer, with a size of N bits, that carries the CFN of the fragment. In the No ACK option, N=1. For the rest of options, N equal to or greater than 3 is recommended. The CFN MUST be set sequentially decreasing from 2^N - 2 for the first fragment, and MUST wrap from 0 back to 2^N - 2 (e.g. for N=3, the first fragment has CFN=6, subsequent CFNs are set sequentially and in decreasing order, and CFN will wrap from 0 back to 6). The CFN for the last fragment has all bits set to 1. Note that, by this definition, the CFN value of 2^N - 1 is only used to identify a fragment as the last fragment carrying a subset of the IPv6 packet being transported, and thus the CFN does not strictly correspond to the N least significant bits of the actual absolute fragment number. It is also important to note that, for N=1, the last fragment of the packet will carry a CFN equal to 1, while all previous fragments will carry a CFN of 0.
+   * CFN: This field is an unsigned integer, with a size of N bits, that carries the CFN of the fragment. In the No ACK option, N=1. For the rest of options, N equal to or greater than 3 is recommended. The CFN MUST be set sequentially decreasing from the highest CFN in the window (which will be used for the first fragment), and MUST wrap from 0 back to the highest CFN in the window. The highest CFN in the window MUST NOT be a value greater than 2^N - 2. The highest CFN in the window MAY be a value smaller than 2^N-2. (Example 1: 
+for N=5, the highest CFN value may be configured to be 30, then subsequent CFNs are set sequentially and in decreasing order, and CFN will wrap from 0 back to 30; Example 2: for N=5, the highest CFN value may be set to 23, then subsequent CFNs are set sequentially and in decreasing order, and the CFN will wrap from 0 back to 23). The CFN for the last fragment has all bits set to 1. Note that, by this definition, the CFN value of 2^N - 1 is only used to identify a fragment as the last fragment carrying a subset of the IPv6 packet being transported, and thus the CFN does not strictly correspond to the N least significant bits of the actual absolute fragment number. It is also important to note that, for N=1, the last fragment of the packet will carry a CFN equal to 1, while all previous fragments will carry a CFN of 0.
       
-* W: W is a 1-bit field. This field carries the same value for all fragments of a window, and it is complemented for the next window. The initial value for this field is 1.
+   * W: W is a 1-bit field. This field carries the same value for all fragments of a window, and it is complemented for the next window. The initial value for this field is 1.
 
-* MIC: This field, which has a size of M bits, carries the MIC for the IPv6 packet.
+   * MIC: This field, which has a size of M bits, carries the MIC for the IPv6 packet.
    
    The values for R, N, T and M are not specified in this document, and have to be determined in other documents (e.g. technology-specific profile documents).
    
@@ -915,7 +916,7 @@ indicates that the second and the fifth fragments have not been correctly receiv
 ~~~~
 {: #Fig-NoBitmap title='Example of an ACK without a bitmap'}
 
-Note that, in order to exploit the available L2 payload space to the fullest, and reduce ACK overhead, a bitmap may have a size smaller than (2^N)/8 bytes. In that case, the window in use will have a size lower than 2^N-1 fragments. For example, if the maximum available space for a bitmap is 7 bytes, N can be set to 6, and the window size can be set to a maximum of 56 fragments.
+Note that, in order to exploit the available L2 payload space to the fullest, a bitmap may have a size smaller than 2^N bits. In that case, the window in use will have a size lower than 2^N-1 fragments. For example, if the maximum available space for a bitmap is 56 bits, N can be set to 6, and the window size can be set to a maximum of 56 fragments.  
 
 ## Baseline mechanism
 
@@ -937,7 +938,7 @@ If a fragment recipient disassociates from its L2 network, the recipient MUST di
 
 ## Supporting multiple window sizes
 
-For Window mode operation, implementers may opt to support a single window size or multiple window sizes. The latter, when feasible, may provide performance optimizations. For example, a large window size will be appropriate for IPv6 packets that need to be carried by a large number of fragments. However, when the number of fragments required to carry an IPv6 packet is low, a smaller window size may be sufficient to provide feedback on all fragments, while the bitmap will be shorter. If multiple window sizes are supported, the Rule ID may be used to signal the window size in use for a specific IPv6 packet transmission.
+For Window mode operation, implementers may opt to support a single window size or multiple window sizes. The latter, when feasible, may provide performance optimizations. For example, a large window size may be used for IPv6 packets that need to be carried by a large number of fragments. However, when the number of fragments required to carry an IPv6 packet is low, a smaller window size, and thus a shorter bitmap, may be sufficient to provide feedback on all fragments. If multiple window sizes are supported, the Rule ID may be used to signal the window size in use for a specific IPv6 packet transmission.
 
 ## Aborting a fragmented IPv6 datagram transmission
 
