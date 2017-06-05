@@ -719,15 +719,13 @@ The third rule compresses port numbers to 4 bits.
 ## Overview
 
 Fragmentation support in LPWAN is mandatory when the underlying LPWAN technology is not capable of fulfilling the IPv6 MTU requirement. Fragmentation is used if, after SCHC header compression, the size of the resulting IPv6 packet is larger than the L2 data unit maximum payload. Fragmentation is also used if SCHC header compression has not been able to compress an IPv6 packet that is larger than the L2 data unit maximum payload. In LPWAN technologies, the L2 data unit size typically varies from tens to hundreds of bytes. 
-If the entire IPv6 datagram fits within a single L2
-data unit, the fragmentation mechanism is not used and the packet is sent unfragmented.  
-If the datagram does not fit within a single L2 data unit,
-it SHALL be broken into fragments. 
+If the entire IPv6 datagram fits within a single L2 data unit, the fragmentation mechanism is not used and the packet is sent unfragmented.  
+If the datagram does not fit within a single L2 data unit, it SHALL be broken into fragments. 
 
 Moreover, LPWAN technologies impose some strict limitations on traffic; 
 therefore it is desirable to enable optional fragment retransmission, while 
 a single fragment loss should not lead to retransmitting the full IPv6 datagram. 
-On the other hand, in order to preserve energy, Things (End Systems) are sleeping most of the time and 
+On the other hand, in order to preserve energy, Devices are sleeping most of the time and 
 may receive data during a short period of time after transmission. In 
 order to adapt to the capabilities of various LPWAN technologies,
 this specification allows for a gradation of fragment delivery
@@ -1003,7 +1001,7 @@ by such event.
 # Acknowledgements
 
 Thanks to Dominique Barthel, Carsten Bormann, Philippe Clavier, Arunprabhu Kandasamy, Antony Markovski, Alexander
-Pelov, Pascal Thubert, Juan Carlos Zuniga for useful design consideration. 
+Pelov, Pascal Thubert, Juan Carlos Zuniga and Diego Dujovne for useful design consideration and comments. 
 
 --- back
 
@@ -1112,6 +1110,19 @@ This section provides examples of different fragment delivery reliability option
         (End)    
       
 {: #Fig-Example-Rel-Window-ACK-Loss title='Transmission of an IPv6 packet carried by 11 fragments in Window mode - ACK "Always", for N=3, with three losses.'}
+
+# Rule IDs for fragmentation
+
+Different Rule IDs may be used for different aspects of fragmentation functionality as per this document. A summary of such Rule IDs follows:   
+   o  A fragment, and the reliability option in use for the IPv6 datagram being carried: 
+      -  No ACK
+      -  Window mode - ACK on error. A specific Rule ID may be used for each supported window 	size.
+      -  Window mode - ACK “always”. A specific Rule ID may be used for each supported window size.
+   o  An ACK message
+   o  An abort message
+      - ABORT_TX
+      - ABORT_RX
+      - Abort all on-going transmissions
 
 
 # Note
