@@ -860,7 +860,7 @@ In any of the Window mode options, fragments except the last one SHALL
       using the TBD algorithm. The MIC allows to check for errors in the reassembled IPv6 packet, 
       while it also enables compressing the UDP checksum by use of SCHC.
    
-   The values for R, N, A and M are not specified in this document, and have to be determined by the underlying
+   The values for R, N, M and T are not specified in this document, and have to be determined by the underlying
    LPWAN technology.
    
 ## ACK format
