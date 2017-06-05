@@ -1044,6 +1044,7 @@ This section provides examples of different fragment delivery reliability option
           |-----W=0, CFN=4----->|
           |-----W=0, CFN=7----->|MIC checked =>
       (no ACK)
+      
 {: #Fig-Example-Win-NoLoss-NACK title='Transmission of an IPv6 packet carried by 11 fragments in Window mode - ACK on error, for N=3, without losses.'}
 
 {{Fig-Example-Rel-Window-NACK-Loss}} illustrates the transmission of an IPv6 packet that needs 11 fragments in Window mode - ACK on error, for N=3, with three losses.
@@ -1118,15 +1119,18 @@ This section provides examples of different fragment delivery reliability option
 # Rule IDs for fragmentation
 
 Different Rule IDs may be used for different aspects of fragmentation functionality as per this document. A summary of such Rule IDs follows:   
-   o  A fragment, and the reliability option in use for the IPv6 datagram being carried: 
-      -  No ACK
-      -  Window mode - ACK on error. A specific Rule ID may be used for each supported window 	size.
-      -  Window mode - ACK “always”. A specific Rule ID may be used for each supported window size.
-   o  An ACK message
-   o  An abort message
-      - ABORT_TX
-      - ABORT_RX
-      - Abort all on-going transmissions
+
+   *  A fragment, and the reliability option in use for the IPv6 datagram being carried: 
+     *  No ACK
+     *  Window mode - ACK on error. A specific Rule ID may be used for each supported window size.
+     *  Window mode - ACK “always”. A specific Rule ID may be used for each supported window size.
+     
+   *  An ACK message
+   
+   *  An abort message
+     * ABORT_TX
+     * ABORT_RX
+     * Abort all on-going transmissions
 
 
 # Note
