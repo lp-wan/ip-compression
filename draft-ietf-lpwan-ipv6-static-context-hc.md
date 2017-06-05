@@ -1123,16 +1123,16 @@ This section provides examples of different fragment delivery reliability option
 Different Rule IDs may be used for different aspects of fragmentation functionality as per this document. A summary of such Rule IDs follows:   
 
    *  A fragment, and the reliability option in use for the IPv6 datagram being carried: 
-     *  No ACK
-     *  Window mode - ACK on error. A specific Rule ID may be used for each supported window size.
-     *  Window mode - ACK “always”. A specific Rule ID may be used for each supported window size.
+        a)  No ACK
+        b)  Window mode - ACK on error. A specific Rule ID may be used for each supported window size.
+        c)  Window mode - ACK “always”. A specific Rule ID may be used for each supported window size.
      
    *  An ACK message
    
    *  An abort message
-     * ABORT_TX
-     * ABORT_RX
-     * Abort all on-going transmissions
+        a) ABORT_TX
+        b) ABORT_RX
+        c) Abort all on-going transmissions
 
 
 # Note
