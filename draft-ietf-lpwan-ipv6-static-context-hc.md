@@ -254,7 +254,7 @@ of the Rule ID is not specified in this document, it is implementation-specific 
 LPWAN technology, the number of flows, among others. 
 
 Some values in the Rule ID space may be reserved for goals other than header 
-compression as fragmentation. (See {{#Frag}}). 
+compression as fragmentation. (See {{Frag}}). 
 
 Rule IDs are specific to a Dev. Two Devs may use the same Rule ID for different
 header compression. To identify the correct Rule ID, the SCHC C/D needs to combine the Rule ID with the Dev L2 identifier
@@ -581,7 +581,7 @@ On other cases, the length must be sent and the CDA is replaced by "value-sent".
 
 IPv6 mandates a checksum in the protocol above IP. Nevertheless, if a more efficient
 mechanism such as L2 CRC or MIC is carried by or over the L2 (such as in the 
-LPWAN fragmentation process (see section {{#Frag}})), the UDP checksum transmission can be avoided.
+LPWAN fragmentation process (see section {{Frag}})), the UDP checksum transmission can be avoided.
 In that case, the TV is not set, the MO is set to "ignore" and the CDA is set to
 "compute-UDP-checksum".
 
