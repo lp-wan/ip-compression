@@ -126,7 +126,7 @@ This section defines the terminology and acronyms used in this document.
 
 * DI: Direction Indicator is a differentiator for matching in order to be able to have different values for both sides.
 
-* IID: Interface Identifier. See the IPv6 addressing architecture  {{I-D.RFC7136}}
+* IID: Interface Identifier. See the IPv6 addressing architecture  {{RFC7136}}
 
 * Dev-IID: Device Interface Identifier. Second part of the IPv6 address to identify the device interface
 
@@ -142,7 +142,7 @@ This section defines the terminology and acronyms used in this document.
 
 Static Context Header Compression (SCHC) avoids context synchronization,
 which is the most bandwidth-consuming operation in other header compression mechanisms
-such as RoHC {{I-D.RFC5795}}. Based on the fact
+such as RoHC {{RFC5795}}. Based on the fact
 that the nature of data flows is highly predictable in LPWAN networks, a static
 context may be stored on the Device (Dev). The context must be stored in both ends, and it can 
 either be learned by a provisioning protocol or by out of band means or it can be pre-provosioned, etc. 
