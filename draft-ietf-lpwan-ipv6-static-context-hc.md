@@ -40,6 +40,8 @@ author:
 normative:
   rfc4944: 
   rfc2460: 
+  rfc7136:
+  rfc5795:
 informative:  
   I-D.minaburo-lp-wan-gap-analysis:
   I-D.ietf-lpwan-overview:
@@ -126,7 +128,7 @@ This section defines the terminology and acronyms used in this document.
 
 * DI: Direction Indicator is a differentiator for matching in order to be able to have different values for both sides.
 
-* IID: Interface Identifier. See the IPv6 addressing architecture  {{RFC7136}}
+* IID: Interface Identifier. See the IPv6 addressing architecture {{RFC7136}}
 
 * Dev-IID: Device Interface Identifier. Second part of the IPv6 address to identify the device interface
 
