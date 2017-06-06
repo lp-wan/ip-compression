@@ -1015,7 +1015,8 @@ This section provides examples of different fragment delivery reliability option
 
 {{Fig-Example-Unreliable}} illustrates the transmission of an IPv6 packet that needs 11 fragments in the No ACK option.
 
-        Sender               Receiver
+~~~~
+        Sender               Receiver
           |-------CFN=0-------->|
           |-------CFN=0-------->|
           |-------CFN=0-------->|
@@ -1027,12 +1028,14 @@ This section provides examples of different fragment delivery reliability option
           |-------CFN=0-------->|
           |-------CFN=0-------->|
           |-------CFN=1-------->|MIC checked =>
-          
+         
+~~~~
 {: #Fig-Example-Unreliable title='Transmission of an IPv6 packet carried by 11 fragments in the No ACK option'}
 
 {{Fig-Example-Win-NoLoss-NACK}} illustrates the transmission of an IPv6 packet that needs 11 fragments in Window mode - ACK on error, for N=3, without losses.
 
-        Sender               Receiver
+~~~~
+        Sender               Receiver
           |-----W=1, CFN=6----->|
           |-----W=1, CFN=5----->|
           |-----W=1, CFN=4----->|
@@ -1046,12 +1049,14 @@ This section provides examples of different fragment delivery reliability option
           |-----W=0, CFN=4----->|
           |-----W=0, CFN=7----->|MIC checked =>
       (no ACK)
-      
+
+~~~~
 {: #Fig-Example-Win-NoLoss-NACK title='Transmission of an IPv6 packet carried by 11 fragments in Window mode - ACK on error, for N=3, without losses.'}
 
 {{Fig-Example-Rel-Window-NACK-Loss}} illustrates the transmission of an IPv6 packet that needs 11 fragments in Window mode - ACK on error, for N=3, with three losses.
 
-         Sender               Receiver
+~~~~
+         Sender             Receiver
           |-----W=1, CFN=6----->|
           |-----W=1, CFN=5----->|
           |-----W=1, CFN=4--X-->|
@@ -1070,12 +1075,14 @@ This section provides examples of different fragment delivery reliability option
           |<-------ACK----------|Bitmap:11010001
           |-----W=0, CFN=4----->|MIC checked =>
       (no ACK)    
-      
+
+~~~~
 {: #Fig-Example-Rel-Window-NACK-Loss title='Transmission of an IPv6 packet carried by 11 fragments in Window mode - ACK on error, for N=3, three losses.'}
 
 {{Fig-Example-Rel-Window-ACK-NoLoss}} illustrates the transmission of an IPv6 packet that needs 11 fragments in Window mode - ACK "always", for N=3, without losses. Note: in Window mode, an additional bit will be needed to number windows.
 
-        Sender               Receiver
+~~~~
+        Sender               Receiver
           |-----W=1, CFN=6----->|
           |-----W=1, CFN=5----->|
           |-----W=1, CFN=4----->|
@@ -1090,12 +1097,14 @@ This section provides examples of different fragment delivery reliability option
           |-----W=0, CFN=7----->|MIC checked =>
           |<-------ACK----------|no bitmap
         (End)    
-      
+
+~~~~
 {: #Fig-Example-Rel-Window-ACK-NoLoss title='Transmission of an IPv6 packet carried by 11 fragments in Window mode - ACK "always", for N=3, no losses.'}
 
 {{Fig-Example-Rel-Window-ACK-Loss}} illustrates the transmission of an IPv6 packet that needs 11 fragments in Window mode - ACK "always", for N=3, with three losses.
 
-        Sender               Receiver
+~~~~
+        Sender               Receiver
           |-----W=1, CFN=6----->|
           |-----W=1, CFN=5----->|
           |-----W=1, CFN=4--X-->|
@@ -1115,7 +1124,8 @@ This section provides examples of different fragment delivery reliability option
           |-----W=0, CFN=4----->|MIC checked =>
           |<-------ACK----------|no bitmap
         (End)    
-      
+
+~~~~
 {: #Fig-Example-Rel-Window-ACK-Loss title='Transmission of an IPv6 packet carried by 11 fragments in Window mode - ACK "Always", for N=3, with three losses.'}
 
 # Rule IDs for fragmentation
