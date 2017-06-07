@@ -320,8 +320,8 @@ or any other data type. The result of the operation can either be True or False.
   
 * match-mapping: The goal of mapping-sent is to reduce the size of a field by allocating
   a shorter value. The Target Value contains a list of values. Each value is idenfied by a short ID (or index). 
-  This operator matches if a field value is equal to one of those target values. The MSB Matching Operator needs a parameter 
-  to proceed to the matching, which indicates the number of bits to compare.
+  This operator matches if a field value is equal to one of those target values. The MSB Matching Operator needs a parameter,
+  indicating the number of bits, to proceed to the matching.
 
 # Compression Decompression Actions (CDA) {#chap-CDA}
 
