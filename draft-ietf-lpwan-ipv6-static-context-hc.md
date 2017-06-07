@@ -67,9 +67,7 @@ separate documents. Moreover, this document specifies fragmentation and reassemb
 # Introduction {#Introduction}
 
 Header compression is mandatory to efficiently bring Internet connectivity to the node
-within a LPWAN network {{I-D.ietf-lpwan-overview}}. 
-
-Some LPWAN networks properties can be exploited for an efficient header
+within a LPWAN network. Some LPWAN networks properties can be exploited for an efficient header
 compression:
 
 * Topology is star-oriented, therefore all the packets follow the same path.
@@ -99,6 +97,36 @@ adaptation layer below IPv6.
 This draft defines also a fragmentation 
 functionality to support the IPv6 MTU requirements over LPWAN 
 technologies. Such functionality has been designed under the assumption that data unit reordering will not happen between the entity performing fragmentation and the entity performing reassembly.
+
+# LPWAN Architecture
+
+LPWAN technologies have similar architectures but different terminology. We can identify different
+types of entities in a typical LPWAN network:
+
+   o  Devices (Dev) are the end-devices or hosts (e.g. sensors,
+      actuators, etc.). There can be a high density of devices per radio gateway.
+
+   o  The Radio Gateway (RG), which is the end point of the constrained link.
+
+   o  The Network Gateway (NGW) is the interconnection node between the Radio Gateway and the Internet.  
+
+   o  LPWAN-AAA Server, which controls the user authentication, the
+      applications. We use the term LPWAN-AAA server because we are not assuming 
+      that this entity speaks RADIUS or Diameter as many/most AAA servers do, but equally we don't want to
+      rule that out, as the functionality will be similar.
+
+   o  Application Server (App)
+
+                                                 +------+
+ ()    ()   ()         |                         |LPWAN-|
+   ()  () () ()       / \         +---------+    | AAA  |
+() () () () () ()    /   \========|    /\   |====|Server|  +-----------+
+ ()  ()   ()        |             | <--|--> |    +------+  |APPLICATION|
+()  ()  ()  ()     / \============|    v    |==============|    (App)  |
+  ()  ()  ()      /   \           +---------+              +-----------+
+ Dev         Radio Gateways           NGW
+
+                       Figure 9: LPWAN Architecture
 
 
 # Terminology
@@ -187,8 +215,8 @@ of sending known field values. When a value is known by both
 ends, it is not necessary sent through the LPWAN network. 
 
 The context contains a list of rules (cf. {{Fig-ctxt}}). Each Rule contains 
-itself a list of fields descriptions composed of a field identifier (FID), a field position (FP), a direction indicator (DI), a target
-value (TV), a matching operator (MO) and a Compression/Decompression Action
+itself a list of fields descriptions composed of a field identifier (FID), a field position (FP), a direction indicator (DI), 
+a target value (TV), a matching operator (MO) and a Compression/Decompression Action
 (CDA).
 
 
@@ -963,7 +991,11 @@ In some LPWAN technologies, as part of energy-saving techniques, downlink transm
 # Security considerations
 
 ## Security considerations for header compression
-TBD
+A malicious header compression could cause the reconstruction of a 
+wrong packet that does not match with the original one, such corruption 
+may be detected with end-to-end authentication and integrity mechanisms. 
+Denial of Service may be produced but its arise other security problems 
+that may be solved with or without header compression.
 
 ## Security considerations for fragmentation
 This subsection describes potential attacks to LPWAN fragmentation 
