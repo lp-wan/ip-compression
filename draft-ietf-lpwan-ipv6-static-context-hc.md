@@ -124,7 +124,7 @@ This section defines the terminology and acronyms used in this document.
 
 * FID: Field Indentifier is an index to describe the header fields in the Rule
 
-* FP: Field Position is a list of possible correct values a field may use
+* FP: Field Position is a list of possible correct values that a field may use
 
 * DI: Direction Indicator is a differentiator for matching in order to be able to have different values for both sides.
 
@@ -218,7 +218,7 @@ The Rule does not describe the original packet format which
 must be known from the compressor/decompressor. The rule just describes the
 compression/decompression behavior for the header fields. In the rule, the description of the header field must be performed in the format packet order.
 
-The Rule describes also the compressed header fields which is transmitted regarding their position
+The Rule describes also the compressed header fields which are transmitted regarding their position
 in the rule which is used for data serialization on the compressor side and data deserialization on the decompressor side.
 
 The Context describes the header fields and its values with the following entries:
@@ -267,8 +267,8 @@ to find the appropriate Rule.
 The compression/decompression process follows several steps:
 
 * compression Rule selection: The goal is to identify which Rule(s) will be used
-  to compress the packet's headers. When doing compression from DL to UL the SCHC C/D needs to find the 
-  correct Rule to use by identifying its Dev-ID and the Rule-ID. In the UL situation only the Rule-ID is used. 
+  to compress the packet's headers. When doing compression from Dw to Up the SCHC C/D needs to find the 
+  correct Rule to use by identifying its Dev-ID and the Rule-ID. In the Up situation only the Rule-ID is used. 
   The next step is to choose the fields by their direction, using the 
   direction indicator (DI), so the fields that does not correspond to the DI will be excluded. 
   Next, then fields are identified according to their field identifier (FID) and field position (FP). 
@@ -355,7 +355,7 @@ Compression is done in the rule order and compressed values are sent in that ord
 message. The receiver must be able to find the size of each compressed field
 which can be given by the rule or may be sent with the compressed header. 
 
-If a field is identified as variable, then its size is sent before the value. ????
+If a field is identified as variable, then its size is sent before the value as indicated in each CDAs
 
 ## not-sent CDA
 
@@ -415,7 +415,7 @@ In the downstream direction, these CDA are used to determine the L2 addresses us
 
 ## Compute-\*
 
-This class of functions is used by the decompressor to compute the compressed field value based on received information. 
+Thes classes of functions are used by the decompressor to compute the compressed field value based on received information. 
 Compressed fields are elided during compression and reconstructed during decompression.
 
 * compute-length: compute the length assigned to this field. For instance, regarding
@@ -446,7 +446,7 @@ the second where the values can be computed by sending only the LSB bits:
 
 * TV is not set to any value, MO is set to "ignore" and CDA is set to "value-sent"
 
-* TV contains a stable value, MO is MSB(X) and CDA is set to LSB(8-X)
+* TV contains a stable value, MO is MSB(X) and CDA is set to LSB
 
 ## Flow label field
 
@@ -461,7 +461,7 @@ and the second where only part of the value is sent and the decompressor needs t
 
 * TV is not set, MO is set to "ignore" and CDA is set to "value-sent"
 
-* TV contains a stable value, MO is MSB(X) and CDA is set to LSB(20-X)
+* TV contains a stable value, MO is MSB(X) and CDA is set to LSB
 
 ## Payload Length field
 
