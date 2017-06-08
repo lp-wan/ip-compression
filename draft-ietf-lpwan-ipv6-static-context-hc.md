@@ -971,17 +971,10 @@ For Window mode operation, implementers may opt to support a single window size 
 
 ## Aborting a fragmented IPv6 datagram transmission
 
-For several reasons, a fragment sender or a fragment receiver may want to abort the transmission of a fragmented IPv6 datagram.
+For several reasons, a fragment sender or a fragment receiver may want to abort the on-going transmission of one or several fragmented IPv6 datagrams. The entity (either the fragment sender or the fragment receiver) that triggers abortion transmits to the other endpoint a format that only comprises a Rule ID (of size R bits), which signals abortion of all on-going fragmented IPv6 packet transmissions. The specific value to be used for the Rule ID of this abortion signal is not defined in this document, and is expected to be defined in future documents.
 
-If the fragment sender triggers abortion, it transmits to the receiver a format equivalent to a fragmentation header (with the format for a fragment that is not the last one), with the Rule ID field (of size R – T – N bits) set to ABORT_TX, the DTag field (if present) set to the same value as the datagram whose transmission is being aborted, and all CFN bits set to 1. No data is carried along with this fragmentation header. The specific value for ABORT_TX is not stated in this document and is expected to be defined in other documents.
+Upon transmission or reception of the abortion signal, both entities MUST release any resources allocated for the fragmented IPv6 datagram transmissions being aborted. 
 
-When a fragment receiver receives an L2 frame containing a Rule ID set to ABORT_TX and a CFN field with all bits set to 1, the receiver MUST release any resources allocated for the fragmented IPv6 datagram transmission being aborted.
-
-If the fragment receiver triggers abortion, it transmits to the fragment sender a format equivalent to a fragmentation header (with the format for a fragment that is not the last one), with Rule ID (of size R – T – N bits) set to ABORT_RX, with the Dtag field (if present) set to the same value as the datagram whose reception is being aborted. The entity that triggers abortion (either a fragment sender or a fragment receiver) MUST release any resources allocated for the fragmented IPv6 datagram transmission being aborted. The specific value for ABORT_RX is not stated in this document and is expected to be defined in other documents.
-
-When a fragment sender receives an L2 frame containing a Rule ID set to ABORT_RX, the fragment sender MUST abort transmission of the fragmented IPv6 datagram being transmitted, and MUST release any resources allocated for the fragmented IPv6 datagram transmission being aborted.
-
-A further Rule ID value may be used by an entity to signal abortion of all on-going, possibly interleaved, fragmented IPv6 datagram transmissions.
 
 ## Downlink fragment transmission
 
