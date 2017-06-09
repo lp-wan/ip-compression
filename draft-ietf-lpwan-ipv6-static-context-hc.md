@@ -117,6 +117,7 @@ types of entities in a typical LPWAN network:
 
    o  Application Server (App)
 
+~~~~
                                                  +------+
  ()    ()   ()         |                         |LPWAN-|
    ()  () () ()       / \         +---------+    | AAA  |
@@ -126,7 +127,8 @@ types of entities in a typical LPWAN network:
   ()  ()  ()      /   \           +---------+              +-----------+
  Dev         Radio Gateways           NGW
 
-                       Figure 9: LPWAN Architecture
+~~~~
+{: #Fig-LPWANarchi title='LPWAN Architecture'}                      
 
 
 # Terminology
