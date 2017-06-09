@@ -52,7 +52,7 @@ This document describes a header compression scheme and fragmentation functional
 for very low bandwidth networks. These techniques are especially tailored for LPWAN (Low Power Wide Area Network) networks.
 
 The Static Context Header Compression (SCHC) offers a great level of flexibility 
-when  processing the header fields and must be used for this kind of networks.
+when  processing the header fields and must be used for this kind of networks. A common context stored in a LPWAN device and in the LPWAN network is used. This context store information that will not be transmitted in the contrained network.
 Static context means that information stored in the context which describes field values, does not change during
 packet transmission, avoiding complex resynchronization mechanisms, incompatible
 with LPWAN characteristics. In most of the cases, IPv6/UDP headers are reduced
@@ -87,7 +87,7 @@ to a small context identifier.
 
 The SCHC header compression mechanism is independent of the specific LPWAN technology over which it will be used.
 
-Moreover, LPWAN technologies are also characterized,
+LPWAN technologies are also characterized,
 among others, by a very reduced data unit and/or payload size
 {{I-D.ietf-lpwan-overview}}.  However, some of these technologies
 do not support layer two fragmentation, therefore the only option for
@@ -251,7 +251,7 @@ in the rule which is used for data serialization on the compressor side and data
 
 The Context describes the header fields and its values with the following entries:
 
-* A Field ID (FID) is a unique value to define the header field. In the context the name of the header field is not used, only the identifier.
+* A Field ID (FID) is a unique value to define the header field. In the context the name of the header field is not used, each field is recognize with the FID identifier.
 
 * A Field Position (FP) indicating if several instances of the field exist in the 
   headers which one is targeted. The default position is 1
@@ -266,8 +266,7 @@ The Context describes the header fields and its values with the following entrie
 
 * A Target Value (TV) is the value used to make the comparison with
   the packet header field. The Target Value can be of any type (integer, strings,...).
-  For instance, it can be a single value or a more complex structure (array, list,...). It can
-  be considered as a CBOR structure.
+  For instance, it can be a single value or a more complex structure (array, list,...), such as a JSON or a CBOR structure.
 
 * A Matching Operator (MO) is the operator used to make the comparison between 
   the Field Value and the Target Value. The Matching Operator may require some 
@@ -298,7 +297,7 @@ The compression/decompression process follows several steps:
   to compress the packet's headers. When doing compression from Dw to Up the SCHC C/D needs to find the 
   correct Rule to use by identifying its Dev-ID and the Rule-ID. In the Up situation only the Rule-ID is used. 
   The next step is to choose the fields by their direction, using the 
-  direction indicator (DI), so the fields that does not correspond to the DI will be excluded. 
+  direction indicator (DI), so the fields that does not correspond to the appropiated DI will be excluded. 
   Next, then fields are identified according to their field identifier (FID) and field position (FP). 
   If the field position does not correspond then the Rule is not use and the SCHC take next Rule.
   Once the DI and the FP correspond to the header information, each field's value is then compared to the corresponding 
@@ -344,12 +343,14 @@ or any other data type. The result of the operation can either be True or False.
 * ignore: No check is done between a field value in a packet and a TV
   in the Rule. The result of the matching is always true.
 
-* MSB(length): A matching is obtained if the most significant bits of the length field value bits of the header are equal to the TV in the rule.
+* MSB(length): A matching is obtained if the most significant bits of the length field value bits 
+  of the header are equal to the TV in the rule. The MSB Matching Operator needs a parameter,
+  indicating the number of bits, to proceed to the matching.
   
 * match-mapping: The goal of mapping-sent is to reduce the size of a field by allocating
   a shorter value. The Target Value contains a list of values. Each value is idenfied by a short ID (or index). 
-  This operator matches if a field value is equal to one of those target values. The MSB Matching Operator needs a parameter,
-  indicating the number of bits, to proceed to the matching.
+  This operator matches if a field value is equal to one of those target values. 
+  
 
 # Compression Decompression Actions (CDA) {#chap-CDA}
 
@@ -383,7 +384,7 @@ Compression is done in the rule order and compressed values are sent in that ord
 message. The receiver must be able to find the size of each compressed field
 which can be given by the rule or may be sent with the compressed header. 
 
-If a field is identified as variable, then its size is sent before the value as indicated in each CDAs
+If the field is identified as variable, then its size is sent first using the following coding. If the size is between 1 and 15 bytes it is sent using 4 bits. For values between 15 and 255, the first 4 bit sent are set to 0 and the size is sent using 8 bits. For higher value, the first 12 bytes are set to 0 and the size is sent on 2 bytes. Nevertheless, the size is sent before the value as indicated in each CDAs.
 
 ## not-sent CDA
 
@@ -394,8 +395,7 @@ value different from the compressed field.
 
 The compressor does not send any value on the compressed header for the field on which compression is applied.
 
-The decompressor
-restores the field value with the target value stored in the matched rule.
+The decompressor restores the field value with the target value stored in the matched rule.
 
 ## value-sent CDA
 
@@ -428,6 +428,9 @@ field length minus the bits length specified in the MSB MO.
 
 The compressor sends the "length" Least Significant Bits. The decompressor
 combines with an OR operator the value received with the Target Value.
+
+In some cases, where the field has a variable length, the complete value is sent, as for example the Uri-Path the MSB(16) will be used.
+The decompressor known the field size, either given byt he rule or sent with the data and can process the reverse operation.
 
 
 ## DEViid, APPiid CDA
@@ -497,7 +500,7 @@ If the LPWAN technology does not add padding, this field can be elided for the
 transmission on the LPWAN network. The SCHC C/D recomputes the original payload length
 value. The TV is not set, the MO is set to "ignore" and the CDA is "compute-IPv6-length".
 
-If the payload is small, the TV can be set to 0x0000, the MO set to "MSB (16-s)" and the
+If the payload length needs to be sent, the TV can be set to 0x0000, the MO set to "MSB (16-s)" and the
 CDA to "LSB (s)". The 's' parameter depends on the maximum packet length.
 
 On other cases, the payload length field must be sent and the CDA is replaced by "value-sent".
@@ -699,9 +702,12 @@ Local address for the SCHC C/D.
   |IPv6 Length     |1 |Bi|         | ignore | comp-length ||      |
   |IPv6 Next Header|1 |Bi|17       | equal  | not-sent    ||      |
   |IPv6 Hop Limit  |1 |Bi|255      | ignore | not-sent    ||      |
-  |IPv6 DEVprefix  |1 |Bi|alpha/64 | equal  | not-sent    ||      |
+  |IPv6 DEVprefix  |1 |Bi|[alpha/64, match- | mapping-sent||  X   |
+  |                |1 |Bi|fe80::/64] mapping|             ||      |
   |IPv6 DEViid     |1 |Bi|         | ignore | DEViid-DID  ||      |
-  |IPv6 APPprefix  |1 |Bi|beta/64  | equal  | not-sent    ||      |
+  |IPv6 APPprefix  |1 |Bi|[beta/64,| match- | mapping-sent||  YY  |
+  |                |  |  |alpha/64,| mapping|             ||      |
+  |                |  |  |fe80::64]|        |             ||      |
   |IPv6 APPiid     |1 |Bi|::1000   | equal  | not-sent    ||      |
   +================+==+==+=========+========+=============++======+
   |UDP DEVport     |1 |Bi|5683     | equal  | not-sent    ||      |
@@ -719,7 +725,8 @@ Local address for the SCHC C/D.
   |IPv6 Flow Label |1 |Bi|0        | equal  | not-sent    ||      |
   |IPv6 Length     |1 |Bi|         | ignore | comp-length ||      |
   |IPv6 Next Header|1 |Bi|17       | equal  | not-sent    ||      |
-  |IPv6 Hop Limit  |1 |Bi|255      | ignore | not-sent    ||      |
+  |IPv6 Hop Limit  |1 |Up|255      | ignore | not-sent    ||      |
+  |IPv6 Hop Limit  |1 |Dw|         | ignore | value-sent  ||  HL  |
   |IPv6 DEVprefix  |1 |Bi|alpha/64 | equal  | not-sent    ||      |
   |IPv6 DEViid     |1 |Bi|         | ignore | DEViid-DID  ||      |
   |IPv6 APPprefix  |1 |Bi|gamma/64 | equal  | not-sent    ||      |
