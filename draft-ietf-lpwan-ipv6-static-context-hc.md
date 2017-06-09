@@ -98,10 +98,10 @@ This draft defines also a fragmentation
 functionality to support the IPv6 MTU requirements over LPWAN 
 technologies. Such functionality has been designed under the assumption that data unit reordering will not happen between the entity performing fragmentation and the entity performing reassembly.
 
-# LPWAN Architecture
+# LPWAN Architecture {#LPWAN-Archi}
 
 LPWAN technologies have similar architectures but different terminology. We can identify different
-types of entities in a typical LPWAN network:
+types of entities in a typical LPWAN network, see {{Fig-LPWANarchi}}:
 
    o  Devices (Dev) are the end-devices or hosts (e.g. sensors,
       actuators, etc.). There can be a high density of devices per radio gateway.
