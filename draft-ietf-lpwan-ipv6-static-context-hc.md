@@ -681,8 +681,8 @@ Local address for the SCHC C/D.
 ~~~~
   Rule 0
   +----------------+--+--+---------+--------+-------------++------+
-  | Field          |FP|DI| Value   | Match  | Function    || Sent |
-  |                |  |  |         |        |             ||[bits]|
+  | Field          |FP|DI| Value   | Match  | Comp Decomp || Sent |
+  |                |  |  |         | Opera. | Action      ||[bits]|
   +----------------+--+--+---------+----------------------++------+
   |IPv6 version    |1 |Bi|6        | equal  | not-sent    ||      |
   |IPv6 DiffServ   |1 |Bi|0        | equal  | not-sent    ||      |
@@ -691,7 +691,7 @@ Local address for the SCHC C/D.
   |IPv6 Next Header|1 |Bi|17       | equal  | not-sent    ||      |
   |IPv6 Hop Limit  |1 |Bi|255      | ignore | not-sent    ||      |
   |IPv6 DEVprefix  |1 |Bi|FE80::/64| equal  | not-sent    ||      |
-  |IPv6 DEViid     |1 |Bi|         | ignore | DEViid-DID  ||      |
+  |IPv6 DEViid     |1 |Bi|         | ignore | DEViid      ||      |
   |IPv6 APPprefix  |1 |Bi|FE80::/64| equal  | not-sent    ||      |
   |IPv6 APPiid     |1 |Bi|::1      | equal  | not-sent    ||      |
   +================+==+==+=========+========+=============++======+
@@ -703,8 +703,8 @@ Local address for the SCHC C/D.
 
   Rule 1
   +----------------+--+--+---------+--------+-------------++------+
-  | Field          |FP|DI| Value   | Match  | Function    || Sent |
-  |                |  |  |         |        |             ||[bits]|
+  | Field          |FP|DI| Value   | Match  | Action      || Sent |
+  |                |  |  |         | Opera. | Action      ||[bits]|
   +----------------+--+--+---------+--------+-------------++------+
   |IPv6 version    |1 |Bi|6        | equal  | not-sent    ||      |
   |IPv6 DiffServ   |1 |Bi|0        | equal  | not-sent    ||      |
@@ -714,7 +714,7 @@ Local address for the SCHC C/D.
   |IPv6 Hop Limit  |1 |Bi|255      | ignore | not-sent    ||      |
   |IPv6 DEVprefix  |1 |Bi|[alpha/64, match- | mapping-sent||  [1] |
   |                |1 |Bi|fe80::/64] mapping|             ||      |
-  |IPv6 DEViid     |1 |Bi|         | ignore | DEViid-DID  ||      |
+  |IPv6 DEViid     |1 |Bi|         | ignore | DEViid      ||      |
   |IPv6 APPprefix  |1 |Bi|[beta/64,| match- | mapping-sent||  [2] |
   |                |  |  |alpha/64,| mapping|             ||      |
   |                |  |  |fe80::64]|        |             ||      |
@@ -728,8 +728,8 @@ Local address for the SCHC C/D.
 
   Rule 2
   +----------------+--+--+---------+--------+-------------++------+
-  | Field          |FP|DI| Value   | Match  | Function    || Sent |
-  |                |  |  |         |        |             ||[bits]|
+  | Field          |FP|DI| Value   | Match  | Action      || Sent |
+  |                |  |  |         | Opera. | Action      ||[bits]|
   +----------------+--+--+---------+--------+-------------++------+
   |IPv6 version    |1 |Bi|6        | equal  | not-sent    ||      |
   |IPv6 DiffServ   |1 |Bi|0        | equal  | not-sent    ||      |
@@ -739,7 +739,7 @@ Local address for the SCHC C/D.
   |IPv6 Hop Limit  |1 |Up|255      | ignore | not-sent    ||      |
   |IPv6 Hop Limit  |1 |Dw|         | ignore | value-sent  ||  [8] |
   |IPv6 DEVprefix  |1 |Bi|alpha/64 | equal  | not-sent    ||      |
-  |IPv6 DEViid     |1 |Bi|         | ignore | DEViid-DID  ||      |
+  |IPv6 DEViid     |1 |Bi|         | ignore | DEViid      ||      |
   |IPv6 APPprefix  |1 |Bi|gamma/64 | equal  | not-sent    ||      |
   |IPv6 APPiid     |1 |Bi|::1000   | equal  | not-sent    ||      |
   +================+==+==+=========+========+=============++======+
