@@ -52,7 +52,7 @@ This document describes a header compression scheme and fragmentation functional
 for very low bandwidth networks. These techniques are especially tailored for LPWAN (Low Power Wide Area Network) networks.
 
 The Static Context Header Compression (SCHC) offers a great level of flexibility 
-when  processing the header fields and must be used for this kind of networks. A common context stored in a LPWAN device and in the LPWAN network is used. This context store information that will not be transmitted in the contrained network.
+when  processing the header fields and must be used for this kind of networks. A common context stored in a LPWAN device and in the  network is used. This context stores information that will not be transmitted in the constrained network.
 Static context means that information stored in the context which describes field values, does not change during
 packet transmission, avoiding complex resynchronization mechanisms, incompatible
 with LPWAN characteristics. In most of the cases, IPv6/UDP headers are reduced
@@ -121,7 +121,7 @@ types of entities in a typical LPWAN network, see {{Fig-LPWANarchi}}:
                                                  +------+
  ()    ()   ()         |                         |LPWAN-|
    ()  () () ()       / \         +---------+    | AAA  |
-() () () () () ()    /   \========|    /\   |====|Server|  +-----------+
+() () () () () ()    /   \========|    ^    |====|Server|  +-----------+
  ()  ()   ()        |             | <--|--> |    +------+  |APPLICATION|
 ()  ()  ()  ()     / \============|    v    |==============|    (App)  |
   ()  ()  ()      /   \           +---------+              +-----------+
@@ -253,7 +253,7 @@ in the rule which is used for data serialization on the compressor side and data
 
 The Context describes the header fields and its values with the following entries:
 
-* A Field ID (FID) is a unique value to define the header field. In the context the name of the header field is not used, each field is recognize with the FID identifier.
+* A Field ID (FID) is a unique value to define the header field. 
 
 * A Field Position (FP) indicating if several instances of the field exist in the 
   headers which one is targeted. The default position is 1
@@ -371,8 +371,8 @@ the original value.
 |LSB(length)         |send LSB     |TV OR received value        |
 |compute-length      |elided       |compute length              |
 |compute-checksum    |elided       |compute UDP checksum        |
-|Deviid-DID          |elided       |build IID from L2 Dev addr  |
-|Appiid-DID          |elided       |build IID from L2 App addr  |
+|Deviid              |elided       |build IID from L2 Dev addr  |
+|Appiid              |elided       |build IID from L2 App addr  |
 \--------------------+-------------+----------------------------/
 
 ~~~~
@@ -386,7 +386,13 @@ Compression is done in the rule order and compressed values are sent in that ord
 message. The receiver must be able to find the size of each compressed field
 which can be given by the rule or may be sent with the compressed header. 
 
-If the field is identified as variable, then its size is sent first using the following coding. If the size is between 1 and 15 bytes it is sent using 4 bits. For values between 15 and 255, the first 4 bit sent are set to 0 and the size is sent using 8 bits. For higher value, the first 12 bytes are set to 0 and the size is sent on 2 bytes. Nevertheless, the size is sent before the value as indicated in each CDAs.
+If the field is identified as variable, then its size must be sent first using the following coding:
+
+* If the size is between 0 and 14 bytes it is sent using 4 bits. 
+
+* For values between 15 and 255, the first 4 bit sent are set to 1 and the size is sent using 8 bits. 
+
+* For higher value, the first 12 bytes are set to 1 and the size is sent on 2 bytes. 
 
 ## not-sent CDA
 
@@ -423,16 +429,15 @@ The number of bits sent is the minimal size to code all the possible indexes.
 
 ## LSB CDA
 
-LSB action is used to avoid sendind the fixed part of the packet field header to the other end.
+LSB action is used to avoid sendind the known part of the packet field header to the other end.
 This action is used together with the "MSB" MO. A length can be specified in the rule to indicate
 how many bits have to be sent. If not length is specified, the number of bits sent are the
 field length minus the bits length specified in the MSB MO.
 
 The compressor sends the "length" Least Significant Bits. The decompressor
-combines with an OR operator the value received with the Target Value.
+combines the value received with the Target Value.
 
-In some cases, where the field has a variable length, the complete value is sent, as for example the Uri-Path the MSB(16) will be used.
-The decompressor known the field size, either given byt he rule or sent with the data and can process the reverse operation.
+If this action is made on a variable length field, the remaning size in byte has to be sent before.
 
 
 ## DEViid, APPiid CDA
@@ -502,8 +507,9 @@ If the LPWAN technology does not add padding, this field can be elided for the
 transmission on the LPWAN network. The SCHC C/D recomputes the original payload length
 value. The TV is not set, the MO is set to "ignore" and the CDA is "compute-IPv6-length".
 
-If the payload length needs to be sent, the TV can be set to 0x0000, the MO set to "MSB (16-s)" and the
-CDA to "LSB (s)". The 's' parameter depends on the maximum packet length.
+If the payload length needs to be sent and does not need to be coded in 16 bits, the TV can be set to 0x0000, 
+the MO set to "MSB (16-s)" and the
+CDA to "LSB". The 's' parameter depends on the expected maximum packet length.
 
 On other cases, the payload length field must be sent and the CDA is replaced by "value-sent".
 
@@ -676,6 +682,7 @@ Local address for the SCHC C/D.
   Rule 0
   +----------------+--+--+---------+--------+-------------++------+
   | Field          |FP|DI| Value   | Match  | Function    || Sent |
+  |                |  |  |         |        |             ||[bits]|
   +----------------+--+--+---------+----------------------++------+
   |IPv6 version    |1 |Bi|6        | equal  | not-sent    ||      |
   |IPv6 DiffServ   |1 |Bi|0        | equal  | not-sent    ||      |
@@ -697,6 +704,7 @@ Local address for the SCHC C/D.
   Rule 1
   +----------------+--+--+---------+--------+-------------++------+
   | Field          |FP|DI| Value   | Match  | Function    || Sent |
+  |                |  |  |         |        |             ||[bits]|
   +----------------+--+--+---------+--------+-------------++------+
   |IPv6 version    |1 |Bi|6        | equal  | not-sent    ||      |
   |IPv6 DiffServ   |1 |Bi|0        | equal  | not-sent    ||      |
@@ -704,10 +712,10 @@ Local address for the SCHC C/D.
   |IPv6 Length     |1 |Bi|         | ignore | comp-length ||      |
   |IPv6 Next Header|1 |Bi|17       | equal  | not-sent    ||      |
   |IPv6 Hop Limit  |1 |Bi|255      | ignore | not-sent    ||      |
-  |IPv6 DEVprefix  |1 |Bi|[alpha/64, match- | mapping-sent||  X   |
+  |IPv6 DEVprefix  |1 |Bi|[alpha/64, match- | mapping-sent||  [1] |
   |                |1 |Bi|fe80::/64] mapping|             ||      |
   |IPv6 DEViid     |1 |Bi|         | ignore | DEViid-DID  ||      |
-  |IPv6 APPprefix  |1 |Bi|[beta/64,| match- | mapping-sent||  YY  |
+  |IPv6 APPprefix  |1 |Bi|[beta/64,| match- | mapping-sent||  [2] |
   |                |  |  |alpha/64,| mapping|             ||      |
   |                |  |  |fe80::64]|        |             ||      |
   |IPv6 APPiid     |1 |Bi|::1000   | equal  | not-sent    ||      |
@@ -721,6 +729,7 @@ Local address for the SCHC C/D.
   Rule 2
   +----------------+--+--+---------+--------+-------------++------+
   | Field          |FP|DI| Value   | Match  | Function    || Sent |
+  |                |  |  |         |        |             ||[bits]|
   +----------------+--+--+---------+--------+-------------++------+
   |IPv6 version    |1 |Bi|6        | equal  | not-sent    ||      |
   |IPv6 DiffServ   |1 |Bi|0        | equal  | not-sent    ||      |
@@ -728,14 +737,14 @@ Local address for the SCHC C/D.
   |IPv6 Length     |1 |Bi|         | ignore | comp-length ||      |
   |IPv6 Next Header|1 |Bi|17       | equal  | not-sent    ||      |
   |IPv6 Hop Limit  |1 |Up|255      | ignore | not-sent    ||      |
-  |IPv6 Hop Limit  |1 |Dw|         | ignore | value-sent  ||  HL  |
+  |IPv6 Hop Limit  |1 |Dw|         | ignore | value-sent  ||  [8] |
   |IPv6 DEVprefix  |1 |Bi|alpha/64 | equal  | not-sent    ||      |
   |IPv6 DEViid     |1 |Bi|         | ignore | DEViid-DID  ||      |
   |IPv6 APPprefix  |1 |Bi|gamma/64 | equal  | not-sent    ||      |
   |IPv6 APPiid     |1 |Bi|::1000   | equal  | not-sent    ||      |
   +================+==+==+=========+========+=============++======+
-  |UDP DEVport     |1 |Bi|8720     | MSB(12)| LSB(4)      || lsb  |
-  |UDP APPport     |1 |Bi|8720     | MSB(12)| LSB(4)      || lsb  |
+  |UDP DEVport     |1 |Bi|8720     | MSB(12)| LSB(4)      || [4]  |
+  |UDP APPport     |1 |Bi|8720     | MSB(12)| LSB(4)      || [4]  |
   |UDP Length      |1 |Bi|         | ignore | comp-length ||      |
   |UDP checksum    |1 |Bi|         | ignore | comp-chk    ||      |
   +================+==+==+=========+========+=============++======+
