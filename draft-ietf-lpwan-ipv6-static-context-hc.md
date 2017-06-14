@@ -43,7 +43,6 @@ normative:
   rfc7136:
   rfc5795:
 informative:  
-  I-D.minaburo-lp-wan-gap-analysis:
   I-D.ietf-lpwan-overview:
 
 --- abstract
