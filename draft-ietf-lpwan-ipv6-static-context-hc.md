@@ -1009,13 +1009,11 @@ that may be solved with or without header compression.
 
 ## Security considerations for fragmentation
 This subsection describes potential attacks to LPWAN fragmentation 
-and proposes countermeasures, based on existing analysis of attacks
-to 6LoWPAN fragmentation.
+and suggests possible countermeasures.
 
 A node can perform a buffer reservation attack by sending a first
 fragment to a target.  Then, the receiver will reserve buffer space
-for the whole packet on the basis of the datagram size announced in
-that first fragment.  Other incoming fragmented packets will be
+for the IPv6 packet.  Other incoming fragmented packets will be
 dropped while the reassembly buffer is occupied during the reassembly
 timeout.  Once that timeout expires, the attacker can repeat the same
 procedure, and iterate, thus creating a denial of service attack.
