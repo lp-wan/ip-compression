@@ -117,14 +117,14 @@ types of entities in a typical LPWAN network, see {{Fig-LPWANarchi}}:
    o  Application Server (App)
 
 ~~~~
-                                                 +------+
- ()    ()   ()         |                         |LPWAN-|
-   ()  () () ()       / \         +---------+    | AAA  |
-() () () () () ()    /   \========|    ^    |====|Server|  +-----------+
- ()  ()   ()        |             | <--|--> |    +------+  |APPLICATION|
-()  ()  ()  ()     / \============|    v    |==============|    (App)  |
-  ()  ()  ()      /   \           +---------+              +-----------+
- Dev         Radio Gateways           NGW
+                                              +------+
+ ()   ()   ()       |                         |LPWAN-|
+  ()  () () ()     / \         +---------+    | AAA  |
+() () () () () ()  /   \=======|    ^    |====|Server|  +-----------+
+ ()  ()   ()     |             | <--|--> |    +------+  |APPLICATION|
+()  ()  ()  ()  / \============|    v    |==============|    (App)  |
+  ()  ()  ()   /   \           +---------+              +-----------+
+ Dev        Radio Gateways         NGW
 
 ~~~~
 {: #Fig-LPWANarchi title='LPWAN Architecture'}                      
