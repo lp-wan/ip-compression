@@ -921,31 +921,33 @@ In any of the Window mode options, fragments except the last one SHALL
 The format of an ACK is shown in {{Fig-ACK-Format}}:
 
 ~~~~
-                <-------  R  ------>
-                             <- T ->  
-                +---- ... --+-... -+----- ... ---+
-                |  Rule ID  | DTag |   bitmap    |
-                +---- ... --+-... -+----- ... ---+
+                <--------  R  ------->
+                            <- T -> 1  
+                +---- ... --+-... -+-+----- ... ---+
+                |  Rule ID  | DTag |W|   bitmap    |
+                +---- ... --+-... -+-+----- ... ---+
 ~~~~
 {: #Fig-ACK-Format title='Format of an ACK'}
 
 
-  Rule ID: In all ACKs, Rule ID has a size of R - T bits.
+  Rule ID: In all ACKs, Rule ID has a size of R - T - 1 bits.
    
   DTag: DTag has a size of T bits. DTag carries the same value as the DTag field in the fragments carrying the IPv6 datagram for which this ACK is intended.
-
-  bitmap: This field carries the bitmap sent by the receiver to inform the sender about whether fragments in the current window have been received or not. size of the bitmap field of an ACK can be equal to 0 or Ceiling(Number_of_Fragments/8) octets, where Number_of_Fragments denotes the number of fragments of a window. The bitmap is a sequence of bits, where the n-th bit signals whether the n-th fragment transmitted in the current window has been correctly received (n-th bit set to 1) or not (n-th bit set to 0). Remaining bits with bit order greater than the number of fragments sent (as determined by the receiver) are set to 0, except for the last bit in the bitmap, which is set to 1 if the last fragment has been correctly received, and 0 otherwise. Absence of the bitmap in an ACK confirms correct reception of all fragments to be acknowledged by means of the ACK.
+  
+  W: This field has a size of 1 bit. In all ACKs, the W bit carries the same value as the W bit carried by the fragments whose reception is being positively or negatively acknowledged by the ACK.
+  
+  bitmap: This field carries the bitmap sent by the receiver to inform the sender about whether fragments in the current window have been received or not. Size of the bitmap field of an ACK can be equal to 0 or Ceiling(Number_of_Fragments/8) octets, where Number_of_Fragments denotes the number of fragments of a window. The bitmap is a sequence of bits, where the n-th bit signals whether the n-th fragment transmitted in the current window has been correctly received (n-th bit set to 1) or not (n-th bit set to 0). Remaining bits with bit order greater than the number of fragments sent (as determined by the receiver) are set to 0, except for the last bit in the bitmap, which is set to 1 if the last fragment of the window has been correctly received, and 0 otherwise. Feedback on reception of the fragment with CFN = 2^N - 1 (last fragment carrying an IPv6 packet) is only given by the last bit of the corresponding window. Absence of the bitmap in an ACK confirms correct reception of all fragments to be acknowledged by means of the ACK.
   
    
 {{Fig-Bitmap-Win}} shows an example of an ACK (N=3), where the bitmap
 indicates that the second and the fifth fragments have not been correctly received. 
 
 ~~~~                                                  
-              <------  R  ------>
-                          <- T -> 0 1 2 3 4 5 6 7
-              +---- ... --+-... -+-+-+-+-+-+-+-+-+
-              |  Rule ID  | DTag |1|0|1|1|0|1|1|1|
-              +---- ... --+-... -+-+-+-+-+-+-+-+-+
+              <-------   R  ------->
+                          <- T ->   0 1 2 3 4 5 6 7
+              +---- ... --+-... -+-+-+-+-+-+-+-+-+-+
+              |  Rule ID  | DTag |W|1|0|1|1|0|1|1|1|
+              +---- ... --+-... -+-+-+-+-+-+-+-+-+-+
 
 ~~~~
 {: #Fig-Bitmap-Win title='Example of the bitmap in an ACK (in Window mode, for N=3)'}
@@ -953,11 +955,11 @@ indicates that the second and the fifth fragments have not been correctly receiv
 {{Fig-NoBitmap}} illustrates an ACK without a bitmap.
 
 ~~~~
-                    <------  R  ------>
+                    <-------   R  ------->
                                 <- T -> 
-                    +---- ... --+-... -+
-                    |  Rule ID  | DTag |
-                    +---- ... --+-... -+
+                    +---- ... --+-... -+-+
+                    |  Rule ID  | DTag |W|
+                    +---- ... --+-... -+-+
 
 ~~~~
 {: #Fig-NoBitmap title='Example of an ACK without a bitmap'}
@@ -1106,7 +1108,7 @@ This section provides examples of different fragment delivery reliability option
           |-----W=1, CFN=2--X-->|
           |-----W=1, CFN=1----->|
           |-----W=1, CFN=0----->|
-          |<-------ACK----------|Bitmap:11010111
+          |<-----ACK, W=1-------|Bitmap:11010111
           |-----W=1, CFN=4----->|
           |-----W=1, CFN=2----->|   
       (no ACK)     
@@ -1114,7 +1116,7 @@ This section provides examples of different fragment delivery reliability option
           |-----W=0, CFN=5----->|
           |-----W=0, CFN=4--X-->|
           |-----W=0, CFN=7----->|MIC checked
-          |<-------ACK----------|Bitmap:11010001
+          |<-----ACK, W=0-------|Bitmap:11000001
           |-----W=0, CFN=4----->|MIC checked =>
       (no ACK)    
 
@@ -1132,12 +1134,12 @@ This section provides examples of different fragment delivery reliability option
           |-----W=1, CFN=2----->|
           |-----W=1, CFN=1----->|
           |-----W=1, CFN=0----->|
-          |<-------ACK----------|no bitmap
+          |<-----ACK, W=1-------|no bitmap
           |-----W=0, CFN=6----->|
           |-----W=0, CFN=5----->|   
           |-----W=0, CFN=4----->|
           |-----W=0, CFN=7----->|MIC checked =>
-          |<-------ACK----------|no bitmap
+          |<-----ACK, W=0-------|no bitmap
         (End)    
 
 ~~~~
@@ -1154,17 +1156,17 @@ This section provides examples of different fragment delivery reliability option
           |-----W=1, CFN=2--X-->|
           |-----W=1, CFN=1----->|
           |-----W=1, CFN=0----->|
-          |<-------ACK----------|bitmap:11010111
+          |<-----ACK, W=1-------|bitmap:11010111
           |-----W=1, CFN=4----->|
           |-----W=1, CFN=2----->|
-          |<-------ACK----------|no bitmap
+          |<-----ACK, W=1-------|no bitmap
           |-----W=0, CFN=6----->|
           |-----W=0, CFN=5----->|   
           |-----W=0, CFN=4--X-->|
           |-----W=0, CFN=7----->|MIC checked
-          |<-------ACK----------|bitmap:11010001
+          |<-----ACK, W=0-------|bitmap:11000001
           |-----W=0, CFN=4----->|MIC checked =>
-          |<-------ACK----------|no bitmap
+          |<-----ACK, W=0-------|no bitmap
         (End)    
 
 ~~~~
@@ -1178,7 +1180,7 @@ Different Rule IDs may be used for different aspects of fragmentation functional
      
    *  An ACK message.
    
-   *  An abort message: i) ABORT_TX, ii) ABORT_RX, iii) Abort all on-going transmissions.
+   *  A message to abort all on-going transmissions.
 
 
 # Note
