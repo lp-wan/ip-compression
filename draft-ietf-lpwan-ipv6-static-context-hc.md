@@ -38,10 +38,10 @@ author:
   country: Spain
   email: carlesgo@entel.upc.edu
 normative:
-  rfc4944: 
-  rfc2460: 
-  rfc7136:
-  rfc5795:
+  RFC4944: 
+  RFC2460: 
+  RFC7136:
+  RFC5795:
 informative:  
   I-D.ietf-lpwan-overview:
 
