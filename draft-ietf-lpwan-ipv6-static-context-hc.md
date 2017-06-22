@@ -890,7 +890,7 @@ In any of the Window mode options, fragments except the last one SHALL
 {: #Fig-NotLastWin title='Fragmentation Header for Fragments except the Last One, Window mode'}
    
    
-   The last fragment of an IPv6 datagram SHALL contain a fragmentation header that conforms to 
+   In the No ACK option, the last fragment of an IPv6 datagram SHALL contain a fragmentation header that conforms to 
    the format shown in {{Fig-Last}}. The total size of this fragmentation 
    header is R+M bits. 
 
@@ -901,7 +901,22 @@ In any of the Window mode options, fragments except the last one SHALL
               |   Rule ID  | DTag  | 11..1 |     MIC     |
               +---- ... ---+- ... -+- ... -+---- ... ----+
 ~~~~
-{: #Fig-Last title='Fragmentation Header for the Last Fragment'}
+{: #Fig-Last title='Fragmentation Header for the Last Fragment, No ACK option'}
+
+   In any of the Window modes, the last fragment of an IPv6 datagram SHALL contain a fragmentation header that conforms to 
+   the format shown in {{Fig-LastWinMode}}. The total size of this fragmentation 
+   header is R+M bits. 
+
+~~~~
+              <------------ R ------------>
+                         <- T -> 1 <- N -> <---- M ----->
+              +-- ... --+- ... -+-+- ... -+---- ... ----+
+              | Rule ID | DTag  |W| 11..1 |     MIC     |
+              +-- ... --+- ... -+-+- ... -+---- ... ----+
+~~~~
+{: #Fig-LastWinMode title='Fragmentation Header for the Last Fragment, Window mode'}
+
+
 
 
    * Rule ID: This field has a size of R - T - N - 1 bits in all fragments that are not the last one, when Window mode is used. In all other fragments, the Rule ID field has a size of R – T – N bits. 
@@ -936,7 +951,7 @@ The format of an ACK is shown in {{Fig-ACK-Format}}:
   
   W: This field has a size of 1 bit. In all ACKs, the W bit carries the same value as the W bit carried by the fragments whose reception is being positively or negatively acknowledged by the ACK.
   
-  bitmap: This field carries the bitmap sent by the receiver to inform the sender about whether fragments in the current window have been received or not. Size of the bitmap field of an ACK can be equal to 0 or Ceiling(Number_of_Fragments/8) octets, where Number_of_Fragments denotes the number of fragments of a window. The bitmap is a sequence of bits, where the n-th bit signals whether the n-th fragment transmitted in the current window has been correctly received (n-th bit set to 1) or not (n-th bit set to 0). Remaining bits with bit order greater than the number of fragments sent (as determined by the receiver) are set to 0, except for the last bit in the bitmap, which is set to 1 if the last fragment of the window has been correctly received, and 0 otherwise. Feedback on reception of the fragment with CFN = 2^N - 1 (last fragment carrying an IPv6 packet) is only given by the last bit of the corresponding window. Absence of the bitmap in an ACK confirms correct reception of all fragments to be acknowledged by means of the ACK.
+  bitmap: This field carries the bitmap sent by the receiver to inform the sender about whether fragments in the current window have been received or not. Size of the bitmap field of an ACK can be equal to 0 or Ceiling(Number_of_Fragments/8) octets, where Number_of_Fragments denotes the number of fragments of a window. The bitmap is a sequence of bits, where the n-th bit signals whether the n-th fragment transmitted in the current window has been correctly received (n-th bit set to 1) or not (n-th bit set to 0). Remaining bits with bit order greater than the number of fragments sent (as determined by the receiver) are set to 0, except for the last bit in the bitmap, which is set to 1 if the last fragment of the window has been correctly received, and 0 otherwise. Feedback on reception of the fragment with CFN = 2^N - 1 (last fragment carrying an IPv6 packet) is only given by the last bit of the corresponding bitmap. Absence of the bitmap in an ACK confirms correct reception of all fragments to be acknowledged by means of the ACK.
   
    
 {{Fig-Bitmap-Win}} shows an example of an ACK (N=3), where the bitmap
