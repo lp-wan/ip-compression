@@ -917,9 +917,7 @@ In any of the Window mode options, fragments except the last one SHALL
 {: #Fig-LastWinMode title='Fragmentation Header for the Last Fragment, Window mode'}
 
 
-
-
-   * Rule ID: This field has a size of R - T - N - 1 bits when Window mode is used. In No ACK mode is used, the Rule ID field has a size of R – T – N bits. 
+   * Rule ID: This field has a size of R - T - N - 1 bits when Window mode is used. In No ACK mode, the Rule ID field has a size of R – T – N bits. 
    
    * DTag: The size of the DTag field is T bits, which may be set to a value greater than or equal to 0 bits. The DTag field in all fragments that carry the same IPv6 datagram MUST be set to the same value. DTag MUST be set sequentially increasing from 0 to 2^T - 1, and MUST wrap back from 2^T - 1 to 0.
 
