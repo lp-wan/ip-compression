@@ -339,7 +339,7 @@ address {
 
   <meta name="dct.creator" content="Minaburo, A., Toutain, L., and C. Gomez" />
   <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-lpwan-ipv6-static-context-hc-04" />
-  <meta name="dct.issued" scheme="ISO8601" content="2017-6-21" />
+  <meta name="dct.issued" scheme="ISO8601" content="2017-6-22" />
   <meta name="dct.abstract" content="This document describes a header compression scheme and fragmentation functionality for very low bandwidth networks. These techniques are especially tailored for LPWAN (Low Power Wide Area Network) networks." />
   <meta name="description" content="This document describes a header compression scheme and fragmentation functionality for very low bandwidth networks. These techniques are especially tailored for LPWAN (Low Power Wide Area Network) networks." />
 
@@ -363,7 +363,7 @@ address {
 <td class="right">L. Toutain</td>
 </tr>
 <tr>
-<td class="left">Expires: December 23, 2017</td>
+<td class="left">Expires: December 24, 2017</td>
 <td class="right">IMT-Atlantique</td>
 </tr>
 <tr>
@@ -376,7 +376,7 @@ address {
 </tr>
 <tr>
 <td class="left"></td>
-<td class="right">June 21, 2017</td>
+<td class="right">June 22, 2017</td>
 </tr>
 
     	
@@ -394,7 +394,7 @@ address {
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at http://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on December 23, 2017.</p>
+<p>This Internet-Draft will expire on December 24, 2017.</p>
 <h1 id="rfc.copyrightnotice"><a href="#rfc.copyrightnotice">Copyright Notice</a></h1>
 <p>Copyright (c) 2017 IETF Trust and the persons identified as the document authors.  All rights reserved.</p>
 <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (http://trustee.ietf.org/license-info) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.</p>
@@ -1041,7 +1041,7 @@ address {
 
 </pre>
 <p class="figure">Figure 10: Fragmentation Header for Fragments except the Last One, Window mode</p>
-<p id="rfc.section.9.5.2.p.3">The last fragment of an IPv6 datagram SHALL contain a fragmentation header that conforms to the format shown in <a href="#Fig-Last" class="xref">Figure 11</a>. The total size of this fragmentation header is R+M bits.</p>
+<p id="rfc.section.9.5.2.p.3">In the No ACK option, the last fragment of an IPv6 datagram SHALL contain a fragmentation header that conforms to the format shown in <a href="#Fig-Last" class="xref">Figure 11</a>. The total size of this fragmentation header is R+M bits.</p>
 <div id="rfc.figure.11"></div>
 <div id="Fig-Last"></div>
 <pre>
@@ -1051,7 +1051,18 @@ address {
               |   Rule ID  | DTag  | 11..1 |     MIC     |
               +---- ... ---+- ... -+- ... -+---- ... ----+
 </pre>
-<p class="figure">Figure 11: Fragmentation Header for the Last Fragment</p>
+<p class="figure">Figure 11: Fragmentation Header for the Last Fragment, No ACK option</p>
+<p id="rfc.section.9.5.2.p.4">In any of the Window modes, the last fragment of an IPv6 datagram SHALL contain a fragmentation header that conforms to the format shown in <a href="#Fig-LastWinMode" class="xref">Figure 12</a>. The total size of this fragmentation header is R+M bits.</p>
+<div id="rfc.figure.12"></div>
+<div id="Fig-LastWinMode"></div>
+<pre>
+              &lt;------------ R ------------&gt;
+                         &lt;- T -&gt; 1 &lt;- N -&gt; &lt;---- M -----&gt;
+              +-- ... --+- ... -+-+- ... -+---- ... ----+
+              | Rule ID | DTag  |W| 11..1 |     MIC     |
+              +-- ... --+- ... -+-+- ... -+---- ... ----+
+</pre>
+<p class="figure">Figure 12: Fragmentation Header for the Last Fragment, Window mode</p>
 <p></p>
 
 <ul>
@@ -1061,12 +1072,12 @@ address {
 <li>W: W is a 1-bit field. This field carries the same value for all fragments of a window, and it is complemented for the next window. The initial value for this field is 1.</li>
 <li>MIC: This field, which has a size of M bits, carries the MIC for the IPv6 packet.</li>
 </ul>
-<p id="rfc.section.9.5.2.p.5">The values for R, N, T and M are not specified in this document, and have to be determined in other documents (e.g. technology-specific profile documents).</p>
+<p id="rfc.section.9.5.2.p.6">The values for R, N, T and M are not specified in this document, and have to be determined in other documents (e.g. technology-specific profile documents).</p>
 <h1 id="rfc.section.9.5.3">
 <a href="#rfc.section.9.5.3">9.5.3.</a> <a href="#ack-format" id="ack-format">ACK format</a>
 </h1>
-<p id="rfc.section.9.5.3.p.1">The format of an ACK is shown in <a href="#Fig-ACK-Format" class="xref">Figure 12</a>:</p>
-<div id="rfc.figure.12"></div>
+<p id="rfc.section.9.5.3.p.1">The format of an ACK is shown in <a href="#Fig-ACK-Format" class="xref">Figure 13</a>:</p>
+<div id="rfc.figure.13"></div>
 <div id="Fig-ACK-Format"></div>
 <pre>
                 &lt;--------  R  -------&gt;
@@ -1075,13 +1086,13 @@ address {
                 |  Rule ID  | DTag |W|   bitmap    |
                 +---- ... --+-... -+-+----- ... ---+
 </pre>
-<p class="figure">Figure 12: Format of an ACK</p>
+<p class="figure">Figure 13: Format of an ACK</p>
 <p id="rfc.section.9.5.3.p.2">Rule ID: In all ACKs, Rule ID has a size of R - T - 1 bits.</p>
 <p id="rfc.section.9.5.3.p.3">DTag: DTag has a size of T bits. DTag carries the same value as the DTag field in the fragments carrying the IPv6 datagram for which this ACK is intended.</p>
 <p id="rfc.section.9.5.3.p.4">W: This field has a size of 1 bit. In all ACKs, the W bit carries the same value as the W bit carried by the fragments whose reception is being positively or negatively acknowledged by the ACK.</p>
-<p id="rfc.section.9.5.3.p.5">bitmap: This field carries the bitmap sent by the receiver to inform the sender about whether fragments in the current window have been received or not. Size of the bitmap field of an ACK can be equal to 0 or Ceiling(Number_of_Fragments/8) octets, where Number_of_Fragments denotes the number of fragments of a window. The bitmap is a sequence of bits, where the n-th bit signals whether the n-th fragment transmitted in the current window has been correctly received (n-th bit set to 1) or not (n-th bit set to 0). Remaining bits with bit order greater than the number of fragments sent (as determined by the receiver) are set to 0, except for the last bit in the bitmap, which is set to 1 if the last fragment of the window has been correctly received, and 0 otherwise. Feedback on reception of the fragment with CFN = 2^N - 1 (last fragment carrying an IPv6 packet) is only given by the last bit of the corresponding window. Absence of the bitmap in an ACK confirms correct reception of all fragments to be acknowledged by means of the ACK.</p>
-<p><a href="#Fig-Bitmap-Win" class="xref">Figure 13</a> shows an example of an ACK (N=3), where the bitmap indicates that the second and the fifth fragments have not been correctly received.</p>
-<div id="rfc.figure.13"></div>
+<p id="rfc.section.9.5.3.p.5">bitmap: This field carries the bitmap sent by the receiver to inform the sender about whether fragments in the current window have been received or not. Size of the bitmap field of an ACK can be equal to 0 or Ceiling(Number_of_Fragments/8) octets, where Number_of_Fragments denotes the number of fragments of a window. The bitmap is a sequence of bits, where the n-th bit signals whether the n-th fragment transmitted in the current window has been correctly received (n-th bit set to 1) or not (n-th bit set to 0). Remaining bits with bit order greater than the number of fragments sent (as determined by the receiver) are set to 0, except for the last bit in the bitmap, which is set to 1 if the last fragment of the window has been correctly received, and 0 otherwise. Feedback on reception of the fragment with CFN = 2^N - 1 (last fragment carrying an IPv6 packet) is only given by the last bit of the corresponding bitmap. Absence of the bitmap in an ACK confirms correct reception of all fragments to be acknowledged by means of the ACK.</p>
+<p><a href="#Fig-Bitmap-Win" class="xref">Figure 14</a> shows an example of an ACK (N=3), where the bitmap indicates that the second and the fifth fragments have not been correctly received.</p>
+<div id="rfc.figure.14"></div>
 <div id="Fig-Bitmap-Win"></div>
 <pre>
               &lt;-------   R  -------&gt;
@@ -1091,9 +1102,9 @@ address {
               +---- ... --+-... -+-+-+-+-+-+-+-+-+-+
 
 </pre>
-<p class="figure">Figure 13: Example of the bitmap in an ACK (in Window mode, for N=3)</p>
-<p><a href="#Fig-NoBitmap" class="xref">Figure 14</a> illustrates an ACK without a bitmap.</p>
-<div id="rfc.figure.14"></div>
+<p class="figure">Figure 14: Example of the bitmap in an ACK (in Window mode, for N=3)</p>
+<p><a href="#Fig-NoBitmap" class="xref">Figure 15</a> illustrates an ACK without a bitmap.</p>
+<div id="rfc.figure.15"></div>
 <div id="Fig-NoBitmap"></div>
 <pre>
                     &lt;-------   R  -------&gt;
@@ -1103,7 +1114,7 @@ address {
                     +---- ... --+-... -+-+
 
 </pre>
-<p class="figure">Figure 14: Example of an ACK without a bitmap</p>
+<p class="figure">Figure 15: Example of an ACK without a bitmap</p>
 <p id="rfc.section.9.5.3.p.8">Note that, in order to exploit the available L2 payload space to the fullest, a bitmap may have a size smaller than 2^N bits. In that case, the window in use will have a size lower than 2^N-1 fragments. For example, if the maximum available space for a bitmap is 56 bits, N can be set to 6, and the window size can be set to a maximum of 56 fragments.</p>
 <h1 id="rfc.section.9.6">
 <a href="#rfc.section.9.6">9.6.</a> <a href="#baseline-mechanism" id="baseline-mechanism">Baseline mechanism</a>
@@ -1184,8 +1195,8 @@ address {
 <a href="#rfc.appendix.A">Appendix A.</a> <a href="#fragmentation-examples" id="fragmentation-examples">Fragmentation examples</a>
 </h1>
 <p id="rfc.section.A.p.1">This section provides examples of different fragment delivery reliability options possible on the basis of this specification.</p>
-<p><a href="#Fig-Example-Unreliable" class="xref">Figure 15</a> illustrates the transmission of an IPv6 packet that needs 11 fragments in the No ACK option.</p>
-<div id="rfc.figure.15"></div>
+<p><a href="#Fig-Example-Unreliable" class="xref">Figure 16</a> illustrates the transmission of an IPv6 packet that needs 11 fragments in the No ACK option.</p>
+<div id="rfc.figure.16"></div>
 <div id="Fig-Example-Unreliable"></div>
 <pre>
  &#160; &#160; &#160; &#160;Sender &#160; &#160; &#160; &#160; &#160; &#160; &#160; Receiver
@@ -1202,9 +1213,9 @@ address {
           |-------CFN=1--------&gt;|MIC checked =&gt;
  &#160; &#160; &#160; &#160; 
 </pre>
-<p class="figure">Figure 15: Transmission of an IPv6 packet carried by 11 fragments in the No ACK option</p>
-<p><a href="#Fig-Example-Win-NoLoss-NACK" class="xref">Figure 16</a> illustrates the transmission of an IPv6 packet that needs 11 fragments in Window mode - ACK on error, for N=3, without losses.</p>
-<div id="rfc.figure.16"></div>
+<p class="figure">Figure 16: Transmission of an IPv6 packet carried by 11 fragments in the No ACK option</p>
+<p><a href="#Fig-Example-Win-NoLoss-NACK" class="xref">Figure 17</a> illustrates the transmission of an IPv6 packet that needs 11 fragments in Window mode - ACK on error, for N=3, without losses.</p>
+<div id="rfc.figure.17"></div>
 <div id="Fig-Example-Win-NoLoss-NACK"></div>
 <pre>
  &#160; &#160; &#160; &#160;Sender &#160; &#160; &#160; &#160; &#160; &#160; &#160; Receiver
@@ -1223,9 +1234,9 @@ address {
       (no ACK)
 
 </pre>
-<p class="figure">Figure 16: Transmission of an IPv6 packet carried by 11 fragments in Window mode - ACK on error, for N=3, without losses.</p>
-<p><a href="#Fig-Example-Rel-Window-NACK-Loss" class="xref">Figure 17</a> illustrates the transmission of an IPv6 packet that needs 11 fragments in Window mode - ACK on error, for N=3, with three losses.</p>
-<div id="rfc.figure.17"></div>
+<p class="figure">Figure 17: Transmission of an IPv6 packet carried by 11 fragments in Window mode - ACK on error, for N=3, without losses.</p>
+<p><a href="#Fig-Example-Rel-Window-NACK-Loss" class="xref">Figure 18</a> illustrates the transmission of an IPv6 packet that needs 11 fragments in Window mode - ACK on error, for N=3, with three losses.</p>
+<div id="rfc.figure.18"></div>
 <div id="Fig-Example-Rel-Window-NACK-Loss"></div>
 <pre>
  &#160; &#160; &#160; &#160; Sender &#160; &#160; &#160; &#160; &#160; &#160; Receiver
@@ -1249,9 +1260,9 @@ address {
       (no ACK)    
 
 </pre>
-<p class="figure">Figure 17: Transmission of an IPv6 packet carried by 11 fragments in Window mode - ACK on error, for N=3, three losses.</p>
-<p><a href="#Fig-Example-Rel-Window-ACK-NoLoss" class="xref">Figure 18</a> illustrates the transmission of an IPv6 packet that needs 11 fragments in Window mode - ACK &#8220;always&#8221;, for N=3, without losses. Note: in Window mode, an additional bit will be needed to number windows.</p>
-<div id="rfc.figure.18"></div>
+<p class="figure">Figure 18: Transmission of an IPv6 packet carried by 11 fragments in Window mode - ACK on error, for N=3, three losses.</p>
+<p><a href="#Fig-Example-Rel-Window-ACK-NoLoss" class="xref">Figure 19</a> illustrates the transmission of an IPv6 packet that needs 11 fragments in Window mode - ACK &#8220;always&#8221;, for N=3, without losses. Note: in Window mode, an additional bit will be needed to number windows.</p>
+<div id="rfc.figure.19"></div>
 <div id="Fig-Example-Rel-Window-ACK-NoLoss"></div>
 <pre>
  &#160; &#160; &#160; &#160;Sender &#160; &#160; &#160; &#160; &#160; &#160; &#160; Receiver
@@ -1271,9 +1282,9 @@ address {
         (End)    
 
 </pre>
-<p class="figure">Figure 18: Transmission of an IPv6 packet carried by 11 fragments in Window mode - ACK "always", for N=3, no losses.</p>
-<p><a href="#Fig-Example-Rel-Window-ACK-Loss" class="xref">Figure 19</a> illustrates the transmission of an IPv6 packet that needs 11 fragments in Window mode - ACK &#8220;always&#8221;, for N=3, with three losses.</p>
-<div id="rfc.figure.19"></div>
+<p class="figure">Figure 19: Transmission of an IPv6 packet carried by 11 fragments in Window mode - ACK "always", for N=3, no losses.</p>
+<p><a href="#Fig-Example-Rel-Window-ACK-Loss" class="xref">Figure 20</a> illustrates the transmission of an IPv6 packet that needs 11 fragments in Window mode - ACK &#8220;always&#8221;, for N=3, with three losses.</p>
+<div id="rfc.figure.20"></div>
 <div id="Fig-Example-Rel-Window-ACK-Loss"></div>
 <pre>
  &#160; &#160; &#160; &#160;Sender &#160; &#160; &#160; &#160; &#160; &#160; &#160; Receiver
@@ -1298,7 +1309,7 @@ address {
         (End)    
 
 </pre>
-<p class="figure">Figure 19: Transmission of an IPv6 packet carried by 11 fragments in Window mode - ACK "Always", for N=3, with three losses.</p>
+<p class="figure">Figure 20: Transmission of an IPv6 packet carried by 11 fragments in Window mode - ACK "Always", for N=3, with three losses.</p>
 <h1 id="rfc.appendix.B">
 <a href="#rfc.appendix.B">Appendix B.</a> <a href="#rule-ids-for-fragmentation" id="rule-ids-for-fragmentation">Rule IDs for fragmentation</a>
 </h1>
