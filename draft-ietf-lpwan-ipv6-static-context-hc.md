@@ -310,7 +310,8 @@ The compression/decompression process follows several steps:
   must be required.
 
 * sending: The Rule ID is sent to the other end followed by information resulting
-  from the compression of header fields. This information is sent in the order expressed in the Rule for the matching
+  from the compression of header fields, directly followed by the payload.
+  The product of field compression is sent in the order expressed in the Rule for the matching
   fields. The way the Rule ID is sent depends on the specific LPWAN
   layer two technology and will be specified in a specific document, and is out of the scope of this document. 
   For example, it can be either included in a Layer 2 header or sent in the first byte of
@@ -412,10 +413,6 @@ size of the field, either implicitly (the size is known by both sides)
 or explicitly in the compressed header
 field by indicating the length. This function is generally used with the "ignore" MO.
 
-The compressor sends the Target Value stored on the rule in the compressed
-header message. The decompressor restores the field value with the one received 
-from the LPWAN 
-
 ## mapping-sent
 
 mapping-sent is used to send a smaller index associated to the list of values
@@ -445,10 +442,10 @@ These functions are used to process respectively the Dev and the App Interface I
 IPv6 addresses. Appiid CDA is less common, since current LPWAN technologies
 frames contain a single address.
 
-The IID value can be computed from the Device ID present in the Layer 2 header. The
-computation is specific for each LPWAN technology and depends on the Device ID size.
+The IID value may be computed from the Device ID present in the Layer 2 header. The
+computation is specific for each LPWAN technology and may depend on the Device ID size.
 
-In the downstream direction, these CDA are used to determine the L2 addresses used by the LPWAN.
+In the downstream direction, these CDA may be used to determine the L2 addresses used by the LPWAN.
 
 ## Compute-\*
 
@@ -569,8 +566,8 @@ is set to "ignore" and the CDA is set to "DEViid" or "APPiid". Note that the
 LPWAN technology is generally carrying a single device identifier corresponding
 to the DEV. The SCHC C/D may also not be aware of these values. 
 
-If the DEV address has a static value that is not derivated from the EUI-64, 
-then TV contains the value, the MO operator is set to
+If the DEV address has a static value that is not derivated from an IEEE EUI-64,
+then TV contains the actual Dev address value, the MO operator is set to
 "equal" and the CDA is set to "not-sent". 
 
 If several IIDs are possible, then the TV contains the list of possible IIDs, the MO is 
