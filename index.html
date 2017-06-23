@@ -339,7 +339,7 @@ address {
 
   <meta name="dct.creator" content="Minaburo, A., Toutain, L., and C. Gomez" />
   <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-lpwan-ipv6-static-context-hc-04" />
-  <meta name="dct.issued" scheme="ISO8601" content="2017-6-22" />
+  <meta name="dct.issued" scheme="ISO8601" content="2017-6-23" />
   <meta name="dct.abstract" content="This document describes a header compression scheme and fragmentation functionality for very low bandwidth networks. These techniques are especially tailored for LPWAN (Low Power Wide Area Network) networks." />
   <meta name="description" content="This document describes a header compression scheme and fragmentation functionality for very low bandwidth networks. These techniques are especially tailored for LPWAN (Low Power Wide Area Network) networks." />
 
@@ -363,7 +363,7 @@ address {
 <td class="right">L. Toutain</td>
 </tr>
 <tr>
-<td class="left">Expires: December 24, 2017</td>
+<td class="left">Expires: December 25, 2017</td>
 <td class="right">IMT-Atlantique</td>
 </tr>
 <tr>
@@ -376,7 +376,7 @@ address {
 </tr>
 <tr>
 <td class="left"></td>
-<td class="right">June 22, 2017</td>
+<td class="right">June 23, 2017</td>
 </tr>
 
     	
@@ -394,7 +394,7 @@ address {
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at http://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on December 24, 2017.</p>
+<p>This Internet-Draft will expire on December 25, 2017.</p>
 <h1 id="rfc.copyrightnotice"><a href="#rfc.copyrightnotice">Copyright Notice</a></h1>
 <p>Copyright (c) 2017 IETF Trust and the persons identified as the document authors.  All rights reserved.</p>
 <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (http://trustee.ietf.org/license-info) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.</p>
@@ -665,7 +665,7 @@ address {
 
 <ul>
 <li>compression Rule selection: The goal is to identify which Rule(s) will be used to compress the packet&#8217;s headers. When doing compression from Dw to Up the SCHC C/D needs to find the correct Rule to use by identifying its Dev-ID and the Rule-ID. In the Up situation only the Rule-ID is used.  The next step is to choose the fields by their direction, using the direction indicator (DI), so the fields that does not correspond to the appropiated DI will be excluded.  Next, then fields are identified according to their field identifier (FID) and field position (FP).  If the field position does not correspond then the Rule is not use and the SCHC take next Rule.  Once the DI and the FP correspond to the header information, each field&#8217;s value is then compared to the corresponding target value (TV) stored in the Rule for that specific field using the matching operator (MO).  If all the fields in the packet&#8217;s header satisfy all the matching operators (MOs) of a Rule (i.e. all results are True), the fields of the header are then processed according to the Compression/Decompession Actions (CDAs) and a compressed header is obtained. Otherwise the next rule is tested.  If no eligible rule is found, then the header must be sent without compression, in which case the fragmentation process must be required.</li>
-<li>sending: The Rule ID is sent to the other end followed by information resulting from the compression of header fields. This information is sent in the order expressed in the Rule for the matching fields. The way the Rule ID is sent depends on the specific LPWAN layer two technology and will be specified in a specific document, and is out of the scope of this document.  For example, it can be either included in a Layer 2 header or sent in the first byte of the L2 payload. (cf. <a href="#Fig-FormatPckt" class="xref">Figure 4</a>).</li>
+<li>sending: The Rule ID is sent to the other end followed by information resulting from the compression of header fields, directly followed by the payload.  The product of field compression is sent in the order expressed in the Rule for the matching fields. The way the Rule ID is sent depends on the specific LPWAN layer two technology and will be specified in a specific document, and is out of the scope of this document.  For example, it can be either included in a Layer 2 header or sent in the first byte of the L2 payload. (cf. <a href="#Fig-FormatPckt" class="xref">Figure 4</a>).</li>
 <li>decompression: In both directions, The receiver identifies the sender through its device-id (e.g. MAC address) and selects the appropriate Rule through the Rule ID. This Rule gives the compressed header format and associates these values to header fields.  It applies the CDA action to reconstruct the original header fields. The CDA application order can be different of the order given by the Rule. For instance Compute-* may be applied at end, after the other CDAs.</li>
 </ul>
 <div id="rfc.figure.4"></div>
@@ -733,7 +733,6 @@ address {
 <a href="#rfc.section.6.2">6.2.</a> <a href="#value-sent-cda" id="value-sent-cda">value-sent CDA</a>
 </h1>
 <p id="rfc.section.6.2.p.1">The value-sent action is generally used when the field value is not known by both Compressor and Decompressor.  The value is sent in the compressed message header. Both Compressor and Decompressor must know the size of the field, either implicitly (the size is known by both sides) or explicitly in the compressed header field by indicating the length. This function is generally used with the &#8220;ignore&#8221; MO.</p>
-<p id="rfc.section.6.2.p.2">The compressor sends the Target Value stored on the rule in the compressed header message. The decompressor restores the field value with the one received from the LPWAN</p>
 <h1 id="rfc.section.6.3">
 <a href="#rfc.section.6.3">6.3.</a> <a href="#mapping-sent" id="mapping-sent">mapping-sent</a>
 </h1>
@@ -750,8 +749,8 @@ address {
 <a href="#rfc.section.6.5">6.5.</a> <a href="#deviid-appiid-cda" id="deviid-appiid-cda">DEViid, APPiid CDA</a>
 </h1>
 <p id="rfc.section.6.5.p.1">These functions are used to process respectively the Dev and the App Interface Identifiers (Deviid and Appiid) of the IPv6 addresses. Appiid CDA is less common, since current LPWAN technologies frames contain a single address.</p>
-<p id="rfc.section.6.5.p.2">The IID value can be computed from the Device ID present in the Layer 2 header. The computation is specific for each LPWAN technology and depends on the Device ID size.</p>
-<p id="rfc.section.6.5.p.3">In the downstream direction, these CDA are used to determine the L2 addresses used by the LPWAN.</p>
+<p id="rfc.section.6.5.p.2">The IID value may be computed from the Device ID present in the Layer 2 header. The computation is specific for each LPWAN technology and may depend on the Device ID size.</p>
+<p id="rfc.section.6.5.p.3">In the downstream direction, these CDA may be used to determine the L2 addresses used by the LPWAN.</p>
 <h1 id="rfc.section.6.6">
 <a href="#rfc.section.6.6">6.6.</a> <a href="#compute-" id="compute-">Compute-*</a>
 </h1>
@@ -823,7 +822,7 @@ address {
 <a href="#rfc.section.7.7.2">7.7.2.</a> <a href="#ipv6-source-and-destination-iid" id="ipv6-source-and-destination-iid">IPv6 source and destination IID</a>
 </h1>
 <p id="rfc.section.7.7.2.p.1">If the DEV or APP IID are based on an LPWAN address, then the IID can be reconstructed with information coming from the LPWAN header. In that case, the TV is not set, the MO is set to &#8220;ignore&#8221; and the CDA is set to &#8220;DEViid&#8221; or &#8220;APPiid&#8221;. Note that the LPWAN technology is generally carrying a single device identifier corresponding to the DEV. The SCHC C/D may also not be aware of these values.</p>
-<p id="rfc.section.7.7.2.p.2">If the DEV address has a static value that is not derivated from the EUI-64, then TV contains the value, the MO operator is set to &#8220;equal&#8221; and the CDA is set to &#8220;not-sent&#8221;.</p>
+<p id="rfc.section.7.7.2.p.2">If the DEV address has a static value that is not derivated from an IEEE EUI-64, then TV contains the actual Dev address value, the MO operator is set to &#8220;equal&#8221; and the CDA is set to &#8220;not-sent&#8221;.</p>
 <p id="rfc.section.7.7.2.p.3">If several IIDs are possible, then the TV contains the list of possible IIDs, the MO is set to &#8220;match-mapping&#8221; and the CDA is set to &#8220;mapping-sent&#8221;.</p>
 <p id="rfc.section.7.7.2.p.4">Otherwise the value variation of the IID may be reduced to few bytes. In that case, the TV is set to the stable part of the IID, the MO is set to MSB and the CDA is set to LSB.</p>
 <p id="rfc.section.7.7.2.p.5">Finally, the IID can be sent on the LPWAN. In that case, the TV is not set, the MO is set to &#8220;ignore&#8221; and the CDA is set to &#8220;value-sent&#8221;.</p>

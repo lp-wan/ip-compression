@@ -5,10 +5,10 @@
 lpwan Working Group                                          A. Minaburo
 Internet-Draft                                                    Acklio
 Intended status: Informational                                L. Toutain
-Expires: December 24, 2017                                IMT-Atlantique
+Expires: December 25, 2017                                IMT-Atlantique
                                                                 C. Gomez
                                     Universitat Politecnica de Catalunya
-                                                           June 22, 2017
+                                                           June 23, 2017
 
 
   LPWAN Static Context Header Compression (SCHC) and fragmentation for
@@ -53,7 +53,7 @@ Status of This Memo
 
 
 
-Minaburo, et al.        Expires December 24, 2017               [Page 1]
+Minaburo, et al.        Expires December 25, 2017               [Page 1]
 
 Internet-Draft                 LPWAN SCHC                      June 2017
 
@@ -66,7 +66,7 @@ Internet-Draft                 LPWAN SCHC                      June 2017
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on December 24, 2017.
+   This Internet-Draft will expire on December 25, 2017.
 
 Copyright Notice
 
@@ -109,7 +109,7 @@ Table of Contents
 
 
 
-Minaburo, et al.        Expires December 24, 2017               [Page 2]
+Minaburo, et al.        Expires December 25, 2017               [Page 2]
 
 Internet-Draft                 LPWAN SCHC                      June 2017
 
@@ -165,7 +165,7 @@ Internet-Draft                 LPWAN SCHC                      June 2017
 
 
 
-Minaburo, et al.        Expires December 24, 2017               [Page 3]
+Minaburo, et al.        Expires December 25, 2017               [Page 3]
 
 Internet-Draft                 LPWAN SCHC                      June 2017
 
@@ -221,7 +221,7 @@ Internet-Draft                 LPWAN SCHC                      June 2017
 
 
 
-Minaburo, et al.        Expires December 24, 2017               [Page 4]
+Minaburo, et al.        Expires December 25, 2017               [Page 4]
 
 Internet-Draft                 LPWAN SCHC                      June 2017
 
@@ -277,7 +277,7 @@ Internet-Draft                 LPWAN SCHC                      June 2017
 
 
 
-Minaburo, et al.        Expires December 24, 2017               [Page 5]
+Minaburo, et al.        Expires December 25, 2017               [Page 5]
 
 Internet-Draft                 LPWAN SCHC                      June 2017
 
@@ -333,7 +333,7 @@ Internet-Draft                 LPWAN SCHC                      June 2017
 
 
 
-Minaburo, et al.        Expires December 24, 2017               [Page 6]
+Minaburo, et al.        Expires December 25, 2017               [Page 6]
 
 Internet-Draft                 LPWAN SCHC                      June 2017
 
@@ -389,7 +389,7 @@ Internet-Draft                 LPWAN SCHC                      June 2017
 
 
 
-Minaburo, et al.        Expires December 24, 2017               [Page 7]
+Minaburo, et al.        Expires December 25, 2017               [Page 7]
 
 Internet-Draft                 LPWAN SCHC                      June 2017
 
@@ -445,7 +445,7 @@ Internet-Draft                 LPWAN SCHC                      June 2017
 
 
 
-Minaburo, et al.        Expires December 24, 2017               [Page 8]
+Minaburo, et al.        Expires December 25, 2017               [Page 8]
 
 Internet-Draft                 LPWAN SCHC                      June 2017
 
@@ -501,7 +501,7 @@ Internet-Draft                 LPWAN SCHC                      June 2017
 
 
 
-Minaburo, et al.        Expires December 24, 2017               [Page 9]
+Minaburo, et al.        Expires December 25, 2017               [Page 9]
 
 Internet-Draft                 LPWAN SCHC                      June 2017
 
@@ -519,8 +519,9 @@ Internet-Draft                 LPWAN SCHC                      June 2017
       the fragmentation process must be required.
 
    o  sending: The Rule ID is sent to the other end followed by
-      information resulting from the compression of header fields.  This
-      information is sent in the order expressed in the Rule for the
+      information resulting from the compression of header fields,
+      directly followed by the payload.  The product of field
+      compression is sent in the order expressed in the Rule for the
       matching fields.  The way the Rule ID is sent depends on the
       specific LPWAN layer two technology and will be specified in a
       specific document, and is out of the scope of this document.  For
@@ -552,15 +553,17 @@ Internet-Draft                 LPWAN SCHC                      June 2017
    other data type.  The result of the operation can either be True or
    False.  MOs are defined as follows:
 
-   o  equal: A field value in a packet matches with a TV in a Rule if
-      they are equal.
 
 
 
-Minaburo, et al.        Expires December 24, 2017              [Page 10]
+
+Minaburo, et al.        Expires December 25, 2017              [Page 10]
 
 Internet-Draft                 LPWAN SCHC                      June 2017
 
+
+   o  equal: A field value in a packet matches with a TV in a Rule if
+      they are equal.
 
    o  ignore: No check is done between a field value in a packet and a
       TV in the Rule.  The result of the matching is always true.
@@ -606,17 +609,17 @@ Internet-Draft                 LPWAN SCHC                      June 2017
 
    Compression is done in the rule order and compressed values are sent
    in that order in the compressed message.  The receiver must be able
-   to find the size of each compressed field which can be given by the
-   rule or may be sent with the compressed header.
 
 
 
 
-
-Minaburo, et al.        Expires December 24, 2017              [Page 11]
+Minaburo, et al.        Expires December 25, 2017              [Page 11]
 
 Internet-Draft                 LPWAN SCHC                      June 2017
 
+
+   to find the size of each compressed field which can be given by the
+   rule or may be sent with the compressed header.
 
    If the field is identified as variable, then its size must be sent
    first using the following coding:
@@ -653,10 +656,6 @@ Internet-Draft                 LPWAN SCHC                      June 2017
    indicating the length.  This function is generally used with the
    "ignore" MO.
 
-   The compressor sends the Target Value stored on the rule in the
-   compressed header message.  The decompressor restores the field value
-   with the one received from the LPWAN
-
 6.3.  mapping-sent
 
    mapping-sent is used to send a smaller index associated to the list
@@ -669,7 +668,8 @@ Internet-Draft                 LPWAN SCHC                      June 2017
 
 
 
-Minaburo, et al.        Expires December 24, 2017              [Page 12]
+
+Minaburo, et al.        Expires December 25, 2017              [Page 12]
 
 Internet-Draft                 LPWAN SCHC                      June 2017
 
@@ -699,12 +699,12 @@ Internet-Draft                 LPWAN SCHC                      June 2017
    Appiid CDA is less common, since current LPWAN technologies frames
    contain a single address.
 
-   The IID value can be computed from the Device ID present in the Layer
+   The IID value may be computed from the Device ID present in the Layer
    2 header.  The computation is specific for each LPWAN technology and
-   depends on the Device ID size.
+   may depend on the Device ID size.
 
-   In the downstream direction, these CDA are used to determine the L2
-   addresses used by the LPWAN.
+   In the downstream direction, these CDA may be used to determine the
+   L2 addresses used by the LPWAN.
 
 6.6.  Compute-*
 
@@ -725,7 +725,7 @@ Internet-Draft                 LPWAN SCHC                      June 2017
 
 
 
-Minaburo, et al.        Expires December 24, 2017              [Page 13]
+Minaburo, et al.        Expires December 25, 2017              [Page 13]
 
 Internet-Draft                 LPWAN SCHC                      June 2017
 
@@ -781,7 +781,7 @@ Internet-Draft                 LPWAN SCHC                      June 2017
 
 
 
-Minaburo, et al.        Expires December 24, 2017              [Page 14]
+Minaburo, et al.        Expires December 25, 2017              [Page 14]
 
 Internet-Draft                 LPWAN SCHC                      June 2017
 
@@ -837,7 +837,7 @@ Internet-Draft                 LPWAN SCHC                      June 2017
 
 
 
-Minaburo, et al.        Expires December 24, 2017              [Page 15]
+Minaburo, et al.        Expires December 25, 2017              [Page 15]
 
 Internet-Draft                 LPWAN SCHC                      June 2017
 
@@ -878,9 +878,9 @@ Internet-Draft                 LPWAN SCHC                      June 2017
    generally carrying a single device identifier corresponding to the
    DEV.  The SCHC C/D may also not be aware of these values.
 
-   If the DEV address has a static value that is not derivated from the
-   EUI-64, then TV contains the value, the MO operator is set to "equal"
-   and the CDA is set to "not-sent".
+   If the DEV address has a static value that is not derivated from an
+   IEEE EUI-64, then TV contains the actual Dev address value, the MO
+   operator is set to "equal" and the CDA is set to "not-sent".
 
    If several IIDs are possible, then the TV contains the list of
    possible IIDs, the MO is set to "match-mapping" and the CDA is set to
@@ -893,7 +893,7 @@ Internet-Draft                 LPWAN SCHC                      June 2017
 
 
 
-Minaburo, et al.        Expires December 24, 2017              [Page 16]
+Minaburo, et al.        Expires December 25, 2017              [Page 16]
 
 Internet-Draft                 LPWAN SCHC                      June 2017
 
@@ -949,7 +949,7 @@ Internet-Draft                 LPWAN SCHC                      June 2017
 
 
 
-Minaburo, et al.        Expires December 24, 2017              [Page 17]
+Minaburo, et al.        Expires December 25, 2017              [Page 17]
 
 Internet-Draft                 LPWAN SCHC                      June 2017
 
@@ -1005,7 +1005,7 @@ Internet-Draft                 LPWAN SCHC                      June 2017
 
 
 
-Minaburo, et al.        Expires December 24, 2017              [Page 18]
+Minaburo, et al.        Expires December 25, 2017              [Page 18]
 
 Internet-Draft                 LPWAN SCHC                      June 2017
 
@@ -1061,7 +1061,7 @@ Internet-Draft                 LPWAN SCHC                      June 2017
 
 
 
-Minaburo, et al.        Expires December 24, 2017              [Page 19]
+Minaburo, et al.        Expires December 25, 2017              [Page 19]
 
 Internet-Draft                 LPWAN SCHC                      June 2017
 
@@ -1117,7 +1117,7 @@ Internet-Draft                 LPWAN SCHC                      June 2017
 
 
 
-Minaburo, et al.        Expires December 24, 2017              [Page 20]
+Minaburo, et al.        Expires December 25, 2017              [Page 20]
 
 Internet-Draft                 LPWAN SCHC                      June 2017
 
@@ -1173,7 +1173,7 @@ Internet-Draft                 LPWAN SCHC                      June 2017
 
 
 
-Minaburo, et al.        Expires December 24, 2017              [Page 21]
+Minaburo, et al.        Expires December 25, 2017              [Page 21]
 
 Internet-Draft                 LPWAN SCHC                      June 2017
 
@@ -1229,7 +1229,7 @@ Internet-Draft                 LPWAN SCHC                      June 2017
 
 
 
-Minaburo, et al.        Expires December 24, 2017              [Page 22]
+Minaburo, et al.        Expires December 25, 2017              [Page 22]
 
 Internet-Draft                 LPWAN SCHC                      June 2017
 
@@ -1285,7 +1285,7 @@ Internet-Draft                 LPWAN SCHC                      June 2017
 
 
 
-Minaburo, et al.        Expires December 24, 2017              [Page 23]
+Minaburo, et al.        Expires December 25, 2017              [Page 23]
 
 Internet-Draft                 LPWAN SCHC                      June 2017
 
@@ -1341,7 +1341,7 @@ Internet-Draft                 LPWAN SCHC                      June 2017
 
 
 
-Minaburo, et al.        Expires December 24, 2017              [Page 24]
+Minaburo, et al.        Expires December 25, 2017              [Page 24]
 
 Internet-Draft                 LPWAN SCHC                      June 2017
 
@@ -1397,7 +1397,7 @@ Internet-Draft                 LPWAN SCHC                      June 2017
 
 
 
-Minaburo, et al.        Expires December 24, 2017              [Page 25]
+Minaburo, et al.        Expires December 25, 2017              [Page 25]
 
 Internet-Draft                 LPWAN SCHC                      June 2017
 
@@ -1453,7 +1453,7 @@ Internet-Draft                 LPWAN SCHC                      June 2017
 
 
 
-Minaburo, et al.        Expires December 24, 2017              [Page 26]
+Minaburo, et al.        Expires December 25, 2017              [Page 26]
 
 Internet-Draft                 LPWAN SCHC                      June 2017
 
@@ -1509,7 +1509,7 @@ Internet-Draft                 LPWAN SCHC                      June 2017
 
 
 
-Minaburo, et al.        Expires December 24, 2017              [Page 27]
+Minaburo, et al.        Expires December 25, 2017              [Page 27]
 
 Internet-Draft                 LPWAN SCHC                      June 2017
 
@@ -1565,7 +1565,7 @@ Internet-Draft                 LPWAN SCHC                      June 2017
 
 
 
-Minaburo, et al.        Expires December 24, 2017              [Page 28]
+Minaburo, et al.        Expires December 25, 2017              [Page 28]
 
 Internet-Draft                 LPWAN SCHC                      June 2017
 
@@ -1621,7 +1621,7 @@ Internet-Draft                 LPWAN SCHC                      June 2017
 
 
 
-Minaburo, et al.        Expires December 24, 2017              [Page 29]
+Minaburo, et al.        Expires December 25, 2017              [Page 29]
 
 Internet-Draft                 LPWAN SCHC                      June 2017
 
@@ -1677,7 +1677,7 @@ Internet-Draft                 LPWAN SCHC                      June 2017
 
 
 
-Minaburo, et al.        Expires December 24, 2017              [Page 30]
+Minaburo, et al.        Expires December 25, 2017              [Page 30]
 
 Internet-Draft                 LPWAN SCHC                      June 2017
 
@@ -1733,7 +1733,7 @@ Internet-Draft                 LPWAN SCHC                      June 2017
 
 
 
-Minaburo, et al.        Expires December 24, 2017              [Page 31]
+Minaburo, et al.        Expires December 25, 2017              [Page 31]
 
 Internet-Draft                 LPWAN SCHC                      June 2017
 
@@ -1789,7 +1789,7 @@ Internet-Draft                 LPWAN SCHC                      June 2017
 
 
 
-Minaburo, et al.        Expires December 24, 2017              [Page 32]
+Minaburo, et al.        Expires December 25, 2017              [Page 32]
 
 Internet-Draft                 LPWAN SCHC                      June 2017
 
@@ -1845,7 +1845,7 @@ Appendix A.  Fragmentation examples
 
 
 
-Minaburo, et al.        Expires December 24, 2017              [Page 33]
+Minaburo, et al.        Expires December 25, 2017              [Page 33]
 
 Internet-Draft                 LPWAN SCHC                      June 2017
 
@@ -1901,7 +1901,7 @@ Internet-Draft                 LPWAN SCHC                      June 2017
 
 
 
-Minaburo, et al.        Expires December 24, 2017              [Page 34]
+Minaburo, et al.        Expires December 25, 2017              [Page 34]
 
 Internet-Draft                 LPWAN SCHC                      June 2017
 
@@ -1957,7 +1957,7 @@ Internet-Draft                 LPWAN SCHC                      June 2017
 
 
 
-Minaburo, et al.        Expires December 24, 2017              [Page 35]
+Minaburo, et al.        Expires December 25, 2017              [Page 35]
 
 Internet-Draft                 LPWAN SCHC                      June 2017
 
@@ -2013,7 +2013,7 @@ Authors' Addresses
 
 
 
-Minaburo, et al.        Expires December 24, 2017              [Page 36]
+Minaburo, et al.        Expires December 25, 2017              [Page 36]
 
 Internet-Draft                 LPWAN SCHC                      June 2017
 
@@ -2069,4 +2069,4 @@ Internet-Draft                 LPWAN SCHC                      June 2017
 
 
 
-Minaburo, et al.        Expires December 24, 2017              [Page 37]
+Minaburo, et al.        Expires December 25, 2017              [Page 37]
