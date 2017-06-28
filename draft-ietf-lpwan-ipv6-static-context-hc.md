@@ -66,7 +66,7 @@ separate documents. Moreover, this document specifies fragmentation and reassemb
 # Introduction {#Introduction}
 
 Header compression is mandatory to efficiently bring Internet connectivity to the node
-within a LPWAN network. Some LPWAN networks properties can be exploited for an efficient header
+within a LPWAN network. Some LPWAN networks properties can be exploited to get an efficient header
 compression:
 
 * Topology is star-oriented, therefore all the packets follow the same path.
@@ -84,13 +84,13 @@ complex resynchronization mechanisms, incompatible
 with LPWAN characteristics. In most of the cases, IPv6/UDP headers are reduced
 to a small context identifier. 
 
-The SCHC header compression mechanism is independent of the specific LPWAN technology over which it will be used.
+The SCHC header compression mechanism is independent from the specific LPWAN technology over which it will be used.
 
 LPWAN technologies are also characterized,
 among others, by a very reduced data unit and/or payload size
 {{I-D.ietf-lpwan-overview}}.  However, some of these technologies
 do not support layer two fragmentation, therefore the only option for
-   these to support the IPv6 MTU requirement of 1280 bytes
+   them to support the IPv6 MTU requirement of 1280 bytes
  {{RFC2460}} is the use of a fragmentation protocol at the
 adaptation layer below IPv6. 
 This draft defines also a fragmentation 
@@ -109,7 +109,7 @@ types of entities in a typical LPWAN network, see {{Fig-LPWANarchi}}:
 
    o  The Network Gateway (NGW) is the interconnection node between the Radio Gateway and the Internet.  
 
-   o  LPWAN-AAA Server, which controls the user authentication, the
+   o  LPWAN-AAA Server, which controls the user authentication and the
       applications. We use the term LPWAN-AAA server because we are not assuming 
       that this entity speaks RADIUS or Diameter as many/most AAA servers do, but equally we don't want to
       rule that out, as the functionality will be similar.
@@ -133,41 +133,43 @@ types of entities in a typical LPWAN network, see {{Fig-LPWANarchi}}:
 # Terminology
 This section defines the terminology and acronyms used in this document.
 
+* App: LPWAN Application. An application sending/receiving IPv6 packets to/from the Device.
+
+* APP-IID: Application Interface Identifier. Second part of the IPv6 address to identify the application interface
+
+* Bi: Bidirectional, it can be used in both senses
+
 * CDA: Compression/Decompression Action. An action that is perfomed for both functionnalities to compress a header field or to recover its original value in the decompression phase.
 
 * Context: A set of rules used to compress/decompress headers
 
 * Dev: Device. Node connected to the LPWAN. A Dev may implement SCHC.
 
-* App: LPWAN Application. An application sending/receiving IPv6 packets to/from the Device.
+* Dev-IID: Device Interface Identifier. Second part of the IPv6 address to identify the device interface
 
-* SCHC C/D: LPWAN Compressor/Decompressor. A process in the network to achieve compression/decompressing headers. SCHC C/D uses SCHC rules to perform compression and decompression.
+* DI: Direction Indicator is a differentiator for matching in order to be able to have different values for both sides.
+
+* Dw: Down Link direction for compression, from SCHC C/D to Dev
+
+* FID: Field Indentifier is an index to describe the header fields in the Rule
+
+* FP: Field Position is a list of possible correct values that a field may use
+
+* IID: Interface Identifier. See the IPv6 addressing architecture {{RFC7136}}
 
 * MO: Matching Operator. An operator used to match a value contained in a header field with a value contained in a Rule.
 
 * Rule: A set of header field values.
 
 * Rule ID: An identifier for a rule, SCHC C/D and Dev share the same Rule ID for a specific flow. 
-  
+
+* SCHC C/D: Static Context Header Compression Compressor/Decompressor. A process in the network to achieve compression/decompressing headers. SCHC C/D uses SCHC rules to perform compression and decompression.
+
 * TV: Target value. A value contained in the Rule that will be matched with the value of a header field.
-
-* FID: Field Indentifier is an index to describe the header fields in the Rule
-
-* FP: Field Position is a list of possible correct values that a field may use
-
-* DI: Direction Indicator is a differentiator for matching in order to be able to have different values for both sides.
-
-* IID: Interface Identifier. See the IPv6 addressing architecture {{RFC7136}}
-
-* Dev-IID: Device Interface Identifier. Second part of the IPv6 address to identify the device interface
-
-* APP-IID: Application Interface Identifier. Second part of the IPv6 address to identify the application interface
-
-* Dw: Down Link direction for compression, from SCHC C/D to Dev
 
 * Up: Up Link direction for compression, from Dev to SCHC C/D
 
-* Bi: Bidirectional, it can be used in both senses
+
 
 # Static Context Header Compression
 
