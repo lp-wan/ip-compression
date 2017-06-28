@@ -433,7 +433,7 @@ The number of bits sent is the minimal size to code all the possible indexes.
 
 ## LSB CDA
 
-LSB action is used to avoid sendind the known part of the packet field header to the other end.
+LSB action is used to avoid sending the known part of the packet field header to the other end.
 This action is used together with the "MSB" MO. A length can be specified in the rule to indicate
 how many bits have to be sent. If not length is specified, the number of bits sent are the
 field length minus the bits length specified in the MSB MO.
@@ -457,7 +457,7 @@ In the downstream direction, these CDA may be used to determine the L2 addresses
 
 ## Compute-\*
 
-Thes classes of functions are used by the decompressor to compute the compressed field value based on received information. 
+These classes of functions are used by the decompressor to compute the compressed field value based on received information. 
 Compressed fields are elided during compression and reconstructed during decompression.
 
 * compute-length: compute the length assigned to this field. For instance, regarding
@@ -770,7 +770,7 @@ The third rule compresses port numbers to 4 bits.
 
 ## Overview
 
-Fragmentation support in LPWAN is mandatory when the underlying LPWAN technology is not capable of fulfilling the IPv6 MTU requirement. Fragmentation is used if, after SCHC header compression, the size of the resulting IPv6 packet is larger than the L2 data unit maximum payload. Fragmentation is also used if SCHC header compression has not been able to compress an IPv6 packet that is larger than the L2 data unit maximum payload. In LPWAN technologies, the L2 data unit size typically varies from tens to hundreds of bytes. 
+Fragmentation supported in LPWAN is mandatory when the underlying LPWAN technology is not capable of fulfilling the IPv6 MTU requirement. Fragmentation is used if, after SCHC header compression, the size of the resulting IPv6 packet is larger than the L2 data unit maximum payload. Fragmentation is also used if SCHC header compression has not been able to compress an IPv6 packet that is larger than the L2 data unit maximum payload. In LPWAN technologies, the L2 data unit size typically varies from tens to hundreds of bytes. 
 If the entire IPv6 datagram fits within a single L2 data unit, the fragmentation mechanism is not used and the packet is sent unfragmented.  
 If the datagram does not fit within a single L2 data unit, it SHALL be broken into fragments. 
 
