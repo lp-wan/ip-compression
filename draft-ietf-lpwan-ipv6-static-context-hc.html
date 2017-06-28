@@ -521,7 +521,7 @@ address {
   <h1 id="rfc.section.1">
 <a href="#rfc.section.1">1.</a> <a href="#Introduction" id="Introduction">Introduction</a>
 </h1>
-<p id="rfc.section.1.p.1">Header compression is mandatory to efficiently bring Internet connectivity to the node within a LPWAN network. Some LPWAN networks properties can be exploited for an efficient header compression:</p>
+<p id="rfc.section.1.p.1">Header compression is mandatory to efficiently bring Internet connectivity to the node within a LPWAN network. Some LPWAN networks properties can be exploited to get an efficient header compression:</p>
 <p></p>
 
 <ul>
@@ -529,8 +529,8 @@ address {
 <li>Traffic flows are mostly known in advance, since devices embed built-in applications. Contrary to computers or smartphones, new applications cannot be easily installed.</li>
 </ul>
 <p id="rfc.section.1.p.3">The Static Context Header Compression (SCHC) is defined for this environment.  SCHC uses a context where header information is kept in the header format order. This context is static (the values on the header fields do not change over time) avoiding complex resynchronization mechanisms, incompatible with LPWAN characteristics. In most of the cases, IPv6/UDP headers are reduced to a small context identifier.</p>
-<p id="rfc.section.1.p.4">The SCHC header compression mechanism is independent of the specific LPWAN technology over which it will be used.</p>
-<p id="rfc.section.1.p.5">LPWAN technologies are also characterized, among others, by a very reduced data unit and/or payload size <a href="#I-D.ietf-lpwan-overview" class="xref">[I-D.ietf-lpwan-overview]</a>.  However, some of these technologies do not support layer two fragmentation, therefore the only option for these to support the IPv6 MTU requirement of 1280 bytes <a href="#RFC2460" class="xref">[RFC2460]</a> is the use of a fragmentation protocol at the adaptation layer below IPv6.  This draft defines also a fragmentation functionality to support the IPv6 MTU requirements over LPWAN technologies. Such functionality has been designed under the assumption that data unit reordering will not happen between the entity performing fragmentation and the entity performing reassembly.</p>
+<p id="rfc.section.1.p.4">The SCHC header compression mechanism is independent from the specific LPWAN technology over which it will be used.</p>
+<p id="rfc.section.1.p.5">LPWAN technologies are also characterized, among others, by a very reduced data unit and/or payload size <a href="#I-D.ietf-lpwan-overview" class="xref">[I-D.ietf-lpwan-overview]</a>.  However, some of these technologies do not support layer two fragmentation, therefore the only option for them to support the IPv6 MTU requirement of 1280 bytes <a href="#RFC2460" class="xref">[RFC2460]</a> is the use of a fragmentation protocol at the adaptation layer below IPv6.  This draft defines also a fragmentation functionality to support the IPv6 MTU requirements over LPWAN technologies. Such functionality has been designed under the assumption that data unit reordering will not happen between the entity performing fragmentation and the entity performing reassembly.</p>
 <h1 id="rfc.section.2">
 <a href="#rfc.section.2">2.</a> <a href="#LPWAN-Archi" id="LPWAN-Archi">LPWAN Architecture</a>
 </h1>
@@ -538,7 +538,7 @@ address {
 <p id="rfc.section.2.p.2">o  Devices (Dev) are the end-devices or hosts (e.g. sensors, actuators, etc.). There can be a high density of devices per radio gateway.</p>
 <p id="rfc.section.2.p.3">o  The Radio Gateway (RG), which is the end point of the constrained link.</p>
 <p id="rfc.section.2.p.4">o  The Network Gateway (NGW) is the interconnection node between the Radio Gateway and the Internet.</p>
-<p id="rfc.section.2.p.5">o  LPWAN-AAA Server, which controls the user authentication, the applications. We use the term LPWAN-AAA server because we are not assuming that this entity speaks RADIUS or Diameter as many/most AAA servers do, but equally we don&#8217;t want to rule that out, as the functionality will be similar.</p>
+<p id="rfc.section.2.p.5">o  LPWAN-AAA Server, which controls the user authentication and the applications. We use the term LPWAN-AAA server because we are not assuming that this entity speaks RADIUS or Diameter as many/most AAA servers do, but equally we don&#8217;t want to rule that out, as the functionality will be similar.</p>
 <p id="rfc.section.2.p.6">o  Application Server (App)</p>
 <div id="rfc.figure.1"></div>
 <div id="Fig-LPWANarchi"></div>
@@ -561,25 +561,25 @@ address {
 <p></p>
 
 <ul>
+<li>App: LPWAN Application. An application sending/receiving IPv6 packets to/from the Device.</li>
+<li>APP-IID: Application Interface Identifier. Second part of the IPv6 address to identify the application interface</li>
+<li>Bi: Bidirectional, it can be used in both senses</li>
 <li>CDA: Compression/Decompression Action. An action that is perfomed for both functionnalities to compress a header field or to recover its original value in the decompression phase.</li>
 <li>Context: A set of rules used to compress/decompress headers</li>
 <li>Dev: Device. Node connected to the LPWAN. A Dev may implement SCHC.</li>
-<li>App: LPWAN Application. An application sending/receiving IPv6 packets to/from the Device.</li>
-<li>SCHC C/D: LPWAN Compressor/Decompressor. A process in the network to achieve compression/decompressing headers. SCHC C/D uses SCHC rules to perform compression and decompression.</li>
+<li>Dev-IID: Device Interface Identifier. Second part of the IPv6 address to identify the device interface</li>
+<li>DI: Direction Indicator is a differentiator for matching in order to be able to have different values for both sides.</li>
+<li>Dw: Down Link direction for compression, from SCHC C/D to Dev</li>
+<li>FID: Field Indentifier is an index to describe the header fields in the Rule</li>
+<li>FP: Field Position is a list of possible correct values that a field may use</li>
+<li>IID: Interface Identifier. See the IPv6 addressing architecture <a href="#RFC7136" class="xref">[RFC7136]</a>
+</li>
 <li>MO: Matching Operator. An operator used to match a value contained in a header field with a value contained in a Rule.</li>
 <li>Rule: A set of header field values.</li>
 <li>Rule ID: An identifier for a rule, SCHC C/D and Dev share the same Rule ID for a specific flow.</li>
+<li>SCHC C/D: Static Context Header Compression Compressor/Decompressor. A process in the network to achieve compression/decompressing headers. SCHC C/D uses SCHC rules to perform compression and decompression.</li>
 <li>TV: Target value. A value contained in the Rule that will be matched with the value of a header field.</li>
-<li>FID: Field Indentifier is an index to describe the header fields in the Rule</li>
-<li>FP: Field Position is a list of possible correct values that a field may use</li>
-<li>DI: Direction Indicator is a differentiator for matching in order to be able to have different values for both sides.</li>
-<li>IID: Interface Identifier. See the IPv6 addressing architecture <a href="#RFC7136" class="xref">[RFC7136]</a>
-</li>
-<li>Dev-IID: Device Interface Identifier. Second part of the IPv6 address to identify the device interface</li>
-<li>APP-IID: Application Interface Identifier. Second part of the IPv6 address to identify the application interface</li>
-<li>Dw: Down Link direction for compression, from SCHC C/D to Dev</li>
 <li>Up: Up Link direction for compression, from Dev to SCHC C/D</li>
-<li>Bi: Bidirectional, it can be used in both senses</li>
 </ul>
 <h1 id="rfc.section.4">
 <a href="#rfc.section.4">4.</a> <a href="#static-context-header-compression" id="static-context-header-compression">Static Context Header Compression</a>
