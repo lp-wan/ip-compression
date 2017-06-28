@@ -323,12 +323,15 @@ The compression/decompression process follows several steps:
   It applies the CDA action to reconstruct the original
   header fields. The CDA application order can be different of the order given by the Rule. For instance
   Compute-\* may be applied at end, after the other CDAs.
+  
+  If after using SCHC compression and adding the payload to the L2 frame the datagram is not multiple of 8 bits, 
+  padding may be used.
 
 ~~~~
- 
-+--- ... ---+-------------- ... --------------+
-|  Rule ID  |Compressed Hdr Fields information|
-+--- ... ---+-------------- ... --------------+
+
+   +--- ... ---+-------------- ... --------------+-------------+--...--+
+   |  Rule ID  |Compressed Hdr Fields information|   payload   |padding|
+   +--- ... ---+-------------- ... --------------+-------------+--...--+
 
 ~~~~
 {: #Fig-FormatPckt title='LPWAN Compressed Format Packet'}
