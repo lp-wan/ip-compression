@@ -117,13 +117,13 @@ types of entities in a typical LPWAN network, see {{Fig-LPWANarchi}}:
    o  Application Server (App)
 
 ~~~~
-                                              +------+
- ()   ()   ()       |                         |LPWAN-|
-  ()  () () ()     / \         +---------+    | AAA  |
-() () () () () ()  /   \=======|    ^    |====|Server|  +-----------+
- ()  ()   ()     |             | <--|--> |    +------+  |APPLICATION|
-()  ()  ()  ()  / \============|    v    |==============|    (App)  |
-  ()  ()  ()   /   \           +---------+              +-----------+
+                                           +------+
+ ()   ()   ()       |                      |LPWAN-|
+  ()  () () ()     / \       +---------+   | AAA  |
+() () () () () ()  /   \=====|    ^    |===|Server|  +-----------+
+ ()  ()   ()     |           | <--|--> |   +------+  |APPLICATION|
+()  ()  ()  ()  / \==========|    v    |=============|    (App)  |
+  ()  ()  ()   /   \         +---------+             +-----------+
  Dev        Radio Gateways         NGW
 
 ~~~~
@@ -176,36 +176,38 @@ This section defines the terminology and acronyms used in this document.
 Static Context Header Compression (SCHC) avoids context synchronization,
 which is the most bandwidth-consuming operation in other header compression mechanisms
 such as RoHC {{RFC5795}}. Based on the fact
-that the nature of data flows is highly predictable in LPWAN networks, a static
-context may be stored on the Device (Dev). The context must be stored in both ends, and it can 
+that the nature of data flows is highly predictable in LPWAN networks, some static
+contexts may be stored on the Device (Dev). The contexts must be stored in both ends, and it can 
 either be learned by a provisioning protocol or by out of band means or it can be pre-provosioned, etc. 
 The way the context is learned on both sides is out of the scope of this document.
 
 
 ~~~~
      Dev                                                 App
-+---------------+                                  +---------------+
-| APP1 APP2 APP3|                                  |APP1  APP2 APP3|
-|               |                                  |               |
-|       UDP     |                                  |      UDP      | 
-|      IPv6     |                                  |     IPv6      |   
-|               |                                  |               |  
-|    SCHC C/D   |                                  |               |  
-|    (context)  |                                  |               | 
-+--------+------+                                  +-------+-------+ 
-         |   +--+     +----+     +---------+               .
-         +~~ |RG| === |NGW | === |SCHC C/D |... Internet ...
++--------------+                                  +--------------+
+|APP1 APP2 APP3|                                  |APP1 APP2 APP3|
+|              |                                  |              |
+|      UDP     |                                  |     UDP      | 
+|     IPv6     |                                  |    IPv6      |   
+|              |                                  |              |  
+|   SCHC C/D   |                                  |              |  
+|   (context)  |                                  |              | 
++-------+------+                                  +-------+------+ 
+         |   +--+     +----+     +---------+              .
+         +~~ |RG| === |NGW | === |SCHC C/D |... Internet ..
              +--+     +----+     |(context)| 
                                  +---------+
 ~~~~
 {: #Fig-archi title='Architecture'}
 
-{{Fig-archi}} based on {{I-D.ietf-lpwan-overview}} terminology represents the architecture for 
-compression/decompression. The Device is sending applications flows using IPv6 or IPv6/UDP protocols. These flows are compressed by an Static Context Header Compression Compressor/Decompressor (SCHC C/D) to reduce headers size. Resulting
-information is sent on a layer two (L2) frame to the LPWAN Radio Network to a Radio Gateway (RG) which forwards 
+{{Fig-archi}} represents the architecture for compression/decompression, it is based on {{I-D.ietf-lpwan-overview}} 
+terminology. The Device is sending applications flows using IPv6 or IPv6/UDP protocols. These flows are compressed by an 
+Static Context Header Compression Compressor/Decompressor (SCHC C/D) to reduce headers size. Resulting
+information is sent on a layer two (L2) frame to a LPWAN Radio Network (RG) which forwards 
 the frame to a Network Gateway (NGW).
 The NGW sends the data to a SCHC C/D for decompression which shares the same rules with the Dev. The SCHC C/D can be 
-located on the Network Gateway (NGW) or in another place as long as a tunnel is established between the NGW and the SCHC C/D. SCHC C/D in both sides must share the same set of Rules.
+located on the Network Gateway (NGW) or in another place as long as a tunnel is established between the NGW and the SCHC C/D. 
+The SCHC C/D in both sides must share the same set of Rules.
 After decompression, the packet can be sent on the Internet to one
 or several LPWAN Application Servers (App). 
 
@@ -213,8 +215,9 @@ The SCHC C/D process is bidirectional, so the same principles can be applied in 
 
 ## SCHC Rules
 
-The main idea of the SCHC compression scheme is to send the Rule id to the other end that match as much as possible the original packet values instead 
-of sending known field values. When a value is known by both
+The main idea of the SCHC compression scheme is to send the Rule id to the other end instead 
+of sending known field values. This Rule id identifies a rule that match as much as possible the original 
+packet values. When a value is known by both
 ends, it is not necessary sent through the LPWAN network. 
 
 The context contains a list of rules (cf. {{Fig-ctxt}}). Each Rule contains 
@@ -249,7 +252,7 @@ The Rule does not describe the original packet format which
 must be known from the compressor/decompressor. The rule just describes the
 compression/decompression behavior for the header fields. In the rule, the description of the header field must be performed in the format packet order.
 
-The Rule describes also the compressed header fields which are transmitted regarding their position
+The Rule also describes the compressed header fields which are transmitted regarding their position
 in the rule which is used for data serialization on the compressor side and data deserialization on the decompressor side.
 
 The Context describes the header fields and its values with the following entries:
@@ -300,8 +303,8 @@ The compression/decompression process follows several steps:
   to compress the packet's headers. When doing compression from Dw to Up the SCHC C/D needs to find the 
   correct Rule to use by identifying its Dev-ID and the Rule-ID. In the Up situation only the Rule-ID is used. 
   The next step is to choose the fields by their direction, using the 
-  direction indicator (DI), so the fields that does not correspond to the appropiated DI will be excluded. 
-  Next, then fields are identified according to their field identifier (FID) and field position (FP). 
+  direction indicator (DI), so the fields that do not correspond to the appropiated DI will be excluded. 
+  Next, then the fields are identified according to their field identifier (FID) and field position (FP). 
   If the field position does not correspond then the Rule is not use and the SCHC take next Rule.
   Once the DI and the FP correspond to the header information, each field's value is then compared to the corresponding 
   target value (TV) stored in the Rule for that specific field using the matching operator (MO).
@@ -321,7 +324,7 @@ The compression/decompression process follows several steps:
 
 * decompression: In both directions, The receiver identifies the sender through its device-id
   (e.g. MAC address) and selects the appropriate Rule through the Rule ID. This
-  Rule gives the compressed header format and associates these values to header fields.
+  Rule gives the compressed header format and associates these values to the header fields.
   It applies the CDA action to reconstruct the original
   header fields. The CDA application order can be different of the order given by the Rule. For instance
   Compute-\* may be applied at end, after the other CDAs.
@@ -361,7 +364,7 @@ or any other data type. The result of the operation can either be True or False.
 
 # Compression Decompression Actions (CDA) {#chap-CDA}
 
-The Compression Decompression Actions (CDA) describes the action taken during
+The Compression Decompression Action (CDA) describes the actions taken during
 the compression of headers fields, and inversely, the action taken by the decompressor to restore
 the original value.
 
