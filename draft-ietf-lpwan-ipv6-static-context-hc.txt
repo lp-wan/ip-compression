@@ -228,13 +228,13 @@ Internet-Draft                 LPWAN SCHC                      June 2017
 
    o Application Server (App)
 
-                                                 +------+
-    ()   ()   ()       |                         |LPWAN-|
-     ()  () () ()     / \         +---------+    | AAA  |
-   () () () () () ()  /   \=======|    ^    |====|Server|  +-----------+
-    ()  ()   ()     |             | <--|--> |    +------+  |APPLICATION|
-   ()  ()  ()  ()  / \============|    v    |==============|    (App)  |
-     ()  ()  ()   /   \           +---------+              +-----------+
+                                              +------+
+    ()   ()   ()       |                      |LPWAN-|
+     ()  () () ()     / \       +---------+   | AAA  |
+   () () () () () ()  /   \=====|    ^    |===|Server|  +-----------+
+    ()  ()   ()     |           | <--|--> |   +------+  |APPLICATION|
+   ()  ()  ()  ()  / \==========|    v    |=============|    (App)  |
+     ()  ()  ()   /   \         +---------+             +-----------+
     Dev        Radio Gateways         NGW
 
 
@@ -312,11 +312,11 @@ Internet-Draft                 LPWAN SCHC                      June 2017
    synchronization, which is the most bandwidth-consuming operation in
    other header compression mechanisms such as RoHC [RFC5795].  Based on
    the fact that the nature of data flows is highly predictable in LPWAN
-   networks, a static context may be stored on the Device (Dev).  The
-   context must be stored in both ends, and it can either be learned by
-   a provisioning protocol or by out of band means or it can be pre-
-   provosioned, etc.  The way the context is learned on both sides is
-   out of the scope of this document.
+   networks, some static contexts may be stored on the Device (Dev).
+   The contexts must be stored in both ends, and it can either be
+   learned by a provisioning protocol or by out of band means or it can
+   be pre-provosioned, etc.  The way the context is learned on both
+   sides is out of the scope of this document.
 
 
 
@@ -339,36 +339,36 @@ Internet-Draft                 LPWAN SCHC                      June 2017
 
 
         Dev                                                 App
-   +---------------+                                  +---------------+
-   | APP1 APP2 APP3|                                  |APP1  APP2 APP3|
-   |               |                                  |               |
-   |       UDP     |                                  |      UDP      |
-   |      IPv6     |                                  |     IPv6      |
-   |               |                                  |               |
-   |    SCHC C/D   |                                  |               |
-   |    (context)  |                                  |               |
-   +--------+------+                                  +-------+-------+
-            |   +--+     +----+     +---------+               .
-            +~~ |RG| === |NGW | === |SCHC C/D |... Internet ...
+   +--------------+                                  +--------------+
+   |APP1 APP2 APP3|                                  |APP1 APP2 APP3|
+   |              |                                  |              |
+   |      UDP     |                                  |     UDP      |
+   |     IPv6     |                                  |    IPv6      |
+   |              |                                  |              |
+   |   SCHC C/D   |                                  |              |
+   |   (context)  |                                  |              |
+   +-------+------+                                  +-------+------+
+            |   +--+     +----+     +---------+              .
+            +~~ |RG| === |NGW | === |SCHC C/D |... Internet ..
                 +--+     +----+     |(context)|
                                     +---------+
 
                           Figure 2: Architecture
 
-   Figure 2 based on [I-D.ietf-lpwan-overview] terminology represents
-   the architecture for compression/decompression.  The Device is
+   Figure 2 represents the architecture for compression/decompression,
+   it is based on [I-D.ietf-lpwan-overview] terminology.  The Device is
    sending applications flows using IPv6 or IPv6/UDP protocols.  These
    flows are compressed by an Static Context Header Compression
    Compressor/Decompressor (SCHC C/D) to reduce headers size.  Resulting
-   information is sent on a layer two (L2) frame to the LPWAN Radio
-   Network to a Radio Gateway (RG) which forwards the frame to a Network
-   Gateway (NGW).  The NGW sends the data to a SCHC C/D for
-   decompression which shares the same rules with the Dev. The SCHC C/D
-   can be located on the Network Gateway (NGW) or in another place as
-   long as a tunnel is established between the NGW and the SCHC C/D.
-   SCHC C/D in both sides must share the same set of Rules.  After
-   decompression, the packet can be sent on the Internet to one or
-   several LPWAN Application Servers (App).
+   information is sent on a layer two (L2) frame to a LPWAN Radio
+   Network (RG) which forwards the frame to a Network Gateway (NGW).
+   The NGW sends the data to a SCHC C/D for decompression which shares
+   the same rules with the Dev. The SCHC C/D can be located on the
+   Network Gateway (NGW) or in another place as long as a tunnel is
+   established between the NGW and the SCHC C/D.  The SCHC C/D in both
+   sides must share the same set of Rules.  After decompression, the
+   packet can be sent on the Internet to one or several LPWAN
+   Application Servers (App).
 
    The SCHC C/D process is bidirectional, so the same principles can be
    applied in the other direction.
@@ -376,16 +376,16 @@ Internet-Draft                 LPWAN SCHC                      June 2017
 4.1.  SCHC Rules
 
    The main idea of the SCHC compression scheme is to send the Rule id
-   to the other end that match as much as possible the original packet
-   values instead of sending known field values.  When a value is known
-   by both ends, it is not necessary sent through the LPWAN network.
+   to the other end instead of sending known field values.  This Rule id
+   identifies a rule that match as much as possible the original packet
+   values.  When a value is known by both ends, it is not necessary sent
+   through the LPWAN network.
 
    The context contains a list of rules (cf.  Figure 3).  Each Rule
    contains itself a list of fields descriptions composed of a field
    identifier (FID), a field position (FP), a direction indicator (DI),
    a target value (TV), a matching operator (MO) and a Compression/
    Decompression Action (CDA).
-
 
 
 
@@ -420,7 +420,7 @@ Internet-Draft                 LPWAN SCHC                      June 2017
    rule, the description of the header field must be performed in the
    format packet order.
 
-   The Rule describes also the compressed header fields which are
+   The Rule also describes the compressed header fields which are
    transmitted regarding their position in the rule which is used for
    data serialization on the compressor side and data deserialization on
    the decompressor side.
@@ -494,8 +494,8 @@ Internet-Draft                 LPWAN SCHC                      June 2017
       Rule to use by identifying its Dev-ID and the Rule-ID.  In the Up
       situation only the Rule-ID is used.  The next step is to choose
       the fields by their direction, using the direction indicator (DI),
-      so the fields that does not correspond to the appropiated DI will
-      be excluded.  Next, then fields are identified according to their
+      so the fields that do not correspond to the appropiated DI will be
+      excluded.  Next, then the fields are identified according to their
       field identifier (FID) and field position (FP).  If the field
       position does not correspond then the Rule is not use and the SCHC
 
@@ -531,7 +531,7 @@ Internet-Draft                 LPWAN SCHC                      June 2017
    o  decompression: In both directions, The receiver identifies the
       sender through its device-id (e.g.  MAC address) and selects the
       appropriate Rule through the Rule ID.  This Rule gives the
-      compressed header format and associates these values to header
+      compressed header format and associates these values to the header
       fields.  It applies the CDA action to reconstruct the original
       header fields.  The CDA application order can be different of the
       order given by the Rule.  For instance Compute-* may be applied at
@@ -581,7 +581,7 @@ Internet-Draft                 LPWAN SCHC                      June 2017
 
 6.  Compression Decompression Actions (CDA)
 
-   The Compression Decompression Actions (CDA) describes the action
+   The Compression Decompression Action (CDA) describes the actions
    taken during the compression of headers fields, and inversely, the
    action taken by the decompressor to restore the original value.
 
@@ -679,7 +679,7 @@ Internet-Draft                 LPWAN SCHC                      June 2017
 
 6.4.  LSB CDA
 
-   LSB action is used to avoid sendind the known part of the packet
+   LSB action is used to avoid sending the known part of the packet
    field header to the other end.  This action is used together with the
    "MSB" MO.  A length can be specified in the rule to indicate how many
    bits have to be sent.  If not length is specified, the number of bits
@@ -708,8 +708,8 @@ Internet-Draft                 LPWAN SCHC                      June 2017
 
 6.6.  Compute-*
 
-   Thes classes of functions are used by the decompressor to compute the
-   compressed field value based on received information.  Compressed
+   These classes of functions are used by the decompressor to compute
+   the compressed field value based on received information.  Compressed
    fields are elided during compression and reconstructed during
    decompression.
 
@@ -1135,16 +1135,17 @@ Internet-Draft                 LPWAN SCHC                      June 2017
 
 9.1.  Overview
 
-   Fragmentation support in LPWAN is mandatory when the underlying LPWAN
-   technology is not capable of fulfilling the IPv6 MTU requirement.
-   Fragmentation is used if, after SCHC header compression, the size of
-   the resulting IPv6 packet is larger than the L2 data unit maximum
-   payload.  Fragmentation is also used if SCHC header compression has
-   not been able to compress an IPv6 packet that is larger than the L2
-   data unit maximum payload.  In LPWAN technologies, the L2 data unit
-   size typically varies from tens to hundreds of bytes.  If the entire
-   IPv6 datagram fits within a single L2 data unit, the fragmentation
-   mechanism is not used and the packet is sent unfragmented.
+   Fragmentation supported in LPWAN is mandatory when the underlying
+   LPWAN technology is not capable of fulfilling the IPv6 MTU
+   requirement.  Fragmentation is used if, after SCHC header
+   compression, the size of the resulting IPv6 packet is larger than the
+   L2 data unit maximum payload.  Fragmentation is also used if SCHC
+   header compression has not been able to compress an IPv6 packet that
+   is larger than the L2 data unit maximum payload.  In LPWAN
+   technologies, the L2 data unit size typically varies from tens to
+   hundreds of bytes.  If the entire IPv6 datagram fits within a single
+   L2 data unit, the fragmentation mechanism is not used and the packet
+   is sent unfragmented.
    If the datagram does not fit within a single L2 data unit, it SHALL
    be broken into fragments.
 
@@ -1166,7 +1167,6 @@ Internet-Draft                 LPWAN SCHC                      June 2017
    not happen between the entity performing fragmentation and the entity
    performing reassembly.  This assumption allows to reduce complexity
    and overhead of the fragmentation mechanism.
-
 
 
 
