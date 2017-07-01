@@ -1,7 +1,7 @@
 ---
 stand_alone: true
 ipr: trust200902
-docname: draft-ietf-lpwan-ipv6-static-context-hc-04
+docname: draft-ietf-lpwan-ipv6-static-context-hc-05
 cat: info
 pi:
   symrefs: 'yes'
@@ -400,7 +400,7 @@ If the field is identified as variable, then its size must be sent first using t
 
 * For values between 15 and 255, the first 4 bit sent are set to 1 and the size is sent using 8 bits. 
 
-* For higher value, the first 12 bytes are set to 1 and the size is sent on 2 bytes. 
+* For higher value, the first 12 bits are set to 1 and the size is sent on 2 bytes. 
 
 ## not-sent CDA
 
