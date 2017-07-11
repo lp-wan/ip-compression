@@ -149,13 +149,19 @@ This section defines the terminology and acronyms used in this document.
 
 * DI: Direction Indicator is a differentiator for matching in order to be able to have different values for both sides.
 
+* DTag: Datagram Tag is a fragmentation header field that is set to the same value for all fragments carrying the same IPv6 datagram.
+
 * Dw: Down Link direction for compression, from SCHC C/D to Dev
+
+* FCN: Fragment Compressed Number is a fragmentation header field that carries an efficient representation of a larger-sized fragment number.
 
 * FID: Field Indentifier is an index to describe the header fields in the Rule
 
 * FP: Field Position is a list of possible correct values that a field may use
 
 * IID: Interface Identifier. See the IPv6 addressing architecture {{RFC7136}}
+
+* MIC: Message Integrity Check.  A fragmentation header field computed over an IPv6 packet before fragmentation, used for error detection after IPv6 packet reassembly.
 
 * MO: Matching Operator. An operator used to match a value contained in a header field with a value contained in a Rule.
 
@@ -167,8 +173,9 @@ This section defines the terminology and acronyms used in this document.
 
 * TV: Target value. A value contained in the Rule that will be matched with the value of a header field.
 
-* Up: Up Link direction for compression, from Dev to SCHC C/D
+* Up: Up Link direction for compression, from Dev to SCHC C/D.
 
+* W: Window bit. A fragmentation header field used in Window mode (see section 9), which carries the same value for all fragments of a window.
 
 
 # Static Context Header Compression
@@ -843,9 +850,10 @@ The Window mode – ACK “always” option provides flow control. In addition, 
 
 This subsection describes the different tools that are used to enable the described fragmentation functionality and the different reliability options supported. Each tool has a corresponding header field format that is defined in the next subsection. The list of tools follows: 
 
-o  Rule ID. The Rule ID is used in fragments and in ACKs. The Rule ID in a fragment is set to a value that indicates that the data unit being carried is a fragment. This also allows to interleave non-fragmented IPv6 datagrams with fragments that carry a larger IPv6 datagram. Rule ID may also be used to signal which reliability option is in use for the IPv6 packet being carried. In an ACK, the Rule ID signals that the message this Rule ID is prepended to is an ACK.  
+o  Rule ID. The Rule ID is used in fragments and in ACKs. The Rule ID in a fragment is set to a value that indicates that the data unit being carried is a fragment. This also allows to interleave non-fragmented IPv6 datagrams with fragments that carry a larger IPv6 datagram. Rule ID may also be used to signal which reliability option is in use for the IPv6 packet being carried. Rule ID may also be used to signal the window size if multiple sizes are supported (see 9.7). In an ACK, the Rule ID signals that the message this Rule ID is prepended to is an ACK.  
 
-o  Compressed Fragment Number (CFN). The CFN is included in all fragments. This field can be understood as a truncated, efficient representation of a larger-sized fragment number, and does not necessarily carry an absolute fragment number. A special CFN value signals the last fragment that carries a fragmented IPv6 packet. In Window mode, the CFN is augmented with the W bit, which has the purpose of avoiding possible ambiguity for the receiver that might arise under certain conditions
+o  Fragment Compressed Number (FCN).  The FCN is included in all fragments.  This field can be understood as a truncated, efficient
+   representation of a larger-sized fragment number, and does not carry an absolute fragment number.  A special FCN value signals the last fragment that carries a fragmented IPv6 packet.  In Window mode, the FCN is augmented with the W bit, which has the purpose of avoiding possible ambiguity for the receiver that might arise under certain conditions.
 
 o  Datagram Tag (DTag). The DTag field, if present, is set to the same value for all fragments carrying the same IPv6 datagram, allows to interleave fragments that correspond to different IPv6 datagrams.
 
@@ -879,7 +887,7 @@ In the No ACK option, fragments except the last one SHALL contain the fragmentat
              <------------ R ---------->
                          <--T--> <--N-->
              +-- ... --+- ...  -+- ... -+
-             | Rule ID |  DTag  |  CFN  |
+             | Rule ID |  DTag  |  FCN  |
              +-- ... --+- ...  -+- ... -+
 
 ~~~~
@@ -894,7 +902,7 @@ In any of the Window mode options, fragments except the last one SHALL
              <------------ R ---------->
                        <--T--> 1 <--N-->
             +-- ... --+- ... -+-+- ... -+
-            | Rule ID | DTag  |W|  CFN  |
+            | Rule ID | DTag  |W|  FCN  |
             +-- ... --+- ... -+-+- ... -+
 
 ~~~~
@@ -932,13 +940,20 @@ In any of the Window mode options, fragments except the last one SHALL
    
    * DTag: The size of the DTag field is T bits, which may be set to a value greater than or equal to 0 bits. The DTag field in all fragments that carry the same IPv6 datagram MUST be set to the same value. DTag MUST be set sequentially increasing from 0 to 2^T - 1, and MUST wrap back from 2^T - 1 to 0.
 
-   * CFN: This field is an unsigned integer, with a size of N bits, that carries the CFN of the fragment. In the No ACK option, N=1. For the rest of options, N equal to or greater than 3 is recommended. The CFN MUST be set sequentially decreasing from the highest CFN in the window (which will be used for the first fragment), and MUST wrap from 0 back to the highest CFN in the window. The highest CFN in the window MUST be a value equal to or smaller than 2^N-2. (Example 1: for N=5, the highest CFN value may be configured to be 30, then subsequent CFNs are set sequentially and in decreasing order, and CFN will wrap from 0 back to 30. Example 2: for N=5, the highest CFN value may be set to 23, then subsequent CFNs are set sequentially and in decreasing order, and the CFN will wrap from 0 back to 23). The CFN for the last fragment has all bits set to 1. Note that, by this definition, the CFN value of 2^N - 1 is only used to identify a fragment as the last fragment carrying a subset of the IPv6 packet being transported, and thus the CFN does not strictly correspond to the N least significant bits of the actual absolute fragment number. It is also important to note that, for N=1, the last fragment of the packet will carry a CFN equal to 1, while all previous fragments will carry a CFN of 0.
+   * FCN: This field is an unsigned integer, with a size of N bits, that carries the FCN of the fragment.  In the No ACK option, N=1.
+      For the rest of options, N equal to or greater than 3 is recommended.  The FCN MUST be set sequentially decreasing from the
+      highest FCN in the window (which will be used for the first fragment), and MUST wrap from 0 back to the highest FCN in the
+      window.  The highest FCN in the window, denoted MAX_WIND_FCN, MUST be a value equal to or smaller than 2^N-2, see further details on this at the end of 9.5.3.  (Example 1: for N=5, MAX_WIND_FCN may be configured to be 30, then subsequent FCNs are set       sequentially and in decreasing order, and FCN will wrap from 0 back to 30.  Example 2: for N=5, MAX_WIND_FCN may be set
+      to 23, then subsequent FCNs are set sequentially and in decreasing order, and the FCN will wrap from 0 back to 23).  The FCN for the last fragment has all bits set to 1.  Note that, by this definition, the FCN value of 2^N - 1 is only used to identify a
+      fragment as the last fragment carrying a subset of the IPv6 packet being transported, and thus the FCN does not correspond
+      to the N least significant bits of the actual absolute fragment number.  It is also important to note that, for N=1, the last
+      fragment of the packet will carry a FCN equal to 1, while all previous fragments will carry a FCN of 0.
       
    * W: W is a 1-bit field. This field carries the same value for all fragments of a window, and it is complemented for the next window. The initial value for this field is 1.
 
    * MIC: This field, which has a size of M bits, carries the MIC for the IPv6 packet.
    
-   The values for R, N, T and M are not specified in this document, and have to be determined in other documents (e.g. technology-specific profile documents).
+   The values for R, N, MAX_WIND_FCN, T and M are not specified in this document, and have to be determined in other documents (e.g. technology-specific profile documents).
    
 ### ACK format
 
@@ -960,7 +975,7 @@ The format of an ACK is shown in {{Fig-ACK-Format}}:
   
   W: This field has a size of 1 bit. In all ACKs, the W bit carries the same value as the W bit carried by the fragments whose reception is being positively or negatively acknowledged by the ACK.
   
-  bitmap: This field carries the bitmap sent by the receiver to inform the sender about whether fragments in the current window have been received or not. Size of the bitmap field of an ACK can be equal to 0 or Ceiling(Number_of_Fragments/8) octets, where Number_of_Fragments denotes the number of fragments of a window. The bitmap is a sequence of bits, where the n-th bit signals whether the n-th fragment transmitted in the current window has been correctly received (n-th bit set to 1) or not (n-th bit set to 0). Remaining bits with bit order greater than the number of fragments sent (as determined by the receiver) are set to 0, except for the last bit in the bitmap, which is set to 1 if the last fragment of the window has been correctly received, and 0 otherwise. Feedback on reception of the fragment with CFN = 2^N - 1 (last fragment carrying an IPv6 packet) is only given by the last bit of the corresponding bitmap. Absence of the bitmap in an ACK confirms correct reception of all fragments to be acknowledged by means of the ACK.
+  bitmap: This field carries the bitmap sent by the receiver to inform the sender about whether fragments in the current window have been received or not. Size of the bitmap field of an ACK can be equal to 0 or Ceiling(Number_of_Fragments/8) octets, where Number_of_Fragments denotes the number of fragments of a window. The bitmap is a sequence of bits, where the n-th bit signals whether the n-th fragment transmitted in the current window has been correctly received (n-th bit set to 1) or not (n-th bit set to 0). Remaining bits with bit order greater than the number of fragments sent (as determined by the receiver) are set to 0, except for the last bit in the bitmap, which is set to 1 if the last fragment of the window has been correctly received, and 0 otherwise. Feedback on reception of the fragment with FCN = 2^N - 1 (last fragment carrying an IPv6 packet) is only given by the last bit of the corresponding bitmap. Absence of the bitmap in an ACK confirms correct reception of all fragments to be acknowledged by means of the ACK. Note that absence of the bitmap in an ACK may be determined based on the size of the L2 payload.
   
    
 {{Fig-Bitmap-Win}} shows an example of an ACK (N=3), where the bitmap
@@ -988,26 +1003,26 @@ indicates that the second and the fifth fragments have not been correctly receiv
 ~~~~
 {: #Fig-NoBitmap title='Example of an ACK without a bitmap'}
 
-Note that, in order to exploit the available L2 payload space to the fullest, a bitmap may have a size smaller than 2^N bits. In that case, the window in use will have a size lower than 2^N-1 fragments. For example, if the maximum available space for a bitmap is 56 bits, N can be set to 6, and the window size can be set to a maximum of 56 fragments.  
+Note that, in order to exploit the available L2 payload space to the fullest, a bitmap may have a size smaller than 2^N bits. In that case, the window in use will have a size lower than 2^N-1 fragments. For example, if the maximum available space for a bitmap is 56 bits, N can be set to 6, and the window size can be set to a maximum of 56 fragments, thus MAX_WIND_FCN will be equal to 55 in this example.  
 
 ## Baseline mechanism
 
 The receiver of link fragments SHALL use (1) the sender's L2 source address (if present), (2) the destination's L2 address (if present), (3) Rule ID and (4) DTag (the latter, if present) to identify all the fragments that belong to a given IPv6 datagram. The fragment receiver may determine the fragment delivery reliability option in use for the fragment based on the Rule ID field in that fragment.
 
-Upon receipt of a link fragment, the receiver starts constructing the original unfragmented packet. It uses the CFN and the order of arrival of each fragment to determine the location of the individual fragments within the original unfragmented packet. For example, it may place the data payload of the fragments within a payload datagram reassembly buffer at the location determined from the CFN and order of arrival of the fragments, and the fragment payload sizes. In Window mode, the fragment receiver also uses the W bit in the received fragments. Note that the size of the original, unfragmented IPv6 packet cannot be determined from fragmentation headers.
+Upon receipt of a link fragment, the receiver starts constructing the original unfragmented packet. It uses the FCN and the order of arrival of each fragment to determine the location of the individual fragments within the original unfragmented packet. For example, it may place the data payload of the fragments within a payload datagram reassembly buffer at the location determined from the FCN and order of arrival of the fragments, and the fragment payload sizes. In Window mode, the fragment receiver also uses the W bit in the received fragments. Note that the size of the original, unfragmented IPv6 packet cannot be determined from fragmentation headers.
 
-When Window mode - ACK on error is used, the fragment receiver starts a timer (denoted "ACK on Error Timer") upon reception of the first fragment for an IPv6 datagram.  The initial value for this timer is not provided by this specification, and is expected to be defined in additional documents.  This timer is reset and restarted every time that a new fragment carrying data from the same IPv6 datagram is received. In Window mode – ACK on error, after reception of the last fragment of a window (i.e. the fragment with CFN=0 or CFN=2^N-1), if fragment losses have been detected by the fragment receiver in the current window, the fragment receiver MUST transmit an ACK reporting its available information with regard to sucessfully received and missing fragments from the current window.  Upon expiration of the “ACK on Error Timer”, if the receiver knows that at least one fragment of the current window has been lost, an ACK MUST be transmitted by the fragment receiver to report received and not received fragments for the current window. The “ACK on Error Timer” is then reset and restarted. In Window mode – ACK on error, the fragment sender retransmits any lost fragments reported in an ACK. The maximum number of ACKs to be sent by the receiver for a specific window, denoted MAX_ACKS_PER_WINDOW, is not stated in this document, and it is expected to be defined in other documents (e.g. technology-specific profiles).
+When Window mode - ACK on error is used, the fragment receiver starts a timer (denoted "ACK on Error Timer") upon reception of the first fragment for an IPv6 datagram.  The initial value for this timer is not provided by this specification, and is expected to be defined in additional documents.  This timer is reset and restarted every time that a new fragment carrying data from the same IPv6 datagram is received. In Window mode – ACK on error, after reception of the last fragment of a window (i.e. the fragment with FCN=0 or FCN=2^N-1), if fragment losses have been detected by the fragment receiver in the current window, the fragment receiver MUST transmit an ACK reporting its available information with regard to sucessfully received and missing fragments from the current window.  Upon expiration of the “ACK on Error Timer”, an ACK MUST be transmitted by the fragment receiver to report received and not received fragments for the current window. The “ACK on Error Timer” is then reset and restarted. When the last fragment of the IPv6 datagram is received, if all fragments of that last window of the packet have been received, the “ACK on Error Timer” can be stopped. In Window mode – ACK on error, the fragment sender retransmits any lost fragments reported in an ACK. The maximum number of ACKs to be sent by the receiver for a specific window, denoted MAX_ACKS_PER_WINDOW, is not stated in this document, and it is expected to be defined in other documents (e.g. technology-specific profiles). In Window mode – ACK on error, when a fragment sender has transmitted the last fragment of a window, or it has retransmitted the last fragment within the set of lost fragments reported in an ACK, it is assumed that the time the fragment sender can wait to receive an ACK is smaller than the transmission time of MAX_WIND_FCN + 1 fragments (i.e. the time required to transmit a complete window of fragments). This aspect must be carefully considered if Window mode – ACK on error is used, in particular taking into account the latency characteristics of the underlying L2 technology.
 
-Note that, in Window mode, the first fragment of the window is the one with CFN=2^N-2.  Also note that, in Window mode, the fragment with CFN=0 is considered the last fragment of its window, except for the last fragment of the whole packet (with all CFN bits set to 1, i.e. CFN=2^N-1), which is also the last fragment of the last window.
+Note that, in Window mode, the first fragment of the window is the one with FCN set to MAX_WIND_FCN.  Also note that, in Window mode, the fragment with FCN=0 is considered the last fragment of its window, except for the last fragment of the whole packet (with all FCN bits set to 1, i.e. FCN=2^N-1), which is also the last fragment of the last window.
 
 If Window mode – ACK “always” is used, upon receipt of the last fragment of a window (i.e. the fragment with CFN=0 or CFN=2^N-1), the fragment receiver MUST send an ACK to the fragment sender. The ACK provides feedback on the fragments received and those not received that correspond to the last window. Once all fragments of a window have been received by the fragment receiver (including retransmitted fragments, if any), the latter sends an ACK without a bitmap to the sender, in order to report sucessful reception of all fragments of the window to the fragment sender.
 
-When Window mode - ACK "always" is used, the fragment sender starts a timer (denoted "ACK Always Timer") after the first transmission attempt of the last fragment of a window (i.e. the fragment with CFN=0 or CFN=2^N-1). In the same reliability option, if one or more fragments are reported by an ACK to be lost, the sender retransmits those fragments and starts the “ACK Always Timer” after the last retransmitted fragment (i.e. the fragment with the lowest CFN) among the set of lost fragments reported by the ACK.  The initial value for the “ACK Always Timer” is not provided by this specification, and it is expected to be defined in additional documents. Upon expiration of the timer, if no ACK has been received since the timer start, the sender retransmits the last fragment sent, and it   reinitializes and restarts the timer.  Note that retransmitting the last fragment sent as described serves as an ACK request.  The
+When Window mode - ACK "always" is used, the fragment sender starts a timer (denoted "ACK Always Timer") after the first transmission attempt of the last fragment of a window (i.e. the fragment with FCN=0 or FCN=2^N-1). In the same reliability option, if one or more fragments are reported by an ACK to be lost, the sender retransmits those fragments and starts the “ACK Always Timer” after the last retransmitted fragment (i.e. the fragment with the lowest FCN) among the set of lost fragments reported by the ACK.  The initial value for the “ACK Always Timer” is not provided by this specification, and it is expected to be defined in additional documents. Upon expiration of the timer, if no ACK has been received since the timer start, the sender retransmits the last fragment sent at the moment of timer expiration, and it reinitializes and restarts the timer.  Note that the last fragment sent at the moment of timer expiration may be the last fragment of a window (i.e. FCN=0 or FCN=2^N-1) or the last fragment sent within a round of fragment retransmissions. Note also that retransmitting the last fragment sent as described serves as an ACK request.  The
 maximum number of requests for a specific ACK, denoted MAX_ACK_REQUESTS, is not stated in this document, and it is expected to be defined in other documents (e.g. technology-specific profiles). In Window mode – ACK “Always”, the fragment sender retransmits any lost fragments reported in an ACK, as long as the number of retries for each one of those fragments does not exceed MAX_FRAG_RETRIES. The default value for MAX_FRAG_RETRIES is not provided in this document and it is expected to be defined in additional documents. When the fragment sender receives an ACK that confirms correct reception of all fragments of a window, if there are further fragments to be sent for the same IPv6 datagram, the fragment sender proceeds to transmitting subsequent fragments of the next window.
 
-If the recipient receives the last fragment of an IPv6 datagram (i.e. the fragment with CFN=2^N-1), it checks for the integrity of the reassembled IPv6 datagram, based on the MIC received.  In No ACK mode, if the integrity check indicates that the reassembled IPv6 datagram does not match the original IPv6 datagram (prior to fragmentation), the reassembled IPv6 datagram MUST be discarded.  If Window mode - ACK "Always" is used, the recipient MUST transmit an ACK to the fragment sender.  The ACK provides feedback on the fragments from the last window that have been received or not per the information available at the receiver.  If Window mode - ACK on error is used, the recipient MUST NOT transmit an ACK to the sender if no losses have been detected for the last window.  If losses have been detected, the recipient MUST then transmit an ACK to the sender to provide feedback on the transmission of the last window of fragments.
+If the recipient receives the last fragment of an IPv6 datagram (i.e. the fragment with FCN=2^N-1), it checks for the integrity of the reassembled IPv6 datagram, based on the MIC received.  In No ACK, if the integrity check indicates that the reassembled IPv6 datagram does not match the original IPv6 datagram (prior to fragmentation), the reassembled IPv6 datagram MUST be discarded. In Window mode, a MIC check is also performed by the fragment receiver after reception of a round of retransmitted fragments. If the MIC check still fails after the last round of fragments retransmitted by the fragment sender (which may have been received or not by the fragment receiver), the reassembled IPv6 packet is discarded. Note that the fragment receiver will need to determine when it is safe to assume that no more fragments will be received. Further guidance on this is expected to be provided in future (possibly technology-specific) documents. Note also that, in Window mode, the rules that apply for constructing and transmitting an ACK for the last window are the same rules that apply for any other window.
 
-If a fragment recipient disassociates from its L2 network, the recipient MUST discard all link fragments of all partially reassembled payload datagrams, and fragment senders MUST discard all not yet transmitted link fragments of all partially transmitted payload (e.g., IPv6) datagrams. Similarly, when a node first receives a fragment of a packet, it starts a reassembly timer. When this time expires, if the entire packet has not been reassembled, the existing fragments MUST be discarded and the reassembly state MUST be flushed. The value for this timer is not provided by this specification, and is expected to be defined in technology-specific profile documents.
+If a fragment recipient disassociates from its L2 network, the recipient MUST discard all link fragments of all partially reassembled payload datagrams, and fragment senders MUST discard all not yet transmitted link fragments of all partially transmitted payload (e.g., IPv6) datagrams. Similarly, when either end of the LPWAN link first receives a fragment of a packet, it starts a reassembly timer. When this time expires, if the entire packet has not been reassembled, the existing fragments MUST be discarded and the reassembly state MUST be flushed. The value for this timer is not provided by this specification, and is expected to be defined in technology-specific profile documents.
 
 ## Supporting multiple window sizes
 
@@ -1015,7 +1030,7 @@ For Window mode operation, implementers may opt to support a single window size 
 
 ## Aborting fragmented IPv6 datagram transmissions
 
-For several reasons, a fragment sender or a fragment receiver may want to abort the on-going transmission of one or several fragmented IPv6 datagrams. The entity (either the fragment sender or the fragment receiver) that triggers abortion transmits to the other endpoint a format that only comprises a Rule ID (of size R bits), which signals abortion of all on-going fragmented IPv6 packet transmissions. The specific value to be used for the Rule ID of this abortion signal is not defined in this document, and is expected to be defined in future documents.
+For several reasons, a fragment sender or a fragment receiver may want to abort the on-going transmission of one or several fragmented IPv6 datagrams. The entity (either the fragment sender or the fragment receiver) that triggers abortion transmits to the other endpoint a data unit with an L2 payload that only comprises a Rule ID (of size R bits), which signals abortion of all on-going fragmented IPv6 packet transmissions. The specific value to be used for the Rule ID of this abortion signal is not defined in this document, and is expected to be defined in future documents.
 
 Upon transmission or reception of the abortion signal, both entities MUST release any resources allocated for the fragmented IPv6 datagram transmissions being aborted. 
 
@@ -1057,13 +1072,14 @@ an attacker.
 In another type of attack, the malicious node is required to have
 overhearing capabilities.  If an attacker can overhear a fragment, it
 can send a spoofed duplicate (e.g. with random payload) to the
-destination.  A receiver cannot distinguish legitimate from spoofed
-fragments.  Therefore, the original IPv6 packet will be considered
-corrupt and will be dropped.  To protect resource-constrained nodes
-from this attack, it has been proposed to establish a binding among
-the fragments to be transmitted by a node, by applying content-
-chaining to the different fragments, based on cryptographic hash
-functionality.  The aim of this technique is to allow a receiver to
+destination. If the LPWAN technology does not support suitable protection 
+(e.g. source authentication and frame counters to prevent replay attacks), 
+a receiver cannot distinguish legitimate from spoofed fragments.  Therefore, 
+the original IPv6 packet will be considered corrupt and will be dropped.
+To protect resource-constrained nodes from this attack, it has been proposed
+to establish a binding among the fragments to be transmitted by a node, 
+by applying content-chaining to the different fragments, based on cryptographic
+hash functionality.  The aim of this technique is to allow a receiver to
 identify illegitimate fragments.
 
 Further attacks may involve sending overlapped fragments (i.e.
@@ -1086,17 +1102,17 @@ This section provides examples of different fragment delivery reliability option
 
 ~~~~
         Sender               Receiver
-          |-------CFN=0-------->|
-          |-------CFN=0-------->|
-          |-------CFN=0-------->|
-          |-------CFN=0-------->|
-          |-------CFN=0-------->|
-          |-------CFN=0-------->|
-          |-------CFN=0-------->|
-          |-------CFN=0-------->|
-          |-------CFN=0-------->|
-          |-------CFN=0-------->|
-          |-------CFN=1-------->|MIC checked =>
+          |-------FCN=0-------->|
+          |-------FCN=0-------->|
+          |-------FCN=0-------->|
+          |-------FCN=0-------->|
+          |-------FCN=0-------->|
+          |-------FCN=0-------->|
+          |-------FCN=0-------->|
+          |-------FCN=0-------->|
+          |-------FCN=0-------->|
+          |-------FCN=0-------->|
+          |-------FCN=1-------->|MIC checked =>
          
 ~~~~
 {: #Fig-Example-Unreliable title='Transmission of an IPv6 packet carried by 11 fragments in the No ACK option'}
@@ -1105,107 +1121,151 @@ This section provides examples of different fragment delivery reliability option
 
 ~~~~
         Sender               Receiver
-          |-----W=1, CFN=6----->|
-          |-----W=1, CFN=5----->|
-          |-----W=1, CFN=4----->|
-          |-----W=1, CFN=3----->|
-          |-----W=1, CFN=2----->|
-          |-----W=1, CFN=1----->|
-          |-----W=1, CFN=0----->|
+          |-----W=1, FCN=6----->|
+          |-----W=1, FCN=5----->|
+          |-----W=1, FCN=4----->|
+          |-----W=1, FCN=3----->|
+          |-----W=1, FCN=2----->|
+          |-----W=1, FCN=1----->|
+          |-----W=1, FCN=0----->|
       (no ACK)
-          |-----W=0, CFN=6----->|
-          |-----W=0, CFN=5----->|
-          |-----W=0, CFN=4----->|
-          |-----W=0, CFN=7----->|MIC checked =>
+          |-----W=0, FCN=6----->|
+          |-----W=0, FCN=5----->|
+          |-----W=0, FCN=4----->|
+          |-----W=0, FCN=7----->|MIC checked =>
       (no ACK)
 
 ~~~~
-{: #Fig-Example-Win-NoLoss-NACK title='Transmission of an IPv6 packet carried by 11 fragments in Window mode - ACK on error, for N=3, without losses.'}
+{: #Fig-Example-Win-NoLoss-NACK title='Transmission of an IPv6 packet carried by 11 fragments in Window mode - ACK on error, for N=3 and MAX_WIND_FCN=6, without losses.'}
 
 {{Fig-Example-Rel-Window-NACK-Loss}} illustrates the transmission of an IPv6 packet that needs 11 fragments in Window mode - ACK on error, for N=3, with three losses.
 
 ~~~~
          Sender             Receiver
-          |-----W=1, CFN=6----->|
-          |-----W=1, CFN=5----->|
-          |-----W=1, CFN=4--X-->|
-          |-----W=1, CFN=3----->|
-          |-----W=1, CFN=2--X-->|
-          |-----W=1, CFN=1----->|
-          |-----W=1, CFN=0----->|
+          |-----W=1, FCN=6----->|
+          |-----W=1, FCN=5----->|
+          |-----W=1, FCN=4--X-->|
+          |-----W=1, FCN=3----->|
+          |-----W=1, FCN=2--X-->|
+          |-----W=1, FCN=1----->|
+          |-----W=1, FCN=0----->|
           |<-----ACK, W=1-------|Bitmap:11010111
-          |-----W=1, CFN=4----->|
-          |-----W=1, CFN=2----->|   
+          |-----W=1, FCN=4----->|
+          |-----W=1, FCN=2----->|   
       (no ACK)     
-          |-----W=0, CFN=6----->|
-          |-----W=0, CFN=5----->|
-          |-----W=0, CFN=4--X-->|
-          |-----W=0, CFN=7----->|MIC checked
+          |-----W=0, FCN=6----->|
+          |-----W=0, FCN=5----->|
+          |-----W=0, FCN=4--X-->|
+          |-----W=0, FCN=7----->|MIC checked
           |<-----ACK, W=0-------|Bitmap:11000001
-          |-----W=0, CFN=4----->|MIC checked =>
+          |-----W=0, FCN=4----->|MIC checked =>
       (no ACK)    
 
 ~~~~
-{: #Fig-Example-Rel-Window-NACK-Loss title='Transmission of an IPv6 packet carried by 11 fragments in Window mode - ACK on error, for N=3, three losses.'}
+{: #Fig-Example-Rel-Window-NACK-Loss title='Transmission of an IPv6 packet carried by 11 fragments in Window mode - ACK on error, for N=3 and MAX_WIND_FCN=6, three losses.'}
 
-{{Fig-Example-Rel-Window-ACK-NoLoss}} illustrates the transmission of an IPv6 packet that needs 11 fragments in Window mode - ACK "always", for N=3, without losses. Note: in Window mode, an additional bit will be needed to number windows. 
+{{Fig-Example-Rel-Window-ACK-NoLoss}} illustrates the transmission of an IPv6 packet that needs 11 fragments in Window mode - ACK "always", for N=3 and MAX_WIND_FCN=6, without losses. Note: in Window mode, an additional bit will be needed to number windows. 
 
 ~~~~
         Sender               Receiver
-          |-----W=1, CFN=6----->|
-          |-----W=1, CFN=5----->|
-          |-----W=1, CFN=4----->|
-          |-----W=1, CFN=3----->|
-          |-----W=1, CFN=2----->|
-          |-----W=1, CFN=1----->|
-          |-----W=1, CFN=0----->|
+          |-----W=1, FCN=6----->|
+          |-----W=1, FCN=5----->|
+          |-----W=1, FCN=4----->|
+          |-----W=1, FCN=3----->|
+          |-----W=1, FCN=2----->|
+          |-----W=1, FCN=1----->|
+          |-----W=1, FCN=0----->|
           |<-----ACK, W=1-------|no bitmap
-          |-----W=0, CFN=6----->|
-          |-----W=0, CFN=5----->|   
-          |-----W=0, CFN=4----->|
-          |-----W=0, CFN=7----->|MIC checked =>
+          |-----W=0, FCN=6----->|
+          |-----W=0, FCN=5----->|   
+          |-----W=0, FCN=4----->|
+          |-----W=0, FCN=7----->|MIC checked =>
           |<-----ACK, W=0-------|no bitmap
         (End)    
 
 ~~~~
-{: #Fig-Example-Rel-Window-ACK-NoLoss title='Transmission of an IPv6 packet carried by 11 fragments in Window mode - ACK "always", for N=3, no losses.'}
+{: #Fig-Example-Rel-Window-ACK-NoLoss title='Transmission of an IPv6 packet carried by 11 fragments in Window mode - ACK "always", for N=3 and MAX_WIND_FCN=6, no losses.'}
 
-{{Fig-Example-Rel-Window-ACK-Loss}} illustrates the transmission of an IPv6 packet that needs 11 fragments in Window mode - ACK "always", for N=3, with three losses.
+{{Fig-Example-Rel-Window-ACK-Loss}} illustrates the transmission of an IPv6 packet that needs 11 fragments in Window mode - ACK "always", for N=3 and MAX_WIND_FCN=6, with three losses.
 
 ~~~~
         Sender               Receiver
-          |-----W=1, CFN=6----->|
-          |-----W=1, CFN=5----->|
-          |-----W=1, CFN=4--X-->|
-          |-----W=1, CFN=3----->|
-          |-----W=1, CFN=2--X-->|
-          |-----W=1, CFN=1----->|
-          |-----W=1, CFN=0----->|
+          |-----W=1, FCN=6----->|
+          |-----W=1, FCN=5----->|
+          |-----W=1, FCN=4--X-->|
+          |-----W=1, FCN=3----->|
+          |-----W=1, FCN=2--X-->|
+          |-----W=1, FCN=1----->|
+          |-----W=1, FCN=0----->|
           |<-----ACK, W=1-------|bitmap:11010111
-          |-----W=1, CFN=4----->|
-          |-----W=1, CFN=2----->|
+          |-----W=1, FCN=4----->|
+          |-----W=1, FCN=2----->|
           |<-----ACK, W=1-------|no bitmap
-          |-----W=0, CFN=6----->|
-          |-----W=0, CFN=5----->|   
-          |-----W=0, CFN=4--X-->|
-          |-----W=0, CFN=7----->|MIC checked
+          |-----W=0, FCN=6----->|
+          |-----W=0, FCN=5----->|   
+          |-----W=0, FCN=4--X-->|
+          |-----W=0, FCN=7----->|MIC checked
           |<-----ACK, W=0-------|bitmap:11000001
-          |-----W=0, CFN=4----->|MIC checked =>
+          |-----W=0, FCN=4----->|MIC checked =>
           |<-----ACK, W=0-------|no bitmap
         (End)    
 
 ~~~~
-{: #Fig-Example-Rel-Window-ACK-Loss title='Transmission of an IPv6 packet carried by 11 fragments in Window mode - ACK "Always", for N=3, with three losses.'}
+{: #Fig-Example-Rel-Window-ACK-Loss title='Transmission of an IPv6 packet carried by 11 fragments in Window mode - ACK "Always", for N=3, and MAX_WIND_FCN=6, with three losses.'}
 
-# Rule IDs for fragmentation
+{{Fig-Example-MaxWindFCN}} illustrates the transmission of an IPv6 packet that needs 28 fragments in Window mode - ACK "always", for N=5 and MAX_WIND_FCN=23, with two losses. Note that MAX_WIND_FCN=23 may be useful when the maximum possible bitmap size, considering the maximum lower layer technology payload size and the value of R, is 3 bytes. Note also that the FCN of the last fragment of the packet is the one with FCN=31 (i.e. FCN=2^N-1 for N=5, or equivalently, all FCN bits set to 1). 
 
-Different Rule IDs may be used for different aspects of fragmentation functionality as per this document. A summary of such Rule IDs follows:   
+~~~~
+           Sender               Receiver
+             |-----W=1, CFN=23----->|
+             |-----W=1, CFN=22----->|
+             |-----W=1, CFN=21--X-->|
+             |-----W=1, CFN=20----->|
+             |-----W=1, CFN=19----->|
+             |-----W=1, CFN=18----->|
+             |-----W=1, CFN=17----->|
+             |-----W=1, CFN=16----->|
+             |-----W=1, CFN=15----->|
+             |-----W=1, CFN=14----->|
+             |-----W=1, CFN=13----->|
+             |-----W=1, CFN=12----->|
+             |-----W=1, CFN=11----->|
+             |-----W=1, CFN=10--X-->|
+             |-----W=1, CFN=9 ----->|
+             |-----W=1, CFN=8 ----->|
+             |-----W=1, CFN=7 ----->|
+             |-----W=1, CFN=6 ----->|
+             |-----W=1, CFN=5 ----->|
+             |-----W=1, CFN=4 ----->|
+             |-----W=1, CFN=3 ----->|
+             |-----W=1, CFN=2 ----->|
+             |-----W=1, CFN=1 ----->|
+             |-----W=1, CFN=0 ----->|
+             |<------ACK, W=1-------|bitmap:110111111111101111111111
+             |-----W=1, CFN=21----->|
+             |-----W=1, CFN=10----->|
+             |<------ACK, W=1-------|no bitmap
+             |-----W=0, CFN=23----->|
+             |-----W=0, CFN=22----->|
+             |-----W=0, CFN=21----->|
+             |-----W=0, CFN=31----->|MIC checked =>
+             |<------ACK, W=0-------|no bitmap
+           (End)
+~~~~
 
-   *  A fragment, and the reliability option in use for the IPv6 datagram being carried: i) No ACK, ii) Window mode - ACK on error, iii) Window mode - ACK “always”. In Window mode, a specific Rule ID may be used for each supported window size.
-     
-   *  An ACK message.
+{: #Fig-Example-MaxWindFCN title='Transmission of an IPv6 packet carried by 28 fragments in Window mode - ACK "Always", for N=5 and MAX_WIND_FCN=23, with two losses.'}
+
+
+
+# Allocation of Rule IDs for fragmentation
+
+A set of Rule IDs are allocated to support different aspects of fragmentation functionality as per this document. The allocation of IDs is to be defined in other documents. The set MAY include:   
+
+   *  one ID or a subset of IDs to identify a fragment as well as its reliability option and its window size, if multiple of these are supported.
    
-   *  A message to abort all on-going transmissions.
+   *  one ID to identify the ACK message.
+   
+   *  one ID to identify the Abort message as per Section 9.8.
 
 
 # Note
