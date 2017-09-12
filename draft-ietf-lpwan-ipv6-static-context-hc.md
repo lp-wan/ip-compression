@@ -342,15 +342,15 @@ The compression/decompression process follows several steps:
 
 ~~~~
 
-   +--- ... ---+-------------- ... --------------+-------------+--...--+
-   |  Rule ID  |Compressed Hdr Fields information|   payload   |padding|
-   +--- ... ---+-------------- ... --------------+-------------+--...--+
+   +--- ... --+-------------- ... --------------+-----------+--...--+
+   |  Rule ID |Compressed Hdr Fields information|  payload  |padding|
+   +--- ... --+-------------- ... --------------+-----------+--...--+
 
 ~~~~
 {: #Fig-FormatPckt title='LPWAN Compressed Format Packet'}
 
 
-# Matching operators {#chap-MO}
+## Matching operators {#chap-MO}
 
 Matching Operators (MOs) are functions used by both SCHC C/D endpoints involved in the header 
 compression/decompression. They are not typed and can be applied indifferently to integer, string 
@@ -370,7 +370,7 @@ or any other data type. The result of the operation can either be True or False.
   This operator matches if a field value is equal to one of those target values. 
   
 
-# Compression Decompression Actions (CDA) {#chap-CDA}
+## Compression Decompression Actions (CDA) {#chap-CDA}
 
 The Compression Decompression Action (CDA) describes the actions taken during
 the compression of headers fields, and inversely, the action taken by the decompressor to restore
@@ -410,7 +410,7 @@ If the field is identified as variable, then its size must be sent first using t
 
 * For higher value, the first 12 bits are set to 1 and the size is sent on 2 bytes. 
 
-## not-sent CDA
+### not-sent CDA
 
 Not-sent function is generally used when the field value is specified in the rule and
 therefore known by the both Compressor and Decompressor. This action is generally used with the
@@ -421,7 +421,7 @@ The compressor does not send any value on the compressed header for the field on
 
 The decompressor restores the field value with the target value stored in the matched rule.
 
-## value-sent CDA
+### value-sent CDA
 
 The value-sent action is generally used when the field value is not known by both Compressor and Decompressor.
 The value is sent in the compressed message header. Both Compressor and Decompressor must know the
@@ -429,7 +429,7 @@ size of the field, either implicitly (the size is known by both sides)
 or explicitly in the compressed header
 field by indicating the length. This function is generally used with the "ignore" MO.
 
-## mapping-sent
+### mapping-sent
 
 mapping-sent is used to send a smaller index associated to the list of values
 in the Target Value. This function is used together with the "match-mapping" MO.
@@ -439,7 +439,7 @@ The decompressor uses this index to restore the field value.
 
 The number of bits sent is the minimal size to code all the possible indexes.
 
-## LSB CDA
+### LSB CDA
 
 LSB action is used to avoid sending the known part of the packet field header to the other end.
 This action is used together with the "MSB" MO. A length can be specified in the rule to indicate
@@ -452,7 +452,7 @@ combines the value received with the Target Value.
 If this action is made on a variable length field, the remaning size in byte has to be sent before.
 
 
-## DEViid, APPiid CDA
+### DEViid, APPiid CDA
 
 These functions are used to process respectively the Dev and the App Interface Identifiers (Deviid and Appiid) of the 
 IPv6 addresses. Appiid CDA is less common, since current LPWAN technologies
@@ -463,7 +463,7 @@ computation is specific for each LPWAN technology and may depend on the Device I
 
 In the downstream direction, these CDA may be used to determine the L2 addresses used by the LPWAN.
 
-## Compute-\*
+### Compute-\*
 
 These classes of functions are used by the decompressor to compute the compressed field value based on received information. 
 Compressed fields are elided during compression and reconstructed during decompression.
