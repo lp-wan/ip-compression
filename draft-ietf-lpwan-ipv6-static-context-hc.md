@@ -474,305 +474,6 @@ Compressed fields are elided during compression and reconstructed during decompr
 * compute-checksum: compute a checksum from the information already received by the SCHC C/D.
   This field may be used to compute UDP checksum.
 
-# Application to IPv6 and UDP headers
-
-This section lists the different IPv6 and UDP header fields and how they can be compressed.
-
-## IPv6 version field
-
-This field always holds the same value, therefore the TV is 6, the MO is "equal" 
-and the "CDA "not-sent"".
-
-## IPv6 Traffic class field
-
-If the DiffServ field identified by the rest of the rule do not vary and is known 
-by both sides, the TV should contain this well-known value, the MO should be "equal" 
-and the CDA must be "not-sent.
-
-If the DiffServ field identified by the rest of the rule varies over time or is not 
-known by both sides, then there are two possibilities depending on the variability of the value, 
-the first one is to do not compressed the field and sends the original value, or 
-the second where the values can be computed by sending only the LSB bits:
-
-* TV is not set to any value, MO is set to "ignore" and CDA is set to "value-sent"
-
-* TV contains a stable value, MO is MSB(X) and CDA is set to LSB
-
-## Flow label field
-
-If the Flow Label field identified by the rest of the rule does not vary and is known 
-by both sides, the TV should contain this well-known value, the MO should be "equal" 
-and the CDA should be "not-sent".
-
-If the Flow Label field identified by the rest of the rule varies during time or is not 
-known by both sides, there are two possibilities depending on the variability of the value,
-the first one is without compression and then the value is sent 
-and the second where only part of the value is sent and the decompressor needs to compute the original value:
-
-* TV is not set, MO is set to "ignore" and CDA is set to "value-sent"
-
-* TV contains a stable value, MO is MSB(X) and CDA is set to LSB
-
-## Payload Length field
-
-If the LPWAN technology does not add padding, this field can be elided for the 
-transmission on the LPWAN network. The SCHC C/D recomputes the original payload length
-value. The TV is not set, the MO is set to "ignore" and the CDA is "compute-IPv6-length".
-
-If the payload length needs to be sent and does not need to be coded in 16 bits, the TV can be set to 0x0000, 
-the MO set to "MSB (16-s)" and the
-CDA to "LSB". The 's' parameter depends on the expected maximum packet length.
-
-On other cases, the payload length field must be sent and the CDA is replaced by "value-sent".
-
-## Next Header field
-
-If the Next Header field identified by the rest of the rule does not vary and is known 
-by both sides, the TV should contain this Next Header value, the MO should be "equal" 
-and the CDA should be "not-sent".
-
-If the Next header field identified by the rest of the rule varies during time or is not 
-known by both sides, then TV is not set, MO is set to "ignore" and CDA is set to 
-"value-sent". A matching-list may also be used.
-
-## Hop Limit field
-
-The End System is generally a device and does not forward packets, therefore the
-Hop Limit value is constant. So the TV is set with a default value, the MO 
-is set to "equal" and the CDA is set to "not-sent".
-
-Otherwise the value is sent on the LPWAN: TV is not set, MO is set to ignore and 
-CDA is set to "value-sent".
-
-Note that the field behavior differs in upstream and downstream. In upstream, since there is 
-no IP forwarding between the Dev and the SCHC C/D, the value is relatively constant. On the
-other hand, the downstream value depends of Internet routing and may change more frequently.
-One solution could be to use the Direction Indicator (DI) to distinguish both directions to
-elide the field in the upstream direction and send the value in the downstream direction.
-
-## IPv6 addresses fields
-
-As in 6LoWPAN {{RFC4944}}, IPv6 addresses are split into two 64-bit long fields; 
-one for the prefix and one for the Interface Identifier (IID). These fields should
-be compressed. To allow a single rule, these values are identified by their role 
-(DEV or APP) and not by their position in the frame (source or destination). The SCHC C/D
-must be aware of the traffic direction (upstream, downstream) to select the appropriate
-field.
-
-### IPv6 source and destination prefixes
-
-Both ends must be synchronized with the appropriate prefixes. For a specific flow, 
-the source and destination prefix can be unique and stored in the context. It can 
-be either a link-local prefix or a global prefix. In that case, the TV for the 
-source and destination prefixes contains the values, the MO is set to "equal" and
-the CDA is set to "not-sent".
-
-In case the rule allows several prefixes, mapping-list must be used. The 
-different prefixes are listed in the TV associated with a short ID. The MO is set 
-to "match-mapping" and the CDA is set to "mapping-sent".
-
-Otherwise the TV contains the prefix, the MO is set to "equal" and the CDA is set to
-value-sent.
-
-### IPv6 source and destination IID
-
-If the DEV or APP IID are based on an LPWAN address, then the IID can be reconstructed 
-with information coming from the LPWAN header. In that case, the TV is not set, the MO 
-is set to "ignore" and the CDA is set to "DEViid" or "APPiid". Note that the 
-LPWAN technology is generally carrying a single device identifier corresponding
-to the DEV. The SCHC C/D may also not be aware of these values. 
-
-If the DEV address has a static value that is not derivated from an IEEE EUI-64,
-then TV contains the actual Dev address value, the MO operator is set to
-"equal" and the CDA is set to "not-sent". 
-
-If several IIDs are possible, then the TV contains the list of possible IIDs, the MO is 
-set to "match-mapping" and the CDA is set to "mapping-sent". 
-
-Otherwise the value variation of the IID may be reduced to few bytes. In that case, the TV is
-set to the stable part of the IID, the MO is set to MSB and the CDA is set to LSB.
-
-Finally, the IID can be sent on the LPWAN. In that case, the TV is not set, the MO is set
-to "ignore" and the CDA is set to "value-sent".
-
-## IPv6 extensions
-
-No extension rules are currently defined. They can be based on the MOs and 
-CDAs described above.
-
-## UDP source and destination port
-
-To allow a single rule, the UDP port values are identified by their role 
-(DEV or APP) and not by their position in the frame (source or destination). The SCHC C/D
-must be aware of the traffic direction (upstream, downstream) to select the appropriate
-field. The following rules apply for DEV and APP port numbers.
-
-If both ends know the port number, it can be elided. The TV contains the port number,
-the MO is set to "equal" and the CDA is set to "not-sent".
-
-If the port variation is on few bits, the TV contains the stable part of the port number,
-the MO is set to "MSB" and the CDA is set to "LSB".
-
-If some well-known values are used,  the TV can contain the list of this values, the
-MO is set to "match-mapping" and the CDA is set to "mapping-sent".
-
-Otherwise the port numbers are sent on the LPWAN. The TV is not set, the MO is 
-set to "ignore" and the CDA is set to "value-sent".
-
-## UDP length field
-
-If the LPWAN technology does not introduce padding, the UDP length can be computed
-from the received data. In that case the TV is not set, the MO is set to "ignore" and
-the CDA is set to "compute-UDP-length".
-
-If the payload is small, the TV can be set to 0x0000, the MO set to "MSB" and the
-CDA to "LSB". 
-
-On other cases, the length must be sent and the CDA is replaced by "value-sent".
-
-## UDP Checksum field
-
-IPv6 mandates a checksum in the protocol above IP. Nevertheless, if a more efficient
-mechanism such as L2 CRC or MIC is carried by or over the L2 (such as in the 
-LPWAN fragmentation process (see section {{Frag}})), the UDP checksum transmission can be avoided.
-In that case, the TV is not set, the MO is set to "ignore" and the CDA is set to
-"compute-UDP-checksum".
-
-In other cases the checksum must be explicitly sent. The TV is not set, the MO is set to
-"ignore" and the CDF is set to "value-sent".
-
-
-
-# Examples {#compressIPv6}
-
-
-This section gives some scenarios of the compression mechanism for IPv6/UDP.
-The goal is to illustrate the SCHC behavior.
-
-## IPv6/UDP compression 
-
-The most common case using the mechanisms defined in this document will be a 
-LPWAN Dev that embeds some applications running over
-CoAP. In this example, three flows are considered. The first flow is for the device management based
-on CoAP using
-Link Local IPv6 addresses and UDP ports 123 and 124 for Dev and App, respectively.
-The second flow will be a CoAP server for measurements done by the Device
-(using ports 5683) and Global IPv6 Address prefixes alpha::IID/64 to beta::1/64.
-The last flow is for legacy applications using different ports numbers, the
-destination IPv6 address prefix is gamma::1/64.
-
- {{FigStack}} presents the protocol stack for this Device. IPv6 and UDP are represented
-with dotted lines since these protocols are compressed on the radio link.
-
-~~~~
- Managment    Data
-+----------+---------+---------+
-|   CoAP   |  CoAP   | legacy  |
-+----||----+---||----+---||----+
-.   UDP    .  UDP    |   UDP   |
-................................
-.   IPv6   .  IPv6   .  IPv6   .
-+------------------------------+
-|    SCHC Header compression   |
-|      and fragmentation       |
-+------------------------------+
-|      LPWAN L2 technologies   |
-+------------------------------+
-         DEV or NGW
-
-~~~~
-{: #FigStack title='Simplified Protocol Stack for LP-WAN'}
-
-
-Note that in some LPWAN technologies, only the Devs have a device ID.
-Therefore, when such technologies are used, it is necessary to define statically an IID for the Link
-Local address for the SCHC C/D.
-
-
-
-~~~~
-  Rule 0
-  +----------------+--+--+---------+--------+-------------++------+
-  | Field          |FP|DI| Value   | Match  | Comp Decomp || Sent |
-  |                |  |  |         | Opera. | Action      ||[bits]|
-  +----------------+--+--+---------+----------------------++------+
-  |IPv6 version    |1 |Bi|6        | equal  | not-sent    ||      |
-  |IPv6 DiffServ   |1 |Bi|0        | equal  | not-sent    ||      |
-  |IPv6 Flow Label |1 |Bi|0        | equal  | not-sent    ||      |
-  |IPv6 Length     |1 |Bi|         | ignore | comp-length ||      |
-  |IPv6 Next Header|1 |Bi|17       | equal  | not-sent    ||      |
-  |IPv6 Hop Limit  |1 |Bi|255      | ignore | not-sent    ||      |
-  |IPv6 DEVprefix  |1 |Bi|FE80::/64| equal  | not-sent    ||      |
-  |IPv6 DEViid     |1 |Bi|         | ignore | DEViid      ||      |
-  |IPv6 APPprefix  |1 |Bi|FE80::/64| equal  | not-sent    ||      |
-  |IPv6 APPiid     |1 |Bi|::1      | equal  | not-sent    ||      |
-  +================+==+==+=========+========+=============++======+
-  |UDP DEVport     |1 |Bi|123      | equal  | not-sent    ||      |
-  |UDP APPport     |1 |Bi|124      | equal  | not-sent    ||      |
-  |UDP Length      |1 |Bi|         | ignore | comp-length ||      |
-  |UDP checksum    |1 |Bi|         | ignore | comp-chk    ||      |
-  +================+==+==+=========+========+=============++======+
-
-  Rule 1
-  +----------------+--+--+---------+--------+-------------++------+
-  | Field          |FP|DI| Value   | Match  | Action      || Sent |
-  |                |  |  |         | Opera. | Action      ||[bits]|
-  +----------------+--+--+---------+--------+-------------++------+
-  |IPv6 version    |1 |Bi|6        | equal  | not-sent    ||      |
-  |IPv6 DiffServ   |1 |Bi|0        | equal  | not-sent    ||      |
-  |IPv6 Flow Label |1 |Bi|0        | equal  | not-sent    ||      |
-  |IPv6 Length     |1 |Bi|         | ignore | comp-length ||      |
-  |IPv6 Next Header|1 |Bi|17       | equal  | not-sent    ||      |
-  |IPv6 Hop Limit  |1 |Bi|255      | ignore | not-sent    ||      |
-  |IPv6 DEVprefix  |1 |Bi|[alpha/64, match- | mapping-sent||  [1] |
-  |                |1 |Bi|fe80::/64] mapping|             ||      |
-  |IPv6 DEViid     |1 |Bi|         | ignore | DEViid      ||      |
-  |IPv6 APPprefix  |1 |Bi|[beta/64,| match- | mapping-sent||  [2] |
-  |                |  |  |alpha/64,| mapping|             ||      |
-  |                |  |  |fe80::64]|        |             ||      |
-  |IPv6 APPiid     |1 |Bi|::1000   | equal  | not-sent    ||      |
-  +================+==+==+=========+========+=============++======+
-  |UDP DEVport     |1 |Bi|5683     | equal  | not-sent    ||      |
-  |UDP APPport     |1 |Bi|5683     | equal  | not-sent    ||      |
-  |UDP Length      |1 |Bi|         | ignore | comp-length ||      |
-  |UDP checksum    |1 |Bi|         | ignore | comp-chk    ||      |
-  +================+==+==+=========+========+=============++======+
-
-  Rule 2
-  +----------------+--+--+---------+--------+-------------++------+
-  | Field          |FP|DI| Value   | Match  | Action      || Sent |
-  |                |  |  |         | Opera. | Action      ||[bits]|
-  +----------------+--+--+---------+--------+-------------++------+
-  |IPv6 version    |1 |Bi|6        | equal  | not-sent    ||      |
-  |IPv6 DiffServ   |1 |Bi|0        | equal  | not-sent    ||      |
-  |IPv6 Flow Label |1 |Bi|0        | equal  | not-sent    ||      |
-  |IPv6 Length     |1 |Bi|         | ignore | comp-length ||      |
-  |IPv6 Next Header|1 |Bi|17       | equal  | not-sent    ||      |
-  |IPv6 Hop Limit  |1 |Up|255      | ignore | not-sent    ||      |
-  |IPv6 Hop Limit  |1 |Dw|         | ignore | value-sent  ||  [8] |
-  |IPv6 DEVprefix  |1 |Bi|alpha/64 | equal  | not-sent    ||      |
-  |IPv6 DEViid     |1 |Bi|         | ignore | DEViid      ||      |
-  |IPv6 APPprefix  |1 |Bi|gamma/64 | equal  | not-sent    ||      |
-  |IPv6 APPiid     |1 |Bi|::1000   | equal  | not-sent    ||      |
-  +================+==+==+=========+========+=============++======+
-  |UDP DEVport     |1 |Bi|8720     | MSB(12)| LSB(4)      || [4]  |
-  |UDP APPport     |1 |Bi|8720     | MSB(12)| LSB(4)      || [4]  |
-  |UDP Length      |1 |Bi|         | ignore | comp-length ||      |
-  |UDP checksum    |1 |Bi|         | ignore | comp-chk    ||      |
-  +================+==+==+=========+========+=============++======+
-
-
-~~~~
-{: #Fig-fields title='Context rules'}
-
-All the fields described in the three rules depicted on {{Fig-fields}} are present
-in the IPv6 and UDP headers.  The DEViid-DID value is found in the L2
-header.
-
-The second and third rules use global addresses. The way the Dev learns the
-prefix is not in the scope of the document. 
-
-The third rule compresses port numbers to 4 bits. 
 
 # Fragmentation {#Frag}
 
@@ -1039,6 +740,173 @@ Upon transmission or reception of the abortion signal, both entities MUST releas
 In some LPWAN technologies, as part of energy-saving techniques, downlink transmission is only possible immediately after an uplink transmission. In order to avoid potentially high delay for fragmented IPv6 datagram transmission in the downlink, the fragment receiver MAY perform an uplink transmission as soon as possible after reception of a fragment that is not the last one. Such uplink transmission may be triggered by the L2 (e.g. an L2 ACK sent in response to a fragment encapsulated in a L2 frame that requires an L2 ACK) or it may be triggered from an upper layer.
 
 
+# SCHC Compression for IPv6 and UDP headers
+
+This section lists the different IPv6 and UDP header fields and how they can be compressed.
+
+## IPv6 version field
+
+This field always holds the same value, therefore the TV is 6, the MO is "equal" 
+and the "CDA "not-sent"".
+
+## IPv6 Traffic class field
+
+If the DiffServ field identified by the rest of the rule do not vary and is known 
+by both sides, the TV should contain this well-known value, the MO should be "equal" 
+and the CDA must be "not-sent.
+
+If the DiffServ field identified by the rest of the rule varies over time or is not 
+known by both sides, then there are two possibilities depending on the variability of the value, 
+the first one is to do not compressed the field and sends the original value, or 
+the second where the values can be computed by sending only the LSB bits:
+
+* TV is not set to any value, MO is set to "ignore" and CDA is set to "value-sent"
+
+* TV contains a stable value, MO is MSB(X) and CDA is set to LSB
+
+## Flow label field
+
+If the Flow Label field identified by the rest of the rule does not vary and is known 
+by both sides, the TV should contain this well-known value, the MO should be "equal" 
+and the CDA should be "not-sent".
+
+If the Flow Label field identified by the rest of the rule varies during time or is not 
+known by both sides, there are two possibilities depending on the variability of the value,
+the first one is without compression and then the value is sent 
+and the second where only part of the value is sent and the decompressor needs to compute the original value:
+
+* TV is not set, MO is set to "ignore" and CDA is set to "value-sent"
+
+* TV contains a stable value, MO is MSB(X) and CDA is set to LSB
+
+## Payload Length field
+
+If the LPWAN technology does not add padding, this field can be elided for the 
+transmission on the LPWAN network. The SCHC C/D recomputes the original payload length
+value. The TV is not set, the MO is set to "ignore" and the CDA is "compute-IPv6-length".
+
+If the payload length needs to be sent and does not need to be coded in 16 bits, the TV can be set to 0x0000, 
+the MO set to "MSB (16-s)" and the
+CDA to "LSB". The 's' parameter depends on the expected maximum packet length.
+
+On other cases, the payload length field must be sent and the CDA is replaced by "value-sent".
+
+## Next Header field
+
+If the Next Header field identified by the rest of the rule does not vary and is known 
+by both sides, the TV should contain this Next Header value, the MO should be "equal" 
+and the CDA should be "not-sent".
+
+If the Next header field identified by the rest of the rule varies during time or is not 
+known by both sides, then TV is not set, MO is set to "ignore" and CDA is set to 
+"value-sent". A matching-list may also be used.
+
+## Hop Limit field
+
+The End System is generally a device and does not forward packets, therefore the
+Hop Limit value is constant. So the TV is set with a default value, the MO 
+is set to "equal" and the CDA is set to "not-sent".
+
+Otherwise the value is sent on the LPWAN: TV is not set, MO is set to ignore and 
+CDA is set to "value-sent".
+
+Note that the field behavior differs in upstream and downstream. In upstream, since there is 
+no IP forwarding between the Dev and the SCHC C/D, the value is relatively constant. On the
+other hand, the downstream value depends of Internet routing and may change more frequently.
+One solution could be to use the Direction Indicator (DI) to distinguish both directions to
+elide the field in the upstream direction and send the value in the downstream direction.
+
+## IPv6 addresses fields
+
+As in 6LoWPAN {{RFC4944}}, IPv6 addresses are split into two 64-bit long fields; 
+one for the prefix and one for the Interface Identifier (IID). These fields should
+be compressed. To allow a single rule, these values are identified by their role 
+(DEV or APP) and not by their position in the frame (source or destination). The SCHC C/D
+must be aware of the traffic direction (upstream, downstream) to select the appropriate
+field.
+
+### IPv6 source and destination prefixes
+
+Both ends must be synchronized with the appropriate prefixes. For a specific flow, 
+the source and destination prefix can be unique and stored in the context. It can 
+be either a link-local prefix or a global prefix. In that case, the TV for the 
+source and destination prefixes contains the values, the MO is set to "equal" and
+the CDA is set to "not-sent".
+
+In case the rule allows several prefixes, mapping-list must be used. The 
+different prefixes are listed in the TV associated with a short ID. The MO is set 
+to "match-mapping" and the CDA is set to "mapping-sent".
+
+Otherwise the TV contains the prefix, the MO is set to "equal" and the CDA is set to
+value-sent.
+
+### IPv6 source and destination IID
+
+If the DEV or APP IID are based on an LPWAN address, then the IID can be reconstructed 
+with information coming from the LPWAN header. In that case, the TV is not set, the MO 
+is set to "ignore" and the CDA is set to "DEViid" or "APPiid". Note that the 
+LPWAN technology is generally carrying a single device identifier corresponding
+to the DEV. The SCHC C/D may also not be aware of these values. 
+
+If the DEV address has a static value that is not derivated from an IEEE EUI-64,
+then TV contains the actual Dev address value, the MO operator is set to
+"equal" and the CDA is set to "not-sent". 
+
+If several IIDs are possible, then the TV contains the list of possible IIDs, the MO is 
+set to "match-mapping" and the CDA is set to "mapping-sent". 
+
+Otherwise the value variation of the IID may be reduced to few bytes. In that case, the TV is
+set to the stable part of the IID, the MO is set to MSB and the CDA is set to LSB.
+
+Finally, the IID can be sent on the LPWAN. In that case, the TV is not set, the MO is set
+to "ignore" and the CDA is set to "value-sent".
+
+## IPv6 extensions
+
+No extension rules are currently defined. They can be based on the MOs and 
+CDAs described above.
+
+## UDP source and destination port
+
+To allow a single rule, the UDP port values are identified by their role 
+(DEV or APP) and not by their position in the frame (source or destination). The SCHC C/D
+must be aware of the traffic direction (upstream, downstream) to select the appropriate
+field. The following rules apply for DEV and APP port numbers.
+
+If both ends know the port number, it can be elided. The TV contains the port number,
+the MO is set to "equal" and the CDA is set to "not-sent".
+
+If the port variation is on few bits, the TV contains the stable part of the port number,
+the MO is set to "MSB" and the CDA is set to "LSB".
+
+If some well-known values are used,  the TV can contain the list of this values, the
+MO is set to "match-mapping" and the CDA is set to "mapping-sent".
+
+Otherwise the port numbers are sent on the LPWAN. The TV is not set, the MO is 
+set to "ignore" and the CDA is set to "value-sent".
+
+## UDP length field
+
+If the LPWAN technology does not introduce padding, the UDP length can be computed
+from the received data. In that case the TV is not set, the MO is set to "ignore" and
+the CDA is set to "compute-UDP-length".
+
+If the payload is small, the TV can be set to 0x0000, the MO set to "MSB" and the
+CDA to "LSB". 
+
+On other cases, the length must be sent and the CDA is replaced by "value-sent".
+
+## UDP Checksum field
+
+IPv6 mandates a checksum in the protocol above IP. Nevertheless, if a more efficient
+mechanism such as L2 CRC or MIC is carried by or over the L2 (such as in the 
+LPWAN fragmentation process (see section {{Frag}})), the UDP checksum transmission can be avoided.
+In that case, the TV is not set, the MO is set to "ignore" and the CDA is set to
+"compute-UDP-checksum".
+
+In other cases the checksum must be explicitly sent. The TV is not set, the MO is set to
+"ignore" and the CDF is set to "value-sent".
+
 # Security considerations
 
 ## Security considerations for header compression
@@ -1093,7 +961,139 @@ Pelov, Pascal Thubert, Juan Carlos Zuniga and Diego Dujovne for useful design co
 
 --- back
 
-# Fragmentation examples
+# SCHC Compression Examples {#compressIPv6}
+
+
+This section gives some scenarios of the compression mechanism for IPv6/UDP.
+The goal is to illustrate the SCHC behavior.
+
+## IPv6/UDP compression 
+
+The most common case using the mechanisms defined in this document will be a 
+LPWAN Dev that embeds some applications running over
+CoAP. In this example, three flows are considered. The first flow is for the device management based
+on CoAP using
+Link Local IPv6 addresses and UDP ports 123 and 124 for Dev and App, respectively.
+The second flow will be a CoAP server for measurements done by the Device
+(using ports 5683) and Global IPv6 Address prefixes alpha::IID/64 to beta::1/64.
+The last flow is for legacy applications using different ports numbers, the
+destination IPv6 address prefix is gamma::1/64.
+
+ {{FigStack}} presents the protocol stack for this Device. IPv6 and UDP are represented
+with dotted lines since these protocols are compressed on the radio link.
+
+~~~~
+ Managment    Data
++----------+---------+---------+
+|   CoAP   |  CoAP   | legacy  |
++----||----+---||----+---||----+
+.   UDP    .  UDP    |   UDP   |
+................................
+.   IPv6   .  IPv6   .  IPv6   .
++------------------------------+
+|    SCHC Header compression   |
+|      and fragmentation       |
++------------------------------+
+|      LPWAN L2 technologies   |
++------------------------------+
+         DEV or NGW
+
+~~~~
+{: #FigStack title='Simplified Protocol Stack for LP-WAN'}
+
+
+Note that in some LPWAN technologies, only the Devs have a device ID.
+Therefore, when such technologies are used, it is necessary to define statically an IID for the Link
+Local address for the SCHC C/D.
+
+
+
+~~~~
+  Rule 0
+  +----------------+--+--+---------+--------+-------------++------+
+  | Field          |FP|DI| Value   | Match  | Comp Decomp || Sent |
+  |                |  |  |         | Opera. | Action      ||[bits]|
+  +----------------+--+--+---------+----------------------++------+
+  |IPv6 version    |1 |Bi|6        | equal  | not-sent    ||      |
+  |IPv6 DiffServ   |1 |Bi|0        | equal  | not-sent    ||      |
+  |IPv6 Flow Label |1 |Bi|0        | equal  | not-sent    ||      |
+  |IPv6 Length     |1 |Bi|         | ignore | comp-length ||      |
+  |IPv6 Next Header|1 |Bi|17       | equal  | not-sent    ||      |
+  |IPv6 Hop Limit  |1 |Bi|255      | ignore | not-sent    ||      |
+  |IPv6 DEVprefix  |1 |Bi|FE80::/64| equal  | not-sent    ||      |
+  |IPv6 DEViid     |1 |Bi|         | ignore | DEViid      ||      |
+  |IPv6 APPprefix  |1 |Bi|FE80::/64| equal  | not-sent    ||      |
+  |IPv6 APPiid     |1 |Bi|::1      | equal  | not-sent    ||      |
+  +================+==+==+=========+========+=============++======+
+  |UDP DEVport     |1 |Bi|123      | equal  | not-sent    ||      |
+  |UDP APPport     |1 |Bi|124      | equal  | not-sent    ||      |
+  |UDP Length      |1 |Bi|         | ignore | comp-length ||      |
+  |UDP checksum    |1 |Bi|         | ignore | comp-chk    ||      |
+  +================+==+==+=========+========+=============++======+
+
+  Rule 1
+  +----------------+--+--+---------+--------+-------------++------+
+  | Field          |FP|DI| Value   | Match  | Action      || Sent |
+  |                |  |  |         | Opera. | Action      ||[bits]|
+  +----------------+--+--+---------+--------+-------------++------+
+  |IPv6 version    |1 |Bi|6        | equal  | not-sent    ||      |
+  |IPv6 DiffServ   |1 |Bi|0        | equal  | not-sent    ||      |
+  |IPv6 Flow Label |1 |Bi|0        | equal  | not-sent    ||      |
+  |IPv6 Length     |1 |Bi|         | ignore | comp-length ||      |
+  |IPv6 Next Header|1 |Bi|17       | equal  | not-sent    ||      |
+  |IPv6 Hop Limit  |1 |Bi|255      | ignore | not-sent    ||      |
+  |IPv6 DEVprefix  |1 |Bi|[alpha/64, match- | mapping-sent||  [1] |
+  |                |1 |Bi|fe80::/64] mapping|             ||      |
+  |IPv6 DEViid     |1 |Bi|         | ignore | DEViid      ||      |
+  |IPv6 APPprefix  |1 |Bi|[beta/64,| match- | mapping-sent||  [2] |
+  |                |  |  |alpha/64,| mapping|             ||      |
+  |                |  |  |fe80::64]|        |             ||      |
+  |IPv6 APPiid     |1 |Bi|::1000   | equal  | not-sent    ||      |
+  +================+==+==+=========+========+=============++======+
+  |UDP DEVport     |1 |Bi|5683     | equal  | not-sent    ||      |
+  |UDP APPport     |1 |Bi|5683     | equal  | not-sent    ||      |
+  |UDP Length      |1 |Bi|         | ignore | comp-length ||      |
+  |UDP checksum    |1 |Bi|         | ignore | comp-chk    ||      |
+  +================+==+==+=========+========+=============++======+
+
+  Rule 2
+  +----------------+--+--+---------+--------+-------------++------+
+  | Field          |FP|DI| Value   | Match  | Action      || Sent |
+  |                |  |  |         | Opera. | Action      ||[bits]|
+  +----------------+--+--+---------+--------+-------------++------+
+  |IPv6 version    |1 |Bi|6        | equal  | not-sent    ||      |
+  |IPv6 DiffServ   |1 |Bi|0        | equal  | not-sent    ||      |
+  |IPv6 Flow Label |1 |Bi|0        | equal  | not-sent    ||      |
+  |IPv6 Length     |1 |Bi|         | ignore | comp-length ||      |
+  |IPv6 Next Header|1 |Bi|17       | equal  | not-sent    ||      |
+  |IPv6 Hop Limit  |1 |Up|255      | ignore | not-sent    ||      |
+  |IPv6 Hop Limit  |1 |Dw|         | ignore | value-sent  ||  [8] |
+  |IPv6 DEVprefix  |1 |Bi|alpha/64 | equal  | not-sent    ||      |
+  |IPv6 DEViid     |1 |Bi|         | ignore | DEViid      ||      |
+  |IPv6 APPprefix  |1 |Bi|gamma/64 | equal  | not-sent    ||      |
+  |IPv6 APPiid     |1 |Bi|::1000   | equal  | not-sent    ||      |
+  +================+==+==+=========+========+=============++======+
+  |UDP DEVport     |1 |Bi|8720     | MSB(12)| LSB(4)      || [4]  |
+  |UDP APPport     |1 |Bi|8720     | MSB(12)| LSB(4)      || [4]  |
+  |UDP Length      |1 |Bi|         | ignore | comp-length ||      |
+  |UDP checksum    |1 |Bi|         | ignore | comp-chk    ||      |
+  +================+==+==+=========+========+=============++======+
+
+
+~~~~
+{: #Fig-fields title='Context rules'}
+
+All the fields described in the three rules depicted on {{Fig-fields}} are present
+in the IPv6 and UDP headers.  The DEViid-DID value is found in the L2
+header.
+
+The second and third rules use global addresses. The way the Dev learns the
+prefix is not in the scope of the document. 
+
+The third rule compresses port numbers to 4 bits. 
+
+
+# Fragmentation Examples
 
 This section provides examples of different fragment delivery reliability options possible on the basis of this specification.
 
