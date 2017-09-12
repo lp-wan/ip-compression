@@ -967,7 +967,7 @@ Pelov, Pascal Thubert, Juan Carlos Zuniga and Diego Dujovne for useful design co
 This section gives some scenarios of the compression mechanism for IPv6/UDP.
 The goal is to illustrate the SCHC behavior.
 
-## IPv6/UDP compression 
+--! ## IPv6/UDP compression
 
 The most common case using the mechanisms defined in this document will be a 
 LPWAN Dev that embeds some applications running over
