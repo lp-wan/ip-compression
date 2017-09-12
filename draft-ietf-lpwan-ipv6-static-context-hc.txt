@@ -5,10 +5,10 @@
 lpwan Working Group                                          A. Minaburo
 Internet-Draft                                                    Acklio
 Intended status: Informational                                L. Toutain
-Expires: March 15, 2018                                   IMT-Atlantique
+Expires: March 16, 2018                                   IMT-Atlantique
                                                                 C. Gomez
                                     Universitat Politecnica de Catalunya
-                                                      September 11, 2017
+                                                      September 12, 2017
 
 
   LPWAN Static Context Header Compression (SCHC) and fragmentation for
@@ -26,22 +26,21 @@ Abstract
    these kind of networks.  A common context stored in a LPWAN device
    and in the network is used.  This context keeps information that will
    not be transmitted in the constrained network.  Static context means
-   that information stored in the context which describes field values,
-   does not change during packet transmission, avoiding complex
-   resynchronization mechanisms, incompatible with LPWAN
-   characteristics.  In most of the cases, IPv6/UDP headers are reduced
-   to a small identifier called Rule ID.  But sometimes the SCHC header
-   compression mechanisms will not be enough to send the compressed
-   packet in one L2 PDU, so the SCHC Fragmentation protocol must be used
-   when needed.
+   that information stored in the context, which describes field values,
+   does not change during packet transmission.  This avoids complex
+   resynchronization mechanisms, which are incompatible with LPWAN
+   characteristics.  In most cases, IPv6/UDP headers are reduced to a
+   small identifier called Rule ID.  But sometimes, a packet will not be
+   compressed enough by SCHC to fit in one L2 PDU, and the SCHC
+   fragmentation protocol will be used.
 
-   This document describes SCHC compression/decompression mechanism
-   framework and applies it to IPv6/UDP headers.  Similar solutions for
-   other protocols such as CoAP will be described in separate documents.
-   Moreover, this document specifies fragmentation and reassembly
-   mechanim for SCHC compressed packets exceeding the L2 PDU size and
-   for the case where the SCHC compression is not possible then the
-   packet is sent using the fragmentation protocol.
+   This document describes the SCHC compression/decompression framework
+   and applies it to IPv6/UDP headers.  Similar solutions for other
+   protocols such as CoAP will be described in separate documents.
+   Moreover, this document specifies a fragmentation and reassembly
+   mechanism that is used in two situations: for SCHC-compressed packets
+   that still exceed the L2 PDU size; and for the case where the SCHC
+   compression cannot be performed.
 
 Status of This Memo
 
@@ -53,7 +52,8 @@ Status of This Memo
 
 
 
-Minaburo, et al.         Expires March 15, 2018                 [Page 1]
+
+Minaburo, et al.         Expires March 16, 2018                 [Page 1]
 
 Internet-Draft                 LPWAN SCHC                 September 2017
 
@@ -66,7 +66,7 @@ Internet-Draft                 LPWAN SCHC                 September 2017
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on March 15, 2018.
+   This Internet-Draft will expire on March 16, 2018.
 
 Copyright Notice
 
@@ -109,7 +109,7 @@ Table of Contents
 
 
 
-Minaburo, et al.         Expires March 15, 2018                 [Page 2]
+Minaburo, et al.         Expires March 16, 2018                 [Page 2]
 
 Internet-Draft                 LPWAN SCHC                 September 2017
 
@@ -165,7 +165,7 @@ Internet-Draft                 LPWAN SCHC                 September 2017
 
 
 
-Minaburo, et al.         Expires March 15, 2018                 [Page 3]
+Minaburo, et al.         Expires March 16, 2018                 [Page 3]
 
 Internet-Draft                 LPWAN SCHC                 September 2017
 
@@ -221,7 +221,7 @@ Internet-Draft                 LPWAN SCHC                 September 2017
 
 
 
-Minaburo, et al.         Expires March 15, 2018                 [Page 4]
+Minaburo, et al.         Expires March 16, 2018                 [Page 4]
 
 Internet-Draft                 LPWAN SCHC                 September 2017
 
@@ -277,7 +277,7 @@ Internet-Draft                 LPWAN SCHC                 September 2017
 
 
 
-Minaburo, et al.         Expires March 15, 2018                 [Page 5]
+Minaburo, et al.         Expires March 16, 2018                 [Page 5]
 
 Internet-Draft                 LPWAN SCHC                 September 2017
 
@@ -333,7 +333,7 @@ Internet-Draft                 LPWAN SCHC                 September 2017
 
 
 
-Minaburo, et al.         Expires March 15, 2018                 [Page 6]
+Minaburo, et al.         Expires March 16, 2018                 [Page 6]
 
 Internet-Draft                 LPWAN SCHC                 September 2017
 
@@ -389,7 +389,7 @@ Internet-Draft                 LPWAN SCHC                 September 2017
 
 
 
-Minaburo, et al.         Expires March 15, 2018                 [Page 7]
+Minaburo, et al.         Expires March 16, 2018                 [Page 7]
 
 Internet-Draft                 LPWAN SCHC                 September 2017
 
@@ -445,7 +445,7 @@ Internet-Draft                 LPWAN SCHC                 September 2017
 
 
 
-Minaburo, et al.         Expires March 15, 2018                 [Page 8]
+Minaburo, et al.         Expires March 16, 2018                 [Page 8]
 
 Internet-Draft                 LPWAN SCHC                 September 2017
 
@@ -501,7 +501,7 @@ Internet-Draft                 LPWAN SCHC                 September 2017
 
 
 
-Minaburo, et al.         Expires March 15, 2018                 [Page 9]
+Minaburo, et al.         Expires March 16, 2018                 [Page 9]
 
 Internet-Draft                 LPWAN SCHC                 September 2017
 
@@ -557,7 +557,7 @@ Internet-Draft                 LPWAN SCHC                 September 2017
 
 
 
-Minaburo, et al.         Expires March 15, 2018                [Page 10]
+Minaburo, et al.         Expires March 16, 2018                [Page 10]
 
 Internet-Draft                 LPWAN SCHC                 September 2017
 
@@ -613,7 +613,7 @@ Internet-Draft                 LPWAN SCHC                 September 2017
 
 
 
-Minaburo, et al.         Expires March 15, 2018                [Page 11]
+Minaburo, et al.         Expires March 16, 2018                [Page 11]
 
 Internet-Draft                 LPWAN SCHC                 September 2017
 
@@ -669,7 +669,7 @@ Internet-Draft                 LPWAN SCHC                 September 2017
 
 
 
-Minaburo, et al.         Expires March 15, 2018                [Page 12]
+Minaburo, et al.         Expires March 16, 2018                [Page 12]
 
 Internet-Draft                 LPWAN SCHC                 September 2017
 
@@ -725,7 +725,7 @@ Internet-Draft                 LPWAN SCHC                 September 2017
 
 
 
-Minaburo, et al.         Expires March 15, 2018                [Page 13]
+Minaburo, et al.         Expires March 16, 2018                [Page 13]
 
 Internet-Draft                 LPWAN SCHC                 September 2017
 
@@ -781,7 +781,7 @@ Internet-Draft                 LPWAN SCHC                 September 2017
 
 
 
-Minaburo, et al.         Expires March 15, 2018                [Page 14]
+Minaburo, et al.         Expires March 16, 2018                [Page 14]
 
 Internet-Draft                 LPWAN SCHC                 September 2017
 
@@ -837,7 +837,7 @@ Internet-Draft                 LPWAN SCHC                 September 2017
 
 
 
-Minaburo, et al.         Expires March 15, 2018                [Page 15]
+Minaburo, et al.         Expires March 16, 2018                [Page 15]
 
 Internet-Draft                 LPWAN SCHC                 September 2017
 
@@ -893,7 +893,7 @@ Internet-Draft                 LPWAN SCHC                 September 2017
 
 
 
-Minaburo, et al.         Expires March 15, 2018                [Page 16]
+Minaburo, et al.         Expires March 16, 2018                [Page 16]
 
 Internet-Draft                 LPWAN SCHC                 September 2017
 
@@ -949,7 +949,7 @@ Internet-Draft                 LPWAN SCHC                 September 2017
 
 
 
-Minaburo, et al.         Expires March 15, 2018                [Page 17]
+Minaburo, et al.         Expires March 16, 2018                [Page 17]
 
 Internet-Draft                 LPWAN SCHC                 September 2017
 
@@ -1005,7 +1005,7 @@ Internet-Draft                 LPWAN SCHC                 September 2017
 
 
 
-Minaburo, et al.         Expires March 15, 2018                [Page 18]
+Minaburo, et al.         Expires March 16, 2018                [Page 18]
 
 Internet-Draft                 LPWAN SCHC                 September 2017
 
@@ -1061,7 +1061,7 @@ Internet-Draft                 LPWAN SCHC                 September 2017
 
 
 
-Minaburo, et al.         Expires March 15, 2018                [Page 19]
+Minaburo, et al.         Expires March 16, 2018                [Page 19]
 
 Internet-Draft                 LPWAN SCHC                 September 2017
 
@@ -1117,7 +1117,7 @@ Internet-Draft                 LPWAN SCHC                 September 2017
 
 
 
-Minaburo, et al.         Expires March 15, 2018                [Page 20]
+Minaburo, et al.         Expires March 16, 2018                [Page 20]
 
 Internet-Draft                 LPWAN SCHC                 September 2017
 
@@ -1173,7 +1173,7 @@ Internet-Draft                 LPWAN SCHC                 September 2017
 
 
 
-Minaburo, et al.         Expires March 15, 2018                [Page 21]
+Minaburo, et al.         Expires March 16, 2018                [Page 21]
 
 Internet-Draft                 LPWAN SCHC                 September 2017
 
@@ -1229,7 +1229,7 @@ Internet-Draft                 LPWAN SCHC                 September 2017
 
 
 
-Minaburo, et al.         Expires March 15, 2018                [Page 22]
+Minaburo, et al.         Expires March 16, 2018                [Page 22]
 
 Internet-Draft                 LPWAN SCHC                 September 2017
 
@@ -1285,7 +1285,7 @@ Internet-Draft                 LPWAN SCHC                 September 2017
 
 
 
-Minaburo, et al.         Expires March 15, 2018                [Page 23]
+Minaburo, et al.         Expires March 16, 2018                [Page 23]
 
 Internet-Draft                 LPWAN SCHC                 September 2017
 
@@ -1341,7 +1341,7 @@ Internet-Draft                 LPWAN SCHC                 September 2017
 
 
 
-Minaburo, et al.         Expires March 15, 2018                [Page 24]
+Minaburo, et al.         Expires March 16, 2018                [Page 24]
 
 Internet-Draft                 LPWAN SCHC                 September 2017
 
@@ -1397,7 +1397,7 @@ Internet-Draft                 LPWAN SCHC                 September 2017
 
 
 
-Minaburo, et al.         Expires March 15, 2018                [Page 25]
+Minaburo, et al.         Expires March 16, 2018                [Page 25]
 
 Internet-Draft                 LPWAN SCHC                 September 2017
 
@@ -1453,7 +1453,7 @@ Internet-Draft                 LPWAN SCHC                 September 2017
 
 
 
-Minaburo, et al.         Expires March 15, 2018                [Page 26]
+Minaburo, et al.         Expires March 16, 2018                [Page 26]
 
 Internet-Draft                 LPWAN SCHC                 September 2017
 
@@ -1509,7 +1509,7 @@ Internet-Draft                 LPWAN SCHC                 September 2017
 
 
 
-Minaburo, et al.         Expires March 15, 2018                [Page 27]
+Minaburo, et al.         Expires March 16, 2018                [Page 27]
 
 Internet-Draft                 LPWAN SCHC                 September 2017
 
@@ -1565,7 +1565,7 @@ Internet-Draft                 LPWAN SCHC                 September 2017
 
 
 
-Minaburo, et al.         Expires March 15, 2018                [Page 28]
+Minaburo, et al.         Expires March 16, 2018                [Page 28]
 
 Internet-Draft                 LPWAN SCHC                 September 2017
 
@@ -1621,7 +1621,7 @@ Internet-Draft                 LPWAN SCHC                 September 2017
 
 
 
-Minaburo, et al.         Expires March 15, 2018                [Page 29]
+Minaburo, et al.         Expires March 16, 2018                [Page 29]
 
 Internet-Draft                 LPWAN SCHC                 September 2017
 
@@ -1677,7 +1677,7 @@ Internet-Draft                 LPWAN SCHC                 September 2017
 
 
 
-Minaburo, et al.         Expires March 15, 2018                [Page 30]
+Minaburo, et al.         Expires March 16, 2018                [Page 30]
 
 Internet-Draft                 LPWAN SCHC                 September 2017
 
@@ -1733,7 +1733,7 @@ Internet-Draft                 LPWAN SCHC                 September 2017
 
 
 
-Minaburo, et al.         Expires March 15, 2018                [Page 31]
+Minaburo, et al.         Expires March 16, 2018                [Page 31]
 
 Internet-Draft                 LPWAN SCHC                 September 2017
 
@@ -1789,7 +1789,7 @@ Internet-Draft                 LPWAN SCHC                 September 2017
 
 
 
-Minaburo, et al.         Expires March 15, 2018                [Page 32]
+Minaburo, et al.         Expires March 16, 2018                [Page 32]
 
 Internet-Draft                 LPWAN SCHC                 September 2017
 
@@ -1845,7 +1845,7 @@ Internet-Draft                 LPWAN SCHC                 September 2017
 
 
 
-Minaburo, et al.         Expires March 15, 2018                [Page 33]
+Minaburo, et al.         Expires March 16, 2018                [Page 33]
 
 Internet-Draft                 LPWAN SCHC                 September 2017
 
@@ -1901,7 +1901,7 @@ Appendix A.  Fragmentation examples
 
 
 
-Minaburo, et al.         Expires March 15, 2018                [Page 34]
+Minaburo, et al.         Expires March 16, 2018                [Page 34]
 
 Internet-Draft                 LPWAN SCHC                 September 2017
 
@@ -1957,7 +1957,7 @@ Internet-Draft                 LPWAN SCHC                 September 2017
 
 
 
-Minaburo, et al.         Expires March 15, 2018                [Page 35]
+Minaburo, et al.         Expires March 16, 2018                [Page 35]
 
 Internet-Draft                 LPWAN SCHC                 September 2017
 
@@ -2013,7 +2013,7 @@ Internet-Draft                 LPWAN SCHC                 September 2017
 
 
 
-Minaburo, et al.         Expires March 15, 2018                [Page 36]
+Minaburo, et al.         Expires March 16, 2018                [Page 36]
 
 Internet-Draft                 LPWAN SCHC                 September 2017
 
@@ -2069,7 +2069,7 @@ Internet-Draft                 LPWAN SCHC                 September 2017
 
 
 
-Minaburo, et al.         Expires March 15, 2018                [Page 37]
+Minaburo, et al.         Expires March 16, 2018                [Page 37]
 
 Internet-Draft                 LPWAN SCHC                 September 2017
 
@@ -2125,7 +2125,7 @@ Appendix B.  Allocation of Rule IDs for fragmentation
 
 
 
-Minaburo, et al.         Expires March 15, 2018                [Page 38]
+Minaburo, et al.         Expires March 16, 2018                [Page 38]
 
 Internet-Draft                 LPWAN SCHC                 September 2017
 
@@ -2181,4 +2181,4 @@ Authors' Addresses
 
 
 
-Minaburo, et al.         Expires March 15, 2018                [Page 39]
+Minaburo, et al.         Expires March 16, 2018                [Page 39]
