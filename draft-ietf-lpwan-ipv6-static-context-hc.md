@@ -186,7 +186,7 @@ which is the most bandwidth-consuming operation in other header compression mech
 such as RoHC {{RFC5795}}. Based on the fact
 that the nature of data flows is highly predictable in LPWAN networks, some static
 contexts may be stored on the Device (Dev). The contexts must be stored in both ends, and it can 
-either be learned by a provisioning protocol or by out of band means or it can be pre-provosioned, etc. 
+either be learned by a provisioning protocol or by out of band means or it can be pre-provisioned, etc. 
 The way the context is learned on both sides is out of the scope of this document.
 
 
@@ -311,13 +311,13 @@ The compression/decompression process follows several steps:
   to compress the packet's headers. When doing compression from Dw to Up the SCHC C/D needs to find the 
   correct Rule to use by identifying its Dev-ID and the Rule-ID. In the Up situation only the Rule-ID is used. 
   The next step is to choose the fields by their direction, using the 
-  direction indicator (DI), so the fields that do not correspond to the appropiated DI will be excluded. 
+  direction indicator (DI), so the fields that do not correspond to the appropriated DI will be excluded. 
   Next, then the fields are identified according to their field identifier (FID) and field position (FP). 
   If the field position does not correspond then the Rule is not use and the SCHC take next Rule.
   Once the DI and the FP correspond to the header information, each field's value is then compared to the corresponding 
   target value (TV) stored in the Rule for that specific field using the matching operator (MO).
   If all the fields in the packet's header satisfy all the matching operators (MOs) of a Rule (i.e. all results are True),
-  the fields of the header are then processed according to the Compression/Decompession Actions (CDAs) 
+  the fields of the header are then processed according to the Compression/Decompression Actions (CDAs) 
   and a compressed header is obtained. Otherwise the next rule is tested. 
   If no eligible rule is found, then the header must be sent without compression, in which case the fragmentation process 
   must be required.
@@ -366,7 +366,7 @@ or any other data type. The result of the operation can either be True or False.
   indicating the number of bits, to proceed to the matching.
   
 * match-mapping: The goal of mapping-sent is to reduce the size of a field by allocating
-  a shorter value. The Target Value contains a list of values. Each value is idenfied by a short ID (or index). 
+  a shorter value. The Target Value contains a list of values. Each value is identified by a short ID (or index). 
   This operator matches if a field value is equal to one of those target values. 
   
 
@@ -449,7 +449,7 @@ field length minus the bits length specified in the MSB MO.
 The compressor sends the "length" Least Significant Bits. The decompressor
 combines the value received with the Target Value.
 
-If this action is made on a variable length field, the remaning size in byte has to be sent before.
+If this action is made on a variable length field, the remaining size in byte has to be sent before.
 
 
 ### DEViid, APPiid CDA
@@ -711,12 +711,12 @@ The receiver of link fragments SHALL use (1) the sender's L2 source address (if 
 
 Upon receipt of a link fragment, the receiver starts constructing the original unfragmented packet. It uses the FCN and the order of arrival of each fragment to determine the location of the individual fragments within the original unfragmented packet. For example, it may place the data payload of the fragments within a payload datagram reassembly buffer at the location determined from the FCN and order of arrival of the fragments, and the fragment payload sizes. In Window mode, the fragment receiver also uses the W bit in the received fragments. Note that the size of the original, unfragmented IPv6 packet cannot be determined from fragmentation headers.
 
-When Window mode - ACK on error is used, the fragment receiver starts a timer (denoted "ACK on Error Timer") upon reception of the first fragment for an IPv6 datagram.  The initial value for this timer is not provided by this specification, and is expected to be defined in additional documents.  This timer is reset and restarted every time that a new fragment carrying data from the same IPv6 datagram is received. In Window mode – ACK on error, after reception of the last fragment of a window (i.e. the fragment with FCN=0 or FCN=2^N-1), if fragment losses have been detected by the fragment receiver in the current window, the fragment receiver MUST transmit an ACK reporting its available information with regard to sucessfully received and missing fragments from the current window.  Upon expiration of the “ACK on Error Timer”, an ACK MUST be transmitted by the fragment receiver to report received and not received fragments for the current window. The “ACK on Error Timer” is then reset and restarted. When the last fragment of the IPv6 datagram is received, if all fragments of that last window of the packet have been received, the “ACK on Error Timer” is stopped. In Window mode – ACK on error, the fragment sender retransmits any lost fragments reported in an ACK. The maximum number of ACKs to be sent by the receiver for a specific window, denoted MAX_ACKS_PER_WINDOW, is not stated in this document, and it is expected to be defined in other documents (e.g. technology-specific profiles). In Window mode – ACK on error, when a fragment sender has transmitted the last fragment of a window, or it has retransmitted the last fragment within the set of lost fragments reported in an ACK, it is assumed that the time the fragment sender will wait to receive an ACK is smaller than the transmission time of MAX_WIND_FCN + 1 fragments (i.e. the time required to transmit a complete window of fragments). This aspect must be carefully considered if Window mode – ACK on error is used, in particular taking into account the latency characteristics of the underlying L2 technology.
+When Window mode - ACK on error is used, the fragment receiver starts a timer (denoted "ACK on Error Timer") upon reception of the first fragment for an IPv6 datagram.  The initial value for this timer is not provided by this specification, and is expected to be defined in additional documents.  This timer is reset and restarted every time that a new fragment carrying data from the same IPv6 datagram is received. In Window mode – ACK on error, after reception of the last fragment of a window (i.e. the fragment with FCN=0 or FCN=2^N-1), if fragment losses have been detected by the fragment receiver in the current window, the fragment receiver MUST transmit an ACK reporting its available information with regard to successfully received and missing fragments from the current window.  Upon expiration of the “ACK on Error Timer”, an ACK MUST be transmitted by the fragment receiver to report received and not received fragments for the current window. The “ACK on Error Timer” is then reset and restarted. When the last fragment of the IPv6 datagram is received, if all fragments of that last window of the packet have been received, the “ACK on Error Timer” is stopped. In Window mode – ACK on error, the fragment sender retransmits any lost fragments reported in an ACK. The maximum number of ACKs to be sent by the receiver for a specific window, denoted MAX_ACKS_PER_WINDOW, is not stated in this document, and it is expected to be defined in other documents (e.g. technology-specific profiles). In Window mode – ACK on error, when a fragment sender has transmitted the last fragment of a window, or it has retransmitted the last fragment within the set of lost fragments reported in an ACK, it is assumed that the time the fragment sender will wait to receive an ACK is smaller than the transmission time of MAX_WIND_FCN + 1 fragments (i.e. the time required to transmit a complete window of fragments). This aspect must be carefully considered if Window mode – ACK on error is used, in particular taking into account the latency characteristics of the underlying L2 technology.
 
 Note that, in Window mode, the first fragment of the window is the one with FCN set to MAX_WIND_FCN.  Also note that, in Window mode, the fragment with FCN=0 is considered the last fragment of its window, except for the last fragment of the whole packet (with all FCN bits set to 1, i.e. FCN=2^N-1), which is also the last fragment of the last window.
 
 If Window mode - ACK "always" is used, upon receipt of the last fragment of a window (i.e. the fragment with CFN=0 or CFN=2^N-1), or 
-upon receipt of the last retransmitted fragment from the set of lost fragments reported by the last ACK sent by the fragment receiver (if any), the fragment receiver MUST send an ACK to the fragment sender. The ACK provides feedback on the fragments received and those not received that correspond to the last window. Once all fragments of a window have been received by the fragment receiver (including retransmitted fragments, if any), the latter sends an ACK without a bitmap to the sender, in order to report sucessful reception of all fragments of the window to the fragment sender.
+upon receipt of the last retransmitted fragment from the set of lost fragments reported by the last ACK sent by the fragment receiver (if any), the fragment receiver MUST send an ACK to the fragment sender. The ACK provides feedback on the fragments received and those not received that correspond to the last window. Once all fragments of a window have been received by the fragment receiver (including retransmitted fragments, if any), the latter sends an ACK without a bitmap to the sender, in order to report successful reception of all fragments of the window to the fragment sender.
 
 When Window mode - ACK "always" is used, the fragment sender starts a timer (denoted "ACK Always Timer") after the first transmission attempt of the last fragment of a window (i.e. the fragment with FCN=0 or FCN=2^N-1). In the same reliability option, if one or more fragments are reported by an ACK to be lost, the sender retransmits those fragments and starts the “ACK Always Timer” after the last retransmitted fragment (i.e. the fragment with the lowest FCN) among the set of lost fragments reported by the ACK. The initial value for the “ACK Always Timer” is not provided by this specification, and it is expected to be defined in additional documents. Upon expiration of the timer, if no ACK has been received since the timer start, the next action to be performed by the fragment sender depends on whether the current window is the last window of the IPv6 packet or not. If the current window is not the last one, the sender retransmits the last fragment sent at the moment of timer expiration (which may or may not be the fragment with FCN=0), and it reinitializes and restarts the timer. Otherwise (i.e. the current window is the last one), the sender retransmits the fragment with FCN=2^N-1; if the fragment sender knows that the fragment with FCN=2^N-1 has already been successfully received, the fragment sender MAY opt to send a fragment with FCN=2^N-1 and without a data payload. Note that retransmitting a fragment sent as described serves as an ACK request. The maximum number of requests for a specific ACK, denoted MAX_ACK_REQUESTS, is not stated in this document, and it is expected to be defined in other documents (e.g. technology-specific profiles). In Window mode – ACK “Always”, the fragment sender retransmits any lost fragments reported in an ACK. When the fragment sender receives an ACK that confirms correct reception of all fragments of a window, if there are further fragments to be sent for the same IPv6 datagram, the fragment sender proceeds to transmitting subsequent fragments of the next window.
 
@@ -848,7 +848,7 @@ is set to "ignore" and the CDA is set to "DEViid" or "APPiid". Note that the
 LPWAN technology is generally carrying a single device identifier corresponding
 to the DEV. The SCHC C/D may also not be aware of these values. 
 
-If the DEV address has a static value that is not derivated from an IEEE EUI-64,
+If the DEV address has a static value that is not derived from an IEEE EUI-64,
 then TV contains the actual Dev address value, the MO operator is set to
 "equal" and the CDA is set to "not-sent". 
 
@@ -981,7 +981,7 @@ destination IPv6 address prefix is gamma::1/64.
 with dotted lines since these protocols are compressed on the radio link.
 
 ~~~~
- Managment    Data
+ Management   Data
 +----------+---------+---------+
 |   CoAP   |  CoAP   | legacy  |
 +----||----+---||----+---||----+
