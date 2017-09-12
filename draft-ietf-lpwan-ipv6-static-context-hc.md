@@ -52,14 +52,15 @@ for very low bandwidth networks. These techniques are especially tailored for LP
 
 The Static Context Header Compression (SCHC) offers a great level of flexibility 
 when  processing the header fields and must be used for these kind of networks. A common context stored in a LPWAN device and in the  network is used. This context keeps information that will not be transmitted in the constrained network.
-Static context means that information stored in the context which describes field values, does not change during
-packet transmission, avoiding complex resynchronization mechanisms, incompatible
-with LPWAN characteristics. In most of the cases, IPv6/UDP headers are reduced
-to a small identifier called Rule ID. But sometimes the SCHC header compression mechanisms will not be enough to send the compressed packet in one L2 PDU, so the SCHC Fragmentation protocol must be used when needed. 
+Static context means that information stored in the context, which describes field values, does not change during
+packet transmission.
+This avoids complex resynchronization mechanisms, which are incompatible
+with LPWAN characteristics. In most cases, IPv6/UDP headers are reduced
+to a small identifier called Rule ID. But sometimes, a packet will not be compressed enough by SCHC to fit in one L2 PDU, and the SCHC fragmentation protocol will be used. 
 
-This document describes SCHC compression/decompression mechanism framework and applies it 
+This document describes the SCHC compression/decompression framework and applies it 
 to IPv6/UDP headers. Similar solutions for other protocols such as CoAP will be described in 
-separate documents. Moreover, this document specifies fragmentation and reassembly mechanim for SCHC compressed packets exceeding the L2 PDU size and for the case where the SCHC compression is not possible then the packet is sent using the fragmentation protocol. 
+separate documents. Moreover, this document specifies a fragmentation and reassembly mechanism that is used in two situations: for SCHC-compressed packets that still exceed the L2 PDU size; and for the case where the SCHC compression cannot be performed. 
 
 --- middle
  
