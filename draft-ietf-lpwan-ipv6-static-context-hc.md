@@ -778,19 +778,18 @@ The third rule compresses port numbers to 4 bits.
 
 ## Overview
 
-Fragmentation supported in LPWAN is mandatory when the underlying LPWAN technology is not capable of fulfilling the IPv6 MTU requirement. Fragmentation is used if, after SCHC header compression, the size of the resulting IPv6 packet is larger than the L2 data unit maximum payload. Fragmentation is also used if SCHC header compression has not been able to compress an IPv6 packet that is larger than the L2 data unit maximum payload. In LPWAN technologies, the L2 data unit size typically varies from tens to hundreds of bytes. 
-If the entire IPv6 datagram fits within a single L2 data unit, the fragmentation mechanism is not used and the packet is sent unfragmented.  
-If the datagram does not fit within a single L2 data unit, it SHALL be broken into fragments. 
+Fragmentation supported in LPWAN is mandatory when the underlying LPWAN technology is not capable of fulfilling the IPv6 MTU requirement. Fragmentation is used after SCHC header compression when the size of the resulting compressed packet is larger than the L2 data unit maximum payload. In LPWAN technologies, the L2 data unit size typically varies from tens to hundreds of bytes. 
+If the entire datagram fits within a single L2 data unit, the fragmentation mechanism is not used and the packet is sent unfragmented. Otherwise, the datagram does not fit a single L2 data unit, it SHALL be broken into fragments. 
 
 Moreover, LPWAN technologies impose some strict limitations on traffic; 
 therefore it is desirable to enable optional fragment retransmission, while 
-a single fragment loss should not lead to retransmitting the full IPv6 datagram. 
+a single fragment loss should not lead to retransmitting the full datagram. 
 On the other hand, in order to preserve energy, Devices are sleeping most of the time and 
 may receive data during a short period of time after transmission. In 
 order to adapt to the capabilities of various LPWAN technologies,
-this specification allows for a gradation of fragment delivery
+this specification allows a gradation of fragment delivery
 reliability. This document does not make any decision with regard to which 
-fragment delivery reliability option is used over a specific LPWAN 
+fragment delivery reliability option was used over a specific LPWAN 
 technology.
 
 An important consideration is that LPWAN networks typically follow the star topology, and therefore data unit reordering is not expected in such networks. This specification assumes that reordering will not happen between the entity performing fragmentation and the entity performing reassembly. This assumption allows to reduce complexity and overhead of the fragmentation mechanism.
@@ -813,13 +812,13 @@ This specification defines the following three fragment delivery reliability opt
    receiver after a window of fragments have been sent.  A window of
    fragments is a subset of the full set of fragments needed to carry an
    IPv6 packet.  In this mode, the ACK informs the sender about received
-   and/or missing fragments from the window of fragments. Upon receipt of an ACK that informs about any lost
+   and/or missed fragments from the window of fragments. Upon receipt of an ACK that informs about any lost
    fragments, the sender retransmits the lost fragments. When an ACK is not received by the fragment sender, the latter retransmits a fragment, which serves as an ACK request. The maximum number of ACK requests is MAX_ACK_REQUESTS. The default value of MAX_ACK_REQUESTS is not stated in this document, and it is expected to be defined in other documents (e.g. technology-
    specific profiles).
 
    In Window mode – ACK on error, an ACK is transmitted by the fragment
    receiver after a window of fragments have been sent, only if at least one 
-   of the fragments in the window has been lost. In this mode, the ACK informs the sender about received and/or missing fragments from the window of fragments. Upon receipt of an ACK that informs about any lost
+   of the fragments in the window has been lost. In this mode, the ACK informs the sender about received and/or missed fragments from the window of fragments. Upon receipt of an ACK that informs about any lost
    fragments, the sender retransmits the lost fragments.  The maximum
    number of ACKs to be sent by the receiver for a specific window,
    denoted MAX_ACKS_PER_WINDOW, is not stated in this document, and it
@@ -827,7 +826,7 @@ This specification defines the following three fragment delivery reliability opt
    specific profiles).
   
    This document does not make any decision as to which fragment delivery 
-   reliability option(s) need to be supported over a specific LPWAN 
+   reliability option(s) are supported by a specific LPWAN 
    technology.  
    
    Examples of the different reliability options described are provided in Appendix A.
@@ -842,7 +841,7 @@ This section discusses the properties of each fragment delivery
    However, this option does not enhance delivery reliability beyond that 
    offered by the underlying LPWAN technology.
 
-   The Window mode - ACK on error option is based on the optimistic expectation that the underlying links will offer relatively low L2 data unit loss probability. This option reduces the number of ACKs transmitted by the fragment receiver compared to the Window mode - ACK “always” option. This may be especially beneficial in asymmetric scenarios, e.g. where fragmented data are sent uplink and the underlying LPWAN technology downlink capacity or message rate is lower than the uplink one. However, if an ACK is lost, the sender assumes that all fragments covered by the ACK have been successfully delivered. In contrast, the Window mode - ACK “always” option does not suffer that issue, at the expense of an ACK overhead increase. 
+   The Window mode - ACK on error option is based on the optimistic expectation that the underlying links will offer relatively low L2 data unit loss probability. This option reduces the number of ACKs transmitted by the fragment receiver compared to the Window mode - ACK “always” option. This may be specially beneficial in asymmetric scenarios, e.g. where fragmented data are sent uplink and the underlying LPWAN technology downlink capacity or message rate is lower than the uplink one. However, if an ACK is lost, the sender assumes that all fragments covered by the ACK have been successfully delivered. In contrast, the Window mode - ACK “always” option does not suffer that issue, at the expense of an ACK overhead increase. 
    
 The Window mode – ACK “always” option provides flow control. In addition, it is able to handle long bursts of lost fragments, since detection of such events can be done before end of the IPv6 packet transmission, as long as the window size is short enough. However, such benefit comes at the expense of higher ACK overhead.
 
@@ -853,7 +852,7 @@ This subsection describes the different tools that are used to enable the descri
 o  Rule ID. The Rule ID is used in fragments and in ACKs. The Rule ID in a fragment is set to a value that indicates that the data unit being carried is a fragment. This also allows to interleave non-fragmented IPv6 datagrams with fragments that carry a larger IPv6 datagram. Rule ID may also be used to signal which reliability option is in use for the IPv6 packet being carried. Rule ID may also be used to signal the window size if multiple sizes are supported (see 9.7). In an ACK, the Rule ID signals that the message this Rule ID is prepended to is an ACK.  
 
 o  Fragment Compressed Number (FCN).  The FCN is included in all fragments.  This field can be understood as a truncated, efficient
-   representation of a larger-sized fragment number, and does not carry an absolute fragment number.  A special FCN value signals the last fragment that carries a fragmented IPv6 packet.  In Window mode, the FCN is augmented with the W bit, which has the purpose of avoiding possible ambiguity for the receiver that might arise under certain conditions.
+   representation of a larger-sized fragment number, and does not carry an absolute fragment number.  A special FCN value denotes the last fragment that carries a fragmented IPv6 packet.  In Window mode, the FCN is augmented with the W bit, which has the purpose of avoiding possible ambiguity for the receiver that might arise under certain conditions.
 
 o  Datagram Tag (DTag). The DTag field, if present, is set to the same value for all fragments carrying the same IPv6 datagram, allows to interleave fragments that correspond to different IPv6 datagrams.
 
@@ -868,7 +867,7 @@ This section defines the fragment format, the fragmentation header formats, and 
 ### Fragment format
 
    A fragment comprises a fragmentation header and a fragment payload, and conforms
-   to the format shown in {{Fig-FragFormat}}. The fragment payload carries a subset of either the
+   to the format shown in {{Fig-FragFormat}}. The fragment payload carries a subset of either an
    IPv6 packet after header compression or an IPv6 packet which could not be compressed. 
    A fragment is the payload in the L2 protocol data unit (PDU).
       
