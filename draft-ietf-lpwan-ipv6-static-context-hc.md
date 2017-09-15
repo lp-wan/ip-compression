@@ -51,10 +51,9 @@ This document describes a header compression scheme and fragmentation functional
 for very low bandwidth networks. These techniques are especially tailored for LPWAN (Low Power Wide Area Network) networks.
 
 The Static Context Header Compression (SCHC) offers a great level of flexibility 
-when  processing the header fields and must be used for these kind of networks. A common context stored in a LPWAN device and in the  network is used. This context keeps information that will not be transmitted in the constrained network.
-Static context means that information stored in the context, which describes field values, does not change during
-packet transmission.
-This avoids complex resynchronization mechanisms, which are incompatible
+when processing the header fields. SCHC compression is based on a common static context stored in a LPWAN device and in the network. Static context means that information stored does not change during the packet transmission. The context describes the field values and keeps information that will not be transmitted through the constrained network. 
+
+SCHC must be used for LPWAN networks because it avoids complex resynchronization mechanisms, which are incompatible
 with LPWAN characteristics. In most cases, IPv6/UDP headers are reduced
 to a small identifier called Rule ID. But sometimes, a packet will not be compressed enough by SCHC to fit in one L2 PDU, and the SCHC fragmentation protocol will be used. 
 
