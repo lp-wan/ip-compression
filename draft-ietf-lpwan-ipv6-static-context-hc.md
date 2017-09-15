@@ -54,12 +54,12 @@ The Static Context Header Compression (SCHC) offers a great level of flexibility
 when processing the header fields. SCHC compression is based on a common static context stored in a LPWAN device and in the network. Static context means that information stored does not change during the packet transmission. The context describes the field values and keeps information that will not be transmitted through the constrained network. 
 
 SCHC must be used for LPWAN networks because it avoids complex resynchronization mechanisms, which are incompatible
-with LPWAN characteristics. In most cases, IPv6/UDP headers are reduced
-to a small identifier called Rule ID. But sometimes, a packet will not be compressed enough by SCHC to fit in one L2 PDU, and the SCHC fragmentation protocol will be used. 
+with LPWAN characteristics. And also because in most cases, IPv6/UDP headers are reduced
+to a small identifier called Rule ID. Eventhough sometimes, a SCHC compressed packet will not fit in one L2 PDU, and the SCHC fragmentation protocol will be used. The SCHC fragmentation and reassembly mechanism is used in two situations: for SCHC-compressed packets that still exceed the L2 PDU size; and for the case where the SCHC compression cannot be performed. 
 
 This document describes the SCHC compression/decompression framework and applies it 
-to IPv6/UDP headers. Similar solutions for other protocols such as CoAP will be described in 
-separate documents. Moreover, this document specifies a fragmentation and reassembly mechanism that is used in two situations: for SCHC-compressed packets that still exceed the L2 PDU size; and for the case where the SCHC compression cannot be performed. 
+to IPv6/UDP headers. This document also specifies a fragmentation and reassembly mechanism used when SCHC compression is not enough for the L2 PDU size. Similar solutions for other protocols such as CoAP will be described in 
+separate documents. 
 
 --- middle
  
