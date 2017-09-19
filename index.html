@@ -333,12 +333,12 @@ address {
 <link href="#rfc.authors" rel="Chapter">
 
 
-  <meta name="generator" content="xml2rfc version 2.8.0 - https://tools.ietf.org/tools/xml2rfc" />
+  <meta name="generator" content="xml2rfc version 2.8.1 - https://tools.ietf.org/tools/xml2rfc" />
   <link rel="schema.dct" href="http://purl.org/dc/terms/" />
 
   <meta name="dct.creator" content="Minaburo, A., Toutain, L., and C. Gomez" />
   <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-lpwan-ipv6-static-context-hc-06" />
-  <meta name="dct.issued" scheme="ISO8601" content="2017-9-15" />
+  <meta name="dct.issued" scheme="ISO8601" content="2017-9-19" />
   <meta name="dct.abstract" content="This document describes a header compression scheme and fragmentation functionality for very low bandwidth networks. These techniques are especially tailored for LPWAN (Low Power Wide Area Network) networks." />
   <meta name="description" content="This document describes a header compression scheme and fragmentation functionality for very low bandwidth networks. These techniques are especially tailored for LPWAN (Low Power Wide Area Network) networks." />
 
@@ -362,7 +362,7 @@ address {
 <td class="right">L. Toutain</td>
 </tr>
 <tr>
-<td class="left">Expires: March 19, 2018</td>
+<td class="left">Expires: March 23, 2018</td>
 <td class="right">IMT-Atlantique</td>
 </tr>
 <tr>
@@ -375,7 +375,7 @@ address {
 </tr>
 <tr>
 <td class="left"></td>
-<td class="right">September 15, 2017</td>
+<td class="right">September 19, 2017</td>
 </tr>
 
     	
@@ -387,14 +387,14 @@ address {
   
   <h1 id="rfc.abstract"><a href="#rfc.abstract">Abstract</a></h1>
 <p>This document describes a header compression scheme and fragmentation functionality for very low bandwidth networks. These techniques are especially tailored for LPWAN (Low Power Wide Area Network) networks.</p>
-<p>The Static Context Header Compression (SCHC) offers a great level of flexibility when processing the header fields. SCHC compression is based on a common static context stored in a LPWAN device and in the network. Static context means that information stored does not change during the packet transmission. The context describes the field values and keeps information that will not be transmitted through the constrained network.</p>
+<p>The Static Context Header Compression (SCHC) offers a great level of flexibility when processing the header fields. SCHC compression is based on a common static context stored in a LPWAN device and in the network. Static context means that the stored information does not change during the packet transmission. The context describes the field values and keeps information that will not be transmitted through the constrained network.</p>
 <p>SCHC must be used for LPWAN networks because it avoids complex resynchronization mechanisms, which are incompatible with LPWAN characteristics. And also because in most cases, IPv6/UDP headers are reduced to a small identifier called Rule ID. Eventhough sometimes, a SCHC compressed packet will not fit in one L2 PDU, and the SCHC fragmentation protocol will be used. The SCHC fragmentation and reassembly mechanism is used in two situations: for SCHC-compressed packets that still exceed the L2 PDU size; and for the case where the SCHC compression cannot be performed.</p>
 <p>This document describes the SCHC compression/decompression framework and applies it to IPv6/UDP headers. This document also specifies a fragmentation and reassembly mechanism used when SCHC compression is not enough for the L2 PDU size. Similar solutions for other protocols such as CoAP will be described in separate documents.</p>
 <h1 id="rfc.status"><a href="#rfc.status">Status of This Memo</a></h1>
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at https://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on March 19, 2018.</p>
+<p>This Internet-Draft will expire on March 23, 2018.</p>
 <h1 id="rfc.copyrightnotice"><a href="#rfc.copyrightnotice">Copyright Notice</a></h1>
 <p>Copyright (c) 2017 IETF Trust and the persons identified as the document authors.  All rights reserved.</p>
 <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (https://trustee.ietf.org/license-info) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.</p>
@@ -546,7 +546,7 @@ address {
   ()  () () ()     / \       +---------+   | AAA  |
 () () () () () ()  /   \=====|    ^    |===|Server|  +-----------+
  ()  ()   ()     |           | &lt;--|--&gt; |   +------+  |APPLICATION|
-()  ()  ()  ()  / \==========|    v    |=============|    (App)  |
+()  ()  ()  ()  / \==========|    v    |=============|   (App)   |
   ()  ()  ()   /   \         +---------+             +-----------+
  Dev        Radio Gateways         NGW
 
@@ -611,7 +611,7 @@ address {
 <h1 id="rfc.section.4.1">
 <a href="#rfc.section.4.1">4.1.</a> <a href="#schc-rules" id="schc-rules">SCHC Rules</a>
 </h1>
-<p id="rfc.section.4.1.p.1">The main idea of the SCHC compression scheme is to send the Rule id to the other end instead of sending known field values. This Rule id identifies a rule that match as much as possible the original packet values. When a value is known by both ends, it is not necessary sent through the LPWAN network.</p>
+<p id="rfc.section.4.1.p.1">The main idea of the SCHC compression scheme is to send the Rule id to the other end instead of sending known field values. This Rule id identifies a rule that match as much as possible the original packet values. When a value is known by both ends, it is not necessary to sent it through the LPWAN network.</p>
 <p id="rfc.section.4.1.p.2">The context contains a list of rules (cf. <a href="#Fig-ctxt" class="xref">Figure 3</a>). Each Rule contains itself a list of fields descriptions composed of a field identifier (FID), a field position (FP), a direction indicator (DI), a target value (TV), a matching operator (MO) and a Compression/Decompression Action (CDA).</p>
 <div id="rfc.figure.3"></div>
 <div id="Fig-ctxt"></div>
@@ -657,7 +657,7 @@ address {
 <a href="#rfc.section.4.2">4.2.</a> <a href="#rule-id" id="rule-id">Rule ID</a>
 </h1>
 <p id="rfc.section.4.2.p.1">Rule IDs are sent between both compression/decompression elements. The size of the Rule ID is not specified in this document, it is implementation-specific and can vary regarding the LPWAN technology, the number of flows, among others.</p>
-<p id="rfc.section.4.2.p.2">Some values in the Rule ID space may be reserved for goals other than header compression as fragmentation. (See <a href="#Frag" class="xref">Section 5</a>).</p>
+<p id="rfc.section.4.2.p.2">Some values in the Rule ID space may be reserved for other functionalities than header compression as fragmentation. (See <a href="#Frag" class="xref">Section 5</a>).</p>
 <p id="rfc.section.4.2.p.3">Rule IDs are specific to a Dev. Two Devs may use the same Rule ID for different header compression. To identify the correct Rule ID, the SCHC C/D needs to combine the Rule ID with the Dev L2 identifier to find the appropriate Rule.</p>
 <h1 id="rfc.section.4.3">
 <a href="#rfc.section.4.3">4.3.</a> <a href="#packet-processing" id="packet-processing">Packet processing</a>
@@ -666,9 +666,9 @@ address {
 <p></p>
 
 <ul>
-<li>compression Rule selection: The goal is to identify which Rule(s) will be used to compress the packet&#8217;s headers. When doing compression from Dw to Up the SCHC C/D needs to find the correct Rule to use by identifying its Dev-ID and the Rule-ID. In the Up situation only the Rule-ID is used.  The next step is to choose the fields by their direction, using the direction indicator (DI), so the fields that do not correspond to the appropriated DI will be excluded.  Next, then the fields are identified according to their field identifier (FID) and field position (FP).  If the field position does not correspond then the Rule is not use and the SCHC take next Rule.  Once the DI and the FP correspond to the header information, each field&#8217;s value is then compared to the corresponding target value (TV) stored in the Rule for that specific field using the matching operator (MO).  If all the fields in the packet&#8217;s header satisfy all the matching operators (MOs) of a Rule (i.e. all results are True), the fields of the header are then processed according to the Compression/Decompression Actions (CDAs) and a compressed header is obtained. Otherwise the next rule is tested.  If no eligible rule is found, then the header must be sent without compression, in which case the fragmentation process must be required.</li>
-<li>sending: The Rule ID is sent to the other end followed by information resulting from the compression of header fields, directly followed by the payload.  The product of field compression is sent in the order expressed in the Rule for the matching fields. The way the Rule ID is sent depends on the specific LPWAN layer two technology and will be specified in a specific document, and is out of the scope of this document.  For example, it can be either included in a Layer 2 header or sent in the first byte of the L2 payload. (cf. <a href="#Fig-FormatPckt" class="xref">Figure 4</a>).</li>
-<li>decompression: In both directions, The receiver identifies the sender through its device-id (e.g. MAC address) and selects the appropriate Rule through the Rule ID. This Rule gives the compressed header format and associates these values to the header fields.  It applies the CDA action to reconstruct the original header fields. The CDA application order can be different of the order given by the Rule. For instance Compute-* may be applied at end, after the other CDAs.  <br><br> If after using SCHC compression and adding the payload to the L2 frame the datagram is not multiple of 8 bits, padding may be used.</li>
+<li>compression Rule selection: The goal is to identify which Rule(s) will be used to compress the packet&#8217;s headers. When doing compression from Dw to Up the SCHC C/D needs to find the correct Rule to be used by identifying its Dev-ID and the Rule-ID. In the Up situation only the Rule-ID is used.  The next step is to choose the fields by their direction, using the direction indicator (DI), so the fields that do not correspond to the appropriated DI will be excluded.  Next, then the fields are identified according to their field identifier (FID) and field position (FP).  If the field position does not correspond, then the Rule is not use and the SCHC take next Rule.  Once the DI and the FP correspond to the header information, each field&#8217;s value is then compared to the corresponding target value (TV) stored in the Rule for that specific field using the matching operator (MO).  If all the fields in the packet&#8217;s header satisfy all the matching operators (MOs) of a Rule (i.e. all results are True), the fields of the header are then processed according to the Compression/Decompression Actions (CDAs) and a compressed header is obtained. Otherwise the next rule is tested.  If no eligible rule is found, then the header must be sent without compression, in which case the fragmentation process must be required.</li>
+<li>sending: The Rule ID is sent to the other end followed by the information resulting from the compression of header fields, directly followed by the payload.  The product of field compression is sent in the order expressed in the Rule for the matching fields. The way the Rule ID is sent depends on the specific LPWAN layer two technology and will be specified in a specific document, and is out of the scope of this document.  For example, it can be either included in a Layer 2 header or sent in the first byte of the L2 payload. (cf. <a href="#Fig-FormatPckt" class="xref">Figure 4</a>).</li>
+<li>decompression: In both directions, The receiver identifies the sender through its device-id (e.g. MAC address) and selects the appropriate Rule through the Rule ID. This Rule gives the compressed header format and associates these values to the header fields.  It applies the CDA action to reconstruct the original header fields. The CDA application order can be different of the order given by the Rule. For instance Compute-* may be applied at the end, after all the other CDAs.  <br><br> If after using SCHC compression and adding the payload to the L2 frame the datagram is not multiple of 8 bits, padding may be used.</li>
 </ul>
 <div id="rfc.figure.4"></div>
 <div id="Fig-FormatPckt"></div>
@@ -768,7 +768,7 @@ address {
 <h1 id="rfc.section.5.1">
 <a href="#rfc.section.5.1">5.1.</a> <a href="#overview" id="overview">Overview</a>
 </h1>
-<p id="rfc.section.5.1.p.1">Fragmentation supported in LPWAN is mandatory when the underlying LPWAN technology is not capable of fulfilling the IPv6 MTU requirement. Fragmentation is used after SCHC header compression when the size of the resulting compressed packet is larger than the L2 data unit maximum payload. In LPWAN technologies, the L2 data unit size typically varies from tens to hundreds of bytes.  If the entire datagram fits within a single L2 data unit, the fragmentation mechanism is not used and the packet is sent unfragmented. Otherwise, the datagram does not fit a single L2 data unit, it SHALL be broken into fragments.</p>
+<p id="rfc.section.5.1.p.1">Fragmentation supported in LPWAN is mandatory when the underlying LPWAN technology is not capable of fulfilling the IPv6 MTU requirement. Fragmentation is used after SCHC header compression when the size of the resulting compressed packet is larger than the L2 data unit maximum payload or when SCHC header compression is not possible. In LPWAN technologies, the L2 data unit size typically varies from tens to hundreds of bytes.  If the entire datagram fits within a single L2 data unit, the fragmentation mechanism is not used and the packet is sent unfragmented. Otherwise, when the datagram does not fit a single L2 data unit, it SHALL be broken into fragments.</p>
 <p id="rfc.section.5.1.p.2">Moreover, LPWAN technologies impose some strict limitations on traffic; therefore it is desirable to enable optional fragment retransmission, while a single fragment loss should not lead to retransmitting the full datagram.  On the other hand, in order to preserve energy, Devices are sleeping most of the time and may receive data during a short period of time after transmission. In order to adapt to the capabilities of various LPWAN technologies, this specification allows a gradation of fragment delivery reliability. This document does not make any decision with regard to which fragment delivery reliability option was used over a specific LPWAN technology.</p>
 <p id="rfc.section.5.1.p.3">An important consideration is that LPWAN networks typically follow the star topology, and therefore data unit reordering is not expected in such networks. This specification assumes that reordering will not happen between the entity performing fragmentation and the entity performing reassembly. This assumption allows to reduce complexity and overhead of the fragmentation mechanism.</p>
 <h1 id="rfc.section.5.2">
@@ -798,8 +798,8 @@ address {
 <p id="rfc.section.5.4.p.2">o  Rule ID. The Rule ID is used in fragments and in ACKs. The Rule ID in a fragment is set to a value that indicates that the data unit being carried is a fragment. This also allows to interleave non-fragmented IPv6 datagrams with fragments that carry a larger IPv6 datagram. Rule ID may also be used to signal which reliability option is in use for the IPv6 packet being carried. Rule ID may also be used to signal the window size if multiple sizes are supported (see 9.7). In an ACK, the Rule ID signals that the message this Rule ID is prepended to is an ACK.</p>
 <p id="rfc.section.5.4.p.3">o  Fragment Compressed Number (FCN).  The FCN is included in all fragments.  This field can be understood as a truncated, efficient representation of a larger-sized fragment number, and does not carry an absolute fragment number.  A special FCN value denotes the last fragment that carries a fragmented IPv6 packet.  In Window mode, the FCN is augmented with the W bit, which has the purpose of avoiding possible ambiguity for the receiver that might arise under certain conditions.</p>
 <p id="rfc.section.5.4.p.4">o  Datagram Tag (DTag). The DTag field, if present, is set to the same value for all fragments carrying the same IPv6 datagram, allows to interleave fragments that correspond to different IPv6 datagrams.</p>
-<p id="rfc.section.5.4.p.5">o  Message Integrity Check (MIC). It is computed by the sender over the complete IPv6 packet before fragmentation by using the TBD algorithm. The MIC allows the receiver to check for errors in the reassembled IPv6 packet, while it also enables compressing the UDP checksum by use of SCHC.</p>
-<p id="rfc.section.5.4.p.6">o  Bitmap. The bitmap is a sequence of bits included in the ACK for a given window, that provides feedback on whether each fragment of the current window has been received or not.</p>
+<p id="rfc.section.5.4.p.5">o  Message Integrity Check (MIC). It is computed by the sender over the complete IPv6 packet before fragmentation by using the TBD algorithm. The MIC allows the receiver to check errors in the reassembled IPv6 packet, while it also enables compressing the UDP checksum by use of SCHC compression.</p>
+<p id="rfc.section.5.4.p.6">o  Bitmap. The bitmap is a sequence of bits included in the ACK for a given window, each bit in the Bitmap identifies a fragment. It provides feedback on whether each fragment of the current window has been received or not.</p>
 <h1 id="rfc.section.5.5">
 <a href="#rfc.section.5.5">5.5.</a> <a href="#formats" id="formats">Formats</a>
 </h1>
