@@ -51,7 +51,7 @@ This document describes a header compression scheme and fragmentation functional
 for very low bandwidth networks. These techniques are especially tailored for LPWAN (Low Power Wide Area Network) networks.
 
 The Static Context Header Compression (SCHC) offers a great level of flexibility 
-when processing the header fields. SCHC compression is based on a common static context stored in a LPWAN device and in the network. Static context means that information stored does not change during the packet transmission. The context describes the field values and keeps information that will not be transmitted through the constrained network. 
+when processing the header fields. SCHC compression is based on a common static context stored in a LPWAN device and in the network. Static context means that the stored information does not change during the packet transmission. The context describes the field values and keeps information that will not be transmitted through the constrained network. 
 
 SCHC must be used for LPWAN networks because it avoids complex resynchronization mechanisms, which are incompatible
 with LPWAN characteristics. And also because in most cases, IPv6/UDP headers are reduced
@@ -122,7 +122,7 @@ types of entities in a typical LPWAN network, see {{Fig-LPWANarchi}}:
   ()  () () ()     / \       +---------+   | AAA  |
 () () () () () ()  /   \=====|    ^    |===|Server|  +-----------+
  ()  ()   ()     |           | <--|--> |   +------+  |APPLICATION|
-()  ()  ()  ()  / \==========|    v    |=============|    (App)  |
+()  ()  ()  ()  / \==========|    v    |=============|   (App)   |
   ()  ()  ()   /   \         +---------+             +-----------+
  Dev        Radio Gateways         NGW
 
@@ -225,7 +225,7 @@ The SCHC C/D process is bidirectional, so the same principles can be applied in 
 The main idea of the SCHC compression scheme is to send the Rule id to the other end instead 
 of sending known field values. This Rule id identifies a rule that match as much as possible the original 
 packet values. When a value is known by both
-ends, it is not necessary sent through the LPWAN network. 
+ends, it is not necessary to sent it through the LPWAN network. 
 
 The context contains a list of rules (cf. {{Fig-ctxt}}). Each Rule contains 
 itself a list of fields descriptions composed of a field identifier (FID), a field position (FP), a direction indicator (DI), 
@@ -295,7 +295,7 @@ Rule IDs are sent between both compression/decompression elements. The size
 of the Rule ID is not specified in this document, it is implementation-specific and can vary regarding the
 LPWAN technology, the number of flows, among others. 
 
-Some values in the Rule ID space may be reserved for goals other than header 
+Some values in the Rule ID space may be reserved for other functionalities than header 
 compression as fragmentation. (See {{Frag}}). 
 
 Rule IDs are specific to a Dev. Two Devs may use the same Rule ID for different
@@ -308,11 +308,11 @@ The compression/decompression process follows several steps:
 
 * compression Rule selection: The goal is to identify which Rule(s) will be used
   to compress the packet's headers. When doing compression from Dw to Up the SCHC C/D needs to find the 
-  correct Rule to use by identifying its Dev-ID and the Rule-ID. In the Up situation only the Rule-ID is used. 
+  correct Rule to be used by identifying its Dev-ID and the Rule-ID. In the Up situation only the Rule-ID is used. 
   The next step is to choose the fields by their direction, using the 
   direction indicator (DI), so the fields that do not correspond to the appropriated DI will be excluded. 
   Next, then the fields are identified according to their field identifier (FID) and field position (FP). 
-  If the field position does not correspond then the Rule is not use and the SCHC take next Rule.
+  If the field position does not correspond, then the Rule is not use and the SCHC take next Rule.
   Once the DI and the FP correspond to the header information, each field's value is then compared to the corresponding 
   target value (TV) stored in the Rule for that specific field using the matching operator (MO).
   If all the fields in the packet's header satisfy all the matching operators (MOs) of a Rule (i.e. all results are True),
@@ -321,7 +321,7 @@ The compression/decompression process follows several steps:
   If no eligible rule is found, then the header must be sent without compression, in which case the fragmentation process 
   must be required.
 
-* sending: The Rule ID is sent to the other end followed by information resulting
+* sending: The Rule ID is sent to the other end followed by the information resulting
   from the compression of header fields, directly followed by the payload.
   The product of field compression is sent in the order expressed in the Rule for the matching
   fields. The way the Rule ID is sent depends on the specific LPWAN
@@ -334,7 +334,7 @@ The compression/decompression process follows several steps:
   Rule gives the compressed header format and associates these values to the header fields.
   It applies the CDA action to reconstruct the original
   header fields. The CDA application order can be different of the order given by the Rule. For instance
-  Compute-\* may be applied at end, after the other CDAs.
+  Compute-\* may be applied at the end, after all the other CDAs.
   
   If after using SCHC compression and adding the payload to the L2 frame the datagram is not multiple of 8 bits, 
   padding may be used.
@@ -478,8 +478,8 @@ Compressed fields are elided during compression and reconstructed during decompr
 
 ## Overview
 
-Fragmentation supported in LPWAN is mandatory when the underlying LPWAN technology is not capable of fulfilling the IPv6 MTU requirement. Fragmentation is used after SCHC header compression when the size of the resulting compressed packet is larger than the L2 data unit maximum payload. In LPWAN technologies, the L2 data unit size typically varies from tens to hundreds of bytes. 
-If the entire datagram fits within a single L2 data unit, the fragmentation mechanism is not used and the packet is sent unfragmented. Otherwise, the datagram does not fit a single L2 data unit, it SHALL be broken into fragments. 
+Fragmentation supported in LPWAN is mandatory when the underlying LPWAN technology is not capable of fulfilling the IPv6 MTU requirement. Fragmentation is used after SCHC header compression when the size of the resulting compressed packet is larger than the L2 data unit maximum payload or when SCHC header compression is not possible. In LPWAN technologies, the L2 data unit size typically varies from tens to hundreds of bytes. 
+If the entire datagram fits within a single L2 data unit, the fragmentation mechanism is not used and the packet is sent unfragmented. Otherwise, when the datagram does not fit a single L2 data unit, it SHALL be broken into fragments. 
 
 Moreover, LPWAN technologies impose some strict limitations on traffic; 
 therefore it is desirable to enable optional fragment retransmission, while 
@@ -556,9 +556,9 @@ o  Fragment Compressed Number (FCN).  The FCN is included in all fragments.  Thi
 
 o  Datagram Tag (DTag). The DTag field, if present, is set to the same value for all fragments carrying the same IPv6 datagram, allows to interleave fragments that correspond to different IPv6 datagrams.
 
-o  Message Integrity Check (MIC). It is computed by the sender over the complete IPv6 packet before fragmentation by using the TBD algorithm. The MIC allows the receiver to check for errors in the reassembled IPv6 packet, while it also enables compressing the UDP checksum by use of SCHC.
+o  Message Integrity Check (MIC). It is computed by the sender over the complete IPv6 packet before fragmentation by using the TBD algorithm. The MIC allows the receiver to check errors in the reassembled IPv6 packet, while it also enables compressing the UDP checksum by use of SCHC compression.
 
-o  Bitmap. The bitmap is a sequence of bits included in the ACK for a given window, that provides feedback on whether each fragment of the current window has been received or not.
+o  Bitmap. The bitmap is a sequence of bits included in the ACK for a given window, each bit in the Bitmap identifies a fragment. It provides feedback on whether each fragment of the current window has been received or not.
 
 ## Formats
 
