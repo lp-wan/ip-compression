@@ -489,7 +489,7 @@ LPWAN technologies impose some strict limitations on traffic, devices are sleepi
    and overhead of the fragmentation mechanism.
 
 
-## Reliability options: definition 
+## Reliability options
 
 This specification defines the following three fragment delivery reliability options:
 
@@ -516,7 +516,8 @@ This specification defines the following three fragment delivery reliability opt
    stated in this document, and it is expected to be defined in other
    documents (e.g. technology- specific profiles).
 
-   o  Window mode - ACK on error. The Window mode - ACK on error option is suitable for links offering relatively low L2
+   o  Window mode - ACK on error. 
+   The Window mode - ACK on error option is suitable for links offering relatively low L2
    data unit loss probability.  This option reduces the number of ACKs
    transmitted by the fragment receiver. This may be especially beneficial in asymmetric
    scenarios, e.g. where fragmented data are sent uplink and the
