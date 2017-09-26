@@ -58,8 +58,7 @@ with LPWAN characteristics. And also because in most cases, IPv6/UDP headers are
 to a small identifier called Rule ID. Eventhough sometimes, a SCHC compressed packet will not fit in one L2 PDU, and the SCHC fragmentation protocol will be used. The SCHC fragmentation and reassembly mechanism is used in two situations: for SCHC-compressed packets that still exceed the L2 PDU size; and for the case where the SCHC compression cannot be performed. 
 
 This document describes the SCHC compression/decompression framework and applies it 
-to IPv6/UDP headers. This document also specifies a fragmentation and reassembly mechanism used when SCHC compression is not enough for the L2 PDU size. Similar solutions for other protocols such as CoAP will be described in 
-separate documents. 
+to IPv6/UDP headers. This document also specifies a fragmentation and reassembly mechanism that is used to support the IPv6 MTU requirement over LPWAN technologies. Fragmentation is mandatory for IPv6 datagrams that, after SCHC compression or when it has not been possible to apply such compression, still exceed the L2 maximum payload size. Similar solutions for other protocols such as CoAP will be described in separate documents. 
 
 --- middle
  
@@ -94,7 +93,7 @@ do not support layer two fragmentation, therefore the only option for
  {{RFC2460}} is the use of a fragmentation protocol at the
 adaptation layer below IPv6. 
 This draft defines also a fragmentation 
-functionality to support the IPv6 MTU requirements over LPWAN 
+functionality to support the IPv6 MTU requirement over LPWAN 
 technologies. Such functionality has been designed under the assumption that data unit reordering will not happen between the entity performing fragmentation and the entity performing reassembly.
 
 # LPWAN Architecture {#LPWAN-Archi}
@@ -478,72 +477,78 @@ Compressed fields are elided during compression and reconstructed during decompr
 
 ## Overview
 
-Fragmentation supported in LPWAN is mandatory when the underlying LPWAN technology is not capable of fulfilling the IPv6 MTU requirement. Fragmentation is used after SCHC header compression when the size of the resulting compressed packet is larger than the L2 data unit maximum payload or when SCHC header compression is not possible. In LPWAN technologies, the L2 data unit size typically varies from tens to hundreds of bytes. 
-If the entire datagram fits within a single L2 data unit, the fragmentation mechanism is not used and the packet is sent unfragmented. Otherwise, when the datagram does not fit a single L2 data unit, it SHALL be broken into fragments. 
+In LPWAN technologies, the L2 data unit size typically varies from tens to hundreds of bytes.  If the entire IPv6 datagram after applying SCHC header compression or as is fits within a single L2 data unit, the fragmentation mechanism is not used and the packet is sent. Otherwise, the datagram SHALL be broken into fragments.
 
-Moreover, LPWAN technologies impose some strict limitations on traffic; 
-therefore it is desirable to enable optional fragment retransmission, while 
-a single fragment loss should not lead to retransmitting the full datagram. 
-On the other hand, in order to preserve energy, Devices are sleeping most of the time and 
-may receive data during a short period of time after transmission. In 
-order to adapt to the capabilities of various LPWAN technologies,
-this specification allows a gradation of fragment delivery
-reliability. This document does not make any decision with regard to which 
-fragment delivery reliability option was used over a specific LPWAN 
-technology.
+LPWAN technologies impose some strict limitations on traffic, devices are sleeping most of the time and may receive data during a short period of time after transmission to preserve battery. To adapt the SCHC fragmentation to the capabilities of LPWAN technologies, it is desirable to enable optional fragment retransmission and to allow a gradation of fragment delivery reliability. This document does not make any decision with regard to which fragment delivery reliability option was used over a specific LPWAN technology.
 
-An important consideration is that LPWAN networks typically follow the star topology, and therefore data unit reordering is not expected in such networks. This specification assumes that reordering will not happen between the entity performing fragmentation and the entity performing reassembly. This assumption allows to reduce complexity and overhead of the fragmentation mechanism.
+   An important consideration is that LPWAN networks typically follow
+   the star topology, and therefore data unit reordering is not expected
+   in such networks.  This specification assumes that reordering will
+   not happen between the entity performing fragmentation and the entity
+   performing reassembly.  This assumption allows to reduce complexity
+   and overhead of the fragmentation mechanism.
+
 
 ## Reliability options: definition 
 
 This specification defines the following three fragment delivery reliability options:
 
-   o  No ACK
+   o  No ACK. 
+   No ACK is the simplest fragment delivery reliability option.  The receiver does not generate overhead in the form of acknowledgments (ACKs).  However, this option does not enhance delivery reliability beyond that offered by the underlying LPWAN technology.   In the No ACK option, the receiver MUST NOT issue ACKs.
 
-   o  Window mode - ACK “always”
 
-   o  Window mode - ACK on error 
-
-   The same reliability option MUST be used for all fragments of a packet. It is up to implementers and/or representatives of the underlying LPWAN technology to decide which reliability option to use and whether the same reliability option applies to all IPv6 packets or not.  Note that the reliability option to be used is not necessarily tied to the particular characteristics of the underlying L2 LPWAN technology (e.g. the No ACK reliability option may be used on top of an L2 LPWAN technology with symmetric characteristics for uplink and downlink).
-   
-   In the No ACK option, the receiver MUST NOT issue acknowledgments (ACK). 
-
-   In Window mode – ACK “always”, an ACK is transmitted by the fragment
+   o  Window mode - ACK “always”.    
+   The Window mode - ACK "always" option provides flow control.  In
+   addition, it is able to handle long bursts of lost fragments, since
+   detection of such events can be done before  the end of the IPv6 packet
+   transmission, as long as the window size is short enough.  However,
+   such benefit comes at the expense of higher ACK overhead.
+   In Window mode - ACK "always", an ACK is transmitted by the fragment
    receiver after a window of fragments have been sent.  A window of
    fragments is a subset of the full set of fragments needed to carry an
    IPv6 packet.  In this mode, the ACK informs the sender about received
-   and/or missed fragments from the window of fragments. Upon receipt of an ACK that informs about any lost
-   fragments, the sender retransmits the lost fragments. When an ACK is not received by the fragment sender, the latter retransmits a fragment, which serves as an ACK request. The maximum number of ACK requests is MAX_ACK_REQUESTS. The default value of MAX_ACK_REQUESTS is not stated in this document, and it is expected to be defined in other documents (e.g. technology-
-   specific profiles).
+   and/or missed fragments from the window of fragments.  Upon receipt
+   of an ACK that informs about any lost fragments, the sender
+   retransmits the lost fragments.  When an ACK is not received by the
+   fragment sender, the latter retransmits a fragment, which serves as
+   an ACK request.  The maximum number of ACK requests is
+   MAX_ACK_REQUESTS.  The default value of MAX_ACK_REQUESTS is not
+   stated in this document, and it is expected to be defined in other
+   documents (e.g. technology- specific profiles).
 
-   In Window mode – ACK on error, an ACK is transmitted by the fragment
-   receiver after a window of fragments have been sent, only if at least one 
-   of the fragments in the window has been lost. In this mode, the ACK informs the sender about received and/or missed fragments from the window of fragments. Upon receipt of an ACK that informs about any lost
-   fragments, the sender retransmits the lost fragments.  The maximum
-   number of ACKs to be sent by the receiver for a specific window,
-   denoted MAX_ACKS_PER_WINDOW, is not stated in this document, and it
-   is expected to be defined in other documents (e.g. technology-
-   specific profiles).
-  
-   This document does not make any decision as to which fragment delivery 
-   reliability option(s) are supported by a specific LPWAN 
-   technology.  
-   
-   Examples of the different reliability options described are provided in Appendix A.
+   o  Window mode - ACK on error. The Window mode - ACK on error option is suitable for links offering relatively low L2
+   data unit loss probability.  This option reduces the number of ACKs
+   transmitted by the fragment receiver. This may be especially beneficial in asymmetric
+   scenarios, e.g. where fragmented data are sent uplink and the
+   underlying LPWAN technology downlink capacity or message rate is
+   lower than the uplink one.  However, if an ACK is lost, the sender
+   assumes that all fragments covered by the ACK have been successfully
+   delivered.  
+   In Window mode - ACK on error, an ACK is transmitted by the fragment
+   receiver after a window of fragments has been sent, only if at least
+   one of the fragments in the window has been lost.  In this mode, the
+   ACK informs the sender about received and/or missed fragments from
+   the window of fragments.  Upon receipt of an ACK that informs about
+   any lost fragments, the sender retransmits the lost fragments.  The
+   maximum number of ACKs to be sent by the receiver for a specific
+   window, denoted MAX_ACKS_PER_WINDOW, and the maximum number of fragment retries for a specific fragment, denoted MAX_FRAG_RETRIES,    are not stated in this document, and are expected to be defined in other documents (e.g. technology-specific profiles).
+ 
+   The same reliability option MUST be used for all fragments of a
+   packet.  It is up to implementers and/or representatives of the
+   underlying LPWAN technology to decide which reliability option to use
+   and whether the same reliability option applies to all IPv6 packets
+   or not.  Note that the reliability option to be used is not
+   necessarily tied to the particular characteristics of the underlying
+   L2 LPWAN technology (e.g. the No ACK reliability option may be used
+   on top of an L2 LPWAN technology with symmetric characteristics for
+   uplink and downlink). 
+  This document does not make any decision as to which fragment
+   delivery reliability option(s) are supported by a specific LPWAN
+   technology. 
 
-## Reliability options: discussion
+   Examples of the different reliability options described are provided
+   in Appendix A.
 
-This section discusses the properties of each fragment delivery 
-   reliability option defined in the previous section. 
-
-   No ACK is the most simple fragment delivery reliability option. With this 
-   option, the receiver does not generate overhead in the form of ACKs. 
-   However, this option does not enhance delivery reliability beyond that 
-   offered by the underlying LPWAN technology.
-
-   The Window mode - ACK on error option is based on the optimistic expectation that the underlying links will offer relatively low L2 data unit loss probability. This option reduces the number of ACKs transmitted by the fragment receiver compared to the Window mode - ACK “always” option. This may be specially beneficial in asymmetric scenarios, e.g. where fragmented data are sent uplink and the underlying LPWAN technology downlink capacity or message rate is lower than the uplink one. However, if an ACK is lost, the sender assumes that all fragments covered by the ACK have been successfully delivered. In contrast, the Window mode - ACK “always” option does not suffer that issue, at the expense of an ACK overhead increase. 
-   
-The Window mode – ACK “always” option provides flow control. In addition, it is able to handle long bursts of lost fragments, since detection of such events can be done before end of the IPv6 packet transmission, as long as the window size is short enough. However, such benefit comes at the expense of higher ACK overhead.
 
 ## Tools
 
@@ -710,14 +715,14 @@ The receiver of link fragments SHALL use (1) the sender's L2 source address (if 
 
 Upon receipt of a link fragment, the receiver starts constructing the original unfragmented packet. It uses the FCN and the order of arrival of each fragment to determine the location of the individual fragments within the original unfragmented packet. For example, it may place the data payload of the fragments within a payload datagram reassembly buffer at the location determined from the FCN and order of arrival of the fragments, and the fragment payload sizes. In Window mode, the fragment receiver also uses the W bit in the received fragments. Note that the size of the original, unfragmented IPv6 packet cannot be determined from fragmentation headers.
 
-When Window mode - ACK on error is used, the fragment receiver starts a timer (denoted "ACK on Error Timer") upon reception of the first fragment for an IPv6 datagram.  The initial value for this timer is not provided by this specification, and is expected to be defined in additional documents.  This timer is reset and restarted every time that a new fragment carrying data from the same IPv6 datagram is received. In Window mode – ACK on error, after reception of the last fragment of a window (i.e. the fragment with FCN=0 or FCN=2^N-1), if fragment losses have been detected by the fragment receiver in the current window, the fragment receiver MUST transmit an ACK reporting its available information with regard to successfully received and missing fragments from the current window.  Upon expiration of the “ACK on Error Timer”, an ACK MUST be transmitted by the fragment receiver to report received and not received fragments for the current window. The “ACK on Error Timer” is then reset and restarted. When the last fragment of the IPv6 datagram is received, if all fragments of that last window of the packet have been received, the “ACK on Error Timer” is stopped. In Window mode – ACK on error, the fragment sender retransmits any lost fragments reported in an ACK. The maximum number of ACKs to be sent by the receiver for a specific window, denoted MAX_ACKS_PER_WINDOW, is not stated in this document, and it is expected to be defined in other documents (e.g. technology-specific profiles). In Window mode – ACK on error, when a fragment sender has transmitted the last fragment of a window, or it has retransmitted the last fragment within the set of lost fragments reported in an ACK, it is assumed that the time the fragment sender will wait to receive an ACK is smaller than the transmission time of MAX_WIND_FCN + 1 fragments (i.e. the time required to transmit a complete window of fragments). This aspect must be carefully considered if Window mode – ACK on error is used, in particular taking into account the latency characteristics of the underlying L2 technology.
+When Window mode - ACK on error is used, the fragment receiver starts a timer (denoted "ACK on Error Timer") upon reception of the first fragment for an IPv6 datagram.  The initial value for this timer is not provided by this specification, and is expected to be defined in additional documents.  This timer is reset and restarted every time that a new fragment carrying data from the same IPv6 datagram is received. In Window mode – ACK on error, after reception of the last fragment of a window (i.e. the fragment with FCN=0 or FCN=2^N-1), if fragment losses have been detected by the fragment receiver in the current window, the fragment receiver MUST transmit an ACK reporting its available information with regard to successfully received and missing fragments from the current window.  Upon expiration of the “ACK on Error Timer”, an ACK MUST be transmitted by the fragment receiver to report received and not received fragments for the current window. The “ACK on Error Timer” is then reset and restarted. When the last fragment of the IPv6 datagram is received, if all fragments of that last window of the packet have been received, the “ACK on Error Timer” is stopped. In Window mode – ACK on error, the fragment sender retransmits any lost fragments reported in an ACK, as long as the number of retransmissions for a specific fragment does not exceed MAX_FRAG_RETRIES. The maximum number of ACKs to be sent by the receiver for a specific window, denoted MAX_ACKS_PER_WINDOW, as well as MAX_FRAG_RETRIES, are not stated in this document, and are expected to be defined in other documents (e.g. technology-specific profiles). In Window mode – ACK on error, when a fragment sender has transmitted the last fragment of a window, or it has retransmitted the last fragment within the set of lost fragments reported in an ACK, it is assumed that the time the fragment sender will wait to receive an ACK is smaller than the transmission time of MAX_WIND_FCN + 1 fragments (i.e. the time required to transmit a complete window of fragments). This aspect must be carefully considered if Window mode – ACK on error is used, in particular taking into account the latency characteristics of the underlying L2 technology.
 
 Note that, in Window mode, the first fragment of the window is the one with FCN set to MAX_WIND_FCN.  Also note that, in Window mode, the fragment with FCN=0 is considered the last fragment of its window, except for the last fragment of the whole packet (with all FCN bits set to 1, i.e. FCN=2^N-1), which is also the last fragment of the last window.
 
 If Window mode - ACK "always" is used, upon receipt of the last fragment of a window (i.e. the fragment with CFN=0 or CFN=2^N-1), or 
 upon receipt of the last retransmitted fragment from the set of lost fragments reported by the last ACK sent by the fragment receiver (if any), the fragment receiver MUST send an ACK to the fragment sender. The ACK provides feedback on the fragments received and those not received that correspond to the last window. Once all fragments of a window have been received by the fragment receiver (including retransmitted fragments, if any), the latter sends an ACK without a bitmap to the sender, in order to report successful reception of all fragments of the window to the fragment sender.
 
-When Window mode - ACK "always" is used, the fragment sender starts a timer (denoted "ACK Always Timer") after the first transmission attempt of the last fragment of a window (i.e. the fragment with FCN=0 or FCN=2^N-1). In the same reliability option, if one or more fragments are reported by an ACK to be lost, the sender retransmits those fragments and starts the “ACK Always Timer” after the last retransmitted fragment (i.e. the fragment with the lowest FCN) among the set of lost fragments reported by the ACK. The initial value for the “ACK Always Timer” is not provided by this specification, and it is expected to be defined in additional documents. Upon expiration of the timer, if no ACK has been received since the timer start, the next action to be performed by the fragment sender depends on whether the current window is the last window of the IPv6 packet or not. If the current window is not the last one, the sender retransmits the last fragment sent at the moment of timer expiration (which may or may not be the fragment with FCN=0), and it reinitializes and restarts the timer. Otherwise (i.e. the current window is the last one), the sender retransmits the fragment with FCN=2^N-1; if the fragment sender knows that the fragment with FCN=2^N-1 has already been successfully received, the fragment sender MAY opt to send a fragment with FCN=2^N-1 and without a data payload. Note that retransmitting a fragment sent as described serves as an ACK request. The maximum number of requests for a specific ACK, denoted MAX_ACK_REQUESTS, is not stated in this document, and it is expected to be defined in other documents (e.g. technology-specific profiles). In Window mode – ACK “Always”, the fragment sender retransmits any lost fragments reported in an ACK. When the fragment sender receives an ACK that confirms correct reception of all fragments of a window, if there are further fragments to be sent for the same IPv6 datagram, the fragment sender proceeds to transmitting subsequent fragments of the next window.
+When Window mode - ACK "always" is used, the fragment sender starts a timer (denoted "ACK Always Timer") after the first transmission attempt of the last fragment of a window (i.e. the fragment with FCN=0 or FCN=2^N-1). In the same reliability option, if one or more fragments are reported by an ACK to be lost, the sender retransmits those fragments and starts the “ACK Always Timer” after the last retransmitted fragment (i.e. the fragment with the lowest FCN) among the set of lost fragments reported by the ACK. The initial value for the “ACK Always Timer” is not provided by this specification, and it is expected to be defined in additional documents (nevertheless, a reasonably low value for this timer is recommended, as long as the scenario permits, in order to avoid high fragmented IPv6 packet transmission delay). Upon expiration of the timer, if no ACK has been received since the timer start, the next action to be performed by the fragment sender depends on whether the current window is the last window of the IPv6 packet or not. If the current window is not the last one, the sender retransmits the last fragment sent at the moment of timer expiration (which may or may not be the fragment with FCN=0), and it reinitializes and restarts the timer. Otherwise (i.e. the current window is the last one), the sender retransmits the fragment with FCN=2^N-1; if the fragment sender knows that the fragment with FCN=2^N-1 has already been successfully received, the fragment sender MAY opt to send a fragment with FCN=2^N-1 and without a data payload. Note that retransmitting a fragment sent as described serves as an ACK request. The maximum number of requests for a specific ACK, denoted MAX_ACK_REQUESTS, is not stated in this document, and it is expected to be defined in other documents (e.g. technology-specific profiles). In Window mode – ACK “Always”, the fragment sender retransmits any lost fragments reported in an ACK. When the fragment sender receives an ACK that confirms correct reception of all fragments of a window, if there are further fragments to be sent for the same IPv6 datagram, the fragment sender proceeds to transmitting subsequent fragments of the next window.
 
 If the recipient receives the last fragment of an IPv6 datagram (i.e. the fragment with FCN=2^N-1), it checks for the integrity of the reassembled IPv6 datagram, based on the MIC received. In No ACK, if the integrity check indicates that the reassembled IPv6 datagram does not match the original IPv6 datagram (prior to fragmentation), the reassembled IPv6 datagram MUST be discarded. In Window mode, a MIC check is also performed by the fragment receiver after reception of each subsequent fragment retransmitted after the first MIC check. In Window mode – ACK “always”, if a MIC check indicates that the IPv6 datagram has been successfully reassembled, the fragment receiver sends an ACK without a bitmap to the fragment sender. In the same reliability option, after receiving a fragment with FCN=2^N-1, the fragment receiver sends an ACK to the fragment sender, even if it is not the first fragment with FCN=2^N-1 received by the fragment receiver.
 
@@ -952,6 +957,8 @@ Further attacks may involve sending overlapped fragments (i.e.
 comprising some overlapping parts of the original IPv6 datagram).
 Implementers should make sure that correct operation is not affected
 by such event.
+
+In Window mode – ACK on error, a malicious node may force a fragment sender to resend a fragment a number of times, with the aim to increase consumption of the fragment sender’s resources. To this end, the malicious node may repeatedly send a fake ACK to the fragment sender, with a bitmap that reports that one or more fragments have been lost. In order to mitigate this possible attack, MAX_FRAG_RETRIES may be set to a safe value which allows to limit the maximum damage of the attack to an acceptable extent. However, note that a high setting for MAX_FRAG_RETRIES benefits fragment delivery reliability, therefore the trade-off needs to be carefully considered.
 
 # Acknowledgements
 
