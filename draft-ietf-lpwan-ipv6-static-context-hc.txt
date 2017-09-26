@@ -150,9 +150,9 @@ Internet-Draft                 LPWAN SCHC                 September 2017
      9.2.  Informative References  . . . . . . . . . . . . . . . . .  31
    Appendix A.  SCHC Compression Examples  . . . . . . . . . . . . .  31
    Appendix B.  Fragmentation Examples . . . . . . . . . . . . . . .  33
-   Appendix C.  Allocation of Rule IDs for fragmentation . . . . . .  37
-   Appendix D.  Note . . . . . . . . . . . . . . . . . . . . . . . .  38
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  38
+   Appendix C.  Allocation of Rule IDs for fragmentation . . . . . .  39
+   Appendix D.  Note . . . . . . . . . . . . . . . . . . . . . . . .  40
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  40
 
 1.  Introduction
 
@@ -1992,6 +1992,117 @@ Internet-Draft                 LPWAN SCHC                 September 2017
     Window mode - ACK "Always", for N=3, and MAX_WIND_FCN=6, with three
                                   losses.
 
+   Figure 21 illustrates the transmission of an IPv6 packet that needs 6
+   fragments in Window mode - ACK "always", for N=3 and MAX_WIND_FCN=6,
+   with three losses, and only one retry is needed for each lost
+   fragment.  Note that, since a single window is needed for
+   transmission of the IPv6 packet in this case, the example illustrates
+   behavior when losses happen in the last window.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Minaburo, et al.         Expires March 30, 2018                [Page 36]
+
+Internet-Draft                 LPWAN SCHC                 September 2017
+
+
+             Sender                Receiver
+                |-----W=0, CFN=6----->|
+                |-----W=0, CFN=5----->|
+                |-----W=0, CFN=4--X-->|
+                |-----W=0, CFN=3--X-->|
+                |-----W=0, CFN=2--X-->|
+                |-----W=0, CFN=7----->|MIC checked
+                |<-----ACK, W=0-------|bitmap:11000001
+                |-----W=0, CFN=4----->|MIC checked: failed
+                |-----W=0, CFN=3----->|MIC checked: failed
+                |-----W=0, CFN=2----->|MIC checked: success
+                |<-----ACK, W=0-------|no bitmap
+              (End)
+
+   Figure 21: Transmission of an IPv6 packet carried by 11 fragments in
+    Window mode - ACK "Always", for N=3, and MAX_WIND_FCN=6, with three
+       losses, and only one retry is needed for each lost fragment.
+
+   Figure 22 illustrates the transmission of an IPv6 packet that needs 6
+   fragments in Window mode - ACK "always", for N=3 and MAX_WIND_FCN=6,
+   with three losses, and the second ACK is lost.  Note that, since a
+   single window is needed for transmission of the IPv6 packet in this
+   case, the example illustrates behavior when losses happen in the last
+   window.
+
+                      Sender                Receiver
+                |-----W=0, CFN=6----->|
+                |-----W=0, CFN=5----->|
+                |-----W=0, CFN=4--X-->|
+                |-----W=0, CFN=3--X-->|
+                |-----W=0, CFN=2--X-->|
+                |-----W=0, CFN=7----->|MIC checked
+                |<-----ACK, W=0-------|bitmap:11000001
+                |-----W=0, CFN=4----->|MIC checked: wrong
+                |-----W=0, CFN=3----->|MIC checked: wrong
+                |-----W=0, CFN=2----->|MIC checked: right
+                |  X---ACK, W=0-------|no bitmap
+       timeout  |                     |
+                |-----W=0, CFN=7----->|
+                |<-----ACK, W=0-------|no bitmap
+
+              (End)
+
+   Figure 22: Transmission of an IPv6 packet carried by 11 fragments in
+    Window mode - ACK "Always", for N=3, and MAX_WIND_FCN=6, with three
+                    losses, and the second ACK is lost.
+
+
+
+
+
+Minaburo, et al.         Expires March 30, 2018                [Page 37]
+
+Internet-Draft                 LPWAN SCHC                 September 2017
+
+
+   Figure 23 illustrates the transmission of an IPv6 packet that needs 6
+   fragments in Window mode - ACK "always", for N=3 and MAX_WIND_FCN=6,
+   with three losses, and one retransmitted fragment is lost.  Note
+   that, since a single window is needed for transmission of the IPv6
+   packet in this case, the example illustrates behavior when losses
+   happen in the last window.
+
+              Sender                Receiver
+                |-----W=0, CFN=6----->|
+                |-----W=0, CFN=5----->|
+                |-----W=0, CFN=4--X-->|
+                |-----W=0, CFN=3--X-->|
+                |-----W=0, CFN=2--X-->|
+                |-----W=0, CFN=7----->|MIC checked
+                |<-----ACK, W=0-------|bitmap:11000001
+                |-----W=0, CFN=4----->|MIC checked: wrong
+                |-----W=0, CFN=3----->|MIC checked: wrong
+                |-----W=0, CFN=2--X-->|
+         timeout|                     |
+                |-----W=0, CFN=7----->|
+                |<-----ACK, W=0-------|bitmap:11110001
+                |-----W=0, CFN=2----->|MIC checked: right
+                |<-----ACK, W=0-------|no bitmap
+              (End)
+
+   Figure 23: Transmission of an IPv6 packet carried by 11 fragments in
+    Window mode - ACK "Always", for N=3, and MAX_WIND_FCN=6, with three
+              losses, and one retransmitted fragment is lost.
+
    Appendix C illustrates the transmission of an IPv6 packet that needs
    28 fragments in Window mode - ACK "always", for N=5 and
    MAX_WIND_FCN=23, with two losses.  Note that MAX_WIND_FCN=23 may be
@@ -2013,7 +2124,8 @@ Internet-Draft                 LPWAN SCHC                 September 2017
 
 
 
-Minaburo, et al.         Expires March 30, 2018                [Page 36]
+
+Minaburo, et al.         Expires March 30, 2018                [Page 38]
 
 Internet-Draft                 LPWAN SCHC                 September 2017
 
@@ -2069,7 +2181,7 @@ Appendix C.  Allocation of Rule IDs for fragmentation
 
 
 
-Minaburo, et al.         Expires March 30, 2018                [Page 37]
+Minaburo, et al.         Expires March 30, 2018                [Page 39]
 
 Internet-Draft                 LPWAN SCHC                 September 2017
 
@@ -2125,4 +2237,4 @@ Authors' Addresses
 
 
 
-Minaburo, et al.         Expires March 30, 2018                [Page 38]
+Minaburo, et al.         Expires March 30, 2018                [Page 40]
