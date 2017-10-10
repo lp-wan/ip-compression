@@ -48,7 +48,7 @@ informative:
 --- abstract
 
 This document describes a header compression scheme and fragmentation functionality 
-for very low bandwidth networks. These techniques are especially tailored for LPWAN (Low Power Wide Area Network) networks.
+for very low bandwidth networks. These techniques are specially tailored for LPWAN (Low Power Wide Area Network) networks.
 
 The Static Context Header Compression (SCHC) offers a great level of flexibility 
 when processing the header fields. SCHC compression is based on a common static context stored in a LPWAN device and in the network. Static context means that the stored information does not change during the packet transmission. The context describes the field values and keeps information that will not be transmitted through the constrained network. 
@@ -72,18 +72,18 @@ compression:
   For the needs of this draft, the architecture can be summarized to Devices (Dev)
   exchanging information with LPWAN Application Server (App) through a Network Gateway (NGW). 
 
-* Traffic flows are mostly known in advance, since devices embed built-in
+* Traffic flows are mostly known in advance since devices embed built-in
   applications. Contrary to computers or smartphones, new applications cannot
   be easily installed.
 
 The Static Context Header Compression (SCHC) is defined for this environment.
 SCHC uses a context where header information is kept in the header format order. This context is 
-static (the values on the header fields do not change over time) avoiding 
+static (the values of the header fields do not change over time) avoiding 
 complex resynchronization mechanisms, incompatible
 with LPWAN characteristics. In most of the cases, IPv6/UDP headers are reduced
 to a small context identifier. 
 
-The SCHC header compression mechanism is independent from the specific LPWAN technology over which it will be used.
+The SCHC header compression mechanism is independent of the specific LPWAN technology over which it will be used.
 
 LPWAN technologies are also characterized,
 among others, by a very reduced data unit and/or payload size
@@ -138,11 +138,11 @@ This section defines the terminology and acronyms used in this document.
 
 * Bi: Bidirectional, it can be used in both senses
 
-* CDA: Compression/Decompression Action. An action that is perfomed for both functionnalities to compress a header field or to recover its original value in the decompression phase.
+* CDA: Compression/Decompression Action. An action that is performed for both functionalities to compress a header field or to recover its original value in the decompression phase.
 
 * Context: A set of rules used to compress/decompress headers
 
-* Dev: Device. Node connected to the LPWAN. A Dev may implement SCHC.
+* Dev: Device. A Node connected to the LPWAN. A Dev may implement SCHC.
 
 * Dev-IID: Device Interface Identifier. Second part of the IPv6 address to identify the device interface
 
@@ -154,7 +154,7 @@ This section defines the terminology and acronyms used in this document.
 
 * FCN: Fragment Compressed Number is a fragmentation header field that carries an efficient representation of a larger-sized fragment number.
 
-* FID: Field Indentifier is an index to describe the header fields in the Rule
+* FID: Field Identifier is an index to describe the header fields in the Rule
 
 * FP: Field Position is a list of possible correct values that a field may use
 
@@ -166,7 +166,7 @@ This section defines the terminology and acronyms used in this document.
 
 * Rule: A set of header field values.
 
-* Rule ID: An identifier for a rule, SCHC C/D and Dev share the same Rule ID for a specific flow. 
+* Rule ID: An identifier for a rule, SCHC C/D, and Dev share the same Rule ID for a specific flow. 
 
 * SCHC C/D: Static Context Header Compression Compressor/Decompressor. A process in the network to achieve compression/decompressing headers. SCHC C/D uses SCHC rules to perform compression and decompression.
 
@@ -208,10 +208,10 @@ The way the context is learned on both sides is out of the scope of this documen
 
 {{Fig-archi}} represents the architecture for compression/decompression, it is based on {{I-D.ietf-lpwan-overview}} 
 terminology. The Device is sending applications flows using IPv6 or IPv6/UDP protocols. These flows are compressed by an 
-Static Context Header Compression Compressor/Decompressor (SCHC C/D) to reduce headers size. Resulting
-information is sent on a layer two (L2) frame to a LPWAN Radio Network (RG) which forwards 
+Static Context Header Compression Compressor/Decompressor (SCHC C/D) to reduce headers size. The resulting
+information is sent to a layer two (L2) frame to a LPWAN Radio Network (RG) which forwards 
 the frame to a Network Gateway (NGW).
-The NGW sends the data to a SCHC C/D for decompression which shares the same rules with the Dev. The SCHC C/D can be 
+The NGW sends the data to an SCHC C/D for decompression which shares the same rules with the Dev. The SCHC C/D can be 
 located on the Network Gateway (NGW) or in another place as long as a tunnel is established between the NGW and the SCHC C/D. 
 The SCHC C/D in both sides must share the same set of Rules.
 After decompression, the packet can be sent on the Internet to one
@@ -222,9 +222,9 @@ The SCHC C/D process is bidirectional, so the same principles can be applied in 
 ## SCHC Rules
 
 The main idea of the SCHC compression scheme is to send the Rule id to the other end instead 
-of sending known field values. This Rule id identifies a rule that match as much as possible the original 
+of sending known field values. This Rule id identifies a rule that matches as much as possible the original 
 packet values. When a value is known by both
-ends, it is not necessary to sent it through the LPWAN network. 
+ends, it is not necessary to send it through the LPWAN network. 
 
 The context contains a list of rules (cf. {{Fig-ctxt}}). Each Rule contains 
 itself a list of fields descriptions composed of a field identifier (FID), a field position (FP), a direction indicator (DI), 
@@ -270,9 +270,9 @@ The Context describes the header fields and its values with the following entrie
   
 * A direction indicator (DI) indicating the packet direction. Three values are possible:
 
-  * UP LINK (Up) when the field or the value is only present in packets sent by the Dev to the App,
+  * UPLINK (Up) when the field or the value is only present in packets sent by the Dev to the App,
 
-  * DOWN LINK (Dw) when the field or the value is only present in packet sent from the App to the Dev and 
+  * DOWNLINK (Dw) when the field or the value is only present in packet sent from the App to the Dev and 
 
   * BIDIRECTIONAL (Bi) when the field or the value is present either upstream or downstream. 
 
@@ -307,16 +307,16 @@ The compression/decompression process follows several steps:
 
 * compression Rule selection: The goal is to identify which Rule(s) will be used
   to compress the packet's headers. When doing compression from Dw to Up the SCHC C/D needs to find the 
-  correct Rule to be used by identifying its Dev-ID and the Rule-ID. In the Up situation only the Rule-ID is used. 
+  correct Rule to be used by identifying its Dev-ID and the Rule-ID. In the Up situation, only the Rule-ID is used. 
   The next step is to choose the fields by their direction, using the 
   direction indicator (DI), so the fields that do not correspond to the appropriated DI will be excluded. 
   Next, then the fields are identified according to their field identifier (FID) and field position (FP). 
-  If the field position does not correspond, then the Rule is not use and the SCHC take next Rule.
+  If the field position does not correspond, then the Rule is not used and the SCHC take next Rule.
   Once the DI and the FP correspond to the header information, each field's value is then compared to the corresponding 
   target value (TV) stored in the Rule for that specific field using the matching operator (MO).
   If all the fields in the packet's header satisfy all the matching operators (MOs) of a Rule (i.e. all results are True),
   the fields of the header are then processed according to the Compression/Decompression Actions (CDAs) 
-  and a compressed header is obtained. Otherwise the next rule is tested. 
+  and a compressed header is obtained. Otherwise, the next rule is tested. 
   If no eligible rule is found, then the header must be sent without compression, in which case the fragmentation process 
   must be required.
 
@@ -324,15 +324,15 @@ The compression/decompression process follows several steps:
   from the compression of header fields, directly followed by the payload.
   The product of field compression is sent in the order expressed in the Rule for the matching
   fields. The way the Rule ID is sent depends on the specific LPWAN
-  layer two technology and will be specified in a specific document, and is out of the scope of this document. 
+  layer two technology and will be specified in a specific document and is out of the scope of this document. 
   For example, it can be either included in a Layer 2 header or sent in the first byte of
-  the L2 payload. (cf. {{Fig-FormatPckt}}). 
+  the L2 payload. (Cf. {{Fig-FormatPckt}}). 
 
 * decompression: In both directions, The receiver identifies the sender through its device-id
   (e.g. MAC address) and selects the appropriate Rule through the Rule ID. This
   Rule gives the compressed header format and associates these values to the header fields.
   It applies the CDA action to reconstruct the original
-  header fields. The CDA application order can be different of the order given by the Rule. For instance
+  header fields. The CDA application order can be different from the order given by the Rule. For instance
   Compute-\* may be applied at the end, after all the other CDAs.
   
   If after using SCHC compression and adding the payload to the L2 frame the datagram is not multiple of 8 bits, 
@@ -392,19 +392,19 @@ the original value.
 ~~~~
 {: #Fig-function title='Compression and Decompression Functions'}
 
-{{Fig-function}} sumarizes the basics functions defined to compress and decompress
+{{Fig-function}} summarizes the basics functions defined to compress and decompress
 a field. The first column gives the action's name. The second and third
-columns outlines the compression/decompression behavior.
+columns outline the compression/decompression behavior.
 
 Compression is done in the rule order and compressed values are sent in that order in the compressed
 message. The receiver must be able to find the size of each compressed field
 which can be given by the rule or may be sent with the compressed header. 
 
-If the field is identified as variable, then its size must be sent first using the following coding:
+If the field is identified as being variable, then its size must be sent first using the following coding:
 
 * If the size is between 0 and 14 bytes it is sent using 4 bits. 
 
-* For values between 15 and 255, the first 4 bit sent are set to 1 and the size is sent using 8 bits. 
+* For values between 15 and 255, the first 4 bits sent are set to 1 and the size is sent using 8 bits. 
 
 * For higher value, the first 12 bits are set to 1 and the size is sent on 2 bytes. 
 
