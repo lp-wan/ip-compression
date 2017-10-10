@@ -1102,7 +1102,7 @@ The third rule compresses port numbers to 4 bits.
 
 This section provides examples of different fragment delivery reliability options possible on the basis of this specification.
 
-{{Fig-Example-Unreliable}} illustrates the transmission of an IPv6 packet that needs 11 fragments in the No ACK option, FCN is put to 3 bits.
+{{Fig-Example-Unreliable}} illustrates the transmission of an IPv6 packet that needs 11 fragments in the No ACK option, FCN is always 1 bit.
 
 ~~~~
         Sender               Receiver
@@ -1116,7 +1116,7 @@ This section provides examples of different fragment delivery reliability option
           |-------FCN=0-------->|
           |-------FCN=0-------->|
           |-------FCN=0-------->|
-          |-------FCN=7-------->|MIC checked =>
+          |-------FCN=1-------->|MIC checked =>
          
 ~~~~
 {: #Fig-Example-Unreliable title='Transmission of an IPv6 packet carried by 11 fragments in the No ACK option'}
