@@ -410,12 +410,12 @@ If the field is identified as being variable, then its size must be sent first u
 
 ### not-sent CDA
 
-Not-sent function is generally used when the field value is specified in the rule and
+The not-sent function is generally used when the field value is specified in the rule and
 therefore known by the both Compressor and Decompressor. This action is generally used with the
 "equal" MO. If MO is "ignore", there is a risk to have a decompressed field
 value different from the compressed field.
 
-The compressor does not send any value on the compressed header for the field on which compression is applied.
+The compressor does not send any value in the compressed header for the field on which compression is applied.
 
 The decompressor restores the field value with the target value stored in the matched rule.
 
@@ -429,19 +429,19 @@ field by indicating the length. This function is generally used with the "ignore
 
 ### mapping-sent
 
-mapping-sent is used to send a smaller index associated to the list of values
+mapping-sent is used to send a smaller index associated with the list of values
 in the Target Value. This function is used together with the "match-mapping" MO.
 
-The compressor looks in the TV to find the field value and send the corresponding index.
+The compressor looks on the TV to find the field value and send the corresponding index.
 The decompressor uses this index to restore the field value.
 
-The number of bits sent is the minimal size to code all the possible indexes.
+The number of bits sent is the minimal size for coding all the possible indexes.
 
 ### LSB CDA
 
 LSB action is used to avoid sending the known part of the packet field header to the other end.
 This action is used together with the "MSB" MO. A length can be specified in the rule to indicate
-how many bits have to be sent. If not length is specified, the number of bits sent are the
+how many bits have to be sent. If the length is not specified, the number of bits sent is the
 field length minus the bits length specified in the MSB MO.
 
 The compressor sends the "length" Least Significant Bits. The decompressor
@@ -453,7 +453,7 @@ If this action is made on a variable length field, the remaining size in byte ha
 ### DEViid, APPiid CDA
 
 These functions are used to process respectively the Dev and the App Interface Identifiers (Deviid and Appiid) of the 
-IPv6 addresses. Appiid CDA is less common, since current LPWAN technologies
+IPv6 addresses. Appiid CDA is less common since current LPWAN technologies
 frames contain a single address.
 
 The IID value may be computed from the Device ID present in the Layer 2 header. The
