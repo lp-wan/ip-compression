@@ -156,6 +156,8 @@ This section defines the terminology and acronyms used in this document.
 
 * FID: Field Identifier is an index to describe the header fields in the Rule
 
+* FL: Field Length is a value to identify if the field is of fixed or variable length.
+
 * FP: Field Position is a list of possible correct values that a field may use
 
 * IID: Interface Identifier. See the IPv6 addressing architecture {{RFC7136}}
@@ -226,30 +228,27 @@ of sending known field values. This Rule id identifies a rule that matches as mu
 packet values. When a value is known by both
 ends, it is not necessary to send it through the LPWAN network. 
 
-The context contains a list of rules (cf. {{Fig-ctxt}}). Each Rule contains 
-itself a list of fields descriptions composed of a field identifier (FID), a field position (FP), a direction indicator (DI), 
-a target value (TV), a matching operator (MO) and a Compression/Decompression Action
-(CDA).
+The context contains a list of rules (cf. {{Fig-ctxt}}). Each Rule contains itself a list of fields descriptions composed of a field identifier (FID), a field length (FL), a field position (FP), a direction indicator (DI), a target value (TV), a matching operator (MO) and a Compression/Decompression Action (CDA).
 
 
 ~~~~
-  /--------------------------------------------------------------\
-  |                      Rule N                                  |
- /--------------------------------------------------------------\|
- |                    Rule i                                    ||
-/--------------------------------------------------------------\||
-|  (FID)         Rule 1                                        |||
-|+-------+--+--+------------+-----------------+---------------+|||
-||Field 1|FP|DI|Target Value|Matching Operator|Comp/Decomp Act||||
-|+-------+--+--+------------+-----------------+---------------+|||
-||Field 2|FP|DI|Target Value|Matching Operator|Comp/Decomp Act||||
-|+-------+--+--+------------+-----------------+---------------+|||
-||...    |..|..|   ...      | ...             | ...           ||||
-|+-------+--+--+------------+-----------------+---------------+||/
-||Field N|FP|DI|Target Value|Matching Operator|Comp/Decomp Act|||
-|+-------+--+--+------------+-----------------+---------------+|/
-|                                                              |
-\--------------------------------------------------------------/
+  /-----------------------------------------------------------------\
+  |                         Rule N                                  |
+ /-----------------------------------------------------------------\|
+ |                       Rule i                                    ||
+/-----------------------------------------------------------------\||
+|  (FID)            Rule 1                                        |||
+|+-------+--+--+--+------------+-----------------+---------------+|||
+||Field 1|FL|FP|DI|Target Value|Matching Operator|Comp/Decomp Act||||
+|+-------+--+--+--+------------+-----------------+---------------+|||
+||Field 2|FL|FP|DI|Target Value|Matching Operator|Comp/Decomp Act||||
+|+-------+--+--+--+------------+-----------------+---------------+|||
+||...    |..|..|..|   ...      | ...             | ...           ||||
+|+-------+--+--+--+------------+-----------------+---------------+||/
+||Field N|FL|FP|DI|Target Value|Matching Operator|Comp/Decomp Act|||
+|+-------+--+--+--+------------+-----------------+---------------+|/
+|                                                                 |
+\-----------------------------------------------------------------/
 ~~~~
 {: #Fig-ctxt title='Compression/Decompression Context'}
 
@@ -263,7 +262,10 @@ in the rule which is used for data serialization on the compressor side and data
 
 The Context describes the header fields and its values with the following entries:
 
-* A Field ID (FID) is a unique value to define the header field. 
+* A Field ID (FID) is a unique value to define the header field.
+
+* A Field Length (FL) is the length of the field that can be of fixed length as in IPv6 or UDP headers or variable
+  length as in CoAP options. Fixed length fields shall be represented by its actual value in bits. Variable length fields shall be represented by a function or a variable. 
 
 * A Field Position (FP) indicating if several instances of the field exist in the 
   headers which one is targeted. The default position is 1
@@ -1020,74 +1022,74 @@ Local address for the SCHC C/D.
 
 ~~~~
   Rule 0
-  +----------------+--+--+---------+--------+-------------++------+
-  | Field          |FP|DI| Value   | Match  | Comp Decomp || Sent |
-  |                |  |  |         | Opera. | Action      ||[bits]|
-  +----------------+--+--+---------+----------------------++------+
-  |IPv6 version    |1 |Bi|6        | equal  | not-sent    ||      |
-  |IPv6 DiffServ   |1 |Bi|0        | equal  | not-sent    ||      |
-  |IPv6 Flow Label |1 |Bi|0        | equal  | not-sent    ||      |
-  |IPv6 Length     |1 |Bi|         | ignore | comp-length ||      |
-  |IPv6 Next Header|1 |Bi|17       | equal  | not-sent    ||      |
-  |IPv6 Hop Limit  |1 |Bi|255      | ignore | not-sent    ||      |
-  |IPv6 DEVprefix  |1 |Bi|FE80::/64| equal  | not-sent    ||      |
-  |IPv6 DEViid     |1 |Bi|         | ignore | DEViid      ||      |
-  |IPv6 APPprefix  |1 |Bi|FE80::/64| equal  | not-sent    ||      |
-  |IPv6 APPiid     |1 |Bi|::1      | equal  | not-sent    ||      |
-  +================+==+==+=========+========+=============++======+
-  |UDP DEVport     |1 |Bi|123      | equal  | not-sent    ||      |
-  |UDP APPport     |1 |Bi|124      | equal  | not-sent    ||      |
-  |UDP Length      |1 |Bi|         | ignore | comp-length ||      |
-  |UDP checksum    |1 |Bi|         | ignore | comp-chk    ||      |
-  +================+==+==+=========+========+=============++======+
+  +----------------+--+--+--+---------+--------+-------------++------+
+  | Field          |FL|FP|DI| Value   | Match  | Comp Decomp || Sent |
+  |                |  |  |  |         | Opera. | Action      ||[bits]|
+  +----------------+--+--+--+---------+----------------------++------+
+  |IPv6 version    |4 |1 |Bi|6        | equal  | not-sent    ||      |
+  |IPv6 DiffServ   |8 |1 |Bi|0        | equal  | not-sent    ||      |
+  |IPv6 Flow Label |20|1 |Bi|0        | equal  | not-sent    ||      |
+  |IPv6 Length     |16|1 |Bi|         | ignore | comp-length ||      |
+  |IPv6 Next Header|8 |1 |Bi|17       | equal  | not-sent    ||      |
+  |IPv6 Hop Limit  |8 |1 |Bi|255      | ignore | not-sent    ||      |
+  |IPv6 DEVprefix  |64|1 |Bi|FE80::/64| equal  | not-sent    ||      |
+  |IPv6 DEViid     |64|1 |Bi|         | ignore | DEViid      ||      |
+  |IPv6 APPprefix  |64|1 |Bi|FE80::/64| equal  | not-sent    ||      |
+  |IPv6 APPiid     |64|1 |Bi|::1      | equal  | not-sent    ||      |
+  +================+==+==+==+=========+========+=============++======+
+  |UDP DEVport     |16|1 |Bi|123      | equal  | not-sent    ||      |
+  |UDP APPport     |16|1 |Bi|124      | equal  | not-sent    ||      |
+  |UDP Length      |16|1 |Bi|         | ignore | comp-length ||      |
+  |UDP checksum    |16|1 |Bi|         | ignore | comp-chk    ||      |
+  +================+==+==+==+=========+========+=============++======+
 
   Rule 1
-  +----------------+--+--+---------+--------+-------------++------+
-  | Field          |FP|DI| Value   | Match  | Action      || Sent |
-  |                |  |  |         | Opera. | Action      ||[bits]|
-  +----------------+--+--+---------+--------+-------------++------+
-  |IPv6 version    |1 |Bi|6        | equal  | not-sent    ||      |
-  |IPv6 DiffServ   |1 |Bi|0        | equal  | not-sent    ||      |
-  |IPv6 Flow Label |1 |Bi|0        | equal  | not-sent    ||      |
-  |IPv6 Length     |1 |Bi|         | ignore | comp-length ||      |
-  |IPv6 Next Header|1 |Bi|17       | equal  | not-sent    ||      |
-  |IPv6 Hop Limit  |1 |Bi|255      | ignore | not-sent    ||      |
-  |IPv6 DEVprefix  |1 |Bi|[alpha/64, match- | mapping-sent||  [1] |
-  |                |1 |Bi|fe80::/64] mapping|             ||      |
-  |IPv6 DEViid     |1 |Bi|         | ignore | DEViid      ||      |
-  |IPv6 APPprefix  |1 |Bi|[beta/64,| match- | mapping-sent||  [2] |
-  |                |  |  |alpha/64,| mapping|             ||      |
-  |                |  |  |fe80::64]|        |             ||      |
-  |IPv6 APPiid     |1 |Bi|::1000   | equal  | not-sent    ||      |
-  +================+==+==+=========+========+=============++======+
-  |UDP DEVport     |1 |Bi|5683     | equal  | not-sent    ||      |
-  |UDP APPport     |1 |Bi|5683     | equal  | not-sent    ||      |
-  |UDP Length      |1 |Bi|         | ignore | comp-length ||      |
-  |UDP checksum    |1 |Bi|         | ignore | comp-chk    ||      |
-  +================+==+==+=========+========+=============++======+
+  +----------------+--+--+--+---------+--------+-------------++------+
+  | Field          |FL|FP|DI| Value   | Match  | Action      || Sent |
+  |                |  |  |  |         | Opera. | Action      ||[bits]|
+  +----------------+--+--+--+---------+--------+-------------++------+
+  |IPv6 version    |4 |1 |Bi|6        | equal  | not-sent    ||      |
+  |IPv6 DiffServ   |8 |1 |Bi|0        | equal  | not-sent    ||      |
+  |IPv6 Flow Label |20|1 |Bi|0        | equal  | not-sent    ||      |
+  |IPv6 Length     |16|1 |Bi|         | ignore | comp-length ||      |
+  |IPv6 Next Header|8 |1 |Bi|17       | equal  | not-sent    ||      |
+  |IPv6 Hop Limit  |8 |1 |Bi|255      | ignore | not-sent    ||      |
+  |IPv6 DEVprefix  |64|1 |Bi|[alpha/64, match- | mapping-sent||  [1] |
+  |                |  |  |  |fe80::/64] mapping|             ||      |
+  |IPv6 DEViid     |64|1 |Bi|         | ignore | DEViid      ||      |
+  |IPv6 APPprefix  |64|1 |Bi|[beta/64,| match- | mapping-sent||  [2] |
+  |                |  |  |  |alpha/64,| mapping|             ||      |
+  |                |  |  |  |fe80::64]|        |             ||      |
+  |IPv6 APPiid     |64|1 |Bi|::1000   | equal  | not-sent    ||      |
+  +================+==+==+==+=========+========+=============++======+
+  |UDP DEVport     |16|1 |Bi|5683     | equal  | not-sent    ||      |
+  |UDP APPport     |16|1 |Bi|5683     | equal  | not-sent    ||      |
+  |UDP Length      |16|1 |Bi|         | ignore | comp-length ||      |
+  |UDP checksum    |16|1 |Bi|         | ignore | comp-chk    ||      |
+  +================+==+==+==+=========+========+=============++======+
 
   Rule 2
-  +----------------+--+--+---------+--------+-------------++------+
-  | Field          |FP|DI| Value   | Match  | Action      || Sent |
-  |                |  |  |         | Opera. | Action      ||[bits]|
-  +----------------+--+--+---------+--------+-------------++------+
-  |IPv6 version    |1 |Bi|6        | equal  | not-sent    ||      |
-  |IPv6 DiffServ   |1 |Bi|0        | equal  | not-sent    ||      |
-  |IPv6 Flow Label |1 |Bi|0        | equal  | not-sent    ||      |
-  |IPv6 Length     |1 |Bi|         | ignore | comp-length ||      |
-  |IPv6 Next Header|1 |Bi|17       | equal  | not-sent    ||      |
-  |IPv6 Hop Limit  |1 |Up|255      | ignore | not-sent    ||      |
-  |IPv6 Hop Limit  |1 |Dw|         | ignore | value-sent  ||  [8] |
-  |IPv6 DEVprefix  |1 |Bi|alpha/64 | equal  | not-sent    ||      |
-  |IPv6 DEViid     |1 |Bi|         | ignore | DEViid      ||      |
-  |IPv6 APPprefix  |1 |Bi|gamma/64 | equal  | not-sent    ||      |
-  |IPv6 APPiid     |1 |Bi|::1000   | equal  | not-sent    ||      |
-  +================+==+==+=========+========+=============++======+
-  |UDP DEVport     |1 |Bi|8720     | MSB(12)| LSB(4)      || [4]  |
-  |UDP APPport     |1 |Bi|8720     | MSB(12)| LSB(4)      || [4]  |
-  |UDP Length      |1 |Bi|         | ignore | comp-length ||      |
-  |UDP checksum    |1 |Bi|         | ignore | comp-chk    ||      |
-  +================+==+==+=========+========+=============++======+
+  +----------------+--+--+--+---------+--------+-------------++------+
+  | Field          |FL|FP|DI| Value   | Match  | Action      || Sent |
+  |                |  |  |  |         | Opera. | Action      ||[bits]|
+  +----------------+--+--+--+---------+--------+-------------++------+
+  |IPv6 version    |4 |1 |Bi|6        | equal  | not-sent    ||      |
+  |IPv6 DiffServ   |8 |1 |Bi|0        | equal  | not-sent    ||      |
+  |IPv6 Flow Label |20|1 |Bi|0        | equal  | not-sent    ||      |
+  |IPv6 Length     |16|1 |Bi|         | ignore | comp-length ||      |
+  |IPv6 Next Header|8 |1 |Bi|17       | equal  | not-sent    ||      |
+  |IPv6 Hop Limit  |8 |1 |Up|255      | ignore | not-sent    ||      |
+  |IPv6 Hop Limit  |8 |1 |Dw|         | ignore | value-sent  ||  [8] |
+  |IPv6 DEVprefix  |64|1 |Bi|alpha/64 | equal  | not-sent    ||      |
+  |IPv6 DEViid     |64|1 |Bi|         | ignore | DEViid      ||      |
+  |IPv6 APPprefix  |64|1 |Bi|gamma/64 | equal  | not-sent    ||      |
+  |IPv6 APPiid     |64|1 |Bi|::1000   | equal  | not-sent    ||      |
+  +================+==+==+==+=========+========+=============++======+
+  |UDP DEVport     |16|1 |Bi|8720     | MSB(12)| LSB(4)      || [4]  |
+  |UDP APPport     |16|1 |Bi|8720     | MSB(12)| LSB(4)      || [4]  |
+  |UDP Length      |16|1 |Bi|         | ignore | comp-length ||      |
+  |UDP checksum    |16|1 |Bi|         | ignore | comp-chk    ||      |
+  +================+==+==+==+=========+========+=============++======+
 
 
 ~~~~
