@@ -129,7 +129,7 @@ Internet-Draft                 LPWAN SCHC                   October 2017
      5.8.  Downlink fragment transmission  . . . . . . . . . . . . .  25
      5.9.  Fragmentation Mode of Operation Description . . . . . . .  25
        5.9.1.  No ACK Mode . . . . . . . . . . . . . . . . . . . . .  25
-       5.9.2.  The Window mode . . . . . . . . . . . . . . . . . . .  27
+       5.9.2.  The Window modes  . . . . . . . . . . . . . . . . . .  27
        5.9.3.  ACK on error  . . . . . . . . . . . . . . . . . . . .  27
        5.9.4.  ACK Always  . . . . . . . . . . . . . . . . . . . . .  27
    6.  SCHC Compression for IPv6 and UDP headers . . . . . . . . . .  32
@@ -1458,7 +1458,7 @@ Minaburo, et al.         Expires April 20, 2018                [Page 26]
 Internet-Draft                 LPWAN SCHC                   October 2017
 
 
-5.9.2.  The Window mode
+5.9.2.  The Window modes
 
    The jumping window protocol is using two windows alternatively 0 and
    1.  The FCN to all-0 fragment means that the window is over and
@@ -1467,11 +1467,12 @@ Internet-Draft                 LPWAN SCHC                   October 2017
    another window.
 
    In all the cases, the sender may not have to send all the fragments
-   contained in the window.  To ease FN reconstruction from FCN, it is
-   recommended to send sequentially all the fragments on a window and
-   for all non-terminating window to fill entirely the window based on
-   the size of the bitmap.  The receiver will generate the bitmap and it
-   will be sent in a single frame.
+   contained in the window.  To ease FN (fragment number) reconstruction
+   from FCN, it is recommended to send sequentially all the fragments on
+   a window and for all non-terminating window to fill entirely the
+   window. if the size of the bitmap the receiver will generate can be
+   sent on a single frame based on the size of the bitmap.  The receiver
+   will generate the bitmap and it will be sent in a single frame.
 
    If the bitmap cannot be sent in one frame or for the last window,
    first FCN should be set to the lowest possible value.
@@ -1504,8 +1505,7 @@ Internet-Draft                 LPWAN SCHC                   October 2017
    is sent and the timer is set.  The sender will wait for the bitmap
    acknowledged by the receiver.  - the last fragment is sent.  In that
    case an all-1 fragment with the MIC is sent and the sender will wait
-   for the bitmap acknowledged by the receiver.  The sender set a timer
-   to wait for the ack.
+
 
 
 
@@ -1513,6 +1513,9 @@ Minaburo, et al.         Expires April 20, 2018                [Page 27]
 
 Internet-Draft                 LPWAN SCHC                   October 2017
 
+
+   for the bitmap acknowledged by the receiver.  The sender set a timer
+   to wait for the ack.
 
    During the transition between the sending the fragment of the current
    window and waiting for bitmap, the sender start listening to the
@@ -1539,9 +1542,6 @@ Internet-Draft                 LPWAN SCHC                   October 2017
    finished, it start listening to the bitmap (even if a All-0 or All-1
    has not been sent during the retransmission) and returns to the
    waiting bitmap state.
-
-
-
 
 
 
