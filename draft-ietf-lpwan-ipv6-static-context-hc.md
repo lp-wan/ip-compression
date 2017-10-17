@@ -751,6 +751,89 @@ Upon transmission or reception of the abortion signal, both entities MUST releas
 
 In some LPWAN technologies, as part of energy-saving techniques, downlink transmission is only possible immediately after an uplink transmission. In order to avoid potentially high delay for fragmented datagram transmission in the downlink, the fragment receiver MAY perform an uplink transmission as soon as possible after reception of a fragment that is not the last one. Such uplink transmission may be triggered by the L2 (e.g. an L2 ACK sent in response to a fragment encapsulated in a L2 frame that requires an L2 ACK) or it may be triggered from an upper layer.
 
+## Fragmentation Mode of Operation Description
+The fragmentation is based on the FCN value, which has a length of N bits. The All-1 and All-0 values are reserved, and are used to control the fragmentation transmission. The FCN will be sent in downwards position this means from larger to smaller and the number of bits depends on the implementation. The last fragment in all modes must contains a MIC which is used to check if there are error or missing fragments.
+
+### No ACK Mode
+In the No ACK mode there is no possibility to communicate with the other side, we need only one bit for FCN, where FCN=0 will be sent for all the fragments until the last one which will set FCN to 1 and will send the MIC. Figure {{Fig-NoACKModeSnd}} shows the state machine for the sender. 
+
+~~~~
+           +-----------+
+           |           |                                      
++----------+  Init     |                                      
+|          |           |                                      
+|          +-----------+                                      
+|  FCN=0                                                      
+|  No Window                                                  
+|  No Bitmap        +-------+                              
+|                   |       |  More Fragments  
+|                   |       |  ~~~~~~~~~~~~~~~~~~~~          
+|          +--------+--+    |  send Fragment (FCN=0)                
+|          |           | <--+                          
++--------> |   Send    |                               
+           |           |                                           
+           +---+-------+                                                                      
+               |  last fragment 
+               |  ~~~~~~~~~~~~                               
+               |  FCN = 1                               
+               |  send fragment+MIC 
+               v                    
+           +------------+                                             
+           |            |                                             
+           |    END     |                                             
+           |            |                                             
+           +------------+                       
+~~~~
+{: #Fig-NoACKModeSnd title='Sender State Machine for the No ACK Mode'}
+
+The receiver waits for fragments and will set a timer in order to see if there is no missing fragments with the last fragment where FCN is set to all-1 it checks using the MIC if there is no error. Figure {{Fig-NoACKModeRcv}} shows the state machine for the receiver.
+
+~~~~
+                      +------+ Not All-1
+           +----------+-+    | ~~~~~~~~~~~~~~~~~~~
+           |            + <--+ set Inactivity Timer
+           |            |
+           |  RCV Frag  |
+           |            +-------+
+           +-----+------+       |
+   All-1 & |     |              |
+ MIC wrong |     |Inactivity &  |
+           |     |Timer Exp.    |
+           |     |              | All-1 &
+           |     |              | MIC correct
+           v     |              |
++----------++    |              v
+|           |    |     +--------+--+
+|   Error   |<---+     |           |
+|           |          |    END    |
++-----------+          |           |
+                       +-----------+                     
+~~~~
+{: #Fig-NoACKModeRcv title='Sender State Machine for the No ACK Mode'}
+
+
+### The Window mode 
+The jumping window protocol is using two windows alternatively 0 and 1.
+A all-0 fragment allows to switch from a window to another. A all-1 indicates 
+that it is the last window. 
+
+In all cases, sender may not have to send all the fragment contained in the
+window. To ease FN reconstruction from FCN, it is recommended to send  sequentially
+all the fragments on a window and for all non terminating window to fill entirely the
+window if the size of the bitmap the receiver will generate can be sent on a single frame.
+
+If the bitmap cannot be sent in one frame or for the last window, first FCN should be set
+to the lowest possible value. 
+
+All-1 and All-0 fragments are set to the right-most position on the bitmap. Highest FCN 
+is set to the left-most position. A bit set to 1 indicates that the corresponding FCN 
+fragment has been sent (All-1 is set to All-0 position).
+
+### ACK on error
+
+### ACK Always
+
+
 
 # SCHC Compression for IPv6 and UDP headers
 
