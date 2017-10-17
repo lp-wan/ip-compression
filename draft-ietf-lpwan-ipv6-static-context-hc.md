@@ -751,6 +751,7 @@ Upon transmission or reception of the abortion signal, both entities MUST releas
 
 In some LPWAN technologies, as part of energy-saving techniques, downlink transmission is only possible immediately after an uplink transmission. In order to avoid potentially high delay for fragmented datagram transmission in the downlink, the fragment receiver MAY perform an uplink transmission as soon as possible after reception of a fragment that is not the last one. Such uplink transmission may be triggered by the L2 (e.g. an L2 ACK sent in response to a fragment encapsulated in a L2 frame that requires an L2 ACK) or it may be triggered from an upper layer.
 
+
 ## Fragmentation Mode of Operation Description
 The fragmentation is based on the FCN value, which has a length of N bits. The All-1 and All-0 values are reserved, and are used to control the fragmentation transmission. The FCN will be sent in downwards position this means from larger to smaller and the number of bits depends on the implementation. The last fragment in all modes must contains a MIC which is used to check if there are error or missing fragments.
 
@@ -799,15 +800,16 @@ The receiver waits for fragments and will set a timer in order to see if there i
 {: #Fig-NoACKModeRcv title='Receiver State Machine for the No ACK Mode'}
 
 
-### The Window mode 
+### The Window modes 
 The jumping window protocol is using two windows alternatively 0 and 1. 
 The FCN to all-0 fragment means that the window is over and allows to switch from one window to another. The FCN to all-1 fragment indicates 
 that it is the last fragment and there will not be another window. 
 
 In all the cases, the sender may not have to send all the fragments contained in the
-window. To ease FN reconstruction from FCN, it is recommended to send  sequentially
+window. To ease FN (fragment number) reconstruction from FCN, it is recommended to send sequentially
 all the fragments on a window and for all non-terminating window to fill entirely the
-window based on the size of the bitmap. The receiver will generate the bitmap and it will be sent in a single frame.
+window. if the size of the bitmap the receiver will generate can be sent on a single frame
+based on the size of the bitmap. The receiver will generate the bitmap and it will be sent in a single frame.
 
 If the bitmap cannot be sent in one frame or for the last window, first FCN should be set
 to the lowest possible value. 
