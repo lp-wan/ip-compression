@@ -906,8 +906,8 @@ Lcl_bitmap==recv_bitmap &|   |   all missing frag sent
 
 The {{Fig-ACKAlwaysRcv}} finite state machine describes the receiver behavior.
 
-The receiver start with window 0 as the expecting window and maintain a local_bitmap 
-indicating which fragments it as received (all-0 and all-1 occupy the same position).
+The receiver starts with window 0 as the expecting window and maintain a local_bitmap 
+indicating which fragments it has received (all-0 and all-1 occupy the same position).
 
 Any fragment not belonging to the current window is discarded. Fragment belonging to the 
 correct window are accepted, FN is computed based on the FCN value. The receiver leaves
@@ -916,27 +916,27 @@ this state when receiving a:
 window. Since the sender is not obliged to send a full window, some fragment number
 not set in the local_bitmap may not correspond to losses.
 - all-1 fragment which indicated that the transmission is finished. Since the last window
-is not full, the MIC will be used to detect is all the fragment has been received.
+is not full, the MIC will be used to detect if all the fragments have been received.
 
 A correct MIC indicates the end of the transmission. The receiver must stay in this state
-of a period of time to answer to empty all-1 frag the sender may send if the bitmap
+during a period of time to answer to empty all-1 frag the sender may send if the bitmap
 is lost.
 
 If All-1 frag has not been received, the receiver expect a new window. It waits for
-the next fragment. If the window value is not changing, the received fragments are
-part of a retransmission. A receiver that has already receive a frag should discard it 
-(not represented in the state machine), otherwise if complete its bitmap. If all the
+the next fragment. If the window value has not changed, the received fragments are
+part of a retransmission. A receiver that has already received a frag should discard it 
+(not represented in the state machine), otherwise it completes its bitmap. If all the
 bit of the bitmap are set to one, the receiver may send a bitmap without waiting for a 
 all-0 frag. 
-If the window value is set to the next value, this means that the sender as received 
-a correct bitmpap  telling that all the fragments have been received. The receiver
+If the window value is set to the next value, this means that the sender has received 
+a correct bitmap, which means that all the fragments have been received. The receiver
 change the value of the expected window.
 
-If the receiver receives a all-0 it stays in the same state. Sender may send 1 fragment
-per window or other fragment in the window has been lost.
+If the receiver receives an all-0 fragment, it stays in the same state. Sender may send more one fragment
+per window or more. Otherwise some fragments in the window have been lost.
 
-If the receiver receives a all-1 this means that the transmission should be finished. 
-If the MIC is incorrect some fragments have been lost.
+If the receiver receives an all-1 fragment this means that the transmission should be finished. 
+If the MIC is incorrect some fragments have been lost. It sends its bitmap.
 
 In case of an incorrect MIC, the receivers wait for fragment belonging to the same window.
 
@@ -991,7 +991,7 @@ In case of an incorrect MIC, the receivers wait for fragment belonging to the sa
 {: #Fig-ACKAlwaysRcv title='Receiver State Machine for the ACK Always Mode'}
 
 ### ACK on error
-
+The ACK on error sender is very similar to the ACK always sender, 
 
 
 # SCHC Compression for IPv6 and UDP headers
