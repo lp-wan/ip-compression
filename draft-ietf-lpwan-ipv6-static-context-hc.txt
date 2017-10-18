@@ -1626,9 +1626,9 @@ Minaburo, et al.         Expires April 21, 2018                [Page 29]
 Internet-Draft                 LPWAN SCHC                   October 2017
 
 
-   The receiver start with window 0 as the expecting window and maintain
-   a local_bitmap indicating which fragments it as received (all-0 and
-   all-1 occupy the same position).
+   The receiver starts with window 0 as the expecting window and
+   maintain a local_bitmap indicating which fragments it has received
+   (all-0 and all-1 occupy the same position).
 
    Any fragment not belonging to the current window is discarded.
    Fragment belonging to the correct window are accepted, FN is computed
@@ -1638,31 +1638,31 @@ Internet-Draft                 LPWAN SCHC                   October 2017
    obliged to send a full window, some fragment number not set in the
    local_bitmap may not correspond to losses.  - all-1 fragment which
    indicated that the transmission is finished.  Since the last window
-   is not full, the MIC will be used to detect is all the fragment has
+   is not full, the MIC will be used to detect if all the fragments have
    been received.
 
    A correct MIC indicates the end of the transmission.  The receiver
-   must stay in this state of a period of time to answer to empty all-1
-   frag the sender may send if the bitmap is lost.
+   must stay in this state during a period of time to answer to empty
+   all-1 frag the sender may send if the bitmap is lost.
 
    If All-1 frag has not been received, the receiver expect a new
-   window.  It waits for the next fragment.  If the window value is not
-   changing, the received fragments are part of a retransmission.  A
-   receiver that has already receive a frag should discard it (not
-   represented in the state machine), otherwise if complete its bitmap.
+   window.  It waits for the next fragment.  If the window value has not
+   changed, the received fragments are part of a retransmission.  A
+   receiver that has already received a frag should discard it (not
+   represented in the state machine), otherwise it completes its bitmap.
    If all the bit of the bitmap are set to one, the receiver may send a
    bitmap without waiting for a all-0 frag.  If the window value is set
-   to the next value, this means that the sender as received a correct
-   bitmpap telling that all the fragments have been received.  The
+   to the next value, this means that the sender has received a correct
+   bitmap, which means that all the fragments have been received.  The
    receiver change the value of the expected window.
 
-   If the receiver receives a all-0 it stays in the same state.  Sender
-   may send 1 fragment per window or other fragment in the window has
-   been lost.
+   If the receiver receives an all-0 fragment, it stays in the same
+   state.  Sender may send more one fragment per window or more.
+   Otherwise some fragments in the window have been lost.
 
-   If the receiver receives a all-1 this means that the transmission
-   should be finished.  If the MIC is incorrect some fragments have been
-   lost.
+   If the receiver receives an all-1 fragment this means that the
+   transmission should be finished.  If the MIC is incorrect some
+   fragments have been lost.  It sends its bitmap.
 
    In case of an incorrect MIC, the receivers wait for fragment
    belonging to the same window.
@@ -1740,6 +1740,8 @@ Internet-Draft                 LPWAN SCHC                   October 2017
 
 5.9.4.  ACK on error
 
+   The ACK on error sender is very similar to the ACK always sender,
+
 6.  SCHC Compression for IPv6 and UDP headers
 
    This section lists the different IPv6 and UDP header fields and how
@@ -1784,8 +1786,6 @@ Internet-Draft                 LPWAN SCHC                   October 2017
    o  TV is not set, MO is set to "ignore" and CDA is set to "value-
       sent"
 
-   o  TV contains a stable value, MO is MSB(X) and CDA is set to LSB
-
 
 
 
@@ -1793,6 +1793,8 @@ Minaburo, et al.         Expires April 21, 2018                [Page 32]
 
 Internet-Draft                 LPWAN SCHC                   October 2017
 
+
+   o  TV contains a stable value, MO is MSB(X) and CDA is set to LSB
 
 6.4.  Payload Length field
 
@@ -1838,8 +1840,6 @@ Internet-Draft                 LPWAN SCHC                   October 2017
    frequently.  One solution could be to use the Direction Indicator
    (DI) to distinguish both directions to elide the field in the
    upstream direction and send the value in the downstream direction.
-
-
 
 
 
