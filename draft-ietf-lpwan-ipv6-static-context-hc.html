@@ -1000,19 +1000,20 @@ address {
 </h1>
 <p id="rfc.section.5.9.2.p.1">The jumping window protocol is using two windows alternatively 0 and 1.  The FCN to all-0 fragment means that the window is over and allows to switch from one window to another. The FCN to all-1 fragment indicates that it is the last fragment and there will not be another window.</p>
 <p id="rfc.section.5.9.2.p.2">In all the cases, the sender may not have to send all the fragments contained in the window. To ease FN (fragment number) reconstruction from FCN, it is recommended to send sequentially all the fragments on a window and for all non-terminating window to fill entirely the window.</p>
-<p id="rfc.section.5.9.2.p.3">The receiver generates the bitmap which may have the size of a single frame based on the size of downlink frame of the LPWAN technology used. If the bitmap cannot be sent in one frame or for the last window, then first the FCN should be set to the lowest possible value.</p>
+<p id="rfc.section.5.9.2.p.3">The receiver generates the bitmap which may have the size of a single frame based on the size of downlink frame of the LPWAN technology used. When the bitmap cannot be sent in one frame or for the last window, then first the FCN should be set to the lowest possible value.</p>
 <p id="rfc.section.5.9.2.p.4">FCN set to All-1 and All-0 fragments are set to the right-most position on the bitmap. Highest FCN is set to the left-most position. A bit set to 1 indicates that the corresponding FCN fragment has been sent (All-1 is set to All-0 position).</p>
 <p id="rfc.section.5.9.2.p.5">The Window mode has two different mode of operation: The ACK on error and the ACK always.</p>
 <h1 id="rfc.section.5.9.3">
 <a href="#rfc.section.5.9.3">5.9.3.</a> <a href="#ack-always" id="ack-always">ACK Always</a>
 </h1>
-<p id="rfc.section.5.9.3.p.1">The <a href="#Fig-ACKAlwaysSnd" class="xref">Figure 16</a> finite state machine describes the sender behavior.  Intially, when a fragmented packet is sent, the window is set to 0, a local_bit map is set to 0, and FCN is set the the highest possible value depending on the number of fragment that will be sent in the window.</p>
-<p id="rfc.section.5.9.3.p.2">The sender starts sending fragments, the sender will indicate in the fragmentation header: the current window and the FCN number. A delay between each fragment can be added to respect regulation rules or constraints imposed by the applications. Each time a fragment is sent the FCN is decreased of one value and the bitmap is set. The send state can be leaved for different reasons: - the FCN reaches value 0 and there are more fragments. In that case an all-0 fragmet is sent and the timer is set. The sender will wait for the bitmap acknowledged by the receiver.  - the last fragment is sent. In that case an all-1 fragment with the MIC is sent and the sender will wait for the bitmap acknowledged by the receiver. The sender set a timer to wait for the ack.</p>
-<p id="rfc.section.5.9.3.p.3">During the transition between the sending the fragment of the current window and waiting for bitmap, the sender start listening to the radio and start a timer. This timer is dimensioned  to the receiving window depending on the LPWAN technology.</p>
+<p id="rfc.section.5.9.3.p.1">The <a href="#Fig-ACKAlwaysSnd" class="xref">Figure 16</a> finite state machine describes the sender behavior.  Intially, when a fragmented packet need to be sent, the window is set to 0, a local_bit map is set to 0, and FCN is set the the highest possible value depending on the number of fragment that will be sent in the window (INIT STATE).</p>
+<p id="rfc.section.5.9.3.p.2">The sender starts sending fragments (SEND STATE), the sender will indicate in the fragmentation header: the current window and the FCN number. A delay between each fragment can be added to respect regulation rules or constraints imposed by the applications. Each time a fragment is sent the FCN is decreased of one value and the bitmap is set. The send state can be leaved for different reasons (for both reasons it goes to WAIT BITMAP STATE): - the FCN reaches value 0 and there are more fragments. In that case an all-0 fragmet is sent and the timer is set. The sender will wait for the bitmap acknowledged by the receiver.  - the last fragment is sent. In that case an all-1 fragment with the MIC is sent and the sender will wait for the bitmap acknowledged by the receiver. The sender set a timer to wait for the ack.</p>
+<p id="rfc.section.5.9.3.p.3">During the transition between the SEND state of the current window and the WAIT BITMAP, the sender start listening to the radio and start a timer. This timer is dimensioned to the receiving window depending on the LPWAN technology.</p>
 <p id="rfc.section.5.9.3.p.4">In ACK Always, if the timer expire, an empty All-0 (or All-1 if the last fragment has been sent) fragment is sent to ask the receiver to resent its bitmap. The window number is not changed.</p>
 <p id="rfc.section.5.9.3.p.5">The sender receives a bitmap, it checks the window value. Acknowledgment with the non expected window are discarded.</p>
 <p id="rfc.section.5.9.3.p.6">If the window number on the received bitmap is correct, the sender compare the local bitmap with the received bitmap. If they are equal all the fragments sent during the window have been well received. If at least one fragment need to be sent, the sender clear the bitmap, stop the timer and move its sending window to the next value. If no more fragments have to be sent, then the fragmented packet transmission is terminated.</p>
 <p id="rfc.section.5.9.3.p.7">If some fragments are missing (not set in the bit map) then the sender resend the missing fragments. When the retransmission is finished, it start listening to the bitmap (even if a All-0 or All-1 has not been sent during the retransmission) and returns to the waiting bitmap state.</p>
+<p id="rfc.section.5.9.3.p.8">If the local-bitmap is different from the received bitmap the counter Attemps is increased and the sender resend the missing fragments again, when a MAX_ATTEMPS is reached the sender sends an Abort and goes to error.</p>
 <div id="rfc.figure.16"></div>
 <div id="Fig-ACKAlwaysSnd"></div>
 <pre>
@@ -1032,26 +1033,26 @@ address {
 |    send wnd + frag(all+0 |     | send wnd+frag(all+1)+MIC 
 |                set Timer |     | set Timer 
 |                          |     | 
-|Recv_wnd == wnd &amp;         |     |  +------------------------+
-|Lcl_bitmap==recv_bitmap&amp;  |     |  |local-bitmap!=rcv-bitmap|
-|more frag                 |     |  | ~~~~~~~~~              |
-|~~~~~~~~~~~~~~~~~~~~~~    |     |  | Attemp++               |
-|Stop Timer                |     |  |                        |
-|clear local_bitmap        v     v  |                        v
-|window=next_window   +----+-----+--+--+               +-----+-+
-+---------------------+                |               |Resend |
-                 +----+                +               |Missing|
-not expected wnd |    | Wait bitmap    |               |Frag   |
-~~~~~~~~~~~~~~~~ +---&gt;+                +---+           +------++
-    discard frag      +--+---+---+---+-+   |Timer Exp         |
-                         |   |   ^   ^     |~~~~~~~~~~~~~~~~~ |   
-                         |   |   |   |     |Snd(empty)frag(0) |
+|Recv_wnd == wnd &amp;         |     |  
+|Lcl_bitmap==recv_bitmap&amp;  |     |  +-------------------------+
+|more frag                 |     |  |local-bitmap!=rcv-bitmap |
+|~~~~~~~~~~~~~~~~~~~~~~    |     |  | ~~~~~~~~~               |
+|Stop Timer                |     |  | Attemp++                v
+|clear local_bitmap        v     v  |                  +------++
+|window=next_window   +----+-----+--+--+               |Resend |
++---------------------+                |               |Missing|
+                 +----+     Wait       |               |Frag   |
+not expected wnd |    |    bitmap      |               +------++
+~~~~~~~~~~~~~~~~ +---&gt;+                +---+ Timer Exp        |          
+    discard frag      +--+---+---+---+-+   |~~~~~~~~~~~~~~~~~ |
+                         |   |   ^   ^     |Snd(empty)frag(0) |   
                          |   |   |   |     |Set Timer         |
-Recv_window==window &amp;    |   |   |   +-----+                  |
-Lcl_bitmap==recv_bitmap &amp;|   |   +----------------------------+
-             no more frag|   |    all missing frag sent
- ~~~~~~~~~~~~~~~~~~~~~~~~|   |    ~~~~~~~~~~~~~~~~~~~~               
-               Stop Timer|   |    Set Timer
+                         |   |   |   +-----+                  |
+Recv_window==window &amp;    |   |   +----------------------------+   
+Lcl_bitmap==recv_bitmap &amp;|   |   all missing frag sent
+             no more frag|   |   ~~~~~~~~~~~~~~~~~~~~~~ 
+ ~~~~~~~~~~~~~~~~~~~~~~~~| &#160; | &#160; Set Timer &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; 
+               Stop Timer|   |    
      +-------------+     |   |
      |             +&lt;----+   | MAX_ATTEMPS &gt; limit
      |     END     |         | ~~~~~~~~~~~~~~~~~~
@@ -1061,14 +1062,14 @@ Lcl_bitmap==recv_bitmap &amp;|   |   +----------------------------+
                            +-------------+                                        
 </pre>
 <p class="figure">Figure 16: Sender State Machine for the ACK Always Mode</p>
-<p id="rfc.section.5.9.3.p.8">The <a href="#Fig-ACKAlwaysRcv" class="xref">Figure 17</a> finite state machine describes the receiver behavior.</p>
-<p id="rfc.section.5.9.3.p.9">The receiver start with window 0 as the expecting window and maintain a local_bitmap indicating which fragments it as received (all-0 and all-1 occupy the same position).</p>
-<p id="rfc.section.5.9.3.p.10">Any fragment not belonging to the current window is discarded. Fragment belonging to the correct window are accepted, FN is computed based on the FCN value. The receiver leaves this state when receiving a: - all-0 fragment which indicates that all the fragments have been sent in the current window. Since the sender is not obliged to send a full window, some fragment number not set in the local_bitmap may not correspond to losses.  - all-1 fragment which indicated that the transmission is finished. Since the last window is not full, the MIC will be used to detect is all the fragment has been received.</p>
-<p id="rfc.section.5.9.3.p.11">A correct MIC indicates the end of the transmission. The receiver must stay in this state of a period of time to answer to empty all-1 frag the sender may send if the bitmap is lost.</p>
-<p id="rfc.section.5.9.3.p.12">If All-1 frag has not been received, the receiver expect a new window. It waits for the next fragment. If the window value is not changing, the received fragments are part of a retransmission. A receiver that has already receive a frag should discard it (not represented in the state machine), otherwise if complete its bitmap. If all the bit of the bitmap are set to one, the receiver may send a bitmap without waiting for a all-0 frag.  If the window value is set to the next value, this means that the sender as received a correct bitmpap  telling that all the fragments have been received. The receiver change the value of the expected window.</p>
-<p id="rfc.section.5.9.3.p.13">If the receiver receives a all-0 it stays in the same state. Sender may send 1 fragment per window or other fragment in the window has been lost.</p>
-<p id="rfc.section.5.9.3.p.14">If the receiver receives a all-1 this means that the transmission should be finished.  If the MIC is incorrect some fragments have been lost.</p>
-<p id="rfc.section.5.9.3.p.15">In case of an incorrect MIC, the receivers wait for fragment belonging to the same window.</p>
+<p id="rfc.section.5.9.3.p.9">The <a href="#Fig-ACKAlwaysRcv" class="xref">Figure 17</a> finite state machine describes the receiver behavior.</p>
+<p id="rfc.section.5.9.3.p.10">The receiver start with window 0 as the expecting window and maintain a local_bitmap indicating which fragments it as received (all-0 and all-1 occupy the same position).</p>
+<p id="rfc.section.5.9.3.p.11">Any fragment not belonging to the current window is discarded. Fragment belonging to the correct window are accepted, FN is computed based on the FCN value. The receiver leaves this state when receiving a: - all-0 fragment which indicates that all the fragments have been sent in the current window. Since the sender is not obliged to send a full window, some fragment number not set in the local_bitmap may not correspond to losses.  - all-1 fragment which indicated that the transmission is finished. Since the last window is not full, the MIC will be used to detect is all the fragment has been received.</p>
+<p id="rfc.section.5.9.3.p.12">A correct MIC indicates the end of the transmission. The receiver must stay in this state of a period of time to answer to empty all-1 frag the sender may send if the bitmap is lost.</p>
+<p id="rfc.section.5.9.3.p.13">If All-1 frag has not been received, the receiver expect a new window. It waits for the next fragment. If the window value is not changing, the received fragments are part of a retransmission. A receiver that has already receive a frag should discard it (not represented in the state machine), otherwise if complete its bitmap. If all the bit of the bitmap are set to one, the receiver may send a bitmap without waiting for a all-0 frag.  If the window value is set to the next value, this means that the sender as received a correct bitmpap  telling that all the fragments have been received. The receiver change the value of the expected window.</p>
+<p id="rfc.section.5.9.3.p.14">If the receiver receives a all-0 it stays in the same state. Sender may send 1 fragment per window or other fragment in the window has been lost.</p>
+<p id="rfc.section.5.9.3.p.15">If the receiver receives a all-1 this means that the transmission should be finished.  If the MIC is incorrect some fragments have been lost.</p>
+<p id="rfc.section.5.9.3.p.16">In case of an incorrect MIC, the receivers wait for fragment belonging to the same window.</p>
 <div id="rfc.figure.17"></div>
 <div id="Fig-ACKAlwaysRcv"></div>
 <pre>
