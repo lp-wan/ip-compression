@@ -756,7 +756,7 @@ In some LPWAN technologies, as part of energy-saving techniques, downlink transm
 The fragmentation is based on the FCN value, which has a length of N bits. The All-1 and All-0 values are reserved, and are used to control the fragmentation transmission. The FCN will be sent in downwards position this means from larger to smaller and the number of bits depends on the implementation. The last fragment in all modes must contains a MIC which is used to check if there are error or missing fragments.
 
 ### No ACK Mode
-In the No ACK mode there is no possibility to communicate with the other side, so a one bit FCN is used, where FCN all-0 will be sent for all the fragments except the last one which will use FCN to all-1 and will send the MIC. {{Fig-NoACKModeSnd}} shows the state machine for the sender. 
+In the No ACK mode there is no feedback communication. The sender will send the fragments until the last one whithout any possibility to know if there were an error or lost. As there is not any control one bit FCN is used, where FCN all-0 will be sent for all the fragments except the last one which will use FCN to all-1 and will send the MIC. {{Fig-NoACKModeSnd}} shows the state machine for the sender. 
 
 ~~~~
              +-----------+
@@ -779,7 +779,7 @@ In the No ACK mode there is no possibility to communicate with the other side, s
 ~~~~
 {: #Fig-NoACKModeSnd title='Sender State Machine for the No ACK Mode'}
 
-The receiver waits for fragments and will set a timer in order to see if there is no missing fragments. The No ACK will use  the last fragment to check error using the MIC where FCN is set to all-1 for the last fragment. {{Fig-NoACKModeRcv}} shows the state machine for the receiver. When the Timer expires or when the check of MIC gives an error it will abort and go to error, all the fragments will be lost. Inactivity Timer will be based on the technology used and will be defined in the specific technology document. 
+The receiver waits for fragments and will set a timer in order to see if there is no missing fragments. The No ACK mode will use the MIC contained in the last fragment to check error. The FCN is set to all-1 for the last fragment. {{Fig-NoACKModeRcv}} shows the state machine for the receiver. When the Timer expires or when the check of MIC gives an error it will abort the communication and go to error state, all the fragments will be dropped. The Inactivity Timer will be based on the LPWAN technology and will be defined in the specific technology document. 
 
 ~~~~
                       +------+ Not All-1
@@ -808,10 +808,10 @@ that it is the last fragment and there will not be another window.
 In all the cases, the sender may not have to send all the fragments contained in the
 window. To ease FN (fragment number) reconstruction from FCN, it is recommended to send sequentially
 all the fragments on a window and for all non-terminating window to fill entirely the
-window. if the size of the bitmap the receiver will generate can be sent on a single frame
-based on the size of the bitmap. The receiver will generate the bitmap and it will be sent in a single frame.
+window. 
 
-If the bitmap cannot be sent in one frame or for the last window, first FCN should be set
+The receiver generates the bitmap which may have the size of a single frame
+based on the size of downlink frame of the LPWAN technology used. If the bitmap cannot be sent in one frame or for the last window, then first the FCN should be set
 to the lowest possible value. 
 
 FCN set to All-1 and All-0 fragments are set to the right-most position on the bitmap. Highest FCN 
@@ -819,9 +819,6 @@ is set to the left-most position. A bit set to 1 indicates that the correspondin
 fragment has been sent (All-1 is set to All-0 position).
 
 The Window mode has two different mode of operation: The ACK on error and the ACK always.
-
-### ACK on error
-
 
 ### ACK Always
 The {{Fig-ACKAlwaysSnd}} finite state machine describes the sender behavior.
@@ -831,7 +828,7 @@ of fragment that will be sent in the window.
 
 The sender starts sending fragments, the sender will indicate in the fragmentation header: the current
 window and the FCN number. A delay between each fragment can be added to respect regulation
-rules or constraints imposed by the applications. Each time a fragment is sent the FCN is decrease of one value and the bitmap is set. The send state can be leaved for different
+rules or constraints imposed by the applications. Each time a fragment is sent the FCN is decreased of one value and the bitmap is set. The send state can be leaved for different
 reasons:
 - the FCN reaches value 0 and there are more fragments. In that case an all-0 fragmet is sent and the timer is set. The sender will wait for
 the bitmap acknowledged by the receiver. 
@@ -991,6 +988,8 @@ In case of an incorrect MIC, the receivers wait for fragment belonging to the sa
                             ++--+------+                                          
 ~~~~
 {: #Fig-ACKAlwaysRcv title='Receiver State Machine for the ACK Always Mode'}
+
+### ACK on error
 
 
 
