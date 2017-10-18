@@ -871,7 +871,7 @@ If the local-bitmap is different from the received bitmap the counter Attemps is
 |      FCN==0 & more frags |     | last frag
 |    ~~~~~~~~~~~~~~~~~~~~~ |     | ~~~~~~~~~~~~~~~
 |         set local-bitmap |     | set local-bitmap 
-|    send wnd + frag(all+0 |     | send wnd+frag(all+1)+MIC 
+|   send wnd + frag(all+0) |     | send wnd+frag(all+1)+MIC 
 |                set Timer |     | set Timer 
 |                          |     | 
 |Recv_wnd == wnd &         |     |  
@@ -904,9 +904,7 @@ Lcl_bitmap==recv_bitmap &|   |   all missing frag sent
 ~~~~
 {: #Fig-ACKAlwaysSnd title='Sender State Machine for the ACK Always Mode'}
 
-The {{Fig-ACKAlwaysRcv}} finite state machine describes the receiver behavior.
-
-The receiver starts with window 0 as the expecting window and maintain a local_bitmap 
+The {{Fig-ACKAlwaysRcv}} finite state machine describes the receiver behavior. The receiver starts with window 0 as the expecting window and maintain a local_bitmap 
 indicating which fragments it has received (all-0 and all-1 occupy the same position).
 
 Any fragment not belonging to the current window is discarded. Fragment belonging to the 
@@ -991,8 +989,163 @@ In case of an incorrect MIC, the receivers wait for fragment belonging to the sa
 {: #Fig-ACKAlwaysRcv title='Receiver State Machine for the ACK Always Mode'}
 
 ### ACK on error
-The ACK on error sender is very similar to the ACK always sender, 
+The ACK on error sender is very similar to the ACK always sender, Intially, when a fragmented packet is sent, the window is set to 0, a local_bit map 
+is set to 0, and FCN is set the the highest possible value depending on the number
+of fragment that will be sent in the window. See {{Fig-ACKonerrorSnd}}
 
+The sender start sending fragment indicating in the fragmentation header, the current
+window and the FCN number. A delay between each fragment can be added to respect regulation
+rules or constraints imposed by the applications. This state can be leaved for different
+reasons:
+- the FCN reaches value 0. In that case a all-0 fragmet is sent and the sender will wait for
+the bitmap acknowledged by the receiver.
+- the last fragment is sent. In that case a all-1 fragment is sent and the sender will wait
+for the bitmap acknowledged by the receiver.
+
+During the transition between the sending the fragment of the current window and waiting 
+for bitmap, the sender start listening to the radio and start a timer. This timer 
+is dimensioned to the receiving window depending on the LPWAN technology.
+
+In Ack on error mode, the timer expiration will be considered as a positive acknowledgment. If there are no more fragments then the fragmentation is finished. 
+
+If the sender receives a bitmap, it checks the window value. Acknowledgment with the
+non expected window are discarded.
+
+If the window number on the received bitmap is correct, the sender compare the local bitmap
+with the received bitmap. If they are equal all the fragments sent during the window 
+have been well received. If at least one fragment need to be sent, the sender clear 
+the bitmap, stop the timer and move its sending window to the next value. If no more
+fragments have to be sent, then the fragmented packet transmission is terminated.
+
+If some fragments are missing (not set in the bit map) then the sender resend the missing
+fragments. When the retransmission is finished, it start listening to the bitmap (even if
+a All-0 or All-1 has not been sent during the retransmission) and returns to the 
+waiting bitmap state.
+
+If the local-bitmap is different from the received bitmap the counter Attemps is increased and the sender resend the missing fragments again, when a MAX_ATTEMPS is reached the sender sends an Abort and goes to error.
+
+~~~~
+                   +-------+  
+                   |       |  
+                   | INIT  |  
+                   |       |        FCN!=0 & more frags
+                   +------++  +--+  ~~~~~~~~~~~~~~~~~~~~~~
+                      W=0 |   |  |  send Window + frag(FCN)
+       ~~~~~~~~~~~~~~~~~~ |   |  |  FCN-
+       Clear local bitmap |   |  v  set local bitmap
+            FCN=max value |  ++-------------+
+                          +> |              |
+                             |     SEND     |
++--------------------------> |              |
+|                            ++-----+-------+
+|          FCN==0 & more frags|     |last frag
+|      ~~~~~~~~~~~~~~~~~~~~~~~|     |~~~~~~~~~~~~~~~~~~~~~~~~
+|             set local-bitmap|     |set local-bitmap
+|       send wnd + frag(all-0)|     |send wnd+frag(all-1)+MIC
+|                    set Timer|     |set Timer
+|                             |     |
+|Timer expires &              |     | local-bitmap!=rcv-bitmap 
+|more fragments               |     |  +-----------------+
+|~~~~~~~~~~~~~~~~~~~~         |     |  | ~~~~~~~~~~~~~   |
+|stop Timer                   |     |  | Attemp++        |
+|clear local.bitmap           v     v  |                 v
+|window = next window   +-----+-----+--+--+         +----+----+
++---------------------->+                 +         | Resend  |
+                        |    Wait bitmap  |         | Missing |
+                    +-- +                 |         | Frag    |
+   not expected wnd |   ++-+-------+---+--+         +------+--+
+   ~~~~~~~~~~~~~~~~ |    ^ |       |   ^                   |
+      discard frag  +----+ |       |   +-------------------+
+                           |       |     all missing frag sent
+                           |       |     ~~~~~~~~~~~~~~~~~~~~~ 
+          Timer expires &  |       |     Set Timer
+          No more Frag     |       |   
+          ~~~~~~~~~~~~~~~~ |       |  
+          Stop Timer       |       | MAX_ATTEMPS > limit
+     +-----------+         |       | ~~~~~~~~~~~~~~~~~~
+     |           +<--------+       | Send Abort
+     |    END    |                 v
+     +-----------+               +-+----------+
+                                 |    ERROR   |
+                                 +------------+                                      
+~~~~
+{: #Fig-ACKonerrorSnd title='Sender State Machine for the ACK on error Mode'}
+
+Unlike the sender, the receiver for ACK on error has some differences. First we are not sending the bitmap unless there is an error or an unexpected behavior. The {{Fig-ACKonerrorRcv}} finite state machine describes the receiver behavior. The receiver starts with an the expecting window and maintain a local_bitmap 
+indicating which fragments it has received (all-0 and all-1 occupy the same position).
+
+Any fragment not belonging to the current window is discarded. Fragment belonging to the 
+correct window are accepted, FN is computed based on the FCN value.  When an All-0 fragment is received and the bitmap is full the receiver changes the window value and clear the bitmap. The receiver leaves
+this state when receiving a:
+- all-0 fragment and not a full bitmap indicate that all the fragments have been sent in the current
+window. Since the sender is not obliged to send a full window, some fragment number
+not set in the local_bitmap may not correspond to losses. As the receiver does not know if the missing fragments are looses or normal missing fragments it sned s a local bitmap.
+- all-1 fragment which indicates that the transmission is finished. Since the last window
+is not full, the MIC will be used to detect if all the fragments have been received. A correct MIC indicates the end of the transmission. 
+
+If All-1 frag has not been received, the receiver expect a new window. It waits for
+the next fragment. If the window value has not changed, the received fragments are
+part of a retransmission. A receiver that has already received a frag should discard it 
+(not represented in the state machine), otherwise it completes its bitmap. If all the
+bits of the bitmap are set to one, the receiver clear the bitmap and wait for the next window without waiting for a 
+all-0 frag. 
+While the receiver waits for next window and if the window value is set to the next value, and all-1 fragment with the next value window arrived the receiver goes to error and abort the transmission, it drops the fragments.
+
+If the receiver receives an all-0 fragment, it stays in the same state. Sender may send more one fragment
+per window or more. Otherwise some fragments in the window have been lost.
+
+If the receiver receives an all-1 fragment this means that the transmission should be finished. 
+If the MIC is incorrect some fragments have been lost. It sends its bitmap.
+
+In case of an incorrect MIC, the receivers wait for fragment belonging to the same window.
+
+~~~~
+   Not All- & w=expected +---+   +---+w = Not expected
+   ~~~~~~~~~~~~~~~~~~~~~ |   |   |   |~~~~~~~~~~~~~~~~ 
+   Set local_bitmap(FCN) |   v   v   |discard
+                        ++---+---+---+-+
++-----------------------+              +--+ All-0 & full 
+|                       |  Rcv Window  |  | ~~~~~~~~~~~~ 
+|  +--------------------+              +<-+ w =next
+|  |                    +---+---+------+ clear lcl_bitmap
+|  |                        |   ^
+|  |        All-0 & w=expect|   |w=expct & not-All & full
+|  |        & no_full bitmap|   |~~~~~~~~~~~~~~~~~~~~~~~~
+|  |       ~~~~~~~~~~~~~~~~~|   |clear lcl_bitmap; w =nxt
+|  |       send local_bitmap|   |
+|  |                        |   |              +--------+
+|  |                        |   |  +---------->+        | 
+|  |                        |   |  |w=next     | Error/ |
+|  |                        |   |  |~~~~~~~~   | Abort  |
+|  |                        |   |  |Send abort ++-------+
+|  |                        v   |  |             ^ w=expct
+|  |                      +-+---+--+------+      | & all-1  
+|  |                      |    Wait       +------+ ~~~~~~~
+|  |                      | Next Window   |     Send abort
+|  |                      +-------+---+---+    
+|  |  All-1 & w=next & MIC wrong  |   |   
+|  |  ~~~~~~~~~~~~~~~~~~~~~~~~~~  |   +----------------+
+|  |       set local_bitmap(FCN)  |      All-1 & w=next| 
+|  |       send local_bitmap      |         & MIC right|
+|  |                              |  ~~~~~~~~~~~~~~~~~~|
+|  |                              | set lcl_bitmap(FCN)|                                    
+|  |All-1 & w=expect & MIC wrong  |                    |
+|  |~~~~~~~~~~~~~~~~~~~~~~~~~~~~  |                    |
+|  |set local_bitmap(FCN)         v                    |
+|  |send local_bitmap     +-------+------+             |
+|  +--------------------->+   Wait End   +-+           |
+|                         +-----+------+-+ | w=expct & |
+|       w=expected & MIC right  |      ^   | MIC wrong |
+|       ~~~~~~~~~~~~~~~~~~~~~~  |      +---+ ~~~~~~~~~ |
+|        set local_bitmap(FCN)  |   set lcl_bitmap(FCN)|
+|                               |                      |
+|All-1 & w=expected & MIC right |                      |
+|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ v                      |
+|set local_bitmap(FCN)        +-+----------+           |
++---------------------------->+     END    +<----------+
+                              +------------+                              
+~~~~
+{: #Fig-ACKonerrorRcv title='Receiver State Machine for the ACK on error Mode'}
 
 # SCHC Compression for IPv6 and UDP headers
 
