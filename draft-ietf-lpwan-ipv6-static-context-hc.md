@@ -553,7 +553,7 @@ This specification defines the following three fragment delivery reliability opt
    in Appendix A.
 
 
-## Tools
+## Functionalities
 
 This subsection describes the different tools that are used to enable the described fragmentation functionality and the different reliability options supported. Each tool has a corresponding header field format that is defined in the next subsection. The list of tools follows: 
 
@@ -602,8 +602,7 @@ In the No ACK option, fragments except the last one SHALL contain the fragmentat
 
 
 
-In any of the Window mode options, fragments except the last one SHALL    
-   contain the fragmentation header as defined in {{Fig-NotLastWin}}. The total size of this fragmentation header is R bits. 
+In any of the Window mode options, fragments except the last one SHALL contain the fragmentation header as defined in {{Fig-NotLastWin}}. The total size of this fragmentation header is R bits. 
    
 ~~~~
              <------------ R ---------->
@@ -647,14 +646,24 @@ In any of the Window mode options, fragments except the last one SHALL
    
    * DTag: The size of the DTag field is T bits, which may be set to a value greater than or equal to 0 bits. The DTag field in all fragments that carry the same IPv6 datagram MUST be set to the same value. DTag MUST be set sequentially increasing from 0 to 2^T - 1, and MUST wrap back from 2^T - 1 to 0.
 
-   * FCN: This field is an unsigned integer, with a size of N bits, that carries the FCN of the fragment.  In the No ACK option, N=1.
-      For the rest of options, N equal to or greater than 3 is recommended.  The FCN MUST be set sequentially decreasing from the
-      highest FCN in the window (which will be used for the first fragment), and MUST wrap from 0 back to the highest FCN in the
-      window.  The highest FCN in the window, denoted MAX_WIND_FCN, MUST be a value equal to or smaller than 2^N-2, see further details on this at the end of 5.5.3.  (Example 1: for N=5, MAX_WIND_FCN may be configured to be 30, then subsequent FCNs are set       sequentially and in decreasing order, and FCN will wrap from 0 back to 30.  Example 2: for N=5, MAX_WIND_FCN may be set
-      to 23, then subsequent FCNs are set sequentially and in decreasing order, and the FCN will wrap from 0 back to 23).  The FCN for the last fragment has all bits set to 1.  Note that, by this definition, the FCN value of 2^N - 1 is only used to identify a
-      fragment as the last fragment carrying a subset of the IPv6 packet being transported, and thus the FCN does not correspond
-      to the N least significant bits of the actual absolute fragment number.  It is also important to note that, for N=1, the last
-      fragment of the packet will carry a FCN equal to 1, while all previous fragments will carry a FCN of 0.
+   * FCN: This field is an unsigned integer, with a size of N bits, that carries the FCN of the fragment.  In the No ACK 
+   option, N=1.For the rest of options, N equal to or greater than 3 is recommended.  The FCN MUST be set sequentially  
+   decreasing from the highest FCN in the window (which will be used for the first fragment), and MUST wrap from 0 back to 
+   the highest FCN in the window.  
+   
+   The highest FCN in the window, denoted MAX_WIND_FCN, MUST be a value equal to or smaller than 2^N-2, see further details 
+   on this at the end of 5.5.3.  (Example 1: for N=5, MAX_WIND_FCN may be configured to be 30, then subsequent FCNs are set 
+   sequentially and in decreasing order, and FCN will wrap from 0 back to 30.  Example 2: for N=5, MAX_WIND_FCN may be set to 
+   23, then subsequent FCNs are set sequentially and in decreasing order, and the FCN will wrap from 0 back to 23).  
+   
+   The FCN for the last fragment on a window, when window mode is used has all the bit to 0, called all-0. This will 
+   indicates that the window is finished and either you send and ack or you wait for the next window when there is no error.
+   
+   The FCN for the last fragment has all bits set to 1, called all-1.  Note that, by this definition, the FCN value of 2^N - 
+   1 is only used to identify a fragment as the last fragment carrying a subset of the IPv6 packet being transported, and 
+   thus the FCN does not correspond to the N least significant bits of the actual absolute fragment number.  It is also 
+   important to note that, for N=1, the last fragment of the packet will carry a FCN equal to 1, while all previous fragments 
+   will carry a FCN of 0.
       
    * W: W is a 1-bit field. This field carries the same value for all fragments of a window, and it is complemented for the next window. The initial value for this field is 1.
 
@@ -830,9 +839,11 @@ The sender starts sending fragments (SEND STATE), the sender will indicate in th
 window and the FCN number. A delay between each fragment can be added to respect regulation
 rules or constraints imposed by the applications. Each time a fragment is sent the FCN is decreased of one value and the bitmap is set. The send state can be leaved for different
 reasons (for both reasons it goes to WAIT BITMAP STATE):
-- the FCN reaches value 0 and there are more fragments. In that case an all-0 fragmet is sent and the timer is set. The sender will wait for
-the bitmap acknowledged by the receiver. 
-- the last fragment is sent. In that case an all-1 fragment with the MIC is sent and the sender will wait
+
+* The FCN reaches value 0 and there are more fragments. In that case an all-0 fragmet is sent and the timer is set. The sender will wait for
+the bitmap acknowledged by the receiver.
+
+* The last fragment is sent. In that case an all-1 fragment with the MIC is sent and the sender will wait
 for the bitmap acknowledged by the receiver. The sender set a timer to wait for the ack.
 
 During the transition between the SEND state of the current window and the WAIT BITMAP, the sender start listening to the radio and start a timer. This timer 
@@ -844,7 +855,7 @@ fragment is sent to ask the receiver to resent its bitmap. The window number is 
 The sender receives a bitmap, it checks the window value. Acknowledgment with the
 non expected window are discarded.
 
-If the window number on the received bitmap is correct, the sender compare the local bitmap
+If the window number on the received bitmap is correct, the sender compares the local bitmap
 with the received bitmap. If they are equal all the fragments sent during the window 
 have been well received. If at least one fragment need to be sent, the sender clear 
 the bitmap, stop the timer and move its sending window to the next value. If no more
@@ -871,7 +882,7 @@ If the local-bitmap is different from the received bitmap the counter Attemps is
 |      FCN==0 & more frags |     | last frag
 |    ~~~~~~~~~~~~~~~~~~~~~ |     | ~~~~~~~~~~~~~~~
 |         set local-bitmap |     | set local-bitmap 
-|   send wnd + frag(all+0) |     | send wnd+frag(all+1)+MIC 
+|   send wnd + frag(all-0) |     | send wnd+frag(all-1)+MIC 
 |                set Timer |     | set Timer 
 |                          |     | 
 |Recv_wnd == wnd &         |     |  
@@ -910,10 +921,12 @@ indicating which fragments it has received (all-0 and all-1 occupy the same posi
 Any fragment not belonging to the current window is discarded. Fragment belonging to the 
 correct window are accepted, FN is computed based on the FCN value. The receiver leaves
 this state when receiving a:
-- all-0 fragment which indicates that all the fragments have been sent in the current
+
+* All-0 fragment which indicates that all the fragments have been sent in the current
 window. Since the sender is not obliged to send a full window, some fragment number
 not set in the local_bitmap may not correspond to losses.
-- all-1 fragment which indicated that the transmission is finished. Since the last window
+
+* All-1 fragment which indicated that the transmission is finished. Since the last window
 is not full, the MIC will be used to detect if all the fragments have been received.
 
 A correct MIC indicates the end of the transmission. The receiver must stay in this state
@@ -926,6 +939,7 @@ part of a retransmission. A receiver that has already received a frag should dis
 (not represented in the state machine), otherwise it completes its bitmap. If all the
 bit of the bitmap are set to one, the receiver may send a bitmap without waiting for a 
 all-0 frag. 
+
 If the window value is set to the next value, this means that the sender has received 
 a correct bitmap, which means that all the fragments have been received. The receiver
 change the value of the expected window.
@@ -958,21 +972,22 @@ In case of an incorrect MIC, the receivers wait for fragment belonging to the sa
 |  | if lcl_bitmap full | | |  | |  | ~~~~~~~~~~~~~~~
 |  | send lcl_bitmap    v | v  | |  | expct = nxt wnd
 |  |                  +-+-+-+--+-++ | Clear lcl_bitmap    
-|  |  w=expected & +->+    Wait   +<+ set lcl_btmp(FCN)         
+|  |  w=expected & +->+    Wait   +<+ set lcl_bitmap(FCN)         
 |  |      All-1    |  |    Next   |   send lcl_bitmap
 |  |  ~~~~~~~~~~~~ +--+  Window   |   
 |  |    discard       +--------+-++        
-|  |                           | |  All-1 & w=nxt
-|  | All-1 & w=next & MIC wrong| |  & MIC right      
-|  | ~~~~~~~~~~~~~~~~~~~~~~~~~~| | ~~~~~~~~~~~~~~~~~~ 
+|  |             All-1 & w=next| |  All-1 & w=nxt
+|  |                & MIC wrong| |  & MIC right      
+|  |          ~~~~~~~~~~~~~~~~~| | ~~~~~~~~~~~~~~~~~~ 
 |  |      set local_bitmap(FCN)| |set lcl_bitmap(FCN)       
 |  |          send local_bitmap| |send local_bitmap 
 |  |                           | +----------------------+
-|  |All-1 & w=expct & MICwrong |                        |
-|  |~~~~~~~~~~~~~~~~~~~~~~~~   v   +---+ w=expctd &     |
-|  |set local_bitmap(FCN) +----+---+-+ | MIC wrong      |
-|  |send local_bitmap     |          +<+ ~~~~~~~~~~~~~~ |
-|  +--------------------->+ Wait End + set lcl_btmp(FCN)|
+|  |All-1 & w=expct            |                        |
+|  |& MIC wrong                v   +---+ w=expctd &     |
+|  |~~~~~~~~~~~~~~~~~~~~  +----+---+-+ | MIC wrong      |
+|  |set local_bitmap(FCN) |          +<+ ~~~~~~~~~~~~~~ |
+|  |send local_bitmap     | Wait End | set lcl_btmp(FCN)|
+|  +--------------------->+          |                  |
 |                         +---+----+-+                  |
 |       w=expected & MIC right|                         |
 |       ~~~~~~~~~~~~~~~~~~~~~~| +-+ Not All-1           |
@@ -990,16 +1005,18 @@ In case of an incorrect MIC, the receivers wait for fragment belonging to the sa
 
 ### ACK on error
 The ACK on error sender is very similar to the ACK always sender, Intially, when a fragmented packet is sent, the window is set to 0, a local_bit map 
-is set to 0, and FCN is set the the highest possible value depending on the number
+is set to 0, and FCN is set the highest possible value depending on the number
 of fragment that will be sent in the window. See {{Fig-ACKonerrorSnd}}
 
-The sender start sending fragment indicating in the fragmentation header, the current
+The sender starts sending fragments indicating in the fragmentation header with the current
 window and the FCN number. A delay between each fragment can be added to respect regulation
 rules or constraints imposed by the applications. This state can be leaved for different
 reasons:
-- the FCN reaches value 0. In that case a all-0 fragmet is sent and the sender will wait for
+
+* The FCN reaches value 0. In that case a all-0 fragmet is sent and the sender will wait for
 the bitmap acknowledged by the receiver.
-- the last fragment is sent. In that case a all-1 fragment is sent and the sender will wait
+
+* The last fragment is sent. In that case a all-1 fragment is sent and the sender will wait
 for the bitmap acknowledged by the receiver.
 
 During the transition between the sending the fragment of the current window and waiting 
@@ -1077,10 +1094,12 @@ indicating which fragments it has received (all-0 and all-1 occupy the same posi
 Any fragment not belonging to the current window is discarded. Fragment belonging to the 
 correct window are accepted, FN is computed based on the FCN value.  When an All-0 fragment is received and the bitmap is full the receiver changes the window value and clear the bitmap. The receiver leaves
 this state when receiving a:
-- all-0 fragment and not a full bitmap indicate that all the fragments have been sent in the current
+
+* All-0 fragment and not a full bitmap indicate that all the fragments have been sent in the current
 window. Since the sender is not obliged to send a full window, some fragment number
 not set in the local_bitmap may not correspond to losses. As the receiver does not know if the missing fragments are looses or normal missing fragments it sned s a local bitmap.
-- all-1 fragment which indicates that the transmission is finished. Since the last window
+
+* All-1 fragment which indicates that the transmission is finished. Since the last window
 is not full, the MIC will be used to detect if all the fragments have been received. A correct MIC indicates the end of the transmission. 
 
 If All-1 frag has not been received, the receiver expect a new window. It waits for
