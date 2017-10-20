@@ -158,7 +158,7 @@ This section defines the terminology and acronyms used in this document.
 
 * FL: Field Length is a value to identify if the field is of fixed or variable length.
 
-* FP: Field Position is a list of possible correct values that a field may use
+* FP: Field Position is a value that is used to identify each instance a field apears in the header.  
 
 * IID: Interface Identifier. See the IPv6 addressing architecture {{RFC7136}}
 
@@ -479,9 +479,9 @@ Compressed fields are elided during compression and reconstructed during decompr
 
 ## Overview
 
-In LPWAN technologies, the L2 data unit size typically varies from tens to hundreds of bytes.  If the entire IPv6 datagram after applying SCHC header compression or as is fits within a single L2 data unit, the fragmentation mechanism is not used and the packet is sent. Otherwise, the datagram SHALL be broken into fragments.
+In LPWAN technologies, the L2 data unit size typically varies from tens to hundreds of bytes.  If the entire IPv6 datagram after applying SCHC header compression or when SCHC is not possible, fits within a single L2 data unit, the fragmentation mechanism is not used and the packet is sent. Otherwise, the datagram SHALL be broken into fragments.
 
-LPWAN technologies impose some strict limitations on traffic, devices are sleeping most of the time and may receive data during a short period of time after transmission to preserve battery. To adapt the SCHC fragmentation to the capabilities of LPWAN technologies, it is desirable to enable optional fragment retransmission and to allow a gradation of fragment delivery reliability. This document does not make any decision with regard to which fragment delivery reliability option was used over a specific LPWAN technology.
+LPWAN technologies impose some strict limitations on traffic, devices are sleeping most of the time and may receive data during a short period of time after transmission to preserve battery. To adapt the SCHC fragmentation to the capabilities of LPWAN technologies, it is desirable to enable optional fragment retransmission and to allow a gradation of fragment delivery reliability. This document does not make any decision with regard to which fragment delivery reliability option may be used over a specific LPWAN technology.
 
    An important consideration is that LPWAN networks typically follow
    the star topology, and therefore data unit reordering is not expected
@@ -496,15 +496,14 @@ LPWAN technologies impose some strict limitations on traffic, devices are sleepi
 This specification defines the following three fragment delivery reliability options:
 
    o  No ACK. 
-   No ACK is the simplest fragment delivery reliability option.  The receiver does not generate overhead in the form of acknowledgments (ACKs).  However, this option does not enhance delivery reliability beyond that offered by the underlying LPWAN technology.   In the No ACK option, the receiver MUST NOT issue ACKs.
-
+   No ACK is the simplest fragment delivery reliability option. The receiver does not generate overhead in the form of acknowledgments (ACKs).  However, this option does not enhance delivery reliability beyond that offered by the underlying LPWAN technology. In the No ACK option, the receiver MUST NOT issue ACKs.
 
    o  Window mode - ACK always (ACK always).    
    The ACK always option provides flow control.  In
    addition, it is able to handle long bursts of lost fragments, since
    detection of such events can be done before  the end of the IPv6 packet
    transmission, as long as the window size is short enough.  However,
-   such benefit comes at the expense of higher ACK overhead.
+   such benefit comes at the expense of ACK use.
    In ACK always, an ACK is transmitted by the fragment
    receiver after a window of fragments have been sent.  A window of
    fragments is a subset of the full set of fragments needed to carry an
@@ -555,7 +554,7 @@ This specification defines the following three fragment delivery reliability opt
 
 ## Functionalities
 
-This subsection describes the different tools that are used to enable the described fragmentation functionality and the different reliability options supported. Each tool has a corresponding header field format that is defined in the next subsection. The list of tools follows: 
+This subsection describes the different fields in the fragmentation header that are used to enable the described fragmentation functionality and the different reliability options supported. Each tool has a corresponding header field format that is defined in the next subsection. The list of tools follows: 
 
 o  Rule ID. When used for fragmentation-related functionality, the Rule ID is used in fragments and in ACKs. The Rule ID in a fragment is set to a value that indicates that the data unit being carried is a fragment. This also allows to interleave non-fragmented IPv6 datagrams with fragments that carry a larger IPv6 datagram. Rule ID may also be used to signal which reliability option is in use for the IPv6 packet being carried. Rule ID may also be used to signal the window size if multiple sizes are supported (see 5.7). In an ACK, the Rule ID signals that the message this Rule ID is prepended to is an ACK.  
 
@@ -1659,7 +1658,7 @@ This section provides examples of different fragment delivery reliability option
 {{Fig-Example-Rel-Window-ACK-Loss-Last-B}} illustrates the transmission of an IPv6 packet that needs 6 fragments in Window mode - ACK "always", for N=3 and MAX_WIND_FCN=6, with three losses, and the second ACK is lost. Note that, since a single window is needed for transmission of the IPv6 packet in this case, the example illustrates behavior when losses happen in the last window. 
 
 ~~~~
-                   Sender                Receiver
+          Sender                Receiver
              |-----W=0, CFN=6----->|
              |-----W=0, CFN=5----->|
              |-----W=0, CFN=4--X-->|
