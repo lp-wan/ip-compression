@@ -559,7 +559,7 @@ This subsection describes the different fields in the fragmentation header that 
 o  Rule ID. When used for fragmentation-related functionality, the Rule ID is used in fragments and in ACKs. The Rule ID in a fragment is set to a value that indicates that the data unit being carried is a fragment. This also allows to interleave non-fragmented IPv6 datagrams with fragments that carry a larger IPv6 datagram. Rule ID may also be used to signal which reliability option is in use for the IPv6 packet being carried. Rule ID may also be used to signal the window size if multiple sizes are supported (see 5.7). In an ACK, the Rule ID signals that the message this Rule ID is prepended to is an ACK.  
 
 o  Fragment Compressed Number (FCN).  The FCN is included in all fragments.  This field can be understood as a truncated, efficient
-   representation of a larger-sized fragment number, and does not carry an absolute fragment number.  A special FCN value denotes the last fragment that carries a fragmented IPv6 packet.  In Window mode, the FCN is augmented with the W bit, which has the purpose of avoiding possible ambiguity for the receiver that might arise under certain conditions.
+   representation of a larger-sized fragment number, and does not carry an absolute fragment number.  There are two reserved values used for the control of the fragmentation. The FCN value when all the bits equals 1 (all-1) denotes the last fragment that carries a fragmented IPv6 packet.  And the FCN value when all the bits equals 0 (all-0) denotes the last fragment of the windonw in Window mode or the fragments in No ACK mode. The rest of the FCN values are used in a sequential and decreasing order, which has the purpose of avoiding possible ambiguity for the receiver that might arise under certain conditions.
 
 o  Datagram Tag (DTag). The DTag field, if present, is set to the same value for all fragments carrying the same IPv6 datagram, allows to interleave fragments that correspond to different IPv6 datagrams.
 
@@ -646,29 +646,22 @@ In any of the Window mode options, fragments except the last one SHALL contain t
    * DTag: The size of the DTag field is T bits, which may be set to a value greater than or equal to 0 bits. The DTag field in all fragments that carry the same IPv6 datagram MUST be set to the same value. DTag MUST be set sequentially increasing from 0 to 2^T - 1, and MUST wrap back from 2^T - 1 to 0.
 
    * FCN: This field is an unsigned integer, with a size of N bits, that carries the FCN of the fragment.  In the No ACK 
-   option, N=1.For the rest of options, N equal to or greater than 3 is recommended.  The FCN MUST be set sequentially  
+   option, N=1. For the rest of options, N equal to or greater than 3 is recommended. The FCN MUST be set sequentially  
    decreasing from the highest FCN in the window (which will be used for the first fragment), and MUST wrap from 0 back to 
    the highest FCN in the window.  
-   
-   The highest FCN in the window, denoted MAX_WIND_FCN, MUST be a value equal to or smaller than 2^N-2, see further details 
-   on this at the end of 5.5.3.  (Example 1: for N=5, MAX_WIND_FCN may be configured to be 30, then subsequent FCNs are set 
-   sequentially and in decreasing order, and FCN will wrap from 0 back to 30.  Example 2: for N=5, MAX_WIND_FCN may be set to 
-   23, then subsequent FCNs are set sequentially and in decreasing order, and the FCN will wrap from 0 back to 23).  
-   
    The FCN for the last fragment on a window, when window mode is used has all the bit to 0, called all-0. This will 
    indicates that the window is finished and either you send and ack or you wait for the next window when there is no error.
-   
    The FCN for the last fragment has all bits set to 1, called all-1.  Note that, by this definition, the FCN value of 2^N - 
    1 is only used to identify a fragment as the last fragment carrying a subset of the IPv6 packet being transported, and 
    thus the FCN does not correspond to the N least significant bits of the actual absolute fragment number.  It is also 
    important to note that, for N=1, the last fragment of the packet will carry a FCN equal to 1, while all previous fragments 
    will carry a FCN of 0.
       
-   * W: W is a 1-bit field. This field carries the same value for all fragments of a window, and it is complemented for the next window. The initial value for this field is 1.
+   * W: W is a 1-bit field. This field carries the same value for all fragments of a window, and it is complemented for the next window. The initial value for this field is 0.
 
    * MIC: This field, which has a size of M bits, carries the MIC for the IPv6 packet.
    
-   The values for R, N, MAX_WIND_FCN, T and M are not specified in this document, and have to be determined in other documents (e.g. technology-specific profile documents).
+   The values for R, N, T and M are not specified in this document, and have to be determined in other documents (e.g. technology-specific profile documents).
    
 ### ACK format
 
@@ -690,7 +683,9 @@ The format of an ACK is shown in {{Fig-ACK-Format}}:
   
   W: This field has a size of 1 bit. In all ACKs, the W bit carries the same value as the W bit carried by the fragments whose reception is being positively or negatively acknowledged by the ACK.
   
-  bitmap: This field carries the bitmap sent by the receiver to inform the sender about whether fragments in the current window have been received or not. Size of the bitmap field of an ACK can be equal to 0 or Ceiling(Number_of_Fragments/8) octets, where Number_of_Fragments denotes the number of fragments of a window. The bitmap is a sequence of bits, where the n-th bit signals whether the n-th fragment transmitted in the current window has been correctly received (n-th bit set to 1) or not (n-th bit set to 0). Remaining bits with bit order greater than the number of fragments sent (as determined by the receiver) are set to 0, except for the last bit in the bitmap, which is set to 1 if the last fragment of the window has been correctly received, and 0 otherwise. Feedback on reception of the fragment with FCN = 2^N - 1 (last fragment carrying an IPv6 packet) is only given by the last bit of the corresponding bitmap. Absence of the bitmap in an ACK confirms correct reception of all fragments to be acknowledged by means of the ACK. Note that absence of the bitmap in an ACK may be determined based on the size of the L2 payload.
+  bitmap: 
+  --! This field carries the bitmap sent by the receiver to inform the sender about whether fragments in the current window have been received or not. Size of the bitmap field of an ACK can be equal to 0 or Ceiling(Number_of_Fragments/8) octets, where Number_of_Fragments denotes the number of fragments of a window. The bitmap is a sequence of bits, where the n-th bit signals whether the n-th fragment transmitted in the current window has been correctly received (n-th bit set to 1) or not (n-th bit set to 0). Remaining bits with bit order greater than the number of fragments sent (as determined by the receiver) are set to 0, except for the last bit in the bitmap, which is set to 1 if the last fragment of the window has been correctly received, and 0 otherwise. Feedback on reception of the fragment with FCN = 2^N - 1 (last fragment carrying an IPv6 packet) is only given by the last bit of the corresponding bitmap. Absence of the bitmap in an ACK confirms correct reception of all fragments to be acknowledged by means of the ACK. Note that absence of the bitmap in an ACK may be determined based on the size of the L2 payload. !--
+  
   
    
 {{Fig-Bitmap-Win}} shows an example of an ACK (N=3), where the bitmap
