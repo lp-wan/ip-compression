@@ -656,21 +656,21 @@ The format of an ACK is shown in {{Fig-ACK-Format}}:
 indicates that the second and the fifth fragments have not been correctly received. 
 
 ~~~~                                                  
-              <-------   R  ------->
-                          <- T -> 1 6 5 4 3 2 1   0     
-              +---- ... --+-... -+-+-+-+-+-+-+-+-----+
-              |  Rule ID  | DTag |W|1|0|1|1|0|1|all-0|   TODO
-              +---- ... --+-... -+-+-+-+-+-+-+-+-----+
+    <-------   R  ------->
+                <- T -> 1 6 5 4 3 2 1   0     
+    +---- ... --+-... -+-+-+-+-+-+-+-+-----+
+    |  Rule ID  | DTag |W|1|0|1|1|0|1|all-0|   TODO
+    +---- ... --+-... -+-+-+-+-+-+-+-+-----+
 
 ~~~~
 {: #Fig-Bitmap-Win title='Example of the bitmap in Window mode, in any window unless the last one, for N=3)'}
 
 ~~~~                                                  
-              <-------   R  ------->
-                          <- T -> 1 6 5 4 3 2 1   7
-              +---- ... --+-... -+-+-+-+-+-+-+-+-----+
-              |  Rule ID  | DTag |W|1|0|1|1|0|1|all-1|    TODO
-              +---- ... --+-... -+-+-+-+-+-+-+-+-----+
+     <-------   R  ------->
+                 <- T -> 1 6 5 4 3 2 1   7
+     +---- ... --+-... -+-+-+-+-+-+-+-+-----+
+     |  Rule ID  | DTag |W|1|0|1|1|0|1|all-1|    TODO
+     +---- ... --+-... -+-+-+-+-+-+-+-+-----+
 
 ~~~~
 {: #Fig-Bitmap-lastWin title='Example of the bitmap in Window mode for the last window, for N=3)'}
@@ -678,11 +678,11 @@ indicates that the second and the fifth fragments have not been correctly receiv
 
 ### All-1 and All-0 formats
 ~~~~
-              <------------ R ------------>
-                         <- T -> 1 <- N -> 
-              +-- ... --+- ... -+-+- ... -+--- ... ---+
-              | Rule ID | DTag  |W|  0..0 |  payload  |  TODO
-              +-- ... --+- ... -+-+- ... -+--- ... ---+
+     <------------ R ------------>
+                <- T -> 1 <- N -> 
+     +-- ... --+- ... -+-+- ... -+--- ... ---+
+     | Rule ID | DTag  |W|  0..0 |  payload  |  TODO
+     +-- ... --+- ... -+-+- ... -+--- ... ---+
 ~~~~
 {: #Fig-All0 title='All-0 format fragment'}
 
@@ -701,11 +701,11 @@ indicates that the second and the fifth fragments have not been correctly receiv
 
 
 ~~~~
-              <------------- R ---------->
-                            <- T -> <-N-> <---- M ----->
-              +---- ... ---+- ... -+-----+---- ... ----+---...---+
-              |   Rule ID  | DTag  |  1  |     MIC     | payload |
-              +---- ... ---+- ... -+-----+---- ... ----+---...---+
+    <------------- R ---------->
+                  <- T -> <-N-><----- M ----->
+    +---- ... ---+- ... -+-----+---- ... ----+---...---+
+    |   Rule ID  | DTag  |  1  |     MIC     | payload |
+    +---- ... ---+- ... -+-----+---- ... ----+---...---+
 ~~~~
 {: #Fig-Last title='All-1 Fragmentation Header for the Last Fragment, No ACK option'}
 
@@ -714,12 +714,12 @@ indicates that the second and the fifth fragments have not been correctly receiv
    header is R+M bits. It is used for retransmissions
 
 ~~~~
-              <------------ R ------------>
-                         <- T -> 1 <- N -> <---- M ----->
-              +-- ... --+- ... -+-+- ... -+---- ... ----+---...---+
-              | Rule ID | DTag  |W| 11..1 |     MIC     | payload |
-              +-- ... --+- ... -+-+- ... -+---- ... ----+---...---+
-                                    (FCN)
+      <------------ R ------------>
+                 <- T -> 1 <- N -> <---- M ----->
+      +-- ... --+- ... -+-+- ... -+---- ... ----+---...---+
+      | Rule ID | DTag  |W| 11..1 |     MIC     | payload |
+      +-- ... --+- ... -+-+- ... -+---- ... ----+---...---+
+                            (FCN)
 ~~~~
 {: #Fig-LastWinMode title='All-1 Fragmentation Header for the Last Fragment, Window mode'}
        
@@ -727,30 +727,30 @@ indicates that the second and the fifth fragments have not been correctly receiv
    
 
 ~~~~
-              <------------ R ------------>
-                         <- T -> 1 <- N -> <---- M ----->
-              +-- ... --+- ... -+-+- ... -+---- ... ----+
-              | Rule ID | DTag  |W|  1..1 |     MIC     | (no payload)  TODO
-              +-- ... --+- ... -+-+- ... -+---- ... ----+
+<------------ R ------------>
+           <- T -> 1 <- N -> <---- M ----->
++-- ... --+- ... -+-+- ... -+---- ... ----+
+| Rule ID | DTag  |W|  1..1 |     MIC     | (no payload)  TODO
++-- ... --+- ... -+-+- ... -+---- ... ----+
 ~~~~
 {: #Fig-All1retries title='All-1 for Retries format fragment also called All-1 empty'}
 
 ~~~~
-              <------------ R ------------>
-                         <- T -> 1 <- N -> 
-              +-- ... --+- ... -+-+- ... -+
-              | Rule ID | DTag  |W| 11..1 | (no MIC and no payload)  TODO
-              +-- ... --+- ... -+-+- ... -+
+  <------------ R ------------>
+             <- T -> 1 <- N -> 
+  +-- ... --+- ... -+-+- ... -+
+  | Rule ID | DTag  |W| 11..1 | (no MIC and no payload)  TODO
+  +-- ... --+- ... -+-+- ... -+
 ~~~~
 {: #Fig-All1Abort title='All-1 for Abort format fragment'}
 
 ~~~~
-             <----- Complete Byte ------><--- 1 byte --->
-             <-------   R  ------->
-                          <- T -> 1  
-              +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+-+-+
-              |  Rule ID  | DTag |W| 1..1|      FF       |  TODO
-              +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+-+-+
+ <----- Complete Byte ------><--- 1 byte --->
+ <-------   R  ------->
+              <- T -> 1  
+ +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+-+-+
+ |  Rule ID  | DTag |W| 1..1|      FF       |  TODO
+ +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+-+-+
 ~~~~
 {: #Fig-ACKabort title='ACK Abort format fragment'}
 
