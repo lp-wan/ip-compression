@@ -300,6 +300,7 @@ address {
 <link href="#rfc.section.5.4.1" rel="Chapter" title="5.4.1 Fragment format">
 <link href="#rfc.section.5.4.2" rel="Chapter" title="5.4.2 Fragmentation header formats">
 <link href="#rfc.section.5.4.3" rel="Chapter" title="5.4.3 ACK format">
+<link href="#rfc.section.5.4.4" rel="Chapter" title="5.4.4 All-1 and All-0 formats">
 <link href="#rfc.section.5.5" rel="Chapter" title="5.5 Baseline mechanism">
 <link href="#rfc.section.5.6" rel="Chapter" title="5.6 Supporting multiple window sizes">
 <link href="#rfc.section.5.7" rel="Chapter" title="5.7 Aborting fragmented datagram transmissions">
@@ -453,6 +454,8 @@ address {
 <li>5.4.2.   <a href="#rfc.section.5.4.2">Fragmentation header formats</a>
 </li>
 <li>5.4.3.   <a href="#rfc.section.5.4.3">ACK format</a>
+</li>
+<li>5.4.4.   <a href="#rfc.section.5.4.4">All-1 and All-0 formats</a>
 </li>
 </ul><li>5.5.   <a href="#rfc.section.5.5">Baseline mechanism</a>
 </li>
@@ -798,11 +801,12 @@ address {
 <a href="#rfc.section.5.3">5.3.</a> <a href="#functionalities" id="functionalities">Functionalities</a>
 </h1>
 <p id="rfc.section.5.3.p.1">This subsection describes the different fields in the fragmentation header that are used to enable the described fragmentation functionality and the different reliability options supported. Each tool has a corresponding header field format that is defined in the next subsection. The list of tools follows:</p>
-<p id="rfc.section.5.3.p.2">o  Rule ID. When used for fragmentation-related functionality, the Rule ID is used in fragments and in ACKs. The Rule ID in a fragment is set to a value that indicates that the data unit being carried is a fragment. This also allows to interleave non-fragmented IPv6 datagrams with fragments that carry a larger IPv6 datagram. Rule ID may also be used to signal which reliability option is in use for the IPv6 packet being carried. Rule ID may also be used to signal the window size if multiple sizes are supported (see 5.7). In an ACK, the Rule ID signals that the message this Rule ID is prepended to is an ACK.</p>
-<p id="rfc.section.5.3.p.3">o  Fragment Compressed Number (FCN).  The FCN is included in all fragments.  This field can be understood as a truncated, efficient representation of a larger-sized fragment number, and does not carry an absolute fragment number.  There are two reserved values used for the control of the fragmentation. The FCN value when all the bits equals 1 (all-1) denotes the last fragment that carries a fragmented IPv6 packet.  And the FCN value when all the bits equals 0 (all-0) denotes the last fragment of the windonw in Window mode or the fragments in No ACK mode. The rest of the FCN values are used in a sequential and decreasing order, which has the purpose of avoiding possible ambiguity for the receiver that might arise under certain conditions.</p>
-<p id="rfc.section.5.3.p.4">o  Datagram Tag (DTag). The DTag field, if present, is set to the same value for all fragments carrying the same IPv6 datagram, allows to interleave fragments that correspond to different IPv6 datagrams.</p>
-<p id="rfc.section.5.3.p.5">o  Message Integrity Check (MIC). It is computed by the sender over the complete packet (i.e. a SCHC compressed or an uncompressed IPv6 packet) before fragmentation. The algorithm to be used to compute the MIC is not defined in this document, and needs to be defined in other documents (e.g. technology-specific profiles).  The MIC allows the receiver to check errors in the reassembled packet, while it also enables compressing the UDP checksum by use of SCHC compression.</p>
-<p id="rfc.section.5.3.p.6">o  Bitmap. The bitmap is a sequence of bits included in the ACK for a given window, each bit in the Bitmap identifies a fragment. It provides feedback on whether each fragment of the current window has been received or not.</p>
+<p id="rfc.section.5.3.p.2">o  Rule ID. When used for fragmentation-related functionality, the Rule ID is used in fragments and in ACKs. The Rule ID in a fragment is set to a value that indicates that the data unit being carried is a fragment. This also allows to interleave non- fragmented IPv6 datagrams with fragments that carry a larger IPv6 datagram. Rule ID may also be used to signal which reliability option is in use for the IPv6 packet being carried. The Rule ID in the ACK format identify that this message is ACK.<br> In the fragments format this field has a size of R - T - N - 1 bits when Window mode is used. In No ACK mode, the Rule ID field has a size of R &#8211; T &#8211; N bits.</p>
+<p id="rfc.section.5.3.p.3">o  Fragment Compressed Number (FCN).  The FCN is included in all fragments.  This field can be understood as a truncated, efficient representation of a larger-sized fragment number, and does not carry an absolute fragment number.  There are two reserved values used for the control of the fragmentation. The FCN value when all the bits equals 1 (all-1) denotes the last fragment of a packet.  And the FCN value when all the bits equals 0 (all-0) denotes the last fragment of the windonw in any window mode or the fragments in No ACK mode. The rest of the FCN values are used in a sequential and decreasing order, which has the purpose to avoiding possible ambiguity for the receiver that might arise under certain conditions.  In the fragments, this field is an unsigned integer, with a size of N bits, that carries the FCN of the fragment.  In the No ACK mode it is set to 1 bit (N=1). For the other modes it is recommended to use a number of bits (N) equal to or greater than 3. The FCN MUST be set sequentially<br> decreasing from the highest FCN in the window (which will be used for the first fragment), and MUST wrap from 0 back to the highest FCN in the window.<br> &#160; The FCN for the last fragment on a window is an all-0, which indicates that the window is finished and it proceeds according to the mode in use: either an ack is sent or the next window fragments are expected when there is no error.  The FCN for the last fragment is an all-1. So the FCN value of 2^N - 1 is only used to identify a fragment as the last fragment may carry a subset of the IPv6 packet, and thus the FCN does not correspond to the N least significant bits of the actual absolute fragment number. It is also important to note that, for No ACK mode or N=1, the last fragment of the packet will carry a FCN equal to 1, while all previous fragments will carry a FCN of 0.</p>
+<p id="rfc.section.5.3.p.4">o  Datagram Tag (DTag). The DTag field, if present, is set to the same value for all fragments carrying the same IPv6 datagram, allows to interleave fragments that correspond to different IPv6 datagrams.  In the fragment formats the size of the DTag field is T bits, which may be set to a value greater than or equal to 0 bits. The DTag field in all fragments that carry the same IPv6 datagram MUST be set to the same value. DTag MUST be set sequentially increasing from 0 to 2^T - 1, and MUST wrap back from 2^T - 1 to 0.  In the ACK format, DTag carries the same value as the DTag field in the fragments for which this ACK is intended.</p>
+<p id="rfc.section.5.3.p.5">o  W: W is a 1-bit field. This field carries the same value for all fragments of a window, and it is complemented for the next window. The initial value for this field is 0.  In the ACK format, this field has a size of 1 bit. In all ACKs, the W bit carries the same value as the W bit carried by the fragments whose reception is being positively or negatively acknowledged by the ACK.</p>
+<p id="rfc.section.5.3.p.6">o  Message Integrity Check (MIC). This field, which has a size of M bits. It is computed by the sender over the complete packet (i.e. a SCHC compressed or an uncompressed IPv6 packet) before fragmentation. The algorithm to be used to compute the MIC is not defined in this document, and needs to be defined in other documents (e.g. technology-specific profiles).  The MIC allows the receiver to check errors in the reassembled packet, while it also enables compressing the UDP checksum by use of SCHC compression.</p>
+<p id="rfc.section.5.3.p.7">o  Bitmap. The bitmap is a sequence of bits included in the ACK for a given window, each bit in the Bitmap identifies a fragment. It provides feedback on whether each fragment of the current window has been received or not.  FCN set to All-1 and All-0 fragments are set to the right-most position on the bitmap. Highest FCN is set to the left-most position. A bit set to 1 indicates that the corresponding FCN fragment has been correctly sent.  TODO</p>
 <h1 id="rfc.section.5.4">
 <a href="#rfc.section.5.4">5.4.</a> <a href="#formats" id="formats">Formats</a>
 </h1>
@@ -851,10 +855,10 @@ address {
 <div id="Fig-Last"></div>
 <pre>
               &lt;------------- R ------------&gt;
-                            &lt;- T -&gt; &lt;- N -&gt; &lt;---- M -----&gt;
-              +---- ... ---+- ... -+- ... -+---- ... ----+
-              |   Rule ID  | DTag  | 11..1 |     MIC     |
-              +---- ... ---+- ... -+- ... -+---- ... ----+
+                            &lt;- T -&gt; &lt;-N-&gt; &lt;---- M -----&gt;
+              +---- ... ---+- ... -+-----+---- ... ----+
+              |   Rule ID  | DTag  |  1  |     MIC     |
+              +---- ... ---+- ... -+-----+---- ... ----+
 </pre>
 <p class="figure">Figure 9: Fragmentation Header for the Last Fragment, No ACK option</p>
 <p id="rfc.section.5.4.2.p.4">In any of the Window modes, the last fragment of an IPv6 datagram SHALL contain a fragmentation header that conforms to the format shown in <a href="#Fig-LastWinMode" class="xref">Figure 10</a>. The total size of this fragmentation header is R+M bits.</p>
@@ -868,16 +872,7 @@ address {
               +-- ... --+- ... -+-+- ... -+---- ... ----+
 </pre>
 <p class="figure">Figure 10: Fragmentation Header for the Last Fragment, Window mode</p>
-<p></p>
-
-<ul>
-<li>Rule ID: This field has a size of R - T - N - 1 bits when Window mode is used. In No ACK mode, the Rule ID field has a size of R &#8211; T &#8211; N bits.</li>
-<li>DTag: The size of the DTag field is T bits, which may be set to a value greater than or equal to 0 bits. The DTag field in all fragments that carry the same IPv6 datagram MUST be set to the same value. DTag MUST be set sequentially increasing from 0 to 2^T - 1, and MUST wrap back from 2^T - 1 to 0.</li>
-<li>FCN: This field is an unsigned integer, with a size of N bits, that carries the FCN of the fragment.  In the No ACK option, N=1. For the rest of options, N equal to or greater than 3 is recommended. The FCN MUST be set sequentially<br> decreasing from the highest FCN in the window (which will be used for the first fragment), and MUST wrap from 0 back to the highest FCN in the window.<br> The FCN for the last fragment on a window, when window mode is used has all the bit to 0, called all-0. This will indicates that the window is finished and either you send and ack or you wait for the next window when there is no error.  The FCN for the last fragment has all bits set to 1, called all-1.  Note that, by this definition, the FCN value of 2^N - 1 is only used to identify a fragment as the last fragment carrying a subset of the IPv6 packet being transported, and thus the FCN does not correspond to the N least significant bits of the actual absolute fragment number.  It is also important to note that, for N=1, the last fragment of the packet will carry a FCN equal to 1, while all previous fragments will carry a FCN of 0.</li>
-<li>W: W is a 1-bit field. This field carries the same value for all fragments of a window, and it is complemented for the next window. The initial value for this field is 0.</li>
-<li>MIC: This field, which has a size of M bits, carries the MIC for the IPv6 packet.</li>
-</ul>
-<p id="rfc.section.5.4.2.p.6">The values for R, N, T and M are not specified in this document, and have to be determined in other documents (e.g. technology-specific profile documents).</p>
+<p id="rfc.section.5.4.2.p.5">The values for R, N, T and M are not specified in this document, and have to be determined in other documents (e.g. technology-specific profile documents).</p>
 <h1 id="rfc.section.5.4.3">
 <a href="#rfc.section.5.4.3">5.4.3.</a> <a href="#ack-format" id="ack-format">ACK format</a>
 </h1>
@@ -892,19 +887,15 @@ address {
                 +---- ... --+-... -+-+----- ... ---+
 </pre>
 <p class="figure">Figure 11: Format of an ACK</p>
-<p id="rfc.section.5.4.3.p.2">Rule ID: In all ACKs, Rule ID has a size of R - T - 1 bits.</p>
-<p id="rfc.section.5.4.3.p.3">DTag: DTag has a size of T bits. DTag carries the same value as the DTag field in the fragments carrying the IPv6 datagram for which this ACK is intended.</p>
-<p id="rfc.section.5.4.3.p.4">W: This field has a size of 1 bit. In all ACKs, the W bit carries the same value as the W bit carried by the fragments whose reception is being positively or negatively acknowledged by the ACK.</p>
-<p id="rfc.section.5.4.3.p.5">bitmap: &#8211;! This field carries the bitmap sent by the receiver to inform the sender about whether fragments in the current window have been received or not. Size of the bitmap field of an ACK can be equal to 0 or Ceiling(Number_of_Fragments/8) octets, where Number_of_Fragments denotes the number of fragments of a window. The bitmap is a sequence of bits, where the n-th bit signals whether the n-th fragment transmitted in the current window has been correctly received (n-th bit set to 1) or not (n-th bit set to 0). Remaining bits with bit order greater than the number of fragments sent (as determined by the receiver) are set to 0, except for the last bit in the bitmap, which is set to 1 if the last fragment of the window has been correctly received, and 0 otherwise. Feedback on reception of the fragment with FCN = 2^N - 1 (last fragment carrying an IPv6 packet) is only given by the last bit of the corresponding bitmap. Absence of the bitmap in an ACK confirms correct reception of all fragments to be acknowledged by means of the ACK. Note that absence of the bitmap in an ACK may be determined based on the size of the L2 payload. !&#8211;</p>
 <p><a href="#Fig-Bitmap-Win" class="xref">Figure 12</a> shows an example of an ACK (N=3), where the bitmap indicates that the second and the fifth fragments have not been correctly received.</p>
 <div id="rfc.figure.12"></div>
 <div id="Fig-Bitmap-Win"></div>
 <pre>
               &lt;-------   R  -------&gt;
-                          &lt;- T -&gt;   0 1 2 3 4 5 6 7
-              +---- ... --+-... -+-+-+-+-+-+-+-+-+-+
-              |  Rule ID  | DTag |W|1|0|1|1|0|1|1|1|
-              +---- ... --+-... -+-+-+-+-+-+-+-+-+-+
+                          &lt;- T -&gt; 1 0 1 2 3 4 5 6 7
+              +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-----+-----+
+              |  Rule ID  | DTag |W|1|0|1|1|0|1|1|1|all-0|all-1|    TODO
+              +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-----+-----+
 
 </pre>
 <p class="figure">Figure 12: Example of the bitmap in an ACK (in Window mode, for N=3)</p>
@@ -920,11 +911,54 @@ address {
 
 </pre>
 <p class="figure">Figure 13: Example of an ACK without a bitmap</p>
-<p id="rfc.section.5.4.3.p.8">Note that, in order to exploit the available L2 payload space to the fullest, a bitmap may have a size smaller than 2^N bits. In that case, the window in use will have a size lower than 2^N-1 fragments. For example, if the maximum available space for a bitmap is 56 bits, N can be set to 6, and the window size can be set to a maximum of 56 fragments, thus MAX_WIND_FCN will be equal to 55 in this example.</p>
+<h1 id="rfc.section.5.4.4">
+<a href="#rfc.section.5.4.4">5.4.4.</a> <a href="#all-1-and-all-0-formats" id="all-1-and-all-0-formats">All-1 and All-0 formats</a>
+</h1>
+<div id="rfc.figure.14"></div>
+<div id="Fig-All0"></div>
+<pre>
+              &lt;------------ R ------------&gt;
+                         &lt;- T -&gt; 1 &lt;- N -&gt; &lt;---- M -----&gt;
+              +-- ... --+- ... -+-+- ... -+---- ... ----+
+              | Rule ID | DTag  |W|  0..0 |     MIC     |  TODO
+              +-- ... --+- ... -+-+- ... -+---- ... ----+
+</pre>
+<p class="figure">Figure 14: All-0 format fragment</p>
+<div id="rfc.figure.15"></div>
+<div id="Fig-All1"></div>
+<pre>
+              &lt;------------ R ------------&gt;
+                         &lt;- T -&gt; 1 &lt;- N -&gt; &lt;---- M -----&gt;
+              +-- ... --+- ... -+-+- ... -+---- ... ----+
+              | Rule ID | DTag  |W|  1..1 |     MIC     |  TODO (no data)
+              +-- ... --+- ... -+-+- ... -+---- ... ----+
+</pre>
+<p class="figure">Figure 15: All-1 for Retransmission format fragment</p>
+<div id="rfc.figure.16"></div>
+<div id="Fig-All1Abort"></div>
+<pre>
+              &lt;------------ R ------------&gt;
+                         &lt;- T -&gt; 1 &lt;- N -&gt; 
+              +-- ... --+- ... -+-+- ... -+
+              | Rule ID | DTag  |W| 11..1 | TODO (no MIC and no data)
+              +-- ... --+- ... -+-+- ... -+
+</pre>
+<p class="figure">Figure 16: All-1 for Abort format fragment</p>
+<div id="rfc.figure.17"></div>
+<div id="Fig-ACKabort"></div>
+<pre>
+             &lt;----- Complete Octet ------&gt;&lt;--- 1 octet---&gt;
+             &lt;-------   R  -------&gt;
+                          &lt;- T -&gt; 1  
+              +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+-+-+
+              |  Rule ID  | DTag |W| 1..1|      FF       |  TODO
+              +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+-+-+
+</pre>
+<p class="figure">Figure 17: ACK Abort format fragment</p>
 <h1 id="rfc.section.5.5">
 <a href="#rfc.section.5.5">5.5.</a> <a href="#baseline-mechanism" id="baseline-mechanism">Baseline mechanism</a>
 </h1>
-<p id="rfc.section.5.5.p.1">The receiver needs to identify all the fragments that belong to a given IPv6 datagram. To this end, the receiver SHALL use: (1) the sender&#8217;s L2 source address (if present), (2) the destination&#8217;s L2 address (if present), (3) Rule ID and (4) DTag (the latter, if present).<br> Then, the fragment receiver may determine the fragment delivery reliability option that is used for this fragment based on the Rule ID field in that fragment.</p>
+<p id="rfc.section.5.5.p.1">The receiver needs to identify all the fragments that belong to a given IPv6 datagram. To this end, the receiver SHALL use: * (1) the sender&#8217;s L2 source address (if present), * (2) the destination&#8217;s L2 address (if present), * (3) Rule ID and * (4) DTag (the latter, if present).<br> Then, the fragment receiver may determine the fragment delivery reliability option that is used for this fragment based on the Rule ID field in that fragment.</p>
 <p id="rfc.section.5.5.p.2">Upon receipt of a link fragment, the receiver starts constructing the original unfragmented packet.  It uses the FCN and the order of    arrival of each fragment to determine the location of the individual fragments within the original unfragmented packet. (A fragment payload may carry bytes from a SCHC compressed IPv6 header, an uncompressed IPv6 header or an IPv6 datagram data payload. An unfragmented packet could be a SCHC compressed or an uncompressed IPv6 packet.)  For example, the receiver may place the fragment payload within a payload datagram reassembly buffer at the location determined from: the FCN, the arrival order of the fragments, and the fragment payload sizes. In Window mode, the fragment receiver also uses the W bit in the received fragments. Note that the size of the original, unfragmented packet cannot be determined from fragmentation headers.</p>
 <p id="rfc.section.5.5.p.3">When Window mode - ACK on error is used, the fragment receiver starts a timer (denoted &#8220;ACK on Error Timer&#8221;) upon reception of the first fragment.  The initial value for this timer is not provided by this specification, and is expected to be defined in additional documents.  This timer is reset and restarted every time that a new fragment carrying data from the same datagram is received. In Window mode &#8211; ACK on error, after reception of the last fragment of a window (i.e. the fragment with FCN=0 or FCN=2^N-1), if fragment losses have been detected by the fragment receiver in the current window, the fragment receiver MUST transmit an ACK reporting its available information with regard to successfully received and missing fragments from the current window.  Upon expiration of the &#8220;ACK on Error Timer&#8221;, an ACK MUST be transmitted by the fragment receiver to report received and not received fragments for the current window. The &#8220;ACK on Error Timer&#8221; is then reset and restarted. When the last fragment of the datagram is received, if all fragments of that last window of the packet have been received, the &#8220;ACK on Error Timer&#8221; is stopped. In Window mode &#8211; ACK on error, the fragment sender retransmits any lost fragments reported in an ACK, as long as the number of retransmissions for a specific fragment does not exceed MAX_FRAG_RETRIES. The maximum number of ACKs to be sent by the receiver for a specific window, denoted MAX_ACKS_PER_WINDOW, as well as MAX_FRAG_RETRIES, are not stated in this document, and are expected to be defined in other documents (e.g. technology-specific profiles). In Window mode &#8211; ACK on error, when a fragment sender has transmitted the last fragment of a window, or it has retransmitted the last fragment within the set of lost fragments reported in an ACK, it is assumed that the time the fragment sender will wait to receive an ACK is smaller than the transmission time of MAX_WIND_FCN + 1 fragments (i.e. the time required to transmit a complete window of fragments). This aspect must be carefully considered if Window mode &#8211; ACK on error is used, in particular taking into account the latency characteristics of the underlying L2 technology.</p>
 <p id="rfc.section.5.5.p.4">Note that, in Window mode, the first fragment of the window is the one with FCN set to MAX_WIND_FCN.  Also note that, in Window mode, the fragment with FCN=0 is considered the last fragment of its window, except for the last fragment of the whole packet (with all FCN bits set to 1, i.e. FCN=2^N-1), which is also the last fragment of the last window.</p>
@@ -939,8 +973,9 @@ address {
 <h1 id="rfc.section.5.7">
 <a href="#rfc.section.5.7">5.7.</a> <a href="#aborting-fragmented-datagram-transmissions" id="aborting-fragmented-datagram-transmissions">Aborting fragmented datagram transmissions</a>
 </h1>
-<p id="rfc.section.5.7.p.1">For several reasons, a fragment sender or a fragment receiver may want to abort the on-going transmission of one or several fragmented IPv6 datagrams. The entity (either the fragment sender or the fragment receiver) that triggers abortion transmits to the other endpoint a data unit with an L2 payload that only comprises a Rule ID (of size R bits), which signals abortion of all on-going fragmented packet transmissions. The specific value to be used for the Rule ID of this abortion signal is not defined in this document, and is expected to be defined in future documents.</p>
-<p id="rfc.section.5.7.p.2">Upon transmission or reception of the abortion signal, both entities MUST release any resources allocated for the fragmented datagram transmissions being aborted.</p>
+<p id="rfc.section.5.7.p.1">For several reasons, a fragment sender or a fragment receiver may want to abort the on-going transmission of one or several fragmented IPv6 datagrams. If the sender is triggering the abort signal the All-1</p>
+<p id="rfc.section.5.7.p.2">The entity (either the fragment sender or the fragment receiver) that triggers abortion transmits to the other endpoint a data unit with an L2 payload that only comprises a Rule ID (of size R bits), which signals abortion of all on-going fragmented packet transmissions. The specific value to be used for the Rule ID of this abortion signal is not defined in this document, and is expected to be defined in future documents.</p>
+<p id="rfc.section.5.7.p.3">Upon transmission or reception of the abortion signal, both entities MUST release any resources allocated for the fragmented datagram transmissions being aborted.</p>
 <h1 id="rfc.section.5.8">
 <a href="#rfc.section.5.8">5.8.</a> <a href="#downlink-fragment-transmission" id="downlink-fragment-transmission">Downlink fragment transmission</a>
 </h1>
@@ -952,8 +987,8 @@ address {
 <h1 id="rfc.section.5.9.1">
 <a href="#rfc.section.5.9.1">5.9.1.</a> <a href="#no-ack-mode" id="no-ack-mode">No ACK Mode</a>
 </h1>
-<p id="rfc.section.5.9.1.p.1">In the No ACK mode there is no feedback communication. The sender will send the fragments until the last one whithout any possibility to know if there were an error or lost. As there is not any control one bit FCN is used, where FCN all-0 will be sent for all the fragments except the last one which will use FCN to all-1 and will send the MIC. <a href="#Fig-NoACKModeSnd" class="xref">Figure 14</a> shows the state machine for the sender.</p>
-<div id="rfc.figure.14"></div>
+<p id="rfc.section.5.9.1.p.1">In the No ACK mode there is no feedback communication. The sender will send the fragments until the last one whithout any possibility to know if there were an error or lost. As there is not any control one bit FCN is used, where FCN all-0 will be sent for all the fragments except the last one which will use FCN to all-1 and will send the MIC. <a href="#Fig-NoACKModeSnd" class="xref">Figure 18</a> shows the state machine for the sender.</p>
+<div id="rfc.figure.18"></div>
 <div id="Fig-NoACKModeSnd"></div>
 <pre>
              +-----------+
@@ -974,9 +1009,9 @@ address {
            |    END     |                                             
            +------------+                       
 </pre>
-<p class="figure">Figure 14: Sender State Machine for the No ACK Mode</p>
-<p id="rfc.section.5.9.1.p.2">The receiver waits for fragments and will set a timer in order to see if there is no missing fragments. The No ACK mode will use the MIC contained in the last fragment to check error. The FCN is set to all-1 for the last fragment. <a href="#Fig-NoACKModeRcv" class="xref">Figure 15</a> shows the state machine for the receiver. When the Timer expires or when the check of MIC gives an error it will abort the communication and go to error state, all the fragments will be dropped. The Inactivity Timer will be based on the LPWAN technology and will be defined in the specific technology document.</p>
-<div id="rfc.figure.15"></div>
+<p class="figure">Figure 18: Sender State Machine for the No ACK Mode</p>
+<p id="rfc.section.5.9.1.p.2">The receiver waits for fragments and will set a timer in order to see if there is no missing fragments. The No ACK mode will use the MIC contained in the last fragment to check error. The FCN is set to all-1 for the last fragment. <a href="#Fig-NoACKModeRcv" class="xref">Figure 19</a> shows the state machine for the receiver. When the Timer expires or when the check of MIC gives an error it will abort the communication and go to error state, all the fragments will be dropped. The Inactivity Timer will be based on the LPWAN technology and will be defined in the specific technology document.</p>
+<div id="rfc.figure.19"></div>
 <div id="Fig-NoACKModeRcv"></div>
 <pre>
                       +------+ Not All-1
@@ -994,19 +1029,19 @@ address {
                        +-----------+ 
                                            
 </pre>
-<p class="figure">Figure 15: Receiver State Machine for the No ACK Mode</p>
+<p class="figure">Figure 19: Receiver State Machine for the No ACK Mode</p>
 <h1 id="rfc.section.5.9.2">
 <a href="#rfc.section.5.9.2">5.9.2.</a> <a href="#the-window-modes" id="the-window-modes">The Window modes</a>
 </h1>
 <p id="rfc.section.5.9.2.p.1">The jumping window protocol is using two windows alternatively 0 and 1.  The FCN to all-0 fragment means that the window is over and allows to switch from one window to another. The FCN to all-1 fragment indicates that it is the last fragment and there will not be another window.</p>
 <p id="rfc.section.5.9.2.p.2">In all the cases, the sender may not have to send all the fragments contained in the window. To ease FN (fragment number) reconstruction from FCN, it is recommended to send sequentially all the fragments on a window and for all non-terminating window to fill entirely the window.</p>
-<p id="rfc.section.5.9.2.p.3">The receiver generates the bitmap which may have the size of a single frame based on the size of downlink frame of the LPWAN technology used. When the bitmap cannot be sent in one frame or for the last window, then first the FCN should be set to the lowest possible value.</p>
-<p id="rfc.section.5.9.2.p.4">FCN set to All-1 and All-0 fragments are set to the right-most position on the bitmap. Highest FCN is set to the left-most position. A bit set to 1 indicates that the corresponding FCN fragment has been sent (All-1 is set to All-0 position).</p>
+<p id="rfc.section.5.9.2.p.3">The receiver generates the bitmap which may have the size of a single frame based on the size of downlink frame of the LPWAN technology used. When the bitmap cannot be sent in one frame or for the last window,</p>
+<p id="rfc.section.5.9.2.p.4">, then first the FCN should be set to the lowest possible value.</p>
 <p id="rfc.section.5.9.2.p.5">The Window mode has two different mode of operation: The ACK on error and the ACK always.</p>
 <h1 id="rfc.section.5.9.3">
 <a href="#rfc.section.5.9.3">5.9.3.</a> <a href="#ack-always" id="ack-always">ACK Always</a>
 </h1>
-<p id="rfc.section.5.9.3.p.1">The <a href="#Fig-ACKAlwaysSnd" class="xref">Figure 16</a> finite state machine describes the sender behavior.  Intially, when a fragmented packet need to be sent, the window is set to 0, a local_bit map is set to 0, and FCN is set the the highest possible value depending on the number of fragment that will be sent in the window (INIT STATE).</p>
+<p id="rfc.section.5.9.3.p.1">The <a href="#Fig-ACKAlwaysSnd" class="xref">Figure 20</a> finite state machine describes the sender behavior.  Intially, when a fragmented packet need to be sent, the window is set to 0, a local_bit map is set to 0, and FCN is set the the highest possible value depending on the number of fragment that will be sent in the window (INIT STATE).</p>
 <p id="rfc.section.5.9.3.p.2">The sender starts sending fragments (SEND STATE), the sender will indicate in the fragmentation header: the current window and the FCN number. A delay between each fragment can be added to respect regulation rules or constraints imposed by the applications. Each time a fragment is sent the FCN is decreased of one value and the bitmap is set. The send state can be leaved for different reasons (for both reasons it goes to WAIT BITMAP STATE):</p>
 <p></p>
 
@@ -1020,7 +1055,7 @@ address {
 <p id="rfc.section.5.9.3.p.7">If the window number on the received bitmap is correct, the sender compares the local bitmap with the received bitmap. If they are equal all the fragments sent during the window have been well received. If at least one fragment need to be sent, the sender clear the bitmap, stop the timer and move its sending window to the next value. If no more fragments have to be sent, then the fragmented packet transmission is terminated.</p>
 <p id="rfc.section.5.9.3.p.8">If some fragments are missing (not set in the bit map) then the sender resend the missing fragments. When the retransmission is finished, it start listening to the bitmap (even if a All-0 or All-1 has not been sent during the retransmission) and returns to the waiting bitmap state.</p>
 <p id="rfc.section.5.9.3.p.9">If the local-bitmap is different from the received bitmap the counter Attemps is increased and the sender resend the missing fragments again, when a MAX_ATTEMPS is reached the sender sends an Abort and goes to error.</p>
-<div id="rfc.figure.16"></div>
+<div id="rfc.figure.20"></div>
 <div id="Fig-ACKAlwaysSnd"></div>
 <pre>
               +-------+  
@@ -1067,8 +1102,8 @@ Lcl_bitmap==recv_bitmap &amp;|   |   all missing frag sent
                            |    ERROR    |
                            +-------------+                                        
 </pre>
-<p class="figure">Figure 16: Sender State Machine for the ACK Always Mode</p>
-<p id="rfc.section.5.9.3.p.10">The <a href="#Fig-ACKAlwaysRcv" class="xref">Figure 17</a> finite state machine describes the receiver behavior. The receiver starts with window 0 as the expecting window and maintain a local_bitmap indicating which fragments it has received (all-0 and all-1 occupy the same position).</p>
+<p class="figure">Figure 20: Sender State Machine for the ACK Always Mode</p>
+<p id="rfc.section.5.9.3.p.10">The <a href="#Fig-ACKAlwaysRcv" class="xref">Figure 21</a> finite state machine describes the receiver behavior. The receiver starts with window 0 as the expecting window and maintain a local_bitmap indicating which fragments it has received (all-0 and all-1 occupy the same position).</p>
 <p id="rfc.section.5.9.3.p.11">Any fragment not belonging to the current window is discarded. Fragment belonging to the correct window are accepted, FN is computed based on the FCN value. The receiver leaves this state when receiving a:</p>
 <p></p>
 
@@ -1082,7 +1117,7 @@ Lcl_bitmap==recv_bitmap &amp;|   |   all missing frag sent
 <p id="rfc.section.5.9.3.p.16">If the receiver receives an all-0 fragment, it stays in the same state. Sender may send more one fragment per window or more. Otherwise some fragments in the window have been lost.</p>
 <p id="rfc.section.5.9.3.p.17">If the receiver receives an all-1 fragment this means that the transmission should be finished.  If the MIC is incorrect some fragments have been lost. It sends its bitmap.</p>
 <p id="rfc.section.5.9.3.p.18">In case of an incorrect MIC, the receivers wait for fragment belonging to the same window.</p>
-<div id="rfc.figure.17"></div>
+<div id="rfc.figure.21"></div>
 <div id="Fig-ACKAlwaysRcv"></div>
 <pre>
  Not All- &amp; w=expected +---+   +---+w = Not expected
@@ -1132,11 +1167,11 @@ Lcl_bitmap==recv_bitmap &amp;|   |   all missing frag sent
 +--------------------------&gt;+    END   +&lt;---------------+
                             ++--+------+                                          
 </pre>
-<p class="figure">Figure 17: Receiver State Machine for the ACK Always Mode</p>
+<p class="figure">Figure 21: Receiver State Machine for the ACK Always Mode</p>
 <h1 id="rfc.section.5.9.4">
 <a href="#rfc.section.5.9.4">5.9.4.</a> <a href="#ack-on-error" id="ack-on-error">ACK on error</a>
 </h1>
-<p id="rfc.section.5.9.4.p.1">The ACK on error sender is very similar to the ACK always sender, Intially, when a fragmented packet is sent, the window is set to 0, a local_bit map is set to 0, and FCN is set the highest possible value depending on the number of fragment that will be sent in the window. See <a href="#Fig-ACKonerrorSnd" class="xref">Figure 18</a></p>
+<p id="rfc.section.5.9.4.p.1">The ACK on error sender is very similar to the ACK always sender, Intially, when a fragmented packet is sent, the window is set to 0, a local_bit map is set to 0, and FCN is set the highest possible value depending on the number of fragment that will be sent in the window. See <a href="#Fig-ACKonerrorSnd" class="xref">Figure 22</a></p>
 <p id="rfc.section.5.9.4.p.2">The sender starts sending fragments indicating in the fragmentation header with the current window and the FCN number. A delay between each fragment can be added to respect regulation rules or constraints imposed by the applications. This state can be leaved for different reasons:</p>
 <p></p>
 
@@ -1150,7 +1185,7 @@ Lcl_bitmap==recv_bitmap &amp;|   |   all missing frag sent
 <p id="rfc.section.5.9.4.p.7">If the window number on the received bitmap is correct, the sender compare the local bitmap with the received bitmap. If they are equal all the fragments sent during the window have been well received. If at least one fragment need to be sent, the sender clear the bitmap, stop the timer and move its sending window to the next value. If no more fragments have to be sent, then the fragmented packet transmission is terminated.</p>
 <p id="rfc.section.5.9.4.p.8">If some fragments are missing (not set in the bit map) then the sender resend the missing fragments. When the retransmission is finished, it start listening to the bitmap (even if a All-0 or All-1 has not been sent during the retransmission) and returns to the waiting bitmap state.</p>
 <p id="rfc.section.5.9.4.p.9">If the local-bitmap is different from the received bitmap the counter Attemps is increased and the sender resend the missing fragments again, when a MAX_ATTEMPS is reached the sender sends an Abort and goes to error.</p>
-<div id="rfc.figure.18"></div>
+<div id="rfc.figure.22"></div>
 <div id="Fig-ACKonerrorSnd"></div>
 <pre>
                    +-------+  
@@ -1197,8 +1232,8 @@ Lcl_bitmap==recv_bitmap &amp;|   |   all missing frag sent
                                  |    ERROR   |
                                  +------------+                                      
 </pre>
-<p class="figure">Figure 18: Sender State Machine for the ACK on error Mode</p>
-<p id="rfc.section.5.9.4.p.10">Unlike the sender, the receiver for ACK on error has some differences. First we are not sending the bitmap unless there is an error or an unexpected behavior. The <a href="#Fig-ACKonerrorRcv" class="xref">Figure 19</a> finite state machine describes the receiver behavior. The receiver starts with an the expecting window and maintain a local_bitmap indicating which fragments it has received (all-0 and all-1 occupy the same position).</p>
+<p class="figure">Figure 22: Sender State Machine for the ACK on error Mode</p>
+<p id="rfc.section.5.9.4.p.10">Unlike the sender, the receiver for ACK on error has some differences. First we are not sending the bitmap unless there is an error or an unexpected behavior. The <a href="#Fig-ACKonerrorRcv" class="xref">Figure 23</a> finite state machine describes the receiver behavior. The receiver starts with an the expecting window and maintain a local_bitmap indicating which fragments it has received (all-0 and all-1 occupy the same position).</p>
 <p id="rfc.section.5.9.4.p.11">Any fragment not belonging to the current window is discarded. Fragment belonging to the correct window are accepted, FN is computed based on the FCN value.  When an All-0 fragment is received and the bitmap is full the receiver changes the window value and clear the bitmap. The receiver leaves this state when receiving a:</p>
 <p></p>
 
@@ -1210,7 +1245,7 @@ Lcl_bitmap==recv_bitmap &amp;|   |   all missing frag sent
 <p id="rfc.section.5.9.4.p.14">If the receiver receives an all-0 fragment, it stays in the same state. Sender may send more one fragment per window or more. Otherwise some fragments in the window have been lost.</p>
 <p id="rfc.section.5.9.4.p.15">If the receiver receives an all-1 fragment this means that the transmission should be finished.  If the MIC is incorrect some fragments have been lost. It sends its bitmap.</p>
 <p id="rfc.section.5.9.4.p.16">In case of an incorrect MIC, the receivers wait for fragment belonging to the same window.</p>
-<div id="rfc.figure.19"></div>
+<div id="rfc.figure.23"></div>
 <div id="Fig-ACKonerrorRcv"></div>
 <pre>
    Not All- &amp; w=expected +---+   +---+w = Not expected
@@ -1258,7 +1293,7 @@ Lcl_bitmap==recv_bitmap &amp;|   |   all missing frag sent
 +----------------------------&gt;+     END    +&lt;----------+
                               +------------+                              
 </pre>
-<p class="figure">Figure 19: Receiver State Machine for the ACK on error Mode</p>
+<p class="figure">Figure 23: Receiver State Machine for the ACK on error Mode</p>
 <h1 id="rfc.section.6">
 <a href="#rfc.section.6">6.</a> <a href="#schc-compression-for-ipv6-and-udp-headers" id="schc-compression-for-ipv6-and-udp-headers">SCHC Compression for IPv6 and UDP headers</a>
 </h1>
@@ -1404,8 +1439,8 @@ Lcl_bitmap==recv_bitmap &amp;|   |   all missing frag sent
 </h1>
 <p id="rfc.section.A.p.1">This section gives some scenarios of the compression mechanism for IPv6/UDP.  The goal is to illustrate the SCHC behavior.</p>
 <p id="rfc.section.A.p.2">The most common case using the mechanisms defined in this document will be a LPWAN Dev that embeds some applications running over CoAP. In this example, three flows are considered. The first flow is for the device management based on CoAP using Link Local IPv6 addresses and UDP ports 123 and 124 for Dev and App, respectively.  The second flow will be a CoAP server for measurements done by the Device (using ports 5683) and Global IPv6 Address prefixes alpha::IID/64 to beta::1/64.  The last flow is for legacy applications using different ports numbers, the destination IPv6 address prefix is gamma::1/64.</p>
-<p><a href="#FigStack" class="xref">Figure 20</a> presents the protocol stack for this Device. IPv6 and UDP are represented with dotted lines since these protocols are compressed on the radio link.</p>
-<div id="rfc.figure.20"></div>
+<p><a href="#FigStack" class="xref">Figure 24</a> presents the protocol stack for this Device. IPv6 and UDP are represented with dotted lines since these protocols are compressed on the radio link.</p>
+<div id="rfc.figure.24"></div>
 <div id="FigStack"></div>
 <pre>
  Management   Data
@@ -1424,9 +1459,9 @@ Lcl_bitmap==recv_bitmap &amp;|   |   all missing frag sent
          DEV or NGW
 
 </pre>
-<p class="figure">Figure 20: Simplified Protocol Stack for LP-WAN</p>
+<p class="figure">Figure 24: Simplified Protocol Stack for LP-WAN</p>
 <p id="rfc.section.A.p.4">Note that in some LPWAN technologies, only the Devs have a device ID.  Therefore, when such technologies are used, it is necessary to define statically an IID for the Link Local address for the SCHC C/D.</p>
-<div id="rfc.figure.21"></div>
+<div id="rfc.figure.25"></div>
 <div id="Fig-fields"></div>
 <pre>
 Rule 0
@@ -1500,16 +1535,16 @@ Rule 0
 
 
 </pre>
-<p class="figure">Figure 21: Context rules</p>
-<p id="rfc.section.A.p.5">All the fields described in the three rules depicted on <a href="#Fig-fields" class="xref">Figure 21</a> are present in the IPv6 and UDP headers.  The DEViid-DID value is found in the L2 header.</p>
+<p class="figure">Figure 25: Context rules</p>
+<p id="rfc.section.A.p.5">All the fields described in the three rules depicted on <a href="#Fig-fields" class="xref">Figure 25</a> are present in the IPv6 and UDP headers.  The DEViid-DID value is found in the L2 header.</p>
 <p id="rfc.section.A.p.6">The second and third rules use global addresses. The way the Dev learns the prefix is not in the scope of the document.</p>
 <p id="rfc.section.A.p.7">The third rule compresses port numbers to 4 bits.</p>
 <h1 id="rfc.appendix.B">
 <a href="#rfc.appendix.B">Appendix B.</a> <a href="#fragmentation-examples" id="fragmentation-examples">Fragmentation Examples</a>
 </h1>
 <p id="rfc.section.B.p.1">This section provides examples of different fragment delivery reliability options possible on the basis of this specification.</p>
-<p><a href="#Fig-Example-Unreliable" class="xref">Figure 22</a> illustrates the transmission of an IPv6 packet that needs 11 fragments in the No ACK option, FCN is always 1 bit.</p>
-<div id="rfc.figure.22"></div>
+<p><a href="#Fig-Example-Unreliable" class="xref">Figure 26</a> illustrates the transmission of an IPv6 packet that needs 11 fragments in the No ACK option, FCN is always 1 bit.</p>
+<div id="rfc.figure.26"></div>
 <div id="Fig-Example-Unreliable"></div>
 <pre>
  &#160; &#160; &#160; &#160;Sender &#160; &#160; &#160; &#160; &#160; &#160; &#160; Receiver
@@ -1526,9 +1561,9 @@ Rule 0
           |-------FCN=1--------&gt;|MIC checked =&gt;
  &#160; &#160; &#160; &#160; 
 </pre>
-<p class="figure">Figure 22: Transmission of an IPv6 packet carried by 11 fragments in the No ACK option</p>
-<p><a href="#Fig-Example-Win-NoLoss-NACK" class="xref">Figure 23</a> illustrates the transmission of an IPv6 packet that needs 11 fragments in Window mode - ACK on error, for N=3, without losses.</p>
-<div id="rfc.figure.23"></div>
+<p class="figure">Figure 26: Transmission of an IPv6 packet carried by 11 fragments in the No ACK option</p>
+<p><a href="#Fig-Example-Win-NoLoss-NACK" class="xref">Figure 27</a> illustrates the transmission of an IPv6 packet that needs 11 fragments in Window mode - ACK on error, for N=3, without losses.</p>
+<div id="rfc.figure.27"></div>
 <div id="Fig-Example-Win-NoLoss-NACK"></div>
 <pre>
  &#160; &#160; &#160; &#160;Sender &#160; &#160; &#160; &#160; &#160; &#160; &#160; Receiver
@@ -1547,9 +1582,9 @@ Rule 0
       (no ACK)
 
 </pre>
-<p class="figure">Figure 23: Transmission of an IPv6 packet carried by 11 fragments in Window mode - ACK on error, for N=3 and MAX_WIND_FCN=6, without losses.</p>
-<p><a href="#Fig-Example-Rel-Window-NACK-Loss" class="xref">Figure 24</a> illustrates the transmission of an IPv6 packet that needs 11 fragments in Window mode - ACK on error, for N=3, with three losses.</p>
-<div id="rfc.figure.24"></div>
+<p class="figure">Figure 27: Transmission of an IPv6 packet carried by 11 fragments in Window mode - ACK on error, for N=3 and MAX_WIND_FCN=6, without losses.</p>
+<p><a href="#Fig-Example-Rel-Window-NACK-Loss" class="xref">Figure 28</a> illustrates the transmission of an IPv6 packet that needs 11 fragments in Window mode - ACK on error, for N=3, with three losses.</p>
+<div id="rfc.figure.28"></div>
 <div id="Fig-Example-Rel-Window-NACK-Loss"></div>
 <pre>
  &#160; &#160; &#160; &#160; Sender &#160; &#160; &#160; &#160; &#160; &#160; Receiver
@@ -1573,9 +1608,9 @@ Rule 0
       (no ACK)    
 
 </pre>
-<p class="figure">Figure 24: Transmission of an IPv6 packet carried by 11 fragments in Window mode - ACK on error, for N=3 and MAX_WIND_FCN=6, three losses.</p>
-<p><a href="#Fig-Example-Rel-Window-ACK-NoLoss" class="xref">Figure 25</a> illustrates the transmission of an IPv6 packet that needs 11 fragments in Window mode - ACK &#8220;always&#8221;, for N=3 and MAX_WIND_FCN=6, without losses. Note: in Window mode, an additional bit will be needed to number windows.</p>
-<div id="rfc.figure.25"></div>
+<p class="figure">Figure 28: Transmission of an IPv6 packet carried by 11 fragments in Window mode - ACK on error, for N=3 and MAX_WIND_FCN=6, three losses.</p>
+<p><a href="#Fig-Example-Rel-Window-ACK-NoLoss" class="xref">Figure 29</a> illustrates the transmission of an IPv6 packet that needs 11 fragments in Window mode - ACK &#8220;always&#8221;, for N=3 and MAX_WIND_FCN=6, without losses. Note: in Window mode, an additional bit will be needed to number windows.</p>
+<div id="rfc.figure.29"></div>
 <div id="Fig-Example-Rel-Window-ACK-NoLoss"></div>
 <pre>
  &#160; &#160; &#160; &#160;Sender &#160; &#160; &#160; &#160; &#160; &#160; &#160; Receiver
@@ -1595,9 +1630,9 @@ Rule 0
         (End)    
 
 </pre>
-<p class="figure">Figure 25: Transmission of an IPv6 packet carried by 11 fragments in Window mode - ACK "always", for N=3 and MAX_WIND_FCN=6, no losses.</p>
-<p><a href="#Fig-Example-Rel-Window-ACK-Loss" class="xref">Figure 26</a> illustrates the transmission of an IPv6 packet that needs 11 fragments in Window mode - ACK &#8220;always&#8221;, for N=3 and MAX_WIND_FCN=6, with three losses.</p>
-<div id="rfc.figure.26"></div>
+<p class="figure">Figure 29: Transmission of an IPv6 packet carried by 11 fragments in Window mode - ACK "always", for N=3 and MAX_WIND_FCN=6, no losses.</p>
+<p><a href="#Fig-Example-Rel-Window-ACK-Loss" class="xref">Figure 30</a> illustrates the transmission of an IPv6 packet that needs 11 fragments in Window mode - ACK &#8220;always&#8221;, for N=3 and MAX_WIND_FCN=6, with three losses.</p>
+<div id="rfc.figure.30"></div>
 <div id="Fig-Example-Rel-Window-ACK-Loss"></div>
 <pre>
  &#160; &#160; &#160; &#160;Sender &#160; &#160; &#160; &#160; &#160; &#160; &#160; Receiver
@@ -1622,9 +1657,9 @@ Rule 0
         (End)    
 
 </pre>
-<p class="figure">Figure 26: Transmission of an IPv6 packet carried by 11 fragments in Window mode - ACK "Always", for N=3, and MAX_WIND_FCN=6, with three losses.</p>
-<p><a href="#Fig-Example-Rel-Window-ACK-Loss-Last-A" class="xref">Figure 27</a> illustrates the transmission of an IPv6 packet that needs 6 fragments in Window mode - ACK &#8220;always&#8221;, for N=3 and MAX_WIND_FCN=6, with three losses, and only one retry is needed for each lost fragment. Note that, since a single window is needed for transmission of the IPv6 packet in this case, the example illustrates behavior when losses happen in the last window.</p>
-<div id="rfc.figure.27"></div>
+<p class="figure">Figure 30: Transmission of an IPv6 packet carried by 11 fragments in Window mode - ACK "Always", for N=3, and MAX_WIND_FCN=6, with three losses.</p>
+<p><a href="#Fig-Example-Rel-Window-ACK-Loss-Last-A" class="xref">Figure 31</a> illustrates the transmission of an IPv6 packet that needs 6 fragments in Window mode - ACK &#8220;always&#8221;, for N=3 and MAX_WIND_FCN=6, with three losses, and only one retry is needed for each lost fragment. Note that, since a single window is needed for transmission of the IPv6 packet in this case, the example illustrates behavior when losses happen in the last window.</p>
+<div id="rfc.figure.31"></div>
 <div id="Fig-Example-Rel-Window-ACK-Loss-Last-A"></div>
 <pre>
           Sender                Receiver
@@ -1641,9 +1676,9 @@ Rule 0
              |&lt;-----ACK, W=0-------|no bitmap
            (End) 
 </pre>
-<p class="figure">Figure 27: Transmission of an IPv6 packet carried by 11 fragments in Window mode - ACK "Always", for N=3, and MAX_WIND_FCN=6, with three losses, and only one retry is needed for each lost fragment.</p>
-<p><a href="#Fig-Example-Rel-Window-ACK-Loss-Last-B" class="xref">Figure 28</a> illustrates the transmission of an IPv6 packet that needs 6 fragments in Window mode - ACK &#8220;always&#8221;, for N=3 and MAX_WIND_FCN=6, with three losses, and the second ACK is lost. Note that, since a single window is needed for transmission of the IPv6 packet in this case, the example illustrates behavior when losses happen in the last window.</p>
-<div id="rfc.figure.28"></div>
+<p class="figure">Figure 31: Transmission of an IPv6 packet carried by 11 fragments in Window mode - ACK "Always", for N=3, and MAX_WIND_FCN=6, with three losses, and only one retry is needed for each lost fragment.</p>
+<p><a href="#Fig-Example-Rel-Window-ACK-Loss-Last-B" class="xref">Figure 32</a> illustrates the transmission of an IPv6 packet that needs 6 fragments in Window mode - ACK &#8220;always&#8221;, for N=3 and MAX_WIND_FCN=6, with three losses, and the second ACK is lost. Note that, since a single window is needed for transmission of the IPv6 packet in this case, the example illustrates behavior when losses happen in the last window.</p>
+<div id="rfc.figure.32"></div>
 <div id="Fig-Example-Rel-Window-ACK-Loss-Last-B"></div>
 <pre>
           Sender                Receiver
@@ -1664,9 +1699,9 @@ Rule 0
 
            (End) 
 </pre>
-<p class="figure">Figure 28: Transmission of an IPv6 packet carried by 11 fragments in Window mode - ACK "Always", for N=3, and MAX_WIND_FCN=6, with three losses, and the second ACK is lost.</p>
-<p><a href="#Fig-Example-Rel-Window-ACK-Loss-Last-C" class="xref">Figure 29</a> illustrates the transmission of an IPv6 packet that needs 6 fragments in Window mode - ACK &#8220;always&#8221;, for N=3 and MAX_WIND_FCN=6, with three losses, and one retransmitted fragment is lost. Note that, since a single window is needed for transmission of the IPv6 packet in this case, the example illustrates behavior when losses happen in the last window.</p>
-<div id="rfc.figure.29"></div>
+<p class="figure">Figure 32: Transmission of an IPv6 packet carried by 11 fragments in Window mode - ACK "Always", for N=3, and MAX_WIND_FCN=6, with three losses, and the second ACK is lost.</p>
+<p><a href="#Fig-Example-Rel-Window-ACK-Loss-Last-C" class="xref">Figure 33</a> illustrates the transmission of an IPv6 packet that needs 6 fragments in Window mode - ACK &#8220;always&#8221;, for N=3 and MAX_WIND_FCN=6, with three losses, and one retransmitted fragment is lost. Note that, since a single window is needed for transmission of the IPv6 packet in this case, the example illustrates behavior when losses happen in the last window.</p>
+<div id="rfc.figure.33"></div>
 <div id="Fig-Example-Rel-Window-ACK-Loss-Last-C"></div>
 <pre>
            Sender                Receiver
@@ -1687,7 +1722,7 @@ Rule 0
              |&lt;-----ACK, W=0-------|no bitmap
            (End) 
 </pre>
-<p class="figure">Figure 29: Transmission of an IPv6 packet carried by 11 fragments in Window mode - ACK "Always", for N=3, and MAX_WIND_FCN=6, with three losses, and one retransmitted fragment is lost.</p>
+<p class="figure">Figure 33: Transmission of an IPv6 packet carried by 11 fragments in Window mode - ACK "Always", for N=3, and MAX_WIND_FCN=6, with three losses, and one retransmitted fragment is lost.</p>
 <p><a href="#Fig-Example-MaxWindFCN" class="xref">Appendix C</a> illustrates the transmission of an IPv6 packet that needs 28 fragments in Window mode - ACK &#8220;always&#8221;, for N=5 and MAX_WIND_FCN=23, with two losses. Note that MAX_WIND_FCN=23 may be useful when the maximum possible bitmap size, considering the maximum lower layer technology payload size and the value of R, is 3 bytes. Note also that the FCN of the last fragment of the packet is the one with FCN=31 (i.e. FCN=2^N-1 for N=5, or equivalently, all FCN bits set to 1).</p>
 <pre>
            Sender               Receiver
