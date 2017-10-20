@@ -676,10 +676,6 @@ indicates that the second and the fifth fragments have not been correctly receiv
 {: #Fig-Bitmap-lastWin title='Example of the bitmap in Window mode for the last window, for N=3)'}
 
 
-
-{{Fig-NoBitmap}} illustrates an ACK without a bitmap.
-
-
 ### All-1 and All-0 formats
 ~~~~
               <------------ R ------------>
