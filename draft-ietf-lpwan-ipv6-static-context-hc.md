@@ -673,7 +673,7 @@ indicates that the second and the fifth fragments have not been correctly receiv
               +---- ... --+-... -+-+-+-+-+-+-+-+-----+
 
 ~~~~
-{: #Fig-Bitmap-Win title='Example of the bitmap in Window mode for the last window, for N=3)'}
+{: #Fig-Bitmap-lastWin title='Example of the bitmap in Window mode for the last window, for N=3)'}
 
 
 
@@ -701,7 +701,7 @@ indicates that the second and the fifth fragments have not been correctly receiv
               | Rule ID | DTag  |W|  0..0 |   TODO
               +-- ... --+- ... -+-+- ... -+
 ~~~~
-{: #Fig-All0 title='All-0  empty format fragment'}
+{: #Fig-All0empty title='All-0  empty format fragment'}
 
 
 ~~~~
@@ -737,7 +737,7 @@ indicates that the second and the fifth fragments have not been correctly receiv
               | Rule ID | DTag  |W|  1..1 |     MIC     | (no payload)  TODO
               +-- ... --+- ... -+-+- ... -+---- ... ----+
 ~~~~
-{: #Fig-All1 title='All-1 for Retries format fragment also called All-1 empty'}
+{: #Fig-All1retries title='All-1 for Retries format fragment also called All-1 empty'}
 
 ~~~~
               <------------ R ------------>
