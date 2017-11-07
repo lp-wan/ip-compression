@@ -933,7 +933,7 @@ If the local-bitmap is different from the received bitmap the counter Attemps is
 not expected wnd |    |    bitmap      |               +------++
 ~~~~~~~~~~~~~~~~ +--->+                +---+ Timer Exp        |          
     discard frag      +--+---+---+---+-+   |~~~~~~~~~~~~~~~~~ |
-                         |   |   ^   ^     |Snd(empty)frag(0) |   
+                         |   |   ^   ^     |reSend(empty)All-*|   
                          |   |   |   |     |Set Timer         |
                          |   |   |   +-----+                  |
 Recv_window==window &    |   |   +----------------------------+   
