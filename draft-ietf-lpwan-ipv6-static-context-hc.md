@@ -511,8 +511,8 @@ This specification defines the following three fragment delivery reliability opt
    and/or missed fragments from the window of fragments.  Upon receipt
    of an ACK that informs about any lost fragments, the sender
    retransmits the lost fragments.  When an ACK is not received by the
-   fragment sender, the latter sends an all-1 empty fragment, which serves as
-   an ACK request.  The maximum number of ACK requests is
+   fragment sender, the latter sends an ACK request using the all-1 empty fragment.  
+   The maximum number of ACK requests is
    MAX_ACK_REQUESTS.  The default value of MAX_ACK_REQUESTS is not
    stated in this document, and it is expected to be defined in other
    documents (e.g. technology- specific profiles).
@@ -527,7 +527,7 @@ This specification defines the following three fragment delivery reliability opt
    assumes that all fragments covered by the ACK have been successfully
    delivered. And the receiver will abort the fragmentation.  
    In ACK-on-error, an ACK is transmitted by the fragment
-   receiver after a window of fragments has been sent, only if at least
+   receiver after a window of fragments have been sent, only if at least
    one of the fragments in the window has been lost. In this mode, the
    ACK informs the sender about received and/or missed fragments from
    the window of fragments. Upon receipt of an ACK that informs about
@@ -554,9 +554,7 @@ Examples of the different reliability options described are provided
 
 This subsection describes the different fields in the fragmentation header (see format header in {{#Fragment format}}) that are used to enable the described fragmentation functionalities and the different reliability options supported. 
 
- o  Rule ID. The Rule ID in the fragmentation header is used to identify the fragmentation mode used, and also to identify fragments from ACK and Abort frames. The Rule ID also allows to interleave non-fragmented IPv6 datagrams with fragments that carry a larger IPv6 datagram. 
-In the fragmentation header format, this field has a size of R - T - N - 1 bits when Window mode is used. In No ACK mode, the Rule ID 
-field has a size of R – T – N bits see format section {{#Fragment format}}. 
+ o  Rule ID. The Rule ID in the fragmentation header is used to identify the fragmentation mode used, and also to identify fragments from ACK and Abort frames TODO((((55555555WITH THE OPTIMIZATION THIS PART IS NOT GOOD555555555))). The Rule ID also allows to interleave non-fragmented IPv6 datagrams with fragments that carry a larger IPv6 datagram. See format section {{#Fragment format}}. 
 
  o  Fragment Compressed Number (FCN).  The FCN is included in all fragments.  This field can be understood as a truncated, 
 efficient representation of a larger-sized fragment number, and does not carry an absolute fragment number.  There are two FCN reserved values. They are used for controlling the fragmentation process. The FCN value with all the bits equal to 1 (all-1) denotes the last 
@@ -581,8 +579,7 @@ In the ACK format, DTag carries the same value as the DTag field in the fragment
 
  o  Message Integrity Check (MIC). This field, which has a size of M bits, is computed by the sender over the complete packet (i.e. a SCHC compressed or an uncompressed IPv6 packet) before fragmentation. The algorithm to be used to compute the MIC is not defined in this document, and needs to be defined in other documents (e.g. technology-specific profiles).  The MIC allows the receiver to check errors in the reassembled packet, while it also enables compressing the UDP checksum by use of SCHC compression.
 
- o  Bitmap. The bitmap is a sequence of bits included in the ACK for a given window. Each bit in the Bitmap identifies a fragment. It provides feedback on whether each fragment of the current window has been received or not. The
-FCN set to All-0 and All-1 fragments are set to the right-most position on the bitmap. Feedback for a fragment with the highest FCN value
+ o  Bitmap. The bitmap is a sequence of bits included in the ACK for a given window. Each bit in the Bitmap identifies a fragment. It provides feedback on whether each fragment of the current window has been received or not. The right-most position on the bitmap is used to set the All-0 or All-1 FCN values which control the window state. Feedback for a fragment with the highest FCN value
 is set to the left-most position in the Bitmap. In the Bitmap a bit set to 1 indicates that the corresponding FCN 
 fragment has been correctly sent and received.
 TODO
@@ -772,7 +769,7 @@ Then, the fragment receiver may determine the fragment delivery reliability opti
 
 Upon receipt of a link fragment, the receiver starts constructing the original unfragmented packet.  It uses the FCN and the order of    arrival of each fragment to determine the location of the individual fragments within the original unfragmented packet. A fragment payload may carry bytes from a SCHC compressed IPv6 header, an uncompressed IPv6 header or an IPv6 datagram data payload. An unfragmented packet could be a SCHC compressed or an uncompressed IPv6 packet (header and data).  For example, the receiver may place the fragment payload within a payload datagram reassembly buffer at the location determined from: the FCN, the arrival order of the fragments, and the fragment payload sizes. In Window mode, the fragment receiver also uses the W bit in the received fragments. Note that the size of the original, unfragmented packet cannot be determined from fragmentation headers.
 
-In Window mode, the first fragment of a window is the one with FCN set to MAX_WIND_FCN.  Also note that, in Window mode, a fragment with all-0 format is considered the last fragment of this window, except for the last fragment of the whole packet in the last window which will have the all-1 format fragment, which is also the last fragment of the last window.
+In Window mode, the first fragment of a window is the one with FCN set to highest possible value depending on the FCN number of bits but not All-1 value.  Also note that, in Window mode, a fragment with all-0 format is considered the last fragment of this window, except for the last fragment of the whole packet in the last window which will have the all-1 format fragment, which is also the last fragment of the last window.
 
 If the recipient receives the last fragment of a datagram (all-1), it checks for the integrity of the reassembled datagram, based on the MIC received. In No ACK, if the integrity check indicates that the reassembled datagram does not match the original datagram (prior to fragmentation), the reassembled datagram MUST be discarded. In Window mode, a MIC check is also performed by the fragment receiver after reception of each subsequent fragment retransmitted after the first MIC check. In ACK always, if a MIC check indicates that the datagram has been successfully reassembled, the fragment receiver sends an ACK without a bitmap to the fragment sender. 
 
@@ -877,8 +874,7 @@ of fragments that will be sent in the window (INIT STATE).
 
 The sender starts sending fragments (SEND STATE), the sender will indicate in the fragmentation header: the current
 window (W bit) and the FCN fragment number. A delay between each fragment can be added to respect regulation
-rules or constraints imposed by the applications. Each time a fragment is sent the FCN is decreased by one and the bitmap is set locally. The SEND STATE can be left for two different
-reasons (for both of them, the next state is WAIT BITMAP STATE):
+rules or constraints imposed by the applications. Each time a fragment is sent the FCN is decreased by one and the bitmap is set locally. The SEND STATE is left always for the WAIT BITMAP STATE, in the following two cases:
 
 * The FCN reaches value 0 and there are more fragments to be sent. In that case, an all-0 fragmet is sent and the timer is set. The sender will wait for
 the ACK sent by the receiver.
@@ -955,7 +951,7 @@ Lcl_bitmap==recv_bitmap &|   |   all missing frag sent
 {: #Fig-ACKAlwaysSnd title='Sender State Machine for the ACK Always Mode'}
 
 The {{Fig-ACKAlwaysRcv}} finite state machine describes the receiver behavior. The receiver starts with window 0 as the expecting window and maintain a local_bitmap 
-indicating which fragments it has received (all-0 and all-1 occupy the same position).
+indicating which fragments it has received (All-0 and All-1 occupy the same position).
 
 Any fragment not belonging to the current window is discarded. Fragment belonging to the 
 correct window are accepted, FN is computed based on the FCN value. The receiver leaves
