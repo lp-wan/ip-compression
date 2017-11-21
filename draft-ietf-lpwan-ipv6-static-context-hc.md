@@ -552,9 +552,9 @@ Examples of the different reliability options described are provided
 
 ## Functionalities
 
-This subsection describes the different fields in the fragmentation header (see format header in {{#Fragment format}}) that are used to enable the described fragmentation functionalities and the different reliability options supported. 
+This subsection describes the different fields in the fragmentation header (see format header in {{###Fragment format}}) that are used to enable the described fragmentation functionalities and the different reliability options supported. 
 
- o  Rule ID. The Rule ID in the fragmentation header is used to identify the fragmentation mode used, and also to identify fragments from ACK and Abort frames TODO((((55555555WITH THE OPTIMIZATION THIS PART IS NOT GOOD555555555))). The Rule ID also allows to interleave non-fragmented IPv6 datagrams with fragments that carry a larger IPv6 datagram. See format section {{#Fragment format}}. 
+ o  Rule ID. The Rule ID in the fragmentation header is used to identify the fragmentation mode used, and also to identify fragments from ACK and Abort frames TODO((((55555555WITH THE OPTIMIZATION THIS PART IS NOT GOOD555555555))). The Rule ID also allows to interleave non-fragmented IPv6 datagrams with fragments that carry a larger IPv6 datagram. See format section {{###Fragment format}}. 
 
  o  Fragment Compressed Number (FCN).  The FCN is included in all fragments.  This field can be understood as a truncated, 
 efficient representation of a larger-sized fragment number, and does not carry an absolute fragment number.  There are two FCN reserved values. They are used for controlling the fragmentation process. The FCN value with all the bits equal to 1 (all-1) denotes the last 
@@ -802,7 +802,7 @@ In some LPWAN technologies, as part of energy-saving techniques, downlink transm
 The fragmentation is based on the FCN value, which has a length of N bits. The All-1 and All-0 values are reserved, and are used to control the fragmentation transmission. The FCN will be sent in downwards position this means from larger to smaller and the number of bits depends on the implementation. The last fragment in all modes must contains a MIC which is used to check if there are error or missing fragments.
 
 ### No ACK Mode
-In the No ACK mode there is no feedback communication. The sender will send the fragments until the last one whithout any possibility to know if there were an error or a loss has occurred. As there is not a need to identify specific fragments a  one-bit FCN is used, where FCN all-0 will be sent for all fragments except the last one. The latter will carry an all-1 FCN and will send the MIC. {{Fig-NoACKModeSnd}} shows the state machine for the sender. 
+In the No ACK mode there is no feedback communication. The sender will send the fragments until the last one whithout any possibility to know if there were an error or a loss has occurred. As there is not a need to identify specific fragments a  one-bit FCN is used, where FCN all-0 will be sent for all fragments except the last one. The latter will carry an all-1 FCN and will send the MIC. The next figure shows the state machine for the sender. 
 
 ~~~~
              +-----------+
@@ -825,7 +825,8 @@ In the No ACK mode there is no feedback communication. The sender will send the 
 ~~~~
 {: #Fig-NoACKModeSnd title='Sender State Machine for the No ACK Mode'}
 
-The receiver waits for fragments and will set a timer in order to see if there is no missing fragments. The No ACK mode will use the MIC contained in the last fragment to check error. The FCN is set to all-1 for the last fragment. {{Fig-NoACKModeRcv}} shows the state machine for the receiver. When the Timer expires or when the check of MIC gives an error the receiver will abort the communication and go to error state, all the fragments will be dropped. The Inactivity Timer will be based on the LPWAN technology and will be defined in the specific technology document. 
+The receiver waits for fragments and will set a timer in order to see if there is no missing fragments. The No ACK mode will use the MIC contained in the last fragment to check error. The FCN is set to all-1 for the last fragment. 
+{{Fig-NoACKModeRcv}} shows the state machine for the receiver. When the Timer expires or when the check of MIC gives an error the receiver will abort the communication and go to error state, all the fragments will be dropped. The Inactivity Timer will be based on the LPWAN technology and will be defined in the specific technology document. 
 
 
 TODO named TIMER and the Inactivity TImer for all draft??
