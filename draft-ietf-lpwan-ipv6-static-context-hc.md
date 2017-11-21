@@ -552,9 +552,9 @@ Examples of the different reliability options described are provided
 
 ## Functionalities
 
-This subsection describes the different fields in the fragmentation header (see format header in {{###Fragment format}}) that are used to enable the described fragmentation functionalities and the different reliability options supported. 
+This subsection describes the different fields in the fragmentation header (see format header in {{#Fragmentformat}}) that are used to enable the described fragmentation functionalities and the different reliability options supported. 
 
- o  Rule ID. The Rule ID in the fragmentation header is used to identify the fragmentation mode used, and also to identify fragments from ACK and Abort frames TODO((((55555555WITH THE OPTIMIZATION THIS PART IS NOT GOOD555555555))). The Rule ID also allows to interleave non-fragmented IPv6 datagrams with fragments that carry a larger IPv6 datagram. See format section {{###Fragment format}}. 
+ o  Rule ID. The Rule ID in the fragmentation header is used to identify the fragmentation mode used, and also to identify fragments from ACK and Abort frames TODO((((55555555WITH THE OPTIMIZATION THIS PART IS NOT GOOD555555555))). The Rule ID also allows to interleave non-fragmented IPv6 datagrams with fragments that carry a larger IPv6 datagram. See format section {{#Fragment format}}. 
 
  o  Fragment Compressed Number (FCN).  The FCN is included in all fragments.  This field can be understood as a truncated, 
 efficient representation of a larger-sized fragment number, and does not carry an absolute fragment number.  There are two FCN reserved values. They are used for controlling the fragmentation process. The FCN value with all the bits equal to 1 (all-1) denotes the last 
@@ -589,7 +589,7 @@ TODO
 
 This section defines the fragment format, the fragmentation header formats, and the ACK format.
 
-### Fragment format {Fragment format}
+### Fragment format {#Fragmentformat}
 
    A fragment comprises a fragmentation header and a fragment payload, and conforms
    to the format shown in {{Fig-FragFormat}}. The fragment payload carries a subset of either a SCHC header 
