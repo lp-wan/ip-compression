@@ -826,10 +826,12 @@ In the No ACK mode there is no feedback communication. The sender will send the 
 {: #Fig-NoACKModeSnd title='Sender State Machine for the No ACK Mode'}
 
 The receiver waits for fragments and will set a timer in order to see if there is no missing fragments. The No ACK mode will use the MIC contained in the last fragment to check error. The FCN is set to all-1 for the last fragment. 
-({{Fig-NoACKModeRcv}}) shows the state machine for the receiver. When the Timer expires or when the check of MIC gives an error the receiver will abort the communication and go to error state, all the fragments will be dropped. The Inactivity Timer will be based on the LPWAN technology and will be defined in the specific technology document. 
+{{Fig-NoACKModeRcv}} shows the state machine for the receiver. When the Timer expires or when the check of MIC gives an error the receiver will abort the communication and go to error state, all the fragments will be dropped. The Inactivity Timer will be based on the LPWAN technology and will be defined in the specific technology document. 
 
 
 TODO named TIMER and the Inactivity TImer for all draft??
+
+
 ~~~~
                       +------+ Not All-1
            +----------+-+    | ~~~~~~~~~~~~~~~~~~~
@@ -847,6 +849,8 @@ TODO named TIMER and the Inactivity TImer for all draft??
                                            
 ~~~~
 {: #Fig-NoACKModeRcv title='Receiver State Machine for the No ACK Mode'}
+
+
 
 
 ### The Window modes 
