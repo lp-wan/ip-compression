@@ -585,6 +585,8 @@ fragment has been correctly sent and received.
 TODO
 (it is missing to explain the optimization of bitmap in order to have a way to send an abort)
 
+
+
 ## Formats
 
 This section defines the fragment format, the fragmentation header formats, and the ACK format.
@@ -635,7 +637,7 @@ In any of the Window mode options, fragments except the last one SHALL contain t
    
 ### ACK format
 
-The format of an ACK is shown in {{Fig-ACK-Format}}:
+The format of an ACK is shown in {{Fig-ACK-Format}} to acknowledge All-0 windows.
 
 ~~~~
                 <--------  R  ------->
@@ -644,8 +646,26 @@ The format of an ACK is shown in {{Fig-ACK-Format}}:
                 |  Rule ID  | DTag |W|   bitmap    |
                 +---- ... --+-... -+-+----- ... ---+
 ~~~~
-{: #Fig-ACK-Format title='Format of an ACK'}
+{: #Fig-ACK-Format title='Format of an ACK for All-0 windows'}
 
+To acknowledge the last windw (All-1 window), a MIC bit following the W bit is set
+to one to indicate that the MIC has been corectly computed by the receiver. If the MIC 
+is not correct, this MIC bit is set to 0 and the bitmap follow.
+
+~~~~
+    <--------  R  -------> 
+                <- T -> 1  1 MIC
+    +---- ... --+-... -+-+---+
+    |  Rule ID  | DTag |W| 1 | (MIC correct)
+    +---- ... --+-... -+-+---+
+                
+    +---- ... --+-... -+-+---+----- ... ---+
+    |  Rule ID  | DTag |W| 0 |   bitmap    | (MIC Incorrect)
+    +---- ... --+-... -+-+---+----- ... ---+
+                
+                
+~~~~
+{: #Fig-ACK-Format title='Format of an ACK for All-1 windows'}
 
    
 {{Fig-Bitmap-Win}} shows an example of an ACK (N=3), where the bitmap
@@ -654,22 +674,53 @@ indicates that the second and the fifth fragments have not been correctly receiv
 ~~~~                                                  
     <-------   R  ------->6 5 4 3 2 1   0 (FCN values indicating the order)
                 <- T -> 1     
-    +---- ... --+-... -+-+-+-+-+-+-+-+-----+
-    |  Rule ID  | DTag |W|1|0|1|1|0|1|all-0|   TODO
-    +---- ... --+-... -+-+-+-+-+-+-+-+-----+
+    +---- ... --+-... -+-+-+-+-+-+-+-+-----+-------+
+    |  Rule ID  | DTag |W|1|0|1|1|0|1|all-0|padding|  
+    +---- ... --+-... -+-+-+-+-+-+-+-+-----+-------+
 
 ~~~~
 {: #Fig-Bitmap-Win title='Example of the bitmap in Window mode, in any window except the last one, for N=3)'}
 
 ~~~~                                                  
-     <-------   R  ------->6 5 4 3 2 1   7 (FCN values indicating the order)
-                 <- T -> 1 
-     +---- ... --+-... -+-+-+-+-+-+-+-+-----+
-     |  Rule ID  | DTag |W|1|0|1|1|0|1|all-1|    TODO
-     +---- ... --+-... -+-+-+-+-+-+-+-+-----+
-
+     <-------   R  ------->    6 5 4 3 2 1   7 (FCN values indicating the order)
+                 <- T -> 1  1
+     +---- ... --+-... -+-+---+-+-+-+-+-+-+-----+-------+
+     |  Rule ID  | DTag |W| 0 |1|0|1|1|0|1|all-1|padding|   
+     +---- ... --+-... -+-+---+-+-+-+-+-+-+-----+-------+
+                           MIC bitmap
 ~~~~
 {: #Fig-Bitmap-lastWin title='Example of the bitmap in Window mode for the last window, for N=3)'}
+
+A ACK message may introcude padding at the end to aling transmitted data to a byte boundary.
+
+Bitmap sending MUST be optimized in size to reduce frame size and allow the ABORT message 
+definition. The right-most bytes with all bitmap bit set to 1 MUST be removed from the transmission.
+As the receiver knows the bitmap size, it can recontruct the value. In the example {{Fig-All-opt}} 
+the last 2 bytes of the bitmap are set to 1, therefore they are not sent.
+
+~~~~                                                  
+     <-------   R  ------->  
+                 <- T -> 1 1
+     +---- ... --+-... -+-+-+-+
+     |  Rule ID  | DTag |W|1|0|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|P|  
+     +---- ... --+-... -+-+-+-+
+     |       byte 1           |     byte  2   |     byte 3    |        
+~~~~
+{: #Fig-All-opt title='Bitmap optmized fragment format'}
+
+An exception to that optmization is used to send an ABORT message. An ABORT message 
+is a minimum size ACK message concatenated by a byte with all bit set to 1.
+
+~~~~                                                  
+     <-------   R  ------->    6 5 4 3 2 1   7 (FCN values indicating the order)
+                 <- T -> 1  1
+     +---- ... --+-... -+-+---+-+-+-+-+-+-+-+-+-+
+     |  Rule ID  | DTag |W| 0 |1|1|1|1|1|1|1|1|1| 
+     +---- ... --+-... -+-+---+-+-+-+-+-+-+-+-+-+
+     |          byte 1          |     byte 2    |      
+     
+~~~~
+{: #Fig-Abort2 title='Abort Fragment Format'}
 
 
 ### All-1 and All-0 formats
@@ -974,6 +1025,14 @@ If the MIC is incorrect some fragments have been lost. It sends its bitmap.
 
 In case of an incorrect MIC, the receivers wait for fragment belonging to the same window.
 
+
+# Padding management 
+
+SCHC header either for compression, fragmentation or acknowledgment do not preserve byte alignment. Since most of the LPWAN network payload is expressed in a number of byte, the receiver must be able to elimitate the padding bits.
+
+Padding bit elimination for compressed or fragmented frames. The header size is given by the rule and is not aligned on a byte boundary. The data size is variable, but always a multiple of 8 bits. In that case, the padding MUST never exceed 7 bits.
+
+For fragmentation acknowledgement, the header size and the bitmap size are given by the rule. The remaining bits are padding and can be of any size
 
 # SCHC Compression for IPv6 and UDP headers
 
