@@ -1770,7 +1770,7 @@ Lcl_bitmap==recv_bitmap &| |   |   all missing frag sent
    Set local_bitmap(FCN) |   v   v   |discard
                         ++---+---+---+-+
 +-----------------------+              +--+ All-0 & full 
-|                  *<---+  Rcv Window  |  | ~~~~~~~~~~~~ 
+|            ABORT *<---+  Rcv Window  |  | ~~~~~~~~~~~~ 
 |  +--------------------+              +<-+ w =next
 |  |                    +---+---+------+ clear lcl_bitmap
 |  |                        |   ^
@@ -1785,7 +1785,7 @@ Lcl_bitmap==recv_bitmap &| |   |   all missing frag sent
 |  |                        |   |  |Send abort ++-------+
 |  |                        v   |  |             ^ w=expct
 |  |                      +-+---+--+------+      | & all-1  
-|  |                 *<---+    Wait       +------+ ~~~~~~~
+|  |           ABORT *<---+    Wait       +------+ ~~~~~~~
 |  |                      | Next Window   |     Send abort
 |  |                      +-------+---+---+    
 |  |  All-1 & w=next & MIC wrong  |   |   
@@ -1796,7 +1796,7 @@ Lcl_bitmap==recv_bitmap &| |   |   all missing frag sent
 |  |                              | set lcl_bitmap(FCN)|                                    
 |  |All-1 & w=expect & MIC wrong  |                    |
 |  |~~~~~~~~~~~~~~~~~~~~~~~~~~~~  |                    |
-|  |set local_bitmap(FCN)         v                    |
+|  |set local_bitmap(FCN)         v   +--->* ABORT     |
 |  |send local_bitmap     +-------+---+--+             |
 |  +--------------------->+   Wait End   +-+           |
 |                         +-----+------+-+ | w=expct & |
@@ -1808,7 +1808,11 @@ Lcl_bitmap==recv_bitmap &| |   |   all missing frag sent
 |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ v                      |
 |set local_bitmap(FCN)        +-+----------+           |
 +---------------------------->+     END    +<----------+
-                              +------------+                              
+                              +------------+   
+            --->* Only Uplink
+                 ABORT
+                 ~~~~~~~~
+                 Inactivity_Timer = expires                                                      
 ~~~~
 {: #Fig-ACKonerrorRcv title='Receiver State Machine for the ACK on error Mode'}
 
