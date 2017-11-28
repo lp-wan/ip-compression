@@ -178,6 +178,19 @@ This section defines the terminology and acronyms used in this document.
 
 * W: Window bit. A fragmentation header field used in Window mode (see section 9), which carries the same value for all fragments of a window.
 
+* All-0. Fragmentation Packet format to send the last frame of a window.
+
+* All-1. Fragmentation Packet format to send the last frame of a packet.
+
+* All-0 empty. Fragmentation Packet format without payload to request the bitmap when the Retransmission Timer expires in a window.
+
+* All-1 empty. Fragmentation Packet format without payload to request the bitmap when the Retransmission Timer expires in the last window.
+
+* Retransmission Timer. Timer to know when the a number of attemps to receive the information has been raised
+
+* Inactivity Timer. Timer to End the state machine when there is an error and there is no possibility to continue the transmission.
+
+
 
 # Static Context Header Compression
 
@@ -490,6 +503,45 @@ LPWAN technologies impose some strict limitations on traffic, devices are sleepi
    performing reassembly.  This assumption allows to reduce complexity
    and overhead of the fragmentation mechanism.
 
+## Functionalities
+
+This subsection describes the different fields in the fragmentation header (see format header in {{Fragfor}}) that are used to enable the described fragmentation functionalities and the different reliability options supported. 
+
+ o  Rule ID. The Rule ID in the fragmentation header is used to identify the fragmentation mode used. The Rule ID also allows to interleave non-fragmented IPv6 datagrams with fragments that carry a larger IPv6 datagram. See format section {{Fragfor}}. 
+
+ o  Fragment Compressed Number (FCN).  The FCN is included in all fragments.  This field can be understood as a truncated, 
+efficient representation of a larger-sized fragment number, and does not carry an absolute fragment number.  There are two FCN reserved values. They are used for controlling the fragmentation process. The FCN value with all the bits equal to 1 (all-1) denotes the last 
+fragment of a packet.  And the FCN value with all the bits equal to 0 (all-0) denotes the last 
+fragment of a windonw (when such window is not the last one of the packet) in any window mode or the fragments in No ACK mode. The rest of the FCN values are assigned in a sequential 
+and decreasing order, which has the purpose to avoid possible ambiguity for the receiver that might arise under certain 
+conditions.
+In the fragments, this field is an unsigned integer, with a size of N bits. In the No ACK mode it is set to 1 bit (N=1). For the other reliability options it is recommended to use a number of bits (N) equal to or greater than 3. The FCN MUST be set sequentially  
+   decreasing from the highest FCN in the window (which will be used for the first fragment), and MUST wrap from 0 back to 
+   the highest FCN in the window.  
+   For windows that are not the last one  from a fragmented packet, the FCN for the last fragment in such windows is an all-0. This indicates that the window is finished and it proceeds according to the reliability option in use: either an ACK is sent or the next window of fragments are expected when there is no error.
+   The FCN for the last fragment in the last window is an all-1.  It is also 
+   important to note that, for No ACK mode or N=1, the last fragment of the packet will carry a FCN equal to 1, while all previous fragments 
+   will carry a FCN of 0.
+   
+ o  Datagram Tag (DTag). The DTag field, if present, is set to the same value for all fragments carrying the same IPv6 datagram. This field allows to interleave fragments that correspond to different IPv6 datagrams.
+In the fragment formats the size of the DTag field is T bits, which may be set to a value greater than or equal to 0 bits.  DTag MUST be set sequentially increasing from 0 to 2^T - 1, and MUST wrap back from 2^T - 1 to 0.
+In the ACK format, DTag carries the same value as the DTag field in the fragments for which this ACK is intended.
+
+ o  W (window): W is a 1-bit field. This field carries the same value for all fragments of a window, and it is complemented for the next window. The initial value for this field is 0.
+   In the ACK format, this field has a size of 1 bit. In all ACKs, the W bit carries the same value as the W bit carried by the fragments whose reception is being positively or negatively acknowledged by the ACK.
+   
+ o  C (MIC control): C is a 1-bit field. This field is used in the ACK format packets to know if the MIC check was correct or incorrect.  
+
+ o  Message Integrity Check (MIC). This field, which has a size of M bits, is computed by the sender over the complete packet (i.e. a SCHC compressed or an uncompressed IPv6 packet) before fragmentation. The algorithm to be used to compute the MIC is not defined in this document, and needs to be defined in other documents (e.g. technology-specific profiles).  The MIC allows the receiver to check errors in the reassembled packet, while it also enables compressing the UDP checksum by use of SCHC compression.
+
+ o  Bitmap. The bitmap is a sequence of bits included in the ACK for a given window. Each bit in the Bitmap identifies a fragment. It provides feedback on whether each fragment of the current window has been received or not. The right-most position on the bitmap is used to set the All-0 or All-1 FCN values which control the window state. Feedback for a fragment with the highest FCN value
+is set to the left-most position in the Bitmap. In the Bitmap a bit set to 1 indicates that the corresponding FCN 
+fragment has been correctly sent and received. However, when all the fragments have been correctly received, the receiver sends only the content until a byte boundary or until the byte boundary of the first error carried on the bitmap. 
+
+o  ABORT: When the receiver needs to abort the transmission, it uses the ACK format packet with all the bits set to 1.
+TODO
+(it is missing to explain the optimization of bitmap in order to have a way to send an abort)
+
 
 ## Reliability options
 
@@ -501,8 +553,8 @@ This specification defines the following three fragment delivery reliability opt
  o  Window mode - ACK always (ACK-always).    
    The ACK-always option provides flow control.  In
    addition, it is able to handle long bursts of lost fragments, since
-   detection of such events can be done before  the end of the IPv6 packet
-   transmission, as long as the window size is short enough.  However,
+   detection of such events can be done before the end of the IPv6 packet
+   transmission, as long as the window size is short enough. However,
    such benefit comes at the expense of ACK use.
    In ACK-always, an ACK is transmitted by the fragment
    receiver after a window of fragments have been sent.  A window of
@@ -548,43 +600,6 @@ This document does not make any decision as to which fragment
 
 Examples of the different reliability options described are provided
    in Appendix B.
-
-
-## Functionalities
-
-This subsection describes the different fields in the fragmentation header (see format header in {{Fragfor}}) that are used to enable the described fragmentation functionalities and the different reliability options supported. 
-
- o  Rule ID. The Rule ID in the fragmentation header is used to identify the fragmentation mode used, and also to identify fragments from ACK and Abort frames TODO((((55555555WITH THE OPTIMIZATION THIS PART IS NOT GOOD555555555))). The Rule ID also allows to interleave non-fragmented IPv6 datagrams with fragments that carry a larger IPv6 datagram. See format section {{Fragfor}}. 
-
- o  Fragment Compressed Number (FCN).  The FCN is included in all fragments.  This field can be understood as a truncated, 
-efficient representation of a larger-sized fragment number, and does not carry an absolute fragment number.  There are two FCN reserved values. They are used for controlling the fragmentation process. The FCN value with all the bits equal to 1 (all-1) denotes the last 
-fragment of a packet.  And the FCN value with all the bits equal to 0 (all-0) denotes the last 
-fragment of a windonw (when such window is not the last one of the packet) in any window mode or the fragments in No ACK mode. The rest of the FCN values are assigned in a sequential 
-and decreasing order, which has the purpose to avoid possible ambiguity for the receiver that might arise under certain 
-conditions.
-In the fragments, this field is an unsigned integer, with a size of N bits. In the No ACK mode it is set to 1 bit (N=1). For the other reliability options it is recommended to use a number of bits (N) equal to or greater than 3. The FCN MUST be set sequentially  
-   decreasing from the highest FCN in the window (which will be used for the first fragment), and MUST wrap from 0 back to 
-   the highest FCN in the window.  
-   For windows that are not the last one  from a fragmented packet, the FCN for the last fragment in such windows is an all-0. This indicates that the window is finished and it proceeds according to the reliability option in use: either an ACK is sent or the next window of fragments are expected when there is no error.
-   The FCN for the last fragment in the last window is an all-1.  It is also 
-   important to note that, for No ACK mode or N=1, the last fragment of the packet will carry a FCN equal to 1, while all previous fragments 
-   will carry a FCN of 0.
-   
- o  Datagram Tag (DTag). The DTag field, if present, is set to the same value for all fragments carrying the same IPv6 datagram. This field allows to interleave fragments that correspond to different IPv6 datagrams.
-In the fragment formats the size of the DTag field is T bits, which may be set to a value greater than or equal to 0 bits.  DTag MUST be set sequentially increasing from 0 to 2^T - 1, and MUST wrap back from 2^T - 1 to 0.
-In the ACK format, DTag carries the same value as the DTag field in the fragments for which this ACK is intended.
-
- o  W (window): W is a 1-bit field. This field carries the same value for all fragments of a window, and it is complemented for the next window. The initial value for this field is 0.
-   In the ACK format, this field has a size of 1 bit. In all ACKs, the W bit carries the same value as the W bit carried by the fragments whose reception is being positively or negatively acknowledged by the ACK.
-
- o  Message Integrity Check (MIC). This field, which has a size of M bits, is computed by the sender over the complete packet (i.e. a SCHC compressed or an uncompressed IPv6 packet) before fragmentation. The algorithm to be used to compute the MIC is not defined in this document, and needs to be defined in other documents (e.g. technology-specific profiles).  The MIC allows the receiver to check errors in the reassembled packet, while it also enables compressing the UDP checksum by use of SCHC compression.
-
- o  Bitmap. The bitmap is a sequence of bits included in the ACK for a given window. Each bit in the Bitmap identifies a fragment. It provides feedback on whether each fragment of the current window has been received or not. The right-most position on the bitmap is used to set the All-0 or All-1 FCN values which control the window state. Feedback for a fragment with the highest FCN value
-is set to the left-most position in the Bitmap. In the Bitmap a bit set to 1 indicates that the corresponding FCN 
-fragment has been correctly sent and received.
-TODO
-(it is missing to explain the optimization of bitmap in order to have a way to send an abort)
-
 
 
 ## Formats
@@ -654,15 +669,15 @@ is not correct, this MIC bit is set to 0 and the bitmap follow.
 
 ~~~~
     <--------  R  -------> 
-                <- T -> 1  1 MIC
-    +---- ... --+-... -+-+---+
-    |  Rule ID  | DTag |W| 1 | (MIC correct)
-    +---- ... --+-... -+-+---+
+                <- T -> 1 1
+    +---- ... --+-... -+-+-+
+    |  Rule ID  | DTag |W|1| (MIC correct)
+    +---- ... --+-... -+-+-+
                 
-    +---- ... --+-... -+-+---+----- ... ---+
-    |  Rule ID  | DTag |W| 0 |   bitmap    | (MIC Incorrect)
-    +---- ... --+-... -+-+---+----- ... ---+
-                
+    +---- ... --+-... -+-+-+----- ... ---+
+    |  Rule ID  | DTag |W|0|   bitmap    | (MIC Incorrect)
+    +---- ... --+-... -+-+-+----- ... ---+
+                          C
                 
 ~~~~
 {: #Fig-ACK-Format title='Format of an ACK for All-1 windows'}
@@ -684,10 +699,10 @@ indicates that the second and the fifth fragments have not been correctly receiv
 ~~~~                                                  
      <-------   R  ------->    6 5 4 3 2 1   7 (FCN values indicating the order)
                  <- T -> 1  1
-     +---- ... --+-... -+-+---+-+-+-+-+-+-+-----+-------+
-     |  Rule ID  | DTag |W| 0 |1|0|1|1|0|1|all-1|padding|   
-     +---- ... --+-... -+-+---+-+-+-+-+-+-+-----+-------+
-                           MIC bitmap
+     +---- ... --+-... -+-+-+-+-+-+-+-+-+-----+-------+
+     |  Rule ID  | DTag |W|0|1|0|1|1|0|1|all-1|padding|   
+     +---- ... --+-... -+-+-+-+-+-+-+-+-+-----+-------+
+                           C  bitmap
 ~~~~
 {: #Fig-Bitmap-lastWin title='Example of the bitmap in Window mode for the last window, for N=3)'}
 
@@ -699,7 +714,7 @@ As the receiver knows the bitmap size, it can recontruct the value. In the examp
 the last 2 bytes of the bitmap are set to 1, therefore they are not sent.
 
 ~~~~                                                  
-     <-------   R  ------->  
+     <-------   R  ------->C  
                  <- T -> 1 1
      +---- ... --+-... -+-+-+-+
      |  Rule ID  | DTag |W|1|0|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|P|  
@@ -712,12 +727,12 @@ An exception to that optmization is used to send an ABORT message. An ABORT mess
 is a minimum size ACK message concatenated by a byte with all bit set to 1.
 
 ~~~~                                                  
-     <-------   R  ------->    6 5 4 3 2 1   7 (FCN values indicating the order)
-                 <- T -> 1  1
-     +---- ... --+-... -+-+---+-+-+-+-+-+-+-+-+-+
-     |  Rule ID  | DTag |W| 0 |1|1|1|1|1|1|1|1|1| 
-     +---- ... --+-... -+-+---+-+-+-+-+-+-+-+-+-+
-     |          byte 1          |     byte 2    |      
+     <-------   R  ------->C 6 5 4 3 2 1   7 (FCN values indicating the order)
+                 <- T -> 1 1
+     +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+-+
+     |  Rule ID  | DTag |W|0|1|1|1|1|1|1|1|1|1| 
+     +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+-+
+     |          byte 1        |     byte 2    |      
      
 ~~~~
 {: #Fig-Abort2 title='Abort Fragment Format'}
