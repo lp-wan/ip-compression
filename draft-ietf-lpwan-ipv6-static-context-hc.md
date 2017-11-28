@@ -1618,35 +1618,35 @@ The fragmentation state machines of the sender and the receiver in the different
 |    ~~~~~~~~~~~~~~~~~~~~~ |     | ~~~~~~~~~~~~~~~
 |         set local-bitmap |     | set local-bitmap 
 |   send wnd + frag(all-0) |     | send wnd+frag(all-1)+MIC 
-|                set Timer |     | set Timer 
+|       set Retrans_Timer  |     | set Retrans_Timer 
 |                          |     | 
 |Recv_wnd == wnd &         |     |  
 |Lcl_bitmap==recv_bitmap&  |     |  +-------------------------+
 |more frag                 |     |  |local-bitmap!=rcv-bitmap |
 |~~~~~~~~~~~~~~~~~~~~~~    |     |  | ~~~~~~~~~               |
-|Stop Timer                |     |  | Attemp++                v
+|Stop Retrans_Timer        |     |  | Attemp++                v
 |clear local_bitmap        v     v  |                  +------++
 |window=next_window   +----+-----+--+--+               |Resend |
 +---------------------+                |               |Missing|
                  +----+     Wait       |               |Frag   |
 not expected wnd |    |    bitmap      |               +------++
 ~~~~~~~~~~~~~~~~ +--->+                +---+ Timer Exp        |          
-    discard frag      +--+---+---+---+-+   |~~~~~~~~~~~~~~~~~ |
-                         |   |   ^   ^     |reSend(empty)All-*|   
-                         |   |   |   |     |Set Timer         |
-                         |   |   |   +-----+                  |
-Recv_window==window &    |   |   +----------------------------+   
-Lcl_bitmap==recv_bitmap &|   |   all missing frag sent
-             no more frag|   |   ~~~~~~~~~~~~~~~~~~~~~~ 
- ~~~~~~~~~~~~~~~~~~~~~~~~|   |   Set Timer                 
-               Stop Timer|   |    
-     +-------------+     |   |
-     |             +<----+   | MAX_ATTEMPS > limit
-     |     END     |         | ~~~~~~~~~~~~~~~~~~
-     |             |         v Send Abort
-     +-------------+       +-+-----------+
-                           |    ERROR    |
-                           +-------------+                                        
+    discard frag      +--+-+---+-+---+-+   |~~~~~~~~~~~~~~~~~ |
+                         | |   | ^   ^     |reSend(empty)All-*|   
+                         | |   | |   |     |Set Retrans_Timer |
+MIC_bit==1 &             | |   | |   +-----+Attemp++          |
+Recv_window==window &    | |   | +----------------------------+   
+Lcl_bitmap==recv_bitmap &| |   |   all missing frag sent
+             no more frag| |   |   ~~~~~~~~~~~~~~~~~~~~~~ 
+ ~~~~~~~~~~~~~~~~~~~~~~~~| |   |   Set Retrans_Timer                 
+               Stop Timer| |   |    
+ +-------------+         | |   |
+ |     END     +<--------+ |   | Attemp > MAX_ACK_REQUESTS
+ +-------------+           |   | ~~~~~~~~~~~~~~~~~~
+              All-1 Window |   v Send Abort
+              ~~~~~~~~~~~~ | +-+-----------+
+             MIC_bit ==0 & +>|    ERROR    |
+    Lcl_bitmap==recv_bitmap  +-------------+                                        
 ~~~~
 {: #Fig-ACKAlwaysSnd title='Sender State Machine for the ACK Always Mode'}
 
@@ -1656,10 +1656,10 @@ Lcl_bitmap==recv_bitmap &|   |   all missing frag sent
  Not All- & w=expected +---+   +---+w = Not expected
  ~~~~~~~~~~~~~~~~~~~~~ |   |   |   |~~~~~~~~~~~~~~~~
  Set local_bitmap(FCN) |   v   v   |discard
-                      ++---+---+---+-+
-+---------------------+     Rcv      |
-|  +------------------+   Window     |
-|  |                  +-----+--+-----+
+                      ++---+---+---+-+      
++---------------------+     Rcv      +--->* ABORT 
+|  +------------------+   Window     |
+|  |                  +-----+--+-----+  
 |  |       All-0 & w=expect |  ^ w =next & not-All
 |  |     ~~~~~~~~~~~~~~~~~~ |  |~~~~~~~~~~~~~~~~~~~~~
 |  |     set lcl_bitmap(FCN)|  |expected = next window
@@ -1673,7 +1673,7 @@ Lcl_bitmap==recv_bitmap &|   |   all missing frag sent
 |  |                  +-+-+-+--+-++ | Clear lcl_bitmap    
 |  |  w=expected & +->+    Wait   +<+ set lcl_bitmap(FCN)         
 |  |      All-1    |  |    Next   |   send lcl_bitmap
-|  |  ~~~~~~~~~~~~ +--+  Window   |   
+|  |  ~~~~~~~~~~~~ +--+  Window   +--->* ABORT  
 |  |    discard       +--------+-++        
 |  |             All-1 & w=next| |  All-1 & w=nxt
 |  |                & MIC wrong| |  & MIC right      
@@ -1686,7 +1686,7 @@ Lcl_bitmap==recv_bitmap &|   |   all missing frag sent
 |  |~~~~~~~~~~~~~~~~~~~~  +----+---+-+ | MIC wrong      |
 |  |set local_bitmap(FCN) |          +<+ ~~~~~~~~~~~~~~ |
 |  |send local_bitmap     | Wait End | set lcl_btmp(FCN)|
-|  +--------------------->+          |                  |
+|  +--------------------->+          +--->* ABORT       |
 |                         +---+----+-+                  |
 |       w=expected & MIC right|                         |
 |       ~~~~~~~~~~~~~~~~~~~~~~| +-+ Not All-1           |
@@ -1698,7 +1698,15 @@ Lcl_bitmap==recv_bitmap &|   |   all missing frag sent
 |set local_bitmap(FCN)      +-+-+-+-+-++Send lcl_btmp   |
 |send local_bitmap          |          |                |
 +-------------------------->+    END   +<---------------+
-                            ++--+------+                                          
+                            ++--+------+  
+       --->* ABORT
+            ~~~~~~~
+            Inactivity_Timer = expires
+        When DWN_Link
+          IF Inactivity_Timer expires
+             Send DWL Request
+             Attemp++
+                            
 ~~~~
 {: #Fig-ACKAlwaysRcv title='Receiver State Machine for the ACK Always Mode'}
 
@@ -1716,38 +1724,41 @@ Lcl_bitmap==recv_bitmap &|   |   all missing frag sent
             FCN=max value |  ++-------------+
                           +> |              |
                              |     SEND     |
-+--------------------------> |              |
-|                            ++-----+-------+
-|          FCN==0 & more frags|     |last frag
-|      ~~~~~~~~~~~~~~~~~~~~~~~|     |~~~~~~~~~~~~~~~~~~~~~~~~
-|             set local-bitmap|     |set local-bitmap
-|       send wnd + frag(all-0)|     |send wnd+frag(all-1)+MIC
-|                    set Timer|     |set Timer
-|                             |     |
-|Timer expires &              |     | local-bitmap!=rcv-bitmap 
-|more fragments               |     |  +-----------------+
-|~~~~~~~~~~~~~~~~~~~~         |     |  | ~~~~~~~~~~~~~   |
-|stop Timer                   |     |  | Attemp++        |
-|clear local.bitmap           v     v  |                 v
-|window = next window   +-----+-----+--+--+         +----+----+
-+---------------------->+                 +         | Resend  |
-                        |    Wait bitmap  |         | Missing |
-                    +-- +                 |         | Frag    |
-   not expected wnd |   ++-+-------+---+--+         +------+--+
-   ~~~~~~~~~~~~~~~~ |    ^ |       |   ^                   |
-      discard frag  +----+ |       |   +-------------------+
-                           |       |     all missing frag sent
-                           |       |     ~~~~~~~~~~~~~~~~~~~~~ 
-          Timer expires &  |       |     Set Timer
-          No more Frag     |       |   
-          ~~~~~~~~~~~~~~~~ |       |  
-          Stop Timer       |       | MAX_ATTEMPS > limit
-     +-----------+         |       | ~~~~~~~~~~~~~~~~~~
-     |           +<--------+       | Send Abort
-     |    END    |                 v
-     +-----------+               +-+----------+
-                                 |    ERROR   |
-                                 +------------+                                      
+ +-------------------------> |              |
+ |                           ++-----+-------+
+ |         FCN==0 & more frags|     |last frag
+ |     ~~~~~~~~~~~~~~~~~~~~~~~|     |~~~~~~~~~~~~~~~~~~~~~~~~
+ |            set local-bitmap|     |set local-bitmap
+ |      send wnd + frag(all-0)|     |send wnd+frag(all-1)+MIC
+ |           set Retrans_Timer|     |set Retrans_Timer
+ |                            |     |
+ |Retrans_Timer expires &     |     | local-bitmap!=rcv-bitmap 
+ |more fragments              |     |  +-----------------+
+ |~~~~~~~~~~~~~~~~~~~~        |     |  | ~~~~~~~~~~~~~   |
+ |stop Retrans_Timer          |     |  | Attemp++        |
+ |clear local.bitmap          v     v  |                 v
+ |window = next window  +-----+-----+--+--+         +----+----+
+ +----------------------+                 +         | Resend  |
+ +--------------------->+    Wait bitmap  |         | Missing |
+ |                  +-- +                 |         | Frag    |
+ | not expected wnd |   ++-+---+---+---+--+         +------+--+
+ | ~~~~~~~~~~~~~~~~ |    ^ |   |   |   ^                   |
+ |    discard frag  +----+ |   |   |   +-------------------+
+ |                         |   |   |     all missing frag sent
+ |Retrans_Timer expires &  |   |   |     ~~~~~~~~~~~~~~~~~~~~~ 
+ |       No more Frag      |   |   |     Set Retrans_Timer
+ | ~~~~~~~~~~~~~~~~~~~~~~~ |   |   |   
+ |  Stop Retrans_Timer     |   |   |  
+ |  Send ALL-1-empty       |   |   | 
+ +-------------------------+   |   | 
+                               |   |
+      Local_bitmap==Recv_bitmap|   |
+      ~~~~~~~~~~~~~~~~~~~~~~~~~|   |Attemp > MAX_ACK_REQUESTS
+ +---------+Stop Retrans_Timer |   |~~~~~~~~~~~~~~~~~~~~~~~
+ |   END   +<------------------+   v  Send Abort
+ +---------+                     +-+---------+
+                                 |   ERROR   |
+                                 +-----------+                                      
 ~~~~
 {: #Fig-ACKonerrorSnd title='Sender State Machine for the ACK on error Mode'}
 
@@ -1759,7 +1770,7 @@ Lcl_bitmap==recv_bitmap &|   |   all missing frag sent
    Set local_bitmap(FCN) |   v   v   |discard
                         ++---+---+---+-+
 +-----------------------+              +--+ All-0 & full 
-|                       |  Rcv Window  |  | ~~~~~~~~~~~~ 
+|                  *<---+  Rcv Window  |  | ~~~~~~~~~~~~ 
 |  +--------------------+              +<-+ w =next
 |  |                    +---+---+------+ clear lcl_bitmap
 |  |                        |   ^
@@ -1774,7 +1785,7 @@ Lcl_bitmap==recv_bitmap &|   |   all missing frag sent
 |  |                        |   |  |Send abort ++-------+
 |  |                        v   |  |             ^ w=expct
 |  |                      +-+---+--+------+      | & all-1  
-|  |                      |    Wait       +------+ ~~~~~~~
+|  |                 *<---+    Wait       +------+ ~~~~~~~
 |  |                      | Next Window   |     Send abort
 |  |                      +-------+---+---+    
 |  |  All-1 & w=next & MIC wrong  |   |   
@@ -1786,7 +1797,7 @@ Lcl_bitmap==recv_bitmap &|   |   all missing frag sent
 |  |All-1 & w=expect & MIC wrong  |                    |
 |  |~~~~~~~~~~~~~~~~~~~~~~~~~~~~  |                    |
 |  |set local_bitmap(FCN)         v                    |
-|  |send local_bitmap     +-------+------+             |
+|  |send local_bitmap     +-------+---+--+             |
 |  +--------------------->+   Wait End   +-+           |
 |                         +-----+------+-+ | w=expct & |
 |       w=expected & MIC right  |      ^   | MIC wrong |
