@@ -2751,7 +2751,7 @@ Internet-Draft                 LPWAN SCHC                  November 2017
       Set local_bitmap(FCN) |   v   v   |discard
                            ++---+---+---+-+
    +-----------------------+              +--+ All-0 & full
-   |                  *<---+  Rcv Window  |  | ~~~~~~~~~~~~
+   |            ABORT *<---+  Rcv Window  |  | ~~~~~~~~~~~~
    |  +--------------------+              +<-+ w =next
    |  |                    +---+---+------+ clear lcl_bitmap
    |  |                        |   ^
@@ -2766,7 +2766,7 @@ Internet-Draft                 LPWAN SCHC                  November 2017
    |  |                        |   |  |Send abort ++-------+
    |  |                        v   |  |             ^ w=expct
    |  |                      +-+---+--+------+      | & all-1
-   |  |                 *<---+    Wait       +------+ ~~~~~~~
+   |  |           ABORT *<---+    Wait       +------+ ~~~~~~~
    |  |                      | Next Window   |     Send abort
    |  |                      +-------+---+---+
    |  |  All-1 & w=next & MIC wrong  |   |
@@ -2777,7 +2777,7 @@ Internet-Draft                 LPWAN SCHC                  November 2017
    |  |                              | set lcl_bitmap(FCN)|
    |  |All-1 & w=expect & MIC wrong  |                    |
    |  |~~~~~~~~~~~~~~~~~~~~~~~~~~~~  |                    |
-   |  |set local_bitmap(FCN)         v                    |
+   |  |set local_bitmap(FCN)         v   +--->* ABORT     |
    |  |send local_bitmap     +-------+---+--+             |
    |  +--------------------->+   Wait End   +-+           |
    |                         +-----+------+-+ | w=expct & |
@@ -2790,10 +2790,10 @@ Internet-Draft                 LPWAN SCHC                  November 2017
    |set local_bitmap(FCN)        +-+----------+           |
    +---------------------------->+     END    +<----------+
                                  +------------+
-
-        Figure 34: Receiver State Machine for the ACK on error Mode
-
-
+               --->* Only Uplink
+                    ABORT
+                    ~~~~~~~~
+                    Inactivity_Timer = expires
 
 
 
@@ -2801,6 +2801,8 @@ Minaburo, et al.          Expires June 1, 2018                 [Page 50]
 
 Internet-Draft                 LPWAN SCHC                  November 2017
 
+
+        Figure 34: Receiver State Machine for the ACK on error Mode
 
 Appendix D.  Allocation of Rule IDs for fragmentation
 
@@ -2841,6 +2843,21 @@ Authors' Addresses
    Email: ana@ackl.io
 
 
+
+
+
+
+
+
+
+
+
+
+Minaburo, et al.          Expires June 1, 2018                 [Page 51]
+
+Internet-Draft                 LPWAN SCHC                  November 2017
+
+
    Laurent Toutain
    IMT-Atlantique
    2 rue de la Chataigneraie
@@ -2851,13 +2868,6 @@ Authors' Addresses
    Email: Laurent.Toutain@imt-atlantique.fr
 
 
-
-
-Minaburo, et al.          Expires June 1, 2018                 [Page 51]
-
-Internet-Draft                 LPWAN SCHC                  November 2017
-
-
    Carles Gomez
    Universitat Politecnica de Catalunya
    C/Esteve Terradas, 7
@@ -2865,16 +2875,6 @@ Internet-Draft                 LPWAN SCHC                  November 2017
    Spain
 
    Email: carlesgo@entel.upc.edu
-
-
-
-
-
-
-
-
-
-
 
 
 
