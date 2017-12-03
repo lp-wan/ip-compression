@@ -1022,15 +1022,54 @@ In case of an incorrect MIC, the receivers wait for fragment belonging to the sa
 
 ## Supporting multiple window sizes
 
-For Window mode operation, implementers may opt to support a single window size or multiple window sizes. The latter, when feasible, may provide performance optimizations. For example, a large window size may be used for packets that need to be carried by a large number of fragments. However, when the number of fragments required to carry an packet is low, a smaller window size, and thus a shorter bitmap, may be sufficient to provide feedback on all fragments. If multiple window sizes are supported, the Rule ID may be used to signal the window size in use for a specific packet transmission.
+For ACK Always or ACK on error, implementers may opt to support a single window size or multiple window sizes.  The latter, when feasible, may provide performance optimizations.  For example, a large window size may be used for packets that need to be carried by a large number of fragments.  However, when the number of fragments required to carry an packet is low, a smaller window size, and thus a shorter bitmap, may be sufficient to provide feedback on all fragments.  If multiple window sizes are supported, the Rule ID may be used to signal the window size in use for a specific packet transmission.
 
-TODO (does it works for ACK-on-error?, do we need this really, do you want more explanation or delete this part?)
-
+Note that the same window size MUST be used for the transmission of all fragments that belong to a packet.
 
 
 ## Downlink fragment transmission
 
 In some LPWAN technologies, as part of energy-saving techniques, downlink transmission is only possible immediately after an uplink transmission. In order to avoid potentially high delay for fragmented datagram transmission in the downlink, the fragment receiver MAY perform an uplink transmission as soon as possible after reception of a fragment that is not the last one. Such uplink transmission may be triggered by the L2 (e.g. an L2 ACK sent in response to a fragment encapsulated in a L2 frame that requires an L2 ACK) or it may be triggered from an upper layer.
+
+For fragmented packet transmission in the downlink, and when ACK Always
+   is used, the fragment receiver MAY support timer-based ACK
+   retransmission. In this mechanism, the fragment receiver initializes and
+   starts a timer (denoted "ACK Retry timer") after the transmission of an
+   ACK, except when the ACK is sent in response to the last fragment of a
+   packet (all-1 fragment). In the latter case, the fragment receiver does 
+   not start a timer after transmission of the ACK.
+
+   If, after transmission of an ACK that is not an all-1 fragment, and 
+   before expiration of the corresponding ACK
+   Retry timer, the fragment receiver receives a fragment that belongs to
+   the current window (e.g. a missing fragment from the current window) or 
+   to the next window, the ACK Retry timer for the ACK is stopped. However, 
+   if the ACK Retry timer expires, the ACK is resent and the ACK Retry timer
+   is reinitialized and restarted.
+
+   The default initial value for the ACK Retry timer, as well as the
+   maximum number of retries for a specific ACK, denoted MAX_ACK_RETRIES,
+   are not defined in this document, and need to be defined in other
+   documents (e.g. technology-specific profiles). The initial value of the
+   ACK Retry timer is expected to be greater than that of the ACK Always
+   timer, in order to make sure that a (buffered) fragment to be
+   retransmitted can find an opportunity for that transmission.
+
+   When the fragment sender transmits the all-1 fragment, it
+   initializes and starts its retransmission timer (ACK Always timer) to a
+   long value (e.g. several times the initial ACK Retry timer). If an ACK
+   is received before expiration of this timer, the fragment sender
+   retransmits any lost fragments reported by the ACK, or if the ACK
+   confirms successful reception of all fragments of
+   the last window, transmission of the fragmented packet ends.
+   If the timer expires, and no ACK has been received since the
+   start of the timer, the fragment sender assumes that the all-1
+   fragment has been successfully received (and possibly, the last ACK
+   has been lost: this mechanism assumes that the ACK Always timer for the
+   all-1 fragment is long enough to allow several ACK retries if the all-1
+   fragment has not been received by the fragment receiver, and it also
+   assumes that it is unlikely that several ACKs become all lost).
+
 
 
 
