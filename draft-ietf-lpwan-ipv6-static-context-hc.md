@@ -538,7 +538,7 @@ In the ACK format, DTag carries the same value as the DTag field in the fragment
  
 *  Inactivity Timer. This timer is used to detect when there is a problem in the transmission of frames and the receiver does not get any frame during a period of time or a number of packets in a period of time. When this happen, an abort needs to be sent. Initially and each time a frame is received the timer is reinitialized. The size of the timer is not defined in this document and must be defined in the specific technology document. 
  
-*  Attempts. It is a counter used to determine when an Abort is needed because there is a recurrent error, which maximal value is MAX_ACK_REQUEST. The default value of MAX_ACK_REQUESTS is not
+*  Attempts. It is a counter used to request a missing ACK, and in consequence to determine when an Abort is needed because there is a recurrent error, which maximal value is MAX_ACK_REQUEST. The default value of MAX_ACK_REQUESTS is not
    stated in this document, and it is expected to be defined in other
    documents (e.g. technology- specific profiles).
 
