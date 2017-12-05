@@ -691,18 +691,18 @@ is not correct, this MIC bit is set to 0 and the bitmap follow.
 indicates that the second and the fifth fragments have not been correctly received. 
 
 ~~~~                                                  
-    <-------   R  ------->6 5 4 3 2 1   0 (FCN values indicating the order)
-                <- T -> 1     
-    +---- ... --+-... -+-+-+-+-+-+-+-+-----+-------+
-    |  Rule ID  | DTag |W|1|0|1|1|0|1|all-0|padding|  
-    +---- ... --+-... -+-+-+-+-+-+-+-+-----+-------+
+    <-------   R  ------->  6 5 4 3 2 1   0 (FCN values indicating the order)
+                <- T -> 1 1    
+    +---- ... --+-... -+-+-+-+-+-+-+-+-+-----+-------+
+    |  Rule ID  | DTag |W|C|1|0|1|1|0|1|all-0|padding|  
+    +---- ... --+-... -+-+-+-+-+-+-+-+-+-----+-------+
 
 ~~~~
 {: #Fig-Bitmap-Win title='Example of the bitmap in Window mode, in any window except the last one, for N=3)'}
 
 ~~~~                                                  
-     <-------   R  ------->    6 5 4 3 2 1   7 (FCN values indicating the order)
-                 <- T -> 1  1
+     <-------   R  ------->  6 5 4 3 2 1   7 (FCN values indicating the order)
+                 <- T -> 1 1
      +---- ... --+-... -+-+-+-+-+-+-+-+-+-----+-------+
      |  Rule ID  | DTag |W|0|1|0|1|1|0|1|all-1|padding|   
      +---- ... --+-... -+-+-+-+-+-+-+-+-+-----+-------+
@@ -811,16 +811,14 @@ is a minimum size ACK message concatenated by a byte with all bit set to 1.
 {: #Fig-All1Abort title='All-1 for Abort fragment format'}
 
 ~~~~
- <----- Complete Byte ------><--- 1 byte --->
+ <------- Complete Byte ------><--- 1 byte --->
  <-------   R  ------->
-              <- T -> 1  
- +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+-+-+
- |  Rule ID  | DTag |W| 1..1|      FF       |  
- +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+-+-+
+             <- T -> 1 1 
+ +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |  Rule ID  | DTag |W|C| 1..1|       FF      |  
+ +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+-+-+-+
 ~~~~
 {: #Fig-ACKabort title='ACK Abort fragment format'}
-
-
 
 
 ## Baseline mechanism
@@ -864,11 +862,6 @@ TODO named TIMER and the Inactivity TImer for all draft??
 In Window modes, a jumping window protocol is using two windows alternatively 0 and 1. 
 An FCN set to all-0 indicates that the window is over (i.e. the fragment is the last one of the window) and allows to switch from one window to another. The all-1 FCN in a fragment indicates 
 that it is the last fragment of the packet and there will not be another window. 
-
-In all the cases, the sender may not have to send all the fragments contained in the
-window. To ease FN (fragment number) reconstruction from FCN, it is recommended to send sequentially
-all the fragments on a window and for all non-terminating window to fill entirely the
-window.   TODO: NOT CLEAR
 
 The receiver generates the Bitmap which may have the size of a single frame
 based on the size of downlink frame of the LPWAN technology used. When the bitmap cannot be sent in one frame or for the last window, then first the FCN should be set
