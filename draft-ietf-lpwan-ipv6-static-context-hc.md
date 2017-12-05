@@ -530,7 +530,7 @@ In the ACK format, DTag carries the same value as the DTag field in the fragment
 *  W (window): W is a 1-bit field. This field carries the same value for all fragments of a window, and it is complemented for the next window. The initial value for this field is 0.
    In the ACK format, this field has a size of 1 bit. In all ACKs, the W bit carries the same value as the W bit carried by the fragments whose reception is being positively or negatively acknowledged by the ACK.
    
-*  C (MIC control): C is a 1-bit field. This field is used in the ACK format packets to know if the MIC check was correct or incorrect.  
+*  C (MIC checked): C is a 1-bit field. This field is used in the ACK format packets to know if the MIC check was correct or not.  
 
 *  Message Integrity Check (MIC). This field, which has a size of M bits, is computed by the sender over the complete packet (i.e. a SCHC compressed or an uncompressed IPv6 packet) before fragmentation. The algorithm to be used to compute the MIC is not defined in this document, and needs to be defined in other documents (e.g. technology-specific profiles).  The MIC allows the receiver to check errors in the reassembled packet, while it also enables compressing the UDP checksum by use of SCHC compression.
  
@@ -546,7 +546,9 @@ In the ACK format, DTag carries the same value as the DTag field in the fragment
 is set to the left-most position in the Bitmap. In the Bitmap a bit set to 1 indicates that the corresponding FCN 
 fragment has been correctly sent and received. However, when all the fragments have been correctly received, the receiver sends only the content until a byte boundary or until the byte boundary of the first error carried on the bitmap. 
 
-*  ABORT: When the receiver needs to abort the transmission, it uses the ACK Abort format packet with all the bits set to 1 or the All-1 Abort format to trigger the end of the transmission.
+*  Abort. When the receiver needs to abort the transmission, it uses the ACK Abort format packet with all the bits set to 1 or the All-1 Abort format to trigger the end of the transmission.
+
+*  Padding (P). The number of bits used for padding is not defined and depends on the size of the Rule ID, DTag and FCN number of bits, and in the other hand it depends on the frame size. It will be used to align in byte boundary the last byte.
 
 
 
@@ -618,9 +620,9 @@ This section defines the fragment format, the fragmentation header formats, and 
    A fragment is the payload in the L2 protocol data unit (PDU).
       
 ~~~~   
-      +---------------+-----------------------+
-      | Fragm. Header |   Fragment payload    |
-      +---------------+-----------------------+
+      +---------------+-----------------------+---------+
+      | Fragm. Header |   Fragment payload    | padding |
+      +---------------+-----------------------+---------+
 ~~~~
 {: #Fig-FragFormat title='Fragment format.'}
 
@@ -631,9 +633,9 @@ In the No ACK option, fragments except the last one SHALL contain the fragmentat
 ~~~~
              <------------ R ---------->
                          <--T--> <--N-->
-             +-- ... --+- ...  -+- ... -+---...---+
-             | Rule ID |  DTag  |  FCN  | payload |
-             +-- ... --+- ...  -+- ... -+---...---+
+             +-- ... --+- ...  -+- ... -+---...---+-+
+             | Rule ID |  DTag  |  FCN  | payload |P|
+             +-- ... --+- ...  -+- ... -+---...---+-+
 
 ~~~~
 {: #Fig-NotLast title='Fragmentation Format for Fragments except the Last One, No ACK option'}
@@ -645,9 +647,9 @@ In any of the Window mode options, fragments except the last one SHALL contain t
 ~~~~
              <------------ R ---------->
                        <--T--> 1 <--N-->
-            +-- ... --+- ... -+-+- ... -+---...---+
-            | Rule ID | DTag  |W|  FCN  | payload |
-            +-- ... --+- ... -+-+- ... -+---...---+
+            +-- ... --+- ... -+-+- ... -+---...---+-+
+            | Rule ID | DTag  |W|  FCN  | payload |P|
+            +-- ... --+- ... -+-+- ... -+---...---+-+
 
 ~~~~
 {: #Fig-NotLastWin title='Fragmentation Format for Fragments except the Last One, Window mode'}
@@ -734,12 +736,21 @@ is a minimum size ACK message concatenated by a byte with all bit set to 1.
      <-------   R  ------->C 6 5 4 3 2 1   7 (FCN values indicating the order)
                  <- T -> 1 1
      +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+-+
-     |  Rule ID  | DTag |W|0|1|1|1|1|1|1|1|1|1| 
+     |  Rule ID  | DTag |W|1|1|1|1|1|1|1|1|1|1| 
      +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+-+
      |          byte 1        |     byte 2    |      
      
 ~~~~
 {: #Fig-Abort2 title='Abort Fragment Format'}
+
+~~~~
+ <------ Complete Byte -----><--- 1 byte --->
+
+ +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+-+-+
+ |  Rule ID  | DTag |W| 1..1|       FF      |  
+ +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+-+-+
+~~~~
+{: #Fig-ACKabort title='ACK Abort fragment format'}
 
 
 ### All-1 and All-0 formats
@@ -747,7 +758,7 @@ is a minimum size ACK message concatenated by a byte with all bit set to 1.
      <------------ R ------------>
                 <- T -> 1 <- N -> 
      +-- ... --+- ... -+-+- ... -+--- ... ---+
-     | Rule ID | DTag  |W|  0..0 |  payload  |  TODO
+     | Rule ID | DTag  |W|  0..0 |  payload  |  
      +-- ... --+- ... -+-+- ... -+--- ... ---+
 ~~~~
 {: #Fig-All0 title='All-0 fragment format'}
@@ -810,15 +821,7 @@ is a minimum size ACK message concatenated by a byte with all bit set to 1.
 ~~~~
 {: #Fig-All1Abort title='All-1 for Abort fragment format'}
 
-~~~~
- <------- Complete Byte ------><--- 1 byte --->
- <-------   R  ------->
-             <- T -> 1 1 
- +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+-+-+-+
- |  Rule ID  | DTag |W|C| 1..1|       FF      |  
- +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+-+-+-+
-~~~~
-{: #Fig-ACKabort title='ACK Abort fragment format'}
+
 
 
 ## Baseline mechanism
@@ -1015,7 +1018,7 @@ If the MIC is incorrect some fragments have been lost. It sends its bitmap.
 
 In case of an incorrect MIC, the receivers wait for fragment belonging to the same window.
 
-
+### Bitmap Optimization 
 
 ## Supporting multiple window sizes
 
