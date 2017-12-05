@@ -129,6 +129,7 @@ Internet-Draft                 LPWAN SCHC                  December 2017
        5.5.2.  The Window modes  . . . . . . . . . . . . . . . . . .  26
        5.5.3.  ACK Always  . . . . . . . . . . . . . . . . . . . . .  26
        5.5.4.  ACK on error  . . . . . . . . . . . . . . . . . . . .  28
+       5.5.5.  Bitmap Optimization . . . . . . . . . . . . . . . . .  30
      5.6.  Supporting multiple window sizes  . . . . . . . . . . . .  30
      5.7.  Downlink fragment transmission  . . . . . . . . . . . . .  31
    6.  Padding management  . . . . . . . . . . . . . . . . . . . . .  32
@@ -159,7 +160,6 @@ Internet-Draft                 LPWAN SCHC                  December 2017
    Appendix D.  Allocation of Rule IDs for fragmentation . . . . . .  54
    Appendix E.  Note . . . . . . . . . . . . . . . . . . . . . . . .  54
    Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  54
-
 
 
 
@@ -898,9 +898,8 @@ Minaburo, et al.          Expires June 8, 2018                 [Page 16]
 Internet-Draft                 LPWAN SCHC                  December 2017
 
 
-   o  C (MIC control): C is a 1-bit field.  This field is used in the
-      ACK format packets to know if the MIC check was correct or
-      incorrect.
+   o  C (MIC checked): C is a 1-bit field.  This field is used in the
+      ACK format packets to know if the MIC check was correct or not.
 
    o  Message Integrity Check (MIC).  This field, which has a size of M
       bits, is computed by the sender over the complete packet (i.e. a
@@ -949,14 +948,20 @@ Internet-Draft                 LPWAN SCHC                  December 2017
 
 
 
+
 Minaburo, et al.          Expires June 8, 2018                 [Page 17]
 
 Internet-Draft                 LPWAN SCHC                  December 2017
 
 
-   o  ABORT: When the receiver needs to abort the transmission, it uses
+   o  Abort.  When the receiver needs to abort the transmission, it uses
       the ACK Abort format packet with all the bits set to 1 or the
       All-1 Abort format to trigger the end of the transmission.
+
+   o  Padding (P).  The number of bits used for padding is not defined
+      and depends on the size of the Rule ID, DTag and FCN number of
+      bits, and in the other hand it depends on the frame size.  It will
+      be used to align in byte boundary the last byte.
 
 5.3.  Reliability options
 
@@ -997,11 +1002,6 @@ Internet-Draft                 LPWAN SCHC                  December 2017
       is lost, the sender assumes that all fragments covered by the ACK
       have been successfully delivered.  And the receiver will abort the
       fragmentation.
-      In ACK-on-error, an ACK is transmitted by the fragment receiver
-      after a window of fragments have been sent, only if at least one
-      of the fragments in the window has been lost.  In this mode, the
-      ACK informs the sender about received and/or missed fragments from
-      the window of fragments.  Upon receipt of an ACK that informs
 
 
 
@@ -1010,6 +1010,11 @@ Minaburo, et al.          Expires June 8, 2018                 [Page 18]
 Internet-Draft                 LPWAN SCHC                  December 2017
 
 
+      In ACK-on-error, an ACK is transmitted by the fragment receiver
+      after a window of fragments have been sent, only if at least one
+      of the fragments in the window has been lost.  In this mode, the
+      ACK informs the sender about received and/or missed fragments from
+      the window of fragments.  Upon receipt of an ACK that informs
       about any lost fragments, the sender retransmits the lost
       fragments.
 
@@ -1042,9 +1047,9 @@ Internet-Draft                 LPWAN SCHC                  December 2017
    original IPv6 packet data payload.  A fragment is the payload in the
    L2 protocol data unit (PDU).
 
-         +---------------+-----------------------+
-         | Fragm. Header |   Fragment payload    |
-         +---------------+-----------------------+
+         +---------------+-----------------------+---------+
+         | Fragm. Header |   Fragment payload    | padding |
+         +---------------+-----------------------+---------+
 
                         Figure 6: Fragment format.
 
@@ -1056,11 +1061,6 @@ Internet-Draft                 LPWAN SCHC                  December 2017
 
 
 
-
-
-
-
-
 Minaburo, et al.          Expires June 8, 2018                 [Page 19]
 
 Internet-Draft                 LPWAN SCHC                  December 2017
@@ -1068,9 +1068,9 @@ Internet-Draft                 LPWAN SCHC                  December 2017
 
                 <------------ R ---------->
                             <--T--> <--N-->
-                +-- ... --+- ...  -+- ... -+---...---+
-                | Rule ID |  DTag  |  FCN  | payload |
-                +-- ... --+- ...  -+- ... -+---...---+
+                +-- ... --+- ...  -+- ... -+---...---+-+
+                | Rule ID |  DTag  |  FCN  | payload |P|
+                +-- ... --+- ...  -+- ... -+---...---+-+
 
 
    Figure 7: Fragmentation Format for Fragments except the Last One, No
@@ -1082,9 +1082,9 @@ Internet-Draft                 LPWAN SCHC                  December 2017
 
                 <------------ R ---------->
                           <--T--> 1 <--N-->
-               +-- ... --+- ... -+-+- ... -+---...---+
-               | Rule ID | DTag  |W|  FCN  | payload |
-               +-- ... --+- ... -+-+- ... -+---...---+
+               +-- ... --+- ... -+-+- ... -+---...---+-+
+               | Rule ID | DTag  |W|  FCN  | payload |P|
+               +-- ... --+- ... -+-+- ... -+---...---+-+
 
 
      Figure 8: Fragmentation Format for Fragments except the Last One,
@@ -1194,34 +1194,34 @@ Internet-Draft                 LPWAN SCHC                  December 2017
      <-------   R  ------->C 6 5 4 3 2 1   7 (FCN values indicating the order)
                  <- T -> 1 1
      +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+-+
-     |  Rule ID  | DTag |W|0|1|1|1|1|1|1|1|1|1|
+     |  Rule ID  | DTag |W|1|1|1|1|1|1|1|1|1|1|
      +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+-+
      |          byte 1        |     byte 2    |
 
 
                      Figure 14: Abort Fragment Format
 
+    <------ Complete Byte -----><--- 1 byte --->
+
+    +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+-+-+
+    |  Rule ID  | DTag |W| 1..1|       FF      |
+    +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+-+-+
+
+                   Figure 15: ACK Abort fragment format
+
 5.4.4.  All-1 and All-0 formats
 
         <------------ R ------------>
                    <- T -> 1 <- N ->
         +-- ... --+- ... -+-+- ... -+--- ... ---+
-        | Rule ID | DTag  |W|  0..0 |  payload  |  TODO
+        | Rule ID | DTag  |W|  0..0 |  payload  |
         +-- ... --+- ... -+-+- ... -+--- ... ---+
 
-                     Figure 15: All-0 fragment format
+                     Figure 16: All-0 fragment format
 
    In the No ACK option, the last fragment of an IPv6 datagram SHALL
    contain a fragmentation header that conforms to the format shown in
-   Figure 17.  The total size of this fragmentation header is R+M bits.
-
-                 <------------ R ------------>
-                            <- T -> 1 <- N ->
-                 +-- ... --+- ... -+-+- ... -+
-                 | Rule ID | DTag  |W|  0..0 |
-                 +-- ... --+- ... -+-+- ... -+
-
-                  Figure 16: All-0 empty fragment format
+   Figure 18.  The total size of this fragmentation header is R+M bits.
 
 
 
@@ -1234,18 +1234,26 @@ Minaburo, et al.          Expires June 8, 2018                 [Page 22]
 Internet-Draft                 LPWAN SCHC                  December 2017
 
 
+                 <------------ R ------------>
+                            <- T -> 1 <- N ->
+                 +-- ... --+- ... -+-+- ... -+
+                 | Rule ID | DTag  |W|  0..0 |
+                 +-- ... --+- ... -+-+- ... -+
+
+                  Figure 17: All-0 empty fragment format
+
        <------------- R ---------->
                      <- T -> <-N-><----- M ----->
        +---- ... ---+- ... -+-----+---- ... ----+---...---+
        |   Rule ID  | DTag  |  1  |     MIC     | payload |
        +---- ... ---+- ... -+-----+---- ... ----+---...---+
 
-    Figure 17: All-1 Fragmentation Formt for the Last Fragment, No ACK
+    Figure 18: All-1 Fragmentation Formt for the Last Fragment, No ACK
                                   option
 
    In any of the Window modes, the last fragment of an IPv6 datagram
    SHALL contain a fragmentation header that conforms to the format
-   shown in Figure 18.  The total size of this fragmentation header is
+   shown in Figure 19.  The total size of this fragmentation header is
    R+M bits.  It is used for request a retransmissions
 
          <------------ R ------------>
@@ -1255,7 +1263,7 @@ Internet-Draft                 LPWAN SCHC                  December 2017
          +-- ... --+- ... -+-+- ... -+---- ... ----+---...---+
                                (FCN)
 
-    Figure 18: All-1 Fragmentation Format for the Last Fragment, Window
+    Figure 19: All-1 Fragmentation Format for the Last Fragment, Window
                                    mode
 
    The values for R, N, T and M are not specified in this document, and
@@ -1268,15 +1276,7 @@ Internet-Draft                 LPWAN SCHC                  December 2017
    | Rule ID | DTag  |W|  1..1 |     MIC     | (no payload)
    +-- ... --+- ... -+-+- ... -+---- ... ----+
 
-   Figure 19: All-1 for Retries format fragment also called All-1 empty
-
-     <------------ R ------------>
-                <- T -> 1 <- N ->
-     +-- ... --+- ... -+-+- ... -+
-     | Rule ID | DTag  |W| 11..1 | (no MIC and no payload)
-     +-- ... --+- ... -+-+- ... -+
-
-                Figure 20: All-1 for Abort fragment format
+   Figure 20: All-1 for Retries format fragment also called All-1 empty
 
 
 
@@ -1290,14 +1290,13 @@ Minaburo, et al.          Expires June 8, 2018                 [Page 23]
 Internet-Draft                 LPWAN SCHC                  December 2017
 
 
-    <------- Complete Byte ------><--- 1 byte --->
-    <-------   R  ------->
-                <- T -> 1 1
-    +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |  Rule ID  | DTag |W|C| 1..1|       FF      |
-    +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+-+-+-+
+     <------------ R ------------>
+                <- T -> 1 <- N ->
+     +-- ... --+- ... -+-+- ... -+
+     | Rule ID | DTag  |W| 11..1 | (no MIC and no payload)
+     +-- ... --+- ... -+-+- ... -+
 
-                   Figure 21: ACK Abort fragment format
+                Figure 21: All-1 for Abort fragment format
 
 5.5.  Baseline mechanism
 
@@ -1338,6 +1337,7 @@ Internet-Draft                 LPWAN SCHC                  December 2017
    for the last fragment of the whole packet in the last window which
    will have the all-1 format fragment, which is also the last fragment
    of the last window.
+
 
 
 
@@ -1661,6 +1661,8 @@ Internet-Draft                 LPWAN SCHC                  December 2017
    In case of an incorrect MIC, the receivers wait for fragment
    belonging to the same window.
 
+5.5.5.  Bitmap Optimization
+
 5.6.  Supporting multiple window sizes
 
    For ACK Always or ACK on error, implementers may opt to support a
@@ -1671,8 +1673,6 @@ Internet-Draft                 LPWAN SCHC                  December 2017
    required to carry an packet is low, a smaller window size, and thus a
    shorter bitmap, may be sufficient to provide feedback on all
    fragments.  If multiple window sizes are supported, the Rule ID may
-   be used to signal the window size in use for a specific packet
-   transmission.
 
 
 
@@ -1681,6 +1681,9 @@ Minaburo, et al.          Expires June 8, 2018                 [Page 30]
 
 Internet-Draft                 LPWAN SCHC                  December 2017
 
+
+   be used to signal the window size in use for a specific packet
+   transmission.
 
    Note that the same window size MUST be used for the transmission of
    all fragments that belong to a packet.
@@ -1727,9 +1730,6 @@ Internet-Draft                 LPWAN SCHC                  December 2017
    and starts its retransmission timer (ACK Always timer) to a long
    value (e.g. several times the initial ACK Retry timer).  If an ACK is
    received before expiration of this timer, the fragment sender
-   retransmits any lost fragments reported by the ACK, or if the ACK
-   confirms successful reception of all fragments of the last window,
-   transmission of the fragmented packet ends.  If the timer expires,
 
 
 
@@ -1738,6 +1738,9 @@ Minaburo, et al.          Expires June 8, 2018                 [Page 31]
 Internet-Draft                 LPWAN SCHC                  December 2017
 
 
+   retransmits any lost fragments reported by the ACK, or if the ACK
+   confirms successful reception of all fragments of the last window,
+   transmission of the fragmented packet ends.  If the timer expires,
    and no ACK has been received since the start of the timer, the
    fragment sender assumes that the all-1 fragment has been successfully
    received (and possibly, the last ACK has been lost: this mechanism
@@ -1784,15 +1787,15 @@ Internet-Draft                 LPWAN SCHC                  December 2017
    compressed the field and sends the original value, or the second
    where the values can be computed by sending only the LSB bits:
 
-   o  TV is not set to any value, MO is set to "ignore" and CDA is set
-      to "value-sent"
-
 
 
 Minaburo, et al.          Expires June 8, 2018                 [Page 32]
 
 Internet-Draft                 LPWAN SCHC                  December 2017
 
+
+   o  TV is not set to any value, MO is set to "ignore" and CDA is set
+      to "value-sent"
 
    o  TV contains a stable value, MO is MSB(X) and CDA is set to LSB
 
@@ -1839,9 +1842,6 @@ Internet-Draft                 LPWAN SCHC                  December 2017
 
    If the Next header field identified by the rest of the rule varies
    during time or is not known by both sides, then TV is not set, MO is
-   set to "ignore" and CDA is set to "value-sent".  A matching-list may
-   also be used.
-
 
 
 
@@ -1849,6 +1849,9 @@ Minaburo, et al.          Expires June 8, 2018                 [Page 33]
 
 Internet-Draft                 LPWAN SCHC                  December 2017
 
+
+   set to "ignore" and CDA is set to "value-sent".  A matching-list may
+   also be used.
 
 7.6.  Hop Limit field
 
@@ -1894,9 +1897,6 @@ Internet-Draft                 LPWAN SCHC                  December 2017
 
    Otherwise the TV contains the prefix, the MO is set to "equal" and
    the CDA is set to value-sent.
-
-
-
 
 
 
