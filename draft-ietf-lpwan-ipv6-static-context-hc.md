@@ -650,7 +650,7 @@ In any of the Window mode options, fragments except the last one SHALL contain t
             +-- ... --+- ... -+-+- ... -+---...---+
 
 ~~~~
-{: #Fig-NotLastWin title='Fragmentation Header for Fragments except the Last One, Window mode'}
+{: #Fig-NotLastWin title='Fragmentation Format for Fragments except the Last One, Window mode'}
    
  
    
@@ -684,7 +684,7 @@ is not correct, this MIC bit is set to 0 and the bitmap follow.
                           C
                 
 ~~~~
-{: #Fig-ACK-Format title='Format of an ACK for All-1 windows'}
+{: #Fig-ACK-Format1 title='Format of an ACK for All-1 windows'}
 
    
 {{Fig-Bitmap-Win}} shows an example of an ACK (N=3), where the bitmap
@@ -773,7 +773,7 @@ is a minimum size ACK message concatenated by a byte with all bit set to 1.
     |   Rule ID  | DTag  |  1  |     MIC     | payload |
     +---- ... ---+- ... -+-----+---- ... ----+---...---+
 ~~~~
-{: #Fig-Last title='All-1 Fragmentation Header for the Last Fragment, No ACK option'}
+{: #Fig-Last title='All-1 Fragmentation Formt for the Last Fragment, No ACK option'}
 
    In any of the Window modes, the last fragment of an IPv6 datagram SHALL contain a fragmentation header that conforms to 
    the format shown in {{Fig-LastWinMode}}. The total size of this fragmentation 
@@ -787,7 +787,7 @@ is a minimum size ACK message concatenated by a byte with all bit set to 1.
       +-- ... --+- ... -+-+- ... -+---- ... ----+---...---+
                             (FCN)
 ~~~~
-{: #Fig-LastWinMode title='All-1 Fragmentation Header for the Last Fragment, Window mode'}
+{: #Fig-LastWinMode title='All-1 Fragmentation Format for the Last Fragment, Window mode'}
        
    The values for R, N, T and M are not specified in this document, and have to be determined in other documents (e.g. technology-specific profile documents).
    
