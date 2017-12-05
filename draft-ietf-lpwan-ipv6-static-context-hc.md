@@ -603,7 +603,7 @@ This document does not make any decision as to which fragment
    technology. 
 
 Examples of the different reliability options described are provided
-   in {{AppendixB}}.
+   in Appendix B.
 
 
 ## Formats
@@ -1430,7 +1430,7 @@ prefix is not in the scope of the document.
 The third rule compresses port numbers to 4 bits. 
 
 
-# Fragmentation Examples{#AppendixB}
+# Fragmentation Examples 
 
 This section provides examples of different fragment delivery reliability options possible on the basis of this specification.
 
