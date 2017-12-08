@@ -712,7 +712,7 @@ indicates that the second and the fifth fragments have not been correctly receiv
 ~~~~
 {: #Fig-Bitmap-lastWin title='Example of the bitmap in Window mode for the last window, for N=3)'}
 
-A ACK message may introduce padding at the end to align transmitted data to a byte boundary.
+An ACK message may introduce padding at the end to align transmitted data to a byte boundary.
 
 Bitmap sending MUST be optimized in size to reduce frame size and allow the ABORT message 
 definition. The right-most bytes with all bitmap bit set to 1 MUST be removed from the transmission.
@@ -733,8 +733,8 @@ An exception to that optimization is used to send an ABORT message. An ABORT mes
 is a minimum size ACK message concatenated by a byte with all bit set to 1.
 
 ~~~~                                                  
-     <-------   R  ------->C 6 5 4 3 2 1   7 (FCN values indicating the order)
-                 <- T -> 1 1
+     <-------   R  ------->
+                 <- T -> 1 
      +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+-+
      |  Rule ID  | DTag |W|1|1|1|1|1|1|1|1|1|1| 
      +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+-+
