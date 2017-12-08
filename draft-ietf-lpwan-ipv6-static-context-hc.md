@@ -54,8 +54,8 @@ The Static Context Header Compression (SCHC) offers a great level of flexibility
 when processing the header fields. SCHC compression is based on a common static context stored in a LPWAN device and in the network. Static context means that the stored information does not change during the packet transmission. The context describes the field values and keeps information that will not be transmitted through the constrained network. 
 
 SCHC must be used for LPWAN networks because it avoids complex resynchronization mechanisms, which are incompatible
-with LPWAN characteristics. And also because in most cases, IPv6/UDP headers are reduced
-to a small identifier called Rule ID. Eventhough sometimes, a SCHC compressed packet will not fit in one L2 PDU, and the SCHC fragmentation protocol will be used. The SCHC fragmentation and reassembly mechanism is used in two situations: for SCHC-compressed packets that still exceed the L2 PDU size; and for the case where the SCHC compression cannot be performed. 
+with LPWAN characteristics. And also, because in most cases, IPv6/UDP headers are reduced
+to a small identifier called Rule ID. Even though sometimes, a SCHC compressed packet will not fit in one L2 PDU, and the SCHC fragmentation protocol will be used. The SCHC fragmentation and reassembly mechanism is used in two situations: for SCHC-compressed packets that still exceed the L2 PDU size; and for the case where the SCHC compression cannot be performed. 
 
 This document describes the SCHC compression/decompression framework and applies it 
 to IPv6/UDP headers. This document also specifies a fragmentation and reassembly mechanism that is used to support the IPv6 MTU requirement over LPWAN technologies. Fragmentation is mandatory for IPv6 datagrams that, after SCHC compression or when it has not been possible to apply such compression, still exceed the L2 maximum payload size. Similar solutions for other protocols such as CoAP will be described in separate documents. 
@@ -68,7 +68,7 @@ Header compression is mandatory to efficiently bring Internet connectivity to th
 within a LPWAN network. Some LPWAN networks properties can be exploited to get an efficient header
 compression:
 
-* Topology is star-oriented, therefore all the packets follow the same path.
+* Topology is star-oriented; therefore, all the packets follow the same path.
   For the needs of this draft, the architecture can be summarized to Devices (Dev)
   exchanging information with LPWAN Application Server (App) through a Network Gateway (NGW). 
 
@@ -158,7 +158,7 @@ This section defines the terminology and acronyms used in this document.
 
 * FL: Field Length is a value to identify if the field is fixed or variable length.
 
-* FP: Field Position is a value that is used to identify each instance a field apears in the header.  
+* FP: Field Position is a value that is used to identify each instance a field appears in the header.  
 
 * IID: Interface Identifier. See the IPv6 addressing architecture {{RFC7136}}
 
@@ -186,7 +186,7 @@ This section defines the terminology and acronyms used in this document.
 
 * All-1 empty. Fragmentation Packet format without payload to request the bitmap when the Retransmission Timer expires in the last window.
 
-* Retransmission Timer. Timer to know when the a number of attemps to receive the information has been raised
+* Retransmission Timer. Timer used in the sender transmission to detect error in the link when waiting for an ACK.
 
 * Inactivity Timer. Timer to End the state machine when there is an error and there is no possibility to continue the transmission.
 
@@ -200,7 +200,7 @@ such as RoHC {{RFC5795}}. Based on the fact
 that the nature of data flows is highly predictable in LPWAN networks, some static
 contexts may be stored on the Device (Dev). The contexts must be stored in both ends, and it can 
 either be learned by a provisioning protocol or by out of band means or it can be pre-provisioned, etc. 
-The way the context is learned on both sides is out of the scope of this document.
+The way the context is learned on both sides are out of the scope of this document.
 
 
 ~~~~
@@ -222,7 +222,7 @@ The way the context is learned on both sides is out of the scope of this documen
 {: #Fig-archi title='Architecture'}
 
 {{Fig-archi}} represents the architecture for compression/decompression, it is based on {{I-D.ietf-lpwan-overview}} 
-terminology. The Device is sending applications flows using IPv6 or IPv6/UDP protocols. These flows are compressed by an 
+terminology. The Device is sending applications flows using IPv6 or IPv6/UDP protocols. These flows are compressed by a 
 Static Context Header Compression Compressor/Decompressor (SCHC C/D) to reduce headers size. The resulting
 information is sent to a layer two (L2) frame to a LPWAN Radio Network (RG) which forwards 
 the frame to a Network Gateway (NGW).
@@ -292,8 +292,8 @@ The Context describes the header fields and its values with the following entrie
   * BIDIRECTIONAL (Bi) when the field or the value is present either upstream or downstream. 
 
 * A Target Value (TV) is the value used to make the comparison with
-  the packet header field. The Target Value can be of any type (integer, strings,...).
-  For instance, it can be a single value or a more complex structure (array, list,...), such as a JSON or a CBOR structure.
+  the packet header field. The Target Value can be of any type (integer, strings, etc.).
+  For instance, it can be a single value or a more complex structure (array, list, etc.), such as a JSON or a CBOR structure.
 
 * A Matching Operator (MO) is the operator used to make the comparison between 
   the Field Value and the Target Value. The Matching Operator may require some 
@@ -343,11 +343,11 @@ The compression/decompression process follows several steps:
   For example, it can be either included in a Layer 2 header or sent in the first byte of
   the L2 payload. (Cf. {{Fig-FormatPckt}}). 
 
-* decompression: In both directions, The receiver identifies the sender through its device-id
+* decompression: In both directions, the receiver identifies the sender through its device-id
   (e.g. MAC address) and selects the appropriate Rule through the Rule ID. This
   Rule gives the compressed header format and associates these values to the header fields.
   It applies the CDA action to reconstruct the original
-  header fields. The CDA application order can be different from the order given by the Rule. For instance
+  header fields. The CDA application order can be different from the order given by the Rule. For instance,
   Compute-\* may be applied at the end, after all the other CDAs.
   
   If after using SCHC compression and adding the payload to the L2 frame the datagram is not multiple of 8 bits, 
@@ -444,7 +444,7 @@ field by indicating the length. This function is generally used with the "ignore
 
 ### mapping-sent
 
-mapping-sent is used to send a smaller index associated with the list of values
+The mapping-sent is used to send a smaller index associated with the list of values
 in the Target Value. This function is used together with the "match-mapping" MO.
 
 The compressor looks on the TV to find the field value and send the corresponding index.
@@ -457,7 +457,7 @@ The number of bits sent is the minimal size for coding all the possible indexes.
 LSB action is used to avoid sending the known part of the packet field header to the other end.
 This action is used together with the "MSB" MO. A length can be specified in the rule to indicate
 how many bits have to be sent. If the length is not specified, the number of bits sent is the
-field length minus the bits length specified in the MSB MO.
+field length minus the bits' length specified in the MSB MO.
 
 The compressor sends the "length" Least Significant Bits. The decompressor
 combines the value received with the Target Value.
@@ -507,18 +507,18 @@ LPWAN technologies impose some strict limitations on traffic, devices are sleepi
 
 This subsection describes the different fields in the fragmentation header (see format header in {{Fragfor}}) that are used to enable the described fragmentation functionalities and the different reliability options supported. 
 
-*  Rule ID. The Rule ID in the fragmentation header is used to identify the fragmentation mode used. The Rule ID also allows to interleave non-fragmented IPv6 datagrams with fragments that carry a larger IPv6 datagram. See format section {{Fragfor}}. 
+*  Rule ID. The Rule ID in the fragmentation header is used to identify the fragmentation mode used. The Rule ID also allows to interleave non-fragmented IPv6 datagrams with fragments that carry a larger IPv6 datagram. See format {{Fragfor}}. 
 
 *  Fragment Compressed Number (FCN).  The FCN is included in all fragments.  This field can be understood as a truncated, 
 efficient representation of a larger-sized fragment number, and does not carry an absolute fragment number.  There are two FCN reserved values. They are used for controlling the fragmentation process. The FCN value with all the bits equal to 1 (all-1) denotes the last 
 fragment of a packet.  And the FCN value with all the bits equal to 0 (all-0) denotes the last 
-fragment of a windonw (when such window is not the last one of the packet) in any window mode or the fragments in No ACK mode. The rest of the FCN values are assigned in a sequential 
+fragment of a window (when such window is not the last one of the packet) in any window mode or the fragments in No ACK mode. The rest of the FCN values are assigned in a sequential 
 and decreasing order, which has the purpose to avoid possible ambiguity for the receiver that might arise under certain 
 conditions.
-In the fragments, this field is an unsigned integer, with a size of N bits. In the No ACK mode it is set to 1 bit (N=1). For the other reliability options it is recommended to use a number of bits (N) equal to or greater than 3. The FCN MUST be set sequentially  
+In the fragments, this field is an unsigned integer, with a size of N bits. In the No ACK mode it is set to 1 bit (N=1). For the other reliability options, it is recommended to use a number of bits (N) equal to or greater than 3. The FCN MUST be set sequentially  
    decreasing from the highest FCN in the window (which will be used for the first fragment), and MUST wrap from 0 back to 
    the highest FCN in the window.  
-   For windows that are not the last one  from a fragmented packet, the FCN for the last fragment in such windows is an all-0. This indicates that the window is finished and it proceeds according to the reliability option in use: either an ACK is sent or the next window of fragments are expected when there is no error.
+   For windows that are not the last one  from a fragmented packet, the FCN for the last fragment in such windows is an all-0. This indicates that the window is finished and it proceeds according to the reliability option in use: either an ACK is sent or the next window of fragments is expected when there is no error.
    The FCN for the last fragment in the last window is an all-1.  It is also 
    important to note that, for No ACK mode or N=1, the last fragment of the packet will carry a FCN equal to 1, while all previous fragments 
    will carry a FCN of 0.
@@ -534,7 +534,7 @@ In the ACK format, DTag carries the same value as the DTag field in the fragment
 
 *  Message Integrity Check (MIC). This field, which has a size of M bits, is computed by the sender over the complete packet (i.e. a SCHC compressed or an uncompressed IPv6 packet) before fragmentation. The algorithm to be used to compute the MIC is not defined in this document, and needs to be defined in other documents (e.g. technology-specific profiles).  The MIC allows the receiver to check errors in the reassembled packet, while it also enables compressing the UDP checksum by use of SCHC compression.
  
-*  Retransmission Timer. It is used after the tranmsission of a window to detect an error tranmission of the ACK correponding to this window. Depending on the reliability option it will ask for an ACK retransmission on ACK-Always or it will triggers the next window on ACK-on-error.
+*  Retransmission Timer. It is used after the transmission of a window to detect an error transmission of the ACK corresponding to this window. Depending on the reliability option it will ask for an ACK retransmission on ACK-Always or it will trigger the next window on ACK-on-error.
  
 *  Inactivity Timer. This timer is used to detect when there is a problem in the transmission of frames and the receiver does not get any frame during a period of time or a number of packets in a period of time. When this happen, an abort needs to be sent. Initially and each time a frame is received the timer is reinitialized. The size of the timer is not defined in this document and must be defined in the specific technology document. 
  
@@ -566,7 +566,7 @@ This specification defines the following three fragment delivery reliability opt
    transmission, as long as the window size is short enough. However,
    such benefit comes at the expense of ACK use.
    In ACK-always, an ACK is transmitted by the fragment
-   receiver after a window of fragments have been sent.  A window of
+   receiver after a window of fragments has been sent.  A window of
    fragments is a subset of the full set of fragments needed to carry an
    IPv6 packet.  In this mode, the ACK informs the sender about received
    and/or missed fragments from the window of fragments.  Upon receipt
@@ -669,8 +669,8 @@ The format of an ACK is shown in {{Fig-ACK-Format}} to acknowledge All-0 windows
 ~~~~
 {: #Fig-ACK-Format title='Format of an ACK for All-0 windows'}
 
-To acknowledge the last windw (All-1 window), a MIC bit following the W bit is set
-to one to indicate that the MIC has been corectly computed by the receiver. If the MIC 
+To acknowledge the last window (All-1 window), a MIC bit following the W bit is set
+to one to indicate that the MIC has been correctly computed by the receiver. If the MIC 
 is not correct, this MIC bit is set to 0 and the bitmap follow.
 
 ~~~~
@@ -712,12 +712,12 @@ indicates that the second and the fifth fragments have not been correctly receiv
 ~~~~
 {: #Fig-Bitmap-lastWin title='Example of the bitmap in Window mode for the last window, for N=3)'}
 
-A ACK message may introcude padding at the end to aling transmitted data to a byte boundary.
+A ACK message may introduce padding at the end to align transmitted data to a byte boundary.
 
 Bitmap sending MUST be optimized in size to reduce frame size and allow the ABORT message 
 definition. The right-most bytes with all bitmap bit set to 1 MUST be removed from the transmission.
-As the receiver knows the bitmap size, it can recontruct the value. In the example {{Fig-All-opt}} 
-the last 2 bytes of the bitmap are set to 1, therefore they are not sent.
+As the receiver knows the bitmap size, it can reconstruct the value. In the example {{Fig-All-opt}} 
+the last 2 bytes of the bitmap are set to 1, therefore, they are not sent.
 
 ~~~~                                                  
      <-------   R  ------->C  
@@ -727,9 +727,9 @@ the last 2 bytes of the bitmap are set to 1, therefore they are not sent.
      +---- ... --+-... -+-+-+-+
      |       byte 1           |     byte  2   |     byte 3    |        
 ~~~~
-{: #Fig-All-opt title='Bitmap optmized fragment format'}
+{: #Fig-All-opt title='Bitmap optimized fragment format'}
 
-An exception to that optmization is used to send an ABORT message. An ABORT message 
+An exception to that optimization is used to send an ABORT message. An ABORT message 
 is a minimum size ACK message concatenated by a byte with all bit set to 1.
 
 ~~~~                                                  
@@ -784,11 +784,11 @@ is a minimum size ACK message concatenated by a byte with all bit set to 1.
     |   Rule ID  | DTag  |  1  |     MIC     | payload |
     +---- ... ---+- ... -+-----+---- ... ----+---...---+
 ~~~~
-{: #Fig-Last title='All-1 Fragmentation Formt for the Last Fragment, No ACK option'}
+{: #Fig-Last title='All-1 Fragmentation Format for the Last Fragment, No ACK option'}
 
    In any of the Window modes, the last fragment of an IPv6 datagram SHALL contain a fragmentation header that conforms to 
    the format shown in {{Fig-LastWinMode}}. The total size of this fragmentation 
-   header is R+M bits. It is used for request a retransmissions
+   header is R+M bits. It is used for request a retransmission
 
 ~~~~
       <------------ R ------------>
@@ -851,7 +851,7 @@ TODO (explain the Bitmap optimization)
 The fragmentation is based on the FCN value, which has a length of N bits. The All-1 and All-0 values are reserved, and are used to control the fragmentation transmission. The FCN will be sent in downwards position this means from larger to smaller and the number of bits depends on the implementation. The last fragment in all modes must contains a MIC which is used to check if there are error or missing fragments.
 
 ### No ACK Mode
-In the No ACK mode there is no feedback communication. The sender will send the fragments until the last one whithout any possibility to know if there were an error or a loss has occurred. As there is not a need to identify specific fragments a  one-bit FCN is used, where FCN all-0 will be sent for all fragments except the last one. The latter will carry an all-1 FCN and will send the MIC. The next figure shows the state machine for the sender. 
+In the No ACK mode there is no feedback communication. The sender will send the fragments until the last one without any possibility to know if there were an error or a loss has occurred. As there is not a need to identify specific fragments a  one-bit FCN is used, where FCN all-0 will be sent for all fragments except the last one. The latter will carry an all-1 FCN and will send the MIC. The next figure shows the state machine for the sender. 
 The receiver waits for fragments and will set a timer in order to see if there is no missing fragments. The No ACK mode will use the MIC contained in the last fragment to check error. The FCN is set to all-1 for the last fragment. 
 {{Fig-NoACKModeRcv}} shows the state machine for the receiver. When the Timer expires or when the check of MIC gives an error the receiver will abort the communication and go to error state, all the fragments will be dropped. The Inactivity Timer will be based on the LPWAN technology and will be defined in the specific technology document. 
 
@@ -862,7 +862,7 @@ TODO named TIMER and the Inactivity TImer for all draft??
 
 
 ### The Window modes 
-In Window modes, a jumping window protocol is using two windows alternatively 0 and 1. 
+In Window modes, a jumping window protocol is using two windows alternatively, 0 and 1. 
 An FCN set to all-0 indicates that the window is over (i.e. the fragment is the last one of the window) and allows to switch from one window to another. The all-1 FCN in a fragment indicates 
 that it is the last fragment of the packet and there will not be another window. 
 
@@ -876,7 +876,7 @@ The Window mode has two different mode of operation: The ACK on error and the AC
 
 ### ACK Always
 The {{Fig-ACKAlwaysSnd}} finite state machine describes the sender behavior.
-Intially, when a fragmented packet needs to be sent, the window is set to 0, a local_bitmap 
+Initially, when a fragmented packet needs to be sent, the window is set to 0, a local_bitmap 
 is set to 0, and FCN is set to the highest possible value depending on the number
 of fragments that will be sent in the window (INIT STATE). 
 
@@ -884,17 +884,17 @@ The sender starts sending fragments (SEND STATE), the sender will indicate in th
 window (W bit) and the FCN fragment number. A delay between each fragment can be added to respect regulation
 rules or constraints imposed by the applications. Each time a fragment is sent the FCN is decreased by one and the bitmap is set locally. The SEND STATE is left always for the WAIT BITMAP STATE, in the following two cases:
 
-* The FCN reaches value 0 and there are more fragments to be sent. In that case, an all-0 fragmet is sent and the timer is set. The sender will wait for
+* The FCN reaches value 0 and there are more fragments to be sent. In that case, an all-0 fragment is sent and the timer is set. The sender will wait for
 the ACK sent by the receiver.
 
-* The last fragment is sent. In that case an all-1 fragment with the MIC is sent and the sender will wait
+* The last fragment is sent. In that case, an all-1 fragment with the MIC is sent and the sender will wait
 for the bitmap acknowledged by the receiver. The sender sets a timer to wait for the ACK.
 
 During the transition between the SEND state of the current window and the WAIT BITMAP, the sender starts listening to the radio and starts a timer. This timer 
 is dimensioned based on the receive window available for the LPWAN technology in use.
 
-In ACK Always, if the timer expire, an empty All-0 (or All-1 if the last fragment has been sent)
-fragment is sent to ask the receiver to resens its Bitmap. The window number is not changed.
+In ACK Always, if the timer expires, an empty All-0 (or All-1 if the last fragment has been sent)
+fragment is sent to ask the receiver to resend its Bitmap. The window number is not changed.
 
 When the sender receives an ACK, it checks the window value. Acks carrying an unexpected W bit are discarded.
 
@@ -905,11 +905,11 @@ the bitmap, stop the timer and move its sending window to the next value. If no 
 fragments have to be sent, then the fragmented packet transmission is terminated.
 
 If some fragments are missing (not set in the bit map) then the sender resend the missing
-fragments. When the retransmission is finished, it start listening to the bitmap (even if
-a All-0 or All-1 has not been sent during the retransmission) and returns to the 
+fragments. When the retransmission is finished, it starts listening to the bitmap (even if
+an All-0 or an All-1 has not been sent during the retransmission) and returns to the 
 waiting bitmap state.
 
-If the local-bitmap is different from the received bitmap the counter Attemps is increased and the sender resend the missing fragments again, when a MAX_ATTEMPS is reached the sender sends an Abort and goes to error.
+If the local-bitmap is different from the received bitmap the counter Attempts is increased and the sender resend the missing fragments again, when a MAX_ATTEMPS is reached the sender sends an Abort and goes to error.
 
 The {{Fig-ACKAlwaysRcv}} finite state machine describes the receiver behavior. The receiver starts with window 0 as the expecting window and maintain a local_bitmap 
 indicating which fragments it has received (All-0 and All-1 occupy the same position).
@@ -929,11 +929,11 @@ A correct MIC indicates the end of the transmission. The receiver must stay in t
 during a period of time to answer to empty all-1 frag the sender may send if the bitmap
 is lost.
 
-If All-1 frag has not been received, the receiver expect a new window. It waits for
+If All-1 frag has not been received, the receiver expects a new window. It waits for
 the next fragment. If the window value has not changed, the received fragments are
 part of a retransmission. A receiver that has already received a frag should discard it 
 (not represented in the state machine), otherwise it completes its bitmap. If all the
-bit of the bitmap are set to one, the receiver may send a bitmap without waiting for a 
+bits of the bitmap are set to one, the receiver may send a bitmap without waiting for an 
 all-0 frag. 
 
 If the window value is set to the next value, this means that the sender has received 
@@ -950,7 +950,7 @@ In case of an incorrect MIC, the receivers wait for fragment belonging to the sa
 
 
 ### ACK on error
-The ACK on error sender is very similar to the ACK always sender, Intially, when a fragmented packet is sent, the window is set to 0, a local_bit map 
+The ACK on error sender is very similar to the ACK always sender, Initially, when a fragmented packet is sent, the window is set to 0, a local_bit map 
 is set to 0, and FCN is set the highest possible value depending on the number
 of fragment that will be sent in the window. See {{Fig-ACKonerrorSnd}}
 
@@ -959,10 +959,10 @@ window and the FCN number. A delay between each fragment can be added to respect
 rules or constraints imposed by the applications. This state can be leaved for different
 reasons:
 
-* The FCN reaches value 0. In that case a all-0 fragmet is sent and the sender will wait for
+* The FCN reaches value 0. In that case, an all-0 fragment is sent and the sender will wait for
 the bitmap acknowledged by the receiver.
 
-* The last fragment is sent. In that case a all-1 fragment is sent and the sender will wait
+* The last fragment is sent. In that case, an all-1 fragment is sent and the sender will wait
 for the bitmap acknowledged by the receiver.
 
 During the transition between the sending the fragment of the current window and waiting 
@@ -972,7 +972,7 @@ is dimensioned to the receiving window depending on the LPWAN technology.
 In Ack on error mode, the timer expiration will be considered as a positive acknowledgment. If there are no more fragments then the fragmentation is finished. 
 
 If the sender receives a bitmap, it checks the window value. Acknowledgment with the
-non expected window are discarded.
+non-expected window are discarded.
 
 If the window number on the received bitmap is correct, the sender compare the local bitmap
 with the received bitmap. If they are equal all the fragments sent during the window 
@@ -981,14 +981,14 @@ the bitmap, stop the timer and move its sending window to the next value. If no 
 fragments have to be sent, then the fragmented packet transmission is terminated.
 
 If some fragments are missing (not set in the bit map) then the sender resend the missing
-fragments. When the retransmission is finished, it start listening to the bitmap (even if
-a All-0 or All-1 has not been sent during the retransmission) and returns to the 
+fragments. When the retransmission is finished, it starts listening to the bitmap (even if
+an All-0 or an All-1 has not been sent during the retransmission) and returns to the 
 waiting bitmap state.
 
-If the local-bitmap is different from the received bitmap the counter Attemps is increased and the sender resend the missing fragments again, when a MAX_ATTEMPS is reached the sender sends an Abort and goes to error.
+If the local-bitmap is different from the received bitmap the counter Attempts is increased and the sender resend the missing fragments again, when a MAX_ATTEMPS is reached the sender sends an Abort and goes to error.
 
 
-Unlike the sender, the receiver for ACK on error has some differences. First we are not sending the bitmap unless there is an error or an unexpected behavior. The {{Fig-ACKonerrorRcv}} finite state machine describes the receiver behavior. The receiver starts with an the expecting window and maintain a local_bitmap 
+Unlike the sender, the receiver for ACK on error has some differences. First, we are not sending the bitmap unless there is an error or an unexpected behavior. The {{Fig-ACKonerrorRcv}} finite state machine describes the receiver behavior. The receiver starts with an the expecting window and maintain a local_bitmap 
 indicating which fragments it has received (all-0 and all-1 occupy the same position).
 
 Any fragment not belonging to the current window is discarded. Fragment belonging to the 
@@ -997,16 +997,16 @@ this state when receiving a:
 
 * All-0 fragment and not a full bitmap indicate that all the fragments have been sent in the current
 window. Since the sender is not obliged to send a full window, some fragment number
-not set in the local_bitmap may not correspond to losses. As the receiver does not know if the missing fragments are looses or normal missing fragments it sned s a local bitmap.
+not set in the local_bitmap may not correspond to losses. As the receiver does not know if the missing fragments are lost or normal missing fragments, it sends a local bitmap.
 
 * All-1 fragment which indicates that the transmission is finished. Since the last window
 is not full, the MIC will be used to detect if all the fragments have been received. A correct MIC indicates the end of the transmission. 
 
-If All-1 frag has not been received, the receiver expect a new window. It waits for
+If All-1 frag has not been received, the receiver expects a new window. It waits for
 the next fragment. If the window value has not changed, the received fragments are
 part of a retransmission. A receiver that has already received a frag should discard it 
 (not represented in the state machine), otherwise it completes its bitmap. If all the
-bits of the bitmap are set to one, the receiver clear the bitmap and wait for the next window without waiting for a 
+bits of the bitmap are set to one, the receiver clear the bitmap and wait for the next window without waiting for an 
 all-0 frag. 
 While the receiver waits for next window and if the window value is set to the next value, and all-1 fragment with the next value window arrived the receiver goes to error and abort the transmission, it drops the fragments.
 
@@ -1022,7 +1022,7 @@ In case of an incorrect MIC, the receivers wait for fragment belonging to the sa
 
 ## Supporting multiple window sizes
 
-For ACK Always or ACK on error, implementers may opt to support a single window size or multiple window sizes.  The latter, when feasible, may provide performance optimizations.  For example, a large window size may be used for packets that need to be carried by a large number of fragments.  However, when the number of fragments required to carry an packet is low, a smaller window size, and thus a shorter bitmap, may be sufficient to provide feedback on all fragments.  If multiple window sizes are supported, the Rule ID may be used to signal the window size in use for a specific packet transmission.
+For ACK Always or ACK on error, implementers may opt to support a single window size or multiple window sizes.  The latter, when feasible, may provide performance optimizations.  For example, a large window size may be used for packets that need to be carried by a large number of fragments.  However, when the number of fragments required to carry a packet is low, a smaller window size, and thus a shorter bitmap, may be sufficient to provide feedback on all fragments.  If multiple window sizes are supported, the Rule ID may be used to signal the window size in use for a specific packet transmission.
 
 Note that the same window size MUST be used for the transmission of all fragments that belong to a packet.
 
@@ -1075,11 +1075,11 @@ For fragmented packet transmission in the downlink, and when ACK Always
 
 # Padding management 
 
-SCHC header either for compression, fragmentation or acknowledgment do not preserve byte alignment. Since most of the LPWAN network payload is expressed in a number of byte, the receiver must be able to elimitate the padding bits.
+SCHC header either for compression, fragmentation or acknowledgment do not preserve byte alignment. Since most of the LPWAN network payload is expressed in a number of byte; the receiver must be able to eliminate the padding bits.
 
 Padding bit elimination for compressed or fragmented frames. The header size is given by the rule and is not aligned on a byte boundary. The data size is variable, but always a multiple of 8 bits. In that case, the padding MUST never exceed 7 bits.
 
-For fragmentation acknowledgement, the header size and the bitmap size are given by the rule. The remaining bits are padding and can be of any size
+For fragmentation acknowledgement, the header size and the bitmap size is given by the rule. The remaining bits are padding and can be of any size
 
 # SCHC Compression for IPv6 and UDP headers
 
@@ -1087,7 +1087,7 @@ This section lists the different IPv6 and UDP header fields and how they can be 
 
 ## IPv6 version field
 
-This field always holds the same value, therefore the TV is 6, the MO is "equal" 
+This field always holds the same value. Therefore, the TV is 6, the MO is "equal" 
 and the "CDA "not-sent"".
 
 ## IPv6 Traffic class field
@@ -1144,8 +1144,8 @@ known by both sides, then TV is not set, MO is set to "ignore" and CDA is set to
 
 ## Hop Limit field
 
-The End System is generally a device and does not forward packets, therefore the
-Hop Limit value is constant. So the TV is set with a default value, the MO 
+The End System is generally a device and does not forward packets. Therefore, the
+Hop Limit value is constant. So, the TV is set with a default value, the MO 
 is set to "equal" and the CDA is set to "not-sent".
 
 Otherwise the value is sent on the LPWAN: TV is not set, MO is set to ignore and 
@@ -1171,7 +1171,7 @@ field.
 Both ends must be synchronized with the appropriate prefixes. For a specific flow, 
 the source and destination prefix can be unique and stored in the context. It can 
 be either a link-local prefix or a global prefix. In that case, the TV for the 
-source and destination prefixes contains the values, the MO is set to "equal" and
+source and destination prefixes contain the values, the MO is set to "equal" and
 the CDA is set to "not-sent".
 
 In case the rule allows several prefixes, mapping-list must be used. The 
@@ -1220,7 +1220,7 @@ the MO is set to "equal" and the CDA is set to "not-sent".
 If the port variation is on few bits, the TV contains the stable part of the port number,
 the MO is set to "MSB" and the CDA is set to "LSB".
 
-If some well-known values are used,  the TV can contain the list of this values, the
+If some well-known values are used,  the TV can contain the list of these values, the
 MO is set to "match-mapping" and the CDA is set to "mapping-sent".
 
 Otherwise the port numbers are sent on the LPWAN. The TV is not set, the MO is 
@@ -1229,7 +1229,7 @@ set to "ignore" and the CDA is set to "value-sent".
 ## UDP length field
 
 If the LPWAN technology does not introduce padding, the UDP length can be computed
-from the received data. In that case the TV is not set, the MO is set to "ignore" and
+from the received data. In that case, the TV is not set, the MO is set to "ignore" and
 the CDA is set to "compute-UDP-length".
 
 If the payload is small, the TV can be set to 0x0000, the MO set to "MSB" and the
@@ -1241,11 +1241,11 @@ On other cases, the length must be sent and the CDA is replaced by "value-sent".
 
 IPv6 mandates a checksum in the protocol above IP. Nevertheless, if a more efficient
 mechanism such as L2 CRC or MIC is carried by or over the L2 (such as in the 
-LPWAN fragmentation process (see section {{Frag}})), the UDP checksum transmission can be avoided.
+LPWAN fragmentation process (see {{Frag}})), the UDP checksum transmission can be avoided.
 In that case, the TV is not set, the MO is set to "ignore" and the CDA is set to
 "compute-UDP-checksum".
 
-In other cases the checksum must be explicitly sent. The TV is not set, the MO is set to
+In other cases, the checksum must be explicitly sent. The TV is not set, the MO is set to
 "ignore" and the CDF is set to "value-sent".
 
 # Security considerations
