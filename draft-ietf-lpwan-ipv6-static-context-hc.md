@@ -552,7 +552,6 @@ fragment has been correctly sent and received. However, the sending format of th
 *  Padding (P). The number of bits used for padding is not defined and depends on the size of the Rule ID, DTag and FCN number of bits, and in the other hand it depends on the frame size. It will be used to align in byte boundary the last byte.
 
 
-
 ## Reliability options
 
 This specification defines the following three fragment delivery reliability options:
@@ -688,47 +687,6 @@ is not correct, this MIC bit is set to 0 and the bitmap follow.
                 
 ~~~~
 {: #Fig-ACK-Format1 title='Format of an ACK for All-1 windows'}
-
-   
-{{Fig-Bitmap-Win}} shows an example of an ACK (N=3), where the bitmap
-indicates that the second and the fifth fragments have not been correctly received. 
-
-~~~~                                                  
-    <-------   R  ------->  6 5 4 3 2 1   0 (FCN values indicating the order)
-                <- T -> 1 1    
-    +---- ... --+-... -+-+-+-+-+-+-+-+-+-----+-------+
-    |  Rule ID  | DTag |W|C|1|0|1|1|0|1|all-0|padding|  
-    +---- ... --+-... -+-+-+-+-+-+-+-+-+-----+-------+
-
-~~~~
-{: #Fig-Bitmap-Win title='Example of the bitmap in Window mode, in any window except the last one, for N=3)'}
-
-~~~~                                                  
-     <-------   R  ------->  6 5 4 3 2 1   7 (FCN values indicating the order)
-                 <- T -> 1 1
-     +---- ... --+-... -+-+-+-+-+-+-+-+-+-----+-------+
-     |  Rule ID  | DTag |W|0|1|0|1|1|0|1|all-1|padding|   
-     +---- ... --+-... -+-+-+-+-+-+-+-+-+-----+-------+
-                           C  bitmap
-~~~~
-{: #Fig-Bitmap-lastWin title='Example of the bitmap in Window mode for the last window, for N=3)'}
-
-An ACK message may introduce padding at the end to align transmitted data to a byte boundary.
-
-Bitmap sending MUST be optimized in size to reduce frame size and allow the ABORT message 
-definition. The right-most bytes with all bitmap bit set to 1 MUST be removed from the transmission.
-As the receiver knows the bitmap size, it can reconstruct the value. In the example {{Fig-All-opt}} 
-the last 2 bytes of the bitmap are set to 1, therefore, they are not sent.
-
-~~~~                                                  
-     <-------   R  ------->C  
-                 <- T -> 1 1
-     +---- ... --+-... -+-+-+-+
-     |  Rule ID  | DTag |W|1|0|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|P|  
-     +---- ... --+-... -+-+-+-+
-     |---- byte boundary -----| 1 byte  next  |  1 byte next  |        
-~~~~
-{: #Fig-All-opt title='Bitmap optimized fragment format'}
 
 
 ### All-1 and All-0 formats
@@ -949,29 +907,59 @@ In case of an incorrect MIC, the receivers wait for fragment belonging to the sa
 
 ### Bitmap Optimization 
 
-The Fragmentation Bitmap has two instance the local one and the sending one. The local_bitmap is the representation of each fragment correctly received and kept in memory. The size of the local_bitmap may be based on the FCN size 
+The Fragmentation Bitmap has two instance the local one and the sending one. The local_bitmap is the representation of each fragment correctly received and kept in memory. The size of the local_bitmap may be based on the FCN size. The bitmap sending is the optmization of what has been received. An ACK message may introduce padding at the end to align transmitted data to a byte boundary. The first byte boundary includes one or more complete bytes, depending on the size of Rule ID and DTag.
 
 ~~~~                                                  
                             <----     bitmap fragments    ---->   
-     |  Rule ID  | DTag |W|C|0|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|0|  
-           
+     |  Rule ID  | DTag |W|C|0|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|0|   
+     |---- byte boundary -----| 1 byte  next  |  1 byte next  |   
+      
 ~~~~
 {: #Fig-Localbitmap title='Local_Bitmap'}
 
-Bitmap sending MUST be optimized in size to reduce frame size and allow the ABORT message 
-definition. The right-most bytes with all bitmap bit set to 1 MUST be removed from the transmission.
-As the receiver knows the bitmap size, it can reconstruct the value. In the example {{Fig-All-opt}} 
-the last 2 bytes of the bitmap are set to 1, therefore, they are not sent.
+Bitmap sending MUST be optimized in size to reduce frame size. The right-most bytes with all bitmap bit set to 1 MUST be removed from the transmission. As the receiver knows the bitmap size, it can reconstruct the value. In the example {{Fig-All-opt}} the last 2 bytes of the bitmap are set to 1, therefore, they are not sent.
 
 ~~~~                                                  
-     <-------   R  ------->C  
-                 <- T -> 1 1
+     <-------   R  ------->  
+                 <- T -> 1 
      +---- ... --+-... -+-+-+-+
-     |  Rule ID  | DTag |W|1|0|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|P|  
+     |  Rule ID  | DTag |W|1|0|
      +---- ... --+-... -+-+-+-+
-     |---- byte boundary -----| 1 byte  next  |  1 byte next  |        
+     |---- byte boundary -----|       
 ~~~~
-{: #Fig-All-opt title='Bitmap optimized fragment format'}
+{: #Fig-Sendingbitmap title='Bitmap sending fragment format'}
+
+{{Fig-Bitmap-Win}} shows an example of an ACK (N=3), where the bitmap
+indicates that the second and the fifth fragments have not been correctly received. 
+
+~~~~                                                  
+    <-------   R  ------->  6 5 4 3 2 1   0 (FCN values indicating the order)
+                <- T -> 1 1  
+    |  Rule ID  | DTag |W|C|1|0|1|1|0|1|all-0|padding|  local_bitmap
+    |---- byte boundary -----|   1 byte  next  |  1 byte next  |
+    
+    
+    +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+
+    |  Rule ID  | DTag |W|C|1|0|1|1|0|1|1|P|  sending bitmap
+    +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+
+    |---- byte boundary -----| 1 byte next | 
+~~~~
+{: #Fig-Bitmap-Win title='Example of the bitmap in Window mode, in any window except the last one, for N=3)'}
+
+~~~~                                                  
+     <-------   R  ------->  6 5 4 3 2 1 7 (FCN values indicating the order)
+                 <- T -> 1 1
+     |  Rule ID  | DTag |W|0|1|1|1|1|1|1|1|padding|  local_bitmap
+     |---- byte boundary -----|  1 byte next |  1 byte next  |
+     
+     +---- ... --+-... -+-+-+-+
+     |  Rule ID  | DTag |W|0|1| sending bitmap
+     +---- ... --+-... -+-+-+-+
+     |---- byte boundary -----| 
+~~~~
+{: #Fig-Bitmap-lastWin title='Example of the bitmap in Window mode for the last window, for N=3)'}
+
+
 
 
 ### Abort
