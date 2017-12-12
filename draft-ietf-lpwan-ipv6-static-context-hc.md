@@ -949,6 +949,33 @@ In case of an incorrect MIC, the receivers wait for fragment belonging to the sa
 
 ### Bitmap Optimization 
 
+The Fragmentation Bitmap has two instance the local one and the sending one. The local_bitmap is the representation of each fragment correctly received and kept in memory. The size of the local_bitmap may be based on the FCN size 
+
+~~~~                                                  
+                            <----     bitmap fragments    ---->   
+     |  Rule ID  | DTag |W|C|0|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|0|  
+           
+~~~~
+{: #Fig-Localbitmap title='Local_Bitmap'}
+
+Bitmap sending MUST be optimized in size to reduce frame size and allow the ABORT message 
+definition. The right-most bytes with all bitmap bit set to 1 MUST be removed from the transmission.
+As the receiver knows the bitmap size, it can reconstruct the value. In the example {{Fig-All-opt}} 
+the last 2 bytes of the bitmap are set to 1, therefore, they are not sent.
+
+~~~~                                                  
+     <-------   R  ------->C  
+                 <- T -> 1 1
+     +---- ... --+-... -+-+-+-+
+     |  Rule ID  | DTag |W|1|0|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|P|  
+     +---- ... --+-... -+-+-+-+
+     |---- byte boundary -----| 1 byte  next  |  1 byte next  |        
+~~~~
+{: #Fig-All-opt title='Bitmap optimized fragment format'}
+
+
+### Abort
+
 ## Supporting multiple window sizes
 
 For ACK Always or ACK on error, implementers may opt to support a single window size or multiple window sizes.  The latter, when feasible, may provide performance optimizations.  For example, a large window size may be used for packets that need to be carried by a large number of fragments.  However, when the number of fragments required to carry a packet is low, a smaller window size, and thus a shorter bitmap, may be sufficient to provide feedback on all fragments.  If multiple window sizes are supported, the Rule ID may be used to signal the window size in use for a specific packet transmission.
