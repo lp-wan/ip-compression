@@ -533,7 +533,7 @@ In the ACK format, DTag carries the same value as the DTag field in the fragment
    
 *  C (MIC checked): C is a 1-bit field. This field is used in the ACK format packets to know if the MIC check was correct or not.  
 
-*  Message Integrity Check (MIC). This field, which has a size of M bits, is computed by the sender over the complete packet (i.e. a SCHC compressed or an uncompressed IPv6 packet) before fragmentation. The algorithm to be used to compute the MIC is not defined in this document, and needs to be defined in other documents (e.g. technology-specific profiles).  The MIC allows the receiver to check errors in the reassembled packet, while it also enables compressing the UDP checksum by use of SCHC compression.
+*  Message Integrity Check (MIC). This field, which has a size of M bits, is computed by the sender over the complete packet (i.e. a SCHC compressed or an uncompressed IPv6 packet) before fragmentation. The algorithm to be used to compute the MIC is not defined in this document, and needs to be defined in other documents (e.g. technology-specific profiles).  The MIC allows the receiver to check errors in the reassembled packet, while it also enables compressing the UDP checksum by use of SCHC compression. The CRC32 as 0xEDB88320 is recommended for the computing MIC, other algorithm MUST be defined in the corresponding technology documents.
  
 *  Retransmission Timer. It is used after the transmission of a window to detect an error transmission of the ACK corresponding to this window. Depending on the reliability option it will ask for an ACK retransmission on ACK-Always or it will trigger the next window on ACK-on-error.
  
@@ -843,7 +843,7 @@ Any fragment not belonging to the current window is discarded. All Fragments bel
 When All-0 fragment is received, which indicates that all the fragments have been sent in the current window. Since the sender is not obliged to send a full window, some fragment number not set in the local_bitmap may not correspond to losses. The next window can start.
 
 When All-1 fragment is received, which indicated that the transmission is finished. Since the last window is not full, the MIC will be used to detect if all the fragments have been received. A correct MIC indicates the end of the transmission but the receiver must stay alive 
-a period of time to answer to empty All-1 frag the sender may send if the bitmap
+a period of time to answer to empty All-1 fragment the sender may send if the bitmap
 is lost.
 
 If All-1 fragment has not been received, the receiver expects a new window. It waits for
@@ -893,9 +893,9 @@ An All-0 fragment and not a full bitmap indicate that all the fragments have bee
 An All-1 fragment indicates that the transmission is finished. Since the last window
 is not full, the MIC will be used to detect if all the fragments have been received. A correct MIC indicates the end of the transmission. 
 
-If All-1 frag has not been received, the receiver expects a new window. It waits for
+If All-1 fragment has not been received, the receiver expects a new window. It waits for
 the next fragment. If the window value has not changed, the received fragments are
-part of a retransmission. A receiver that has already received a fragment should discard it, otherwise it completes its bitmap. If all the bits of the bitmap are set to one, the receiver clear the bitmap and wait for the next window without waiting for an All-0 frag. 
+part of a retransmission. A receiver that has already received a fragment should discard it, otherwise it completes its bitmap. If all the bits of the bitmap are set to one, the receiver clear the bitmap and wait for the next window without waiting for an All-0 fragment. 
 While the receiver waits for next window and if the window value is set to the next value, and All-1 fragment with the next value window arrived the receiver goes to error and abort the transmission, it drops the fragments.
 
 If the receiver receives an All-0 fragment, it stays in the same state. Sender may send one fragment per window or more. Otherwise some fragments in the window have been lost.
