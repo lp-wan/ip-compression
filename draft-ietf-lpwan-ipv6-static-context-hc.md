@@ -132,11 +132,21 @@ types of entities in a typical LPWAN network, see {{Fig-LPWANarchi}}:
 # Terminology
 This section defines the terminology and acronyms used in this document.
 
+* All-0. Fragmentation Packet format to send the last frame of a window.
+
+* All-1. Fragmentation Packet format to send the last frame of a packet.
+
+* All-0 empty. Fragmentation Packet format without payload to request the bitmap when the Retransmission Timer expires in a window.
+
+* All-1 empty. Fragmentation Packet format without payload to request the bitmap when the Retransmission Timer expires in the last window.
+
 * App: LPWAN Application. An application sending/receiving IPv6 packets to/from the Device.
 
 * APP-IID: Application Interface Identifier. Second part of the IPv6 address to identify the application interface
 
 * Bi: Bidirectional, it can be used in both senses
+
+* C: Checked bit. Used in fragmentation header to determine when the MIC is correct (1) or not (0).
 
 * CDA: Compression/Decompression Action. An action that is performed for both functionalities to compress a header field or to recover its original value in the decompression phase.
 
@@ -162,9 +172,13 @@ This section defines the terminology and acronyms used in this document.
 
 * IID: Interface Identifier. See the IPv6 addressing architecture {{RFC7136}}
 
+* Inactivity Timer. Timer to End the state machine when there is an error and there is no possibility to continue the transmission.
+
 * MIC: Message Integrity Check.  A fragmentation header field computed over an IPv6 packet before fragmentation, used for error detection after IPv6 packet reassembly. 
 
 * MO: Matching Operator. An operator used to match a value contained in a header field with a value contained in a Rule.
+
+* Retransmission Timer. Timer used in the sender transmission to detect error in the link when waiting for an ACK.
 
 * Rule: A set of header field values.
 
@@ -177,19 +191,6 @@ This section defines the terminology and acronyms used in this document.
 * Up: Up Link direction for compression, from Dev to SCHC C/D.
 
 * W: Window bit. A fragmentation header field used in Window mode (see section 9), which carries the same value for all fragments of a window.
-
-* All-0. Fragmentation Packet format to send the last frame of a window.
-
-* All-1. Fragmentation Packet format to send the last frame of a packet.
-
-* All-0 empty. Fragmentation Packet format without payload to request the bitmap when the Retransmission Timer expires in a window.
-
-* All-1 empty. Fragmentation Packet format without payload to request the bitmap when the Retransmission Timer expires in the last window.
-
-* Retransmission Timer. Timer used in the sender transmission to detect error in the link when waiting for an ACK.
-
-* Inactivity Timer. Timer to End the state machine when there is an error and there is no possibility to continue the transmission.
-
 
 
 # Static Context Header Compression
