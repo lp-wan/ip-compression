@@ -515,7 +515,7 @@ fragment of a packet.  And the FCN value with all the bits equal to 0 (all-0) de
 fragment of a window (when such window is not the last one of the packet) in any window mode or the fragments in No ACK mode. The rest of the FCN values are assigned in a sequential 
 and decreasing order, which has the purpose to avoid possible ambiguity for the receiver that might arise under certain 
 conditions.
-In the fragments, this field is an unsigned integer, with a size of N bits. In the No ACK mode it is set to 1 bit (N=1). For the other reliability options, it is recommended to use a number of bits (N) equal to or greater than 3. The FCN MUST be set sequentially  
+In the fragments, this field is an unsigned integer, with a size of N bits. In the No ACK mode it is set to 1 bit (N=1). For the other reliability options, it is recommended to use a number of bits (N) equal to or greater than 3. Nevertheless, the apropriate value will be defined in the corresponding technology documents. The FCN MUST be set sequentially  
    decreasing from the highest FCN in the window (which will be used for the first fragment), and MUST wrap from 0 back to 
    the highest FCN in the window.  
    For windows that are not the last one  from a fragmented packet, the FCN for the last fragment in such windows is an all-0. This indicates that the window is finished and it proceeds according to the reliability option in use: either an ACK is sent or the next window of fragments is expected when there is no error.
@@ -540,11 +540,11 @@ In the ACK format, DTag carries the same value as the DTag field in the fragment
  
 *  Attempts. It is a counter used to request a missing ACK, and in consequence to determine when an Abort is needed because there is a recurrent error, which maximal value is MAX_ACK_REQUEST. The default value of MAX_ACK_REQUESTS is not
    stated in this document, and it is expected to be defined in other
-   documents (e.g. technology- specific profiles).
+   documents (e.g. technology-specific profiles).
 
 *  Bitmap. The bitmap is a sequence of bits to define the ACK for a given window. Each bit in the Bitmap identifies a fragment. It provides feedback on whether each fragment of the current window has been received or not. The right-most position on the bitmap is used to set the All-0 or All-1 FCN values which control the window state. Feedback for a fragment with the highest FCN value
 is set to the left-most position in the Bitmap. In the Bitmap a bit set to 1 indicates that the corresponding FCN 
-fragment has been correctly sent and received. However, when all the fragments have been correctly received, the receiver sends only the content until a byte boundary or until the byte boundary of the first error carried on the bitmap. 
+fragment has been correctly sent and received. However, the sending format of the bitmap will be truncated until a byte boundary where the last error is given. When all the fragments have been correctly received, the receiver sends only the content until a byte boundary for the header fragment or until the byte boundary of the first error carried on the bitmap. 
 
 *  Abort. When the receiver needs to abort the transmission, it uses the ACK Abort format packet with all the bits set to 1 or the All-1 Abort format to trigger the end of the transmission.
 
@@ -674,15 +674,15 @@ to one to indicate that the MIC has been correctly computed by the receiver. If 
 is not correct, this MIC bit is set to 0 and the bitmap follow.
 
 ~~~~
-    <--------  R  -------> 
+    <--------  R  ------->  <- byte boundary ->
                 <- T -> 1 1
     +---- ... --+-... -+-+-+
     |  Rule ID  | DTag |W|1| (MIC correct)
     +---- ... --+-... -+-+-+
                 
-    +---- ... --+-... -+-+-+----- ... ---+
-    |  Rule ID  | DTag |W|0|   bitmap    | (MIC Incorrect)
-    +---- ... --+-... -+-+-+----- ... ---+
+    +---- ... --+-... -+-+-+------- ... -------+
+    |  Rule ID  | DTag |W|0|      bitmap       | (MIC Incorrect)
+    +---- ... --+-... -+-+-+------- ... -------+
                           C
                 
 ~~~~
@@ -725,32 +725,9 @@ the last 2 bytes of the bitmap are set to 1, therefore, they are not sent.
      +---- ... --+-... -+-+-+-+
      |  Rule ID  | DTag |W|1|0|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|P|  
      +---- ... --+-... -+-+-+-+
-     |       byte 1           |     byte  2   |     byte 3    |        
+     |---- byte boundary -----| 1 byte  next  |  1 byte next  |        
 ~~~~
 {: #Fig-All-opt title='Bitmap optimized fragment format'}
-
-An exception to that optimization is used to send an ABORT message. An ABORT message 
-is a minimum size ACK message concatenated by a byte with all bit set to 1.
-
-~~~~                                                  
-     <-------   R  ------->
-                 <- T -> 1 
-     +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+-+
-     |  Rule ID  | DTag |W|1|1|1|1|1|1|1|1|1|1| 
-     +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+-+
-     |          byte 1        |     byte 2    |      
-     
-~~~~
-{: #Fig-Abort2 title='Abort Fragment Format'}
-
-~~~~
- <------ Complete Byte -----><--- 1 byte --->
-
- +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+-+-+
- |  Rule ID  | DTag |W| 1..1|       FF      |  
- +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+-+-+
-~~~~
-{: #Fig-ACKabort title='ACK Abort fragment format'}
 
 
 ### All-1 and All-0 formats
@@ -812,15 +789,27 @@ is a minimum size ACK message concatenated by a byte with all bit set to 1.
 ~~~~
 {: #Fig-All1retries title='All-1 for Retries format fragment also called All-1 empty'}
 
-~~~~
-  <------------ R ------------>
-             <- T -> 1 <- N -> 
-  +-- ... --+- ... -+-+- ... -+
-  | Rule ID | DTag  |W| 11..1 | (no MIC and no payload)  
-  +-- ... --+- ... -+-+- ... -+
-~~~~
-{: #Fig-All1Abort title='All-1 for Abort fragment format'}
 
+### Abort formats
+~~~~
+  
+  <---- byte boundary ----><--- 1 byte --->
+  +--- ... ---+- ... -+-+-+-+-+-+-+-+-+-+-+
+  |  Rule ID  | DTag  |W|       FF        | (no MIC and no payload)  
+  +--- ... ---+- ... -+-+-+-+-+-+-+-+-+-+-+
+   
+~~~~
+{: #Fig-All1Abort title='All-* Abort fragment format'}
+
+
+~~~~
+ <------ byte boundary -----><--- 1 byte --->
+
+ +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+-+-+
+ |  Rule ID  | DTag |W| 1..1|       FF      |  
+ +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+-+-+
+~~~~
+{: #Fig-ACKabort title='ACK Abort fragment format'}
 
 
 
