@@ -752,10 +752,10 @@ is not correct, this MIC bit is set to 0 and the bitmap follow.
 ### Abort formats
 ~~~~
   
-  <---- byte boundary ----><--- 1 byte --->
-  +--- ... ---+- ... -+-+-+-+-+-+-+-+-+-+-+
-  |  Rule ID  | DTag  |W|       FF        | (no MIC and no payload)  
-  +--- ... ---+- ... -+-+-+-+-+-+-+-+-+-+-+
+  <------ byte boundary ------><--- 1 byte --->
+  +--- ... ---+- ... -+-+-...-+-+-+-+-+-+-+-+-+
+  |  Rule ID  | DTag  |W| FCN |       FF      | (no MIC and no payload)  
+  +--- ... ---+- ... -+-+-...-+-+-+-+-+-+-+-+-+
    
 ~~~~
 {: #Fig-All1Abort title='All-* Abort fragment format'}
@@ -833,7 +833,7 @@ an All-0 or an All-1 has not been sent during the retransmission) and waits for 
 
 If the local-bitmap is different from the received bitmap the counter Attempts is increased and the sender resend the missing fragments again, when a MAX_ACK_REQUEST is reached the sender sends an Abort and goes to error.
 
-The sender Abort the transmission when a corrupt MIC has been received.
+The sender Abort the transmission when a corrupt MIC has been received or when MAX_ACK_REQUEST has reached.
 
 The receiver starts with window 0 as the expecting window and maintain a local_bitmap 
 indicating which fragments, it has received (All-0 and All-1 occupy the same position).
@@ -858,7 +858,7 @@ If the receiver receives an All-0 fragment, sender may send one fragment per win
 
 If the receiver receives an All-1 fragment this means that the transmission should be finished. If the MIC is incorrect some fragments have been lost. It sends its bitmap.
 
-In case of an incorrect MIC, the receivers wait for fragments belonging to the same window. After MAX_ACK_REQUEST
+In case of an incorrect MIC, the receivers wait for fragments belonging to the same window. After MAX_ACK_REQUEST the receiver will Abort the transmission. It can also Abort when the Inactivity timer has expired.
 
 
 ### ACK-on-error
@@ -902,12 +902,14 @@ If the receiver receives an All-0 fragment, it stays in the same state. Sender m
 
 If the receiver receives an All-1 fragment this means that the transmission should be finished.  If the MIC is incorrect some fragments have been lost. It sends its bitmap.
 
-In case of an incorrect MIC, the receivers wait for fragment belonging to the same window or the expiration of the inactivity timer which will Abort the transmission.
+In case of an incorrect MIC, the receivers wait for fragment belonging to the same window or the expiration of the Inactivity timer which will Abort the transmission.
 
 
 ### Bitmap Optimization 
 
-The Fragmentation Bitmap has two instance the local one and the sending one. The local_bitmap is the representation of each fragment correctly received and kept in memory. The size of the local_bitmap may be based on the FCN size. The bitmap sending is the optmization of what has been received. An ACK message may introduce padding at the end to align transmitted data to a byte boundary. The first byte boundary includes one or more complete bytes, depending on the size of Rule ID and DTag.
+The Fragmentation Bitmap has two instance the local one and the transmitted one. The local_bitmap is the representation of each fragment correctly received or sent and kept in memory. The size of the local_bitmap may be based on the FCN size. The bitmap transmitted is the optmization of what has been received. An ACK message may introduce padding at the end to align transmitted data to a byte boundary. The first byte boundary includes one or more complete bytes, depending on the size of Rule ID and DTag.
+
+The receiver generates the Bitmap which may have the size of a single downlink frame of the LPWAN technology used. To avoid this problem the FCN size should be set to the corresponding downlink size minus 1 bit for C bit.
 
 ~~~~                                                  
                             <----     bitmap fragments    ---->   
@@ -917,7 +919,9 @@ The Fragmentation Bitmap has two instance the local one and the sending one. The
 ~~~~
 {: #Fig-Localbitmap title='Local_Bitmap'}
 
-Bitmap sending MUST be optimized in size to reduce frame size. The right-most bytes with all bitmap bit set to 1 MUST be removed from the transmission. As the receiver knows the bitmap size, it can reconstruct the value. In the example {{Fig-All-opt}} the last 2 bytes of the bitmap are set to 1, therefore, they are not sent.
+Bitmap transmitted MUST be optimized in size to reduce frame size. The right-most bytes with all bitmap bit set to 1 MUST be removed from the transmission. As the receiver knows the bitmap size, it can reconstruct the value. In the example {{Fig-transmittedbitmap}} the last 2 bytes of the bitmap are set to 1, therefore, they are not sent.
+
+In the last window, when checked bit C value is one, means that the MIC is corrected and the bitmap is not sent. Otherwise the bitmap needs to be sent after the C bit. Note that the introduction of a C bit may force to reduce the number of fragments to allow the bitmap to fit in a frame. 
 
 ~~~~                                                  
      <-------   R  ------->  
@@ -927,42 +931,40 @@ Bitmap sending MUST be optimized in size to reduce frame size. The right-most by
      +---- ... --+-... -+-+-+-+
      |---- byte boundary -----|       
 ~~~~
-{: #Fig-Sendingbitmap title='Bitmap sending fragment format'}
+{: #Fig-transmittedbitmap title='Bitmap transmitted fragment format'}
 
 {{Fig-Bitmap-Win}} shows an example of an ACK (N=3), where the bitmap
 indicates that the second and the fifth fragments have not been correctly received. 
 
 ~~~~                                                  
     <-------   R  ------->  6 5 4 3 2 1   0 (FCN values indicating the order)
-                <- T -> 1 1  
-    |  Rule ID  | DTag |W|C|1|0|1|1|0|1|all-0|padding|  local_bitmap
+                <- T -> 1   
+    |  Rule ID  | DTag |W|1|0|1|1|0|1|all-0|padding|  local_bitmap
     |---- byte boundary -----|   1 byte  next  |  1 byte next  |
     
     
-    +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+
-    |  Rule ID  | DTag |W|C|1|0|1|1|0|1|1|P|  sending bitmap
-    +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+
-    |---- byte boundary -----| 1 byte next | 
+    +---- ... --+-... -+-+-+-+-+-+-+-+-+-+
+    |  Rule ID  | DTag |W|1|0|1|1|0|1|1|P|  transmitted bitmap
+    +---- ... --+-... -+-+-+-+-+-+-+-+-+-+
+    |--- byte boundary ----| 1 byte next | 
 ~~~~
 {: #Fig-Bitmap-Win title='Example of the bitmap in Window mode, in any window except the last one, for N=3)'}
+
+{{Fig-Bitmap-lastWin}} shows an example of an ACK (N=3), where the bitmap indicates that the MIC check has failed but there is no missing fragments. 
 
 ~~~~                                                  
      <-------   R  ------->  6 5 4 3 2 1 7 (FCN values indicating the order)
                  <- T -> 1 1
      |  Rule ID  | DTag |W|0|1|1|1|1|1|1|1|padding|  local_bitmap
-     |---- byte boundary -----|  1 byte next |  1 byte next  |
-     
+     |---- byte boundary ----|  1 byte next |  1 byte next  |
+                           C
      +---- ... --+-... -+-+-+-+
-     |  Rule ID  | DTag |W|0|1| sending bitmap
+     |  Rule ID  | DTag |W|0|1| transmitted bitmap
      +---- ... --+-... -+-+-+-+
      |---- byte boundary -----| 
 ~~~~
 {: #Fig-Bitmap-lastWin title='Example of the bitmap in Window mode for the last window, for N=3)'}
 
-
-
-
-### Abort
 
 ## Supporting multiple window sizes
 
@@ -978,30 +980,29 @@ In some LPWAN technologies, as part of energy-saving techniques, downlink transm
 For fragmented packet transmission in the downlink, and when ACK Always
    is used, the fragment receiver MAY support timer-based ACK
    retransmission. In this mechanism, the fragment receiver initializes and
-   starts a timer (denoted "ACK Retry timer") after the transmission of an
+   starts a timer (the Inactivity Timer is used) after the transmission of an
    ACK, except when the ACK is sent in response to the last fragment of a
    packet (all-1 fragment). In the latter case, the fragment receiver does 
    not start a timer after transmission of the ACK.
 
    If, after transmission of an ACK that is not an all-1 fragment, and 
-   before expiration of the corresponding ACK
-   Retry timer, the fragment receiver receives a fragment that belongs to
+   before expiration of the corresponding Inactivity timer, the fragment receiver receives a fragment that belongs to
    the current window (e.g. a missing fragment from the current window) or 
-   to the next window, the ACK Retry timer for the ACK is stopped. However, 
-   if the ACK Retry timer expires, the ACK is resent and the ACK Retry timer
+   to the next window, the Inactivity timer for the ACK is stopped. However, 
+   if the Inactivity timer expires, the ACK is resent and the Inactivity timer
    is reinitialized and restarted.
 
-   The default initial value for the ACK Retry timer, as well as the
+   The default initial value for the Inactivity timer, as well as the
    maximum number of retries for a specific ACK, denoted MAX_ACK_RETRIES,
    are not defined in this document, and need to be defined in other
    documents (e.g. technology-specific profiles). The initial value of the
-   ACK Retry timer is expected to be greater than that of the ACK Always
+   Inactivity timer is expected to be greater than that of the Retransmission
    timer, in order to make sure that a (buffered) fragment to be
    retransmitted can find an opportunity for that transmission.
 
    When the fragment sender transmits the all-1 fragment, it
-   initializes and starts its retransmission timer (ACK Always timer) to a
-   long value (e.g. several times the initial ACK Retry timer). If an ACK
+   initializes and starts its retransmission timer to a
+   long value (e.g. several times the initial Inactivity timer). If an ACK
    is received before expiration of this timer, the fragment sender
    retransmits any lost fragments reported by the ACK, or if the ACK
    confirms successful reception of all fragments of
@@ -1009,7 +1010,7 @@ For fragmented packet transmission in the downlink, and when ACK Always
    If the timer expires, and no ACK has been received since the
    start of the timer, the fragment sender assumes that the all-1
    fragment has been successfully received (and possibly, the last ACK
-   has been lost: this mechanism assumes that the ACK Always timer for the
+   has been lost: this mechanism assumes that the retransmission timer for the
    all-1 fragment is long enough to allow several ACK retries if the all-1
    fragment has not been received by the fragment receiver, and it also
    assumes that it is unlikely that several ACKs become all lost).
