@@ -1,7 +1,7 @@
 ---
 stand_alone: true
 ipr: trust200902
-docname: draft-ietf-lpwan-ipv6-static-context-hc-07
+docname: draft-ietf-lpwan-ipv6-static-context-hc-08
 cat: info
 pi:
   symrefs: 'yes'
@@ -665,7 +665,7 @@ The format of an ACK is shown in {{Fig-ACK-Format}} to acknowledge All-0 windows
                 <--------  R  ------->
                             <- T -> 1  
                 +---- ... --+-... -+-+----- ... ---+
-                |  Rule ID  | DTag |W|   bitmap    |
+                |  Rule ID  | DTag |W|   bitmap    | (no payload)
                 +---- ... --+-... -+-+----- ... ---+
 ~~~~
 {: #Fig-ACK-Format title='Format of an ACK for All-0 windows'}
