@@ -912,6 +912,9 @@ Internet-Draft                 LPWAN SCHC                  December 2017
       documents (e.g. technology-specific profiles).  The MIC allows the
       receiver to check errors in the reassembled packet, while it also
       enables compressing the UDP checksum by use of SCHC compression.
+      The CRC32 as 0xEDB88320 is recommended for the computing MIC,
+      other algorithm MUST be defined in the corresponding technology
+      documents.
 
    o  Retransmission Timer.  It is used after the transmission of a
       window to detect an error transmission of the ACK corresponding to
@@ -943,9 +946,6 @@ Internet-Draft                 LPWAN SCHC                  December 2017
       is set to the left-most position in the Bitmap.  In the Bitmap a
       bit set to 1 indicates that the corresponding FCN fragment has
       been correctly sent and received.  However, the sending format of
-      the bitmap will be truncated until a byte boundary where the last
-      error is given.  When all the fragments have been correctly
-      received, the receiver sends only the content until a byte
 
 
 
@@ -954,6 +954,9 @@ Minaburo, et al.          Expires June 15, 2018                [Page 17]
 Internet-Draft                 LPWAN SCHC                  December 2017
 
 
+      the bitmap will be truncated until a byte boundary where the last
+      error is given.  When all the fragments have been correctly
+      received, the receiver sends only the content until a byte
       boundary for the header fragment or until the byte boundary of the
       first error carried on the bitmap.
 
@@ -999,9 +1002,6 @@ Internet-Draft                 LPWAN SCHC                  December 2017
       option is suitable for links offering relatively low L2 data unit
       loss probability.  This option reduces the number of ACKs
       transmitted by the fragment receiver.  This may be especially
-      beneficial in asymmetric scenarios, e.g. where fragmented data are
-      sent uplink and the underlying LPWAN technology downlink capacity
-      or message rate is lower than the uplink one.  However, if an ACK
 
 
 
@@ -1010,6 +1010,9 @@ Minaburo, et al.          Expires June 15, 2018                [Page 18]
 Internet-Draft                 LPWAN SCHC                  December 2017
 
 
+      beneficial in asymmetric scenarios, e.g. where fragmented data are
+      sent uplink and the underlying LPWAN technology downlink capacity
+      or message rate is lower than the uplink one.  However, if an ACK
       is lost, the sender assumes that all fragments covered by the ACK
       have been successfully delivered.  And the receiver will abort the
       fragmentation.
@@ -1055,9 +1058,6 @@ Internet-Draft                 LPWAN SCHC                  December 2017
          +---------------+-----------------------+---------+
 
                         Figure 6: Fragment format.
-
-
-
 
 
 
@@ -1412,8 +1412,8 @@ Internet-Draft                 LPWAN SCHC                  December 2017
    transmission is finished.  Since the last window is not full, the MIC
    will be used to detect if all the fragments have been received.  A
    correct MIC indicates the end of the transmission but the receiver
-   must stay alive a period of time to answer to empty All-1 frag the
-   sender may send if the bitmap is lost.
+   must stay alive a period of time to answer to empty All-1 fragment
+   the sender may send if the bitmap is lost.
 
    If All-1 fragment has not been received, the receiver expects a new
    window.  It waits for the next fragment.  If the window value has not
@@ -1524,16 +1524,17 @@ Internet-Draft                 LPWAN SCHC                  December 2017
    the fragments have been received.  A correct MIC indicates the end of
    the transmission.
 
-   If All-1 frag has not been received, the receiver expects a new
+   If All-1 fragment has not been received, the receiver expects a new
    window.  It waits for the next fragment.  If the window value has not
    changed, the received fragments are part of a retransmission.  A
    receiver that has already received a fragment should discard it,
    otherwise it completes its bitmap.  If all the bits of the bitmap are
    set to one, the receiver clear the bitmap and wait for the next
-   window without waiting for an All-0 frag.  While the receiver waits
-   for next window and if the window value is set to the next value, and
-   All-1 fragment with the next value window arrived the receiver goes
-   to error and abort the transmission, it drops the fragments.
+   window without waiting for an All-0 fragment.  While the receiver
+   waits for next window and if the window value is set to the next
+   value, and All-1 fragment with the next value window arrived the
+   receiver goes to error and abort the transmission, it drops the
+   fragments.
 
    If the receiver receives an All-0 fragment, it stays in the same
    state.  Sender may send one fragment per window or more.  Otherwise
@@ -1560,8 +1561,7 @@ Internet-Draft                 LPWAN SCHC                  December 2017
 
    The receiver generates the Bitmap which may have the size of a single
    downlink frame of the LPWAN technology used.  To avoid this problem
-   the FCN size should be set to the corresponding downlink size minus 1
-   bit for C bit.
+
 
 
 
@@ -1569,6 +1569,9 @@ Minaburo, et al.          Expires June 15, 2018                [Page 28]
 
 Internet-Draft                 LPWAN SCHC                  December 2017
 
+
+   the FCN size should be set to the corresponding downlink size minus 1
+   bit for C bit.
 
                                <----     bitmap fragments    ---->
         |  Rule ID  | DTag |W|C|0|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|0|
@@ -1615,9 +1618,6 @@ Internet-Draft                 LPWAN SCHC                  December 2017
 
    Figure 20: Example of the bitmap in Window mode, in any window except
                           the last one, for N=3)
-
-
-
 
 
 
