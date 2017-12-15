@@ -104,14 +104,12 @@ types of entities in a typical LPWAN network, see {{Fig-LPWANarchi}}:
    o  Devices (Dev) are the end-devices or hosts (e.g. sensors,
       actuators, etc.). There can be a high density of devices per radio gateway.
 
-   o  The Radio Gateway (RG), which is the end point of the constrained link.
+   o  The Radio Gateway (RGW), which is the end point of the constrained link.
 
    o  The Network Gateway (NGW) is the interconnection node between the Radio Gateway and the Internet.  
 
    o  LPWAN-AAA Server, which controls the user authentication and the
-      applications. We use the term LPWAN-AAA server because we are not assuming 
-      that this entity speaks RADIUS or Diameter as many/most AAA servers do, but equally we don't want to
-      rule that out, as the functionality will be similar.
+      applications. 
 
    o  Application Server (App)
 
@@ -144,7 +142,7 @@ This section defines the terminology and acronyms used in this document.
 
 * APP-IID: Application Interface Identifier. Second part of the IPv6 address to identify the application interface
 
-* Bi: Bidirectional, it can be used in both senses
+* Bi: Bidirectional, a rule entry that applies in both directions.
 
 * C: Checked bit. Used in fragmentation header to determine when the MIC is correct (1) or not (0).
 
@@ -181,6 +179,8 @@ This section defines the terminology and acronyms used in this document.
 * Retransmission Timer. Timer used in the sender transmission to detect error in the link when waiting for an ACK.
 
 * Rule: A set of header field values.
+
+* Rule entry: A row in the rule that describes a header field.
 
 * Rule ID: An identifier for a rule, SCHC C/D, and Dev share the same Rule ID for a specific flow. A set of Rule IDs are used to support fragmentation functionality.
 
@@ -323,7 +323,7 @@ The compression/decompression process follows several steps:
 
 * compression Rule selection: The goal is to identify which Rule(s) will be used
   to compress the packet's headers. When doing compression from Dw to Up the SCHC C/D needs to find the 
-  correct Rule to be used by identifying its Dev-ID and the Rule-ID. In the Up situation, only the Rule-ID is used. 
+  correct Rule to be used by identifying its Dev-ID and the Rule-ID. In the Up situation, only the Rule-ID may be used. 
   The next step is to choose the fields by their direction, using the 
   direction indicator (DI), so the fields that do not correspond to the appropriated DI will be excluded. 
   Next, then the fields are identified according to their field identifier (FID) and field position (FP). 
@@ -508,19 +508,17 @@ LPWAN technologies impose some strict limitations on traffic, devices are sleepi
 
 This subsection describes the different fields in the fragmentation header (see format header in {{Fragfor}}) that are used to enable the described fragmentation functionalities and the different reliability options supported. 
 
-*  Rule ID. The Rule ID in the fragmentation header is used to identify the fragmentation mode used. The Rule ID also allows to interleave non-fragmented IPv6 datagrams with fragments that carry a larger IPv6 datagram. See format {{Fragfor}}. 
+*  Rule ID. The Rule ID in the fragmentation header is used to identify the fragmentation delivery reliability option used. The Rule ID also allows to interleave non-fragmented IPv6 datagrams with fragments that carry a larger IPv6 datagram. See format {{Fragfor}}. 
 
 *  Fragment Compressed Number (FCN).  The FCN is included in all fragments.  This field can be understood as a truncated, 
-efficient representation of a larger-sized fragment number, and does not carry an absolute fragment number.  There are two FCN reserved values. They are used for controlling the fragmentation process. The FCN value with all the bits equal to 1 (all-1) denotes the last 
-fragment of a packet.  And the FCN value with all the bits equal to 0 (all-0) denotes the last 
+efficient representation of a larger-sized fragment number, and does not carry an absolute fragment number.  There are two FCN reserved values. They are used for controlling the fragmentation process. The FCN value with all the bits equal to 1 (All-1) denotes the last 
+fragment of a packet.  And the FCN value with all the bits equal to 0 (All-0) denotes the last 
 fragment of a window (when such window is not the last one of the packet) in any window mode or the fragments in No ACK mode. The rest of the FCN values are assigned in a sequential 
 and decreasing order, which has the purpose to avoid possible ambiguity for the receiver that might arise under certain 
 conditions.
-In the fragments, this field is an unsigned integer, with a size of N bits. In the No ACK mode it is set to 1 bit (N=1). For the other reliability options, it is recommended to use a number of bits (N) equal to or greater than 3. Nevertheless, the apropriate value will be defined in the corresponding technology documents. The FCN MUST be set sequentially  
-   decreasing from the highest FCN in the window (which will be used for the first fragment), and MUST wrap from 0 back to 
-   the highest FCN in the window.  
-   For windows that are not the last one  from a fragmented packet, the FCN for the last fragment in such windows is an all-0. This indicates that the window is finished and it proceeds according to the reliability option in use: either an ACK is sent or the next window of fragments is expected when there is no error.
-   The FCN for the last fragment in the last window is an all-1.  It is also 
+In the fragments, this field is an unsigned integer, with a size of N bits. In the No ACK mode it is set to 1 bit (N=1). For the other reliability options, it is recommended to use a number of bits (N) equal to or greater than 3. Nevertheless, the apropriate value will be defined in the corresponding technology documents. The FCN MUST be set sequentially decreasing from the highest FCN in the window (which will be used for the first fragment), and MUST wrap from 0 back to the highest FCN in the window.  
+   For windows that are not the last one  from a fragmented packet, the FCN for the last fragment in such windows is an All-0. This indicates that the window is finished and it proceeds according to the reliability option in use: either an ACK is sent or the next window of fragments is expected when there is no error.
+   The FCN for the last fragment in the last window is an All-1.  It is also 
    important to note that, for No ACK mode or N=1, the last fragment of the packet will carry a FCN equal to 1, while all previous fragments 
    will carry a FCN of 0.
    
@@ -533,11 +531,11 @@ In the ACK format, DTag carries the same value as the DTag field in the fragment
    
 *  C (MIC checked): C is a 1-bit field. This field is used in the ACK format packets to know if the MIC check was correct or not.  
 
-*  Message Integrity Check (MIC). This field, which has a size of M bits, is computed by the sender over the complete packet (i.e. a SCHC compressed or an uncompressed IPv6 packet) before fragmentation. The algorithm to be used to compute the MIC is not defined in this document, and needs to be defined in other documents (e.g. technology-specific profiles).  The MIC allows the receiver to check errors in the reassembled packet, while it also enables compressing the UDP checksum by use of SCHC compression. The CRC32 as 0xEDB88320 is recommended for the computing MIC, other algorithm MUST be defined in the corresponding technology documents.
+*  Message Integrity Check (MIC). This field, which has a size of M bits, is computed by the sender over the complete packet (i.e. a SCHC compressed or an uncompressed IPv6 packet) before fragmentation. The MIC allows the receiver to check errors in the reassembled packet, while it also enables compressing the UDP checksum by use of SCHC compression. The CRC32 as 0xEDB88320 is recommended for computing the MIC, other algorithm MUST be defined in the corresponding technology documents (e.g. technology-specific profiles). 
  
 *  Retransmission Timer. It is used after the transmission of a window to detect an error transmission of the ACK corresponding to this window. Depending on the reliability option it will ask for an ACK retransmission on ACK-Always or it will trigger the next window on ACK-on-error.
  
-*  Inactivity Timer. This timer is used to detect when there is a problem in the transmission of frames and the receiver does not get any frame during a period of time or a number of packets in a period of time. When this happen, an abort needs to be sent. Initially and each time a frame is received the timer is reinitialized. The size of the timer is not defined in this document and must be defined in the specific technology document. 
+*  Inactivity Timer. This timer is used to detect when there is a problem in the transmission of frames and the receiver does not get any frame during a period of time or a number of packets in a period of time. When this happens, an abort needs to be sent. Initially and each time a frame is received the timer is reinitialized. The size of the timer is not defined in this document and must be defined in the specific technology document. 
  
 *  Attempts. It is a counter used to request a missing ACK, and in consequence to determine when an Abort is needed because there is a recurrent error, which maximal value is MAX_ACK_REQUEST. The default value of MAX_ACK_REQUESTS is not
    stated in this document, and it is expected to be defined in other
@@ -552,7 +550,7 @@ fragment has been correctly sent and received. However, the sending format of th
 *  Padding (P). The number of bits used for padding is not defined and depends on the size of the Rule ID, DTag and FCN number of bits, and in the other hand it depends on the frame size. It will be used to align in byte boundary the last byte.
 
 
-## Reliability options
+## Delivery Reliability options
 
 This specification defines the following three fragment delivery reliability options:
 
@@ -572,7 +570,7 @@ This specification defines the following three fragment delivery reliability opt
    and/or missed fragments from the window of fragments.  Upon receipt
    of an ACK that informs about any lost fragments, the sender
    retransmits the lost fragments.  When an ACK is not received by the
-   fragment sender, the latter sends an ACK request using the all-1 empty fragment.  
+   fragment sender, the latter sends an ACK request using the All-1 empty fragment.  
    The maximum number of ACK requests is MAX_ACK_REQUESTS.  
 
 *  Window mode - ACK-on-error (ACK-on-error). 
@@ -608,11 +606,11 @@ Examples of the different reliability options described are provided
    in Appendix B.
 
 
-## Formats
+## Formats {#Fragfor}
 
-This section defines the fragment format, the fragmentation header formats, and the ACK format.
+This section defines the fragment format, the All-0 and All-1 frames, the ACK format and the Abort frames.
 
-### Fragment format {#Fragfor}
+### Fragment format 
 
    A fragment comprises a fragmentation header and a fragment payload, and conforms
    to the format shown in {{Fig-FragFormat}}. The fragment payload carries a subset of either a SCHC header 
@@ -642,7 +640,7 @@ In the No ACK option, fragments except the last one SHALL contain the fragmentat
 
 
 
-In any of the Window mode options, fragments except the last one SHALL contain the fragmentation header as defined in {{Fig-NotLastWin}}. The total size of this fragmentation header is R bits. 
+In any of the Window mode options, fragments except the last one SHALL contain the fragmentation format as defined in {{Fig-NotLastWin}}. The total size of this fragmentation header is R bits. 
    
 ~~~~
              <------------ R ---------->
@@ -671,7 +669,7 @@ The format of an ACK is shown in {{Fig-ACK-Format}} to acknowledge All-0 windows
 
 To acknowledge the last window (All-1 window), a MIC bit following the W bit is set
 to one to indicate that the MIC has been correctly computed by the receiver. If the MIC 
-is not correct, this MIC bit is set to 0 and the bitmap follow.
+is not correct, this MIC bit is set to 0 and the bitmap follows.
 
 ~~~~
     <--------  R  ------->  <- byte boundary ->
@@ -707,11 +705,12 @@ is not correct, this MIC bit is set to 0 and the bitmap follow.
               <------------ R ------------>
                          <- T -> 1 <- N -> 
               +-- ... --+- ... -+-+- ... -+
-              | Rule ID | DTag  |W|  0..0 |   
+              | Rule ID | DTag  |W|  0..0 | (no payload)  
               +-- ... --+- ... -+-+- ... -+
 ~~~~
 {: #Fig-All0empty title='All-0 empty fragment format'}
 
+For the last fragment in No ACK mode the {{Fig-Last}} is used.
 
 ~~~~
     <------------- R ---------->
@@ -794,7 +793,7 @@ If the recipient receives the last fragment of a datagram (All-1), it checks for
 
 ### No ACK
 In the No ACK mode there is no feedback communication. The sender will send the fragments until the last one without any possibility to know if there were an error or a loss has occurred. As there is not a need to identify specific fragments a one-bit FCN is used, where FCN All-0 will be sent for all fragments except the last one. The latter will carry an All-1 FCN and will send the MIC. 
-The receiver waits for fragments and will set a timer in order to see if there are no missing fragments. The No ACK mode will use the MIC contained in the last fragment to check error. The FCN is set to All-1 for the last fragment. 
+The receiver waits for fragments and will set the Inactivity timer in order to see if there are no missing fragments. The No ACK mode will use the MIC contained in the last fragment to check error. The FCN is set to All-1 for the last fragment. 
 When the Inactivity Timer expires or when the check of MIC gives an error the receiver will abort the communication, all the fragments will be dropped. The Inactivity Timer will be based on the LPWAN technology and will be defined in the specific technology document. 
 
 ### The Window modes 
@@ -810,20 +809,20 @@ of fragments that will be sent in the window.
 
 The sender starts sending fragments, the sender will indicate in the fragmentation header: the current window (W bit) and the FCN fragment number. A delay between each fragment can be added to respect regulation rules or constraints imposed by the applications. Each time a fragment is sent the FCN is decreased by one and the bitmap is set locally. 
 
-The sender waits for and ACK:
+The sender waits for and ACK when:
 
 * The FCN reaches value 0 and there are more fragments to be sent. In that case, an All-0 fragment is sent and the retransmission timer is set. 
 
 * The last fragment is sent. In that case, an All-1 fragment with the MIC is sent. The sender sets a retransmission timer to wait for the ACK.
 
-During these period, the sender starts listening to the radio and starts an inactivity timer, which is dimensioned based on the receive window available for the LPWAN technology in use.
+During these period, the sender starts listening to the radio and starts an Inactivity timer, which is dimensioned based on the received window available for the LPWAN technology in use.
 
-In ACK Always, if the inactivity timer expires, an empty All-0 (or All-1 if the last fragment has been sent) fragment is sent to ask the receiver to resend its Bitmap. The window number is not changed.
+In ACK-Always, if the inactivity timer expires, an empty All-0 (or All-1 if the last fragment has been sent) fragment is sent to ask the receiver to resend its Bitmap. The window number is not changed.
 
 When the sender receives an ACK, it checks the window value. The ACK fragments carrying an unexpected W bit are discarded.
 
 If the window number of the received ACK is correct, the sender compares the local bitmap
-with the received bitmap. If they are equal all the fragments sent during the window 
+with the received bitmap. If the local bitmap is equal to the received bitmap all the fragments sent during the window 
 have been well received. If at least one fragment need to be sent, the sender clear 
 the bitmap, stop the retransmission timer and move its sending window to the next value. If no more fragments have to be sent, then the fragmented packet transmission is terminated.
 
@@ -831,9 +830,9 @@ If some fragments are missing (not set in the bitmap) then the sender resends th
 fragments. When the retransmission is finished, it starts the retransmission timer (even if
 an All-0 or an All-1 has not been sent during the retransmission) and waits for ACK.
 
-If the local-bitmap is different from the received bitmap the counter Attempts is increased and the sender resend the missing fragments again, when a MAX_ACK_REQUEST is reached the sender sends an Abort and goes to error.
+If the local-bitmap is different from the received bitmap the counter Attempts is increased and the sender resend the missing fragments again, when a MAX_ACK_REQUEST is reached the sender sends an Abort and drops the fragments.
 
-The sender Abort the transmission when a corrupt MIC has been received or when MAX_ACK_REQUEST has reached.
+The sender Aborts the transmission when a corrupt MIC has been received or when MAX_ACK_REQUEST has reached.
 
 The receiver starts with window 0 as the expecting window and maintain a local_bitmap 
 indicating which fragments, it has received (All-0 and All-1 occupy the same position).
@@ -842,7 +841,7 @@ Any fragment not belonging to the current window is discarded. All Fragments bel
 
 When All-0 fragment is received, which indicates that all the fragments have been sent in the current window. Since the sender is not obliged to send a full window, some fragment number not set in the local_bitmap may not correspond to losses. The next window can start.
 
-When All-1 fragment is received, which indicated that the transmission is finished. Since the last window is not full, the MIC will be used to detect if all the fragments have been received. A correct MIC indicates the end of the transmission but the receiver must stay alive 
+When All-1 fragment is received, indicates that the transmission is finished. Since the last window is not full, the MIC will be used to detect if all the fragments have been received. A correct MIC indicates the end of the transmission but the receiver must stay alive 
 a period of time to answer to empty All-1 fragment the sender may send if the bitmap
 is lost.
 
@@ -874,7 +873,7 @@ When the FCN reaches value 0, an All-0 fragment is sent and the sender will wait
 When the last fragment is sent, an All-1 fragment is sent and the sender will wait
 for the bitmap acknowledged by the receiver.
 
-In Ask on error mode, the timer expiration will be considered as a positive acknowledgment. If there are no more fragments then the fragmentation is finished. 
+In Ack-on-error mode, the retransmission timer expiration will be considered as a positive acknowledgment. If there are no more fragments then the fragmentation is finished. 
 
 If the sender receives a bitmap, it checks the window value. ACKs with the non-expected window number are discarded. If the window number on the received bitmap is correct, the sender compare the local bitmap with the received bitmap. If they are equal all the fragments sent during the window have been well received and it continues the transmission of the new window. 
 
@@ -904,6 +903,7 @@ If the receiver receives an All-1 fragment this means that the transmission shou
 
 In case of an incorrect MIC, the receivers wait for fragment belonging to the same window or the expiration of the Inactivity timer which will Abort the transmission.
 
+At the end of the transmission after the All-1 and the correct MIC have been received and ACK is sent to confirms the end of the correct transmission. 
 
 ### Bitmap Optimization 
 
