@@ -839,9 +839,9 @@ indicating which fragments, it has received (All-0 and All-1 occupy the same pos
 
 Any fragment not belonging to the current window is discarded. All Fragments belonging to the correct window are accepted, the fragment number is computed based on the FCN value. 
 
-When All-0 fragment is received, which indicates that all the fragments have been sent in the current window. Since the sender is not obliged to send a full window, some fragment number not set in the local_bitmap may not correspond to losses. The next window can start.
+When All-0 fragment is received, it indicates that all the fragments have been sent in the current window. Since the sender is not obliged to send a full window, some fragment number not set in the local_bitmap may not correspond to losses. The next window can start.
 
-When All-1 fragment is received, indicates that the transmission is finished. Since the last window is not full, the MIC will be used to detect if all the fragments have been received. A correct MIC indicates the end of the transmission but the receiver must stay alive 
+When All-1 fragment is received, it indicates that the transmission is finished. Since the last window is not full, the MIC will be used to detect if all the fragments have been received. A correct MIC indicates the end of the transmission but the receiver must stay alive 
 a period of time to answer to empty All-1 fragment the sender may send if the bitmap
 is lost.
 
@@ -907,9 +907,9 @@ At the end of the transmission after the All-1 and the correct MIC have been rec
 
 ### Bitmap Optimization 
 
-The Fragmentation Bitmap has two instance the local one and the transmitted one. The local_bitmap is the representation of each fragment correctly received or sent and kept in memory. The size of the local_bitmap may be based on the FCN size. The bitmap transmitted is the optmization of what has been received. An ACK message may introduce padding at the end to align transmitted data to a byte boundary. The first byte boundary includes one or more complete bytes, depending on the size of Rule ID and DTag.
+The Fragmentation Bitmap has two instances the local one and the transmitted one. The local_bitmap is the representation of each fragment correctly received or sent and kept in memory. The size of the local_bitmap may be based on the FCN size. The bitmap transmitted is the optmization of what has been received. An ACK message may introduce padding at the end to align transmitted data to a byte boundary. The first byte boundary includes one or more complete bytes, depending on the size of Rule ID and DTag.
 
-The receiver generates the Bitmap which may have the size of a single downlink frame of the LPWAN technology used. To avoid this problem the FCN size should be set to the corresponding downlink size minus 1 bit for C bit.
+The receiver generates the Bitmap which may have the size of a single downlink frame of the LPWAN technology used. To avoid this problem the FCN size should be set to the corresponding downlink size minus 1 bit for C bit. The C bit will be sent only in the ACK for the last frame (All-1).
 
 ~~~~                                                  
                             <----     bitmap fragments    ---->   
@@ -937,7 +937,7 @@ In the last window, when checked bit C value is one, means that the MIC is corre
 indicates that the second and the fifth fragments have not been correctly received. 
 
 ~~~~                                                  
-    <-------   R  ------->  6 5 4 3 2 1   0 (FCN values indicating the order)
+    <-------   R  ------->6 5 4 3 2 1   0 (FCN values indicating the order)
                 <- T -> 1   
     |  Rule ID  | DTag |W|1|0|1|1|0|1|all-0|padding|  local_bitmap
     |---- byte boundary -----|   1 byte  next  |  1 byte next  |
@@ -968,7 +968,7 @@ indicates that the second and the fifth fragments have not been correctly receiv
 
 ## Supporting multiple window sizes
 
-For ACK Always or ACK on error, implementers may opt to support a single window size or multiple window sizes.  The latter, when feasible, may provide performance optimizations.  For example, a large window size may be used for packets that need to be carried by a large number of fragments.  However, when the number of fragments required to carry a packet is low, a smaller window size, and thus a shorter bitmap, may be sufficient to provide feedback on all fragments.  If multiple window sizes are supported, the Rule ID may be used to signal the window size in use for a specific packet transmission.
+For ACK-Always or ACK-on-error, implementers may opt to support a single window size or multiple window sizes.  The latter, when feasible, may provide performance optimizations.  For example, a large window size may be used for packets that need to be carried by a large number of fragments.  However, when the number of fragments required to carry a packet is low, a smaller window size, and thus a shorter bitmap, may be sufficient to provide feedback on all fragments.  If multiple window sizes are supported, the Rule ID may be used to signal the window size in use for a specific packet transmission.
 
 Note that the same window size MUST be used for the transmission of all fragments that belong to a packet.
 
@@ -982,10 +982,10 @@ For fragmented packet transmission in the downlink, and when ACK Always
    retransmission. In this mechanism, the fragment receiver initializes and
    starts a timer (the Inactivity Timer is used) after the transmission of an
    ACK, except when the ACK is sent in response to the last fragment of a
-   packet (all-1 fragment). In the latter case, the fragment receiver does 
+   packet (All-1 fragment). In the latter case, the fragment receiver does 
    not start a timer after transmission of the ACK.
 
-   If, after transmission of an ACK that is not an all-1 fragment, and 
+   If, after transmission of an ACK that is not an All-1 fragment, and 
    before expiration of the corresponding Inactivity timer, the fragment receiver receives a fragment that belongs to
    the current window (e.g. a missing fragment from the current window) or 
    to the next window, the Inactivity timer for the ACK is stopped. However, 
@@ -1000,7 +1000,7 @@ For fragmented packet transmission in the downlink, and when ACK Always
    timer, in order to make sure that a (buffered) fragment to be
    retransmitted can find an opportunity for that transmission.
 
-   When the fragment sender transmits the all-1 fragment, it
+   When the fragment sender transmits the All-1 fragment, it
    initializes and starts its retransmission timer to a
    long value (e.g. several times the initial Inactivity timer). If an ACK
    is received before expiration of this timer, the fragment sender
@@ -1014,8 +1014,6 @@ For fragmented packet transmission in the downlink, and when ACK Always
    all-1 fragment is long enough to allow several ACK retries if the all-1
    fragment has not been received by the fragment receiver, and it also
    assumes that it is unlikely that several ACKs become all lost).
-
-
 
 
 # Padding management 
