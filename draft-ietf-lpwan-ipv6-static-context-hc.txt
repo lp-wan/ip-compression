@@ -1402,15 +1402,15 @@ Minaburo, et al.          Expires June 18, 2018                [Page 25]
 Internet-Draft                 LPWAN SCHC                  December 2017
 
 
-   When All-0 fragment is received, which indicates that all the
-   fragments have been sent in the current window.  Since the sender is
-   not obliged to send a full window, some fragment number not set in
-   the local_bitmap may not correspond to losses.  The next window can
+   When All-0 fragment is received, it indicates that all the fragments
+   have been sent in the current window.  Since the sender is not
+   obliged to send a full window, some fragment number not set in the
+   local_bitmap may not correspond to losses.  The next window can
    start.
 
-   When All-1 fragment is received, indicates that the transmission is
-   finished.  Since the last window is not full, the MIC will be used to
-   detect if all the fragments have been received.  A correct MIC
+   When All-1 fragment is received, it indicates that the transmission
+   is finished.  Since the last window is not full, the MIC will be used
+   to detect if all the fragments have been received.  A correct MIC
    indicates the end of the transmission but the receiver must stay
    alive a period of time to answer to empty All-1 fragment the sender
    may send if the bitmap is lost.
@@ -1554,7 +1554,7 @@ Internet-Draft                 LPWAN SCHC                  December 2017
 
 5.5.5.  Bitmap Optimization
 
-   The Fragmentation Bitmap has two instance the local one and the
+   The Fragmentation Bitmap has two instances the local one and the
    transmitted one.  The local_bitmap is the representation of each
    fragment correctly received or sent and kept in memory.  The size of
    the local_bitmap may be based on the FCN size.  The bitmap
@@ -1573,7 +1573,8 @@ Internet-Draft                 LPWAN SCHC                  December 2017
    The receiver generates the Bitmap which may have the size of a single
    downlink frame of the LPWAN technology used.  To avoid this problem
    the FCN size should be set to the corresponding downlink size minus 1
-   bit for C bit.
+   bit for C bit.  The C bit will be sent only in the ACK for the last
+   frame (All-1).
 
                                <----     bitmap fragments    ---->
         |  Rule ID  | DTag |W|C|0|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|0|
@@ -1620,13 +1621,12 @@ Internet-Draft                 LPWAN SCHC                  December 2017
 
 
 
-
 Minaburo, et al.          Expires June 18, 2018                [Page 29]
 
 Internet-Draft                 LPWAN SCHC                  December 2017
 
 
-    <-------   R  ------->  6 5 4 3 2 1   0 (FCN values indicating the order)
+    <-------   R  ------->6 5 4 3 2 1   0 (FCN values indicating the order)
                 <- T -> 1
     |  Rule ID  | DTag |W|1|0|1|1|0|1|all-0|padding|  local_bitmap
     |---- byte boundary -----|   1 byte  next  |  1 byte next  |
@@ -1659,7 +1659,7 @@ Internet-Draft                 LPWAN SCHC                  December 2017
 
 5.6.  Supporting multiple window sizes
 
-   For ACK Always or ACK on error, implementers may opt to support a
+   For ACK-Always or ACK-on-error, implementers may opt to support a
    single window size or multiple window sizes.  The latter, when
    feasible, may provide performance optimizations.  For example, a
    large window size may be used for packets that need to be carried by
@@ -1699,11 +1699,11 @@ Internet-Draft                 LPWAN SCHC                  December 2017
    retransmission.  In this mechanism, the fragment receiver initializes
    and starts a timer (the Inactivity Timer is used) after the
    transmission of an ACK, except when the ACK is sent in response to
-   the last fragment of a packet (all-1 fragment).  In the latter case,
+   the last fragment of a packet (All-1 fragment).  In the latter case,
    the fragment receiver does not start a timer after transmission of
    the ACK.
 
-   If, after transmission of an ACK that is not an all-1 fragment, and
+   If, after transmission of an ACK that is not an All-1 fragment, and
    before expiration of the corresponding Inactivity timer, the fragment
    receiver receives a fragment that belongs to the current window (e.g.
    a missing fragment from the current window) or to the next window,
@@ -1720,7 +1720,7 @@ Internet-Draft                 LPWAN SCHC                  December 2017
    (buffered) fragment to be retransmitted can find an opportunity for
    that transmission.
 
-   When the fragment sender transmits the all-1 fragment, it initializes
+   When the fragment sender transmits the All-1 fragment, it initializes
    and starts its retransmission timer to a long value (e.g. several
    times the initial Inactivity timer).  If an ACK is received before
    expiration of this timer, the fragment sender retransmits any lost
