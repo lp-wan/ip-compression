@@ -1319,7 +1319,7 @@ Local address for the SCHC C/D.
 Rule 0
  +----------------+--+--+--+---------+--------+------------++------+
  | Field          |FL|FP|DI| Value   | Match  | Comp Decomp|| Sent |
- |                |  |  |  |         | Opera. | Action     ||[bits]|
+ |                |  |  |  |         | Opera. | Action     ||\[bits\]|
  +----------------+--+--+--+---------+---------------------++------+
  |IPv6 version    |4 |1 |Bi|6        | equal  | not-sent   ||      |
  |IPv6 DiffServ   |8 |1 |Bi|0        | equal  | not-sent   ||      |
@@ -1341,7 +1341,7 @@ Rule 0
  Rule 1
  +----------------+--+--+--+---------+--------+------------++------+
  | Field          |FL|FP|DI| Value   | Match  | Action     || Sent |
- |                |  |  |  |         | Opera. | Action     ||[bits]|
+ |                |  |  |  |         | Opera. | Action     ||\[bits\]|
  +----------------+--+--+--+---------+--------+------------++------+
  |IPv6 version    |4 |1 |Bi|6        | equal  | not-sent   ||      |
  |IPv6 DiffServ   |8 |1 |Bi|0        | equal  | not-sent   ||      |
@@ -1349,12 +1349,12 @@ Rule 0
  |IPv6 Length     |16|1 |Bi|         | ignore | comp-length||      |
  |IPv6 Next Header|8 |1 |Bi|17       | equal  | not-sent   ||      |
  |IPv6 Hop Limit  |8 |1 |Bi|255      | ignore | not-sent   ||      |
- |IPv6 DEVprefix  |64|1 |Bi|[alpha/64, match- |mapping-sent||  [1] |
- |                |  |  |  |fe80::/64] mapping|            ||      |
+ |IPv6 DEVprefix  |64|1 |Bi|\[alpha/64, match- |mapping-sent||  [1] |
+ |                |  |  |  |fe80::/64\] mapping|            ||      |
  |IPv6 DEViid     |64|1 |Bi|         | ignore | DEViid     ||      |
- |IPv6 APPprefix  |64|1 |Bi|[beta/64,| match- |mapping-sent||  [2] |
+ |IPv6 APPprefix  |64|1 |Bi|\[beta/64,| match- |mapping-sent||  [2] |
  |                |  |  |  |alpha/64,| mapping|            ||      |
- |                |  |  |  |fe80::64]|        |            ||      |
+ |                |  |  |  |fe80::64\]|        |            ||      |
  |IPv6 APPiid     |64|1 |Bi|::1000   | equal  | not-sent   ||      |
  +================+==+==+==+=========+========+============++======+
  |UDP DEVport     |16|1 |Bi|5683     | equal  | not-sent   ||      |
@@ -1366,7 +1366,7 @@ Rule 0
  Rule 2
  +----------------+--+--+--+---------+--------+------------++------+
  | Field          |FL|FP|DI| Value   | Match  | Action     || Sent |
- |                |  |  |  |         | Opera. | Action     ||[bits]|
+ |                |  |  |  |         | Opera. | Action     ||\[bits\]|
  +----------------+--+--+--+---------+--------+-------------++------+
  |IPv6 version    |4 |1 |Bi|6        | equal  | not-sent   ||      |
  |IPv6 DiffServ   |8 |1 |Bi|0        | equal  | not-sent   ||      |
