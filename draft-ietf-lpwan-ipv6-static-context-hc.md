@@ -322,8 +322,8 @@ to find the appropriate Rule.
 The compression/decompression process follows several steps:
 
 * compression Rule selection: The goal is to identify which Rule(s) will be used
-  to compress the packet's headers. When doing compression in Downlink direction the SCHC C/D needs to find the 
-  correct Rule to be used by identifying its Dev-ID and the Rule-ID. In the Uplink direction, only the Rule-ID may be used. 
+  to compress the packet's headers. When doing compression in the NGW side the SCHC C/D needs to find the 
+  correct Rule to be used by identifying its Dev-ID and the Rule-ID. In the Dev, only the Rule-ID may be used. 
   The next step is to choose the fields by their direction, using the 
   direction indicator (DI), so the fields that do not correspond to the appropriated DI will be excluded. 
   Next, then the fields are identified according to their field identifier (FID) and field position (FP). 
@@ -817,7 +817,7 @@ If the recipient receives the last fragment of a datagram (All-1), it checks for
 
 ### No ACK
 In the No ACK mode there is no feedback communication from the fragment receiver. The sender will send the fragments of a packet until the last one without any possibility to know if errors or a losses have occurred. As in this mode there is not a need to identify specific fragments a one-bit FCN is used, therefore FCN All-0 will be used in all fragments except the last one. The latter will carry an All-1 FCN and will also carry the MIC. 
-The receiver will wait for fragments and will set the Inactivity timer. The No ACK mode will use the MIC contained in the last fragment to check error. The FCN is set to All-1 for the last fragment. 
+The receiver will wait for fragments and will set the Inactivity timer. The No ACK mode will use the MIC contained in the last fragment to check error. 
 When the Inactivity Timer expires or when the MIC check indicates that the reassembled packet does not match the originall one, the receiver will release all resources allocated to reassembly of the packet. The initial value of the Inactivity Timer will be determined based on the characteristics of the underlying LPWAN technology and will be defined in other documents (e.g. technology-specific profile documents).
     
 
@@ -827,7 +827,7 @@ An FCN set to All-0 indicates that the window is over (i.e. the fragment is the 
 
 The Window mode offers two different reliability options modes: ACK-on-error and ACK-always.
 
-### ACK-Always
+#### ACK-Always
 Initially, when a fragmented packet needs to be sent, the window is set to 0, a local_bitmap 
 is set to 0, and FCN is set to the highest possible value depending on the number
 of fragments that will be sent in the window. 
@@ -885,7 +885,7 @@ If the receiver receives an All-1 fragment this means that the transmission shou
 In case of an incorrect MIC, the receivers wait for fragments belonging to the same window. After MAX_ACK_REQUEST the receiver will Abort the transmission. It can also Abort when the Inactivity timer has expired.
 
 
-### ACK-on-error
+#### ACK-on-error
 Initially, when a fragmented packet is sent, the window is set to 0, a local bitmap 
 is set to 0, and FCN is set the highest possible value depending on the number
 of fragment that will be sent in the window. 
@@ -1046,11 +1046,16 @@ For fragmented packet transmission in the downlink, and when ACK Always
 
 # Padding management 
 
-SCHC header, either for compression, fragmentation or acknowledgment does not preserve byte alignment. Since most of the LPWAN network technologies payload is expressed in an integer number of bytes; the receiver must be able to eliminate the padding bits.
+SCHC header, either for compression, fragmentation or acknowledgment does not preserve byte alignment. Since most of the LPWAN network technologies payload is expressed in an integer number of bytes; the sender will introduce at the end some padding bits while the receiver must be able to eliminate them.
 
-Padding bit elimination for compressed or fragmented frames. The header size is given by the rule and is not aligned on a byte boundary. The data size is variable, but always a multiple of 8 bits. In that case, the padding MUST never exceed 7 bits.
+The algorithm for padding bit elimination for compressed or fragmented frames is simple. Based on the following principle: 
+ * The SCHC header is not aligned on a byte boundary, but its size in bits is given by the rule.
+ 
+ * The data size is variable, but always a multiple of 8 bits. 
+ 
+ * Padding bits MUST never exceed 7 bits.
 
-For fragmentation acknowledgement, the header size and the bitmap size are given by the corresponding rule. The remaining bits are padding and can be of any size
+In that case, a receiver after decoding the SCHC header, must take the maximum multiple of 8 bits as data. The remaining bits are padding bits.
 
 # SCHC Compression for IPv6 and UDP headers
 
