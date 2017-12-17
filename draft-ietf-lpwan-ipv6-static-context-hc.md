@@ -705,6 +705,7 @@ The All-0 format is used for the last fragment of a window that is not the last 
    
 The All-0 empty fragment format is used by a sender to request an ACK in ACK-Always mode
 ~~~~
+
               <------------ R ------------>
                          <- T -> 1 <- N -> 
               +-- ... --+- ... -+-+- ... -+
@@ -734,6 +735,7 @@ In the No ACK option, the last fragment of an IPv6 datagram SHALL contain a frag
    the format shown in {{Fig-LastWinMode}}. The total size of the fragmentation 
    header in this format is R+M bits. It is used for request a retransmission
 ~~~~
+
       <------------ R ------------>
                  <- T -> 1 <- N -> <---- M ----->
       +-- ... --+- ... -+-+- ... -+---- ... ----+---...---+
@@ -746,11 +748,13 @@ In the No ACK option, the last fragment of an IPv6 datagram SHALL contain a frag
  In either ACK-Always or ACK-on-error, in order to request a retransmission of the ACK for the All-1 window, the fragment sender uses the format shown in {{Fig-All1retries}}. The total size of the fragmentation header in this format is R+M bits.
 
 ~~~~
+
 <------------ R ------------>
            <- T -> 1 <- N -> <---- M ----->
 +-- ... --+- ... -+-+- ... -+---- ... ----+
 | Rule ID | DTag  |W|  1..1 |     MIC     | (no payload)  
 +-- ... --+- ... -+-+- ... -+---- ... ----+
+
 ~~~~
 {: #Fig-All1retries title='All-1 for Retries format fragment also called All-1 empty'}
 
@@ -771,11 +775,13 @@ The All-1 Abort format and the ACK abort have the following formats.
 
 
 ~~~~
+
  <------ byte boundary -----><--- 1 byte --->
 
  +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+-+-+
  |  Rule ID  | DTag |W| 1..1|       FF      |  
  +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+-+-+
+ 
 ~~~~
 {: #Fig-ACKabort title='ACK Abort format'}
 
