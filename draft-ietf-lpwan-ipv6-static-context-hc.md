@@ -1349,10 +1349,10 @@ Rule 0
  |IPv6 Length     |16|1 |Bi|         | ignore | comp-length||      |
  |IPv6 Next Header|8 |1 |Bi|17       | equal  | not-sent   ||      |
  |IPv6 Hop Limit  |8 |1 |Bi|255      | ignore | not-sent   ||      |
- |IPv6 DEVprefix  |64|1 |Bi|\[alpha/64, match- |mapping-sent||  [1] |
+ |IPv6 DEVprefix  |64|1 |Bi|\[alpha/64, match- |mapping-sent||  \[1\] |
  |                |  |  |  |fe80::/64\] mapping|            ||      |
  |IPv6 DEViid     |64|1 |Bi|         | ignore | DEViid     ||      |
- |IPv6 APPprefix  |64|1 |Bi|\[beta/64,| match- |mapping-sent||  [2] |
+ |IPv6 APPprefix  |64|1 |Bi|\[beta/64,| match- |mapping-sent||  \[2\] |
  |                |  |  |  |alpha/64,| mapping|            ||      |
  |                |  |  |  |fe80::64\]|        |            ||      |
  |IPv6 APPiid     |64|1 |Bi|::1000   | equal  | not-sent   ||      |
@@ -1374,14 +1374,14 @@ Rule 0
  |IPv6 Length     |16|1 |Bi|         | ignore | comp-length||      |
  |IPv6 Next Header|8 |1 |Bi|17       | equal  | not-sent   ||      |
  |IPv6 Hop Limit  |8 |1 |Up|255      | ignore | not-sent   ||      |
- |IPv6 Hop Limit  |8 |1 |Dw|         | ignore | value-sent ||  [8] |
+ |IPv6 Hop Limit  |8 |1 |Dw|         | ignore | value-sent ||  \[8\] |
  |IPv6 DEVprefix  |64|1 |Bi|alpha/64 | equal  | not-sent   ||      |
  |IPv6 DEViid     |64|1 |Bi|         | ignore | DEViid     ||      |
  |IPv6 APPprefix  |64|1 |Bi|gamma/64 | equal  | not-sent   ||      |
  |IPv6 APPiid     |64|1 |Bi|::1000   | equal  | not-sent   ||      |
  +================+==+==+==+=========+========+============++======+
- |UDP DEVport     |16|1 |Bi|8720     | MSB(12)| LSB(4)     || [4]  |
- |UDP APPport     |16|1 |Bi|8720     | MSB(12)| LSB(4)     || [4]  |
+ |UDP DEVport     |16|1 |Bi|8720     | MSB(12)| LSB(4)     || \[4\]  |
+ |UDP APPport     |16|1 |Bi|8720     | MSB(12)| LSB(4)     || \[4\]  |
  |UDP Length      |16|1 |Bi|         | ignore | comp-length||      |
  |UDP checksum    |16|1 |Bi|         | ignore | comp-chk   ||      |
  +================+==+==+==+=========+========+============++======+
