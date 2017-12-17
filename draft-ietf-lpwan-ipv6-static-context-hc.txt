@@ -1178,11 +1178,11 @@ Minaburo, et al.          Expires June 20, 2018                [Page 21]
 Internet-Draft                 LPWAN SCHC                  December 2017
 
 
-                 <------------ R ------------>
-                            <- T -> 1 <- N ->
-                 +-- ... --+- ... -+-+- ... -+
-                 | Rule ID | DTag  |W|  0..0 | (no payload)
-                 +-- ... --+- ... -+-+- ... -+
+    <------------ R ------------>
+               <- T -> 1 <- N ->
+    +-- ... --+- ... -+-+- ... -+
+    | Rule ID | DTag  |W|  0..0 | (no payload)
+    +-- ... --+- ... -+-+- ... -+
 
 
                   Figure 12: All-0 empty fragment format
@@ -1191,11 +1191,11 @@ Internet-Draft                 LPWAN SCHC                  December 2017
    contain a fragmentation header that conforms to the format shown in
    Figure 13.  The total size of this fragmentation header is R+M bits.
 
-       <------------- R ---------->
-                     <- T -> <-N-><----- M ----->
-       +---- ... ---+- ... -+-----+---- ... ----+---...---+
-       |   Rule ID  | DTag  |  1  |     MIC     | payload |
-       +---- ... ---+- ... -+-----+---- ... ----+---...---+
+   <------------- R ---------->
+                 <- T -> <-N-><----- M ----->
+   +---- ... ---+- ... -+-----+---- ... ----+---...---+
+   |   Rule ID  | DTag  |  1  |     MIC     | payload |
+   +---- ... ---+- ... -+-----+---- ... ----+---...---+
 
 
     Figure 13: All-1 Fragmentation Format for the Last Fragment, No ACK
@@ -1206,12 +1206,12 @@ Internet-Draft                 LPWAN SCHC                  December 2017
    shown in Figure 14.  The total size of the fragmentation header in
    this format is R+M bits.  It is used for request a retransmission
 
-         <------------ R ------------>
-                    <- T -> 1 <- N -> <---- M ----->
-         +-- ... --+- ... -+-+- ... -+---- ... ----+---...---+
-         | Rule ID | DTag  |W| 11..1 |     MIC     | payload |
-         +-- ... --+- ... -+-+- ... -+---- ... ----+---...---+
-                               (FCN)
+   <------------ R ------------>
+              <- T -> 1 <- N -> <---- M ----->
+   +-- ... --+- ... -+-+- ... -+---- ... ----+---...---+
+   | Rule ID | DTag  |W| 11..1 |     MIC     | payload |
+   +-- ... --+- ... -+-+- ... -+---- ... ----+---...---+
+                         (FCN)
 
     Figure 14: All-1 Fragmentation Format for the Last Fragment, Window
                                    mode
@@ -1251,10 +1251,9 @@ Internet-Draft                 LPWAN SCHC                  December 2017
 
    The All-1 Abort format and the ACK abort have the following formats.
 
-
    <------ byte boundary ------><--- 1 byte --->
    +--- ... ---+- ... -+-+-...-+-+-+-+-+-+-+-+-+
-   |  Rule ID  | DTag  |W| FCN |       FF      | (no MIC and no payload)
+   |  Rule ID  | DTag  |W| FCN |       FF      | (no MIC & no payload)
    +--- ... ---+- ... -+-+-...-+-+-+-+-+-+-+-+-+
 
 
@@ -1281,6 +1280,7 @@ Internet-Draft                 LPWAN SCHC                  December 2017
    o  Rule ID and
 
    o  DTag (the latter, if present).
+
 
 
 
@@ -1573,9 +1573,9 @@ Internet-Draft                 LPWAN SCHC                  December 2017
    bit for C bit.  The C bit will be sent only in the ACK for the last
    frame of the packet (All-1).
 
-                               <----     bitmap fragments    ---->
-        |  Rule ID  | DTag |W|C|0|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|0|
-        |---- byte boundary -----| 1 byte  next  |  1 byte next  |
+                        <----     bitmap fragments    ---->
+   | Rule ID | DTag |W|C|0|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|0|
+   |--- byte boundary ----| 1 byte  next  |  1 byte next  |
 
 
                              Figure 18: Bitmap
@@ -1626,16 +1626,16 @@ Minaburo, et al.          Expires June 20, 2018                [Page 29]
 Internet-Draft                 LPWAN SCHC                  December 2017
 
 
- <-------   R  ------->6 5 4 3 2 1   0 (FCN values indicating the order)
-             <- T -> 1
- |  Rule ID  | DTag |W|1|0|1|1|0|1|all-0|padding|  Bitmap
- |---- byte boundary -----|     1 byte next     |
+   <------   R  ------>6 5 4 3 2 1   0 (*)
+               <- T -> 1
+   | Rule ID | DTag |W|1|0|1|1|0|1|all-0|padding|  Bitmap
+   |--- byte boundary ----|     1 byte next     |
+       (*)=(FCN values indicating the order)
 
-
- +---- ... --+-... -+-+-+-+-+-+-+-+-+-+
- |  Rule ID  | DTag |W|1|0|1|1|0|1|1|P|  transmitted Bitmap
- +---- ... --+-... -+-+-+-+-+-+-+-+-+-+
- |--- byte boundary ----| 1 byte next |
+   +---- ... --+-... -+-+-+-+-+-+-+-+-+-+
+   |  Rule ID  | DTag |W|1|0|1|1|0|1|1|P|  transmitted Bitmap
+   +---- ... --+-... -+-+-+-+-+-+-+-+-+-+
+   |--- byte boundary ----| 1 byte next |
 
 
    Figure 20: Example of the bitmap in Window mode, in any window except
@@ -1645,15 +1645,16 @@ Internet-Draft                 LPWAN SCHC                  December 2017
    indicates that the MIC check has failed but there is no missing
    fragments.
 
- <-------   R  ------->  6 5 4 3 2 1 7 (FCN values indicating the order)
-             <- T -> 1 1
- |  Rule ID  | DTag |W|0|1|1|1|1|1|1|1|padding|  Bitmap
- |---- byte boundary ----|  1 byte next |  1 byte next  |
-                       C
- +---- ... --+-... -+-+-+-+
- |  Rule ID  | DTag |W|0|1| transmitted Bitmap
- +---- ... --+-... -+-+-+-+
- |---- byte boundary -----|
+    <-------   R  ------->  6 5 4 3 2 1 7 (*)
+                <- T -> 1 1
+    |  Rule ID  | DTag |W|0|1|1|1|1|1|1|1|padding|  Bitmap
+    |---- byte boundary ----|  1 byte next |  1 byte next  |
+                          C
+    +---- ... --+-... -+-+-+-+
+    |  Rule ID  | DTag |W|0|1| transmitted Bitmap
+    +---- ... --+-... -+-+-+-+
+    |---- byte boundary -----|
+      (*) = (FCN values indicating the order)
 
 
    Figure 21: Example of the Bitmap in Window mode for the last window,
@@ -1672,8 +1673,7 @@ Internet-Draft                 LPWAN SCHC                  December 2017
    be used to signal the window size in use for a specific packet
    transmission.
 
-   Note that the same window size MUST be used for the transmission of
-   all fragments that belong to a packet.
+
 
 
 
@@ -1681,6 +1681,9 @@ Minaburo, et al.          Expires June 20, 2018                [Page 30]
 
 Internet-Draft                 LPWAN SCHC                  December 2017
 
+
+   Note that the same window size MUST be used for the transmission of
+   all fragments that belong to a packet.
 
 5.7.  Downlink fragment transmission
 
@@ -1727,9 +1730,6 @@ Internet-Draft                 LPWAN SCHC                  December 2017
    fragments reported by the ACK, or if the ACK confirms successful
    reception of all fragments of the last window, transmission of the
    fragmented packet ends.  If the timer expires, and no ACK has been
-   received since the start of the timer, the fragment sender assumes
-   that the all-1 fragment has been successfully received (and possibly,
-   the last ACK has been lost: this mechanism assumes that the
 
 
 
@@ -1738,6 +1738,9 @@ Minaburo, et al.          Expires June 20, 2018                [Page 31]
 Internet-Draft                 LPWAN SCHC                  December 2017
 
 
+   received since the start of the timer, the fragment sender assumes
+   that the all-1 fragment has been successfully received (and possibly,
+   the last ACK has been lost: this mechanism assumes that the
    retransmission timer for the all-1 fragment is long enough to allow
    several ACK retries if the all-1 fragment has not been received by
    the fragment receiver, and it also assumes that it is unlikely that
@@ -1783,9 +1786,6 @@ Internet-Draft                 LPWAN SCHC                  December 2017
    If the DiffServ field identified by the rest of the rule varies over
    time or is not known by both sides, then there are two possibilities
    depending on the variability of the value, the first one is to do not
-   compressed the field and sends the original value, or the second
-   where the values can be computed by sending only the LSB bits:
-
 
 
 
@@ -1793,6 +1793,9 @@ Minaburo, et al.          Expires June 20, 2018                [Page 32]
 
 Internet-Draft                 LPWAN SCHC                  December 2017
 
+
+   compressed the field and sends the original value, or the second
+   where the values can be computed by sending only the LSB bits:
 
    o  TV is not set to any value, MO is set to "ignore" and CDA is set
       to "value-sent"
@@ -1840,9 +1843,6 @@ Internet-Draft                 LPWAN SCHC                  December 2017
    Header value, the MO should be "equal" and the CDA should be "not-
    sent".
 
-   If the Next header field identified by the rest of the rule varies
-   during time or is not known by both sides, then TV is not set, MO is
-
 
 
 Minaburo, et al.          Expires June 20, 2018                [Page 33]
@@ -1850,6 +1850,8 @@ Minaburo, et al.          Expires June 20, 2018                [Page 33]
 Internet-Draft                 LPWAN SCHC                  December 2017
 
 
+   If the Next header field identified by the rest of the rule varies
+   during time or is not known by both sides, then TV is not set, MO is
    set to "ignore" and CDA is set to "value-sent".  A matching-list may
    also be used.
 
@@ -1895,8 +1897,6 @@ Internet-Draft                 LPWAN SCHC                  December 2017
    ID.  The MO is set to "match-mapping" and the CDA is set to "mapping-
    sent".
 
-   Otherwise the TV contains the prefix, the MO is set to "equal" and
-   the CDA is set to value-sent.
 
 
 
@@ -1905,6 +1905,9 @@ Minaburo, et al.          Expires June 20, 2018                [Page 34]
 
 Internet-Draft                 LPWAN SCHC                  December 2017
 
+
+   Otherwise the TV contains the prefix, the MO is set to "equal" and
+   the CDA is set to value-sent.
 
 7.7.2.  IPv6 source and destination IID
 
@@ -1951,9 +1954,6 @@ Internet-Draft                 LPWAN SCHC                  December 2017
    If the port variation is on few bits, the TV contains the stable part
    of the port number, the MO is set to "MSB" and the CDA is set to
    "LSB".
-
-
-
 
 
 
@@ -2707,21 +2707,21 @@ Internet-Draft                 LPWAN SCHC                  December 2017
    |       set Retrans_Timer  |     | set Retrans_Timer
    |                          |     |
    |Recv_wnd == wnd &         |     |
-   |Lcl_bitmap==recv_bitmap&  |     |  +-------------------------+
-   |more frag                 |     |  |local-bitmap!=rcv-bitmap |
-   |~~~~~~~~~~~~~~~~~~~~~~    |     |  | ~~~~~~~~~               |
-   |Stop Retrans_Timer        |     |  | Attemp++                v
-   |clear local_bitmap        v     v  |                  +------++
-   |window=next_window   +----+-----+--+--+               |Resend |
-   +---------------------+                |               |Missing|
-                    +----+     Wait       |               |Frag   |
-   not expected wnd |    |    bitmap      |               +------++
-   ~~~~~~~~~~~~~~~~ +--->+                +--+Retrans_Timer Exp  |
-       discard frag      +--+-+---+-+---+-+  |~~~~~~~~~~~~~~~~~  |
-                            | |   | ^   ^    |reSend(empty)All-* |
-                            | |   | |   |    |Set Retrans_Timer  |
-   MIC_bit==1 &             | |   | |   +----+Attemp++           |
-   Recv_window==window &    | |   | +----------------------------+
+   |Lcl_bitmap==recv_bitmap&  |     |  +------------------------+
+   |more frag                 |     |  |local-bitmap!=rcv-bitmap|
+   |~~~~~~~~~~~~~~~~~~~~~~    |     |  | ~~~~~~~~~              |
+   |Stop Retrans_Timer        |     |  | Attemp++               v
+   |clear local_bitmap        v     v  |                 +------++
+   |window=next_window   +----+-----+--+--+              |Resend |
+   +---------------------+                |              |Missing|
+                    +----+     Wait       |              |Frag   |
+   not expected wnd |    |    bitmap      |              +------++
+   ~~~~~~~~~~~~~~~~ +--->+                +-+Retrans_Timer Exp  |
+       discard frag      +--+-+---+-+---+-+ |~~~~~~~~~~~~~~~~~  |
+                            | |   | ^   ^   |reSend(empty)All-* |
+                            | |   | |   |   |Set Retrans_Timer  |
+   MIC_bit==1 &             | |   | |   +---+Attemp++           |
+   Recv_window==window &    | |   | +---------------------------+
    Lcl_bitmap==recv_bitmap &| |   |   all missing frag sent
                 no more frag| |   |   ~~~~~~~~~~~~~~~~~~~~~~
     ~~~~~~~~~~~~~~~~~~~~~~~~| |   |   Set Retrans_Timer

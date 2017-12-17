@@ -924,11 +924,11 @@ address {
 <div id="rfc.figure.12"></div>
 <div id="Fig-All0empty"></div>
 <pre>
-              &lt;------------ R ------------&gt;
-                         &lt;- T -&gt; 1 &lt;- N -&gt; 
-              +-- ... --+- ... -+-+- ... -+
-              | Rule ID | DTag  |W|  0..0 | (no payload)  
-              +-- ... --+- ... -+-+- ... -+
+ &lt;------------ R ------------&gt;
+            &lt;- T -&gt; 1 &lt;- N -&gt; 
+ +-- ... --+- ... -+-+- ... -+
+ | Rule ID | DTag  |W|  0..0 | (no payload)  
+ +-- ... --+- ... -+-+- ... -+
               
 </pre>
 <p class="figure">Figure 12: All-0 empty fragment format</p>
@@ -936,11 +936,11 @@ address {
 <div id="rfc.figure.13"></div>
 <div id="Fig-Last"></div>
 <pre>
-    &lt;------------- R ----------&gt;
-                  &lt;- T -&gt; &lt;-N-&gt;&lt;----- M -----&gt;
-    +---- ... ---+- ... -+-----+---- ... ----+---...---+
-    |   Rule ID  | DTag  |  1  |     MIC     | payload |
-    +---- ... ---+- ... -+-----+---- ... ----+---...---+
+&lt;------------- R ----------&gt;
+              &lt;- T -&gt; &lt;-N-&gt;&lt;----- M -----&gt;
++---- ... ---+- ... -+-----+---- ... ----+---...---+
+|   Rule ID  | DTag  |  1  |     MIC     | payload |
++---- ... ---+- ... -+-----+---- ... ----+---...---+
     
 </pre>
 <p class="figure">Figure 13: All-1 Fragmentation Format for the Last Fragment, No ACK option</p>
@@ -948,12 +948,12 @@ address {
 <div id="rfc.figure.14"></div>
 <div id="Fig-LastWinMode"></div>
 <pre>
-      &lt;------------ R ------------&gt;
-                 &lt;- T -&gt; 1 &lt;- N -&gt; &lt;---- M -----&gt;
-      +-- ... --+- ... -+-+- ... -+---- ... ----+---...---+
-      | Rule ID | DTag  |W| 11..1 |     MIC     | payload |
-      +-- ... --+- ... -+-+- ... -+---- ... ----+---...---+
-                            (FCN)
+&lt;------------ R ------------&gt;
+           &lt;- T -&gt; 1 &lt;- N -&gt; &lt;---- M -----&gt;
++-- ... --+- ... -+-+- ... -+---- ... ----+---...---+
+| Rule ID | DTag  |W| 11..1 |     MIC     | payload |
++-- ... --+- ... -+-+- ... -+---- ... ----+---...---+
+                      (FCN)
 </pre>
 <p class="figure">Figure 14: All-1 Fragmentation Format for the Last Fragment, Window mode</p>
 <p id="rfc.section.5.4.4.p.5">In either ACK-Always or ACK-on-error, in order to request a retransmission of the ACK for the All-1 window, the fragment sender uses the format shown in <a href="#Fig-All1retries" class="xref">Figure 15</a>. The total size of the fragmentation header in this format is R+M bits.</p>
@@ -976,11 +976,10 @@ address {
 <div id="rfc.figure.16"></div>
 <div id="Fig-All1Abort"></div>
 <pre>
-  
-  &lt;------ byte boundary ------&gt;&lt;--- 1 byte ---&gt;
-  +--- ... ---+- ... -+-+-...-+-+-+-+-+-+-+-+-+
-  |  Rule ID  | DTag  |W| FCN |       FF      | (no MIC and no payload)  
-  +--- ... ---+- ... -+-+-...-+-+-+-+-+-+-+-+-+
+&lt;------ byte boundary ------&gt;&lt;--- 1 byte ---&gt;
++--- ... ---+- ... -+-+-...-+-+-+-+-+-+-+-+-+
+|  Rule ID  | DTag  |W| FCN |       FF      | (no MIC &amp; no payload)  
++--- ... ---+- ... -+-+-...-+-+-+-+-+-+-+-+-+
    
 </pre>
 <p class="figure">Figure 16: All-1 Abort format</p>
@@ -1055,9 +1054,9 @@ address {
 <div id="rfc.figure.18"></div>
 <div id="Fig-Localbitmap"></div>
 <pre>
-                            &lt;----     bitmap fragments    ----&gt;   
-     |  Rule ID  | DTag |W|C|0|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|0|   
-     |---- byte boundary -----| 1 byte  next  |  1 byte next  |   
+                     &lt;----     bitmap fragments    ----&gt;   
+| Rule ID | DTag |W|C|0|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|0|   
+|--- byte boundary ----| 1 byte  next  |  1 byte next  |   
       
 </pre>
 <p class="figure">Figure 18: Bitmap</p>
@@ -1079,16 +1078,16 @@ address {
 <div id="rfc.figure.20"></div>
 <div id="Fig-Bitmap-Win"></div>
 <pre>
- &lt;-------   R  -------&gt;6 5 4 3 2 1   0 (FCN values indicating the order)
-             &lt;- T -&gt; 1   
- |  Rule ID  | DTag |W|1|0|1|1|0|1|all-0|padding|  Bitmap
- |---- byte boundary -----|     1 byte next     | 
+&lt;------   R  ------&gt;6 5 4 3 2 1   0 (*) 
+            &lt;- T -&gt; 1   
+| Rule ID | DTag |W|1|0|1|1|0|1|all-0|padding|  Bitmap
+|--- byte boundary ----|     1 byte next     | 
+    (*)=(FCN values indicating the order) 
     
-    
- +---- ... --+-... -+-+-+-+-+-+-+-+-+-+
- |  Rule ID  | DTag |W|1|0|1|1|0|1|1|P|  transmitted Bitmap
- +---- ... --+-... -+-+-+-+-+-+-+-+-+-+
- |--- byte boundary ----| 1 byte next | 
++---- ... --+-... -+-+-+-+-+-+-+-+-+-+
+|  Rule ID  | DTag |W|1|0|1|1|0|1|1|P|  transmitted Bitmap
++---- ... --+-... -+-+-+-+-+-+-+-+-+-+
+|--- byte boundary ----| 1 byte next | 
     
 </pre>
 <p class="figure">Figure 20: Example of the bitmap in Window mode, in any window except the last one, for N=3)</p>
@@ -1096,7 +1095,7 @@ address {
 <div id="rfc.figure.21"></div>
 <div id="Fig-Bitmap-lastWin"></div>
 <pre>
- &lt;-------   R  -------&gt;  6 5 4 3 2 1 7 (FCN values indicating the order)
+ &lt;-------   R  -------&gt;  6 5 4 3 2 1 7 (*) 
              &lt;- T -&gt; 1 1
  |  Rule ID  | DTag |W|0|1|1|1|1|1|1|1|padding|  Bitmap
  |---- byte boundary ----|  1 byte next |  1 byte next  |
@@ -1105,7 +1104,8 @@ address {
  |  Rule ID  | DTag |W|0|1| transmitted Bitmap
  +---- ... --+-... -+-+-+-+
  |---- byte boundary -----| 
-     
+   (*) = (FCN values indicating the order)
+   
 </pre>
 <p class="figure">Figure 21: Example of the Bitmap in Window mode for the last window, for N=3)</p>
 <h1 id="rfc.section.5.6">
@@ -1667,21 +1667,21 @@ Rule 0
 |       set Retrans_Timer  |     | set Retrans_Timer 
 |                          |     | 
 |Recv_wnd == wnd &amp;         |     |  
-|Lcl_bitmap==recv_bitmap&amp;  |     |  +-------------------------+
-|more frag                 |     |  |local-bitmap!=rcv-bitmap |
-|~~~~~~~~~~~~~~~~~~~~~~    |     |  | ~~~~~~~~~               |
-|Stop Retrans_Timer        |     |  | Attemp++                v
-|clear local_bitmap        v     v  |                  +------++
-|window=next_window   +----+-----+--+--+               |Resend |
-+---------------------+                |               |Missing|
-                 +----+     Wait       |               |Frag   |
-not expected wnd |    |    bitmap      |               +------++
-~~~~~~~~~~~~~~~~ +---&gt;+                +--+Retrans_Timer Exp  |          
-    discard frag      +--+-+---+-+---+-+  |~~~~~~~~~~~~~~~~~  |
-                         | |   | ^   ^    |reSend(empty)All-* |   
-                         | |   | |   |    |Set Retrans_Timer  |
-MIC_bit==1 &amp;             | |   | |   +----+Attemp++           |
-Recv_window==window &amp;    | |   | +----------------------------+   
+|Lcl_bitmap==recv_bitmap&amp;  |     |  +------------------------+
+|more frag                 |     |  |local-bitmap!=rcv-bitmap|
+|~~~~~~~~~~~~~~~~~~~~~~    |     |  | ~~~~~~~~~              |
+|Stop Retrans_Timer        |     |  | Attemp++               v
+|clear local_bitmap        v     v  |                 +------++
+|window=next_window   +----+-----+--+--+              |Resend |
++---------------------+                |              |Missing|
+                 +----+     Wait       |              |Frag   |
+not expected wnd |    |    bitmap      |              +------++
+~~~~~~~~~~~~~~~~ +---&gt;+                +-+Retrans_Timer Exp  |          
+    discard frag      +--+-+---+-+---+-+ |~~~~~~~~~~~~~~~~~  |
+                         | |   | ^   ^   |reSend(empty)All-* |   
+                         | |   | |   |   |Set Retrans_Timer  |
+MIC_bit==1 &amp;             | |   | |   +---+Attemp++           |
+Recv_window==window &amp;    | |   | +---------------------------+   
 Lcl_bitmap==recv_bitmap &amp;| |   |   all missing frag sent
              no more frag| |   |   ~~~~~~~~~~~~~~~~~~~~~~ 
  ~~~~~~~~~~~~~~~~~~~~~~~~| |&#160;  | &#160; Set Retrans_Timer &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; 
