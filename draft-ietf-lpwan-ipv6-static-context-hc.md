@@ -976,7 +976,7 @@ indicates that the second and the fifth fragments have not been correctly receiv
 {{Fig-Bitmap-lastWin}} shows an example of an ACK (N=3), where the bitmap indicates that the MIC check has failed but there is no missing fragments. 
 
 ~~~~                                                  
-     <-------   R  ------->  6 5 4 3 2 1 7 (FCN values indicating the order)
+     <-------   R  ------ ->  6 5 4 3 2 1 7 (FCN values indicating the order)
                  <- T -> 1 1
      |  Rule ID  | DTag |W|0|1|1|1|1|1|1|1|padding|  local_bitmap
      |---- byte boundary ----|  1 byte next |  1 byte next  |
