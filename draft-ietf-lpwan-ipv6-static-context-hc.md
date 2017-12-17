@@ -664,7 +664,7 @@ The format of an ACK that acknowledges a window that is not the last one (denote
                 |  Rule ID  | DTag |W|   bitmap    | (no payload)
                 +---- ... --+-... -+-+----- ... ---+
 ~~~~
-{: #Fig-ACK-Format title=' ACK format for All-0 windows'}
+{: #Fig-ACK-Format title='ACK format for All-0 windows'}
 
 To acknowledge the last window of a packet (denoted as All-1 window), a C bit (i.e. MIC checked) following the W bit is set
 to 1 to indicate that the MIC check computed by the receiver matches the MIC present in the ALL-1 fragment. If the MIC check fails, the C bit is set to 0 and the Bitmap for the All-1 window follows.
