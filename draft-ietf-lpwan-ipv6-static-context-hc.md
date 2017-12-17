@@ -710,6 +710,7 @@ The All-0 format is used for the last fragment of a window that is not the last 
 
    
 The All-0 empty fragment format is used by a sender to request an ACK in ACK-Always mode
+
 ~~~~
 
               <------------ R ------------>
@@ -768,6 +769,7 @@ The values for R, N, T and M are not specified in this document, and have to be 
 ### Abort formats
 
 The All-1 Abort format and the ACK abort have the following formats. 
+
 ~~~~
   
   <------ byte boundary ------><--- 1 byte --->
