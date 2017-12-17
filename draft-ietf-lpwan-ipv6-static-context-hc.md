@@ -947,16 +947,16 @@ In the last window, when checked bit C value is one, means that the MIC is corre
 indicates that the second and the fifth fragments have not been correctly received. 
 
 ~~~~                                                  
-    <-------   R  ------->6 5 4 3 2 1   0 (FCN values indicating the order)
-                <- T -> 1   
-    |  Rule ID  | DTag |W|1|0|1|1|0|1|all-0|padding|  Bitmap
-    |---- byte boundary -----|     1 byte next     | 
+ <-------   R  ------->6 5 4 3 2 1   0 (FCN values indicating the order)
+             <- T -> 1   
+ |  Rule ID  | DTag |W|1|0|1|1|0|1|all-0|padding|  Bitmap
+ |---- byte boundary -----|     1 byte next     | 
     
     
-    +---- ... --+-... -+-+-+-+-+-+-+-+-+-+
-    |  Rule ID  | DTag |W|1|0|1|1|0|1|1|P|  transmitted Bitmap
-    +---- ... --+-... -+-+-+-+-+-+-+-+-+-+
-    |--- byte boundary ----| 1 byte next | 
+ +---- ... --+-... -+-+-+-+-+-+-+-+-+-+
+ |  Rule ID  | DTag |W|1|0|1|1|0|1|1|P|  transmitted Bitmap
+ +---- ... --+-... -+-+-+-+-+-+-+-+-+-+
+ |--- byte boundary ----| 1 byte next | 
     
 ~~~~
 {: #Fig-Bitmap-Win title='Example of the bitmap in Window mode, in any window except the last one, for N=3)'}
@@ -964,15 +964,15 @@ indicates that the second and the fifth fragments have not been correctly receiv
 {{Fig-Bitmap-lastWin}} shows an example of an ACK (N=3), where the bitmap indicates that the MIC check has failed but there is no missing fragments. 
 
 ~~~~                                                  
-     <-------   R  ------->  6 5 4 3 2 1 7 (FCN values indicating the order)
-                 <- T -> 1 1
-     |  Rule ID  | DTag |W|0|1|1|1|1|1|1|1|padding|  Bitmap
-     |---- byte boundary ----|  1 byte next |  1 byte next  |
-                           C
-     +---- ... --+-... -+-+-+-+
-     |  Rule ID  | DTag |W|0|1| transmitted Bitmap
-     +---- ... --+-... -+-+-+-+
-     |---- byte boundary -----| 
+ <-------   R  ------->  6 5 4 3 2 1 7 (FCN values indicating the order)
+             <- T -> 1 1
+ |  Rule ID  | DTag |W|0|1|1|1|1|1|1|1|padding|  Bitmap
+ |---- byte boundary ----|  1 byte next |  1 byte next  |
+                       C
+ +---- ... --+-... -+-+-+-+
+ |  Rule ID  | DTag |W|0|1| transmitted Bitmap
+ +---- ... --+-... -+-+-+-+
+ |---- byte boundary -----| 
      
 ~~~~
 {: #Fig-Bitmap-lastWin title='Example of the Bitmap in Window mode for the last window, for N=3)'}
