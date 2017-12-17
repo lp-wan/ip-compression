@@ -696,6 +696,7 @@ to 1 to indicate that the MIC check computed by the receiver matches the MIC pre
 ### All-1 and All-0 formats
 
 The All-0 format is used for the last fragment of a window that is not the last window of the packet.
+
 ~~~~
 
      <------------ R ------------>
