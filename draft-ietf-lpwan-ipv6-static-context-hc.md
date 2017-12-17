@@ -87,7 +87,7 @@ The SCHC header compression mechanism is independent of the specific LPWAN techn
 
 LPWAN technologies are also characterized,
 among others, by a very reduced data unit and/or payload size
-{{I-D.ietf-lpwan-overview}}.  However, some of these technologies
+({{I-D.ietf-lpwan-overview}}).  However, some of these technologies
 do not support layer two fragmentation, therefore the only option for
    them to support the IPv6 MTU requirement of 1280 bytes
  {{RFC2460}} is the use of a fragmentation protocol at the
