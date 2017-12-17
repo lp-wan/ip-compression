@@ -828,64 +828,69 @@ An FCN set to All-0 indicates that the window is over (i.e. the fragment is the 
 The Window mode offers two different reliability options modes: ACK-on-error and ACK-always.
 
 #### ACK-Always
-Initially, when a fragmented packet needs to be sent, the window is set to 0, a local_bitmap 
-is set to 0, and FCN is set to the highest possible value depending on the number
-of fragments that will be sent in the window. 
-
-The sender starts sending fragments, the sender will indicate in the fragmentation header: the current window (W bit) and the FCN fragment number. A delay between each fragment can be added to respect regulation rules or constraints imposed by the applications. Each time a fragment is sent the FCN is decreased by one and the bitmap is set locally. 
-
-The sender waits for and ACK when:
-
-* The FCN reaches value 0 and there are more fragments to be sent. In that case, an All-0 fragment is sent and the retransmission timer is set. 
-
-* The last fragment is sent. In that case, an All-1 fragment with the MIC is sent. The sender sets a retransmission timer to wait for the ACK.
-
-During these period, the sender starts listening to the radio and starts an Inactivity timer, which is dimensioned based on the received window available for the LPWAN technology in use.
-
-In ACK-Always, if the inactivity timer expires, an empty All-0 (or All-1 if the last fragment has been sent) fragment is sent to ask the receiver to resend its Bitmap. The window number is not changed.
+The sender starts sending fragments using the two windows procedure. A delay between each fragment can be added to respect 
+regulation rules or constraints imposed by the applications. Each time a fragment is sent the FCN is decreased by one and 
+the sending information is set locally. When the FCN reaches value 0 and there are more fragments to be sent, an All-0 
+fragment is sent and the retransmission timer is set. The sender waits for an ACK to know if there were some transmission 
+errors. If there are some errors the receiver sends an ACK with Bitmap, otherwise, an ACK will be sent and a new window 
+should be sent. When the last fragment is sent, and All-1 fragment with MIC is sent. The sender sets the retransmission 
+timer to wait for the ACK corresponding to the last window.
+During this period, the sender starts listening to the radio and starts an Inactivity timer, which is dimensioned based on 
+the received window available for the LPWAN technology in use. If the Inactivity timer expires an empty All-0 (or All-1 if 
+the last fragment has been sent) fragment is sent to ask the receiver to resend its ACK with Bitmap. The window number is 
+not changed.
 
 When the sender receives an ACK, it checks the window value. The ACK fragments carrying an unexpected W bit are discarded.
+If the window number of the received ACK is correct, the sender compares the sending information 
+with the received bitmap. If the sending information is equal to the received Bitmap all the fragments sent during the 
+window have been well received. If at least one fragment needs to be sent, the sender moves its sending window to the next 
+value and sends the last fragment. If no more fragments have to be sent, then the fragmented packet transmission is 
+terminated.
 
-If the window number of the received ACK is correct, the sender compares the local bitmap
-with the received bitmap. If the local bitmap is equal to the received bitmap all the fragments sent during the window 
-have been well received. If at least one fragment need to be sent, the sender clear 
-the bitmap, stop the retransmission timer and move its sending window to the next value. If no more fragments have to be sent, then the fragmented packet transmission is terminated.
+If some fragments are missing (not set in the Bitmap) then the sender resends the missing fragments. When the 
+retransmission is finished, it starts the retransmission timer (even if an All-0 or an All-1 has not been sent during the 
+retransmission) and waits for ACK.
 
-If some fragments are missing (not set in the bitmap) then the sender resends the missing
-fragments. When the retransmission is finished, it starts the retransmission timer (even if
-an All-0 or an All-1 has not been sent during the retransmission) and waits for ACK.
+If the sending information is different from the received Bitmap the counter Attempts is increased and the sender resends
+the missing fragments again when a MAX_ACK_REQUESTS is reached, the sender sends an Abort and drops the fragments. The 
+sender Aborts the transmission when a corrupt MIC has been received or when MAX_ACK_REQUESTS has reached.
 
-If the local-bitmap is different from the received bitmap the counter Attempts is increased and the sender resend the missing fragments again, when a MAX_ACK_REQUEST is reached the sender sends an Abort and drops the fragments.
+At the beginning, the receiver side expects to receive window 0. Any fragment not belonging to the current window is 
+discarded. All Fragments belonging to the correct window are accepted, the fragment number is computed based on the FCN 
+value. The receiver updates the Bitmap with the correct received fragments. 
 
-The sender Aborts the transmission when a corrupt MIC has been received or when MAX_ACK_REQUEST has reached.
+When All-0 fragment is received, it indicates that all the fragments have been sent in the current window. Since the sender 
+is not obliged to send a full window, some fragment number not set in the memory may not correspond to losses. It sends the 
+corresponding ACK and the next window can start.
 
-The receiver starts with window 0 as the expecting window and maintain a local_bitmap 
-indicating which fragments, it has received (All-0 and All-1 occupy the same position).
-
-Any fragment not belonging to the current window is discarded. All Fragments belonging to the correct window are accepted, the fragment number is computed based on the FCN value. 
-
-When All-0 fragment is received, it indicates that all the fragments have been sent in the current window. Since the sender is not obliged to send a full window, some fragment number not set in the local_bitmap may not correspond to losses. The next window can start.
-
-When All-1 fragment is received, it indicates that the transmission is finished. Since the last window is not full, the MIC will be used to detect if all the fragments have been received. A correct MIC indicates the end of the transmission but the receiver must stay alive 
-a period of time to answer to empty All-1 fragment the sender may send if the bitmap
-is lost.
+When All-1 fragment is received, it indicates that the transmission is finished. Since the last window is not full, the MIC 
+will be used to detect if all the fragments have been received. A correct MIC indicates the end of the transmission but the 
+receiver must stay alive an Inactivity timer period to answer to empty All-1 fragment the sender may send if the ACK with 
+Bitmap is lost.
 
 If All-1 fragment has not been received, the receiver expects a new window. It waits for
 the next fragment. If the window value has not changed, the received fragments are
-part of a retransmission. A receiver that has already received a fragment should discard it, otherwise it completes its bitmap. If all the bits of the bitmap are set to one, the receiver may send a bitmap without waiting for an All-0 frag. 
+part of a retransmission. A receiver that has already received a fragment should discard it, otherwise, it updates the 
+received fragment memory. If all the bits of the Bitmap are set to one, the receiver may send a Bitmap without waiting for 
+an All-0 fragment.
 
 If the window value is set to the next value, this means that the sender has received 
 a correct bitmap, which means that all the fragments have been received. The receiver
-change the value of the expected window.
+changes the value of the expected window.
 
-If the receiver receives an All-0 fragment, sender may send one fragment per window or more. Otherwise some fragments in the window have been lost.
+If the receiver receives an All-0 fragment, the sender may send one or more fragments per window. Otherwise, some fragments 
+in the window have been lost.
 
-If the receiver receives an All-1 fragment this means that the transmission should be finished. If the MIC is incorrect some fragments have been lost. It sends its bitmap.
-
-In case of an incorrect MIC, the receivers wait for fragments belonging to the same window. After MAX_ACK_REQUEST the receiver will Abort the transmission. It can also Abort when the Inactivity timer has expired.
-
+If the receiver receives an All-1 fragment this means that the transmission should be finished. If the MIC is incorrect 
+some fragments have been lost. It sends the ACK with Bitmap. In case of an incorrect MIC, the receivers wait for fragments belonging to the same window. After MAX_ACK_REQUESTS the 
+receiver will Abort the transmission. It can also Abort when the Inactivity timer has expired.
 
 #### ACK-on-error
+The ACK-on-error is similar to the ACK-Always procedure, the difference is that in ACK-on-error 
+
+
+
+
 Initially, when a fragmented packet is sent, the window is set to 0, a local bitmap 
 is set to 0, and FCN is set the highest possible value depending on the number
 of fragment that will be sent in the window. 
