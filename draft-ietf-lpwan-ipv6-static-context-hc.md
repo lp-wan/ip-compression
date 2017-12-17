@@ -712,12 +712,11 @@ The All-0 format is used for the last fragment of a window that is not the last 
 The All-0 empty fragment format is used by a sender to request an ACK in ACK-Always mode
 
 ~~~~
-
-              <------------ R ------------>
-                         <- T -> 1 <- N -> 
-              +-- ... --+- ... -+-+- ... -+
-              | Rule ID | DTag  |W|  0..0 | (no payload)  
-              +-- ... --+- ... -+-+- ... -+
+ <------------ R ------------>
+            <- T -> 1 <- N -> 
+ +-- ... --+- ... -+-+- ... -+
+ | Rule ID | DTag  |W|  0..0 | (no payload)  
+ +-- ... --+- ... -+-+- ... -+
               
 ~~~~
 {: #Fig-All0empty title='All-0 empty fragment format'}
@@ -728,12 +727,11 @@ In the No ACK option, the last fragment of an IPv6 datagram SHALL contain a frag
    header is R+M bits. 
    
 ~~~~
-
-    <------------- R ---------->
-                  <- T -> <-N-><----- M ----->
-    +---- ... ---+- ... -+-----+---- ... ----+---...---+
-    |   Rule ID  | DTag  |  1  |     MIC     | payload |
-    +---- ... ---+- ... -+-----+---- ... ----+---...---+
+<------------- R ---------->
+              <- T -> <-N-><----- M ----->
++---- ... ---+- ... -+-----+---- ... ----+---...---+
+|   Rule ID  | DTag  |  1  |     MIC     | payload |
++---- ... ---+- ... -+-----+---- ... ----+---...---+
     
 ~~~~
 {: #Fig-Last title='All-1 Fragmentation Format for the Last Fragment, No ACK option'}
@@ -744,12 +742,12 @@ In the No ACK option, the last fragment of an IPv6 datagram SHALL contain a frag
    header in this format is R+M bits. It is used for request a retransmission
    
 ~~~~
-      <------------ R ------------>
-                 <- T -> 1 <- N -> <---- M ----->
-      +-- ... --+- ... -+-+- ... -+---- ... ----+---...---+
-      | Rule ID | DTag  |W| 11..1 |     MIC     | payload |
-      +-- ... --+- ... -+-+- ... -+---- ... ----+---...---+
-                            (FCN)
+<------------ R ------------>
+           <- T -> 1 <- N -> <---- M ----->
++-- ... --+- ... -+-+- ... -+---- ... ----+---...---+
+| Rule ID | DTag  |W| 11..1 |     MIC     | payload |
++-- ... --+- ... -+-+- ... -+---- ... ----+---...---+
+                      (FCN)
 ~~~~
 {: #Fig-LastWinMode title='All-1 Fragmentation Format for the Last Fragment, Window mode'}
        
@@ -772,11 +770,10 @@ The values for R, N, T and M are not specified in this document, and have to be 
 The All-1 Abort format and the ACK abort have the following formats. 
 
 ~~~~
-  
-  <------ byte boundary ------><--- 1 byte --->
-  +--- ... ---+- ... -+-+-...-+-+-+-+-+-+-+-+-+
-  |  Rule ID  | DTag  |W| FCN |       FF      | (no MIC and no payload)  
-  +--- ... ---+- ... -+-+-...-+-+-+-+-+-+-+-+-+
+<------ byte boundary ------><--- 1 byte --->
++--- ... ---+- ... -+-+-...-+-+-+-+-+-+-+-+-+
+|  Rule ID  | DTag  |W| FCN |       FF      | (no MIC & no payload)  
++--- ... ---+- ... -+-+-...-+-+-+-+-+-+-+-+-+
    
 ~~~~
 {: #Fig-All1Abort title='All-1 Abort format'}
@@ -921,9 +918,9 @@ The Fragmentation Bitmap is the optmization of what has been received. It is tra
 The receiver generates the Bitmap which may have the size of a single downlink frame of the LPWAN technology used. To avoid this problem the FCN size should be set to the corresponding downlink size minus 1 bit for C bit. The C bit will be sent only in the ACK for the last frame of the packet (All-1).
 
 ~~~~                                                  
-                            <----     bitmap fragments    ---->   
-     |  Rule ID  | DTag |W|C|0|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|0|   
-     |---- byte boundary -----| 1 byte  next  |  1 byte next  |   
+                     <----     bitmap fragments    ---->   
+| Rule ID | DTag |W|C|0|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|0|   
+|--- byte boundary ----| 1 byte  next  |  1 byte next  |   
       
 ~~~~
 {: #Fig-Localbitmap title='Bitmap'}
@@ -947,16 +944,16 @@ In the last window, when checked bit C value is one, means that the MIC is corre
 indicates that the second and the fifth fragments have not been correctly received. 
 
 ~~~~                                                  
- <-------   R  ------->6 5 4 3 2 1   0 (FCN values indicating the order)
-             <- T -> 1   
- |  Rule ID  | DTag |W|1|0|1|1|0|1|all-0|padding|  Bitmap
- |---- byte boundary -----|     1 byte next     | 
+<------   R  ------>6 5 4 3 2 1   0 (*) 
+            <- T -> 1   
+| Rule ID | DTag |W|1|0|1|1|0|1|all-0|padding|  Bitmap
+|--- byte boundary ----|     1 byte next     | 
+    (*)=(FCN values indicating the order) 
     
-    
- +---- ... --+-... -+-+-+-+-+-+-+-+-+-+
- |  Rule ID  | DTag |W|1|0|1|1|0|1|1|P|  transmitted Bitmap
- +---- ... --+-... -+-+-+-+-+-+-+-+-+-+
- |--- byte boundary ----| 1 byte next | 
++---- ... --+-... -+-+-+-+-+-+-+-+-+-+
+|  Rule ID  | DTag |W|1|0|1|1|0|1|1|P|  transmitted Bitmap
++---- ... --+-... -+-+-+-+-+-+-+-+-+-+
+|--- byte boundary ----| 1 byte next | 
     
 ~~~~
 {: #Fig-Bitmap-Win title='Example of the bitmap in Window mode, in any window except the last one, for N=3)'}
@@ -964,7 +961,7 @@ indicates that the second and the fifth fragments have not been correctly receiv
 {{Fig-Bitmap-lastWin}} shows an example of an ACK (N=3), where the bitmap indicates that the MIC check has failed but there is no missing fragments. 
 
 ~~~~                                                  
- <-------   R  ------->  6 5 4 3 2 1 7 (FCN values indicating the order)
+ <-------   R  ------->  6 5 4 3 2 1 7 (*) 
              <- T -> 1 1
  |  Rule ID  | DTag |W|0|1|1|1|1|1|1|1|padding|  Bitmap
  |---- byte boundary ----|  1 byte next |  1 byte next  |
@@ -973,7 +970,8 @@ indicates that the second and the fifth fragments have not been correctly receiv
  |  Rule ID  | DTag |W|0|1| transmitted Bitmap
  +---- ... --+-... -+-+-+-+
  |---- byte boundary -----| 
-     
+   (*) = (FCN values indicating the order)
+   
 ~~~~
 {: #Fig-Bitmap-lastWin title='Example of the Bitmap in Window mode for the last window, for N=3)'}
 
@@ -1688,21 +1686,21 @@ The fragmentation state machines of the sender and the receiver in the different
 |       set Retrans_Timer  |     | set Retrans_Timer 
 |                          |     | 
 |Recv_wnd == wnd &         |     |  
-|Lcl_bitmap==recv_bitmap&  |     |  +-------------------------+
-|more frag                 |     |  |local-bitmap!=rcv-bitmap |
-|~~~~~~~~~~~~~~~~~~~~~~    |     |  | ~~~~~~~~~               |
-|Stop Retrans_Timer        |     |  | Attemp++                v
-|clear local_bitmap        v     v  |                  +------++
-|window=next_window   +----+-----+--+--+               |Resend |
-+---------------------+                |               |Missing|
-                 +----+     Wait       |               |Frag   |
-not expected wnd |    |    bitmap      |               +------++
-~~~~~~~~~~~~~~~~ +--->+                +--+Retrans_Timer Exp  |          
-    discard frag      +--+-+---+-+---+-+  |~~~~~~~~~~~~~~~~~  |
-                         | |   | ^   ^    |reSend(empty)All-* |   
-                         | |   | |   |    |Set Retrans_Timer  |
-MIC_bit==1 &             | |   | |   +----+Attemp++           |
-Recv_window==window &    | |   | +----------------------------+   
+|Lcl_bitmap==recv_bitmap&  |     |  +------------------------+
+|more frag                 |     |  |local-bitmap!=rcv-bitmap|
+|~~~~~~~~~~~~~~~~~~~~~~    |     |  | ~~~~~~~~~              |
+|Stop Retrans_Timer        |     |  | Attemp++               v
+|clear local_bitmap        v     v  |                 +------++
+|window=next_window   +----+-----+--+--+              |Resend |
++---------------------+                |              |Missing|
+                 +----+     Wait       |              |Frag   |
+not expected wnd |    |    bitmap      |              +------++
+~~~~~~~~~~~~~~~~ +--->+                +-+Retrans_Timer Exp  |          
+    discard frag      +--+-+---+-+---+-+ |~~~~~~~~~~~~~~~~~  |
+                         | |   | ^   ^   |reSend(empty)All-* |   
+                         | |   | |   |   |Set Retrans_Timer  |
+MIC_bit==1 &             | |   | |   +---+Attemp++           |
+Recv_window==window &    | |   | +---------------------------+   
 Lcl_bitmap==recv_bitmap &| |   |   all missing frag sent
              no more frag| |   |   ~~~~~~~~~~~~~~~~~~~~~~ 
  ~~~~~~~~~~~~~~~~~~~~~~~~| |   |   Set Retrans_Timer                 
