@@ -726,6 +726,7 @@ The All-0 empty fragment format is used by a sender to request an ACK in ACK-Alw
 In the No ACK option, the last fragment of an IPv6 datagram SHALL contain a fragmentation header that conforms to 
    the format shown in {{Fig-Last}}. The total size of this fragmentation 
    header is R+M bits. 
+   
 ~~~~
 
     <------------- R ---------->
