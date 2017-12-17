@@ -739,8 +739,8 @@ In the No ACK option, the last fragment of an IPv6 datagram SHALL contain a frag
    In any of the Window modes, the last fragment of an IPv6 datagram SHALL contain a fragmentation header that conforms to 
    the format shown in {{Fig-LastWinMode}}. The total size of the fragmentation 
    header in this format is R+M bits. It is used for request a retransmission
+   
 ~~~~
-
       <------------ R ------------>
                  <- T -> 1 <- N -> <---- M ----->
       +-- ... --+- ... -+-+- ... -+---- ... ----+---...---+
@@ -753,7 +753,6 @@ In the No ACK option, the last fragment of an IPv6 datagram SHALL contain a frag
  In either ACK-Always or ACK-on-error, in order to request a retransmission of the ACK for the All-1 window, the fragment sender uses the format shown in {{Fig-All1retries}}. The total size of the fragmentation header in this format is R+M bits.
 
 ~~~~
-
 <------------ R ------------>
            <- T -> 1 <- N -> <---- M ----->
 +-- ... --+- ... -+-+- ... -+---- ... ----+
@@ -1316,6 +1315,7 @@ Therefore, when such technologies are used, it is necessary to define statically
 Local address for the SCHC C/D.
 
 ~~~~
+
 Rule 0
  +----------------+--+--+--+---------+--------+------------++------+
  | Field          |FL|FP|DI| Value   | Match  | Comp Decomp|| Sent |
