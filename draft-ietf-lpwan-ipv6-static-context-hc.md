@@ -658,11 +658,13 @@ In any of the Window mode options, fragments except the last one SHALL contain t
 The format of an ACK that acknowledges a window that is not the last one (denoted as ALL-0 window) is shown in {{Fig-ACK-Format}}.
 
 ~~~~
+
                 <--------  R  ------->
                             <- T -> 1  
                 +---- ... --+-... -+-+----- ... ---+
                 |  Rule ID  | DTag |W|   bitmap    | (no payload)
                 +---- ... --+-... -+-+----- ... ---+
+                
 ~~~~
 {: #Fig-ACK-Format title='ACK format for All-0 windows'}
 
@@ -670,6 +672,7 @@ To acknowledge the last window of a packet (denoted as All-1 window), a C bit (i
 to 1 to indicate that the MIC check computed by the receiver matches the MIC present in the ALL-1 fragment. If the MIC check fails, the C bit is set to 0 and the Bitmap for the All-1 window follows.
 
 ~~~~
+
     <--------  R  ------->  <- byte boundary ->
                 <- T -> 1 1
     +---- ... --+-... -+-+-+
@@ -689,11 +692,13 @@ to 1 to indicate that the MIC check computed by the receiver matches the MIC pre
 
 The All-0 format is used for the last fragment of a window that is not the last window of the packet.
 ~~~~
+
      <------------ R ------------>
                 <- T -> 1 <- N -> 
      +-- ... --+- ... -+-+- ... -+--- ... ---+
      | Rule ID | DTag  |W|  0..0 |  payload  |  
      +-- ... --+- ... -+-+- ... -+--- ... ---+
+     
 ~~~~
 {: #Fig-All0 title='All-0 fragment format'}
 
@@ -705,6 +710,7 @@ The All-0 empty fragment format is used by a sender to request an ACK in ACK-Alw
               +-- ... --+- ... -+-+- ... -+
               | Rule ID | DTag  |W|  0..0 | (no payload)  
               +-- ... --+- ... -+-+- ... -+
+              
 ~~~~
 {: #Fig-All0empty title='All-0 empty fragment format'}
 
@@ -713,11 +719,13 @@ In the No ACK option, the last fragment of an IPv6 datagram SHALL contain a frag
    the format shown in {{Fig-Last}}. The total size of this fragmentation 
    header is R+M bits. 
 ~~~~
+
     <------------- R ---------->
                   <- T -> <-N-><----- M ----->
     +---- ... ---+- ... -+-----+---- ... ----+---...---+
     |   Rule ID  | DTag  |  1  |     MIC     | payload |
     +---- ... ---+- ... -+-----+---- ... ----+---...---+
+    
 ~~~~
 {: #Fig-Last title='All-1 Fragmentation Format for the Last Fragment, No ACK option'}
 
