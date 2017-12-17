@@ -128,9 +128,9 @@ Internet-Draft                 LPWAN SCHC                  December 2017
      5.5.  Baseline mechanism  . . . . . . . . . . . . . . . . . . .  23
        5.5.1.  No ACK  . . . . . . . . . . . . . . . . . . . . . . .  24
        5.5.2.  The Window modes  . . . . . . . . . . . . . . . . . .  25
-     5.6.  Bitmap Optimization . . . . . . . . . . . . . . . . . . .  28
-     5.7.  Supporting multiple window sizes  . . . . . . . . . . . .  30
-     5.8.  Downlink fragment transmission  . . . . . . . . . . . . .  31
+       5.5.3.  Bitmap Optimization . . . . . . . . . . . . . . . . .  28
+     5.6.  Supporting multiple window sizes  . . . . . . . . . . . .  30
+     5.7.  Downlink fragment transmission  . . . . . . . . . . . . .  31
    6.  Padding management  . . . . . . . . . . . . . . . . . . . . .  32
    7.  SCHC Compression for IPv6 and UDP headers . . . . . . . . . .  32
      7.1.  IPv6 version field  . . . . . . . . . . . . . . . . . . .  32
@@ -961,7 +961,7 @@ Internet-Draft                 LPWAN SCHC                  December 2017
       sending format of the bitmap will be truncated until a byte
       boundary where the last error is given.  However, when all the
       Bitmap is transmitted, it may be truncated, see more details in
-      Section 5.6
+      Section 5.5.3
 
    o  Abort.  In case of error or when the Inactivity timer expires or
       the MAX_ACK_REQUESTS is reached the sender or the receiver may use
@@ -1550,18 +1550,18 @@ Internet-Draft                 LPWAN SCHC                  December 2017
    belonging to the same window or the expiration of the Inactivity
    timer which will Abort the transmission.
 
-5.6.  Bitmap Optimization
+5.5.3.  Bitmap Optimization
 
-   The Fragmentation Bitmap has two instances the local one and the
-   transmitted one.  The local_bitmap is the representation of each
-   fragment correctly received or sent and kept in memory.  The size of
-   the local_bitmap may be based on the FCN size.  The bitmap
-   transmitted is the optmization of what has been received.  An ACK
-   message may introduce padding at the end to align transmitted data to
-   a byte boundary.  The first byte boundary includes one or more
-   complete bytes, depending on the size of Rule ID and DTag.
+   The Fragmentation Bitmap is the optmization of what has been
+   received.  It is transmitted in the ACK format fragment when there
+   are some missing fragments.  An ACK message may introduce padding at
+   the end to align transmitted data to a byte boundary.  The first byte
+   boundary includes one or more complete bytes, depending on the size
+   of Rule ID and DTag.
 
-
+   The receiver generates the Bitmap which may have the size of a single
+   downlink frame of the LPWAN technology used.  To avoid this problem
+   the FCN size should be set to the corresponding downlink size minus 1
 
 
 
@@ -1570,9 +1570,6 @@ Minaburo, et al.          Expires June 20, 2018                [Page 28]
 Internet-Draft                 LPWAN SCHC                  December 2017
 
 
-   The receiver generates the Bitmap which may have the size of a single
-   downlink frame of the LPWAN technology used.  To avoid this problem
-   the FCN size should be set to the corresponding downlink size minus 1
    bit for C bit.  The C bit will be sent only in the ACK for the last
    frame of the packet (All-1).
 
@@ -1581,16 +1578,16 @@ Internet-Draft                 LPWAN SCHC                  December 2017
         |---- byte boundary -----| 1 byte  next  |  1 byte next  |
 
 
-                          Figure 18: Local_Bitmap
+                             Figure 18: Bitmap
 
    Bitmap transmitted MUST be optimized in size to reduce frame size.
-   The right-most bytes with all bitmap bit set to 1 MUST be removed
-   from the transmission.  As the receiver knows the bitmap size, it can
+   The right-most bytes with all Bitmap bit set to 1 MUST be removed
+   from the transmission.  As the receiver knows the Bitmap size, it can
    reconstruct the value.  In the example Figure 19 the last 2 bytes of
    the bitmap are set to 1, therefore, they are not sent.
 
    In the last window, when checked bit C value is one, means that the
-   MIC is corrected and the bitmap is not sent.  Otherwise the bitmap
+   MIC is corrected and the Bitmap is not sent.  Otherwise, the Bitmap
    needs to be sent after the C bit.  Note that the introduction of a C
    bit may force to reduce the number of fragments to allow the bitmap
    to fit in a frame.
@@ -1605,9 +1602,12 @@ Internet-Draft                 LPWAN SCHC                  December 2017
 
                Figure 19: Bitmap transmitted fragment format
 
-   Figure 20 shows an example of an ACK (N=3), where the bitmap
+   Figure 20 shows an example of an ACK (N=3), where the Bitmap
    indicates that the second and the fifth fragments have not been
    correctly received.
+
+
+
 
 
 
@@ -1628,12 +1628,12 @@ Internet-Draft                 LPWAN SCHC                  December 2017
 
     <-------   R  ------->6 5 4 3 2 1   0 (FCN values indicating the order)
                 <- T -> 1
-    |  Rule ID  | DTag |W|1|0|1|1|0|1|all-0|padding|  local_bitmap
+    |  Rule ID  | DTag |W|1|0|1|1|0|1|all-0|padding|  Bitmap
     |---- byte boundary -----|     1 byte next     |
 
 
     +---- ... --+-... -+-+-+-+-+-+-+-+-+-+
-    |  Rule ID  | DTag |W|1|0|1|1|0|1|1|P|  transmitted bitmap
+    |  Rule ID  | DTag |W|1|0|1|1|0|1|1|P|  transmitted Bitmap
     +---- ... --+-... -+-+-+-+-+-+-+-+-+-+
     |--- byte boundary ----| 1 byte next |
 
@@ -1647,19 +1647,19 @@ Internet-Draft                 LPWAN SCHC                  December 2017
 
      <-------   R  ------->  6 5 4 3 2 1 7 (FCN values indicating the order)
                  <- T -> 1 1
-     |  Rule ID  | DTag |W|0|1|1|1|1|1|1|1|padding|  local_bitmap
+     |  Rule ID  | DTag |W|0|1|1|1|1|1|1|1|padding|  Bitmap
      |---- byte boundary ----|  1 byte next |  1 byte next  |
                            C
      +---- ... --+-... -+-+-+-+
-     |  Rule ID  | DTag |W|0|1| transmitted bitmap
+     |  Rule ID  | DTag |W|0|1| transmitted Bitmap
      +---- ... --+-... -+-+-+-+
      |---- byte boundary -----|
 
 
-   Figure 21: Example of the bitmap in Window mode for the last window,
+   Figure 21: Example of the Bitmap in Window mode for the last window,
                                  for N=3)
 
-5.7.  Supporting multiple window sizes
+5.6.  Supporting multiple window sizes
 
    For ACK-Always or ACK-on-error, implementers may opt to support a
    single window size or multiple window sizes.  The latter, when
@@ -1682,7 +1682,7 @@ Minaburo, et al.          Expires June 20, 2018                [Page 30]
 Internet-Draft                 LPWAN SCHC                  December 2017
 
 
-5.8.  Downlink fragment transmission
+5.7.  Downlink fragment transmission
 
    In some LPWAN technologies, as part of energy-saving techniques,
    downlink transmission is only possible immediately after an uplink

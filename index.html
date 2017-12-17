@@ -305,9 +305,9 @@ address {
 <link href="#rfc.section.5.5" rel="Chapter" title="5.5 Baseline mechanism">
 <link href="#rfc.section.5.5.1" rel="Chapter" title="5.5.1 No ACK">
 <link href="#rfc.section.5.5.2" rel="Chapter" title="5.5.2 The Window modes">
-<link href="#rfc.section.5.6" rel="Chapter" title="5.6 Bitmap Optimization">
-<link href="#rfc.section.5.7" rel="Chapter" title="5.7 Supporting multiple window sizes">
-<link href="#rfc.section.5.8" rel="Chapter" title="5.8 Downlink fragment transmission">
+<link href="#rfc.section.5.5.3" rel="Chapter" title="5.5.3 Bitmap Optimization">
+<link href="#rfc.section.5.6" rel="Chapter" title="5.6 Supporting multiple window sizes">
+<link href="#rfc.section.5.7" rel="Chapter" title="5.7 Downlink fragment transmission">
 <link href="#rfc.section.6" rel="Chapter" title="6 Padding management">
 <link href="#rfc.section.7" rel="Chapter" title="7 SCHC Compression for IPv6 and UDP headers">
 <link href="#rfc.section.7.1" rel="Chapter" title="7.1 IPv6 version field">
@@ -465,11 +465,11 @@ address {
 </li>
 <li>5.5.2.   <a href="#rfc.section.5.5.2">The Window modes</a>
 </li>
-</ul><li>5.6.   <a href="#rfc.section.5.6">Bitmap Optimization</a>
+<li>5.5.3.   <a href="#rfc.section.5.5.3">Bitmap Optimization</a>
 </li>
-<li>5.7.   <a href="#rfc.section.5.7">Supporting multiple window sizes</a>
+</ul><li>5.6.   <a href="#rfc.section.5.6">Supporting multiple window sizes</a>
 </li>
-<li>5.8.   <a href="#rfc.section.5.8">Downlink fragment transmission</a>
+<li>5.7.   <a href="#rfc.section.5.7">Downlink fragment transmission</a>
 </li>
 </ul><li>6.   <a href="#rfc.section.6">Padding management</a>
 </li>
@@ -812,7 +812,7 @@ address {
 <li>Retransmission Timer. It is used by a fragment sender after the transmission of a window to detect a transmission error  of the ACK corresponding to this window. Depending on the reliability option, it will lead to a request for an ACK retransmission on ACK-Always or it will trigger the next window on ACK-on-error. The dureation of this timer is not defined in this document and must be defined in the corresponding technology documents (e.g. technology-specific profiles).</li>
 <li>Inactivity Timer. This timer is used by a fragment receiver to detect when there is a problem in the transmission of fragments and the receiver does not get any fragment during a period of time or a number of packets in a period of time. When this happens, an Abort message needs to be sent. Initially, and each time a fragment is received the timer is reinitialized. The duration of this timer timer is not defined in this document and must be defined in the specific technology document (e.g. technology-specific profiles).</li>
 <li>Attempts. It is a counter used to request a missing ACK, and in consequence to determine when an Abort is needed, because there are recurrent fragment transmission errors, whose maximum value is MAX_ACK_REQUESTS. The default value of MAX_ACK_REQUESTS is not stated in this document, and it is expected to be defined in other documents (e.g. technology-specific profiles).</li>
-<li>Bitmap. The Bitmap is a sequence of bits carried in an ACK for a given window. Each bit in the Bitmap corresponds to a fragment of the current window, and provides feedback on whether the fragment has been received or not. The right-most position on the Bitmap is used to report whether the All-0 or All-1 fragments have been received or not. Feedback for a fragment with the highest FCN value is provided by the left-most position in the Bitmap. In the Bitmap, a bit set to 1 indicates that the corresponding FCN fragment has been correctly sent and received. However, the sending format of the bitmap will be truncated until a byte boundary where the last error is given. However, when all the Bitmap is transmitted, it may be truncated, see more details in <a href="#Bitmapopt" class="xref">Section 5.6</a>
+<li>Bitmap. The Bitmap is a sequence of bits carried in an ACK for a given window. Each bit in the Bitmap corresponds to a fragment of the current window, and provides feedback on whether the fragment has been received or not. The right-most position on the Bitmap is used to report whether the All-0 or All-1 fragments have been received or not. Feedback for a fragment with the highest FCN value is provided by the left-most position in the Bitmap. In the Bitmap, a bit set to 1 indicates that the corresponding FCN fragment has been correctly sent and received. However, the sending format of the bitmap will be truncated until a byte boundary where the last error is given. However, when all the Bitmap is transmitted, it may be truncated, see more details in <a href="#Bitmapopt" class="xref">Section 5.5.3</a>
 </li>
 <li>Abort. In case of error or when the Inactivity timer expires or the MAX_ACK_REQUESTS is reached the sender or the receiver may use the Abort frames. When the receiver needs to abort the on-going fragmented packet transmission, it uses the ACK Abort format packet with all the bits set to 1. The sender will use the All-1 Abort format to trigger the end of the transmission.</li>
 <li>Padding (P). Padding will be used to align the last byte of a fragment with a byte boundary. The number of bits used for padding is not defined and depends on the size of the Rule ID, DTag and FCN fields, and on the layer two payload size.</li>
@@ -1047,11 +1047,11 @@ address {
 <p id="rfc.section.5.5.2.2.p.8">If All-1 fragment has not been received, the receiver expects a new window. It waits for the next fragment. If the window value has not changed, the received fragments are part of a retransmission. A receiver that has already received a fragment should discard it. If all the bits of the Bitmap are set to one, the receiver waits for the next window without waiting for an All-0 fragment and it does not send an ACK either.  While the receiver waits for next window and if the window value is set to the next value, and if an All-1 fragment with the next value window arrived the receiver goes to error and abort the transmission, it drops the fragments.</p>
 <p id="rfc.section.5.5.2.2.p.9">If the receiver receives an All-1 fragment this means that the transmission should be finished.  If the MIC is incorrect some fragments have been lost. It sends an ACK.</p>
 <p id="rfc.section.5.5.2.2.p.10">In case of an incorrect MIC, the receivers wait for fragment belonging to the same window or the expiration of the Inactivity timer which will Abort the transmission.</p>
-<h1 id="rfc.section.5.6">
-<a href="#rfc.section.5.6">5.6.</a> <a href="#Bitmapopt" id="Bitmapopt">Bitmap Optimization</a>
+<h1 id="rfc.section.5.5.3">
+<a href="#rfc.section.5.5.3">5.5.3.</a> <a href="#Bitmapopt" id="Bitmapopt">Bitmap Optimization</a>
 </h1>
-<p id="rfc.section.5.6.p.1">The Fragmentation Bitmap has two instances the local one and the transmitted one. The local_bitmap is the representation of each fragment correctly received or sent and kept in memory. The size of the local_bitmap may be based on the FCN size. The bitmap transmitted is the optmization of what has been received. An ACK message may introduce padding at the end to align transmitted data to a byte boundary. The first byte boundary includes one or more complete bytes, depending on the size of Rule ID and DTag.</p>
-<p id="rfc.section.5.6.p.2">The receiver generates the Bitmap which may have the size of a single downlink frame of the LPWAN technology used. To avoid this problem the FCN size should be set to the corresponding downlink size minus 1 bit for C bit. The C bit will be sent only in the ACK for the last frame of the packet (All-1).</p>
+<p id="rfc.section.5.5.3.p.1">The Fragmentation Bitmap is the optmization of what has been received. It is transmitted in the ACK format fragment when there are some missing fragments. An ACK message may introduce padding at the end to align transmitted data to a byte boundary. The first byte boundary includes one or more complete bytes, depending on the size of Rule ID and DTag.</p>
+<p id="rfc.section.5.5.3.p.2">The receiver generates the Bitmap which may have the size of a single downlink frame of the LPWAN technology used. To avoid this problem the FCN size should be set to the corresponding downlink size minus 1 bit for C bit. The C bit will be sent only in the ACK for the last frame of the packet (All-1).</p>
 <div id="rfc.figure.18"></div>
 <div id="Fig-Localbitmap"></div>
 <pre>
@@ -1060,9 +1060,9 @@ address {
      |---- byte boundary -----| 1 byte  next  |  1 byte next  |   
       
 </pre>
-<p class="figure">Figure 18: Local_Bitmap</p>
-<p id="rfc.section.5.6.p.3">Bitmap transmitted MUST be optimized in size to reduce frame size. The right-most bytes with all bitmap bit set to 1 MUST be removed from the transmission. As the receiver knows the bitmap size, it can reconstruct the value. In the example <a href="#Fig-transmittedbitmap" class="xref">Figure 19</a> the last 2 bytes of the bitmap are set to 1, therefore, they are not sent.</p>
-<p id="rfc.section.5.6.p.4">In the last window, when checked bit C value is one, means that the MIC is corrected and the bitmap is not sent. Otherwise the bitmap needs to be sent after the C bit. Note that the introduction of a C bit may force to reduce the number of fragments to allow the bitmap to fit in a frame.</p>
+<p class="figure">Figure 18: Bitmap</p>
+<p id="rfc.section.5.5.3.p.3">Bitmap transmitted MUST be optimized in size to reduce frame size. The right-most bytes with all Bitmap bit set to 1 MUST be removed from the transmission. As the receiver knows the Bitmap size, it can reconstruct the value. In the example <a href="#Fig-transmittedbitmap" class="xref">Figure 19</a> the last 2 bytes of the bitmap are set to 1, therefore, they are not sent.</p>
+<p id="rfc.section.5.5.3.p.4">In the last window, when checked bit C value is one, means that the MIC is corrected and the Bitmap is not sent. Otherwise, the Bitmap needs to be sent after the C bit. Note that the introduction of a C bit may force to reduce the number of fragments to allow the bitmap to fit in a frame.</p>
 <div id="rfc.figure.19"></div>
 <div id="Fig-transmittedbitmap"></div>
 <pre>
@@ -1075,18 +1075,18 @@ address {
      
 </pre>
 <p class="figure">Figure 19: Bitmap transmitted fragment format</p>
-<p><a href="#Fig-Bitmap-Win" class="xref">Figure 20</a> shows an example of an ACK (N=3), where the bitmap indicates that the second and the fifth fragments have not been correctly received.</p>
+<p><a href="#Fig-Bitmap-Win" class="xref">Figure 20</a> shows an example of an ACK (N=3), where the Bitmap indicates that the second and the fifth fragments have not been correctly received.</p>
 <div id="rfc.figure.20"></div>
 <div id="Fig-Bitmap-Win"></div>
 <pre>
     &lt;-------   R  -------&gt;6 5 4 3 2 1   0 (FCN values indicating the order)
                 &lt;- T -&gt; 1   
-    |  Rule ID  | DTag |W|1|0|1|1|0|1|all-0|padding|  local_bitmap
+    |  Rule ID  | DTag |W|1|0|1|1|0|1|all-0|padding|  Bitmap
     |---- byte boundary -----|     1 byte next     | 
     
     
     +---- ... --+-... -+-+-+-+-+-+-+-+-+-+
-    |  Rule ID  | DTag |W|1|0|1|1|0|1|1|P|  transmitted bitmap
+    |  Rule ID  | DTag |W|1|0|1|1|0|1|1|P|  transmitted Bitmap
     +---- ... --+-... -+-+-+-+-+-+-+-+-+-+
     |--- byte boundary ----| 1 byte next | 
     
@@ -1098,29 +1098,29 @@ address {
 <pre>
      &lt;-------   R  -------&gt;  6 5 4 3 2 1 7 (FCN values indicating the order)
                  &lt;- T -&gt; 1 1
-     |  Rule ID  | DTag |W|0|1|1|1|1|1|1|1|padding|  local_bitmap
+     |  Rule ID  | DTag |W|0|1|1|1|1|1|1|1|padding|  Bitmap
      |---- byte boundary ----|  1 byte next |  1 byte next  |
                            C
      +---- ... --+-... -+-+-+-+
-     |  Rule ID  | DTag |W|0|1| transmitted bitmap
+     |  Rule ID  | DTag |W|0|1| transmitted Bitmap
      +---- ... --+-... -+-+-+-+
      |---- byte boundary -----| 
      
 </pre>
-<p class="figure">Figure 21: Example of the bitmap in Window mode for the last window, for N=3)</p>
+<p class="figure">Figure 21: Example of the Bitmap in Window mode for the last window, for N=3)</p>
+<h1 id="rfc.section.5.6">
+<a href="#rfc.section.5.6">5.6.</a> <a href="#supporting-multiple-window-sizes" id="supporting-multiple-window-sizes">Supporting multiple window sizes</a>
+</h1>
+<p id="rfc.section.5.6.p.1">For ACK-Always or ACK-on-error, implementers may opt to support a single window size or multiple window sizes.  The latter, when feasible, may provide performance optimizations.  For example, a large window size may be used for packets that need to be carried by a large number of fragments.  However, when the number of fragments required to carry a packet is low, a smaller window size, and thus a shorter bitmap, may be sufficient to provide feedback on all fragments.  If multiple window sizes are supported, the Rule ID may be used to signal the window size in use for a specific packet transmission.</p>
+<p id="rfc.section.5.6.p.2">Note that the same window size MUST be used for the transmission of all fragments that belong to a packet.</p>
 <h1 id="rfc.section.5.7">
-<a href="#rfc.section.5.7">5.7.</a> <a href="#supporting-multiple-window-sizes" id="supporting-multiple-window-sizes">Supporting multiple window sizes</a>
+<a href="#rfc.section.5.7">5.7.</a> <a href="#downlink-fragment-transmission" id="downlink-fragment-transmission">Downlink fragment transmission</a>
 </h1>
-<p id="rfc.section.5.7.p.1">For ACK-Always or ACK-on-error, implementers may opt to support a single window size or multiple window sizes.  The latter, when feasible, may provide performance optimizations.  For example, a large window size may be used for packets that need to be carried by a large number of fragments.  However, when the number of fragments required to carry a packet is low, a smaller window size, and thus a shorter bitmap, may be sufficient to provide feedback on all fragments.  If multiple window sizes are supported, the Rule ID may be used to signal the window size in use for a specific packet transmission.</p>
-<p id="rfc.section.5.7.p.2">Note that the same window size MUST be used for the transmission of all fragments that belong to a packet.</p>
-<h1 id="rfc.section.5.8">
-<a href="#rfc.section.5.8">5.8.</a> <a href="#downlink-fragment-transmission" id="downlink-fragment-transmission">Downlink fragment transmission</a>
-</h1>
-<p id="rfc.section.5.8.p.1">In some LPWAN technologies, as part of energy-saving techniques, downlink transmission is only possible immediately after an uplink transmission. In order to avoid potentially high delay for fragmented datagram transmission in the downlink, the fragment receiver MAY perform an uplink transmission as soon as possible after reception of a fragment that is not the last one. Such uplink transmission may be triggered by the L2 (e.g. an L2 ACK sent in response to a fragment encapsulated in a L2 frame that requires an L2 ACK) or it may be triggered from an upper layer.</p>
-<p id="rfc.section.5.8.p.2">For fragmented packet transmission in the downlink, and when ACK Always is used, the fragment receiver MAY support timer-based ACK retransmission. In this mechanism, the fragment receiver initializes and starts a timer (the Inactivity Timer is used) after the transmission of an ACK, except when the ACK is sent in response to the last fragment of a packet (All-1 fragment). In the latter case, the fragment receiver does not start a timer after transmission of the ACK.</p>
-<p id="rfc.section.5.8.p.3">If, after transmission of an ACK that is not an All-1 fragment, and before expiration of the corresponding Inactivity timer, the fragment receiver receives a fragment that belongs to the current window (e.g. a missing fragment from the current window) or to the next window, the Inactivity timer for the ACK is stopped. However, if the Inactivity timer expires, the ACK is resent and the Inactivity timer is reinitialized and restarted.</p>
-<p id="rfc.section.5.8.p.4">The default initial value for the Inactivity timer, as well as the maximum number of retries for a specific ACK, denoted MAX_ACK_RETRIES, are not defined in this document, and need to be defined in other documents (e.g. technology-specific profiles). The initial value of the Inactivity timer is expected to be greater than that of the Retransmission timer, in order to make sure that a (buffered) fragment to be retransmitted can find an opportunity for that transmission.</p>
-<p id="rfc.section.5.8.p.5">When the fragment sender transmits the All-1 fragment, it initializes and starts its retransmission timer to a long value (e.g. several times the initial Inactivity timer). If an ACK is received before expiration of this timer, the fragment sender retransmits any lost fragments reported by the ACK, or if the ACK confirms successful reception of all fragments of the last window, transmission of the fragmented packet ends.  If the timer expires, and no ACK has been received since the start of the timer, the fragment sender assumes that the all-1 fragment has been successfully received (and possibly, the last ACK has been lost: this mechanism assumes that the retransmission timer for the all-1 fragment is long enough to allow several ACK retries if the all-1 fragment has not been received by the fragment receiver, and it also assumes that it is unlikely that several ACKs become all lost).</p>
+<p id="rfc.section.5.7.p.1">In some LPWAN technologies, as part of energy-saving techniques, downlink transmission is only possible immediately after an uplink transmission. In order to avoid potentially high delay for fragmented datagram transmission in the downlink, the fragment receiver MAY perform an uplink transmission as soon as possible after reception of a fragment that is not the last one. Such uplink transmission may be triggered by the L2 (e.g. an L2 ACK sent in response to a fragment encapsulated in a L2 frame that requires an L2 ACK) or it may be triggered from an upper layer.</p>
+<p id="rfc.section.5.7.p.2">For fragmented packet transmission in the downlink, and when ACK Always is used, the fragment receiver MAY support timer-based ACK retransmission. In this mechanism, the fragment receiver initializes and starts a timer (the Inactivity Timer is used) after the transmission of an ACK, except when the ACK is sent in response to the last fragment of a packet (All-1 fragment). In the latter case, the fragment receiver does not start a timer after transmission of the ACK.</p>
+<p id="rfc.section.5.7.p.3">If, after transmission of an ACK that is not an All-1 fragment, and before expiration of the corresponding Inactivity timer, the fragment receiver receives a fragment that belongs to the current window (e.g. a missing fragment from the current window) or to the next window, the Inactivity timer for the ACK is stopped. However, if the Inactivity timer expires, the ACK is resent and the Inactivity timer is reinitialized and restarted.</p>
+<p id="rfc.section.5.7.p.4">The default initial value for the Inactivity timer, as well as the maximum number of retries for a specific ACK, denoted MAX_ACK_RETRIES, are not defined in this document, and need to be defined in other documents (e.g. technology-specific profiles). The initial value of the Inactivity timer is expected to be greater than that of the Retransmission timer, in order to make sure that a (buffered) fragment to be retransmitted can find an opportunity for that transmission.</p>
+<p id="rfc.section.5.7.p.5">When the fragment sender transmits the All-1 fragment, it initializes and starts its retransmission timer to a long value (e.g. several times the initial Inactivity timer). If an ACK is received before expiration of this timer, the fragment sender retransmits any lost fragments reported by the ACK, or if the ACK confirms successful reception of all fragments of the last window, transmission of the fragmented packet ends.  If the timer expires, and no ACK has been received since the start of the timer, the fragment sender assumes that the all-1 fragment has been successfully received (and possibly, the last ACK has been lost: this mechanism assumes that the retransmission timer for the all-1 fragment is long enough to allow several ACK retries if the all-1 fragment has not been received by the fragment receiver, and it also assumes that it is unlikely that several ACKs become all lost).</p>
 <h1 id="rfc.section.6">
 <a href="#rfc.section.6">6.</a> <a href="#padding-management" id="padding-management">Padding management</a>
 </h1>
