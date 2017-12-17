@@ -1315,10 +1315,7 @@ Note that in some LPWAN technologies, only the Devs have a device ID.
 Therefore, when such technologies are used, it is necessary to define statically an IID for the Link
 Local address for the SCHC C/D.
 
-
-
 ~~~~
-
 Rule 0
  +----------------+--+--+--+---------+--------+------------++------+
  | Field          |FL|FP|DI| Value   | Match  | Comp Decomp|| Sent |
@@ -1365,6 +1362,7 @@ Rule 0
  |UDP Length      |16|1 |Bi|         | ignore | comp-length||      |
  |UDP checksum    |16|1 |Bi|         | ignore | comp-chk   ||      |
  +================+==+==+==+=========+========+============++======+
+ 
  Rule 2
  +----------------+--+--+--+---------+--------+------------++------+
  | Field          |FL|FP|DI| Value   | Match  | Action     || Sent |
