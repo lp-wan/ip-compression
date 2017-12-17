@@ -128,8 +128,6 @@ Internet-Draft                 LPWAN SCHC                  December 2017
      5.5.  Baseline mechanism  . . . . . . . . . . . . . . . . . . .  23
        5.5.1.  No ACK  . . . . . . . . . . . . . . . . . . . . . . .  24
        5.5.2.  The Window modes  . . . . . . . . . . . . . . . . . .  25
-       5.5.3.  ACK-Always  . . . . . . . . . . . . . . . . . . . . .  25
-       5.5.4.  ACK-on-error  . . . . . . . . . . . . . . . . . . . .  27
      5.6.  Bitmap Optimization . . . . . . . . . . . . . . . . . . .  29
      5.7.  Supporting multiple window sizes  . . . . . . . . . . . .  31
      5.8.  Downlink fragment transmission  . . . . . . . . . . . . .  31
@@ -161,6 +159,8 @@ Internet-Draft                 LPWAN SCHC                  December 2017
    Appendix D.  Allocation of Rule IDs for fragmentation . . . . . .  55
    Appendix E.  Note . . . . . . . . . . . . . . . . . . . . . . . .  55
    Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  55
+
+
 
 
 
@@ -553,7 +553,7 @@ Internet-Draft                 LPWAN SCHC                  December 2017
 
    o  compression Rule selection: The goal is to identify which Rule(s)
       will be used to compress the packet's headers.  When doing
-      compression in Downlink direction the SCHC C/D needs to find the
+      compression in the NGW side the SCHC C/D needs to find the correct
 
 
 
@@ -562,20 +562,20 @@ Minaburo, et al.          Expires June 20, 2018                [Page 10]
 Internet-Draft                 LPWAN SCHC                  December 2017
 
 
-      correct Rule to be used by identifying its Dev-ID and the Rule-ID.
-      In the Uplink direction, only the Rule-ID may be used.  The next
-      step is to choose the fields by their direction, using the
-      direction indicator (DI), so the fields that do not correspond to
-      the appropriated DI will be excluded.  Next, then the fields are
-      identified according to their field identifier (FID) and field
-      position (FP).  If the field position does not correspond, then
-      the Rule is not used and the SCHC take next Rule.  Once the DI and
-      the FP correspond to the header information, each field's value is
-      then compared to the corresponding target value (TV) stored in the
-      Rule for that specific field using the matching operator (MO).  If
-      all the fields in the packet's header satisfy all the matching
-      operators (MOs) of a Rule (i.e. all results are True), the fields
-      of the header are then processed according to the Compression/
+      Rule to be used by identifying its Dev-ID and the Rule-ID.  In the
+      Dev, only the Rule-ID may be used.  The next step is to choose the
+      fields by their direction, using the direction indicator (DI), so
+      the fields that do not correspond to the appropriated DI will be
+      excluded.  Next, then the fields are identified according to their
+      field identifier (FID) and field position (FP).  If the field
+      position does not correspond, then the Rule is not used and the
+      SCHC take next Rule.  Once the DI and the FP correspond to the
+      header information, each field's value is then compared to the
+      corresponding target value (TV) stored in the Rule for that
+      specific field using the matching operator (MO).  If all the
+      fields in the packet's header satisfy all the matching operators
+      (MOs) of a Rule (i.e. all results are True), the fields of the
+      header are then processed according to the Compression/
       Decompression Actions (CDAs) and a compressed header is obtained.
       Otherwise, the next rule is tested.  If no eligible rule is found,
       then the header must be sent without compression, in which case
@@ -1348,14 +1348,13 @@ Internet-Draft                 LPWAN SCHC                  December 2017
 
    will wait for fragments and will set the Inactivity timer.  The No
    ACK mode will use the MIC contained in the last fragment to check
-   error.  The FCN is set to All-1 for the last fragment.  When the
-   Inactivity Timer expires or when the MIC check indicates that the
-   reassembled packet does not match the originall one, the receiver
-   will release all resources allocated to reassembly of the packet.
-   The initial value of the Inactivity Timer will be determined based on
-   the characteristics of the underlying LPWAN technology and will be
-   defined in other documents (e.g. technology-specific profile
-   documents).
+   error.  When the Inactivity Timer expires or when the MIC check
+   indicates that the reassembled packet does not match the originall
+   one, the receiver will release all resources allocated to reassembly
+   of the packet.  The initial value of the Inactivity Timer will be
+   determined based on the characteristics of the underlying LPWAN
+   technology and will be defined in other documents (e.g. technology-
+   specific profile documents).
 
 5.5.2.  The Window modes
 
@@ -1369,7 +1368,7 @@ Internet-Draft                 LPWAN SCHC                  December 2017
    The Window mode offers two different reliability options modes: ACK-
    on-error and ACK-always.
 
-5.5.3.  ACK-Always
+5.5.2.1.  ACK-Always
 
    Initially, when a fragmented packet needs to be sent, the window is
    set to 0, a local_bitmap is set to 0, and FCN is set to the highest
@@ -1392,6 +1391,7 @@ Internet-Draft                 LPWAN SCHC                  December 2017
    o  The last fragment is sent.  In that case, an All-1 fragment with
       the MIC is sent.  The sender sets a retransmission timer to wait
       for the ACK.
+
 
 
 
@@ -1491,7 +1491,7 @@ Internet-Draft                 LPWAN SCHC                  December 2017
    will Abort the transmission.  It can also Abort when the Inactivity
    timer has expired.
 
-5.5.4.  ACK-on-error
+5.5.2.2.  ACK-on-error
 
    Initially, when a fragmented packet is sent, the window is set to 0,
    a local bitmap is set to 0, and FCN is set the highest possible value
@@ -1782,10 +1782,10 @@ Internet-Draft                 LPWAN SCHC                  December 2017
    SCHC header, either for compression, fragmentation or acknowledgment
    does not preserve byte alignment.  Since most of the LPWAN network
    technologies payload is expressed in an integer number of bytes; the
-   receiver must be able to eliminate the padding bits.
+   sender will introduce at the end some padding bits while the receiver
+   must be able to eliminate them.
 
-   Padding bit elimination for compressed or fragmented frames.  The
-   header size is given by the rule and is not aligned on a byte
+
 
 
 
@@ -1794,12 +1794,18 @@ Minaburo, et al.          Expires June 20, 2018                [Page 32]
 Internet-Draft                 LPWAN SCHC                  December 2017
 
 
-   boundary.  The data size is variable, but always a multiple of 8
-   bits.  In that case, the padding MUST never exceed 7 bits.
+   The algorithm for padding bit elimination for compressed or
+   fragmented frames is simple.  Based on the following principle: * The
+   SCHC header is not aligned on a byte boundary, but its size in bits
+   is given by the rule.
 
-   For fragmentation acknowledgement, the header size and the bitmap
-   size are given by the corresponding rule.  The remaining bits are
-   padding and can be of any size
+   o  The data size is variable, but always a multiple of 8 bits.
+
+   o  Padding bits MUST never exceed 7 bits.
+
+   In that case, a receiver after decoding the SCHC header, must take
+   the maximum multiple of 8 bits as data.  The remaining bits are
+   padding bits.
 
 7.  SCHC Compression for IPv6 and UDP headers
 
@@ -1835,12 +1841,6 @@ Internet-Draft                 LPWAN SCHC                  December 2017
    known value, the MO should be "equal" and the CDA should be "not-
    sent".
 
-   If the Flow Label field identified by the rest of the rule varies
-   during time or is not known by both sides, there are two
-   possibilities depending on the variability of the value, the first
-   one is without compression and then the value is sent and the second
-   where only part of the value is sent and the decompressor needs to
-   compute the original value:
 
 
 
@@ -1849,6 +1849,13 @@ Minaburo, et al.          Expires June 20, 2018                [Page 33]
 
 Internet-Draft                 LPWAN SCHC                  December 2017
 
+
+   If the Flow Label field identified by the rest of the rule varies
+   during time or is not known by both sides, there are two
+   possibilities depending on the variability of the value, the first
+   one is without compression and then the value is sent and the second
+   where only part of the value is sent and the decompressor needs to
+   compute the original value:
 
    o  TV is not set, MO is set to "ignore" and CDA is set to "value-
       sent"
@@ -1892,13 +1899,6 @@ Internet-Draft                 LPWAN SCHC                  December 2017
    Otherwise the value is sent on the LPWAN: TV is not set, MO is set to
    ignore and CDA is set to "value-sent".
 
-   Note that the field behavior differs in upstream and downstream.  In
-   upstream, since there is no IP forwarding between the Dev and the
-   SCHC C/D, the value is relatively constant.  On the other hand, the
-   downstream value depends of Internet routing and may change more
-   frequently.  One solution could be to use the Direction Indicator
-
-
 
 
 Minaburo, et al.          Expires June 20, 2018                [Page 34]
@@ -1906,6 +1906,11 @@ Minaburo, et al.          Expires June 20, 2018                [Page 34]
 Internet-Draft                 LPWAN SCHC                  December 2017
 
 
+   Note that the field behavior differs in upstream and downstream.  In
+   upstream, since there is no IP forwarding between the Dev and the
+   SCHC C/D, the value is relatively constant.  On the other hand, the
+   downstream value depends of Internet routing and may change more
+   frequently.  One solution could be to use the Direction Indicator
    (DI) to distinguish both directions to elide the field in the
    upstream direction and send the value in the downstream direction.
 
@@ -1949,11 +1954,6 @@ Internet-Draft                 LPWAN SCHC                  December 2017
    IEEE EUI-64, then TV contains the actual Dev address value, the MO
    operator is set to "equal" and the CDA is set to "not-sent".
 
-   If several IIDs are possible, then the TV contains the list of
-   possible IIDs, the MO is set to "match-mapping" and the CDA is set to
-   "mapping-sent".
-
-
 
 
 
@@ -1961,6 +1961,10 @@ Minaburo, et al.          Expires June 20, 2018                [Page 35]
 
 Internet-Draft                 LPWAN SCHC                  December 2017
 
+
+   If several IIDs are possible, then the TV contains the list of
+   possible IIDs, the MO is set to "match-mapping" and the CDA is set to
+   "mapping-sent".
 
    Otherwise the value variation of the IID may be reduced to few bytes.
    In that case, the TV is set to the stable part of the IID, the MO is
@@ -2005,11 +2009,7 @@ Internet-Draft                 LPWAN SCHC                  December 2017
    set, the MO is set to "ignore" and the CDA is set to "compute-UDP-
    length".
 
-   If the payload is small, the TV can be set to 0x0000, the MO set to
-   "MSB" and the CDA to "LSB".
 
-   On other cases, the length must be sent and the CDA is replaced by
-   "value-sent".
 
 
 
@@ -2017,6 +2017,12 @@ Minaburo, et al.          Expires June 20, 2018                [Page 36]
 
 Internet-Draft                 LPWAN SCHC                  December 2017
 
+
+   If the payload is small, the TV can be set to 0x0000, the MO set to
+   "MSB" and the CDA to "LSB".
+
+   On other cases, the length must be sent and the CDA is replaced by
+   "value-sent".
 
 7.11.  UDP Checksum field
 
@@ -2059,13 +2065,7 @@ Internet-Draft                 LPWAN SCHC                  December 2017
    reassembly buffer can be split into fragment-sized buffer slots.
    Once a packet is complete, it is processed normally.  If buffer
    overload occurs, a receiver can discard packets based on the sender
-   behavior, which may help identify which fragments have been sent by
-   an attacker.
 
-   In another type of attack, the malicious node is required to have
-   overhearing capabilities.  If an attacker can overhear a fragment, it
-   can send a spoofed duplicate (e.g. with random payload) to the
-   destination.  If the LPWAN technology does not support suitable
 
 
 
@@ -2074,6 +2074,13 @@ Minaburo, et al.          Expires June 20, 2018                [Page 37]
 Internet-Draft                 LPWAN SCHC                  December 2017
 
 
+   behavior, which may help identify which fragments have been sent by
+   an attacker.
+
+   In another type of attack, the malicious node is required to have
+   overhearing capabilities.  If an attacker can overhear a fragment, it
+   can send a spoofed duplicate (e.g. with random payload) to the
+   destination.  If the LPWAN technology does not support suitable
    protection (e.g. source authentication and frame counters to prevent
    replay attacks), a receiver cannot distinguish legitimate from
    spoofed fragments.  Therefore, the original IPv6 packet will be
@@ -2116,19 +2123,17 @@ Internet-Draft                 LPWAN SCHC                  December 2017
               (IPv6) Specification", RFC 2460, DOI 10.17487/RFC2460,
               December 1998, <https://www.rfc-editor.org/info/rfc2460>.
 
-   [RFC4944]  Montenegro, G., Kushalnagar, N., Hui, J., and D. Culler,
-              "Transmission of IPv6 Packets over IEEE 802.15.4
-              Networks", RFC 4944, DOI 10.17487/RFC4944, September 2007,
-              <https://www.rfc-editor.org/info/rfc4944>.
-
-
-
 
 
 Minaburo, et al.          Expires June 20, 2018                [Page 38]
 
 Internet-Draft                 LPWAN SCHC                  December 2017
 
+
+   [RFC4944]  Montenegro, G., Kushalnagar, N., Hui, J., and D. Culler,
+              "Transmission of IPv6 Packets over IEEE 802.15.4
+              Networks", RFC 4944, DOI 10.17487/RFC4944, September 2007,
+              <https://www.rfc-editor.org/info/rfc4944>.
 
    [RFC5795]  Sandlund, K., Pelletier, G., and L-E. Jonsson, "The RObust
               Header Compression (ROHC) Framework", RFC 5795,
@@ -2163,11 +2168,6 @@ Appendix A.  SCHC Compression Examples
    Figure 22 presents the protocol stack for this Device.  IPv6 and UDP
    are represented with dotted lines since these protocols are
    compressed on the radio link.
-
-
-
-
-
 
 
 
