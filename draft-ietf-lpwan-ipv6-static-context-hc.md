@@ -980,7 +980,7 @@ indicates that the second and the fifth fragments have not been correctly receiv
 {{Fig-Bitmap-lastWin}} shows an example of an ACK (N=3), where the bitmap indicates that the MIC check has failed but there is no missing fragments. 
 
 ~~~~                                                  
-     <-------   R  ------ ->  6 5 4 3 2 1 7 (FCN values indicating the order)
+     <-------   R  ------->  6 5 4 3 2 1 7 (FCN values indicating the order)
                  <- T -> 1 1
      |  Rule ID  | DTag |W|0|1|1|1|1|1|1|1|padding|  local_bitmap
      |---- byte boundary ----|  1 byte next |  1 byte next  |
@@ -1323,7 +1323,7 @@ Local address for the SCHC C/D.
 Rule 0
  +----------------+--+--+--+---------+--------+------------++------+
  | Field          |FL|FP|DI| Value   | Match  | Comp Decomp|| Sent |
- |                |  |  |  |         | Opera. | Action     ||\[bits\]|
+ |                |  |  |  |         | Opera. | Action     ||[bits]|
  +----------------+--+--+--+---------+---------------------++------+
  |IPv6 version    |4 |1 |Bi|6        | equal  | not-sent   ||      |
  |IPv6 DiffServ   |8 |1 |Bi|0        | equal  | not-sent   ||      |
@@ -1345,7 +1345,7 @@ Rule 0
  Rule 1
  +----------------+--+--+--+---------+--------+------------++------+
  | Field          |FL|FP|DI| Value   | Match  | Action     || Sent |
- |                |  |  |  |         | Opera. | Action     ||\[bits\]|
+ |                |  |  |  |         | Opera. | Action     ||[bits]|
  +----------------+--+--+--+---------+--------+------------++------+
  |IPv6 version    |4 |1 |Bi|6        | equal  | not-sent   ||      |
  |IPv6 DiffServ   |8 |1 |Bi|0        | equal  | not-sent   ||      |
@@ -1353,12 +1353,12 @@ Rule 0
  |IPv6 Length     |16|1 |Bi|         | ignore | comp-length||      |
  |IPv6 Next Header|8 |1 |Bi|17       | equal  | not-sent   ||      |
  |IPv6 Hop Limit  |8 |1 |Bi|255      | ignore | not-sent   ||      |
- |IPv6 DEVprefix  |64|1 |Bi|\[alpha/64, match- |mapping-sent||  \[1\] |
- |                |  |  |  |fe80::/64\] mapping|            ||      |
+ |IPv6 DEVprefix  |64|1 |Bi|[alpha/64, match- |mapping-sent||  [1] |
+ |                |  |  |  |fe80::/64] mapping|            ||      |
  |IPv6 DEViid     |64|1 |Bi|         | ignore | DEViid     ||      |
- |IPv6 APPprefix  |64|1 |Bi|\[beta/64,| match- |mapping-sent||  \[2\] |
+ |IPv6 APPprefix  |64|1 |Bi|[beta/64,| match- |mapping-sent||  [2] |
  |                |  |  |  |alpha/64,| mapping|            ||      |
- |                |  |  |  |fe80::64\]|        |            ||      |
+ |                |  |  |  |fe80::64]|        |            ||      |
  |IPv6 APPiid     |64|1 |Bi|::1000   | equal  | not-sent   ||      |
  +================+==+==+==+=========+========+============++======+
  |UDP DEVport     |16|1 |Bi|5683     | equal  | not-sent   ||      |
@@ -1370,7 +1370,7 @@ Rule 0
  Rule 2
  +----------------+--+--+--+---------+--------+------------++------+
  | Field          |FL|FP|DI| Value   | Match  | Action     || Sent |
- |                |  |  |  |         | Opera. | Action     ||\[bits\]|
+ |                |  |  |  |         | Opera. | Action     ||[bits]|
  +----------------+--+--+--+---------+--------+-------------++------+
  |IPv6 version    |4 |1 |Bi|6        | equal  | not-sent   ||      |
  |IPv6 DiffServ   |8 |1 |Bi|0        | equal  | not-sent   ||      |
@@ -1378,14 +1378,14 @@ Rule 0
  |IPv6 Length     |16|1 |Bi|         | ignore | comp-length||      |
  |IPv6 Next Header|8 |1 |Bi|17       | equal  | not-sent   ||      |
  |IPv6 Hop Limit  |8 |1 |Up|255      | ignore | not-sent   ||      |
- |IPv6 Hop Limit  |8 |1 |Dw|         | ignore | value-sent ||  \[8\] |
+ |IPv6 Hop Limit  |8 |1 |Dw|         | ignore | value-sent ||  [8] |
  |IPv6 DEVprefix  |64|1 |Bi|alpha/64 | equal  | not-sent   ||      |
  |IPv6 DEViid     |64|1 |Bi|         | ignore | DEViid     ||      |
  |IPv6 APPprefix  |64|1 |Bi|gamma/64 | equal  | not-sent   ||      |
  |IPv6 APPiid     |64|1 |Bi|::1000   | equal  | not-sent   ||      |
  +================+==+==+==+=========+========+============++======+
- |UDP DEVport     |16|1 |Bi|8720     | MSB(12)| LSB(4)     || \[4\]  |
- |UDP APPport     |16|1 |Bi|8720     | MSB(12)| LSB(4)     || \[4\]  |
+ |UDP DEVport     |16|1 |Bi|8720     | MSB(12)| LSB(4)     || [4]  |
+ |UDP APPport     |16|1 |Bi|8720     | MSB(12)| LSB(4)     || [4]  |
  |UDP Length      |16|1 |Bi|         | ignore | comp-length||      |
  |UDP checksum    |16|1 |Bi|         | ignore | comp-chk   ||      |
  +================+==+==+==+=========+========+============++======+
