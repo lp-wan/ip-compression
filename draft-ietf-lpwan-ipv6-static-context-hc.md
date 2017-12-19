@@ -134,9 +134,9 @@ This section defines the terminology and acronyms used in this document.
 
 * All-1. Fragmentation Packet format to send the last frame of a packet.
 
-* All-0 empty. Fragmentation Packet format without payload to request the bitmap when the Retransmission Timer expires in a window.
+* All-0 empty. Fragmentation Packet format without payload to request the Bitmap when the Retransmission Timer expires in a window.
 
-* All-1 empty. Fragmentation Packet format without payload to request the bitmap when the Retransmission Timer expires in the last window.
+* All-1 empty. Fragmentation Packet format without payload to request the Bitmap when the Retransmission Timer expires in the last window.
 
 * App: LPWAN Application. An application sending/receiving IPv6 packets to/from the Device.
 
@@ -493,11 +493,11 @@ Compressed fields are elided during compression and reconstructed during decompr
 
 ## Overview
 
-In LPWAN technologies, the L2 data unit size typically varies from tens to hundreds of bytes.  If the entire IPv6 datagram after applying SCHC header compression or when SCHC header compression is not possible, fits within a single L2 data unit, the fragmentation mechanism is not used and the packet is sent. Otherwise, the datagram SHALL be broken into fragments.
+In LPWAN technologies, the L2 data unit size typically varies from tens to hundreds of bytes.  If after applying SCHC header compression or when SCHC header compression is not possible the entire IPv6 datagram fits within a single L2 data unit, the fragmentation mechanism is not used and the packet is sent. Otherwise, the datagram SHALL be broken into fragments.
 
-LPWAN technologies impose some strict limitations on traffic, devices are sleeping most of the time and may receive data during a short period of time after transmission to preserve battery. To adapt the SCHC fragmentation to the capabilities of LPWAN technologies, it is desirable to enable optional fragment retransmission and to allow a gradation of fragment delivery reliability. This document does not make any decision with regard to which fragment delivery reliability option(s) will be used over a specific LPWAN technology.
+LPWAN technologies impose some strict limitations on traffic, (e.g.) devices are sleeping most of the time and may receive data during a short period of time after transmission to preserve battery. To adapt the SCHC fragmentation to the capabilities of LPWAN technologies, it is desirable to enable optional fragment retransmission and to allow a gradation of fragment delivery reliability. This document does not make any decision with regard to which fragment delivery reliability option(s) will be used over a specific LPWAN technology.
 
-   An important consideration is that LPWAN networks typically follow
+   An important consideration is that LPWAN networks typically follow a
    the star topology, and therefore data unit reordering is not expected
    in such networks.  This specification assumes that reordering will
    not happen between the entity performing fragmentation and the entity
@@ -508,7 +508,7 @@ LPWAN technologies impose some strict limitations on traffic, devices are sleepi
 
 This subsection describes the different fields in the fragmentation header frames (see the fragmentation frames format in {{Fragfor}}) that are used to enable the fragmentation functionalities defined in this document, and the different reliability options supported. 
 
-*  Rule ID. The Rule ID is present in the fragmentation header and in the ACK header format. The Rule ID is a fragmentation header is used to identify that a fragment is being carried, the fragmentation delivery reliability option used and it may indicate the window size in use (if any). The Rule ID  in the fragmentation header also allows to interleave non-fragmented IPv6 datagrams with fragments that carry a larger IPv6 datagram. The Rule ID in an ACK allows to identify that the message is an ACK.  
+*  Rule ID. The Rule ID is present in the fragmentation header and in the ACK header format. The Rule ID in a fragmentation header is used to identify that a fragment is being carried, the fragmentation delivery reliability option used and it may indicate the window size in use (if any). The Rule ID  in the fragmentation header also allows to interleave non-fragmented IPv6 datagrams with fragments that carry a larger IPv6 datagram. The Rule ID in an ACK allows to identify that the message is an ACK.  
 
 *  Fragment Compressed Number (FCN).  The FCN is included in all fragments.  This field can be understood as a truncated, 
 efficient representation of a larger-sized fragment number, and does not carry an absolute fragment number.  There are two FCN reserved values that are used for controlling the fragmentation process, as described next. The FCN value with all the bits equal to 1 (All-1) denotes the last 
@@ -535,7 +535,7 @@ In the ACK format, DTag carries the same value as the DTag field in the fragment
  
 *  Retransmission Timer. It is used by a fragment sender after the transmission of a window to detect a transmission error  of the ACK corresponding to this window. Depending on the reliability option, it will lead to a request for an ACK retransmission on ACK-Always or it will trigger the next window on ACK-on-error. The dureation of this timer is not defined in this document and must be defined in the corresponding technology documents (e.g. technology-specific profiles).
  
-*  Inactivity Timer. This timer is used by a fragment receiver to detect when there is a problem in the transmission of fragments and the receiver does not get any fragment during a period of time or a number of packets in a period of time. When this happens, an Abort message needs to be sent. Initially, and each time a fragment is received the timer is reinitialized. The duration of this timer timer is not defined in this document and must be defined in the specific technology document (e.g. technology-specific profiles).
+*  Inactivity Timer. This timer is used by a fragment receiver to detect when there is a problem in the transmission of fragments and the receiver does not get any fragment during a period of time or a number of packets in a period of time. When this happens, an Abort message needs to be sent. Initially, and each time a fragment is received the timer is reinitialized. The duration of this timer is not defined in this document and must be defined in the specific technology document (e.g. technology-specific profiles).
  
 *  Attempts. It is a counter used to request a missing ACK, and in consequence to determine when an Abort is needed, because there are recurrent fragment transmission errors, whose maximum value is MAX_ACK_REQUESTS. The default value of MAX_ACK_REQUESTS is not
    stated in this document, and it is expected to be defined in other
@@ -546,11 +546,11 @@ fragment of the current window, and provides feedback on whether the fragment ha
 position on the Bitmap is used to report whether the All-0 or All-1 fragments have been received or not. Feedback for a 
 fragment with the highest FCN value
 is provided by the left-most position in the Bitmap. In the Bitmap, a bit set to 1 indicates that the corresponding FCN 
-fragment has been correctly sent and received. However, the sending format of the bitmap will be truncated until a byte 
+fragment has been correctly sent and received. However, the sending format of the Bitmap will be truncated until a byte 
 boundary where the last error is given. However, when all the Bitmap is transmitted, it may be truncated, see more details 
 in {{Bitmapopt}}
 
-*  Abort. In case of error or when the Inactivity timer expires or the MAX_ACK_REQUESTS is reached the sender or the receiver may use the Abort frames. When the receiver needs to abort the on-going fragmented packet transmission, it uses the ACK Abort format packet with all the bits set to 1. The sender will use the All-1 Abort format to trigger the end of the transmission.
+*  Abort. In case of error or when the Inactivity timer expires or the MAX_ACK_REQUESTS is reached, the sender or the receiver may use the Abort frames. When the receiver needs to abort the on-going fragmented packet transmission, it uses the ACK Abort format packet with all the bits set to 1. The sender will use the All-1 Abort format to trigger the end of the transmission.
 
 *  Padding (P). Padding will be used to align the last byte of a fragment with a byte boundary. The number of bits used for padding is not defined and depends on the size of the Rule ID, DTag and FCN fields, and on the layer two payload size. 
 
@@ -577,8 +577,7 @@ This specification defines the following three fragment delivery reliability opt
    fragment sender, the latter sends an ACK request using the All-1 empty fragment.  
    The maximum number of ACK requests is MAX_ACK_REQUESTS.  
 
-*  Window mode - ACK-on-error (ACK-on-error). 
-   The ACK-on-error option is suitable for links offering relatively low L2
+*  Window mode - ACK-on-error (ACK-on-error). The ACK-on-error option is suitable for links offering relatively low L2
    data unit loss probability.  This option reduces the number of ACKs
    transmitted by the fragment receiver. This may be especially beneficial in asymmetric
    scenarios, e.g. where fragmented data are sent uplink and the
@@ -591,7 +590,7 @@ This specification defines the following three fragment delivery reliability opt
    the window of fragments. Upon receipt of an ACK that informs about
    any lost fragments, the sender retransmits the lost fragments. However, if an ACK is lost, the sender
    assumes that all fragments covered by the ACK have been successfully
-   delivered. And the receiver will abort the on-going fragmented packet transmission. One exception to this behavior is in the last window, whete the receiver MUST transmit an ACK, even if all the fragments in the last window have been correctly received.  
+   delivered, and the receiver will abort the on-going fragmented packet transmission. One exception to this behavior is in the last window, where the receiver MUST transmit an ACK, even if all the fragments in the last window have been correctly received.  
  
 The same reliability option MUST be used for all fragments of a
    packet.  It is up to implementers and/or representatives of the
@@ -667,7 +666,7 @@ The format of an ACK that acknowledges a window that is not the last one (denote
                 <--------  R  ------->
                             <- T -> 1  
                 +---- ... --+-... -+-+----- ... ---+
-                |  Rule ID  | DTag |W|   bitmap    | (no payload)
+                |  Rule ID  | DTag |W|   Bitmap    | (no payload)
                 +---- ... --+-... -+-+----- ... ---+
                 
 ~~~~
@@ -685,7 +684,7 @@ to 1 to indicate that the MIC check computed by the receiver matches the MIC pre
     +---- ... --+-... -+-+-+
                 
     +---- ... --+-... -+-+-+------- ... -------+
-    |  Rule ID  | DTag |W|0|      bitmap       | (MIC Incorrect)
+    |  Rule ID  | DTag |W|0|      Bitmap       | (MIC Incorrect)
     +---- ... --+-... -+-+-+------- ... -------+
                           C
                 
@@ -815,7 +814,7 @@ If the recipient receives the last fragment of a datagram (All-1), it checks for
 ### No ACK
 In the No ACK mode there is no feedback communication from the fragment receiver. The sender will send the fragments of a packet until the last one without any possibility to know if errors or a losses have occurred. As in this mode there is not a need to identify specific fragments a one-bit FCN is used, therefore FCN All-0 will be used in all fragments except the last one. The latter will carry an All-1 FCN and will also carry the MIC. 
 The receiver will wait for fragments and will set the Inactivity timer. The No ACK mode will use the MIC contained in the last fragment to check error. 
-When the Inactivity Timer expires or when the MIC check indicates that the reassembled packet does not match the originall one, the receiver will release all resources allocated to reassembly of the packet. The initial value of the Inactivity Timer will be determined based on the characteristics of the underlying LPWAN technology and will be defined in other documents (e.g. technology-specific profile documents).
+When the Inactivity Timer expires or when the MIC check indicates that the reassembled packet does not match the original one, the receiver will release all resources allocated to reassembly of the packet. The initial value of the Inactivity Timer will be determined based on the characteristics of the underlying LPWAN technology and will be defined in other documents (e.g. technology-specific profile documents).
     
 
 ### The Window modes 
@@ -856,8 +855,8 @@ discarded. All Fragments belonging to the correct window are accepted, the fragm
 value. The receiver updates the Bitmap with the correct received fragments. 
 
 When All-0 fragment is received, it indicates that all the fragments have been sent in the current window. Since the sender 
-is not obliged to send a full window, some fragment number not set in the memory may not correspond to losses. It sends the 
-corresponding ACK and the next window can start.
+is not obliged to send a full window, some fragment numbers not set in the memory may not correspond to losses. It sends 
+the corresponding ACK and the next window can start.
 
 When All-1 fragment is received, it indicates that the transmission is finished. Since the last window is not full, the MIC 
 will be used to detect if all the fragments have been received. A correct MIC indicates the end of the transmission but the 
@@ -870,7 +869,7 @@ Bitmap. If all the bits of the Bitmap are set to one, the receiver may send an A
 an All-0 fragment.
 
 If the window value is set to the next value, this means that the sender has received 
-a correct bitmap, which means that all the fragments have been received. The receiver
+a correct Bitmap, which means that all the fragments have been received. The receiver
 changes the value of the expected window.
 
 If the receiver receives an All-0 fragment, the sender may send one or more fragments per window. Otherwise, some fragments 
@@ -881,7 +880,7 @@ some fragments have been lost. It sends the ACK. In case of an incorrect MIC, th
 receiver will Abort the transmission. It can also Abort when the Inactivity timer has expired.
 
 #### ACK-on-error
-The ACK-on-error is similar to the ACK-Always procedure, the difference is that in ACK-on-error the ACK is not sent at the end of each window but only when there is an error. In Ack-on-error mode, the retransmission timer expiration will be considered as a positive acknowledgment, it is set when receiving an All-0 or an All-1 fragment. If there are no more fragments then the fragmentation is finished. 
+The ACK-on-error is similar to the ACK-Always procedure, the difference is that in ACK-on-error the ACK is not sent at the end of each window but only when there is an error. In ACK-on-error mode, the retransmission timer expiration will be considered as a positive acknowledgment, it is set when receiving an All-0 or an All-1 fragment. If there are no more fragments then the fragmentation is finished. 
 
 When the All-1 last fragment is sent and the correct MIC have been received an ACK is sent to confirms the end of the correct transmission. If the retransmission timer expires an All-1 empty request the last ACK that MUST be sent to complete the fragmentation transmission.
 
@@ -897,7 +896,7 @@ Unlike the sender, the receiver for ACK-on-error has some differences. First, we
 
 Any fragment not belonging to the current window is discarded. The Fragment Number is computed based on the FCN value.  When an All-0 fragment is received and the Bitmap is full, the receiver changes the window value. 
 
-An All-0 fragment and not a full bitmap indicate that all the fragments have been sent in the current window. Since the sender is not obligated to send a full window, some fragment number not used may not correspond to losses. As the receiver does not know if the missing fragments are lost or normal missing fragments, it sends an ACK.
+An All-0 fragment and not a full Bitmap indicate that all the fragments have been sent in the current window. Since the sender is not obligated to send a full window, some fragment number not used may not correspond to losses. As the receiver does not know if the missing fragments are lost or normal missing fragments, it sends an ACK.
 
 An All-1 fragment indicates that the transmission is finished. Since the last window is not full, the MIC will be used to 
 detect if all the fragments have been received. A correct MIC indicates the end of the transmission. 
@@ -925,9 +924,9 @@ The receiver generates the Bitmap which may have the size of a single downlink f
 ~~~~
 {: #Fig-Localbitmap title='Bitmap'}
 
-Bitmap transmitted MUST be optimized in size to reduce frame size. The right-most bytes with all Bitmap bit set to 1 MUST be removed from the transmission. As the receiver knows the Bitmap size, it can reconstruct the value. In the example {{Fig-transmittedbitmap}} the last 2 bytes of the bitmap are set to 1, therefore, they are not sent.
+Bitmap transmitted MUST be optimized in size to reduce frame size. The right-most bytes with all Bitmap bit set to 1 MUST be removed from the transmission. As the receiver knows the Bitmap size, it can reconstruct the value. In the example {{Fig-transmittedbitmap}} the last 2 bytes of the Bitmap are set to 1, therefore, they are not sent.
 
-In the last window, when checked bit C value is one, means that the MIC is corrected and the Bitmap is not sent. Otherwise, the Bitmap needs to be sent after the C bit. Note that the introduction of a C bit may force to reduce the number of fragments to allow the bitmap to fit in a frame. 
+In the last window, when checked bit C value is one, means that the MIC is corrected and the Bitmap is not sent. Otherwise, the Bitmap needs to be sent after the C bit. Note that the introduction of a C bit may force to reduce the number of fragments to allow the Bitmap to fit in a frame. 
 
 ~~~~   
      <-------   R  ------->  
@@ -956,9 +955,9 @@ indicates that the second and the fifth fragments have not been correctly receiv
 |--- byte boundary ----| 1 byte next | 
     
 ~~~~
-{: #Fig-Bitmap-Win title='Example of the bitmap in Window mode, in any window except the last one, for N=3)'}
+{: #Fig-Bitmap-Win title='Example of the Bitmap in Window mode, in any window except the last one, for N=3)'}
 
-{{Fig-Bitmap-lastWin}} shows an example of an ACK (N=3), where the bitmap indicates that the MIC check has failed but there is no missing fragments. 
+{{Fig-Bitmap-lastWin}} shows an example of an ACK (N=3), where the Bitmap indicates that the MIC check has failed but there is no missing fragments. 
 
 ~~~~                                                  
  <-------   R  ------->  6 5 4 3 2 1 7 (*) 
@@ -978,7 +977,7 @@ indicates that the second and the fifth fragments have not been correctly receiv
 
 ## Supporting multiple window sizes
 
-For ACK-Always or ACK-on-error, implementers may opt to support a single window size or multiple window sizes.  The latter, when feasible, may provide performance optimizations.  For example, a large window size may be used for packets that need to be carried by a large number of fragments.  However, when the number of fragments required to carry a packet is low, a smaller window size, and thus a shorter bitmap, may be sufficient to provide feedback on all fragments.  If multiple window sizes are supported, the Rule ID may be used to signal the window size in use for a specific packet transmission.
+For ACK-Always or ACK-on-error, implementers may opt to support a single window size or multiple window sizes.  The latter, when feasible, may provide performance optimizations.  For example, a large window size may be used for packets that need to be carried by a large number of fragments.  However, when the number of fragments required to carry a packet is low, a smaller window size, and thus a shorter Bitmap, may be sufficient to provide feedback on all fragments.  If multiple window sizes are supported, the Rule ID may be used to signal the window size in use for a specific packet transmission.
 
 Note that the same window size MUST be used for the transmission of all fragments that belong to a packet.
 
@@ -1253,7 +1252,7 @@ comprising some overlapping parts of the original IPv6 datagram).
 Implementers should make sure that correct operation is not affected
 by such event.
 
-In Window mode – ACK on error, a malicious node may force a fragment sender to resend a fragment a number of times, with the aim to increase consumption of the fragment sender’s resources. To this end, the malicious node may repeatedly send a fake ACK to the fragment sender, with a bitmap that reports that one or more fragments have been lost. In order to mitigate this possible attack, MAX_FRAG_RETRIES may be set to a safe value which allows to limit the maximum damage of the attack to an acceptable extent. However, note that a high setting for MAX_FRAG_RETRIES benefits fragment delivery reliability, therefore the trade-off needs to be carefully considered.
+In Window mode – ACK on error, a malicious node may force a fragment sender to resend a fragment a number of times, with the aim to increase consumption of the fragment sender’s resources. To this end, the malicious node may repeatedly send a fake ACK to the fragment sender, with a Bitmap that reports that one or more fragments have been lost. In order to mitigate this possible attack, MAX_FRAG_RETRIES may be set to a safe value which allows to limit the maximum damage of the attack to an acceptable extent. However, note that a high setting for MAX_FRAG_RETRIES benefits fragment delivery reliability, therefore the trade-off needs to be carefully considered.
 
 # Acknowledgements
 
@@ -1576,7 +1575,7 @@ This section provides examples of different fragment delivery reliability option
 {: #Fig-Example-Rel-Window-ACK-Loss-Last-C title='Transmission of an IPv6 packet carried by 11 fragments in ACK-Always, for N=3, and MAX_WIND_FCN=6, with three losses, and one retransmitted fragment is lost.'}
 
 
-{{Fig-Example-MaxWindFCN}} illustrates the transmission of an IPv6 packet that needs 28 fragments in ACK-Always, for N=5 and MAX_WIND_FCN=23, with two losses. Note that MAX_WIND_FCN=23 may be useful when the maximum possible bitmap size, considering the maximum lower layer technology payload size and the value of R, is 3 bytes. Note also that the FCN of the last fragment of the packet is the one with FCN=31 (i.e. FCN=2^N-1 for N=5, or equivalently, all FCN bits set to 1). 
+{{Fig-Example-MaxWindFCN}} illustrates the transmission of an IPv6 packet that needs 28 fragments in ACK-Always, for N=5 and MAX_WIND_FCN=23, with two losses. Note that MAX_WIND_FCN=23 may be useful when the maximum possible Bitmap size, considering the maximum lower layer technology payload size and the value of R, is 3 bytes. Note also that the FCN of the last fragment of the packet is the one with FCN=31 (i.e. FCN=2^N-1 for N=5, or equivalently, all FCN bits set to 1). 
 
 ~~~~
            Sender               Receiver
@@ -1674,34 +1673,34 @@ The fragmentation state machines of the sender and the receiver in the different
               |       |       ~~~~~~~~~~~~~~~~~~~~~~
               +------++  +--+ send Window + frag(FCN)
                  W=0 |   |  | FCN-
-  Clear local bitmap |   |  v set local bitmap
+  Clear local Bitmap |   |  v set local Bitmap
        FCN=max value |  ++--+--------+
                      +> |            |
 +---------------------> |    SEND    |
 |                       +--+-----+---+ 
 |      FCN==0 & more frags |     | last frag
 |    ~~~~~~~~~~~~~~~~~~~~~ |     | ~~~~~~~~~~~~~~~
-|         set local-bitmap |     | set local-bitmap 
+|         set local-Bitmap |     | set local-Bitmap 
 |   send wnd + frag(all-0) |     | send wnd+frag(all-1)+MIC 
 |       set Retrans_Timer  |     | set Retrans_Timer 
 |                          |     | 
 |Recv_wnd == wnd &         |     |  
-|Lcl_bitmap==recv_bitmap&  |     |  +------------------------+
-|more frag                 |     |  |local-bitmap!=rcv-bitmap|
+|Lcl_Bitmap==recv_Bitmap&  |     |  +------------------------+
+|more frag                 |     |  |local-Bitmap!=rcv-Bitmap|
 |~~~~~~~~~~~~~~~~~~~~~~    |     |  | ~~~~~~~~~              |
 |Stop Retrans_Timer        |     |  | Attemp++               v
-|clear local_bitmap        v     v  |                 +------++
+|clear local_Bitmap        v     v  |                 +------++
 |window=next_window   +----+-----+--+--+              |Resend |
 +---------------------+                |              |Missing|
                  +----+     Wait       |              |Frag   |
-not expected wnd |    |    bitmap      |              +------++
+not expected wnd |    |    Bitmap      |              +------++
 ~~~~~~~~~~~~~~~~ +--->+                +-+Retrans_Timer Exp  |          
     discard frag      +--+-+---+-+---+-+ |~~~~~~~~~~~~~~~~~  |
                          | |   | ^   ^   |reSend(empty)All-* |   
                          | |   | |   |   |Set Retrans_Timer  |
 MIC_bit==1 &             | |   | |   +---+Attemp++           |
 Recv_window==window &    | |   | +---------------------------+   
-Lcl_bitmap==recv_bitmap &| |   |   all missing frag sent
+Lcl_Bitmap==recv_Bitmap &| |   |   all missing frag sent
              no more frag| |   |   ~~~~~~~~~~~~~~~~~~~~~~ 
  ~~~~~~~~~~~~~~~~~~~~~~~~| |   |   Set Retrans_Timer                 
        Stop Retrans_Timer| |   |    
@@ -1711,7 +1710,7 @@ Lcl_bitmap==recv_bitmap &| |   |   all missing frag sent
               All-1 Window |   v Send Abort
               ~~~~~~~~~~~~ | +-+-----------+
              MIC_bit ==0 & +>|    ERROR    |
-    Lcl_bitmap==recv_bitmap  +-------------+                                        
+    Lcl_Bitmap==recv_Bitmap  +-------------+                                        
 ~~~~
 {: #Fig-ACKAlwaysSnd title='Sender State Machine for the ACK Always Mode'}
 
@@ -1720,48 +1719,48 @@ Lcl_bitmap==recv_bitmap &| |   |   all missing frag sent
 ~~~~
  Not All- & w=expected +---+   +---+w = Not expected
  ~~~~~~~~~~~~~~~~~~~~~ |   |   |   |~~~~~~~~~~~~~~~~
- Set local_bitmap(FCN) |   v   v   |discard
+ Set local_Bitmap(FCN) |   v   v   |discard
                       ++---+---+---+-+      
 +---------------------+     Rcv      +--->* ABORT 
 |  +------------------+   Window     |
 |  |                  +-----+--+-----+  
 |  |       All-0 & w=expect |  ^ w =next & not-All
 |  |     ~~~~~~~~~~~~~~~~~~ |  |~~~~~~~~~~~~~~~~~~~~~
-|  |     set lcl_bitmap(FCN)|  |expected = next window
-|  |      send local_bitmap |  |Clear local_bitmap
+|  |     set lcl_Bitmap(FCN)|  |expected = next window
+|  |      send local_Bitmap |  |Clear local_Bitmap
 |  |                        |  |    
 |  | w=expct & not-All      |  |    
 |  | ~~~~~~~~~~~~~~~~~~     |  | 
-|  | set lcl_bitmap(FCN)+-+ |  | +--+ w=next & All-0
-|  | if lcl_bitmap full | | |  | |  | ~~~~~~~~~~~~~~~
-|  | send lcl_bitmap    v | v  | |  | expct = nxt wnd
-|  |                  +-+-+-+--+-++ | Clear lcl_bitmap    
-|  |  w=expected & +->+    Wait   +<+ set lcl_bitmap(FCN)         
-|  |      All-1    |  |    Next   |   send lcl_bitmap
+|  | set lcl_Bitmap(FCN)+-+ |  | +--+ w=next & All-0
+|  | if lcl_Bitmap full | | |  | |  | ~~~~~~~~~~~~~~~
+|  | send lcl_Bitmap    v | v  | |  | expct = nxt wnd
+|  |                  +-+-+-+--+-++ | Clear lcl_Bitmap    
+|  |  w=expected & +->+    Wait   +<+ set lcl_Bitmap(FCN)         
+|  |      All-1    |  |    Next   |   send lcl_Bitmap
 |  |  ~~~~~~~~~~~~ +--+  Window   +--->* ABORT  
 |  |    discard       +--------+-++        
 |  |             All-1 & w=next| |  All-1 & w=nxt
 |  |                & MIC wrong| |  & MIC right      
 |  |          ~~~~~~~~~~~~~~~~~| | ~~~~~~~~~~~~~~~~~~ 
-|  |      set local_bitmap(FCN)| |set lcl_bitmap(FCN)       
-|  |          send local_bitmap| |send local_bitmap 
+|  |      set local_Bitmap(FCN)| |set lcl_Bitmap(FCN)       
+|  |          send local_Bitmap| |send local_Bitmap 
 |  |                           | +----------------------+
 |  |All-1 & w=expct            |                        |
 |  |& MIC wrong                v   +---+ w=expctd &     |
 |  |~~~~~~~~~~~~~~~~~~~~  +----+---+-+ | MIC wrong      |
-|  |set local_bitmap(FCN) |          +<+ ~~~~~~~~~~~~~~ |
-|  |send local_bitmap     | Wait End | set lcl_btmp(FCN)|
+|  |set local_Bitmap(FCN) |          +<+ ~~~~~~~~~~~~~~ |
+|  |send local_Bitmap     | Wait End | set lcl_btmp(FCN)|
 |  +--------------------->+          +--->* ABORT       |
 |                         +---+----+-+                  |
 |       w=expected & MIC right|                         |
 |       ~~~~~~~~~~~~~~~~~~~~~~| +-+ Not All-1           |
-|        set local_bitmap(FCN)| | | ~~~~~~~~~           |
-|            send local_bitmap| | |  discard            |
+|        set local_Bitmap(FCN)| | | ~~~~~~~~~           |
+|            send local_Bitmap| | |  discard            |
 |                             | | |                     | 
 |All-1 & w=expctd & MIC right | | |   +-+ All-1         |
 |~~~~~~~~~~~~~~~~~~~~~~~~~~~~ v | v | v ~~~~~~~~~       |
-|set local_bitmap(FCN)      +-+-+-+-+-++Send lcl_btmp   |
-|send local_bitmap          |          |                |
+|set local_Bitmap(FCN)      +-+-+-+-+-++Send lcl_btmp   |
+|send local_Bitmap          |          |                |
 +-------------------------->+    END   +<---------------+
                             ++--+------+  
        --->* ABORT
@@ -1785,7 +1784,7 @@ Lcl_bitmap==recv_bitmap &| |   |   all missing frag sent
                    +------++  +--+  ~~~~~~~~~~~~~~~~~~~~~~
                       W=0 |   |  |  send Window + frag(FCN)
        ~~~~~~~~~~~~~~~~~~ |   |  |  FCN-
-       Clear local bitmap |   |  v  set local bitmap
+       Clear local Bitmap |   |  v  set local Bitmap
             FCN=max value |  ++-------------+
                           +> |              |
                              |     SEND     |
@@ -1793,18 +1792,18 @@ Lcl_bitmap==recv_bitmap &| |   |   all missing frag sent
  |                           ++-----+-------+
  |         FCN==0 & more frags|     |last frag
  |     ~~~~~~~~~~~~~~~~~~~~~~~|     |~~~~~~~~~~~~~~~~~~~~~~~~
- |            set local-bitmap|     |set local-bitmap
+ |            set local-Bitmap|     |set local-Bitmap
  |      send wnd + frag(all-0)|     |send wnd+frag(all-1)+MIC
  |           set Retrans_Timer|     |set Retrans_Timer
  |                            |     |
- |Retrans_Timer expires &     |     | local-bitmap!=rcv-bitmap 
+ |Retrans_Timer expires &     |     | local-Bitmap!=rcv-Bitmap 
  |more fragments              |     |  +-----------------+
  |~~~~~~~~~~~~~~~~~~~~        |     |  | ~~~~~~~~~~~~~   |
  |stop Retrans_Timer          |     |  | Attemp++        |
- |clear local.bitmap          v     v  |                 v
+ |clear local-Bitmap          v     v  |                 v
  |window = next window  +-----+-----+--+--+         +----+----+
  +----------------------+                 +         | Resend  |
- +--------------------->+    Wait bitmap  |         | Missing |
+ +--------------------->+    Wait Bitmap  |         | Missing |
  |                  +-- +                 |         | Frag    |
  | not expected wnd |   ++-+---+---+---+--+         +------+--+
  | ~~~~~~~~~~~~~~~~ |    ^ |   |   |   ^                   |
@@ -1817,7 +1816,7 @@ Lcl_bitmap==recv_bitmap &| |   |   all missing frag sent
  |  Send ALL-1-empty       |   |   | 
  +-------------------------+   |   | 
                                |   |
-      Local_bitmap==Recv_bitmap|   |
+      Local_Bitmap==Recv_Bitmap|   |
       ~~~~~~~~~~~~~~~~~~~~~~~~~|   |Attemp > MAX_ACK_REQUESTS
  +---------+Stop Retrans_Timer |   |~~~~~~~~~~~~~~~~~~~~~~~
  |   END   +<------------------+   v  Send Abort
@@ -1832,17 +1831,17 @@ Lcl_bitmap==recv_bitmap &| |   |   all missing frag sent
 ~~~~
    Not All- & w=expected +---+   +---+w = Not expected
    ~~~~~~~~~~~~~~~~~~~~~ |   |   |   |~~~~~~~~~~~~~~~~ 
-   Set local_bitmap(FCN) |   v   v   |discard
+   Set local_Bitmap(FCN) |   v   v   |discard
                         ++---+---+---+-+
 +-----------------------+              +--+ All-0 & full 
 |            ABORT *<---+  Rcv Window  |  | ~~~~~~~~~~~~ 
 |  +--------------------+              +<-+ w =next
-|  |                    +---+---+------+ clear lcl_bitmap
+|  |                    +---+---+------+ clear lcl_Bitmap
 |  |                        |   ^
 |  |        All-0 & w=expect|   |w=expct & not-All & full
-|  |        & no_full bitmap|   |~~~~~~~~~~~~~~~~~~~~~~~~
-|  |       ~~~~~~~~~~~~~~~~~|   |clear lcl_bitmap; w =nxt
-|  |       send local_bitmap|   |
+|  |        & no_full Bitmap|   |~~~~~~~~~~~~~~~~~~~~~~~~
+|  |       ~~~~~~~~~~~~~~~~~|   |clear lcl_Bitmap; w =nxt
+|  |       send local_Bitmap|   |
 |  |                        |   |              +--------+
 |  |                        |   |  +---------->+        | 
 |  |                        |   |  |w=next     | Error/ |
@@ -1855,23 +1854,23 @@ Lcl_bitmap==recv_bitmap &| |   |   all missing frag sent
 |  |                      +-------+---+---+    
 |  |  All-1 & w=next & MIC wrong  |   |   
 |  |  ~~~~~~~~~~~~~~~~~~~~~~~~~~  |   +----------------+
-|  |       set local_bitmap(FCN)  |      All-1 & w=next| 
-|  |       send local_bitmap      |         & MIC right|
+|  |       set local_Bitmap(FCN)  |      All-1 & w=next| 
+|  |       send local_Bitmap      |         & MIC right|
 |  |                              |  ~~~~~~~~~~~~~~~~~~|
-|  |                              | set lcl_bitmap(FCN)|                                    
+|  |                              | set lcl_Bitmap(FCN)|                                    
 |  |All-1 & w=expect & MIC wrong  |                    |
 |  |~~~~~~~~~~~~~~~~~~~~~~~~~~~~  |                    |
-|  |set local_bitmap(FCN)         v   +--->* ABORT     |
-|  |send local_bitmap     +-------+---+--+             |
+|  |set local_Bitmap(FCN)         v   +--->* ABORT     |
+|  |send local_Bitmap     +-------+---+--+             |
 |  +--------------------->+   Wait End   +-+           |
 |                         +-----+------+-+ | w=expct & |
 |       w=expected & MIC right  |      ^   | MIC wrong |
 |       ~~~~~~~~~~~~~~~~~~~~~~  |      +---+ ~~~~~~~~~ |
-|        set local_bitmap(FCN)  |   set lcl_bitmap(FCN)|
+|        set local_Bitmap(FCN)  |   set lcl_Bitmap(FCN)|
 |                               |                      |
 |All-1 & w=expected & MIC right |                      |
 |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ v                      |
-|set local_bitmap(FCN)        +-+----------+           |
+|set local_Bitmap(FCN)        +-+----------+           |
 +---------------------------->+     END    +<----------+
                               +------------+   
             --->* Only Uplink
