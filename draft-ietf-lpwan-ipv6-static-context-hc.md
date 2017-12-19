@@ -882,7 +882,7 @@ receiver will Abort the transmission. It can also Abort when the Inactivity time
 #### ACK-on-error
 The ACK-on-error is similar to the ACK-Always procedure, the difference is that in ACK-on-error the ACK is not sent at the end of each window but only when there is an error. In ACK-on-error mode, the retransmission timer expiration will be considered as a positive acknowledgment, it is set when receiving an All-0 or an All-1 fragment. If there are no more fragments then the fragmentation is finished. 
 
-When the All-1 last fragment is sent and the correct MIC have been received an ACK is sent to confirms the end of the correct transmission. If the retransmission timer expires an All-1 empty request the last ACK that MUST be sent to complete the fragmentation transmission.
+When the All-1 last fragment is sent and the correct MIC have been received, an ACK is sent to confirm the end of the end of transmission. If the retransmission timer expires an All-1 empty requests the last ACK that MUST be sent to complete the end of transmission.
 
 If the sender receives an ACK, it checks the window value. ACKs with the non-expected window number are 
 discarded. If the window number on the received Bitmap is correct, the sender verifies if the receiver has all the 
@@ -896,7 +896,7 @@ Unlike the sender, the receiver for ACK-on-error has some differences. First, we
 
 Any fragment not belonging to the current window is discarded. The Fragment Number is computed based on the FCN value.  When an All-0 fragment is received and the Bitmap is full, the receiver changes the window value. 
 
-An All-0 fragment and not a full Bitmap indicate that all the fragments have been sent in the current window. Since the sender is not obligated to send a full window, some fragment number not used may not correspond to losses. As the receiver does not know if the missing fragments are lost or normal missing fragments, it sends an ACK.
+An All-0 fragment and not a full Bitmap indicate that all the fragments have been sent in the current window. Since the sender is not obligated to send a full window, some fragment numbers not used may not correspond to losses. As the receiver does not know if the missing fragments are lost or normal missing fragments, it sends an ACK.
 
 An All-1 fragment indicates that the transmission is finished. Since the last window is not full, the MIC will be used to 
 detect if all the fragments have been received. A correct MIC indicates the end of the transmission. 
@@ -904,11 +904,11 @@ detect if all the fragments have been received. A correct MIC indicates the end 
 If All-1 fragment has not been received, the receiver expects a new window. It waits for
 the next fragment. If the window value has not changed, the received fragments are
 part of a retransmission. A receiver that has already received a fragment should discard it. If all the bits of the Bitmap are set to one, the receiver waits for the next window without waiting for an All-0 fragment and it does not send an ACK either. 
-While the receiver waits for next window and if the window value is set to the next value, and if an All-1 fragment with the next value window arrived the receiver goes to error and abort the transmission, it drops the fragments.
+While the receiver waits for next window and if the window value is set to the next value, and if an All-1 fragment with the next value window arrived the receiver goes to error and abort the transmission. It drops the fragments.
 
 If the receiver receives an All-1 fragment this means that the transmission should be finished.  If the MIC is incorrect some fragments have been lost. It sends an ACK.
 
-In case of an incorrect MIC, the receivers wait for fragment belonging to the same window or the expiration of the Inactivity timer which will Abort the transmission.
+In case of an incorrect MIC, the receiver waits for fragment belonging to the same window or the expiration of the Inactivity timer which will Abort the transmission.
 
 ### Bitmap Optimization {#Bitmapopt}
 
@@ -1017,10 +1017,10 @@ For fragmented packet transmission in the downlink, and when ACK Always
    confirms successful reception of all fragments of
    the last window, transmission of the fragmented packet ends.
    If the timer expires, and no ACK has been received since the
-   start of the timer, the fragment sender assumes that the all-1
+   start of the timer, the fragment sender assumes that the All-1
    fragment has been successfully received (and possibly, the last ACK
    has been lost: this mechanism assumes that the retransmission timer for the
-   all-1 fragment is long enough to allow several ACK retries if the all-1
+   All-1 fragment is long enough to allow several ACK retries if the All-1
    fragment has not been received by the fragment receiver, and it also
    assumes that it is unlikely that several ACKs become all lost).
 
@@ -1045,18 +1045,17 @@ This section lists the different IPv6 and UDP header fields and how they can be 
 ## IPv6 version field
 
 This field always holds the same value. Therefore, the TV is 6, the MO is "equal" 
-and the "CDA "not-sent"".
+and the "CDA "not-sent".
 
 ## IPv6 Traffic class field
 
-If the DiffServ field identified by the rest of the rule do not vary and is known 
+If the DiffServ field identified by the rest of the rule does not vary and is known 
 by both sides, the TV should contain this well-known value, the MO should be "equal" 
 and the CDA must be "not-sent.
 
 If the DiffServ field identified by the rest of the rule varies over time or is not 
-known by both sides, then there are two possibilities depending on the variability of the value, 
-the first one is to do not compressed the field and sends the original value, or 
-the second where the values can be computed by sending only the LSB bits:
+known by both sides, then there are two possibilities depending on the variability of the value: 
+The first one is to do not compressed the field and sends the original value. In the second, where the values can be computed by sending only the LSB bits:
 
 * TV is not set to any value, MO is set to "ignore" and CDA is set to "value-sent"
 
@@ -1069,9 +1068,8 @@ by both sides, the TV should contain this well-known value, the MO should be "eq
 and the CDA should be "not-sent".
 
 If the Flow Label field identified by the rest of the rule varies during time or is not 
-known by both sides, there are two possibilities depending on the variability of the value,
-the first one is without compression and then the value is sent 
-and the second where only part of the value is sent and the decompressor needs to compute the original value:
+known by both sides, there are two possibilities depending on the variability of the value:
+The first one is without compression and then the value is sent. In the second, only part of the value is sent and the decompressor needs to compute the original value:
 
 * TV is not set, MO is set to "ignore" and CDA is set to "value-sent"
 
@@ -1087,7 +1085,7 @@ If the payload length needs to be sent and does not need to be coded in 16 bits,
 the MO set to "MSB (16-s)" and the
 CDA to "LSB". The 's' parameter depends on the expected maximum packet length.
 
-On other cases, the payload length field must be sent and the CDA is replaced by "value-sent".
+In other cases, the payload length field must be sent and the CDA is replaced by "value-sent".
 
 ## Next Header field
 
@@ -1095,7 +1093,7 @@ If the Next Header field identified by the rest of the rule does not vary and is
 by both sides, the TV should contain this Next Header value, the MO should be "equal" 
 and the CDA should be "not-sent".
 
-If the Next header field identified by the rest of the rule varies during time or is not 
+If the Next Header field identified by the rest of the rule varies during time or is not 
 known by both sides, then TV is not set, MO is set to "ignore" and CDA is set to 
 "value-sent". A matching-list may also be used.
 
@@ -1116,7 +1114,7 @@ elide the field in the upstream direction and send the value in the downstream d
 
 ## IPv6 addresses fields
 
-As in 6LoWPAN {{RFC4944}}, IPv6 addresses are split into two 64-bit long fields; 
+As in 6LoWPAN {{RFC4944}}, IPv6 addresses are splitted into two 64-bit long fields; 
 one for the prefix and one for the Interface Identifier (IID). These fields should
 be compressed. To allow a single rule, these values are identified by their role 
 (DEV or APP) and not by their position in the frame (source or destination). The SCHC C/D
@@ -1126,7 +1124,7 @@ field.
 ### IPv6 source and destination prefixes
 
 Both ends must be synchronized with the appropriate prefixes. For a specific flow, 
-the source and destination prefix can be unique and stored in the context. It can 
+the source and destination prefixes can be unique and stored in the context. It can 
 be either a link-local prefix or a global prefix. In that case, the TV for the 
 source and destination prefixes contain the values, the MO is set to "equal" and
 the CDA is set to "not-sent".
@@ -1136,7 +1134,7 @@ different prefixes are listed in the TV associated with a short ID. The MO is se
 to "match-mapping" and the CDA is set to "mapping-sent".
 
 Otherwise the TV contains the prefix, the MO is set to "equal" and the CDA is set to
-value-sent.
+"value-sent".
 
 ### IPv6 source and destination IID
 
@@ -1154,7 +1152,7 @@ If several IIDs are possible, then the TV contains the list of possible IIDs, th
 set to "match-mapping" and the CDA is set to "mapping-sent". 
 
 Otherwise the value variation of the IID may be reduced to few bytes. In that case, the TV is
-set to the stable part of the IID, the MO is set to MSB and the CDA is set to LSB.
+set to the stable part of the IID, the MO is set to "MSB" and the CDA is set to "LSB".
 
 Finally, the IID can be sent on the LPWAN. In that case, the TV is not set, the MO is set
 to "ignore" and the CDA is set to "value-sent".
@@ -1228,7 +1226,7 @@ The (low) cost to mount this attack is linear with the number of
 buffers at the target node.  However, the cost for an attacker can be
 increased if individual fragments of multiple packets can be stored
 in the reassembly buffer.  To further increase the attack cost, the
-reassembly buffer can be split into fragment-sized buffer slots.
+reassembly buffer can be splitted into fragment-sized buffer slots.
 Once a packet is complete, it is processed normally.  If buffer
 overload occurs, a receiver can discard packets based on the sender
 behavior, which may help identify which fragments have been sent by
@@ -1249,7 +1247,7 @@ identify illegitimate fragments.
 
 Further attacks may involve sending overlapped fragments (i.e.
 comprising some overlapping parts of the original IPv6 datagram).
-Implementers should make sure that correct operation is not affected
+Implementers should make sure that the correct operation is not affected
 by such event.
 
 In Window mode – ACK on error, a malicious node may force a fragment sender to resend a fragment a number of times, with the aim to increase consumption of the fragment sender’s resources. To this end, the malicious node may repeatedly send a fake ACK to the fragment sender, with a Bitmap that reports that one or more fragments have been lost. In order to mitigate this possible attack, MAX_FRAG_RETRIES may be set to a safe value which allows to limit the maximum damage of the attack to an acceptable extent. However, note that a high setting for MAX_FRAG_RETRIES benefits fragment delivery reliability, therefore the trade-off needs to be carefully considered.
@@ -1394,7 +1392,7 @@ The third rule compresses port numbers to 4 bits.
 
 This section provides examples of different fragment delivery reliability options possible on the basis of this specification.
 
-{{Fig-Example-Unreliable}} illustrates the transmission of an IPv6 packet that needs 11 fragments in the No ACK option, FCN is always 1 bit.
+{{Fig-Example-Unreliable}} illustrates the transmission of an IPv6 packet that needs 11 fragments in the No ACK option. Where FCN is always 1 bit.
 
 ~~~~
         Sender               Receiver
