@@ -886,7 +886,7 @@ The receiver generates the Bitmap, which may have the size of a single downlink 
 ~~~~
 {: #Fig-Localbitmap title='Bitmap'}
 
-The Bitmap, when transmitted, MUST be optimized in size to reduce the resulting frame size. The right-most bytes with all Bitmap bits set to 1 MUST NOT be transmitted.  As the receiver knows the Bitmap size, it can reconstruct the original Bitmap without this optimization.  In the example Figure 19, the last 2 bytes of the Bitmap shown in Figure 18 comprise comprise all bits set to 1, therefore, the last 2 bytes of the Bitmap are not sent.
+The Bitmap, when transmitted, MUST be optimized in size to reduce the resulting frame size. The right-most bytes with all Bitmap bits set to 1 MUST NOT be transmitted.  As the receiver knows the Bitmap size, it can reconstruct the original Bitmap without this optimization.  In the example {{Fig-transmittedbitmap}}, the last 2 bytes of the Bitmap shown in {{Fig-Localbitmap}} comprise all bits set to 1, therefore, the last 2 bytes of the Bitmap are not sent.
 
 In the last window, when checked bit C value is 1, it means that the received MIC matches the one computed by the receiver, and thus the Bitmap is not sent.  Otherwise, the Bitmap needs to be sent after the C bit.  Note that the introduction of a C bit may force to reduce the number of fragments in a window to allow the bitmap to fit in a frame.
 
