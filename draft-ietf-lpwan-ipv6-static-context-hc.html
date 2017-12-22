@@ -1705,13 +1705,14 @@ Lcl_Bitmap==recv_Bitmap &amp;| |   |   all missing frag sent
 |  | ~~~~~~~~~~~~~~~~~~     |  | 
 |  | set lcl_Bitmap(FCN)+-+ |  | +--+ w=next &amp; All-0
 |  | if lcl_Bitmap full | | |  | |  | ~~~~~~~~~~~~~~~
-|  | send lcl_Bitmap    v | v  | |  | expct = nxt wnd
-|  |                  +-+-+-+--+-++ | Clear lcl_Bitmap    
-|  |  w=expected &amp; +-&gt;+    Wait   +&lt;+ set lcl_Bitmap(FCN)         
-|  |      All-1    |  |    Next   |   send lcl_Bitmap
-|  |  ~~~~~~~~~~~~ +--+  Window   +---&gt;* ABORT  
-|  |    discard       +--------+-++        
-|  |             All-1 &amp; w=next| |  All-1 &amp; w=nxt
+|  | send lcl_Bitmap    | | |  | |  | expct = nxt wnd
+|  |                    v | v  v v  |
+|  |  w=expct &amp; All-1 +-+-+-+--+-++ | Clear lcl_Bitmap    
+|  |  ~~~~~~~~~~~  +-&gt;+    Wait   +&lt;+ set lcl_Bitmap(FCN)         
+|  |    discard    +--|    Next   |   send lcl_Bitmap
+|  | All-0  +---------+  Window   +---&gt;* ABORT  
+|  | ~~~~~  +--------&gt;+--------+-++        
+|  | snd lcl_bm  All-1 &amp; w=next| |  All-1 &amp; w=nxt
 |  |                &amp; MIC wrong| |  &amp; MIC right      
 |  |          ~~~~~~~~~~~~~~~~~| | ~~~~~~~~~~~~~~~~~~ 
 |  |      set local_Bitmap(FCN)| |set lcl_Bitmap(FCN)       
