@@ -1805,26 +1805,26 @@ Lcl_Bitmap==recv_Bitmap &amp;| |   |   all missing frag sent
    Not All- &amp; w=expected +---+   +---+w = Not expected
    ~~~~~~~~~~~~~~~~~~~~~ |   |   |   |~~~~~~~~~~~~~~~~ 
    Set local_Bitmap(FCN) |   v   v   |discard
-                        ++---+---+---+-+
+                        ++===+===+===+=+
 +-----------------------+              +--+ All-0 &amp; full 
 |            ABORT *&lt;---+  Rcv Window  |  | ~~~~~~~~~~~~ 
 |  +--------------------+              +&lt;-+ w =next
-|  |                    +---+---+------+ clear lcl_Bitmap
+|  |                    +===+===+======+ clear lcl_Bitmap
 |  |                        |   ^
 |  |        All-0 &amp; w=expect|   |w=expct &amp; not-All &amp; full
 |  |        &amp; no_full Bitmap|   |~~~~~~~~~~~~~~~~~~~~~~~~
 |  |       ~~~~~~~~~~~~~~~~~|   |clear lcl_Bitmap; w =nxt
 |  |       send local_Bitmap|   |
-|  |                        |   |              +--------+
+|  |                        |   |              +========+
 |  |                        |   |  +----------&gt;+        | 
 |  |                        |   |  |w=next     | Error/ |
 |  |                        |   |  |~~~~~~~~   | Abort  |
-|  |                        |   |  |Send abort ++-------+
+|  |                        |   |  |Send abort ++=======+
 |  |                        v   |  |             ^ w=expct
-|  |                      +-+---+--+------+      | &amp; all-1  
+|  |                      +=+===+==+======+      | &amp; all-1  
 |  |           ABORT *&lt;---+    Wait       +------+ ~~~~~~~
 |  |                      | Next Window   |     Send abort
-|  |                      +-------+---+---+    
+|  |                      +=======+===+===+    
 |  |  All-1 &amp; w=next &amp; MIC wrong  |   |   
 |  |  ~~~~~~~~~~~~~~~~~~~~~~~~~~  |   +----------------+
 |  |       set local_Bitmap(FCN)  |      All-1 &amp; w=next| 
@@ -1834,18 +1834,18 @@ Lcl_Bitmap==recv_Bitmap &amp;| |   |   all missing frag sent
 |  |All-1 &amp; w=expect &amp; MIC wrong  |                    |
 |  |~~~~~~~~~~~~~~~~~~~~~~~~~~~~  |                    |
 |  |set local_Bitmap(FCN)         v   +---&gt;* ABORT     |
-|  |send local_Bitmap     +-------+---+--+             |
+|  |send local_Bitmap     +=======+===+==+             |
 |  +---------------------&gt;+   Wait End   +-+           |
-|                         +-----+------+-+ | w=expct &amp; |
+|                         +=====+======+=+ | w=expct &amp; |
 |       w=expected &amp; MIC right  |      ^   | MIC wrong |
 |       ~~~~~~~~~~~~~~~~~~~~~~  |      +---+ ~~~~~~~~~ |
 |        set local_Bitmap(FCN)  |   set lcl_Bitmap(FCN)|
 |                               |                      |
 |All-1 &amp; w=expected &amp; MIC right |                      |
 |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ v                      |
-|set local_Bitmap(FCN)        +-+----------+           |
+|set local_Bitmap(FCN)        +=+==========+           |
 +----------------------------&gt;+     END    +&lt;----------+
-                              +------------+   
+                              +============+   
             ---&gt;* Only Uplink
                  ABORT
  &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; ~~~~~~~~
