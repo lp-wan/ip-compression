@@ -1431,14 +1431,16 @@ Internet-Draft                 LPWAN SCHC                  December 2017
    window are accepted, and the actual fragment number managed by the
    receiver is computed based on the FCN value.  The receiver prepares
    the Bitmap to report the correctly received and the missing fragments
-   for the current window.
+   for the current window.  After each fragment is received the receiver
+   initializes the Inactivity timer, if the Inactivity Timer expires the
+   transmission is aborted.
 
    When an All-0 fragment is received, it indicates that all the
    fragments have been sent in the current window.  Since the sender is
    not obliged to always send a full window, some fragment number not
    set in the receiver memory may not correspond to losses.  The
-   receiver sends the corresponding ACK and transmission of the next
-   window by the sender can start.
+   receiver sends the corresponding ACK, the Inactivity Timer is set and
+   the transmission of the next window by the sender can start.
 
    If an All-0 fragment has been received and all fragments of the
    current window have also been received, the receiver then expects a
@@ -1447,8 +1449,6 @@ Internet-Draft                 LPWAN SCHC                  December 2017
    are part of a retransmission.  A receiver that has already received a
    fragment should discard it, otherwise, it updates the Bitmap.  If all
    the bits of the Bitmap are set to one, the receiver may send an ACK
-   without waiting for an All-0 fragment.
-
 
 
 
@@ -1458,9 +1458,12 @@ Minaburo, et al.          Expires June 25, 2018                [Page 26]
 Internet-Draft                 LPWAN SCHC                  December 2017
 
 
+   without waiting for an All-0 fragment and the Inactivity Timer is
+   initialized.
+
    On the other hand, if the window value of the next received fragment
    is set to the next expected window value, this means that the sender
-   has received a correct bitmap reporting that all fragments have been
+   has received a correct Bitmap reporting that all fragments have been
    received.  The receiver then updates the value of the next expected
    window.
 
@@ -1476,21 +1479,21 @@ Internet-Draft                 LPWAN SCHC                  December 2017
    period to answer to any empty All-1 fragments the sender may send if
    ACKs sent by the receiver are lost.  If the MIC is incorrect, some
    fragments have been lost.  The receiver sends the ACK regardless of
-   successful fragmented packet reception or not.  In case of an
-   incorrect MIC, the receiver waits for fragments belonging to the same
-   window.  After MAX_ACK_REQUESTS, the receiver will abort the on-going
-   fragmented packet transmission.  The receiver also Aborts upon
-   Inactivity Timer expiration.
+   successful fragmented packet reception or not, the Inactitivity Timer
+   is set.  In case of an incorrect MIC, the receiver waits for
+   fragments belonging to the same window.  After MAX_ACK_REQUESTS, the
+   receiver will abort the on-going fragmented packet transmission.  The
+   receiver also Aborts upon Inactivity Timer expiration.
 
 5.5.2.2.  ACK-on-error
 
-   The ACK-on-error option is similar to ACK-Always, the main difference
+   The ACK-on-error sender is similar to ACK-Always, the main difference
    being that in ACK-on-error the ACK is not sent at the end of each
    window but only when at least one fragment of the current window has
    been lost (with the exception of the last window, see next
    paragraph).  In Ack-on-error, the Retransmission Timer expiration
-   will be considered as a positive acknowledgment.  The retransmission
-   timer is set when sending an All-0 or an All-1 fragment.  When the
+   will be considered as a positive acknowledgment.  The Retransmission
+   Timer is set when sending an All-0 or an All-1 fragment.  When the
    All-1 fragment has been sent, then the on-going fragmented packet
    transmission fragmentation is finished and the sender waits for the
    last ACK.  At the receiver side, when the All-1 fragment is sent and
@@ -1503,9 +1506,6 @@ Internet-Draft                 LPWAN SCHC                  December 2017
    If the sender receives an ACK, it checks the window value.  ACKs with
    an unexpected window number are discarded.  If the window number on
    the received Bitmap is correct, the sender verifies if the receiver
-   has received all fragments of the current window.  When at least one
-   fragment has been lost, the counter Attempts is increased by one and
-   the sender resends the missing fragments again.  When Attempts
 
 
 
@@ -1514,6 +1514,9 @@ Minaburo, et al.          Expires June 25, 2018                [Page 27]
 Internet-Draft                 LPWAN SCHC                  December 2017
 
 
+   has received all fragments of the current window.  When at least one
+   fragment has been lost, the counter Attempts is increased by one and
+   the sender resends the missing fragments again.  When Attempts
    reaches MAX_ACK_REQUESTS, the sender sends an Abort message and
    releases all resources for the on-going fragmented packet
    transmission.  When the retransmission of missing fragments is
@@ -1547,20 +1550,17 @@ Internet-Draft                 LPWAN SCHC                  December 2017
    the sender is not obligated to send a full window, a fragment number
    not used may not necessarily correspond to losses.  As the receiver
    does not know if the missing fragments are lost or not, it sends an
-   ACK.
+   ACK and reinitialises the Inactivity Timer.
 
    On the other hand, after receiving an All-0 fragment, the receiver
-   expects a new window and waits for the next fragment.  If the window
-   value of the next fragment has not changed, the received fragment is
-   a retransmission.  A receiver that has already received a fragment
-   should discard it.  If all fragments of a window (that is not the
-   last one) have been received, the receiver does not send an ACK.
-   While the receiver waits for the next window and if the window value
-   is set to the next value, and if an All-1 fragment with the next
-   value window arrived the receiver aborts the on-going fragmented
-   packet transmission, and it drops the fragments of the aborted packet
-   transmission.
-
+   expects a new window and waits for the next fragment.
+   If the window value of the next fragment has not changed, the
+   received fragment is a retransmission.  A receiver that has already
+   received a fragment should discard it.  If all fragments of a window
+   (that is not the last one) have been received, the receiver does not
+   send an ACK.  While the receiver waits for the next window and if the
+   window value is set to the next value, and if an All-1 fragment with
+   the next value window arrived the receiver aborts the on-going
 
 
 
@@ -1570,10 +1570,13 @@ Minaburo, et al.          Expires June 25, 2018                [Page 28]
 Internet-Draft                 LPWAN SCHC                  December 2017
 
 
+   fragmented packet transmission, and it drops the fragments of the
+   aborted packet transmission.
+
    If the receiver receives an All-1 fragment, this means that the
    transmission should be finished.  If the MIC is incorrect some
    fragments have been lost.  Regardless of fragment losses, the
-   receiver sends an ACK.
+   receiver sends an ACK and initializes the Inactivity Timer.
 
    Reception of an All-1 fragment indicates the last fragment of the
    packet has been sent.  Since the last window is not always full, the
@@ -1614,10 +1617,7 @@ Internet-Draft                 LPWAN SCHC                  December 2017
    Figure 18 comprise all bits set to 1, therefore, the last 2 bytes of
    the Bitmap are not sent.
 
-   In the last window, when checked bit C value is 1, it means that the
-   received MIC matches the one computed by the receiver, and thus the
-   Bitmap is not sent.  Otherwise, the Bitmap needs to be sent after the
-   C bit.  Note that the introduction of a C bit may force to reduce the
+
 
 
 
@@ -1626,6 +1626,10 @@ Minaburo, et al.          Expires June 25, 2018                [Page 29]
 Internet-Draft                 LPWAN SCHC                  December 2017
 
 
+   In the last window, when checked bit C value is 1, it means that the
+   received MIC matches the one computed by the receiver, and thus the
+   Bitmap is not sent.  Otherwise, the Bitmap needs to be sent after the
+   C bit.  Note that the introduction of a C bit may force to reduce the
    number of fragments in a window to allow the bitmap to fit in a
    frame.
 
@@ -1661,10 +1665,6 @@ Internet-Draft                 LPWAN SCHC                  December 2017
    Figure 21 shows an example of an ACK (for N=3), where the Bitmap
    indicates that the MIC check has failed but there are no missing
    fragments.
-
-
-
-
 
 
 
