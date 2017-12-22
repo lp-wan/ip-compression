@@ -1444,10 +1444,10 @@ This section provides examples of different fragment delivery reliability option
           |-----W=0, FCN=5----->|
           |-----W=0, FCN=4--X-->|
           |-----W=0, FCN=3----->|
-          |-----W=0, FCN=2--X-->|
-          |-----W=0, FCN=1----->|
-          |-----W=0, FCN=0----->|
-          |<-----ACK, W=0-------|Bitmap:11010111
+          |-----W=0, FCN=2--X-->|             7
+          |-----W=0, FCN=1----->|             /
+          |-----W=0, FCN=0----->|       6543210
+          |<-----ACK, W=0-------|Bitmap:1101011
           |-----W=0, FCN=4----->|
           |-----W=0, FCN=2----->|   
       (no ACK)     
@@ -1455,7 +1455,7 @@ This section provides examples of different fragment delivery reliability option
           |-----W=1, FCN=5----->|
           |-----W=1, FCN=4--X-->|
           |-----W=1, FCN=7----->|MIC checked
-          |<-----ACK, W=1-------|Bitmap:11000001
+          |<-----ACK, W=1-------|C=0 Bitmap:1100001
           |-----W=1, FCN=4----->|MIC checked =>
           |<---- ACK, W=1 ------|    
 
@@ -1473,12 +1473,12 @@ This section provides examples of different fragment delivery reliability option
           |-----W=0, FCN=2----->|
           |-----W=0, FCN=1----->|
           |-----W=0, FCN=0----->|
-          |<-----ACK, W=0-------|no Bitmap
+          |<-----ACK, W=0-------| Bitmap:1111111
           |-----W=1, FCN=6----->|
           |-----W=1, FCN=5----->|   
           |-----W=1, FCN=4----->|
           |-----W=1, FCN=7----->|MIC checked =>
-          |<-----ACK, W=1-------|no Bitmap
+          |<-----ACK, W=1-------| C=1 no Bitmap
         (End)    
 
 ~~~~
@@ -1492,20 +1492,20 @@ This section provides examples of different fragment delivery reliability option
           |-----W=1, FCN=5----->|
           |-----W=1, FCN=4--X-->|
           |-----W=1, FCN=3----->|
-          |-----W=1, FCN=2--X-->|
-          |-----W=1, FCN=1----->|
-          |-----W=1, FCN=0----->|
-          |<-----ACK, W=1-------|Bitmap:11010111
+          |-----W=1, FCN=2--X-->|             7
+          |-----W=1, FCN=1----->|             /
+          |-----W=1, FCN=0----->|       6543210
+          |<-----ACK, W=1-------|Bitmap:1101011
           |-----W=1, FCN=4----->|
           |-----W=1, FCN=2----->|
-          |<-----ACK, W=1-------|no Bitmap
+          |<-----ACK, W=1-------|Bitmap:
           |-----W=0, FCN=6----->|
           |-----W=0, FCN=5----->|   
           |-----W=0, FCN=4--X-->|
           |-----W=0, FCN=7----->|MIC checked
-          |<-----ACK, W=0-------|Bitmap:11000001
+          |<-----ACK, W=0-------| C= 0 Bitmap:11000001
           |-----W=0, FCN=4----->|MIC checked =>
-          |<-----ACK, W=0-------|no Bitmap
+          |<-----ACK, W=0-------| C= 1 no Bitmap
         (End)    
 
 ~~~~
@@ -1520,12 +1520,12 @@ This section provides examples of different fragment delivery reliability option
              |-----W=0, CFN=4--X-->|
              |-----W=0, CFN=3--X-->|
              |-----W=0, CFN=2--X-->|
-             |-----W=0, CFN=7----->|MIC checked
-             |<-----ACK, W=0-------|Bitmap:11000001
+             |-----W=0, CFN=7----->|MIC checked 
+             |<-----ACK, W=0-------|C= 0 Bitmap:1100001
              |-----W=0, CFN=4----->|MIC checked: failed
              |-----W=0, CFN=3----->|MIC checked: failed
              |-----W=0, CFN=2----->|MIC checked: success
-             |<-----ACK, W=0-------|no Bitmap
+             |<-----ACK, W=0-------|C=1 no Bitmap
            (End) 
 ~~~~
 {: #Fig-Example-Rel-Window-ACK-Loss-Last-A title='Transmission of an IPv6 packet carried by 11 fragments in ACK-Always, for N=3, and MAX_WIND_FCN=6, with three losses, and only one retry is needed for each lost fragment.'}
@@ -1539,15 +1539,15 @@ This section provides examples of different fragment delivery reliability option
              |-----W=0, CFN=4--X-->|
              |-----W=0, CFN=3--X-->|
              |-----W=0, CFN=2--X-->|
-             |-----W=0, CFN=7----->|MIC checked
-             |<-----ACK, W=0-------|Bitmap:11000001
+             |-----W=0, CFN=7----->|MIC checked 
+             |<-----ACK, W=0-------|C=0  Bitmap:1100001
              |-----W=0, CFN=4----->|MIC checked: wrong
              |-----W=0, CFN=3----->|MIC checked: wrong
              |-----W=0, CFN=2----->|MIC checked: right
-             |  X---ACK, W=0-------|no Bitmap
+             |  X---ACK, W=0-------|C= 1 no Bitmap
     timeout  |                     |
              |-----W=0, CFN=7----->|
-             |<-----ACK, W=0-------|no Bitmap  
+             |<-----ACK, W=0-------|C= 1 no Bitmap  
 
            (End) 
 ~~~~
@@ -1562,16 +1562,16 @@ This section provides examples of different fragment delivery reliability option
              |-----W=0, CFN=4--X-->|
              |-----W=0, CFN=3--X-->|
              |-----W=0, CFN=2--X-->|
-             |-----W=0, CFN=7----->|MIC checked
-             |<-----ACK, W=0-------|Bitmap:11000001
+             |-----W=0, CFN=7----->|MIC checked  
+             |<-----ACK, W=0-------|C=0   Bitmap:1100001
              |-----W=0, CFN=4----->|MIC checked: wrong
              |-----W=0, CFN=3----->|MIC checked: wrong
              |-----W=0, CFN=2--X-->| 
       timeout|                     |
-             |-----W=0, CFN=7----->|All-0 empty
-             |<-----ACK, W=0-------|Bitmap:11110001
+             |-----W=0, CFN=7----->|All-0 empty 
+             |<-----ACK, W=0-------|C=0 Bitmap: 1111101
              |-----W=0, CFN=2----->|MIC checked: right
-             |<-----ACK, W=0-------|no Bitmap
+             |<-----ACK, W=0-------|C=1 no Bitmap
            (End) 
 ~~~~
 {: #Fig-Example-Rel-Window-ACK-Loss-Last-C title='Transmission of an IPv6 packet carried by 11 fragments in ACK-Always, for N=3, and MAX_WIND_FCN=6, with three losses, and one retransmitted fragment is lost.'}
