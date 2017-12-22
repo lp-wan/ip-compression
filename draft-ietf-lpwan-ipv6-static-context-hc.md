@@ -1257,8 +1257,9 @@ In Window mode – ACK on error, a malicious node may force a fragment sender to
 
 # Acknowledgements
 
-Thanks to Dominique Barthel, Carsten Bormann, Philippe Clavier, Arunprabhu Kandasamy, Antony Markovski, Alexander
-Pelov, Pascal Thubert, Juan Carlos Zuniga and Diego Dujovne for useful design consideration and comments. 
+Thanks to Dominique Barthel, Carsten Bormann, Philippe Clavier, Eduardo Ingles Sanchez, Arunprabhu Kandasamy, 
+Sergio Lopez Bernal, Antony Markovski, Alexander Pelov, Pascal Thubert, Juan Carlos Zuniga and Diego Dujovne for 
+useful design consideration and comments. 
 
 --- back
 
@@ -1852,27 +1853,27 @@ Lcl_Bitmap==recv_Bitmap &| |   |   all missing frag sent
 |  |                        |   |  |~~~~~~~~   | Abort  |
 |  |                        |   |  |Send abort ++=======+
 |  |                        v   |  |             ^ w=expct
-|  |                      +=+===+==+======+      | & all-1  
-|  |           ABORT *<---+    Wait       +------+ ~~~~~~~
-|  |                      | Next Window   |     Send abort
-|  |                      +=======+===+===+    
-|  |  All-1 & w=next & MIC wrong  |   |   
+|  |            All-0     +=+===+==+======+      | & all-1  
+|  |     ~~~~~~~~~~~~~<---+    Wait       +------+ ~~~~~~~
+|  |     send lcl_btmp    | Next Window   |     Send abort
+|  |                      +=======+===+==++    
+|  |  All-1 & w=next & MIC wrong  |   |  +---->* ABORT  
 |  |  ~~~~~~~~~~~~~~~~~~~~~~~~~~  |   +----------------+
 |  |       set local_Bitmap(FCN)  |      All-1 & w=next| 
 |  |       send local_Bitmap      |         & MIC right|
 |  |                              |  ~~~~~~~~~~~~~~~~~~|
 |  |                              | set lcl_Bitmap(FCN)|                                    
 |  |All-1 & w=expect & MIC wrong  |                    |
-|  |~~~~~~~~~~~~~~~~~~~~~~~~~~~~  |                    |
-|  |set local_Bitmap(FCN)         v   +--->* ABORT     |
-|  |send local_Bitmap     +=======+===+==+             |
+|  |~~~~~~~~~~~~~~~~~~~~~~~~~~~~  |   +-+  All-1            |
+|  |set local_Bitmap(FCN)         v   | v  ~~~~~~~~~~  |
+|  |send local_Bitmap     +=======+==+===+ snd lcl_btmp|
 |  +--------------------->+   Wait End   +-+           |
-|                         +=====+======+=+ | w=expct & |
-|       w=expected & MIC right  |      ^   | MIC wrong |
-|       ~~~~~~~~~~~~~~~~~~~~~~  |      +---+ ~~~~~~~~~ |
-|        set local_Bitmap(FCN)  |   set lcl_Bitmap(FCN)|
-|                               |                      |
-|All-1 & w=expected & MIC right |                      |
+|                         +=====+=+===+=+ | w=expct &  |
+|       w=expected & MIC right  | |    ^   | MIC wrong |
+|       ~~~~~~~~~~~~~~~~~~~~~~  | |    +---+ ~~~~~~~~~ |
+|        set local_Bitmap(FCN)  | | set lcl_Bitmap(FCN)|
+|                               | |                    |
+|All-1 & w=expected & MIC right | +-->* ABORT          |
 |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ v                      |
 |set local_Bitmap(FCN)        +=+==========+           |
 +---------------------------->+     END    +<----------+
