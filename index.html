@@ -1230,7 +1230,7 @@ address {
 <h1 id="rfc.section.9">
 <a href="#rfc.section.9">9.</a> <a href="#acknowledgements" id="acknowledgements">Acknowledgements</a>
 </h1>
-<p id="rfc.section.9.p.1">Thanks to Dominique Barthel, Carsten Bormann, Philippe Clavier, Arunprabhu Kandasamy, Antony Markovski, Alexander Pelov, Pascal Thubert, Juan Carlos Zuniga and Diego Dujovne for useful design consideration and comments.</p>
+<p id="rfc.section.9.p.1">Thanks to Dominique Barthel, Carsten Bormann, Philippe Clavier, Eduardo Ingles Sanchez, Arunprabhu Kandasamy, Sergio Lopez Bernal, Antony Markovski, Alexander Pelov, Pascal Thubert, Juan Carlos Zuniga and Diego Dujovne for useful design consideration and comments.</p>
 <h1 id="rfc.references">
 <a href="#rfc.references">10.</a> References</h1>
 <h1 id="rfc.references.1">
@@ -1821,27 +1821,27 @@ Lcl_Bitmap==recv_Bitmap &amp;| |   |   all missing frag sent
 |  |                        |   |  |~~~~~~~~   | Abort  |
 |  |                        |   |  |Send abort ++=======+
 |  |                        v   |  |             ^ w=expct
-|  |                      +=+===+==+======+      | &amp; all-1  
-|  |           ABORT *&lt;---+    Wait       +------+ ~~~~~~~
-|  |                      | Next Window   |     Send abort
-|  |                      +=======+===+===+    
-|  |  All-1 &amp; w=next &amp; MIC wrong  |   |   
+|  |            All-0     +=+===+==+======+      | &amp; all-1  
+|  |     ~~~~~~~~~~~~~&lt;---+    Wait       +------+ ~~~~~~~
+|  |     send lcl_btmp    | Next Window   |     Send abort
+|  |                      +=======+===+==++    
+|  |  All-1 &amp; w=next &amp; MIC wrong  |   |  +----&gt;* ABORT  
 |  |  ~~~~~~~~~~~~~~~~~~~~~~~~~~  |   +----------------+
 |  |       set local_Bitmap(FCN)  |      All-1 &amp; w=next| 
 |  |       send local_Bitmap      |         &amp; MIC right|
 |  |                              |  ~~~~~~~~~~~~~~~~~~|
 |  |                              | set lcl_Bitmap(FCN)|                                    
 |  |All-1 &amp; w=expect &amp; MIC wrong  |                    |
-|  |~~~~~~~~~~~~~~~~~~~~~~~~~~~~  |                    |
-|  |set local_Bitmap(FCN)         v   +---&gt;* ABORT     |
-|  |send local_Bitmap     +=======+===+==+             |
+|  |~~~~~~~~~~~~~~~~~~~~~~~~~~~~  |   +-+  All-1            |
+|  |set local_Bitmap(FCN)         v   | v  ~~~~~~~~~~  |
+|  |send local_Bitmap     +=======+==+===+ snd lcl_btmp|
 |  +---------------------&gt;+   Wait End   +-+           |
-|                         +=====+======+=+ | w=expct &amp; |
-|       w=expected &amp; MIC right  |      ^   | MIC wrong |
-|       ~~~~~~~~~~~~~~~~~~~~~~  |      +---+ ~~~~~~~~~ |
-|        set local_Bitmap(FCN)  |   set lcl_Bitmap(FCN)|
-|                               |                      |
-|All-1 &amp; w=expected &amp; MIC right |                      |
+|                         +=====+=+===+=+ | w=expct &amp;  |
+|       w=expected &amp; MIC right  | |    ^   | MIC wrong |
+|       ~~~~~~~~~~~~~~~~~~~~~~  | |    +---+ ~~~~~~~~~ |
+|        set local_Bitmap(FCN)  | | set lcl_Bitmap(FCN)|
+|                               | |                    |
+|All-1 &amp; w=expected &amp; MIC right | +--&gt;* ABORT          |
 |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ v                      |
 |set local_Bitmap(FCN)        +=+==========+           |
 +----------------------------&gt;+     END    +&lt;----------+
