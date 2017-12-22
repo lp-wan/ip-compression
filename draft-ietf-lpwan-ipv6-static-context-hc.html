@@ -1423,10 +1423,10 @@ Rule 0
           |-----W=0, FCN=5-----&gt;|
           |-----W=0, FCN=4--X--&gt;|
           |-----W=0, FCN=3-----&gt;|
-          |-----W=0, FCN=2--X--&gt;|
-          |-----W=0, FCN=1-----&gt;|
-          |-----W=0, FCN=0-----&gt;|
-          |&lt;-----ACK, W=0-------|Bitmap:11010111
+          |-----W=0, FCN=2--X--&gt;|             7
+          |-----W=0, FCN=1-----&gt;|             /
+          |-----W=0, FCN=0-----&gt;|       6543210
+          |&lt;-----ACK, W=0-------|Bitmap:1101011
           |-----W=0, FCN=4-----&gt;|
           |-----W=0, FCN=2-----&gt;|   
       (no ACK)     
@@ -1434,7 +1434,7 @@ Rule 0
           |-----W=1, FCN=5-----&gt;|
           |-----W=1, FCN=4--X--&gt;|
           |-----W=1, FCN=7-----&gt;|MIC checked
-          |&lt;-----ACK, W=1-------|Bitmap:11000001
+          |&lt;-----ACK, W=1-------|C=0 Bitmap:1100001
           |-----W=1, FCN=4-----&gt;|MIC checked =&gt;
           |&lt;---- ACK, W=1 ------|    
 
@@ -1452,12 +1452,12 @@ Rule 0
           |-----W=0, FCN=2-----&gt;|
           |-----W=0, FCN=1-----&gt;|
           |-----W=0, FCN=0-----&gt;|
-          |&lt;-----ACK, W=0-------|no Bitmap
+          |&lt;-----ACK, W=0-------| Bitmap:1111111
           |-----W=1, FCN=6-----&gt;|
           |-----W=1, FCN=5-----&gt;|   
           |-----W=1, FCN=4-----&gt;|
           |-----W=1, FCN=7-----&gt;|MIC checked =&gt;
-          |&lt;-----ACK, W=1-------|no Bitmap
+          |&lt;-----ACK, W=1-------| C=1 no Bitmap
         (End)    
 
 </pre>
@@ -1471,20 +1471,20 @@ Rule 0
           |-----W=1, FCN=5-----&gt;|
           |-----W=1, FCN=4--X--&gt;|
           |-----W=1, FCN=3-----&gt;|
-          |-----W=1, FCN=2--X--&gt;|
-          |-----W=1, FCN=1-----&gt;|
-          |-----W=1, FCN=0-----&gt;|
-          |&lt;-----ACK, W=1-------|Bitmap:11010111
+          |-----W=1, FCN=2--X--&gt;|             7
+          |-----W=1, FCN=1-----&gt;|             /
+          |-----W=1, FCN=0-----&gt;|       6543210
+          |&lt;-----ACK, W=1-------|Bitmap:1101011
           |-----W=1, FCN=4-----&gt;|
           |-----W=1, FCN=2-----&gt;|
-          |&lt;-----ACK, W=1-------|no Bitmap
+          |&lt;-----ACK, W=1-------|Bitmap:
           |-----W=0, FCN=6-----&gt;|
           |-----W=0, FCN=5-----&gt;|   
           |-----W=0, FCN=4--X--&gt;|
           |-----W=0, FCN=7-----&gt;|MIC checked
-          |&lt;-----ACK, W=0-------|Bitmap:11000001
+          |&lt;-----ACK, W=0-------| C= 0 Bitmap:11000001
           |-----W=0, FCN=4-----&gt;|MIC checked =&gt;
-          |&lt;-----ACK, W=0-------|no Bitmap
+          |&lt;-----ACK, W=0-------| C= 1 no Bitmap
         (End)    
 
 </pre>
@@ -1499,12 +1499,12 @@ Rule 0
              |-----W=0, CFN=4--X--&gt;|
              |-----W=0, CFN=3--X--&gt;|
              |-----W=0, CFN=2--X--&gt;|
-             |-----W=0, CFN=7-----&gt;|MIC checked
-             |&lt;-----ACK, W=0-------|Bitmap:11000001
+             |-----W=0, CFN=7-----&gt;|MIC checked 
+             |&lt;-----ACK, W=0-------|C= 0 Bitmap:1100001
              |-----W=0, CFN=4-----&gt;|MIC checked: failed
              |-----W=0, CFN=3-----&gt;|MIC checked: failed
              |-----W=0, CFN=2-----&gt;|MIC checked: success
-             |&lt;-----ACK, W=0-------|no Bitmap
+             |&lt;-----ACK, W=0-------|C=1 no Bitmap
            (End) 
 </pre>
 <p class="figure">Figure 29: Transmission of an IPv6 packet carried by 11 fragments in ACK-Always, for N=3, and MAX_WIND_FCN=6, with three losses, and only one retry is needed for each lost fragment.</p>
@@ -1518,15 +1518,15 @@ Rule 0
              |-----W=0, CFN=4--X--&gt;|
              |-----W=0, CFN=3--X--&gt;|
              |-----W=0, CFN=2--X--&gt;|
-             |-----W=0, CFN=7-----&gt;|MIC checked
-             |&lt;-----ACK, W=0-------|Bitmap:11000001
+             |-----W=0, CFN=7-----&gt;|MIC checked 
+             |&lt;-----ACK, W=0-------|C=0  Bitmap:1100001
              |-----W=0, CFN=4-----&gt;|MIC checked: wrong
              |-----W=0, CFN=3-----&gt;|MIC checked: wrong
              |-----W=0, CFN=2-----&gt;|MIC checked: right
-             |  X---ACK, W=0-------|no Bitmap
+             |  X---ACK, W=0-------|C= 1 no Bitmap
     timeout  |                     |
              |-----W=0, CFN=7-----&gt;|
-             |&lt;-----ACK, W=0-------|no Bitmap  
+             |&lt;-----ACK, W=0-------|C= 1 no Bitmap  
 
            (End) 
 </pre>
@@ -1541,16 +1541,16 @@ Rule 0
              |-----W=0, CFN=4--X--&gt;|
              |-----W=0, CFN=3--X--&gt;|
              |-----W=0, CFN=2--X--&gt;|
-             |-----W=0, CFN=7-----&gt;|MIC checked
-             |&lt;-----ACK, W=0-------|Bitmap:11000001
+             |-----W=0, CFN=7-----&gt;|MIC checked  
+             |&lt;-----ACK, W=0-------|C=0   Bitmap:1100001
              |-----W=0, CFN=4-----&gt;|MIC checked: wrong
              |-----W=0, CFN=3-----&gt;|MIC checked: wrong
              |-----W=0, CFN=2--X--&gt;| 
       timeout|                     |
-             |-----W=0, CFN=7-----&gt;|All-0 empty
-             |&lt;-----ACK, W=0-------|Bitmap:11110001
+             |-----W=0, CFN=7-----&gt;|All-0 empty 
+             |&lt;-----ACK, W=0-------|C=0 Bitmap: 1111101
              |-----W=0, CFN=2-----&gt;|MIC checked: right
-             |&lt;-----ACK, W=0-------|no Bitmap
+             |&lt;-----ACK, W=0-------|C=1 no Bitmap
            (End) 
 </pre>
 <p class="figure">Figure 31: Transmission of an IPv6 packet carried by 11 fragments in ACK-Always, for N=3, and MAX_WIND_FCN=6, with three losses, and one retransmitted fragment is lost.</p>
