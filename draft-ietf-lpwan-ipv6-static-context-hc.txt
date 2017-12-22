@@ -2835,8 +2835,10 @@ Internet-Draft                 LPWAN SCHC                  December 2017
    |  |set local_Bitmap(FCN) |          +<+ ~~~~~~~~~~~~~~ |
    |  |send local_Bitmap     | Wait End | set lcl_btmp(FCN)|
    |  +--------------------->+          +--->* ABORT       |
-   |                         +---+----+-+                  |
-   |       w=expected & MIC right|                         |
+   |                         +---+----+-+-+ All-1&MIC wrong|
+   |                             |    ^   | ~~~~~~~~~~~~~~~|
+   |                             |    +---+ send lcl_btmp  |
+   |       w=expected & MIC right|         |               |
    |       ~~~~~~~~~~~~~~~~~~~~~~| +-+ Not All-1           |
    |        set local_Bitmap(FCN)| | | ~~~~~~~~~           |
    |            send local_Bitmap| | |  discard            |
@@ -2848,8 +2850,6 @@ Internet-Draft                 LPWAN SCHC                  December 2017
    +-------------------------->+    END   +<---------------+
                                ++--+------+
           --->* ABORT
-               ~~~~~~~
-               Inactivity_Timer = expires
 
 
 
@@ -2858,6 +2858,8 @@ Minaburo, et al.          Expires June 25, 2018                [Page 51]
 Internet-Draft                 LPWAN SCHC                  December 2017
 
 
+               ~~~~~~~
+               Inactivity_Timer = expires
            When DWN_Link
              IF Inactivity_Timer expires
                 Send DWL Request
@@ -2865,8 +2867,6 @@ Internet-Draft                 LPWAN SCHC                  December 2017
 
 
          Figure 35: Receiver State Machine for the ACK Always Mode
-
-
 
 
 
