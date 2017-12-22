@@ -541,9 +541,10 @@ In the ACK format, DTag carries the same value as the DTag field in the fragment
  
 *  Inactivity Timer. This timer is used by a fragment receiver to detect when there is a problem in the transmission of fragments and the receiver does not get any fragment during a period of time or a number of packets in a period of time. When this happens, an Abort message needs to be sent. Initially, and each time a fragment is received the timer is reinitialized. The duration of this timer is not defined in this document and must be defined in the specific technology document (e.g. technology-specific profiles).
  
-*  Attempts. It is a counter used to request a missing ACK, and in consequence to determine when an Abort is needed, because there are recurrent fragment transmission errors, whose maximum value is MAX_ACK_REQUESTS. The default value of MAX_ACK_REQUESTS is not
-   stated in this document, and it is expected to be defined in other
-   documents (e.g. technology-specific profiles).
+*  Attempts. It is a counter used to request a missing ACK, and in consequence to determine when an Abort is needed, 
+because there are recurrent fragment transmission errors, whose maximum value is MAX_ACK_REQUESTS. The default value of 
+MAX_ACK_REQUESTS is not stated in this document, and it is expected to be defined in other documents (e.g. technology-
+specific profiles). The Attempts counter is defined per window, it will be initialized each time a new window is used.
 
 *  Bitmap. The Bitmap is a sequence of bits carried in an ACK for a given window. Each bit in the Bitmap corresponds to a 
 fragment of the current window, and provides feedback on whether the fragment has been received or not. The right-most 
@@ -554,8 +555,7 @@ fragment has been correctly sent and received. However, the sending format of th
 boundary where the last error is given. However, when all the Bitmap is transmitted, it may be truncated, see more details 
 in {{Bitmapopt}}
 
-*  Abort. In case of error or when the Inactivity timer expires or MAX_ACK_REQUESTS is reached the sender or the receiver may use       the Abort frames.  When the receiver needs to abort the on-going fragmented packet transmission, it uses the ACK Abort format      packet with all the bits set to 1.  The sender will use the All-1 Abort format to trigger the end of the on-going fragmented packet 
-transmission.
+*  Abort. In case of error or when the Inactivity timer expires or MAX_ACK_REQUESTS is reached the sender or the receiver may use the Abort frames.  When the receiver needs to abort the on-going fragmented packet transmission, it uses the ACK Abort format packet with all the bits set to 1. When the sender needs to abort the transmission it will use the All-1 Abort format, this fragment is not acked.
 
 *  Padding (P). Padding will be used to align the last byte of a fragment with a byte boundary. The number of bits used for padding is not defined and depends on the size of the Rule ID, DTag and FCN fields, and on the layer two payload size. 
 
@@ -666,12 +666,11 @@ In any of the Window mode options, fragments except the last one SHALL contain t
 The format of an ACK that acknowledges a window that is not the last one (denoted as ALL-0 window) is shown in {{Fig-ACK-Format}}.
 
 ~~~~
-
-                <--------  R  ------->
-                            <- T -> 1  
-                +---- ... --+-... -+-+----- ... ---+
-                |  Rule ID  | DTag |W|   Bitmap    | (no payload)
-                +---- ... --+-... -+-+----- ... ---+
+  <--------  R  ------->
+              <- T -> 1  
+  +---- ... --+-... -+-+----- ... ---+
+  |  Rule ID  | DTag |W|   Bitmap    | (no payload)
+  +---- ... --+-... -+-+----- ... ---+
                 
 ~~~~
 {: #Fig-ACK-Format title='ACK format for All-0 windows'}
@@ -680,16 +679,15 @@ To acknowledge the last window of a packet (denoted as All-1 window), a C bit (i
 to 1 to indicate that the MIC check computed by the receiver matches the MIC present in the All-1 fragment. If the MIC check fails, the C bit is set to 0 and the Bitmap for the All-1 window follows.
 
 ~~~~
-
-    <--------  R  ------->  <- byte boundary ->
-                <- T -> 1 1
-    +---- ... --+-... -+-+-+
-    |  Rule ID  | DTag |W|1| (MIC correct)
-    +---- ... --+-... -+-+-+
+<--------  R  ------->  <- byte boundary ->
+            <- T -> 1 1
++---- ... --+-... -+-+-+
+|  Rule ID  | DTag |W|1| (MIC correct)
++---- ... --+-... -+-+-+
                 
-    +---- ... --+-... -+-+-+------- ... -------+
-    |  Rule ID  | DTag |W|0|      Bitmap       | (MIC Incorrect)
-    +---- ... --+-... -+-+-+------- ... -------+
++---- ... --+-... -+-+-+------- ... -------+
+|  Rule ID  | DTag |W|0|      Bitmap       | (MIC Incorrect)
++---- ... --+-... -+-+-+------- ... -------+
                           C
                 
 ~~~~
@@ -701,7 +699,6 @@ to 1 to indicate that the MIC check computed by the receiver matches the MIC pre
 The All-0 format is used for the last fragment of a window that is not the last window of the packet.
 
 ~~~~
-
      <------------ R ------------>
                 <- T -> 1 <- N -> 
      +-- ... --+- ... -+-+- ... -+--- ... ---+
@@ -826,7 +823,7 @@ In Window modes, a jumping window protocol uses two windows alternatively, ident
 The Window mode offers two different reliability option modes: ACK-on-error and ACK-always.
 
 #### ACK-Always
-In ACK-Always, the sender sends fragments by using the two-window jumping window procedure. A delay between each fragment can be added to respect regulation rules or constraints imposed by the applications.  Each time a fragment is sent, the FCN is decreased by one.  When the FCN reaches value 0 and there are more fragments to be sent, an All-0 fragment is sent and the Retransmission Timer is set.  The sender waits for an ACK to know if transmission errors have occurred.  Then, the receiver sends an ACK reporting whether any fragments have been lost or not by setting the corresponding bits in the Bitmap, otherwise, an ACK without Bitmap will be sent, allowing transmission of a new window.  When the last fragment of the packet is sent, an All-1 fragment (which includes a MIC) is used.  In that case, the sender sets the Retransmission Timer to wait for the ACK corresponding to the last window. During this period, the sender starts listening to the radio and starts the Retransmission Timer, which needs to be dimensioned based on the received window available for the LPWAN technology in use.  If the Retransmission Timer expires, an empty All-0 (or an empty All-1 if the last fragment 
+In ACK-Always, the sender sends fragments by using the two-jumping window procedure. A delay between each fragment can be added to respect regulation rules or constraints imposed by the applications.  Each time a fragment is sent, the FCN is decreased by one.  When the FCN reaches value 0 and there are more fragments to be sent, an All-0 fragment is sent and the Retransmission Timer is set.  The sender waits for an ACK to know if transmission errors have occurred.  Then, the receiver sends an ACK reporting whether any fragments have been lost or not by setting the corresponding bits in the Bitmap, otherwise, an ACK without Bitmap will be sent, allowing transmission of a new window.  When the last fragment of the packet is sent, an All-1 fragment (which includes a MIC) is used.  In that case, the sender sets the Retransmission Timer to wait for the ACK corresponding to the last window. During this period, the sender starts listening to the radio and starts the Retransmission Timer, which needs to be dimensioned based on the received window available for the LPWAN technology in use.  If the Retransmission Timer expires, an empty All-0 (or an empty All-1 if the last fragment 
 has been sent) fragment is sent to ask the receiver to resend its ACK. The window number is not changed.
 
 When the sender receives an ACK, it checks the W bit carried by the ACK.  Any ACK carrying an unexpected W bit is discarded.  If the W bit value of the received ACK is correct, the sender analyzes the received Bitmap.  If all the fragments sent during the window have been well received, and if at least one more fragment needs to be sent, the sender moves its sending window to the next window value and sends the next fragments.  If no more fragments have to be sent, then the fragmented packet transmission is finished.
@@ -876,7 +873,7 @@ Note that the ACK sent in response to an All-1 fragment includes the C bit. Ther
 
 ~~~~                                                  
                       <----       Bitmap bits      ---->   
-| Rule ID | DTag |W|C|0|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|0|   
+| Rule ID | DTag |W|C|0|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|   
 |--- byte boundary ----| 1 byte  next  |  1 byte next  |   
       
 ~~~~
