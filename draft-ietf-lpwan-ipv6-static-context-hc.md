@@ -1753,8 +1753,10 @@ Lcl_Bitmap==recv_Bitmap &| |   |   all missing frag sent
 |  |set local_Bitmap(FCN) |          +<+ ~~~~~~~~~~~~~~ |
 |  |send local_Bitmap     | Wait End | set lcl_btmp(FCN)|
 |  +--------------------->+          +--->* ABORT       |
-|                         +---+----+-+                  |
-|       w=expected & MIC right|                         |
+|                         +---+----+-+-+ All-1&MIC wrong|
+|                             |    ^   | ~~~~~~~~~~~~~~~|
+|                             |    +---+ send lcl_btmp  |                
+|       w=expected & MIC right|         |               |
 |       ~~~~~~~~~~~~~~~~~~~~~~| +-+ Not All-1           |
 |        set local_Bitmap(FCN)| | | ~~~~~~~~~           |
 |            send local_Bitmap| | |  discard            |
