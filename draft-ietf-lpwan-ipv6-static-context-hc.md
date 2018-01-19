@@ -241,12 +241,12 @@ The SCHC C/D process is symmetrical, therefore the same description applies to t
 
 ## SCHC Rules
 
-The main idea of the SCHC compression scheme is to send the Rule id to the other end instead 
-of sending known field values. This Rule id identifies a rule that matches as much as possible the original 
-packet values. When a value is known by both
+The main idea of the SCHC compression scheme is to send the Rule ID to the other end instead
+of sending known header field values. This Rule ID identifies a rule that matches as much as possible the original
+packet header values. When a value is known by both
 ends, it is not necessary to send it through the LPWAN network. 
 
-The context contains a list of rules (cf. {{Fig-ctxt}}). Each Rule contains itself a list of fields descriptions composed of a field identifier (FID), a field length (FL), a field position (FP), a direction indicator (DI), a target value (TV), a matching operator (MO) and a Compression/Decompression Action (CDA).
+The context contains a list of rules (cf. {{Fig-ctxt}}). Each Rule itself contains a list of Field Description. Each Field Description is composed of a field identifier (FID), a field length (FL), a field position (FP), a direction indicator (DI), a target value (TV), a matching operator (MO) and a Compression/Decompression Action (CDA).
 
 
 ~~~~
@@ -271,42 +271,42 @@ The context contains a list of rules (cf. {{Fig-ctxt}}). Each Rule contains itse
 {: #Fig-ctxt title='Compression/Decompression Context'}
 
 
-The Rule does not describe the original packet format which
-must be known from the compressor/decompressor. The rule just describes the
-compression/decompression behavior for the header fields. In the rule, the description of the header field should be performed in the format packet order.
+The Rule does not describe how to delineate each field in the original packet header. This
+must be known from the compressor/decompressor. The rule only describes the
+compression/decompression behavior for each header field. In the rule, the Field Descriptions are listed in the order in which the fields appear in the packet header.
 
 The Rule also describes the compressed header fields which are transmitted regarding their position
 in the rule which is used for data serialization on the compressor side and data deserialization on the decompressor side.
 
 The Context describes the header fields and its values with the following entries:
 
-* A Field ID (FID) is a unique value to define the header field.
+* Field ID (FID) is a unique value to define the header field.
 
-* A Field Length (FL) is the length of the field that can be of fixed length as in IPv6 or UDP headers or variable
-  length as in CoAP options. Fixed length fields shall be represented by its actual value in bits. Variable length fields shall be represented by a function or a variable. 
+* Field Length (FL) describes the length of the field. The field can be of fixed length as in IPv6 or UDP headers or of variable
+  length as in CoAP options. FL for fixed length fields shall contain the actual length value, in bits. FL for variable length fields shall represent a function or a variable.
 
-* A Field Position (FP) indicating if several instances of the field exist in the 
-  headers which one is targeted. The default position is 1
+* Field Position (FP): in case several occurences of a field exist in the
+  header, FP indicatess which one is targeted. The default position is 1.
   
-* A direction indicator (DI) indicating the packet direction. Three values are possible:
+* A direction indicator (DI) indicating the packet direction(s) this Field Description applies to. Three values are possible:
 
-  * UPLINK (Up) when the field or the value is only present in packets sent by the Dev to the App,
+  * UPLINK (Up): this Field Description is only applicable to packets sent by the Dev to the App,
 
-  * DOWNLINK (Dw) when the field or the value is only present in packet sent from the App to the Dev and 
+  * DOWNLINK (Dw): this Field Description is only applicable to packets sent from the App to the Dev,
 
-  * BIDIRECTIONAL (Bi) when the field or the value is present either upstream or downstream. 
+  * BIDIRECTIONAL (Bi): this Field Description is applicable to packets travelling both Up and Dw.
 
-* A Target Value (TV) is the value used to make the comparison with
-  the packet header field. The Target Value can be of any type (integer, strings, etc.).
+* Target Value (TV) is the value to compare
+  the packet header field to. The Target Value can be of any type (integer, strings, etc.).
   For instance, it can be a single value or a more complex structure (array, list, etc.), such as a JSON or a CBOR structure.
 
-* A Matching Operator (MO) is the operator used to make the comparison between 
+* Matching Operator (MO) is the operator used to compare
   the Field Value and the Target Value. The Matching Operator may require some 
   parameters. MO is only used during the compression phase.
 
-* A Compression Decompression Action (CDA) is used to describe the compression
-  and the decompression process. The CDA may require some 
-  parameters, CDA are used in both compression and decompression phases. 
+* Compression Decompression Action (CDA) describes the pair of reciprocal compression
+  and decompression processes. The CDA may require some
+  parameters. CDA is used in both the compression and the decompression phases.
 
 ## Rule ID
 
