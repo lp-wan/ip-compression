@@ -202,10 +202,10 @@ on-going fragmented packet transmission.
 Static Context Header Compression (SCHC) avoids context synchronization,
 which is the most bandwidth-consuming operation in other header compression mechanisms
 such as RoHC {{RFC5795}}. Based on the fact
-that the nature of data flows is highly predictable in LPWAN networks, some static
-contexts may be stored on the Device (Dev). The contexts must be stored in both ends, and it can 
-either be learned by a provisioning protocol or by out of band means or it can be pre-provisioned, etc. 
-The way the context is learned on both sides are out of the scope of this document.
+that the nature of data flows is highly predictable in LPWAN networks, the
+context stored on the Device (Dev) may be static. The context must be stored in both ends of the link. It can
+be installed by a provisioning protocol, by pre-provisioning or by any out of band means.
+The way by which the context is learned by both sides is out of the scope of this document.
 
 
 ~~~~
@@ -226,18 +226,18 @@ The way the context is learned on both sides are out of the scope of this docume
 ~~~~
 {: #Fig-archi title='Architecture'}
 
-{{Fig-archi}} represents the architecture for compression/decompression, it is based on {{I-D.ietf-lpwan-overview}} 
-terminology. The Device is sending applications flows using IPv6 or IPv6/UDP protocols. These flows are compressed by a 
-Static Context Header Compression Compressor/Decompressor (SCHC C/D) to reduce headers size. The resulting
-information is sent to a layer two (L2) frame to a LPWAN Radio Network (RG) which forwards 
+{{Fig-archi}} represents the architecture for compression/decompression. It is based on {{I-D.ietf-lpwan-overview}}
+terminology. The Device sends application flows using IPv6 or IPv6/UDP protocols. These flows are compressed by a
+Static Context Header Compression Compressor/Decompressor (SCHC C/D) to reduce the headers size. The resulting
+information is sent as a layer two (L2) frame to a LPWAN Radio Gateway (RG) which forwards
 the frame to a Network Gateway (NGW).
-The NGW sends the data to an SCHC C/D for decompression which shares the same rules with the Dev. The SCHC C/D can be 
-located on the Network Gateway (NGW) or in another place as long as a tunnel is established between the NGW and the SCHC C/D. 
-The SCHC C/D in both sides must share the same set of Rules.
-After decompression, the packet can be sent on the Internet to one
+The NGW sends the data to an SCHC C/D for decompression. The SCHC C/D can be
+located in the Network Gateway (NGW) or somewhere else as long as a tunnel is established between the NGW and the SCHC C/D.
+The SCHC C/Ds on both sides must share the same set of Rules.
+After decompression, the packet can be sent over the Internet to one
 or several LPWAN Application Servers (App). 
 
-The SCHC C/D process is bidirectional, so the same principles can be applied in the other direction.
+The SCHC C/D process is symmetrical, therefore the same description applies to the reverse direction.
 
 ## SCHC Rules
 
