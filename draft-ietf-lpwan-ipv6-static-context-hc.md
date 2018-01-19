@@ -128,43 +128,45 @@ types of entities in a typical LPWAN network, see {{Fig-LPWANarchi}}:
 # Terminology
 This section defines the terminology and acronyms used in this document.
 
-* All-0. Fragment format for the last frame of a window.
+* All-0. The fragment format for the last frame of a window that is not the last one of a packet (see Window in this glossary).
 
-* All-1. Fragment format for the last frame of a packet.
+* All-1. The fragment format for the last frame of the packet.
 
-* All-0 empty. Fragment format without payload for requesting the Bitmap when the Retransmission Timer expires in a window that is not the last one for a fragmented packet transmission.
+* All-0 empty. An All-0 fragment without a payload. It is used to request the Bitmap when the Retransmission Timer expires, in a window that is not the last one of a packet.
 
-* All-1 empty. Fragment format without payload for requesting the Bitmap when the Retransmission Timer expires in the last window.
+* All-1 empty. An All-1 fragment without a payload. It is used to request the Bitmap when the Retransmission Timer expires in the last window of a packet.
 
 * App: LPWAN Application. An application sending/receiving IPv6 packets to/from the Device.
 
-* APP-IID: Application Interface Identifier. Second part of the IPv6 address to identify the application interface
+* APP-IID: Application Interface Identifier. Second part of the IPv6 address that identifies the application server interface.
 
-* Bi: Bidirectional, a rule entry that applies in both directions.
+* Bi: Bidirectional, a rule entry that applies to headers of packets travelling in both directions (Up and Dw).
 
-* C: Checked bit. Used in an acknowledgment (ACK) header to determine when the MIC is correct (1) or not (0).
+* Bitmap: a field of bits in an acknowledgment message that tells the sender which fragments of a window were correctly received.
 
-* CDA: Compression/Decompression Action. An action that is performed for both functionalities to compress a header field or to recover its original value in the decompression phase.
+* C: Checked bit. Used in an acknowledgment (ACK) header to determine if the MIC locally computed by the receiver matches (1) the received MIC or not (0).
 
-* Context: A set of rules used to compress/decompress headers
+* CDA: Compression/Decompression Action. Describes the reciprocal pair of actions that are performed at the compressor to compress a header field and at the decompressor to recover the original header field value.
 
-* Dev: Device. A Node connected to the LPWAN. A Dev may implement SCHC.
+* Context: A set of rules used to compress/decompress headers.
 
-* Dev-IID: Device Interface Identifier. Second part of the IPv6 address to identify the device interface
+* Dev: Device. A node connected to the LPWAN. A Dev may implement SCHC.
 
-* DI: Direction Indicator is a differentiator for matching in order to be able to have different values for both sides.
+* Dev-IID: Device Interface Identifier. Second part of the IPv6 address that identifies the device interface.
 
-* DTag: Datagram Tag is a fragmentation header field that is set to the same value for all fragments carrying the same IPv6 datagram.
+* DI: Direction Indicator. This field tells which direction of packet travel (Up, Dw or Bi) a rule applies to. This allows for assymmetric processing.
 
-* Dw: Down Link direction for compression, from SCHC C/D to Dev
+* DTag: Datagram Tag. This fragmentation header field is set to the same value for all fragments carrying the same IPv6 datagram.
 
-* FCN: Fragment Compressed Number is a fragmentation header field that carries an efficient representation of a larger-sized fragment number.
+* Dw: Down Link. Indicates the direction from SCHC C/D to Dev.
 
-* FID: Field Identifier is an index to describe the header fields in the Rule
+* FCN: Fragment Compressed Number. This fragmentation header field carries an efficient representation of a larger-sized fragment number.
 
-* FL: Field Length is a value to identify if the field is fixed or variable length.
+* FID: Field Identifier. This is an index to describe the header fields in a Rule.
 
-* FP: Field Position is a value that is used to identify each instance a field appears in the header.  
+* FL: Field Length. This tells if the field is of fixed or variable length. In the former case, FL also contains the length value.
+
+* FP: Field Position is a value that is used to distinguish between occurences of a field in the header, when there are several.  
 
 * IID: Interface Identifier. See the IPv6 addressing architecture {{RFC7136}}
 
@@ -183,11 +185,11 @@ on-going fragmented packet transmission.
 
 * Rule ID: An identifier for a rule, SCHC C/D, and Dev share the same Rule ID for a specific flow. A set of Rule IDs are used to support fragmentation functionality.
 
-* SCHC C/D: Static Context Header Compression Compressor/Decompressor. A process in the network to achieve compression/decompressing headers. SCHC C/D uses SCHC rules to perform compression and decompression.
+* SCHC C/D: Static Context Header Compression Compressor/Decompressor. A process in the network that performs compression/decompression of the headers, by using SCHC rules.
 
 * TV: Target value. A value contained in the Rule that will be matched with the value of a header field.
 
-* Up: Up Link direction for compression, from Dev to SCHC C/D.
+* Up: Up Link. Direction from Dev to SCHC C/D.
 
 * W: Window bit. A fragment header field used in Window mode (see section 5), which carries the same value for all fragments of a window.
 
