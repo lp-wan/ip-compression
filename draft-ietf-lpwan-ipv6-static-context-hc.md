@@ -69,31 +69,29 @@ within a LPWAN network. Some LPWAN networks properties can be exploited to get a
 compression:
 
 * Topology is star-oriented; therefore, all the packets follow the same path.
-  For the needs of this draft, the architecture can be summarized to Devices (Dev)
-  exchanging information with LPWAN Application Server (App) through a Network Gateway (NGW). 
+  For the needs of this draft, the architecture can be simply described as: Devices (Dev)
+  exchange information with LPWAN Application Servers (App) through Network Gateways (NGW).
 
 * Traffic flows are mostly known in advance since devices embed built-in
-  applications. Contrary to computers or smartphones, new applications cannot
-  be easily installed.
+  applications. New applications cannot be easily installed in LPWAN devices, as they would in computers or smartphones.
 
 The Static Context Header Compression (SCHC) is defined for this environment.
-SCHC uses a context where header information is kept in the header format order. This context is 
-static (the values of the header fields do not change over time) avoiding 
-complex resynchronization mechanisms, incompatible
-with LPWAN characteristics. In most of the cases, IPv6/UDP headers are reduced
-to a small context identifier. 
+SCHC uses a context, where header information is kept in the header format order. This context is
+static: the values of the header fields do not change over time. This avoids
+complex resynchronization mechanisms, that would be incompatible
+with LPWAN characteristics. In most cases, a small context identifier is enough to represent the full IPv6/UDP headers.
 
-The SCHC header compression mechanism is independent of the specific LPWAN technology over which it will be used.
+The SCHC header compression mechanism is independent of the specific LPWAN technology over which it is used.
 
 LPWAN technologies are also characterized,
 among others, by a very reduced data unit and/or payload size
 {{I-D.ietf-lpwan-overview}}.  However, some of these technologies
 do not support layer two fragmentation, therefore the only option for
    them to support the IPv6 MTU requirement of 1280 bytes
- {{RFC2460}} is the use of a fragmentation protocol at the
-adaptation layer below IPv6. 
-This draft defines also a fragmentation 
-functionality to support the IPv6 MTU requirement over LPWAN 
+ {{RFC2460}} is to use a fragmentation protocol at the
+adaptation layer, below IPv6.
+In response ot this need, this document also defines a fragmentation/reassembly
+mechanism, which supports the IPv6 MTU requirement over LPWAN
 technologies. Such functionality has been designed under the assumption that data unit reordering will not happen between the entity performing fragmentation and the entity performing reassembly.
 
 # LPWAN Architecture {#LPWAN-Archi}
