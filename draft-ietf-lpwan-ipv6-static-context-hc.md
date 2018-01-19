@@ -310,12 +310,12 @@ The Context describes the header fields and its values with the following entrie
 
 ## Rule ID
 
-Rule IDs are sent between both compression/decompression elements. The size 
-of the Rule ID is not specified in this document, it is implementation-specific and can vary regarding the
-LPWAN technology, the number of flows, among others. 
+Rule IDs are sent between the compression and the decompression elements. The size
+of the Rule ID is not specified in this document. It is implementation-specific and can vary according to the
+LPWAN technology and the number of flows, among others.
 
-Some values in the Rule ID space are reserved for other functionalities than header 
-compression as fragmentation. (See {{Frag}}). 
+Some values in the Rule ID space are reserved for functionalities other than header
+compression, such as fragmentation. (See {{Frag}}).
 
 Rule IDs are specific to a Dev. Two Devs may use the same Rule ID for different
 header compression. To identify the correct Rule ID, the SCHC C/D needs to combine the Rule ID with the Dev L2 identifier
