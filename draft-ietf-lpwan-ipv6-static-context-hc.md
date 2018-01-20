@@ -325,13 +325,13 @@ to find the appropriate Rule.
 
 The compression/decompression process follows several steps:
 
-* compression Rule selection: The goal is to identify which Rule(s) will be used
+* compression Rule selection: The goal is to identify which Rule(s) to use
   to compress the packet's headers. When doing compression in the NGW side the SCHC C/D needs to find the 
   correct Rule to be used by identifying its Dev-ID and the Rule-ID. In the Dev, only the Rule-ID may be used. 
-  The next step is to choose the fields by their direction, using the 
-  direction indicator (DI), so the fields that do not correspond to the appropriated DI will be excluded. 
-  Next, then the fields are identified according to their field identifier (FID) and field position (FP). 
-  If the field position does not correspond, then the Rule is not used and the SCHC take next Rule.
+  The next step is to choose the Field Descriptions by their direction, using the
+  direction indicator (DI), so the Field Descriptions that do not correspond to the appropriated DI will be excluded.
+  Next, the fields are identified according to their field identifier (FID) and field position (FP).
+  If the field position does not correspond, then the Rule is not used and the SCHC proceeds to consider the next Rule.
   Once the DI and the FP correspond to the header information, each field's value is then compared to the corresponding 
   target value (TV) stored in the Rule for that specific field using the matching operator (MO).
   If all the fields in the packet's header satisfy all the matching operators (MOs) of a Rule (i.e. all results are True),
@@ -344,28 +344,30 @@ The compression/decompression process follows several steps:
   from the compression of header fields, directly followed by the payload.
   The product of field compression is sent in the order expressed in the Rule for the matching
   fields. The way the Rule ID is sent depends on the specific LPWAN
-  layer two technology and will be specified in a specific document and is out of the scope of this document. 
-  For example, it can be either included in a Layer 2 header or sent in the first byte of
+  layer two technology. It is out of the scope of this document and will be specified in a specific technology-dependant document.
+  For example, the Rule ID can be included in the Layer 2 header or sent as the first byte of
   the L2 payload. (Cf. {{Fig-FormatPckt}}). 
 
 * decompression: In both directions, the receiver identifies the sender through its device-id
   (e.g. MAC address) and selects the appropriate Rule through the Rule ID. This
-  Rule gives the compressed header format and associates these values to the header fields.
-  It applies the CDA action to reconstruct the original
+  Rule describes the compressed header format and associates the values to the header fields.
+  The receiver applies the CDA action to reconstruct the original
   header fields. The CDA application order can be different from the order given by the Rule. For instance,
   Compute-\* may be applied at the end, after all the other CDAs.
   
-  If after using SCHC compression and adding the payload to the L2 frame the datagram is not multiple of 8 bits, 
-  padding may be used.
+  On LPWAN technologies that are byte-oriented, the compressed header concatenated with the original packet payload are padded to a multiple of 8 bits,
+  if needed.
 
 ~~~~
 
-   +--- ... --+-------------- ... --------------+-----------+--...--+
-   |  Rule ID |Compressed Hdr Fields information|  payload  |padding|
-   +--- ... --+-------------- ... --------------+-----------+--...--+
+   +--- ... --+-------------- ... --------------+------------------+--...--+
+   |  Rule ID |Compressed Hdr Fields information|  packet payload  |padding|
+   +--- ... --+-------------- ... --------------+------------------+--...--+
+
+   <--------- compressed header --------------->
 
 ~~~~
-{: #Fig-FormatPckt title='LPWAN Compressed Format Packet'}
+{: #Fig-FormatPckt title='LPWAN Compressed Header Packet Format'}
 
 
 ## Matching operators {#chap-MO}
