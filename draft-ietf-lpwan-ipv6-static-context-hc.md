@@ -356,7 +356,7 @@ The compression/decompression process follows several steps:
   Compute-\* may be applied at the end, after all the other CDAs.
   
   On LPWAN technologies that are byte-oriented, the compressed header concatenated with the original packet payload are padded to a multiple of 8 bits,
-  if needed. See Section {{Padding}} for details.
+  if needed. See {{Padding}} for details.
 
 ~~~~
 
