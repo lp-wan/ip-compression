@@ -356,7 +356,7 @@ The compression/decompression process follows several steps:
   Compute-\* may be applied at the end, after all the other CDAs.
   
   On LPWAN technologies that are byte-oriented, the compressed header concatenated with the original packet payload are padded to a multiple of 8 bits,
-  if needed.
+  if needed. See Section {{Padding}} for details.
 
 ~~~~
 
@@ -373,21 +373,21 @@ The compression/decompression process follows several steps:
 ## Matching operators {#chap-MO}
 
 Matching Operators (MOs) are functions used by both SCHC C/D endpoints involved in the header 
-compression/decompression. They are not typed and can be applied indifferently to integer, string 
+compression/decompression. They are not typed and can be indifferently applied to integer, string
 or any other data type. The result of the operation can either be True or False. MOs are defined as follows: 
 
-* equal: A field value in a packet matches with a TV in a Rule if they are equal.
+* equal: A field value in a packet matches a TV in a Rule if they are equal.
 
 * ignore: No check is done between a field value in a packet and a TV
   in the Rule. The result of the matching is always true.
 
-* MSB(length): A matching is obtained if the most significant bits of the length field value bits 
-  of the header are equal to the TV in the rule. The MSB Matching Operator needs a parameter,
-  indicating the number of bits, to proceed to the matching.
+* MSB(length): A match is obtained if the most significant bits
+  of the header are equal to the TV in the rule. The "length" parameter of the MSB Matching Operator
+  indicates how many bits are involved in the comparison.
   
-* match-mapping: The goal of mapping-sent is to reduce the size of a field by allocating
-  a shorter value. The Target Value contains a list of values. Each value is identified by a short ID (or index). 
-  This operator matches if a field value is equal to one of those target values. 
+* match-mapping: With match-mapping,
+  the Target Value is a list of values. Each value of the list is identified by a short ID (or index). Compression is achieved by sending the index instead of the original header field value.
+  This operator matches if the header field value is equal to one of the values in the target list.
   
 
 ## Compression Decompression Actions (CDA) {#chap-CDA}
@@ -403,7 +403,7 @@ the original value.
 +--------------------+-------------+----------------------------+
 |not-sent            |elided       |use value stored in ctxt    |
 |value-sent          |send         |build from received value   |
-|mapping-sent        |send index   |value from index on a table |
+|mapping-sent        |send index   |value from index in a table |
 |LSB(length)         |send LSB     |TV OR received value        |
 |compute-length      |elided       |compute length              |
 |compute-checksum    |elided       |compute UDP checksum        |
@@ -414,9 +414,9 @@ the original value.
 ~~~~
 {: #Fig-function title='Compression and Decompression Functions'}
 
-{{Fig-function}} summarizes the basics functions defined to compress and decompress
-a field. The first column gives the action's name. The second and third
-columns outline the compression/decompression behavior.
+{{Fig-function}} summarizes the basic functions that can be used to compress and decompress
+a field. The first column lists the actions name. The second and third
+columns outline the reciprocal compression/decompression behavior for each action.
 
 Compression is done in the rule order and compressed values are sent in that order in the compressed
 message. The receiver must be able to find the size of each compressed field
@@ -424,7 +424,7 @@ which can be given by the rule or may be sent with the compressed header.
 
 If the field is identified as being variable, then its size must be sent first using the following coding:
 
-* If the size is between 0 and 14 bytes it is sent using 4 bits. 
+* If the size is between 0 and 14 bytes, it is sent using 4 bits.
 
 * For values between 15 and 255, the first 4 bits sent are set to 1 and the size is sent using 8 bits. 
 
@@ -433,11 +433,11 @@ If the field is identified as being variable, then its size must be sent first u
 ### not-sent CDA
 
 The not-sent function is generally used when the field value is specified in the rule and
-therefore known by the both Compressor and Decompressor. This action is generally used with the
+therefore known by both the Compressor and the Decompressor. This action is generally used with the
 "equal" MO. If MO is "ignore", there is a risk to have a decompressed field
 value different from the compressed field.
 
-The compressor does not send any value in the compressed header for the field on which compression is applied.
+The compressor does not send any value in the compressed header for the field on which not-sent compression is applied.
 
 The decompressor restores the field value with the target value stored in the matched rule.
 
@@ -451,20 +451,20 @@ field by indicating the length. This function is generally used with the "ignore
 
 ### mapping-sent
 
-The mapping-sent is used to send a smaller index associated with the list of values
-in the Target Value. This function is used together with the "match-mapping" MO.
+The mapping-sent is used to send a smaller index (the index into
+the Target Value list of values) instead of the original value. This function is used together with the "match-mapping" MO.
 
-The compressor looks on the TV to find the field value and send the corresponding index.
-The decompressor uses this index to restore the field value.
+On the compressor side, the match-mapping Matching Operator searches the TV for a match with the header field value and the mapping-sent CDA appends the corresponding index to the Compression Residue to be sent.
+On the decompressor side, the CDA uses the received index to restore the field value by looking up the list in the TV.
 
-The number of bits sent is the minimal size for coding all the possible indexes.
+The number of bits sent is the minimal size for coding all the possible indices.
 
 ### LSB CDA
 
-LSB action is used to avoid sending the known part of the packet field header to the other end.
-This action is used together with the "MSB" MO. A length can be specified in the rule to indicate
+The LSB action is used together with the "MSB" MO to avoid sending the higher part of the packet field if that part is already known by the receiving end.
+A length can be specified in the rule to indicate
 how many bits have to be sent. If the length is not specified, the number of bits sent is the
-field length minus the bits' length specified in the MSB MO.
+original header field length minus the length specified in the MSB MO.
 
 The compressor sends the "length" Least Significant Bits. The decompressor
 combines the value received with the Target Value.
@@ -476,10 +476,10 @@ If this action is made on a variable length field, the remaining size in byte ha
 
 These functions are used to process respectively the Dev and the App Interface Identifiers (Deviid and Appiid) of the 
 IPv6 addresses. Appiid CDA is less common since current LPWAN technologies
-frames contain a single address.
+frames contain a single address, which is the Dev's address.
 
 The IID value may be computed from the Device ID present in the Layer 2 header. The
-computation is specific for each LPWAN technology and may depend on the Device ID size.
+computation is specific to each LPWAN technology and may depend on the Device ID size.
 
 In the downstream direction, these CDA may be used to determine the L2 addresses used by the LPWAN.
 
@@ -1030,7 +1030,7 @@ For fragmented packet transmission in the downlink, and when ACK Always
    assumes that it is unlikely that several ACKs become all lost).
 
 
-# Padding management 
+# Padding management {#Padding}
 
 SCHC header, either for compression, fragmentation or acknowledgment does not preserve byte alignment. Since most of the LPWAN network technologies payload is expressed in an integer number of bytes; the sender will introduce at the end some padding bits while the receiver must be able to eliminate them.
 
