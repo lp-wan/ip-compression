@@ -618,48 +618,47 @@ Examples of the different reliability options described are provided
 
 ## Fragmentation Frame Formats {#Fragfor}
 
-This section defines the fragment format, the All-0 and All-1 frame formats, the ACK format and the Abort frame formats.
+This section defines the fragment format, the All-0 and All-1 frame formats, the ACK frame format and the Abort frame formats.
 
 ### Fragment format 
 
-   A fragment comprises a fragment header, a fragment payload, and  Padding bits (if any). A fragment conforms
-   to the format shown in {{Fig-FragFormat}}. The fragment payload carries a subset of either a SCHC header 
+   A fragment comprises a fragment header, a fragment payload and padding bits (if any). A fragment conforms
+   to the general format shown in {{Fig-FragFormat}}. The fragment payload carries a subset of either a SCHC header
    or an IPv6 header or the original IPv6 packet data payload. 
-   A fragment is the payload in the L2 protocol data unit (PDU).
+   A fragment is the payload of the L2 protocol data unit (PDU).
       
 ~~~~   
       +-----------------+-----------------------+---------+
       | Fragment Header |   Fragment payload    | padding |
       +-----------------+-----------------------+---------+
 ~~~~
-{: #Fig-FragFormat title='Fragment format.'}
+{: #Fig-FragFormat title='Fragment general format.'}
 
-In the No ACK option, fragments except the last one SHALL contain the format as defined in {{Fig-NotLast}}. The total size of the fragment header is R bits. 
+In the No ACK option, fragments except the last one SHALL conform to the detailed format defined in {{Fig-NotLast}}. The total size of the fragment header is R bits.
    
 ~~~~
              <------------ R ---------->
                          <--T--> <--N-->
-             +-- ... --+- ...  -+- ... -+---...---+-+
-             | Rule ID |  DTag  |  FCN  | payload |P|
-             +-- ... --+- ...  -+- ... -+---...---+-+
+             +-- ... --+- ...  -+- ... -+--------...-------+---------+
+             | Rule ID |  DTag  |  FCN  | Fragment payload | padding |
+             +-- ... --+- ...  -+- ... -+--------...-------+---------+
 
 ~~~~
-{: #Fig-NotLast title='Fragment Format for Fragments except the Last One, No ACK option'}
+{: #Fig-NotLast title='Fragment Detailed Format for Fragments except the Last One, No ACK option'}
 
 
 
-In any of the Window mode options, fragments except the last one SHALL contain the fragmentation format as defined in {{Fig-NotLastWin}}. The total size of the fragment header in this format is R bits.
-. 
+In any of the Window mode options, fragments except the last one SHALL conform the dtailed format defined in {{Fig-NotLastWin}}. The total size of the fragment header in this format is R bits.
    
 ~~~~
              <------------ R ---------->
                        <--T--> 1 <--N-->
-            +-- ... --+- ... -+-+- ... -+---...---+-+
-            | Rule ID | DTag  |W|  FCN  | payload |P|
-            +-- ... --+- ... -+-+- ... -+---...---+-+
+            +-- ... --+- ... -+-+- ... -+--------...-------+---------+
+            | Rule ID | DTag  |W|  FCN  | Fragment payload | padding |
+            +-- ... --+- ... -+-+- ... -+--------...-------+---------+
 
 ~~~~
-{: #Fig-NotLastWin title='Fragment Format for Fragments except the Last One, Window mode'}
+{: #Fig-NotLastWin title='Fragment Detailed Format for Fragments except the Last One, Window mode'}
    
  
    
@@ -690,7 +689,7 @@ to 1 to indicate that the MIC check computed by the receiver matches the MIC pre
 +---- ... --+-... -+-+-+------- ... -------+
 |  Rule ID  | DTag |W|0|      Bitmap       | (MIC Incorrect)
 +---- ... --+-... -+-+-+------- ... -------+
-                          C
+                      C
                 
 ~~~~
 {: #Fig-ACK-Format1 title='Format of an ACK for All-1 windows'}
@@ -698,65 +697,65 @@ to 1 to indicate that the MIC check computed by the receiver matches the MIC pre
 
 ### All-1 and All-0 formats
 
-The All-0 format is used for the last fragment of a window that is not the last window of the packet.
+The All-0 format is used for sending the last fragment of a window that is not the last window of the packet.
 
 ~~~~
-     <------------ R ------------>
+     <------------ R ----------->
                 <- T -> 1 <- N -> 
      +-- ... --+- ... -+-+- ... -+--- ... ---+
      | Rule ID | DTag  |W|  0..0 |  payload  |  
      +-- ... --+- ... -+-+- ... -+--- ... ---+
      
 ~~~~
-{: #Fig-All0 title='All-0 fragment format'}
+{: #Fig-All0 title='All-0 fragment detailed format'}
 
    
-The All-0 empty fragment format is used by a sender to request an ACK in ACK-Always mode
+The All-0 empty fragment format is used by a sender to request the retransmission of an ACK by the receiver. It is only used in ACK-Always mode.
 
 ~~~~
- <------------ R ------------>
+ <------------ R ----------->
             <- T -> 1 <- N -> 
  +-- ... --+- ... -+-+- ... -+
  | Rule ID | DTag  |W|  0..0 | (no payload)  
  +-- ... --+- ... -+-+- ... -+
               
 ~~~~
-{: #Fig-All0empty title='All-0 empty fragment format'}
+{: #Fig-All0empty title='All-0 empty fragment detailed format'}
 
 
 In the No ACK option, the last fragment of an IPv6 datagram SHALL contain a fragment header that conforms to 
-   the format shown in {{Fig-Last}}. The total size of this fragment header is R+M bits. 
+   the detaield format shown in {{Fig-Last}}. The total size of this fragment header is R+M bits.
    
 ~~~~
-<------------- R ---------->
-              <- T -> <-N-><----- M ----->
+<------------- R --------->
+              <- T -> <-N-> <---- M ---->
 +---- ... ---+- ... -+-----+---- ... ----+---...---+
 |   Rule ID  | DTag  |  1  |     MIC     | payload |
 +---- ... ---+- ... -+-----+---- ... ----+---...---+
     
 ~~~~
-{: #Fig-Last title='All-1 Fragment Format for the Last Fragment, No ACK option'}
+{: #Fig-Last title='All-1 Fragment Detailed Format for the Last Fragment, No ACK option'}
 
 
    In any of the Window modes, the last fragment of an IPv6 datagram SHALL contain a fragment header that conforms to 
-   the format shown in {{Fig-LastWinMode}}. The total size of the fragment 
+   the detailed format shown in {{Fig-LastWinMode}}. The total size of the fragment
    header in this format is R+M bits.
    
 ~~~~
-<------------ R ------------>
-           <- T -> 1 <- N -> <---- M ----->
+<----------- R ------------>
+           <- T -> 1 <- N -> <---- M ---->
 +-- ... --+- ... -+-+- ... -+---- ... ----+---...---+
 | Rule ID | DTag  |W| 11..1 |     MIC     | payload |
 +-- ... --+- ... -+-+- ... -+---- ... ----+---...---+
                       (FCN)
 ~~~~
-{: #Fig-LastWinMode title='All-1 Fragment Format for the Last Fragment, Window mode'}
+{: #Fig-LastWinMode title='All-1 Fragment Detailed Format for the Last Fragment, Window mode'}
        
  In either ACK-Always or ACK-on-error, in order to request a retransmission of the ACK for the All-1 window, the fragment sender uses the format shown in {{Fig-All1retries}}. The total size of the fragment header in this format is R+M bits.
 
 ~~~~
-<------------ R ------------>
-           <- T -> 1 <- N -> <---- M ----->
+<------------ R ----------->
+           <- T -> 1 <- N -> <---- M ---->
 +-- ... --+- ... -+-+- ... -+---- ... ----+
 | Rule ID | DTag  |W|  1..1 |     MIC     | (no payload)  
 +-- ... --+- ... -+-+- ... -+---- ... ----+
@@ -800,37 +799,38 @@ The fragment receiver needs to identify all the fragments that belong to a given
  
  * The destination's L2 address (if present),
  
- * Rule ID and 
+ * Rule ID,
  
- * DTag (the latter, if present).  
+ * DTag (if present).
  
-Then, the fragment receiver may determine the fragment delivery reliability option that is used for this fragment based on the Rule ID field in that fragment.
+Then, the fragment receiver may determine the fragment delivery reliability option that is used for this fragment based on the Rule ID in that fragment.
 
 Upon receipt of a link fragment, the receiver starts constructing the original unfragmented packet.  It uses the FCN and the order of arrival of each fragment to determine the location of the individual fragments within the original unfragmented packet. A fragment payload may carry bytes from a SCHC compressed IPv6 header, an uncompressed IPv6 header or an IPv6 datagram data payload. An unfragmented packet could be a SCHC compressed or an uncompressed IPv6 packet (header and data).  For example, the receiver may place the fragment payload within a payload datagram reassembly buffer at the location determined from: the FCN, the arrival order of the fragments, and the fragment payload sizes. In Window mode, the fragment receiver also uses the W bit in the received fragments. Note that the size of the original, unfragmented packet cannot be determined from fragmentation headers.
 
-Fragmentation functionality uses the FCN value, which has a length of N bits. The All-1 and All-0 FCN values are used to control the fragmentation transmission. The FCN will be assigned sequentially in a decreasing order starting from 2^N-2, i.e. the highest possible FCN value depending on the FCN number of bits, but excluding the All-1 value. In all modes, the last fragment of a packet must contains a MIC which is used to check if there are errors or missing fragments, and must use the corresponding All-1 fragment format.  Also note that, a fragment with an All-0 format is considered the last fragment of the current window.
+Fragmentation functionality uses the FCN value, which has a length of N bits. The All-1 and All-0 FCN values are used to control the fragmentation transmission. The FCN will be assigned sequentially in a decreasing order starting from 2^N-2, i.e. the highest possible FCN value depending on the FCN number of bits, but excluding the All-1 value. In all modes, the last fragment of a packet must contain a MIC which is used to check if there are errors or missing fragments, and must use the corresponding All-1 fragment format.  Also note that a fragment with an All-0 format is considered the last fragment of the current window.
 
 If the recipient receives the last fragment of a datagram (All-1), it checks for the integrity of the reassembled datagram, based on the MIC received. In No ACK, if the integrity check indicates that the reassembled datagram does not match the original datagram (prior to fragmentation), the reassembled datagram MUST be discarded. In Window mode, a MIC check is also performed by the fragment receiver after reception of each subsequent fragment retransmitted after the first MIC check. 
 
 
 ### No ACK
-In the No ACK mode there is no feedback communication from the fragment receiver. The sender will send the fragments of a packet until the last one without any possibility to know if errors or a losses have occurred. As in this mode there is not a need to identify specific fragments a one-bit FCN is used, therefore FCN All-0 will be used in all fragments except the last one. The latter will carry an All-1 FCN and will also carry the MIC. 
-The receiver will wait for fragments and will set the Inactivity timer. The No ACK mode will use the MIC contained in the last fragment to check error. 
-When the Inactivity Timer expires or when the MIC check indicates that the reassembled packet does not match the original one, the receiver will release all resources allocated to reassembly of the packet. The initial value of the Inactivity Timer will be determined based on the characteristics of the underlying LPWAN technology and will be defined in other documents (e.g. technology-specific profile documents).
+In the No ACK mode, there is no feedback communication from the fragment receiver. The sender will send all the fragments of a packet without any possibility of knowing if errors or losses have occurred. As, in this mode, there is no need to identify specific fragments, a one-bit FCN is used. Consequently, the FCN All-0 value is used in all fragments except the last one, which carries an All-1 FCN and the MIC.
+The receiver will wait for fragments and will set the Inactivity timer. The receiver will use the MIC contained in the last fragment to check for errors.
+When the Inactivity Timer expires or if the MIC check indicates that the reassembled packet does not match the original one, the receiver will release all resources allocated to reassembling this packet. The initial value of the Inactivity Timer will be determined based on the characteristics of the underlying LPWAN technology and will be defined in other documents (e.g. technology-specific profile documents).
     
 
 ### The Window modes 
-In Window modes, a jumping window protocol uses two windows alternatively, identified as 0 and 1.  A fragment with all FCN bits set to 0 (i.e. an All-0 fragment) indicates that the window is over (i.e. the fragment is the last one of the window) and allows to switch from one window to the next one.  The All-1 FCN in a fragment indicates that it is the last fragment of the packet being transmitted and therefore there will not be another window for the packet.
+In Window modes, a jumping window protocol uses two windows alternatively, identified as 0 and 1.  A fragment with all FCN bits set to 0 (i.e. an All-0 fragment) indicates that the window is over (i.e. the fragment is the last one of the window) and allows to switch from one window to the next one.  The All-1 FCN in a fragment indicates that it is the last fragment of the packet being transmitted and therefore there will not be another window for this packet.
 
-The Window mode offers two different reliability option modes: ACK-on-error and ACK-always.
+The Window mode is further refined in two different reliability option modes: ACK-on-error and ACK-always.
 
 #### ACK-Always
-In ACK-Always, the sender sends fragments by using the two-jumping window procedure. A delay between each fragment can be added to respect regulation rules or constraints imposed by the applications.  Each time a fragment is sent, the FCN is decreased by one.  When the FCN reaches value 0 and there are more fragments to be sent, an All-0 fragment is sent and the Retransmission Timer is set.  The sender waits for an ACK to know if transmission errors have occurred.  Then, the receiver sends an ACK reporting whether any fragments have been lost or not by setting the corresponding bits in the Bitmap, otherwise, an ACK without Bitmap will be sent, allowing transmission of a new window.  When the last fragment of the packet is sent, an All-1 fragment (which includes a MIC) is used.  In that case, the sender sets the Retransmission Timer to wait for the ACK corresponding to the last window. During this period, the sender starts listening to the radio and starts the Retransmission Timer, which needs to be dimensioned based on the received window available for the LPWAN technology in use.  If the Retransmission Timer expires, an empty All-0 (or an empty All-1 if the last fragment 
-has been sent) fragment is sent to ask the receiver to resend its ACK. The window number is not changed.
+In ACK-Always, the sender sends fragments by using the two-jumping-windows procedure. A delay between each fragment can be added to respect local regulations or other constraints imposed by the applications.  Each time a fragment is sent, the FCN is decreased by one.  When the FCN reaches value 0 and there are more fragments to be sent after the one at hand, the sender sends the fragment at hand using the All-0 fragment format. It starts the Retransmission Timer and waits for an ACK. By contrast, if the FCN has reached 0 and the fragment at hand is the last fragment of the packet, it is sent using the All-1 fragment format, which includes a MIC. The sender sets the Retransmission Timer and waits for the ACK.
 
-When the sender receives an ACK, it checks the W bit carried by the ACK.  Any ACK carrying an unexpected W bit is discarded.  If the W bit value of the received ACK is correct, the sender analyzes the received Bitmap.  If all the fragments sent during the window have been well received, and if at least one more fragment needs to be sent, the sender moves its sending window to the next window value and sends the next fragments.  If no more fragments have to be sent, then the fragmented packet transmission is finished.
+The Retransmission Timer is dimensioned based on the LPWAN technology in use. On expiry of the Retransmission Timer, the sender sends an All-0 (resp. All-1) empty fragment to again request for the ACK for the window that ended with the All-0 (resp. All-1) fragment just sent. The window number is not changed.
 
-However, if one or more fragments have not been received as per the ACK (i.e. the corresponding bits are not set in the Bitmap) then the sender resends the missing fragments.  When all missing fragments have been  retransmitted, the sender starts the Retransmission Timer (even if an All-0 or an All-1 has not been sent during the retransmission) and waits for an ACK. Upon receipt of the ACK, if one or more fragments have not yet been received, the counter Attempts is increased and the sender resends the missing fragments again. When Attempts reaches MAX_ACK_REQUESTS, the sender aborts the on-going fragmented packet transmission by sending an Abort message and releases any resources for transmission of the packet.  The sender also aborts an on-going fragmented packet transmission when a failed MIC check is reported by the receiver.
+When the sender receives an ACK, it checks the W bit carried by the ACK.  Any ACK carrying an unexpected W bit value is discarded.  If the W bit value of the received ACK is correct, the sender analyzes the rest of the ACK message.  If all the fragments sent for this window have been well received, and if at least one more fragment needs to be sent, the sender advances its sending window to the next window value and sends the next fragments.  If no more fragments have to be sent, then the fragmented packet transmission is finished.
+
+However, if one or more fragments have not been received as per the ACK (i.e. the corresponding bits are not set in the Bitmap) then the sender resends the missing fragments.  When all missing fragments have been  retransmitted, the sender starts the Retransmission Timer (even if an All-0 or an All-1 has not been sent as part of this retransmission batch) and waits for an ACK. Upon receipt of the ACK, if one or more fragments have not yet been received, the counter Attempts is increased and the sender resends the missing fragments again. When Attempts reaches MAX_ACK_REQUESTS, the sender aborts the on-going fragmented packet transmission by sending an Abort message and releases any resources for transmission of the packet.  The sender also aborts an on-going fragmented packet transmission when a failed MIC check is reported by the receiver.
 
 On the other hand, at the beginning, the receiver side expects to receive window 0.  Any fragment received but not belonging to the current window is discarded.  All fragments belonging to the correct window are accepted, and the actual fragment number managed by the receiver is computed based on the FCN value.  The receiver prepares the Bitmap to report the correctly received and the missing fragments for the current window. After each fragment is received the receiver initializes the Inactivity timer, if the Inactivity Timer expires the transmission is aborted. 
 
@@ -868,7 +868,7 @@ window, see next paragraph).  In Ack-on-error,  the Retransmission Timer expirat
 acknowledgment. The Retransmission Timer is set when sending an All-0 or an All-1 fragment. When the All-1 fragment has 
 been sent, then the on-going fragmented packet transmission fragmentation is finished and the sender waits for the last 
 ACK. At the receiver side, when the All-1 fragment is sent and the MIC check indicates successful packet reception, an ACK 
-is also sent to confirm the end of a correct transmission.  If the Retransmission Timer expires, an All-1 empty request for 
+is sent nonetheless, to confirm the end of a correct transmission.  If the Retransmission Timer expires while waiting for the ACK for the last window, an All-1 empty request for
 the last ACK MUST be sent by the sender to complete the fragmented packet transmission.
 
 If the sender receives an ACK, it checks the window value.  ACKs with an unexpected window number are discarded.  If the 
@@ -928,9 +928,9 @@ Note that the ACK sent in response to an All-1 fragment includes the C bit. Ther
 ~~~~
 {: #Fig-Localbitmap title='Bitmap'}
 
-The Bitmap, when transmitted, MUST be optimized in size to reduce the resulting frame size. The right-most bytes with all Bitmap bits set to 1 MUST NOT be transmitted.  As the receiver knows the Bitmap size, it can reconstruct the original Bitmap without this optimization.  In the example {{Fig-transmittedbitmap}}, the last 2 bytes of the Bitmap shown in {{Fig-Localbitmap}} comprise all bits set to 1, therefore, the last 2 bytes of the Bitmap are not sent.
+The Bitmap, when transmitted, MUST be optimized in size to reduce the resulting frame size. The right-most bytes with all Bitmap bits set to 1 MUST NOT be transmitted.  As the receiver knows the Bitmap size, it can reconstruct the original Bitmap without this optimization.  In the example shown in {{Fig-transmittedbitmap}}, the last 2 bytes of the Bitmap shown in {{Fig-Localbitmap}} comprise bits that are all set to 1, therefore they are not sent.
 
-In the last window, when checked bit C value is 1, it means that the received MIC matches the one computed by the receiver, and thus the Bitmap is not sent.  Otherwise, the Bitmap needs to be sent after the C bit.  Note that the introduction of a C bit may force to reduce the number of fragments in a window to allow the bitmap to fit in a frame.
+In the last window, when the C bit value is 1, it means that the received MIC matches the one computed by the receiver, and thus the Bitmap is not sent.  Otherwise, the Bitmap is sent after the C bit. Note that the introduction of a C bit may force to reduce the number of fragments in a window to allow the bitmap to fit in a frame.
 
 
 ~~~~   
@@ -984,15 +984,15 @@ indicates that the second and the fifth fragments have not been correctly receiv
 
 For ACK-Always or ACK-on-error, implementers may opt to support a single window size or multiple window sizes.  The latter, when feasible, may provide performance optimizations.  For example, a large window size may be used for packets that need to be carried by a large number of fragments.  However, when the number of fragments required to carry a packet is low, a smaller window size, and thus a shorter Bitmap, may be sufficient to provide feedback on all fragments.  If multiple window sizes are supported, the Rule ID may be used to signal the window size in use for a specific packet transmission.
 
-Note that the same window size MUST be used for the transmission of all fragments that belong to a packet.
+Note that the same window size MUST be used for the transmission of all fragments that belong to the same packet.
 
 
 ## Downlink fragment transmission
 
-In some LPWAN technologies, as part of energy-saving techniques, downlink transmission is only possible immediately after an uplink transmission. In order to avoid potentially high delay for fragmented datagram transmission in the downlink, the fragment receiver MAY perform an uplink transmission as soon as possible after reception of a fragment that is not the last one. Such uplink transmission may be triggered by the L2 (e.g. an L2 ACK sent in response to a fragment encapsulated in a L2 frame that requires an L2 ACK) or it may be triggered from an upper layer.
+In some LPWAN technologies, as part of energy-saving techniques, downlink transmission is only possible immediately after an uplink transmission. In order to avoid potentially high delay in the downlink transmission of a fragmented datagram, the fragment receiver MAY perform an uplink transmission as soon as possible after reception of a fragment that is not the last one. Such uplink transmission may be triggered by the L2 (e.g. an L2 ACK sent in response to a fragment encapsulated in a L2 frame that requires an L2 ACK) or it may be triggered from an upper layer.
 
-For fragmented packet transmission in the downlink, and when ACK Always
-   is used, the fragment receiver MAY support timer-based ACK
+For downlink transmission of a fragmented packet in ACK-always
+   mode, the fragment receiver MAY support timer-based ACK
    retransmission. In this mechanism, the fragment receiver initializes and
    starts a timer (the Inactivity Timer is used) after the transmission of an
    ACK, except when the ACK is sent in response to the last fragment of a
@@ -1015,12 +1015,12 @@ For fragmented packet transmission in the downlink, and when ACK Always
    retransmitted can find an opportunity for that transmission.
 
    When the fragment sender transmits the All-1 fragment, it
-   initializes and starts its retransmission timer to a
-   long value (e.g. several times the initial Inactivity timer). If an ACK
+   starts its Retransmission Timer with a
+   large timeout value (e.g. several times that of the initial Inactivity timer). If an ACK
    is received before expiration of this timer, the fragment sender
    retransmits any lost fragments reported by the ACK, or if the ACK
    confirms successful reception of all fragments of
-   the last window, transmission of the fragmented packet ends.
+   the last window, the transmission of the fragmented packet is considered complete.
    If the timer expires, and no ACK has been received since the
    start of the timer, the fragment sender assumes that the All-1
    fragment has been successfully received (and possibly, the last ACK
