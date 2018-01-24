@@ -1275,7 +1275,7 @@ useful design consideration and comments.
 
 
 This section gives some scenarios of the compression mechanism for IPv6/UDP.
-The goal is to illustrate the SCHC behavior.
+The goal is to illustrate the behavior of SCHC.
 
 The most common case using the mechanisms defined in this document will be a 
 LPWAN Dev that embeds some applications running over
@@ -1311,7 +1311,7 @@ with dotted lines since these protocols are compressed on the radio link.
 
 
 Note that in some LPWAN technologies, only the Devs have a device ID.
-Therefore, when such technologies are used, it is necessary to define statically an IID for the Link
+Therefore, when such technologies are used, it is necessary to statically define an IID for the Link
 Local address for the SCHC C/D.
 
 ~~~~
