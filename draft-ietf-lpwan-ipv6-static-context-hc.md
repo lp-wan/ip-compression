@@ -1367,7 +1367,7 @@ Rule 0
  +----------------+--+--+--+---------+--------+------------++------+
  | Field          |FL|FP|DI| Value   | Match  | Action     || Sent |
  |                |  |  |  |         | Opera. | Action     ||[bits]|
- +----------------+--+--+--+---------+--------+-------------++------+
+ +----------------+--+--+--+---------+--------+------------++------+
  |IPv6 version    |4 |1 |Bi|6        | equal  | not-sent   ||      |
  |IPv6 DiffServ   |8 |1 |Bi|0        | equal  | not-sent   ||      |
  |IPv6 Flow Label |20|1 |Bi|0        | equal  | not-sent   ||      |
@@ -1402,9 +1402,9 @@ The third rule compresses port numbers to 4 bits.
 
 # Fragmentation Examples 
 
-This section provides examples of different fragment delivery reliability options possible on the basis of this specification.
+This section provides examples for the different fragment delivery reliability modes specified in this document.
 
-{{Fig-Example-Unreliable}} illustrates the transmission of an IPv6 packet that needs 11 fragments in the No ACK option. Where FCN is always 1 bit.
+{{Fig-Example-Unreliable}} illustrates the transmission in No-ACK mode of an IPv6 packet that needs 11 fragments. FCN is 1 bit wide.
 
 ~~~~
         Sender               Receiver
@@ -1421,9 +1421,11 @@ This section provides examples of different fragment delivery reliability option
           |-------FCN=1-------->|MIC checked =>
          
 ~~~~
-{: #Fig-Example-Unreliable title='Transmission of an IPv6 packet carried by 11 fragments in the No ACK option'}
+{: #Fig-Example-Unreliable title='Transmission in No-ACK mode of an IPv6 packet carried by 11 fragments'}
 
-{{Fig-Example-Win-NoLoss-NACK}} illustrates the transmission of an IPv6 packet that needs 11 fragments in ACK-on-error, for N=3, without losses.
+In the following examples, N, the size if the FCN field, is 3 bits. Therefore, the All-1 FCN value is 7.
+
+{{Fig-Example-Win-NoLoss-NACK}} illustrates the transmission in ACK-on-error of an IPv6 packet that needs 11 fragments, with MAX_WIND_FCN=6 and no fragment loss.
 
 ~~~~
         Sender               Receiver
@@ -1442,9 +1444,9 @@ This section provides examples of different fragment delivery reliability option
           |<---- ACK, W=1 ------|
 
 ~~~~
-{: #Fig-Example-Win-NoLoss-NACK title='Transmission of an IPv6 packet carried by 11 fragments in ACK-on-error, for N=3 and MAX_WIND_FCN=6, without losses.'}
+{: #Fig-Example-Win-NoLoss-NACK title='Transmission ACK-on-error mode of an IPv6 packet carried by 11 fragments, with MAX_WIND_FCN=6 and no loss.'}
 
-{{Fig-Example-Rel-Window-NACK-Loss}} illustrates the transmission of an IPv6 packet that needs 11 fragments ACK-on-error, for N=3, with three losses.
+{{Fig-Example-Rel-Window-NACK-Loss}} illustrates the transmission in ACK-on-error mode of an IPv6 packet that needs 11 fragments, with MAX_WIND_FCN=6 and three lost fragments.
 
 ~~~~
          Sender             Receiver
@@ -1465,12 +1467,12 @@ This section provides examples of different fragment delivery reliability option
           |-----W=1, FCN=7----->|MIC checked
           |<-----ACK, W=1-------|C=0 Bitmap:1100001
           |-----W=1, FCN=4----->|MIC checked =>
-          |<---- ACK, W=1 ------|    
+          |<---- ACK, W=1 ------|C=1, no bitmap
 
 ~~~~
-{: #Fig-Example-Rel-Window-NACK-Loss title='Transmission of an IPv6 packet carried by 11 fragments in ACK-on-error, for N=3 and MAX_WIND_FCN=6, three losses.'}
+{: #Fig-Example-Rel-Window-NACK-Loss title='Transmission in ACK-on-error mode of an IPv6 packet carried by 11 fragments, with MAX_WIND_FCN=6 and three lost fragments.'}
 
-{{Fig-Example-Rel-Window-ACK-NoLoss}} illustrates the transmission of an IPv6 packet that needs 11 fragments in ACK-Always, for N=3 and MAX_WIND_FCN=6, without losses. Note: in Window mode, an additional bit will be needed to number windows. 
+{{Fig-Example-Rel-Window-ACK-NoLoss}} illustrates the transmission in ACK-Always mdoe of an IPv6 packet that needs 11 fragments, with MAX_WIND_FCN=6 and no loss. Note: in Window mode, an additional bit will be needed to number windows.
 
 ~~~~
         Sender               Receiver
@@ -1490,9 +1492,9 @@ This section provides examples of different fragment delivery reliability option
         (End)    
 
 ~~~~
-{: #Fig-Example-Rel-Window-ACK-NoLoss title='Transmission of an IPv6 packet carried by 11 fragments in ACK-Always, for N=3 and MAX_WIND_FCN=6, no losses.'}
+{: #Fig-Example-Rel-Window-ACK-NoLoss title='Transmission in ACK-Always mode of an IPv6 packet carried by 11 fragments, with MAX_WIND_FCN=6 and no lost fragment.'}
 
-{{Fig-Example-Rel-Window-ACK-Loss}} illustrates the transmission of an IPv6 packet that needs 11 fragments in ACK-Always, for N=3 and MAX_WIND_FCN=6, with three losses.
+{{Fig-Example-Rel-Window-ACK-Loss}} illustrates the transmission in ACK-Always mode of an IPv6 packet that needs 11 fragments, with MAX_WIND_FCN=6 and three lost fragments.
 
 ~~~~
         Sender               Receiver
@@ -1517,121 +1519,120 @@ This section provides examples of different fragment delivery reliability option
         (End)    
 
 ~~~~
-{: #Fig-Example-Rel-Window-ACK-Loss title='Transmission of an IPv6 packet carried by 11 fragments in ACK-Always, for N=3, and MAX_WIND_FCN=6, with three losses.'}
+{: #Fig-Example-Rel-Window-ACK-Loss title='Transmission in ACK-Always mode of an IPv6 packet carried by 11 fragments, with MAX_WIND_FCN=6 and three lost fragments.'}
 
-{{Fig-Example-Rel-Window-ACK-Loss-Last-A}} illustrates the transmission of an IPv6 packet that needs 6 fragments in ACK-Always, for N=3 and MAX_WIND_FCN=6, with three losses, and only one retry is needed for each lost fragment. Note that, since a single window is needed for transmission of the IPv6 packet in this case, the example illustrates behavior when losses happen in the last window. 
+{{Fig-Example-Rel-Window-ACK-Loss-Last-A}} illustrates the transmission in ACK-Always mode of an IPv6 packet that needs 6 fragments, with MAX_WIND_FCN=6, three lost fragments and only one retry needed to recover each lost fragment. Note that, since a single window is needed for transmission of the IPv6 packet in this case, the example illustrates behavior when losses happen in the last window.
 
 ~~~~
           Sender                Receiver
-             |-----W=0, CFN=6----->|
-             |-----W=0, CFN=5----->|
-             |-----W=0, CFN=4--X-->|
-             |-----W=0, CFN=3--X-->|
-             |-----W=0, CFN=2--X-->|
-             |-----W=0, CFN=7----->|MIC checked 
+             |-----W=0, FCN=6----->|
+             |-----W=0, FCN=5----->|
+             |-----W=0, FCN=4--X-->|
+             |-----W=0, FCN=3--X-->|
+             |-----W=0, FCN=2--X-->|
+             |-----W=0, FCN=7----->|MIC checked
              |<-----ACK, W=0-------|C= 0 Bitmap:1100001
-             |-----W=0, CFN=4----->|MIC checked: failed
-             |-----W=0, CFN=3----->|MIC checked: failed
-             |-----W=0, CFN=2----->|MIC checked: success
+             |-----W=0, FCN=4----->|MIC checked: failed
+             |-----W=0, FCN=3----->|MIC checked: failed
+             |-----W=0, FCN=2----->|MIC checked: success
              |<-----ACK, W=0-------|C=1 no Bitmap
            (End) 
 ~~~~
-{: #Fig-Example-Rel-Window-ACK-Loss-Last-A title='Transmission of an IPv6 packet carried by 11 fragments in ACK-Always, for N=3, and MAX_WIND_FCN=6, with three losses, and only one retry is needed for each lost fragment.'}
+{: #Fig-Example-Rel-Window-ACK-Loss-Last-A title='Transmission in ACK-Always mode of an IPv6 packet carried by 11 fragments, fwith MAX_WIND_FCN=6, three lost framents and only one retry needed for each lost fragment.'}
 
-{{Fig-Example-Rel-Window-ACK-Loss-Last-B}} illustrates the transmission of an IPv6 packet that needs 6 fragments in ACK-Always, for N=3 and MAX_WIND_FCN=6, with three losses, and the second ACK is lost. Note that, since a single window is needed for transmission of the IPv6 packet in this case, the example illustrates behavior when losses happen in the last window. 
+{{Fig-Example-Rel-Window-ACK-Loss-Last-B}} illustrates the transmission in ACK-Always mode of an IPv6 packet that needs 6 fragments, with MAX_WIND_FCN=6, three lost fragments, and the second ACK lost. Note that, since a single window is needed for transmission of the IPv6 packet in this case, the example illustrates behavior when losses happen in the last window.
 
 ~~~~
           Sender                Receiver
-             |-----W=0, CFN=6----->|
-             |-----W=0, CFN=5----->|
-             |-----W=0, CFN=4--X-->|
-             |-----W=0, CFN=3--X-->|
-             |-----W=0, CFN=2--X-->|
-             |-----W=0, CFN=7----->|MIC checked 
+             |-----W=0, FCN=6----->|
+             |-----W=0, FCN=5----->|
+             |-----W=0, FCN=4--X-->|
+             |-----W=0, FCN=3--X-->|
+             |-----W=0, FCN=2--X-->|
+             |-----W=0, FCN=7----->|MIC checked
              |<-----ACK, W=0-------|C=0  Bitmap:1100001
-             |-----W=0, CFN=4----->|MIC checked: wrong
-             |-----W=0, CFN=3----->|MIC checked: wrong
-             |-----W=0, CFN=2----->|MIC checked: right
+             |-----W=0, FCN=4----->|MIC checked: wrong
+             |-----W=0, FCN=3----->|MIC checked: wrong
+             |-----W=0, FCN=2----->|MIC checked: right
              |  X---ACK, W=0-------|C= 1 no Bitmap
     timeout  |                     |
-             |-----W=0, CFN=7----->|
+             |-----W=0, FCN=7----->|
              |<-----ACK, W=0-------|C= 1 no Bitmap  
 
            (End) 
 ~~~~
-{: #Fig-Example-Rel-Window-ACK-Loss-Last-B title='Transmission of an IPv6 packet carried by 11 fragments in ACK-Always, for N=3, and MAX_WIND_FCN=6, with three losses, and the second ACK is lost.'}
+{: #Fig-Example-Rel-Window-ACK-Loss-Last-B title='Transmission in ACK-Always mode of an IPv6 packet carried by 11 fragments, with MAX_WIND_FCN=6, three lost fragments, and the second ACK lost.'}
 
-{{Fig-Example-Rel-Window-ACK-Loss-Last-C}} illustrates the transmission of an IPv6 packet that needs 6 fragments in ACK-Always, for N=3 and MAX_WIND_FCN=6, with three losses, and one retransmitted fragment is lost. Note that, since a single window is needed for transmission of the IPv6 packet in this case, the example illustrates behavior when losses happen in the last window. 
+{{Fig-Example-Rel-Window-ACK-Loss-Last-C}} illustrates the transmission in ACK-Always mode of an IPv6 packet that needs 6 fragments, with MAX_WIND_FCN=6, with three lost fragments, and one retransmitted fragment lost again. Note that, since a single window is needed for transmission of the IPv6 packet in this case, the example illustrates behavior when losses happen in the last window.
 
 ~~~~
            Sender                Receiver
-             |-----W=0, CFN=6----->|
-             |-----W=0, CFN=5----->|
-             |-----W=0, CFN=4--X-->|
-             |-----W=0, CFN=3--X-->|
-             |-----W=0, CFN=2--X-->|
-             |-----W=0, CFN=7----->|MIC checked  
+             |-----W=0, FCN=6----->|
+             |-----W=0, FCN=5----->|
+             |-----W=0, FCN=4--X-->|
+             |-----W=0, FCN=3--X-->|
+             |-----W=0, FCN=2--X-->|
+             |-----W=0, FCN=7----->|MIC checked
              |<-----ACK, W=0-------|C=0   Bitmap:1100001
-             |-----W=0, CFN=4----->|MIC checked: wrong
-             |-----W=0, CFN=3----->|MIC checked: wrong
-             |-----W=0, CFN=2--X-->| 
+             |-----W=0, FCN=4----->|MIC checked: wrong
+             |-----W=0, FCN=3----->|MIC checked: wrong
+             |-----W=0, FCN=2--X-->|
       timeout|                     |
-             |-----W=0, CFN=7----->|All-0 empty 
+             |-----W=0, FCN=7----->|All-0 empty
              |<-----ACK, W=0-------|C=0 Bitmap: 1111101
-             |-----W=0, CFN=2----->|MIC checked: right
+             |-----W=0, FCN=2----->|MIC checked: right
              |<-----ACK, W=0-------|C=1 no Bitmap
            (End) 
 ~~~~
-{: #Fig-Example-Rel-Window-ACK-Loss-Last-C title='Transmission of an IPv6 packet carried by 11 fragments in ACK-Always, for N=3, and MAX_WIND_FCN=6, with three losses, and one retransmitted fragment is lost.'}
+{: #Fig-Example-Rel-Window-ACK-Loss-Last-C title='Transmission in ACK-Always mode of an IPv6 packet carried by 11 fragments, with MAX_WIND_FCN=6, with three lost fragments, and one retransmitted fragment lost again.'}
 
 
-{{Fig-Example-MaxWindFCN}} illustrates the transmission of an IPv6 packet that needs 28 fragments in ACK-Always, for N=5 and MAX_WIND_FCN=23, with two losses. Note that MAX_WIND_FCN=23 may be useful when the maximum possible Bitmap size, considering the maximum lower layer technology payload size and the value of R, is 3 bytes. Note also that the FCN of the last fragment of the packet is the one with FCN=31 (i.e. FCN=2^N-1 for N=5, or equivalently, all FCN bits set to 1). 
+{{Fig-Example-MaxWindFCN}} illustrates the transmission in ACK-Always mode of an IPv6 packet that needs 28 fragments, with N=5, MAX_WIND_FCN=23 and two lost fragments. Note that MAX_WIND_FCN=23 may be useful when the maximum possible Bitmap size, considering the maximum lower layer technology payload size and the value of R, is 3 bytes. Note also that the FCN of the last fragment of the packet is the one with FCN=31 (i.e. FCN=2^N-1 for N=5, or equivalently, all FCN bits set to 1).
 
 ~~~~
            Sender               Receiver
-             |-----W=0, CFN=23----->|
-             |-----W=0, CFN=22----->|
-             |-----W=0, CFN=21--X-->|
-             |-----W=0, CFN=20----->|
-             |-----W=0, CFN=19----->|
-             |-----W=0, CFN=18----->|
-             |-----W=0, CFN=17----->|
-             |-----W=0, CFN=16----->|
-             |-----W=0, CFN=15----->|
-             |-----W=0, CFN=14----->|
-             |-----W=0, CFN=13----->|
-             |-----W=0, CFN=12----->|
-             |-----W=0, CFN=11----->|
-             |-----W=0, CFN=10--X-->|
-             |-----W=0, CFN=9 ----->|
-             |-----W=0, CFN=8 ----->|
-             |-----W=0, CFN=7 ----->|
-             |-----W=0, CFN=6 ----->|
-             |-----W=0, CFN=5 ----->|
-             |-----W=0, CFN=4 ----->|
-             |-----W=0, CFN=3 ----->|
-             |-----W=0, CFN=2 ----->|
-             |-----W=0, CFN=1 ----->|
-             |-----W=0, CFN=0 ----->|
+             |-----W=0, FCN=23----->|
+             |-----W=0, FCN=22----->|
+             |-----W=0, FCN=21--X-->|
+             |-----W=0, FCN=20----->|
+             |-----W=0, FCN=19----->|
+             |-----W=0, FCN=18----->|
+             |-----W=0, FCN=17----->|
+             |-----W=0, FCN=16----->|
+             |-----W=0, FCN=15----->|
+             |-----W=0, FCN=14----->|
+             |-----W=0, FCN=13----->|
+             |-----W=0, FCN=12----->|
+             |-----W=0, FCN=11----->|
+             |-----W=0, FCN=10--X-->|
+             |-----W=0, FCN=9 ----->|
+             |-----W=0, FCN=8 ----->|
+             |-----W=0, FCN=7 ----->|
+             |-----W=0, FCN=6 ----->|
+             |-----W=0, FCN=5 ----->|
+             |-----W=0, FCN=4 ----->|
+             |-----W=0, FCN=3 ----->|
+             |-----W=0, FCN=2 ----->|
+             |-----W=0, FCN=1 ----->|
+             |-----W=0, FCN=0 ----->|
              |                      |lcl-Bitmap:110111111111101111111111
              |<------ACK, W=0-------| Bitmap:1101111111111011
-             |-----W=0, CFN=21----->|
-             |-----W=0, CFN=10----->|
+             |-----W=0, FCN=21----->|
+             |-----W=0, FCN=10----->|
              |<------ACK, W=0-------|no Bitmap
-             |-----W=1, CFN=23----->|
-             |-----W=1, CFN=22----->|
-             |-----W=1, CFN=21----->|
-             |-----W=1, CFN=31----->|MIC checked =>
+             |-----W=1, FCN=23----->|
+             |-----W=1, FCN=22----->|
+             |-----W=1, FCN=21----->|
+             |-----W=1, FCN=31----->|MIC checked =>
              |<------ACK, W=1-------|no Bitmap
            (End)
 ~~~~
-
-{: #Fig-Example-MaxWindFCN title='Transmission of an IPv6 packet carried by 28 fragments in ACK-Always, for N=5 and MAX_WIND_FCN=23, with two losses.'}
+{: #Fig-Example-MaxWindFCN title='Transmission in ACK-Always mode of an IPv6 packet carried by 28 fragments, with N=5, MAX_WIND_FCN=23 and two lost fragments.'}
 
 
 # Fragmentation State Machines
 
-The fragmentation state machines of the sender and the receiver in the different reliability options are next in the following figures:
+The fragmentation state machines of the sender and the receiver, one for each of the different reliability modes, are described in the following figures:
 
 
 ~~~~
@@ -1898,9 +1899,9 @@ Lcl_Bitmap==recv_Bitmap &| |   |   all missing frag sent
 
 # Allocation of Rule IDs for fragmentation
 
-A set of Rule IDs are allocated to support different aspects of fragmentation functionality as per this document. The allocation of IDs is to be defined in other documents. The set MAY include:   
+A set of Rule IDs has to be allocated to support different aspects of fragmentation functionality as per this document. The actual allocation of IDs is to be defined in other documents. The set MAY include:
 
-   *  one ID or a subset of IDs to identify a fragment as well as its reliability option and its window size, if multiple of these are supported.
+   *  one ID or several IDs to identify a fragment as well as its reliability mode and its window size, if multiple of these are supported.
    
    *  one ID to identify the ACK message.
    
