@@ -1032,16 +1032,28 @@ For downlink transmission of a fragmented packet in ACK-always
 
 # Padding management {#Padding}
 
-SCHC header, either for compression, fragmentation or acknowledgment does not preserve byte alignment. Since most of the LPWAN network technologies payload is expressed in an integer number of bytes; the sender will introduce at the end some padding bits while the receiver must be able to eliminate them.
+The headers specified in this document, be there for compression, fragmentation or acknowledgment, are not necessarily an integer number of bytes in size.
+Most of the LPWAN technologies have PDUs that are integer numbers of bytes.
+With such a technology, the sender will append padding bits to the messages defined in this document in order to fill up the last byte of the L2 PDU, if it isn't already full.
+Examples are shown in {{Fig-FormatPckt}} and {{Fig-FragFormat}}.
 
-The algorithm for padding bit elimination for compressed or fragmented frames is simple. Based on the following principle: 
- * The SCHC header is not aligned on a byte boundary, but its size in bits is given by the rule.
- 
- * The data size is variable, but always a multiple of 8 bits. 
- 
- * Padding bits MUST never exceed 7 bits.
+The receiver will tell the header, the payload and the padding apart using the following principles:
 
-In that case, a receiver after decoding the SCHC header, must take the maximum multiple of 8 bits as data. The remaining bits are padding bits.
+ * The size of any SCHC header is known from exmining the Rule ID and the content of that header.
+ 
+ * The payload that follows the header, if it exists, is variable in size, but is always a integer nuber of bytes.
+ 
+ * Padding MUST not add more than 7 bits.
+
+Therefore, the algorithm for padding elimination at the receiver is the following:
+
+* decode the SCHC header, find its length (in bits) and set a pointer to the end of the header.
+
+* from that pointer, extract as many blocks of 8 bits as are available in the L2 PDU. They are the payload bytes.
+
+* the remaining bits, if any, are padding.
+
+
 
 # SCHC Compression for IPv6 and UDP headers
 
