@@ -481,7 +481,7 @@ frames contain a single address, which is the Dev's address.
 The IID value may be computed from the Device ID present in the Layer 2 header. The
 computation is specific to each LPWAN technology and may depend on the Device ID size.
 
-In the downstream direction, these CDA may be used to determine the L2 addresses used by the LPWAN.
+In the Downlink direction, these CDA may be used to determine the L2 addresses used by the LPWAN.
 
 ### Compute-\*
 
@@ -1061,81 +1061,74 @@ This section lists the different IPv6 and UDP header fields and how they can be 
 
 ## IPv6 version field
 
-This field always holds the same value. Therefore, the TV is 6, the MO is "equal" 
-and the "CDA "not-sent".
+This field always holds the same value. Therefore, in the rule, TV is set to 6, MO to "equal"
+and CDA to "not-sent".
 
 ## IPv6 Traffic class field
 
 If the DiffServ field identified by the rest of the rule does not vary and is known 
-by both sides, the TV should contain this well-known value, the MO should be "equal" 
-and the CDA must be "not-sent.
+by both sides, the Field Descriptor in the rule should contain a TV with this well-known value, an "equal" MO
+and a "not-sent" CDA.
 
-If the DiffServ field identified by the rest of the rule varies over time or is not 
-known by both sides, then there are two possibilities depending on the variability of the value: 
-The first one is to do not compressed the field and sends the original value. In the second, where the values can be computed by sending only the LSB bits:
+Otherwise, two possibilities can be considered:
 
-* TV is not set to any value, MO is set to "ignore" and CDA is set to "value-sent"
+* One possibility is to not compress the field and send the original value. In the rule, TV is not set to any particular value, MO is set to "ignore" and CDA is set to "value-sent".
 
-* TV contains a stable value, MO is MSB(X) and CDA is set to LSB
+* If some upper bits in the field are constant and known, a better option is to only send the LSBs. In the rule, TV is set to a value with the stable known upper part, MO is set to MSB(X) and CDA to LSB.
 
 ## Flow label field
 
 If the Flow Label field identified by the rest of the rule does not vary and is known 
-by both sides, the TV should contain this well-known value, the MO should be "equal" 
-and the CDA should be "not-sent".
+by both sides, the Field Descriptor in the rule should contain a TV with this well-known value, an "equal" MO
+and a "not-sent" CDA.
 
-If the Flow Label field identified by the rest of the rule varies during time or is not 
-known by both sides, there are two possibilities depending on the variability of the value:
-The first one is without compression and then the value is sent. In the second, only part of the value is sent and the decompressor needs to compute the original value:
+Otherwise, two possibilities can be considered:
 
-* TV is not set, MO is set to "ignore" and CDA is set to "value-sent"
+* One possibility is to not compress the field and send the original value. In the rule, TV is not set to any particular value, MO is set to "ignore" and CDA is set to "value-sent".
 
-* TV contains a stable value, MO is MSB(X) and CDA is set to LSB
+* If some upper bits in the field are constant and known, a better option is to only send the LSBs. In the rule, TV is set to a value with the stable known upper part, MO is set to MSB(X) and CDA to LSB.
 
 ## Payload Length field
 
 If the LPWAN technology does not add padding, this field can be elided for the 
 transmission on the LPWAN network. The SCHC C/D recomputes the original payload length
-value. The TV is not set, the MO is set to "ignore" and the CDA is "compute-IPv6-length".
+value. In the Field Descriptor, TV is not set, MO is set to "ignore" and CDA is "compute-IPv6-length".
 
-If the payload length needs to be sent and does not need to be coded in 16 bits, the TV can be set to 0x0000, 
+If the payload length needs to be sent and is known to need less than 16 bits for its encoding, the TV can be set to 0x0000,
 the MO set to "MSB (16-s)" and the
 CDA to "LSB". The 's' parameter depends on the expected maximum packet length.
 
-In other cases, the payload length field must be sent and the CDA is replaced by "value-sent".
+Otherwise, the payload length field must be sent and the CDA is replaced by "value-sent".
 
 ## Next Header field
 
 If the Next Header field identified by the rest of the rule does not vary and is known 
-by both sides, the TV should contain this Next Header value, the MO should be "equal" 
+by both sides, the Field Descriptor in the rule should contain a TV with this Next Header value, the MO should be "equal"
 and the CDA should be "not-sent".
 
-If the Next Header field identified by the rest of the rule varies during time or is not 
-known by both sides, then TV is not set, MO is set to "ignore" and CDA is set to 
-"value-sent". A matching-list may also be used.
+Otherwise, TV is not set in the Field Descriptor, MO is set to "ignore" and CDA is set to
+"value-sent". Alternatively, a matching-list may also be used.
 
 ## Hop Limit field
 
-The End System is generally a device and does not forward packets. Therefore, the
-Hop Limit value is constant. So, the TV is set with a default value, the MO 
+Note that the value pattern for this field is different for Uplink and Downlink. In Uplink, since there is
+no IP forwarding between the Dev and the SCHC C/D, the value is relatively constant. On the
+other hand, the Downlink value depends of Internet routing and may change more frequently.
+One neat way of processing this field is to use the Direction Indicator (DI) to distinguish between directions:
+
+* in the Uplink, elide the field: the TV in the Field Descriptor is set to the known constant value, the MO
 is set to "equal" and the CDA is set to "not-sent".
 
-Otherwise the value is sent on the LPWAN: TV is not set, MO is set to ignore and 
+* in the Downlink, send the value: TV is not set, MO is set to "ignore" and
 CDA is set to "value-sent".
-
-Note that the field behavior differs in upstream and downstream. In upstream, since there is 
-no IP forwarding between the Dev and the SCHC C/D, the value is relatively constant. On the
-other hand, the downstream value depends of Internet routing and may change more frequently.
-One solution could be to use the Direction Indicator (DI) to distinguish both directions to
-elide the field in the upstream direction and send the value in the downstream direction.
 
 ## IPv6 addresses fields
 
-As in 6LoWPAN {{RFC4944}}, IPv6 addresses are splitted into two 64-bit long fields; 
+As in 6LoWPAN {{RFC4944}}, IPv6 addresses are split into two 64-bit long fields;
 one for the prefix and one for the Interface Identifier (IID). These fields should
-be compressed. To allow a single rule, these values are identified by their role 
+be compressed. To allow for a single rule being used for both directions, these values are identified by their role
 (DEV or APP) and not by their position in the frame (source or destination). The SCHC C/D
-must be aware of the traffic direction (upstream, downstream) to select the appropriate
+must be aware of the traffic direction (Uplink, Downlink) to select the appropriate
 field.
 
 ### IPv6 source and destination prefixes
@@ -1146,11 +1139,11 @@ be either a link-local prefix or a global prefix. In that case, the TV for the
 source and destination prefixes contain the values, the MO is set to "equal" and
 the CDA is set to "not-sent".
 
-In case the rule allows several prefixes, mapping-list must be used. The 
+If the rule is intended to compress packets with different prefix values, match-mapping should be used. The
 different prefixes are listed in the TV associated with a short ID. The MO is set 
 to "match-mapping" and the CDA is set to "mapping-sent".
 
-Otherwise the TV contains the prefix, the MO is set to "equal" and the CDA is set to
+Otherwise, the TV contains the prefix, the MO is set to "equal" and the CDA is set to
 "value-sent".
 
 ### IPv6 source and destination IID
@@ -1158,7 +1151,7 @@ Otherwise the TV contains the prefix, the MO is set to "equal" and the CDA is se
 If the DEV or APP IID are based on an LPWAN address, then the IID can be reconstructed 
 with information coming from the LPWAN header. In that case, the TV is not set, the MO 
 is set to "ignore" and the CDA is set to "DEViid" or "APPiid". Note that the 
-LPWAN technology is generally carrying a single device identifier corresponding
+LPWAN technology generally carries a single identifier, which corresponds
 to the DEV. The SCHC C/D may also not be aware of these values. 
 
 If the DEV address has a static value that is not derived from an IEEE EUI-64,
@@ -1168,22 +1161,23 @@ then TV contains the actual Dev address value, the MO operator is set to
 If several IIDs are possible, then the TV contains the list of possible IIDs, the MO is 
 set to "match-mapping" and the CDA is set to "mapping-sent". 
 
-Otherwise the value variation of the IID may be reduced to few bytes. In that case, the TV is
+It may also happen that the IID variability only expresses itself on a few bytes. In that case, the TV is
 set to the stable part of the IID, the MO is set to "MSB" and the CDA is set to "LSB".
 
-Finally, the IID can be sent on the LPWAN. In that case, the TV is not set, the MO is set
+Finally, the IID can be sent in extenso on the LPWAN. In that case, the TV is not set, the MO is set
 to "ignore" and the CDA is set to "value-sent".
 
 ## IPv6 extensions
 
-No extension rules are currently defined. They can be based on the MOs and 
+No rule is currently defined that processes IPv6 extensions.
+If such extensions are needed, their compression/decompression rules can be based on the MOs and
 CDAs described above.
 
 ## UDP source and destination port
 
-To allow a single rule, the UDP port values are identified by their role 
+To allow for a single rule being used for both directions, the UDP port values are identified by their role
 (DEV or APP) and not by their position in the frame (source or destination). The SCHC C/D
-must be aware of the traffic direction (upstream, downstream) to select the appropriate
+must be aware of the traffic direction (Uplink, Downlink) to select the appropriate
 field. The following rules apply for DEV and APP port numbers.
 
 If both ends know the port number, it can be elided. The TV contains the port number,
@@ -1195,7 +1189,7 @@ the MO is set to "MSB" and the CDA is set to "LSB".
 If some well-known values are used,  the TV can contain the list of these values, the
 MO is set to "match-mapping" and the CDA is set to "mapping-sent".
 
-Otherwise the port numbers are sent on the LPWAN. The TV is not set, the MO is 
+Otherwise the port numbers are sent over the LPWAN. The TV is not set, the MO is
 set to "ignore" and the CDA is set to "value-sent".
 
 ## UDP length field
@@ -1207,12 +1201,12 @@ the CDA is set to "compute-UDP-length".
 If the payload is small, the TV can be set to 0x0000, the MO set to "MSB" and the
 CDA to "LSB". 
 
-On other cases, the length must be sent and the CDA is replaced by "value-sent".
+In other cases, the length must be sent and the CDA is replaced by "value-sent".
 
 ## UDP Checksum field
 
 IPv6 mandates a checksum in the protocol above IP. Nevertheless, if a more efficient
-mechanism such as L2 CRC or MIC is carried by or over the L2 (such as in the 
+mechanism such as L2 CRC or MIC is carried by or over the L2 (such as in the
 LPWAN fragmentation process (see {{Frag}})), the UDP checksum transmission can be avoided.
 In that case, the TV is not set, the MO is set to "ignore" and the CDA is set to
 "compute-UDP-checksum".
