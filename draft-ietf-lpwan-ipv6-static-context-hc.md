@@ -1218,7 +1218,7 @@ In other cases, the checksum must be explicitly sent. The TV is not set, the MO 
 
 ## Security considerations for header compression
 A malicious header compression could cause the reconstruction of a 
-wrong packet that does not match with the original one, such corruption 
+wrong packet that does not match with the original one. Such a corruption
 may be detected with end-to-end authentication and integrity mechanisms. 
 Denial of Service may be produced but its arise other security problems 
 that may be solved with or without header compression.
