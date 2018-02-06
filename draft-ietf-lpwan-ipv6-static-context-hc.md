@@ -481,7 +481,7 @@ frames contain a single address, which is the Dev's address.
 The IID value may be computed from the Device ID present in the Layer 2 header. The
 computation is specific to each LPWAN technology and may depend on the Device ID size.
 
-In the downstream direction, these CDA may be used to determine the L2 addresses used by the LPWAN.
+In the Downlink direction, these CDA may be used to determine the L2 addresses used by the LPWAN.
 
 ### Compute-\*
 
@@ -1032,16 +1032,28 @@ For downlink transmission of a fragmented packet in ACK-always
 
 # Padding management {#Padding}
 
-SCHC header, either for compression, fragmentation or acknowledgment does not preserve byte alignment. Since most of the LPWAN network technologies payload is expressed in an integer number of bytes; the sender will introduce at the end some padding bits while the receiver must be able to eliminate them.
+The headers specified in this document, be there for compression, fragmentation or acknowledgment, are not necessarily an integer number of bytes in size.
+Most of the LPWAN technologies have PDUs that are integer numbers of bytes.
+With such a technology, the sender will append padding bits to the messages defined in this document in order to fill up the last byte of the L2 PDU, if it isn't already full.
+Examples are shown in {{Fig-FormatPckt}} and {{Fig-FragFormat}}.
 
-The algorithm for padding bit elimination for compressed or fragmented frames is simple. Based on the following principle: 
- * The SCHC header is not aligned on a byte boundary, but its size in bits is given by the rule.
- 
- * The data size is variable, but always a multiple of 8 bits. 
- 
- * Padding bits MUST never exceed 7 bits.
+The receiver will tell the header, the payload and the padding apart using the following principles:
 
-In that case, a receiver after decoding the SCHC header, must take the maximum multiple of 8 bits as data. The remaining bits are padding bits.
+ * The size of any SCHC header is known from exmining the Rule ID and the content of that header.
+ 
+ * The payload that follows the header, if it exists, is variable in size, but is always a integer nuber of bytes.
+ 
+ * Padding MUST not add more than 7 bits.
+
+Therefore, the algorithm for padding elimination at the receiver is the following:
+
+* decode the SCHC header, find its length (in bits) and set a pointer to the end of the header.
+
+* from that pointer, extract as many blocks of 8 bits as are available in the L2 PDU. They are the payload bytes.
+
+* the remaining bits, if any, are padding.
+
+
 
 # SCHC Compression for IPv6 and UDP headers
 
@@ -1049,81 +1061,74 @@ This section lists the different IPv6 and UDP header fields and how they can be 
 
 ## IPv6 version field
 
-This field always holds the same value. Therefore, the TV is 6, the MO is "equal" 
-and the "CDA "not-sent".
+This field always holds the same value. Therefore, in the rule, TV is set to 6, MO to "equal"
+and CDA to "not-sent".
 
 ## IPv6 Traffic class field
 
 If the DiffServ field identified by the rest of the rule does not vary and is known 
-by both sides, the TV should contain this well-known value, the MO should be "equal" 
-and the CDA must be "not-sent.
+by both sides, the Field Descriptor in the rule should contain a TV with this well-known value, an "equal" MO
+and a "not-sent" CDA.
 
-If the DiffServ field identified by the rest of the rule varies over time or is not 
-known by both sides, then there are two possibilities depending on the variability of the value: 
-The first one is to do not compressed the field and sends the original value. In the second, where the values can be computed by sending only the LSB bits:
+Otherwise, two possibilities can be considered:
 
-* TV is not set to any value, MO is set to "ignore" and CDA is set to "value-sent"
+* One possibility is to not compress the field and send the original value. In the rule, TV is not set to any particular value, MO is set to "ignore" and CDA is set to "value-sent".
 
-* TV contains a stable value, MO is MSB(X) and CDA is set to LSB
+* If some upper bits in the field are constant and known, a better option is to only send the LSBs. In the rule, TV is set to a value with the stable known upper part, MO is set to MSB(X) and CDA to LSB.
 
 ## Flow label field
 
 If the Flow Label field identified by the rest of the rule does not vary and is known 
-by both sides, the TV should contain this well-known value, the MO should be "equal" 
-and the CDA should be "not-sent".
+by both sides, the Field Descriptor in the rule should contain a TV with this well-known value, an "equal" MO
+and a "not-sent" CDA.
 
-If the Flow Label field identified by the rest of the rule varies during time or is not 
-known by both sides, there are two possibilities depending on the variability of the value:
-The first one is without compression and then the value is sent. In the second, only part of the value is sent and the decompressor needs to compute the original value:
+Otherwise, two possibilities can be considered:
 
-* TV is not set, MO is set to "ignore" and CDA is set to "value-sent"
+* One possibility is to not compress the field and send the original value. In the rule, TV is not set to any particular value, MO is set to "ignore" and CDA is set to "value-sent".
 
-* TV contains a stable value, MO is MSB(X) and CDA is set to LSB
+* If some upper bits in the field are constant and known, a better option is to only send the LSBs. In the rule, TV is set to a value with the stable known upper part, MO is set to MSB(X) and CDA to LSB.
 
 ## Payload Length field
 
 If the LPWAN technology does not add padding, this field can be elided for the 
 transmission on the LPWAN network. The SCHC C/D recomputes the original payload length
-value. The TV is not set, the MO is set to "ignore" and the CDA is "compute-IPv6-length".
+value. In the Field Descriptor, TV is not set, MO is set to "ignore" and CDA is "compute-IPv6-length".
 
-If the payload length needs to be sent and does not need to be coded in 16 bits, the TV can be set to 0x0000, 
+If the payload length needs to be sent and is known to need less than 16 bits for its encoding, the TV can be set to 0x0000,
 the MO set to "MSB (16-s)" and the
 CDA to "LSB". The 's' parameter depends on the expected maximum packet length.
 
-In other cases, the payload length field must be sent and the CDA is replaced by "value-sent".
+Otherwise, the payload length field must be sent and the CDA is replaced by "value-sent".
 
 ## Next Header field
 
 If the Next Header field identified by the rest of the rule does not vary and is known 
-by both sides, the TV should contain this Next Header value, the MO should be "equal" 
+by both sides, the Field Descriptor in the rule should contain a TV with this Next Header value, the MO should be "equal"
 and the CDA should be "not-sent".
 
-If the Next Header field identified by the rest of the rule varies during time or is not 
-known by both sides, then TV is not set, MO is set to "ignore" and CDA is set to 
-"value-sent". A matching-list may also be used.
+Otherwise, TV is not set in the Field Descriptor, MO is set to "ignore" and CDA is set to
+"value-sent". Alternatively, a matching-list may also be used.
 
 ## Hop Limit field
 
-The End System is generally a device and does not forward packets. Therefore, the
-Hop Limit value is constant. So, the TV is set with a default value, the MO 
+Note that the value pattern for this field is different for Uplink and Downlink. In Uplink, since there is
+no IP forwarding between the Dev and the SCHC C/D, the value is relatively constant. On the
+other hand, the Downlink value depends of Internet routing and may change more frequently.
+One neat way of processing this field is to use the Direction Indicator (DI) to distinguish between directions:
+
+* in the Uplink, elide the field: the TV in the Field Descriptor is set to the known constant value, the MO
 is set to "equal" and the CDA is set to "not-sent".
 
-Otherwise the value is sent on the LPWAN: TV is not set, MO is set to ignore and 
+* in the Downlink, send the value: TV is not set, MO is set to "ignore" and
 CDA is set to "value-sent".
-
-Note that the field behavior differs in upstream and downstream. In upstream, since there is 
-no IP forwarding between the Dev and the SCHC C/D, the value is relatively constant. On the
-other hand, the downstream value depends of Internet routing and may change more frequently.
-One solution could be to use the Direction Indicator (DI) to distinguish both directions to
-elide the field in the upstream direction and send the value in the downstream direction.
 
 ## IPv6 addresses fields
 
-As in 6LoWPAN {{RFC4944}}, IPv6 addresses are splitted into two 64-bit long fields; 
+As in 6LoWPAN {{RFC4944}}, IPv6 addresses are split into two 64-bit long fields;
 one for the prefix and one for the Interface Identifier (IID). These fields should
-be compressed. To allow a single rule, these values are identified by their role 
+be compressed. To allow for a single rule being used for both directions, these values are identified by their role
 (DEV or APP) and not by their position in the frame (source or destination). The SCHC C/D
-must be aware of the traffic direction (upstream, downstream) to select the appropriate
+must be aware of the traffic direction (Uplink, Downlink) to select the appropriate
 field.
 
 ### IPv6 source and destination prefixes
@@ -1134,11 +1139,11 @@ be either a link-local prefix or a global prefix. In that case, the TV for the
 source and destination prefixes contain the values, the MO is set to "equal" and
 the CDA is set to "not-sent".
 
-In case the rule allows several prefixes, mapping-list must be used. The 
+If the rule is intended to compress packets with different prefix values, match-mapping should be used. The
 different prefixes are listed in the TV associated with a short ID. The MO is set 
 to "match-mapping" and the CDA is set to "mapping-sent".
 
-Otherwise the TV contains the prefix, the MO is set to "equal" and the CDA is set to
+Otherwise, the TV contains the prefix, the MO is set to "equal" and the CDA is set to
 "value-sent".
 
 ### IPv6 source and destination IID
@@ -1146,7 +1151,7 @@ Otherwise the TV contains the prefix, the MO is set to "equal" and the CDA is se
 If the DEV or APP IID are based on an LPWAN address, then the IID can be reconstructed 
 with information coming from the LPWAN header. In that case, the TV is not set, the MO 
 is set to "ignore" and the CDA is set to "DEViid" or "APPiid". Note that the 
-LPWAN technology is generally carrying a single device identifier corresponding
+LPWAN technology generally carries a single identifier, which corresponds
 to the DEV. The SCHC C/D may also not be aware of these values. 
 
 If the DEV address has a static value that is not derived from an IEEE EUI-64,
@@ -1156,22 +1161,23 @@ then TV contains the actual Dev address value, the MO operator is set to
 If several IIDs are possible, then the TV contains the list of possible IIDs, the MO is 
 set to "match-mapping" and the CDA is set to "mapping-sent". 
 
-Otherwise the value variation of the IID may be reduced to few bytes. In that case, the TV is
+It may also happen that the IID variability only expresses itself on a few bytes. In that case, the TV is
 set to the stable part of the IID, the MO is set to "MSB" and the CDA is set to "LSB".
 
-Finally, the IID can be sent on the LPWAN. In that case, the TV is not set, the MO is set
+Finally, the IID can be sent in extenso on the LPWAN. In that case, the TV is not set, the MO is set
 to "ignore" and the CDA is set to "value-sent".
 
 ## IPv6 extensions
 
-No extension rules are currently defined. They can be based on the MOs and 
+No rule is currently defined that processes IPv6 extensions.
+If such extensions are needed, their compression/decompression rules can be based on the MOs and
 CDAs described above.
 
 ## UDP source and destination port
 
-To allow a single rule, the UDP port values are identified by their role 
+To allow for a single rule being used for both directions, the UDP port values are identified by their role
 (DEV or APP) and not by their position in the frame (source or destination). The SCHC C/D
-must be aware of the traffic direction (upstream, downstream) to select the appropriate
+must be aware of the traffic direction (Uplink, Downlink) to select the appropriate
 field. The following rules apply for DEV and APP port numbers.
 
 If both ends know the port number, it can be elided. The TV contains the port number,
@@ -1183,7 +1189,7 @@ the MO is set to "MSB" and the CDA is set to "LSB".
 If some well-known values are used,  the TV can contain the list of these values, the
 MO is set to "match-mapping" and the CDA is set to "mapping-sent".
 
-Otherwise the port numbers are sent on the LPWAN. The TV is not set, the MO is 
+Otherwise the port numbers are sent over the LPWAN. The TV is not set, the MO is
 set to "ignore" and the CDA is set to "value-sent".
 
 ## UDP length field
@@ -1195,12 +1201,12 @@ the CDA is set to "compute-UDP-length".
 If the payload is small, the TV can be set to 0x0000, the MO set to "MSB" and the
 CDA to "LSB". 
 
-On other cases, the length must be sent and the CDA is replaced by "value-sent".
+In other cases, the length must be sent and the CDA is replaced by "value-sent".
 
 ## UDP Checksum field
 
 IPv6 mandates a checksum in the protocol above IP. Nevertheless, if a more efficient
-mechanism such as L2 CRC or MIC is carried by or over the L2 (such as in the 
+mechanism such as L2 CRC or MIC is carried by or over the L2 (such as in the
 LPWAN fragmentation process (see {{Frag}})), the UDP checksum transmission can be avoided.
 In that case, the TV is not set, the MO is set to "ignore" and the CDA is set to
 "compute-UDP-checksum".
@@ -1212,7 +1218,7 @@ In other cases, the checksum must be explicitly sent. The TV is not set, the MO 
 
 ## Security considerations for header compression
 A malicious header compression could cause the reconstruction of a 
-wrong packet that does not match with the original one, such corruption 
+wrong packet that does not match with the original one. Such a corruption
 may be detected with end-to-end authentication and integrity mechanisms. 
 Denial of Service may be produced but its arise other security problems 
 that may be solved with or without header compression.
@@ -1269,7 +1275,7 @@ useful design consideration and comments.
 
 
 This section gives some scenarios of the compression mechanism for IPv6/UDP.
-The goal is to illustrate the SCHC behavior.
+The goal is to illustrate the behavior of SCHC.
 
 The most common case using the mechanisms defined in this document will be a 
 LPWAN Dev that embeds some applications running over
@@ -1305,7 +1311,7 @@ with dotted lines since these protocols are compressed on the radio link.
 
 
 Note that in some LPWAN technologies, only the Devs have a device ID.
-Therefore, when such technologies are used, it is necessary to define statically an IID for the Link
+Therefore, when such technologies are used, it is necessary to statically define an IID for the Link
 Local address for the SCHC C/D.
 
 ~~~~
@@ -1361,7 +1367,7 @@ Rule 0
  +----------------+--+--+--+---------+--------+------------++------+
  | Field          |FL|FP|DI| Value   | Match  | Action     || Sent |
  |                |  |  |  |         | Opera. | Action     ||[bits]|
- +----------------+--+--+--+---------+--------+-------------++------+
+ +----------------+--+--+--+---------+--------+------------++------+
  |IPv6 version    |4 |1 |Bi|6        | equal  | not-sent   ||      |
  |IPv6 DiffServ   |8 |1 |Bi|0        | equal  | not-sent   ||      |
  |IPv6 Flow Label |20|1 |Bi|0        | equal  | not-sent   ||      |
@@ -1396,9 +1402,9 @@ The third rule compresses port numbers to 4 bits.
 
 # Fragmentation Examples 
 
-This section provides examples of different fragment delivery reliability options possible on the basis of this specification.
+This section provides examples for the different fragment delivery reliability modes specified in this document.
 
-{{Fig-Example-Unreliable}} illustrates the transmission of an IPv6 packet that needs 11 fragments in the No ACK option. Where FCN is always 1 bit.
+{{Fig-Example-Unreliable}} illustrates the transmission in No-ACK mode of an IPv6 packet that needs 11 fragments. FCN is 1 bit wide.
 
 ~~~~
         Sender               Receiver
@@ -1415,9 +1421,11 @@ This section provides examples of different fragment delivery reliability option
           |-------FCN=1-------->|MIC checked =>
          
 ~~~~
-{: #Fig-Example-Unreliable title='Transmission of an IPv6 packet carried by 11 fragments in the No ACK option'}
+{: #Fig-Example-Unreliable title='Transmission in No-ACK mode of an IPv6 packet carried by 11 fragments'}
 
-{{Fig-Example-Win-NoLoss-NACK}} illustrates the transmission of an IPv6 packet that needs 11 fragments in ACK-on-error, for N=3, without losses.
+In the following examples, N, the size if the FCN field, is 3 bits. Therefore, the All-1 FCN value is 7.
+
+{{Fig-Example-Win-NoLoss-NACK}} illustrates the transmission in ACK-on-error of an IPv6 packet that needs 11 fragments, with MAX_WIND_FCN=6 and no fragment loss.
 
 ~~~~
         Sender               Receiver
@@ -1436,9 +1444,9 @@ This section provides examples of different fragment delivery reliability option
           |<---- ACK, W=1 ------|
 
 ~~~~
-{: #Fig-Example-Win-NoLoss-NACK title='Transmission of an IPv6 packet carried by 11 fragments in ACK-on-error, for N=3 and MAX_WIND_FCN=6, without losses.'}
+{: #Fig-Example-Win-NoLoss-NACK title='Transmission ACK-on-error mode of an IPv6 packet carried by 11 fragments, with MAX_WIND_FCN=6 and no loss.'}
 
-{{Fig-Example-Rel-Window-NACK-Loss}} illustrates the transmission of an IPv6 packet that needs 11 fragments ACK-on-error, for N=3, with three losses.
+{{Fig-Example-Rel-Window-NACK-Loss}} illustrates the transmission in ACK-on-error mode of an IPv6 packet that needs 11 fragments, with MAX_WIND_FCN=6 and three lost fragments.
 
 ~~~~
          Sender             Receiver
@@ -1459,12 +1467,12 @@ This section provides examples of different fragment delivery reliability option
           |-----W=1, FCN=7----->|MIC checked
           |<-----ACK, W=1-------|C=0 Bitmap:1100001
           |-----W=1, FCN=4----->|MIC checked =>
-          |<---- ACK, W=1 ------|    
+          |<---- ACK, W=1 ------|C=1, no bitmap
 
 ~~~~
-{: #Fig-Example-Rel-Window-NACK-Loss title='Transmission of an IPv6 packet carried by 11 fragments in ACK-on-error, for N=3 and MAX_WIND_FCN=6, three losses.'}
+{: #Fig-Example-Rel-Window-NACK-Loss title='Transmission in ACK-on-error mode of an IPv6 packet carried by 11 fragments, with MAX_WIND_FCN=6 and three lost fragments.'}
 
-{{Fig-Example-Rel-Window-ACK-NoLoss}} illustrates the transmission of an IPv6 packet that needs 11 fragments in ACK-Always, for N=3 and MAX_WIND_FCN=6, without losses. Note: in Window mode, an additional bit will be needed to number windows. 
+{{Fig-Example-Rel-Window-ACK-NoLoss}} illustrates the transmission in ACK-Always mdoe of an IPv6 packet that needs 11 fragments, with MAX_WIND_FCN=6 and no loss. Note: in Window mode, an additional bit will be needed to number windows.
 
 ~~~~
         Sender               Receiver
@@ -1484,9 +1492,9 @@ This section provides examples of different fragment delivery reliability option
         (End)    
 
 ~~~~
-{: #Fig-Example-Rel-Window-ACK-NoLoss title='Transmission of an IPv6 packet carried by 11 fragments in ACK-Always, for N=3 and MAX_WIND_FCN=6, no losses.'}
+{: #Fig-Example-Rel-Window-ACK-NoLoss title='Transmission in ACK-Always mode of an IPv6 packet carried by 11 fragments, with MAX_WIND_FCN=6 and no lost fragment.'}
 
-{{Fig-Example-Rel-Window-ACK-Loss}} illustrates the transmission of an IPv6 packet that needs 11 fragments in ACK-Always, for N=3 and MAX_WIND_FCN=6, with three losses.
+{{Fig-Example-Rel-Window-ACK-Loss}} illustrates the transmission in ACK-Always mode of an IPv6 packet that needs 11 fragments, with MAX_WIND_FCN=6 and three lost fragments.
 
 ~~~~
         Sender               Receiver
@@ -1511,121 +1519,120 @@ This section provides examples of different fragment delivery reliability option
         (End)    
 
 ~~~~
-{: #Fig-Example-Rel-Window-ACK-Loss title='Transmission of an IPv6 packet carried by 11 fragments in ACK-Always, for N=3, and MAX_WIND_FCN=6, with three losses.'}
+{: #Fig-Example-Rel-Window-ACK-Loss title='Transmission in ACK-Always mode of an IPv6 packet carried by 11 fragments, with MAX_WIND_FCN=6 and three lost fragments.'}
 
-{{Fig-Example-Rel-Window-ACK-Loss-Last-A}} illustrates the transmission of an IPv6 packet that needs 6 fragments in ACK-Always, for N=3 and MAX_WIND_FCN=6, with three losses, and only one retry is needed for each lost fragment. Note that, since a single window is needed for transmission of the IPv6 packet in this case, the example illustrates behavior when losses happen in the last window. 
+{{Fig-Example-Rel-Window-ACK-Loss-Last-A}} illustrates the transmission in ACK-Always mode of an IPv6 packet that needs 6 fragments, with MAX_WIND_FCN=6, three lost fragments and only one retry needed to recover each lost fragment. Note that, since a single window is needed for transmission of the IPv6 packet in this case, the example illustrates behavior when losses happen in the last window.
 
 ~~~~
           Sender                Receiver
-             |-----W=0, CFN=6----->|
-             |-----W=0, CFN=5----->|
-             |-----W=0, CFN=4--X-->|
-             |-----W=0, CFN=3--X-->|
-             |-----W=0, CFN=2--X-->|
-             |-----W=0, CFN=7----->|MIC checked 
+             |-----W=0, FCN=6----->|
+             |-----W=0, FCN=5----->|
+             |-----W=0, FCN=4--X-->|
+             |-----W=0, FCN=3--X-->|
+             |-----W=0, FCN=2--X-->|
+             |-----W=0, FCN=7----->|MIC checked
              |<-----ACK, W=0-------|C= 0 Bitmap:1100001
-             |-----W=0, CFN=4----->|MIC checked: failed
-             |-----W=0, CFN=3----->|MIC checked: failed
-             |-----W=0, CFN=2----->|MIC checked: success
+             |-----W=0, FCN=4----->|MIC checked: failed
+             |-----W=0, FCN=3----->|MIC checked: failed
+             |-----W=0, FCN=2----->|MIC checked: success
              |<-----ACK, W=0-------|C=1 no Bitmap
            (End) 
 ~~~~
-{: #Fig-Example-Rel-Window-ACK-Loss-Last-A title='Transmission of an IPv6 packet carried by 11 fragments in ACK-Always, for N=3, and MAX_WIND_FCN=6, with three losses, and only one retry is needed for each lost fragment.'}
+{: #Fig-Example-Rel-Window-ACK-Loss-Last-A title='Transmission in ACK-Always mode of an IPv6 packet carried by 11 fragments, fwith MAX_WIND_FCN=6, three lost framents and only one retry needed for each lost fragment.'}
 
-{{Fig-Example-Rel-Window-ACK-Loss-Last-B}} illustrates the transmission of an IPv6 packet that needs 6 fragments in ACK-Always, for N=3 and MAX_WIND_FCN=6, with three losses, and the second ACK is lost. Note that, since a single window is needed for transmission of the IPv6 packet in this case, the example illustrates behavior when losses happen in the last window. 
+{{Fig-Example-Rel-Window-ACK-Loss-Last-B}} illustrates the transmission in ACK-Always mode of an IPv6 packet that needs 6 fragments, with MAX_WIND_FCN=6, three lost fragments, and the second ACK lost. Note that, since a single window is needed for transmission of the IPv6 packet in this case, the example illustrates behavior when losses happen in the last window.
 
 ~~~~
           Sender                Receiver
-             |-----W=0, CFN=6----->|
-             |-----W=0, CFN=5----->|
-             |-----W=0, CFN=4--X-->|
-             |-----W=0, CFN=3--X-->|
-             |-----W=0, CFN=2--X-->|
-             |-----W=0, CFN=7----->|MIC checked 
+             |-----W=0, FCN=6----->|
+             |-----W=0, FCN=5----->|
+             |-----W=0, FCN=4--X-->|
+             |-----W=0, FCN=3--X-->|
+             |-----W=0, FCN=2--X-->|
+             |-----W=0, FCN=7----->|MIC checked
              |<-----ACK, W=0-------|C=0  Bitmap:1100001
-             |-----W=0, CFN=4----->|MIC checked: wrong
-             |-----W=0, CFN=3----->|MIC checked: wrong
-             |-----W=0, CFN=2----->|MIC checked: right
+             |-----W=0, FCN=4----->|MIC checked: wrong
+             |-----W=0, FCN=3----->|MIC checked: wrong
+             |-----W=0, FCN=2----->|MIC checked: right
              |  X---ACK, W=0-------|C= 1 no Bitmap
     timeout  |                     |
-             |-----W=0, CFN=7----->|
+             |-----W=0, FCN=7----->|
              |<-----ACK, W=0-------|C= 1 no Bitmap  
 
            (End) 
 ~~~~
-{: #Fig-Example-Rel-Window-ACK-Loss-Last-B title='Transmission of an IPv6 packet carried by 11 fragments in ACK-Always, for N=3, and MAX_WIND_FCN=6, with three losses, and the second ACK is lost.'}
+{: #Fig-Example-Rel-Window-ACK-Loss-Last-B title='Transmission in ACK-Always mode of an IPv6 packet carried by 11 fragments, with MAX_WIND_FCN=6, three lost fragments, and the second ACK lost.'}
 
-{{Fig-Example-Rel-Window-ACK-Loss-Last-C}} illustrates the transmission of an IPv6 packet that needs 6 fragments in ACK-Always, for N=3 and MAX_WIND_FCN=6, with three losses, and one retransmitted fragment is lost. Note that, since a single window is needed for transmission of the IPv6 packet in this case, the example illustrates behavior when losses happen in the last window. 
+{{Fig-Example-Rel-Window-ACK-Loss-Last-C}} illustrates the transmission in ACK-Always mode of an IPv6 packet that needs 6 fragments, with MAX_WIND_FCN=6, with three lost fragments, and one retransmitted fragment lost again. Note that, since a single window is needed for transmission of the IPv6 packet in this case, the example illustrates behavior when losses happen in the last window.
 
 ~~~~
            Sender                Receiver
-             |-----W=0, CFN=6----->|
-             |-----W=0, CFN=5----->|
-             |-----W=0, CFN=4--X-->|
-             |-----W=0, CFN=3--X-->|
-             |-----W=0, CFN=2--X-->|
-             |-----W=0, CFN=7----->|MIC checked  
+             |-----W=0, FCN=6----->|
+             |-----W=0, FCN=5----->|
+             |-----W=0, FCN=4--X-->|
+             |-----W=0, FCN=3--X-->|
+             |-----W=0, FCN=2--X-->|
+             |-----W=0, FCN=7----->|MIC checked
              |<-----ACK, W=0-------|C=0   Bitmap:1100001
-             |-----W=0, CFN=4----->|MIC checked: wrong
-             |-----W=0, CFN=3----->|MIC checked: wrong
-             |-----W=0, CFN=2--X-->| 
+             |-----W=0, FCN=4----->|MIC checked: wrong
+             |-----W=0, FCN=3----->|MIC checked: wrong
+             |-----W=0, FCN=2--X-->|
       timeout|                     |
-             |-----W=0, CFN=7----->|All-0 empty 
+             |-----W=0, FCN=7----->|All-0 empty
              |<-----ACK, W=0-------|C=0 Bitmap: 1111101
-             |-----W=0, CFN=2----->|MIC checked: right
+             |-----W=0, FCN=2----->|MIC checked: right
              |<-----ACK, W=0-------|C=1 no Bitmap
            (End) 
 ~~~~
-{: #Fig-Example-Rel-Window-ACK-Loss-Last-C title='Transmission of an IPv6 packet carried by 11 fragments in ACK-Always, for N=3, and MAX_WIND_FCN=6, with three losses, and one retransmitted fragment is lost.'}
+{: #Fig-Example-Rel-Window-ACK-Loss-Last-C title='Transmission in ACK-Always mode of an IPv6 packet carried by 11 fragments, with MAX_WIND_FCN=6, with three lost fragments, and one retransmitted fragment lost again.'}
 
 
-{{Fig-Example-MaxWindFCN}} illustrates the transmission of an IPv6 packet that needs 28 fragments in ACK-Always, for N=5 and MAX_WIND_FCN=23, with two losses. Note that MAX_WIND_FCN=23 may be useful when the maximum possible Bitmap size, considering the maximum lower layer technology payload size and the value of R, is 3 bytes. Note also that the FCN of the last fragment of the packet is the one with FCN=31 (i.e. FCN=2^N-1 for N=5, or equivalently, all FCN bits set to 1). 
+{{Fig-Example-MaxWindFCN}} illustrates the transmission in ACK-Always mode of an IPv6 packet that needs 28 fragments, with N=5, MAX_WIND_FCN=23 and two lost fragments. Note that MAX_WIND_FCN=23 may be useful when the maximum possible Bitmap size, considering the maximum lower layer technology payload size and the value of R, is 3 bytes. Note also that the FCN of the last fragment of the packet is the one with FCN=31 (i.e. FCN=2^N-1 for N=5, or equivalently, all FCN bits set to 1).
 
 ~~~~
            Sender               Receiver
-             |-----W=0, CFN=23----->|
-             |-----W=0, CFN=22----->|
-             |-----W=0, CFN=21--X-->|
-             |-----W=0, CFN=20----->|
-             |-----W=0, CFN=19----->|
-             |-----W=0, CFN=18----->|
-             |-----W=0, CFN=17----->|
-             |-----W=0, CFN=16----->|
-             |-----W=0, CFN=15----->|
-             |-----W=0, CFN=14----->|
-             |-----W=0, CFN=13----->|
-             |-----W=0, CFN=12----->|
-             |-----W=0, CFN=11----->|
-             |-----W=0, CFN=10--X-->|
-             |-----W=0, CFN=9 ----->|
-             |-----W=0, CFN=8 ----->|
-             |-----W=0, CFN=7 ----->|
-             |-----W=0, CFN=6 ----->|
-             |-----W=0, CFN=5 ----->|
-             |-----W=0, CFN=4 ----->|
-             |-----W=0, CFN=3 ----->|
-             |-----W=0, CFN=2 ----->|
-             |-----W=0, CFN=1 ----->|
-             |-----W=0, CFN=0 ----->|
+             |-----W=0, FCN=23----->|
+             |-----W=0, FCN=22----->|
+             |-----W=0, FCN=21--X-->|
+             |-----W=0, FCN=20----->|
+             |-----W=0, FCN=19----->|
+             |-----W=0, FCN=18----->|
+             |-----W=0, FCN=17----->|
+             |-----W=0, FCN=16----->|
+             |-----W=0, FCN=15----->|
+             |-----W=0, FCN=14----->|
+             |-----W=0, FCN=13----->|
+             |-----W=0, FCN=12----->|
+             |-----W=0, FCN=11----->|
+             |-----W=0, FCN=10--X-->|
+             |-----W=0, FCN=9 ----->|
+             |-----W=0, FCN=8 ----->|
+             |-----W=0, FCN=7 ----->|
+             |-----W=0, FCN=6 ----->|
+             |-----W=0, FCN=5 ----->|
+             |-----W=0, FCN=4 ----->|
+             |-----W=0, FCN=3 ----->|
+             |-----W=0, FCN=2 ----->|
+             |-----W=0, FCN=1 ----->|
+             |-----W=0, FCN=0 ----->|
              |                      |lcl-Bitmap:110111111111101111111111
              |<------ACK, W=0-------| Bitmap:1101111111111011
-             |-----W=0, CFN=21----->|
-             |-----W=0, CFN=10----->|
+             |-----W=0, FCN=21----->|
+             |-----W=0, FCN=10----->|
              |<------ACK, W=0-------|no Bitmap
-             |-----W=1, CFN=23----->|
-             |-----W=1, CFN=22----->|
-             |-----W=1, CFN=21----->|
-             |-----W=1, CFN=31----->|MIC checked =>
+             |-----W=1, FCN=23----->|
+             |-----W=1, FCN=22----->|
+             |-----W=1, FCN=21----->|
+             |-----W=1, FCN=31----->|MIC checked =>
              |<------ACK, W=1-------|no Bitmap
            (End)
 ~~~~
-
-{: #Fig-Example-MaxWindFCN title='Transmission of an IPv6 packet carried by 28 fragments in ACK-Always, for N=5 and MAX_WIND_FCN=23, with two losses.'}
+{: #Fig-Example-MaxWindFCN title='Transmission in ACK-Always mode of an IPv6 packet carried by 28 fragments, with N=5, MAX_WIND_FCN=23 and two lost fragments.'}
 
 
 # Fragmentation State Machines
 
-The fragmentation state machines of the sender and the receiver in the different reliability options are next in the following figures:
+The fragmentation state machines of the sender and the receiver, one for each of the different reliability modes, are described in the following figures:
 
 
 ~~~~
@@ -1892,9 +1899,9 @@ Lcl_Bitmap==recv_Bitmap &| |   |   all missing frag sent
 
 # Allocation of Rule IDs for fragmentation
 
-A set of Rule IDs are allocated to support different aspects of fragmentation functionality as per this document. The allocation of IDs is to be defined in other documents. The set MAY include:   
+A set of Rule IDs has to be allocated to support different aspects of fragmentation functionality as per this document. The actual allocation of IDs is to be defined in other documents. The set MAY include:
 
-   *  one ID or a subset of IDs to identify a fragment as well as its reliability option and its window size, if multiple of these are supported.
+   *  one ID or several IDs to identify a fragment as well as its reliability mode and its window size, if multiple of these are supported.
    
    *  one ID to identify the ACK message.
    
