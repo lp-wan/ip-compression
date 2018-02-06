@@ -514,7 +514,7 @@ LPWAN technologies impose some strict limitations on traffic, (e.g.) devices are
 
 This subsection describes the different fields in the fragmentation header frames (see the related formats in {{Fragfor}}), as well as the tools that are used to enable the fragmentation functionalities defined in this document, and the different reliability modes supported. 
 
-*  Rule ID. The Rule ID is present in the fragment header and in the ACK header format.  The Rule ID in a fragment header is used to identify that a fragment is being carried, what fragmentation delivery reliability mode is used and what window size is used (if multiple sizes are possible). The Rule ID  in the fragmentation header also allows interleaving non-fragmented IPv6 datagrams with fragments that carry a larger IPv6 datagram. The Rule ID in an ACK identifies the message as an ACK.
+*  Rule ID. The Rule ID is present in the fragment header and in the ACK header format.  The Rule ID in a fragment header is used to identify that a fragment is being carried, what fragmentation delivery reliability mode is used and what window size is used (if multiple sizes are possible). The Rule ID  in the fragmentation header also allows interleaving non-fragmented IPv6 datagrams and fragments that carry other IPv6 datagrams. The Rule ID in an ACK identifies the message as an ACK.
 
 *  Fragment Compressed Number (FCN).  The FCN is included in all fragments.  This field can be understood as a truncated, 
 efficient representation of a larger-sized fragment number, and does not carry an absolute fragment number.  There are two FCN reserved values that are used for controlling the fragmentation process, as described next. The FCN value with all the bits equal to 1 (All-1) denotes the last
@@ -529,7 +529,7 @@ In the fragments, this field is an unsigned integer, with a size of N bits. In t
    will carry a FCN of 0.
    
 *  Datagram Tag (DTag). The DTag field, if present, is set to the same value for all fragments carrying the same IPv6 datagram, and to different values for different datagrams. Using this field, the sender can interleave fragments from different IPv6 datagrams, while the receiver can still tell them apart.
-In the fragment formats, the size of the DTag field is T bits, which may be set to a value greater than or equal to 0 bits.  DTag MUST increase sequentially from 0 to 2^T - 1, and MUST wrap back from 2^T - 1 to 0.
+In the fragment formats, the size of the DTag field is T bits, which may be set to a value greater than or equal to 0 bits. For each new IPv6 datagram processed by the sender, DTag MUST be sequentially increased, from 0 to 2^T – 1 wrapping back from 2^T - 1 to 0.
 In the ACK format, DTag carries the same value as the DTag field in the fragments for which this ACK is intended.
 
 *  W (window): W is a 1-bit field. This field carries the same value for all fragments of a window, and it is complemented for the next window. The initial value for this field is 0.
@@ -553,17 +553,16 @@ fragment of the current window, and provides feedback on whether the fragment ha
 position on the Bitmap reports if the All-0 or All-1 fragment has been received or not. Feedback on the
 fragment with the highest FCN value
 is provided by the bit in the left-most position of the Bitmap. In the Bitmap, a bit set to 1 indicates that the fragment of FCN corresponding to that bit position
-has been correctly sent and received. However, the sending format of the Bitmap will be truncated until a byte
-boundary where the last error is given. However, when all the Bitmap is transmitted, it may be truncated, see more details 
+has been correctly sent and received. The text above describes the internal representation of the Bitmap. When inserted in the ACK for transmission from the receiver to the sender, the Bitmap may be truncated for energy/bandwidth optimisation, see more details 
 in {{Bitmapopt}}
 
 *  Abort. On expiration of the Inactivity timer, on Attempts reaching MAX_ACK_REQUESTS or upon occurence of some other error, the sender or the receiver may use the Abort frames.  When the receiver needs to abort the on-going fragmented packet transmission, it sends an ACK with the Abort format (all the bits set to 1). When the sender needs to abort the transmission, it sends a fragment with the All-1 Abort format. This fragment is not acked.
 
-*  Padding (P). Padding will be used to align the last byte of a fragment with a byte boundary. The number of bits used for padding is not defined and depends on the size of the Rule ID, DTag and FCN fields, and on the layer two payload size. 
+*  Padding (P). Padding will be used to align the last byte of a fragment with a byte boundary. The number of bits used for padding is not defined and depends on the size of the Rule ID, DTag and FCN fields, and on the layer two payload size. ACKs never need padding, since they are constructed to be always byte-aligned, see {{Bitmapopt}}.
 
 ## Delivery Reliability modes
 
-This specification defines the following three fragment delivery reliability modes:
+This specification defines three delivery reliability modes, namely No-ACK, ACK-Always and ACK-on-Error. ACK-Always and ACK-on-Error operate on windows of fragments. A window of fragments is a subset of the full set of fragments needed to carry an IPv6 packet. The three delivery reliability modes are overviewed next: 
 
 *  No-ACK. 
    No-ACK is the simplest fragment delivery reliability mode. The receiver does not generate overhead in the form of acknowledgments (ACKs).  However, this mode does not enhance delivery reliability beyond that offered by the underlying LPWAN technology. In the No-ACK mode, the receiver MUST NOT issue ACKs.
@@ -595,9 +594,7 @@ This specification defines the following three fragment delivery reliability mod
    one of the fragments in the window has been lost. The
    ACK informs the sender about received and/or missed fragments from
    the window of fragments. Upon receipt of an ACK that informs about
-   any lost fragments, the sender retransmits the lost fragments. However, if an ACK is lost, the sender
-   assumes that all fragments covered by the ACK have been successfully
-   delivered, and the receiver will abort the on-going fragmented packet transmission. One exception to this behavior is in the last window, where the receiver MUST transmit an ACK, even if all the fragments in the last window have been correctly received.  
+   any lost fragments, the sender retransmits the lost fragments. If an ACK is not transmitted back by the receiver at the end of a window, the implicit meaning conveyed is that all fragments have been correctly received. As a consequence,  if an ACK is lost, the sender assumes that all fragments covered by the ACK have been successfully delivered. In that case, if the next fragments received belong to the next window, the receiver will conclude that successful reassembly of the IPv6 packet is not possible. In that case,   the receiver will abort the on-going fragmented packet transmission. One exception to this behavior is in the last window, where the receiver MUST transmit an ACK, even if all the fragments in the last window have been correctly received.  
  
 The same reliability mode MUST be used for all fragments of a
    packet.  It is up to implementers and/or representatives of the
