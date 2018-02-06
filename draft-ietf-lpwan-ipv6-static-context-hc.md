@@ -1039,7 +1039,7 @@ Examples are shown in {{Fig-FormatPckt}} and {{Fig-FragFormat}}.
 
 The receiver will tell the header, the payload and the padding apart using the following principles:
 
- * The size of any SCHC header is known from exmining the Rule ID and the content of that header.
+ * The size of any SCHC header is known from examining the Rule ID and the content of that header.
  
  * The payload that follows the header, if it exists, is variable in size, but is always a integer nuber of bytes.
  
@@ -1472,7 +1472,7 @@ In the following examples, N, the size if the FCN field, is 3 bits. Therefore, t
 ~~~~
 {: #Fig-Example-Rel-Window-NACK-Loss title='Transmission in ACK-on-error mode of an IPv6 packet carried by 11 fragments, with MAX_WIND_FCN=6 and three lost fragments.'}
 
-{{Fig-Example-Rel-Window-ACK-NoLoss}} illustrates the transmission in ACK-Always mdoe of an IPv6 packet that needs 11 fragments, with MAX_WIND_FCN=6 and no loss. Note: in Window mode, an additional bit will be needed to number windows.
+{{Fig-Example-Rel-Window-ACK-NoLoss}} illustrates the transmission in ACK-Always mode of an IPv6 packet that needs 11 fragments, with MAX_WIND_FCN=6 and no loss. Note: in Window mode, an additional bit will be needed to number windows.
 
 ~~~~
         Sender               Receiver
