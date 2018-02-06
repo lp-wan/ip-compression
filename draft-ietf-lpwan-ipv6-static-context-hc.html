@@ -816,7 +816,7 @@ address {
 <li>Bitmap. The Bitmap is a sequence of bits carried in an ACK. Each bit in the Bitmap corresponds to a fragment of the current window, and provides feedback on whether the fragment has been received or not. The right-most position on the Bitmap reports if the All-0 or All-1 fragment has been received or not. Feedback on the fragment with the highest FCN value is provided by the bit in the left-most position of the Bitmap. In the Bitmap, a bit set to 1 indicates that the fragment of FCN corresponding to that bit position has been correctly sent and received. The text above describes the internal representation of the Bitmap. When inserted in the ACK for transmission from the receiver to the sender, the Bitmap may be truncated for energy/bandwidth optimisation, see more details in <a href="#Bitmapopt" class="xref">Section 5.5.3</a>
 </li>
 <li>Abort. On expiration of the Inactivity timer, on Attempts reaching MAX_ACK_REQUESTS or upon occurence of some other error, the sender or the receiver may use the Abort frames.  When the receiver needs to abort the on-going fragmented packet transmission, it sends an ACK with the Abort format (all the bits set to 1). When the sender needs to abort the transmission, it sends a fragment with the All-1 Abort format. This fragment is not acked.</li>
-<li>Padding (P). Padding will be used to align the last byte of a fragment with a byte boundary. The number of bits used for padding is not defined and depends on the size of the Rule ID, DTag and FCN fields, and on the layer two payload size. ACKs never need padding, since they are constructed to be always byte-aligned, see <a href="#Bitmapopt" class="xref">Section 5.5.3</a>.</li>
+<li>Padding (P). Padding will be used to align the last byte of a fragment with a byte boundary. The number of bits used for padding is not defined and depends on the size of the Rule ID, DTag and FCN fields, and on the layer two payload size. Some ACKs are byte-aligned and do not need padding see <a href="#Bitmapopt" class="xref">Section 5.5.3</a>.</li>
 </ul>
 <h1 id="rfc.section.5.3">
 <a href="#rfc.section.5.3">5.3.</a> <a href="#delivery-reliability-modes" id="delivery-reliability-modes">Delivery Reliability modes</a>
@@ -827,7 +827,7 @@ address {
 <ul>
 <li>No-ACK.  No-ACK is the simplest fragment delivery reliability mode. The receiver does not generate overhead in the form of acknowledgments (ACKs).  However, this mode does not enhance delivery reliability beyond that offered by the underlying LPWAN technology. In the No-ACK mode, the receiver MUST NOT issue ACKs.</li>
 <li>ACK-Always.  <br> The ACK-Always mode provides flow control.  In addition, this mode is able to handle long bursts of lost fragments, since detection of such events can be done before the end of the IPv6 packet transmission, as long as the window size is short enough. However, such benefit comes at the expense of ACK use.  In ACK-always, an ACK is transmitted by the fragment receiver after a window of fragments has been sent.  A window of fragments is a subset of the full set of fragments needed to carry an IPv6 packet.  The ACK informs the sender about received and/or missed fragments from one window of fragments.  Upon receipt of an ACK that informs about any lost fragments, the sender retransmits the lost fragments.  When an ACK is not received by the fragment sender after a reasonable time, the latter sends an ACK request using the All-1 empty fragment.  The maximum number of ACK requests is MAX_ACK_REQUESTS.</li>
-<li>ACK-on-Error. The ACK-on-Error mode is suitable for links offering relatively low L2 data unit loss probability.  This mode reduces the number of ACKs transmitted by the fragment receiver. This may be especially beneficial in asymmetric scenarios, e.g. where fragmented data are sent uplink and the underlying LPWAN technology downlink capacity or message rate is lower than the uplink one.<br> In ACK-on-Error, an ACK is transmitted by the fragment receiver after a window of fragments have been sent, only if at least one of the fragments in the window has been lost. The ACK informs the sender about received and/or missed fragments from the window of fragments. Upon receipt of an ACK that informs about any lost fragments, the sender retransmits the lost fragments. If an ACK is not transmitted back by the receiver at the end of a window, the implicit meaning conveyed is that all fragments have been correctly received. As a consequence,  if an ACK is lost, the sender assumes that all fragments covered by the ACK have been successfully delivered. In that case, if the next fragments received belong to the next window, the receiver will conclude that successful reassembly of the IPv6 packet is not possible. In that case,   the receiver will abort the on-going fragmented packet transmission. One exception to this behavior is in the last window, where the receiver MUST transmit an ACK, even if all the fragments in the last window have been correctly received.</li>
+<li>ACK-on-Error. The ACK-on-Error mode is suitable for links offering relatively low L2 data unit loss probability.  This mode reduces the number of ACKs transmitted by the fragment receiver. This may be especially beneficial in asymmetric scenarios, e.g. where fragmented data are sent uplink and the underlying LPWAN technology downlink capacity or message rate is lower than the uplink one.<br> In ACK-on-Error, an ACK is transmitted by the fragment receiver after a window of fragments have been sent, only if at least one of the fragments in the window has been lost. The ACK informs the sender about received and/or missed fragments from the window of fragments. Upon receipt of an ACK that informs about any lost fragments, the sender retransmits the lost fragments. If an ACK is not transmitted back by the receiver at the end of a window, the implicit meaning conveyed is that all fragments have been correctly received. As a consequence,  if an ACK is lost, the sender assumes that all fragments covered by the ACK have been successfully delivered. The sender will then continue transmitting the next window of fragments. If the next fragments received belong to the next window, the receiver will conclude that successful reassembly of the IPv6 packet is not possible. In that case, the receiver will abort the on-going fragmented packet transmission. As an exception to the behavior described above, the receiver MUST transmit an ACK in the last window, even if all the fragments of the last window have been correctly received.  <br><br> One exception to this behavior is in the last window, where the receiver MUST transmit an ACK, even if all the fragments in the last window have been correctly received.</li>
 </ul>
 <p id="rfc.section.5.3.p.3">The same reliability mode MUST be used for all fragments of a packet.  It is up to implementers and/or representatives of the underlying LPWAN technology to decide which reliability mode to use and whether the same reliability mode applies to all IPv6 packets or not.  Note that the reliability mode to be used is not necessarily tied to the particular characteristics of the underlying L2 LPWAN technology (e.g. the No-ACK mode may be used on top of an L2 LPWAN technology with symmetric characteristics for uplink and downlink).  <br> This document does not make any decision as to which fragment delivery reliability mode(s) are supported by a specific LPWAN technology.</p>
 <p id="rfc.section.5.3.p.4">Examples of the different reliability modes described are provided in Appendix B.</p>
@@ -859,7 +859,7 @@ address {
 
 </pre>
 <p class="figure">Figure 7: Fragment Detailed Format for Fragments except the Last One, No-ACK mode</p>
-<p id="rfc.section.5.4.1.p.3">In ACK-always or ACK-on-error, fragments except the last one SHALL conform the detailed format defined in <a href="#Fig-NotLastWin" class="xref">Figure 8</a>. The total size of the fragment header in this format is R bits.</p>
+<p id="rfc.section.5.4.1.p.3">In ACK-Always or ACK-on-Error, fragments except the last one SHALL conform the detailed format defined in <a href="#Fig-NotLastWin" class="xref">Figure 8</a>. The total size of the fragment header is R bits.</p>
 <div id="rfc.figure.8"></div>
 <div id="Fig-NotLastWin"></div>
 <pre>
@@ -874,15 +874,15 @@ address {
 <h1 id="rfc.section.5.4.2">
 <a href="#rfc.section.5.4.2">5.4.2.</a> <a href="#ack-format" id="ack-format">ACK format</a>
 </h1>
-<p id="rfc.section.5.4.2.p.1">The format of an ACK that acknowledges a window that is not the last one (denoted as ALL-0 window) is shown in <a href="#Fig-ACK-Format" class="xref">Figure 9</a>.</p>
+<p id="rfc.section.5.4.2.p.1">The format of an ACK that acknowledges a window that is not the last one (denoted as All-0 window) is shown in <a href="#Fig-ACK-Format" class="xref">Figure 9</a>.</p>
 <div id="rfc.figure.9"></div>
 <div id="Fig-ACK-Format"></div>
 <pre>
   &lt;--------  R  -------&gt;
               &lt;- T -&gt; 1  
-  +---- ... --+-... -+-+----- ... ---+
-  |  Rule ID  | DTag |W|   Bitmap    | (no payload)
-  +---- ... --+-... -+-+----- ... ---+
+  +---- ... --+-... -+-+----- ... ---+-+
+  |  Rule ID  | DTag |W|   Bitmap    |P| (no payload)
+  +---- ... --+-... -+-+----- ... ---+-+
                 
 </pre>
 <p class="figure">Figure 9: ACK format for All-0 windows</p>
@@ -890,15 +890,15 @@ address {
 <div id="rfc.figure.10"></div>
 <div id="Fig-ACK-Format1"></div>
 <pre>
-&lt;--------  R  -------&gt;  &lt;- byte boundary -&gt;
+&lt;--------  R  -------&gt;  
             &lt;- T -&gt; 1 1
-+---- ... --+-... -+-+-+
-|  Rule ID  | DTag |W|1| (MIC correct)
-+---- ... --+-... -+-+-+
++---- ... --+-... -+-+-+-+
+|  Rule ID  | DTag |W|1|P| (MIC correct)
++---- ... --+-... -+-+-+-+
                 
-+---- ... --+-... -+-+-+------- ... -------+
-|  Rule ID  | DTag |W|0|      Bitmap       | (MIC Incorrect)
-+---- ... --+-... -+-+-+------- ... -------+
++---- ... --+-... -+-+-+------- ... -------+-+
+|  Rule ID  | DTag |W|0|      Bitmap       |P|(MIC Incorrect)
++---- ... --+-... -+-+-+------- ... -------+-+
                       C
                 
 </pre>
@@ -912,9 +912,9 @@ address {
 <pre>
      &lt;------------ R -----------&gt;
                 &lt;- T -&gt; 1 &lt;- N -&gt; 
-     +-- ... --+- ... -+-+- ... -+--- ... ---+
-     | Rule ID | DTag  |W|  0..0 |  payload  |  
-     +-- ... --+- ... -+-+- ... -+--- ... ---+
+     +-- ... --+- ... -+-+- ... -+--- ... ---+-+
+     | Rule ID | DTag  |W|  0..0 |  payload  |P|  
+     +-- ... --+- ... -+-+- ... -+--- ... ---+-+
      
 </pre>
 <p class="figure">Figure 11: All-0 fragment detailed format</p>
@@ -924,9 +924,9 @@ address {
 <pre>
  &lt;------------ R -----------&gt;
             &lt;- T -&gt; 1 &lt;- N -&gt; 
- +-- ... --+- ... -+-+- ... -+
- | Rule ID | DTag  |W|  0..0 | (no payload)  
- +-- ... --+- ... -+-+- ... -+
+ +-- ... --+- ... -+-+- ... -+-+
+ | Rule ID | DTag  |W|  0..0 |P| (no payload)  
+ +-- ... --+- ... -+-+- ... -+-+
               
 </pre>
 <p class="figure">Figure 12: All-0 empty fragment detailed format</p>
@@ -936,9 +936,9 @@ address {
 <pre>
 &lt;------------- R ---------&gt;
               &lt;- T -&gt; &lt;-N-&gt; &lt;---- M ----&gt;
-+---- ... ---+- ... -+-----+---- ... ----+---...---+
-|   Rule ID  | DTag  |  1  |     MIC     | payload |
-+---- ... ---+- ... -+-----+---- ... ----+---...---+
++---- ... ---+- ... -+-----+---- ... ----+---...---+-+
+|   Rule ID  | DTag  |  1  |     MIC     | payload |P|
++---- ... ---+- ... -+-----+---- ... ----+---...---+-+
     
 </pre>
 <p class="figure">Figure 13: All-1 Fragment Detailed Format for the Last Fragment, No-ACK mode</p>
@@ -948,9 +948,9 @@ address {
 <pre>
 &lt;----------- R ------------&gt;
            &lt;- T -&gt; 1 &lt;- N -&gt; &lt;---- M ----&gt;
-+-- ... --+- ... -+-+- ... -+---- ... ----+---...---+
-| Rule ID | DTag  |W| 11..1 |     MIC     | payload |
-+-- ... --+- ... -+-+- ... -+---- ... ----+---...---+
++-- ... --+- ... -+-+- ... -+---- ... ----+---...---+-+
+| Rule ID | DTag  |W| 11..1 |     MIC     | payload |P|
++-- ... --+- ... -+-+- ... -+---- ... ----+---...---+-+
                       (FCN)
 </pre>
 <p class="figure">Figure 14: All-1 Fragment Detailed Format for the Last Fragment, ACK-Always or ACK-on-Error</p>
@@ -960,9 +960,9 @@ address {
 <pre>
 &lt;------------ R -----------&gt;
            &lt;- T -&gt; 1 &lt;- N -&gt; &lt;---- M ----&gt;
-+-- ... --+- ... -+-+- ... -+---- ... ----+
-| Rule ID | DTag  |W|  1..1 |     MIC     | (no payload)  
-+-- ... --+- ... -+-+- ... -+---- ... ----+
++-- ... --+- ... -+-+- ... -+---- ... ----+-+
+| Rule ID | DTag  |W|  1..1 |     MIC     |P| (no payload)  
++-- ... --+- ... -+-+- ... -+---- ... ----+-+
 
 </pre>
 <p class="figure">Figure 15: All-1 for Retries format, also called All-1 empty</p>

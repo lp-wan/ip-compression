@@ -1013,9 +1013,8 @@ Internet-Draft                 LPWAN SCHC                  February 2018
    o  Padding (P).  Padding will be used to align the last byte of a
       fragment with a byte boundary.  The number of bits used for
       padding is not defined and depends on the size of the Rule ID,
-      DTag and FCN fields, and on the layer two payload size.  ACKs
-      never need padding, since they are constructed to be always byte-
-      aligned, see Section 5.5.3.
+      DTag and FCN fields, and on the layer two payload size.  Some ACKs
+      are byte-aligned and do not need padding see Section 5.5.3.
 
 5.3.  Delivery Reliability modes
 
@@ -1058,6 +1057,7 @@ Internet-Draft                 LPWAN SCHC                  February 2018
       In ACK-on-Error, an ACK is transmitted by the fragment receiver
       after a window of fragments have been sent, only if at least one
       of the fragments in the window has been lost.  The ACK informs the
+      sender about received and/or missed fragments from the window of
 
 
 
@@ -1066,20 +1066,24 @@ Minaburo, et al.         Expires August 10, 2018               [Page 19]
 Internet-Draft                 LPWAN SCHC                  February 2018
 
 
-      sender about received and/or missed fragments from the window of
       fragments.  Upon receipt of an ACK that informs about any lost
       fragments, the sender retransmits the lost fragments.  If an ACK
       is not transmitted back by the receiver at the end of a window,
       the implicit meaning conveyed is that all fragments have been
       correctly received.  As a consequence, if an ACK is lost, the
       sender assumes that all fragments covered by the ACK have been
-      successfully delivered.  In that case, if the next fragments
+      successfully delivered.  The sender will then continue
+      transmitting the next window of fragments.  If the next fragments
       received belong to the next window, the receiver will conclude
       that successful reassembly of the IPv6 packet is not possible.  In
       that case, the receiver will abort the on-going fragmented packet
-      transmission.  One exception to this behavior is in the last
-      window, where the receiver MUST transmit an ACK, even if all the
-      fragments in the last window have been correctly received.
+      transmission.  As an exception to the behavior described above,
+      the receiver MUST transmit an ACK in the last window, even if all
+      the fragments of the last window have been correctly received.
+
+      One exception to this behavior is in the last window, where the
+      receiver MUST transmit an ACK, even if all the fragments in the
+      last window have been correctly received.
 
    The same reliability mode MUST be used for all fragments of a packet.
    It is up to implementers and/or representatives of the underlying
@@ -1113,10 +1117,6 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-
-
-
-
 Minaburo, et al.         Expires August 10, 2018               [Page 20]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
@@ -1142,9 +1142,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
    Figure 7: Fragment Detailed Format for Fragments except the Last One,
                                 No-ACK mode
 
-   In ACK-always or ACK-on-error, fragments except the last one SHALL
+   In ACK-Always or ACK-on-Error, fragments except the last one SHALL
    conform the detailed format defined in Figure 8.  The total size of
-   the fragment header in this format is R bits.
+   the fragment header is R bits.
 
                <------------ R ---------->
                          <--T--> 1 <--N-->
@@ -1159,13 +1159,13 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 5.4.2.  ACK format
 
    The format of an ACK that acknowledges a window that is not the last
-   one (denoted as ALL-0 window) is shown in Figure 9.
+   one (denoted as All-0 window) is shown in Figure 9.
 
      <--------  R  ------->
                  <- T -> 1
-     +---- ... --+-... -+-+----- ... ---+
-     |  Rule ID  | DTag |W|   Bitmap    | (no payload)
-     +---- ... --+-... -+-+----- ... ---+
+     +---- ... --+-... -+-+----- ... ---+-+
+     |  Rule ID  | DTag |W|   Bitmap    |P| (no payload)
+     +---- ... --+-... -+-+----- ... ---+-+
 
 
                   Figure 9: ACK format for All-0 windows
@@ -1184,15 +1184,15 @@ Internet-Draft                 LPWAN SCHC                  February 2018
    present in the All-1 fragment.  If the MIC check fails, the C bit is
    set to 0 and the Bitmap for the All-1 window follows.
 
-   <--------  R  ------->  <- byte boundary ->
+   <--------  R  ------->
                <- T -> 1 1
-   +---- ... --+-... -+-+-+
-   |  Rule ID  | DTag |W|1| (MIC correct)
-   +---- ... --+-... -+-+-+
+   +---- ... --+-... -+-+-+-+
+   |  Rule ID  | DTag |W|1|P| (MIC correct)
+   +---- ... --+-... -+-+-+-+
 
-   +---- ... --+-... -+-+-+------- ... -------+
-   |  Rule ID  | DTag |W|0|      Bitmap       | (MIC Incorrect)
-   +---- ... --+-... -+-+-+------- ... -------+
+   +---- ... --+-... -+-+-+------- ... -------+-+
+   |  Rule ID  | DTag |W|0|      Bitmap       |P|(MIC Incorrect)
+   +---- ... --+-... -+-+-+------- ... -------+-+
                          C
 
 
@@ -1205,9 +1205,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
         <------------ R ----------->
                    <- T -> 1 <- N ->
-        +-- ... --+- ... -+-+- ... -+--- ... ---+
-        | Rule ID | DTag  |W|  0..0 |  payload  |
-        +-- ... --+- ... -+-+- ... -+--- ... ---+
+        +-- ... --+- ... -+-+- ... -+--- ... ---+-+
+        | Rule ID | DTag  |W|  0..0 |  payload  |P|
+        +-- ... --+- ... -+-+- ... -+--- ... ---+-+
 
 
                  Figure 11: All-0 fragment detailed format
@@ -1218,9 +1218,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
     <------------ R ----------->
                <- T -> 1 <- N ->
-    +-- ... --+- ... -+-+- ... -+
-    | Rule ID | DTag  |W|  0..0 | (no payload)
-    +-- ... --+- ... -+-+- ... -+
+    +-- ... --+- ... -+-+- ... -+-+
+    | Rule ID | DTag  |W|  0..0 |P| (no payload)
+    +-- ... --+- ... -+-+- ... -+-+
 
 
               Figure 12: All-0 empty fragment detailed format
@@ -1240,9 +1240,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
    <------------- R --------->
                  <- T -> <-N-> <---- M ---->
-   +---- ... ---+- ... -+-----+---- ... ----+---...---+
-   |   Rule ID  | DTag  |  1  |     MIC     | payload |
-   +---- ... ---+- ... -+-----+---- ... ----+---...---+
+   +---- ... ---+- ... -+-----+---- ... ----+---...---+-+
+   |   Rule ID  | DTag  |  1  |     MIC     | payload |P|
+   +---- ... ---+- ... -+-----+---- ... ----+---...---+-+
 
 
    Figure 13: All-1 Fragment Detailed Format for the Last Fragment, No-
@@ -1255,9 +1255,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
    <----------- R ------------>
               <- T -> 1 <- N -> <---- M ---->
-   +-- ... --+- ... -+-+- ... -+---- ... ----+---...---+
-   | Rule ID | DTag  |W| 11..1 |     MIC     | payload |
-   +-- ... --+- ... -+-+- ... -+---- ... ----+---...---+
+   +-- ... --+- ... -+-+- ... -+---- ... ----+---...---+-+
+   | Rule ID | DTag  |W| 11..1 |     MIC     | payload |P|
+   +-- ... --+- ... -+-+- ... -+---- ... ----+---...---+-+
                          (FCN)
 
    Figure 14: All-1 Fragment Detailed Format for the Last Fragment, ACK-
@@ -1270,9 +1270,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
    <------------ R ----------->
               <- T -> 1 <- N -> <---- M ---->
-   +-- ... --+- ... -+-+- ... -+---- ... ----+
-   | Rule ID | DTag  |W|  1..1 |     MIC     | (no payload)
-   +-- ... --+- ... -+-+- ... -+---- ... ----+
+   +-- ... --+- ... -+-+- ... -+---- ... ----+-+
+   | Rule ID | DTag  |W|  1..1 |     MIC     |P| (no payload)
+   +-- ... --+- ... -+-+- ... -+---- ... ----+-+
 
 
        Figure 15: All-1 for Retries format, also called All-1 empty
