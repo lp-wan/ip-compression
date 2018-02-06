@@ -558,7 +558,7 @@ in {{Bitmapopt}}
 
 *  Abort. On expiration of the Inactivity timer, on Attempts reaching MAX_ACK_REQUESTS or upon occurence of some other error, the sender or the receiver may use the Abort frames.  When the receiver needs to abort the on-going fragmented packet transmission, it sends an ACK with the Abort format (all the bits set to 1). When the sender needs to abort the transmission, it sends a fragment with the All-1 Abort format. This fragment is not acked.
 
-*  Padding (P). Padding will be used to align the last byte of a fragment with a byte boundary. The number of bits used for padding is not defined and depends on the size of the Rule ID, DTag and FCN fields, and on the layer two payload size. ACKs never need padding, since they are constructed to be always byte-aligned, see {{Bitmapopt}}.
+*  Padding (P). Padding will be used to align the last byte of a fragment with a byte boundary. The number of bits used for padding is not defined and depends on the size of the Rule ID, DTag and FCN fields, and on the layer two payload size. Some ACKs are byte-aligned and do not need padding see {{Bitmapopt}}.
 
 ## Delivery Reliability modes
 
@@ -594,7 +594,10 @@ This specification defines three delivery reliability modes, namely No-ACK, ACK-
    one of the fragments in the window has been lost. The
    ACK informs the sender about received and/or missed fragments from
    the window of fragments. Upon receipt of an ACK that informs about
-   any lost fragments, the sender retransmits the lost fragments. If an ACK is not transmitted back by the receiver at the end of a window, the implicit meaning conveyed is that all fragments have been correctly received. As a consequence,  if an ACK is lost, the sender assumes that all fragments covered by the ACK have been successfully delivered. In that case, if the next fragments received belong to the next window, the receiver will conclude that successful reassembly of the IPv6 packet is not possible. In that case,   the receiver will abort the on-going fragmented packet transmission. One exception to this behavior is in the last window, where the receiver MUST transmit an ACK, even if all the fragments in the last window have been correctly received.  
+   any lost fragments, the sender retransmits the lost fragments. If an ACK is not transmitted back by the receiver at the end of a window, the implicit meaning conveyed is that all fragments have been correctly received. As a consequence,  if an ACK is lost, the sender assumes that all fragments covered by the ACK have been successfully delivered. The sender will then continue transmitting the next window of fragments. If the next fragments received belong to the next window, the receiver will conclude that successful reassembly of the IPv6 packet is not possible. In that case, the receiver will abort the on-going fragmented packet transmission. As an exception to the behavior described above, the receiver MUST transmit an ACK in the last window, even if all the fragments of the last window have been correctly received.
+   
+   
+   One exception to this behavior is in the last window, where the receiver MUST transmit an ACK, even if all the fragments in the last window have been correctly received.  
  
 The same reliability mode MUST be used for all fragments of a
    packet.  It is up to implementers and/or representatives of the
@@ -645,7 +648,7 @@ In the No-ACK mode, fragments except the last one SHALL conform to the detailed 
 
 
 
-In ACK-always or ACK-on-error, fragments except the last one SHALL conform the detailed format defined in {{Fig-NotLastWin}}. The total size of the fragment header in this format is R bits.
+In ACK-Always or ACK-on-Error, fragments except the last one SHALL conform the detailed format defined in {{Fig-NotLastWin}}. The total size of the fragment header is R bits.
    
 ~~~~
              <------------ R ---------->
@@ -661,14 +664,14 @@ In ACK-always or ACK-on-error, fragments except the last one SHALL conform the d
    
 ### ACK format
 
-The format of an ACK that acknowledges a window that is not the last one (denoted as ALL-0 window) is shown in {{Fig-ACK-Format}}.
+The format of an ACK that acknowledges a window that is not the last one (denoted as All-0 window) is shown in {{Fig-ACK-Format}}.
 
 ~~~~
   <--------  R  ------->
               <- T -> 1  
-  +---- ... --+-... -+-+----- ... ---+
-  |  Rule ID  | DTag |W|   Bitmap    | (no payload)
-  +---- ... --+-... -+-+----- ... ---+
+  +---- ... --+-... -+-+----- ... ---+-+
+  |  Rule ID  | DTag |W|   Bitmap    |P| (no payload)
+  +---- ... --+-... -+-+----- ... ---+-+
                 
 ~~~~
 {: #Fig-ACK-Format title='ACK format for All-0 windows'}
@@ -677,15 +680,15 @@ To acknowledge the last window of a packet (denoted as All-1 window), a C bit (i
 to 1 to indicate that the MIC check computed by the receiver matches the MIC present in the All-1 fragment. If the MIC check fails, the C bit is set to 0 and the Bitmap for the All-1 window follows.
 
 ~~~~
-<--------  R  ------->  <- byte boundary ->
+<--------  R  ------->  
             <- T -> 1 1
-+---- ... --+-... -+-+-+
-|  Rule ID  | DTag |W|1| (MIC correct)
-+---- ... --+-... -+-+-+
++---- ... --+-... -+-+-+-+
+|  Rule ID  | DTag |W|1|P| (MIC correct)
++---- ... --+-... -+-+-+-+
                 
-+---- ... --+-... -+-+-+------- ... -------+
-|  Rule ID  | DTag |W|0|      Bitmap       | (MIC Incorrect)
-+---- ... --+-... -+-+-+------- ... -------+
++---- ... --+-... -+-+-+------- ... -------+-+
+|  Rule ID  | DTag |W|0|      Bitmap       |P|(MIC Incorrect)
++---- ... --+-... -+-+-+------- ... -------+-+
                       C
                 
 ~~~~
@@ -699,9 +702,9 @@ The All-0 format is used for sending the last fragment of a window that is not t
 ~~~~
      <------------ R ----------->
                 <- T -> 1 <- N -> 
-     +-- ... --+- ... -+-+- ... -+--- ... ---+
-     | Rule ID | DTag  |W|  0..0 |  payload  |  
-     +-- ... --+- ... -+-+- ... -+--- ... ---+
+     +-- ... --+- ... -+-+- ... -+--- ... ---+-+
+     | Rule ID | DTag  |W|  0..0 |  payload  |P|  
+     +-- ... --+- ... -+-+- ... -+--- ... ---+-+
      
 ~~~~
 {: #Fig-All0 title='All-0 fragment detailed format'}
@@ -712,9 +715,9 @@ The All-0 empty fragment format is used by a sender to request the retransmissio
 ~~~~
  <------------ R ----------->
             <- T -> 1 <- N -> 
- +-- ... --+- ... -+-+- ... -+
- | Rule ID | DTag  |W|  0..0 | (no payload)  
- +-- ... --+- ... -+-+- ... -+
+ +-- ... --+- ... -+-+- ... -+-+
+ | Rule ID | DTag  |W|  0..0 |P| (no payload)  
+ +-- ... --+- ... -+-+- ... -+-+
               
 ~~~~
 {: #Fig-All0empty title='All-0 empty fragment detailed format'}
@@ -726,9 +729,9 @@ In the No-ACK mode, the last fragment of an IPv6 datagram SHALL contain a fragme
 ~~~~
 <------------- R --------->
               <- T -> <-N-> <---- M ---->
-+---- ... ---+- ... -+-----+---- ... ----+---...---+
-|   Rule ID  | DTag  |  1  |     MIC     | payload |
-+---- ... ---+- ... -+-----+---- ... ----+---...---+
++---- ... ---+- ... -+-----+---- ... ----+---...---+-+
+|   Rule ID  | DTag  |  1  |     MIC     | payload |P|
++---- ... ---+- ... -+-----+---- ... ----+---...---+-+
     
 ~~~~
 {: #Fig-Last title='All-1 Fragment Detailed Format for the Last Fragment, No-ACK mode'}
@@ -741,9 +744,9 @@ In the No-ACK mode, the last fragment of an IPv6 datagram SHALL contain a fragme
 ~~~~
 <----------- R ------------>
            <- T -> 1 <- N -> <---- M ---->
-+-- ... --+- ... -+-+- ... -+---- ... ----+---...---+
-| Rule ID | DTag  |W| 11..1 |     MIC     | payload |
-+-- ... --+- ... -+-+- ... -+---- ... ----+---...---+
++-- ... --+- ... -+-+- ... -+---- ... ----+---...---+-+
+| Rule ID | DTag  |W| 11..1 |     MIC     | payload |P|
++-- ... --+- ... -+-+- ... -+---- ... ----+---...---+-+
                       (FCN)
 ~~~~
 {: #Fig-LastWinMode title='All-1 Fragment Detailed Format for the Last Fragment, ACK-Always or ACK-on-Error'}
@@ -753,9 +756,9 @@ In the No-ACK mode, the last fragment of an IPv6 datagram SHALL contain a fragme
 ~~~~
 <------------ R ----------->
            <- T -> 1 <- N -> <---- M ---->
-+-- ... --+- ... -+-+- ... -+---- ... ----+
-| Rule ID | DTag  |W|  1..1 |     MIC     | (no payload)  
-+-- ... --+- ... -+-+- ... -+---- ... ----+
++-- ... --+- ... -+-+- ... -+---- ... ----+-+
+| Rule ID | DTag  |W|  1..1 |     MIC     |P| (no payload)  
++-- ... --+- ... -+-+- ... -+---- ... ----+-+
 
 ~~~~
 {: #Fig-All1retries title='All-1 for Retries format, also called All-1 empty'}
