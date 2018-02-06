@@ -518,8 +518,8 @@ This subsection describes the different fields in the fragmentation header frame
 
 *  Fragment Compressed Number (FCN).  The FCN is included in all fragments.  This field can be understood as a truncated, 
 efficient representation of a larger-sized fragment number, and does not carry an absolute fragment number.  There are two FCN reserved values that are used for controlling the fragmentation process, as described next. The FCN value with all the bits equal to 1 (All-1) denotes the last
-fragment of a packet.  In any window mode, the FCN value with all the bits equal to 0 (All-0) denotes the last
-fragment of a window (when such window is not the last one of the packet). In the No-ACK mode, All-0 is found in all fragments but the last one. The rest of the FCN values are assigned in a sequentially
+fragment of a packet. The last window of a packet is called an All-1 window.  In ACK-Always or ACK-on-error, the FCN value with all the bits equal to 0 (All-0) denotes the last
+fragment of a window that is not the last one of the packet. Such a window is called an All-0 window. In the No-ACK mode, All-0 is found in all fragments but the last one. The rest of the FCN values are assigned in a sequentially
 decreasing order, which has the purpose to avoid possible ambiguity for the receiver that might arise under certain
 conditions.
 In the fragments, this field is an unsigned integer, with a size of N bits. In the No-ACK mode, it is set to 1 bit (N=1). For the other reliability modes, it is recommended to use a number of bits (N) equal to or greater than 3. Nevertheless, the appropriate value will be defined in the corresponding technology documents. The FCN MUST be set sequentially decreasing from the highest FCN in the window (which will be used for the first fragment), and MUST wrap from 0 back to the highest FCN in the window.
@@ -660,41 +660,6 @@ In ACK-Always or ACK-on-Error, fragments except the last one SHALL conform the d
 ~~~~
 {: #Fig-NotLastWin title='Fragment Detailed Format for Fragments except the Last One, Window mode'}
    
- 
-   
-### ACK format
-
-The format of an ACK that acknowledges a window that is not the last one (denoted as All-0 window) is shown in {{Fig-ACK-Format}}.
-
-~~~~
-  <--------  R  ------->
-              <- T -> 1  
-  +---- ... --+-... -+-+----- ... ---+-+
-  |  Rule ID  | DTag |W|   Bitmap    |P| (no payload)
-  +---- ... --+-... -+-+----- ... ---+-+
-                
-~~~~
-{: #Fig-ACK-Format title='ACK format for All-0 windows'}
-
-To acknowledge the last window of a packet (denoted as All-1 window), a C bit (i.e. MIC checked) following the W bit is set
-to 1 to indicate that the MIC check computed by the receiver matches the MIC present in the All-1 fragment. If the MIC check fails, the C bit is set to 0 and the Bitmap for the All-1 window follows.
-
-~~~~
-<--------  R  ------->  
-            <- T -> 1 1
-+---- ... --+-... -+-+-+-+
-|  Rule ID  | DTag |W|1|P| (MIC correct)
-+---- ... --+-... -+-+-+-+
-                
-+---- ... --+-... -+-+-+------- ... -------+-+
-|  Rule ID  | DTag |W|0|      Bitmap       |P|(MIC Incorrect)
-+---- ... --+-... -+-+-+------- ... -------+-+
-                      C
-                
-~~~~
-{: #Fig-ACK-Format1 title='Format of an ACK for All-1 windows'}
-
-
 ### All-1 and All-0 formats
 
 The All-0 format is used for sending the last fragment of a window that is not the last window of the packet.
@@ -763,7 +728,40 @@ In the No-ACK mode, the last fragment of an IPv6 datagram SHALL contain a fragme
 ~~~~
 {: #Fig-All1retries title='All-1 for Retries format, also called All-1 empty'}
 
-The values for R, N, T and M are not specified in this document, and have to be determined in other documents (e.g. technology-specific profile documents).
+The values for R, N, T and M are not specified in this document, and have to be determined in other documents (e.g. technology-specific profile documents). 
+   
+### ACK format
+
+The format of an ACK that acknowledges a window that is not the last one (denoted as All-0 window) is shown in {{Fig-ACK-Format}}.
+
+~~~~
+  <--------  R  ------->
+              <- T -> 1  
+  +---- ... --+-... -+-+----- ... ---+-+
+  |  Rule ID  | DTag |W|   Bitmap    |P| (no payload)
+  +---- ... --+-... -+-+----- ... ---+-+
+                
+~~~~
+{: #Fig-ACK-Format title='ACK format for All-0 windows'}
+
+To acknowledge the last window of a packet (denoted as All-1 window), a C bit (i.e. MIC checked) following the W bit is set
+to 1 to indicate that the MIC check computed by the receiver matches the MIC present in the All-1 fragment. If the MIC check fails, the C bit is set to 0 and the Bitmap for the All-1 window follows.
+
+~~~~
+<--------  R  ------->  
+            <- T -> 1 1
++---- ... --+-... -+-+-+-+
+|  Rule ID  | DTag |W|1|P| (MIC correct)
++---- ... --+-... -+-+-+-+
+                
++---- ... --+-... -+-+-+------- ... -------+-+
+|  Rule ID  | DTag |W|0|      Bitmap       |P|(MIC Incorrect)
++---- ... --+-... -+-+-+------- ... -------+-+
+                      C
+                
+~~~~
+{: #Fig-ACK-Format1 title='Format of an ACK for All-1 windows'}
+
    
 ### Abort formats
 
