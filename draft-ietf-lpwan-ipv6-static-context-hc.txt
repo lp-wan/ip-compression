@@ -123,11 +123,11 @@ Internet-Draft                 LPWAN SCHC                  February 2018
        5.4.1.  Fragment format . . . . . . . . . . . . . . . . . . .  20
        5.4.2.  ACK format  . . . . . . . . . . . . . . . . . . . . .  21
        5.4.3.  All-1 and All-0 formats . . . . . . . . . . . . . . .  22
-       5.4.4.  Abort formats . . . . . . . . . . . . . . . . . . . .  23
+       5.4.4.  Abort formats . . . . . . . . . . . . . . . . . . . .  24
      5.5.  Baseline mechanism  . . . . . . . . . . . . . . . . . . .  24
        5.5.1.  No-ACK  . . . . . . . . . . . . . . . . . . . . . . .  25
-       5.5.2.  ACK-Always and ACK-on-Error . . . . . . . . . . . . .  25
-       5.5.3.  Bitmap Optimization . . . . . . . . . . . . . . . . .  29
+       5.5.2.  ACK-Always and ACK-on-Error . . . . . . . . . . . . .  26
+       5.5.3.  Bitmap Optimization . . . . . . . . . . . . . . . . .  30
      5.6.  Supporting multiple window sizes  . . . . . . . . . . . .  31
      5.7.  Downlink fragment transmission  . . . . . . . . . . . . .  32
    6.  Padding management  . . . . . . . . . . . . . . . . . . . . .  33
@@ -865,9 +865,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
       identify that a fragment is being carried, what fragmentation
       delivery reliability mode is used and what window size is used (if
       multiple sizes are possible).  The Rule ID in the fragmentation
-      header also allows interleaving non-fragmented IPv6 datagrams with
-      fragments that carry a larger IPv6 datagram.  The Rule ID in an
-      ACK identifies the message as an ACK.
+      header also allows interleaving non-fragmented IPv6 datagrams and
+      fragments that carry other IPv6 datagrams.  The Rule ID in an ACK
+      identifies the message as an ACK.
 
    o  Fragment Compressed Number (FCN).  The FCN is included in all
       fragments.  This field can be understood as a truncated, efficient
@@ -913,10 +913,11 @@ Internet-Draft                 LPWAN SCHC                  February 2018
       the sender can interleave fragments from different IPv6 datagrams,
       while the receiver can still tell them apart.  In the fragment
       formats, the size of the DTag field is T bits, which may be set to
-      a value greater than or equal to 0 bits.  DTag MUST increase
-      sequentially from 0 to 2^T - 1, and MUST wrap back from 2^T - 1 to
-      0.  In the ACK format, DTag carries the same value as the DTag
-      field in the fragments for which this ACK is intended.
+      a value greater than or equal to 0 bits.  For each new IPv6
+      datagram processed by the sender, DTag MUST be sequentially
+      increased, from 0 to 2^T - 1 wrapping back from 2^T - 1 to 0.  In
+      the ACK format, DTag carries the same value as the DTag field in
+      the fragments for which this ACK is intended.
 
    o  W (window): W is a 1-bit field.  This field carries the same value
       for all fragments of a window, and it is complemented for the next
@@ -945,7 +946,6 @@ Internet-Draft                 LPWAN SCHC                  February 2018
       corresponding to this window.  Depending on the reliability mode,
       it will lead to a request for an ACK retransmission (in ACK-Always
       mode) or it will trigger the transmission of the next window (in
-      ACK-on-error mode).  The duration of this timer is not defined in
 
 
 
@@ -954,6 +954,7 @@ Minaburo, et al.         Expires August 10, 2018               [Page 17]
 Internet-Draft                 LPWAN SCHC                  February 2018
 
 
+      ACK-on-error mode).  The duration of this timer is not defined in
       this document and must be defined in the corresponding technology
       documents (e.g. technology-specific profiles).
 
@@ -985,11 +986,11 @@ Internet-Draft                 LPWAN SCHC                  February 2018
       fragment with the highest FCN value is provided by the bit in the
       left-most position of the Bitmap.  In the Bitmap, a bit set to 1
       indicates that the fragment of FCN corresponding to that bit
-      position has been correctly sent and received.  However, the
-      sending format of the Bitmap will be truncated until a byte
-      boundary where the last error is given.  However, when all the
-      Bitmap is transmitted, it may be truncated, see more details in
-      Section 5.5.3
+      position has been correctly sent and received.  The text above
+      describes the internal representation of the Bitmap.  When
+      inserted in the ACK for transmission from the receiver to the
+      sender, the Bitmap may be truncated for energy/bandwidth
+      optimisation, see more details in Section 5.5.3
 
    o  Abort.  On expiration of the Inactivity timer, on Attempts
       reaching MAX_ACK_REQUESTS or upon occurence of some other error,
@@ -1000,8 +1001,7 @@ Internet-Draft                 LPWAN SCHC                  February 2018
       sends a fragment with the All-1 Abort format.  This fragment is
       not acked.
 
-   o  Padding (P).  Padding will be used to align the last byte of a
-      fragment with a byte boundary.  The number of bits used for
+
 
 
 
@@ -1010,13 +1010,20 @@ Minaburo, et al.         Expires August 10, 2018               [Page 18]
 Internet-Draft                 LPWAN SCHC                  February 2018
 
 
+   o  Padding (P).  Padding will be used to align the last byte of a
+      fragment with a byte boundary.  The number of bits used for
       padding is not defined and depends on the size of the Rule ID,
-      DTag and FCN fields, and on the layer two payload size.
+      DTag and FCN fields, and on the layer two payload size.  ACKs
+      never need padding, since they are constructed to be always byte-
+      aligned, see Section 5.5.3.
 
 5.3.  Delivery Reliability modes
 
-   This specification defines the following three fragment delivery
-   reliability modes:
+   This specification defines three delivery reliability modes, namely
+   No-ACK, ACK-Always and ACK-on-Error.  ACK-Always and ACK-on-Error
+   operate on windows of fragments.  A window of fragments is a subset
+   of the full set of fragments needed to carry an IPv6 packet.  The
+   three delivery reliability modes are overviewed next:
 
    o  No-ACK.  No-ACK is the simplest fragment delivery reliability
       mode.  The receiver does not generate overhead in the form of
@@ -1051,13 +1058,6 @@ Internet-Draft                 LPWAN SCHC                  February 2018
       In ACK-on-Error, an ACK is transmitted by the fragment receiver
       after a window of fragments have been sent, only if at least one
       of the fragments in the window has been lost.  The ACK informs the
-      sender about received and/or missed fragments from the window of
-      fragments.  Upon receipt of an ACK that informs about any lost
-      fragments, the sender retransmits the lost fragments.  However, if
-      an ACK is lost, the sender assumes that all fragments covered by
-      the ACK have been successfully delivered, and the receiver will
-      abort the on-going fragmented packet transmission.  One exception
-      to this behavior is in the last window, where the receiver MUST
 
 
 
@@ -1066,8 +1066,20 @@ Minaburo, et al.         Expires August 10, 2018               [Page 19]
 Internet-Draft                 LPWAN SCHC                  February 2018
 
 
-      transmit an ACK, even if all the fragments in the last window have
-      been correctly received.
+      sender about received and/or missed fragments from the window of
+      fragments.  Upon receipt of an ACK that informs about any lost
+      fragments, the sender retransmits the lost fragments.  If an ACK
+      is not transmitted back by the receiver at the end of a window,
+      the implicit meaning conveyed is that all fragments have been
+      correctly received.  As a consequence, if an ACK is lost, the
+      sender assumes that all fragments covered by the ACK have been
+      successfully delivered.  In that case, if the next fragments
+      received belong to the next window, the receiver will conclude
+      that successful reassembly of the IPv6 packet is not possible.  In
+      that case, the receiver will abort the on-going fragmented packet
+      transmission.  One exception to this behavior is in the last
+      window, where the receiver MUST transmit an ACK, even if all the
+      fragments in the last window have been correctly received.
 
    The same reliability mode MUST be used for all fragments of a packet.
    It is up to implementers and/or representatives of the underlying
@@ -1098,18 +1110,6 @@ Internet-Draft                 LPWAN SCHC                  February 2018
    payload.  A fragment is the payload of the L2 protocol data unit
    (PDU).
 
-         +-----------------+-----------------------+---------+
-         | Fragment Header |   Fragment payload    | padding |
-         +-----------------+-----------------------+---------+
-
-                    Figure 6: Fragment general format.
-
-   In the No-ACK mode, fragments except the last one SHALL conform to
-   the detailed format defined in Figure 7.  The total size of the
-   fragment header is R bits.
-
-
-
 
 
 
@@ -1121,6 +1121,16 @@ Minaburo, et al.         Expires August 10, 2018               [Page 20]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
+
+         +-----------------+-----------------------+---------+
+         | Fragment Header |   Fragment payload    | padding |
+         +-----------------+-----------------------+---------+
+
+                    Figure 6: Fragment general format.
+
+   In the No-ACK mode, fragments except the last one SHALL conform to
+   the detailed format defined in Figure 7.  The total size of the
+   fragment header is R bits.
 
                <------------ R ---------->
                            <--T--> <--N-->
@@ -1160,16 +1170,6 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
                   Figure 9: ACK format for All-0 windows
 
-   To acknowledge the last window of a packet (denoted as All-1 window),
-   a C bit (i.e.  MIC checked) following the W bit is set to 1 to
-   indicate that the MIC check computed by the receiver matches the MIC
-   present in the All-1 fragment.  If the MIC check fails, the C bit is
-   set to 0 and the Bitmap for the All-1 window follows.
-
-
-
-
-
 
 
 
@@ -1177,6 +1177,12 @@ Minaburo, et al.         Expires August 10, 2018               [Page 21]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
+
+   To acknowledge the last window of a packet (denoted as All-1 window),
+   a C bit (i.e.  MIC checked) following the W bit is set to 1 to
+   indicate that the MIC check computed by the receiver matches the MIC
+   present in the All-1 fragment.  If the MIC check fails, the C bit is
+   set to 0 and the Bitmap for the All-1 window follows.
 
    <--------  R  ------->  <- byte boundary ->
                <- T -> 1 1
@@ -1219,12 +1225,6 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
               Figure 12: All-0 empty fragment detailed format
 
-   In the No-ACK mode, the last fragment of an IPv6 datagram SHALL
-   contain a fragment header that conforms to the detaield format shown
-   in Figure 13.  The total size of this fragment header is R+M bits.
-
-
-
 
 
 
@@ -1233,6 +1233,10 @@ Minaburo, et al.         Expires August 10, 2018               [Page 22]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
+
+   In the No-ACK mode, the last fragment of an IPv6 datagram SHALL
+   contain a fragment header that conforms to the detaield format shown
+   in Figure 13.  The total size of this fragment header is R+M bits.
 
    <------------- R --------->
                  <- T -> <-N-> <---- M ---->
@@ -1277,10 +1281,6 @@ Internet-Draft                 LPWAN SCHC                  February 2018
    have to be determined in other documents (e.g. technology-specific
    profile documents).
 
-5.4.4.  Abort formats
-
-   The All-1 Abort and the ACK abort messages have the following
-   formats.
 
 
 
@@ -1289,6 +1289,11 @@ Minaburo, et al.         Expires August 10, 2018               [Page 23]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
+
+5.4.4.  Abort formats
+
+   The All-1 Abort and the ACK abort messages have the following
+   formats.
 
    <------ byte boundary ------><--- 1 byte --->
    +--- ... ---+- ... -+-+-...-+-+-+-+-+-+-+-+-+
@@ -1333,11 +1338,6 @@ Internet-Draft                 LPWAN SCHC                  February 2018
    unfragmented packet could be a SCHC compressed or an uncompressed
    IPv6 packet (header and data).  For example, the receiver may place
    the fragment payload within a payload datagram reassembly buffer at
-   the location determined from: the FCN, the arrival order of the
-   fragments, and the fragment payload sizes.  In Window mode, the
-   fragment receiver also uses the W bit in the received fragments.
-   Note that the size of the original, unfragmented packet cannot be
-   determined from fragmentation headers.
 
 
 
@@ -1345,6 +1345,12 @@ Minaburo, et al.         Expires August 10, 2018               [Page 24]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
+
+   the location determined from: the FCN, the arrival order of the
+   fragments, and the fragment payload sizes.  In Window mode, the
+   fragment receiver also uses the W bit in the received fragments.
+   Note that the size of the original, unfragmented packet cannot be
+   determined from fragmentation headers.
 
    Fragmentation functionality uses the FCN value, which has a length of
    N bits.  The All-1 and All-0 FCN values are used to control the
@@ -1384,6 +1390,18 @@ Internet-Draft                 LPWAN SCHC                  February 2018
    the underlying LPWAN technology and will be defined in other
    documents (e.g. technology-specific profile documents).
 
+
+
+
+
+
+
+
+Minaburo, et al.         Expires August 10, 2018               [Page 25]
+
+Internet-Draft                 LPWAN SCHC                  February 2018
+
+
 5.5.2.  ACK-Always and ACK-on-Error
 
    In ACK-Always or ACK-on-Error, a jumping window protocol uses two
@@ -1394,13 +1412,6 @@ Internet-Draft                 LPWAN SCHC                  February 2018
    fragment indicates that it is the last fragment of the packet being
    transmitted and therefore there will not be another window for this
    packet.
-
-
-
-Minaburo, et al.         Expires August 10, 2018               [Page 25]
-
-Internet-Draft                 LPWAN SCHC                  February 2018
-
 
    This section is divided in two parts, which define ACK-Always and
    ACK-on-Error modes, respectively.
@@ -1439,6 +1450,14 @@ Internet-Draft                 LPWAN SCHC                  February 2018
    sender resends the missing fragments.  When all missing fragments
    have been retransmitted, the sender starts the Retransmission Timer
    (even if an All-0 or an All-1 has not been sent as part of this
+
+
+
+Minaburo, et al.         Expires August 10, 2018               [Page 26]
+
+Internet-Draft                 LPWAN SCHC                  February 2018
+
+
    retransmission batch) and waits for an ACK.  Upon receipt of the ACK,
    if one or more fragments have not yet been received, the counter
    Attempts is increased and the sender resends the missing fragments
@@ -1450,14 +1469,6 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
    On the other hand, at the beginning, the receiver side expects to
    receive window 0.  Any fragment received but not belonging to the
-
-
-
-Minaburo, et al.         Expires August 10, 2018               [Page 26]
-
-Internet-Draft                 LPWAN SCHC                  February 2018
-
-
    current window is discarded.  All fragments belonging to the correct
    window are accepted, and the actual fragment number managed by the
    receiver is computed based on the FCN value.  The receiver prepares
@@ -1495,6 +1506,14 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
    When an All-1 fragment is received, it indicates that the last
    fragment of the packet has been sent.  Since the last window is not
+
+
+
+Minaburo, et al.         Expires August 10, 2018               [Page 27]
+
+Internet-Draft                 LPWAN SCHC                  February 2018
+
+
    always full, the MIC will be used to detect if all fragments of the
    packet have been received.  A correct MIC indicates the end of the
    transmission but the receiver must stay alive for an Inactivity Timer
@@ -1506,13 +1525,6 @@ Internet-Draft                 LPWAN SCHC                  February 2018
    fragments belonging to the same window.  After MAX_ACK_REQUESTS, the
    receiver will abort the on-going fragmented packet transmission.  The
    receiver also Aborts upon Inactivity Timer expiration.
-
-
-
-Minaburo, et al.         Expires August 10, 2018               [Page 27]
-
-Internet-Draft                 LPWAN SCHC                  February 2018
-
 
 5.5.2.2.  ACK-on-Error
 
@@ -1551,6 +1563,13 @@ Internet-Draft                 LPWAN SCHC                  February 2018
    If Attempts reaches MAX_ACK_REQUESTS, the on-going fragmented packet
    transmission is aborted.
 
+
+
+Minaburo, et al.         Expires August 10, 2018               [Page 28]
+
+Internet-Draft                 LPWAN SCHC                  February 2018
+
+
    Unlike the sender, the receiver for ACK-on-Error has a larger amount
    of differences compared with ACK-Always.  First, an ACK is not sent
    unless there is a lost fragment or an unexpected behavior (with the
@@ -1560,15 +1579,6 @@ Internet-Draft                 LPWAN SCHC                  February 2018
    fragments it receives.  After receiving a fragment, the Inactivity
    Timer is set, if no fragment has been received and the Inactivity
    Timer expires the transmission is aborted.
-
-
-
-
-
-Minaburo, et al.         Expires August 10, 2018               [Page 28]
-
-Internet-Draft                 LPWAN SCHC                  February 2018
-
 
    Any fragment not belonging to the current window is discarded.  The
    actual fragment number is computed based on the FCN value.  When an
@@ -1609,6 +1619,13 @@ Internet-Draft                 LPWAN SCHC                  February 2018
    latter will lead the receiver to abort the on-going fragmented packet
    transmission.
 
+
+
+Minaburo, et al.         Expires August 10, 2018               [Page 29]
+
+Internet-Draft                 LPWAN SCHC                  February 2018
+
+
 5.5.3.  Bitmap Optimization
 
    The Bitmap is transmitted by a receiver as part of the ACK format
@@ -1616,15 +1633,6 @@ Internet-Draft                 LPWAN SCHC                  February 2018
    may introduce padding at the end to align transmitted data to a byte
    boundary.  The first byte boundary includes one or more complete
    bytes, depending on the size of Rule ID and DTag.
-
-
-
-
-
-Minaburo, et al.         Expires August 10, 2018               [Page 29]
-
-Internet-Draft                 LPWAN SCHC                  February 2018
-
 
    Note that the ACK sent in response to an All-1 fragment includes the
    C bit.  Therefore, the window size and thus the Bitmap size need to
@@ -1666,14 +1674,6 @@ Internet-Draft                 LPWAN SCHC                  February 2018
    Figure 20 shows an example of an ACK (for N=3), where the Bitmap
    indicates that the second and the fifth fragments have not been
    correctly received.
-
-
-
-
-
-
-
-
 
 
 
