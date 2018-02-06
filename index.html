@@ -298,8 +298,8 @@ address {
 <link href="#rfc.section.5.3" rel="Chapter" title="5.3 Delivery Reliability modes">
 <link href="#rfc.section.5.4" rel="Chapter" title="5.4 Fragmentation Frame Formats">
 <link href="#rfc.section.5.4.1" rel="Chapter" title="5.4.1 Fragment format">
-<link href="#rfc.section.5.4.2" rel="Chapter" title="5.4.2 ACK format">
-<link href="#rfc.section.5.4.3" rel="Chapter" title="5.4.3 All-1 and All-0 formats">
+<link href="#rfc.section.5.4.2" rel="Chapter" title="5.4.2 All-1 and All-0 formats">
+<link href="#rfc.section.5.4.3" rel="Chapter" title="5.4.3 ACK format">
 <link href="#rfc.section.5.4.4" rel="Chapter" title="5.4.4 Abort formats">
 <link href="#rfc.section.5.5" rel="Chapter" title="5.5 Baseline mechanism">
 <link href="#rfc.section.5.5.1" rel="Chapter" title="5.5.1 No-ACK">
@@ -450,9 +450,9 @@ address {
 </li>
 <ul><li>5.4.1.   <a href="#rfc.section.5.4.1">Fragment format</a>
 </li>
-<li>5.4.2.   <a href="#rfc.section.5.4.2">ACK format</a>
+<li>5.4.2.   <a href="#rfc.section.5.4.2">All-1 and All-0 formats</a>
 </li>
-<li>5.4.3.   <a href="#rfc.section.5.4.3">All-1 and All-0 formats</a>
+<li>5.4.3.   <a href="#rfc.section.5.4.3">ACK format</a>
 </li>
 <li>5.4.4.   <a href="#rfc.section.5.4.4">Abort formats</a>
 </li>
@@ -805,7 +805,7 @@ address {
 
 <ul>
 <li>Rule ID. The Rule ID is present in the fragment header and in the ACK header format.  The Rule ID in a fragment header is used to identify that a fragment is being carried, what fragmentation delivery reliability mode is used and what window size is used (if multiple sizes are possible). The Rule ID  in the fragmentation header also allows interleaving non-fragmented IPv6 datagrams and fragments that carry other IPv6 datagrams. The Rule ID in an ACK identifies the message as an ACK.</li>
-<li>Fragment Compressed Number (FCN).  The FCN is included in all fragments.  This field can be understood as a truncated, efficient representation of a larger-sized fragment number, and does not carry an absolute fragment number.  There are two FCN reserved values that are used for controlling the fragmentation process, as described next. The FCN value with all the bits equal to 1 (All-1) denotes the last fragment of a packet.  In any window mode, the FCN value with all the bits equal to 0 (All-0) denotes the last fragment of a window (when such window is not the last one of the packet). In the No-ACK mode, All-0 is found in all fragments but the last one. The rest of the FCN values are assigned in a sequentially decreasing order, which has the purpose to avoid possible ambiguity for the receiver that might arise under certain conditions.  In the fragments, this field is an unsigned integer, with a size of N bits. In the No-ACK mode, it is set to 1 bit (N=1). For the other reliability modes, it is recommended to use a number of bits (N) equal to or greater than 3. Nevertheless, the appropriate value will be defined in the corresponding technology documents. The FCN MUST be set sequentially decreasing from the highest FCN in the window (which will be used for the first fragment), and MUST wrap from 0 back to the highest FCN in the window.  &#160; For windows that are not the last one  from a fragmented packet, the FCN for the last fragment in such windows is an All-0. This indicates that the window is finished and communication proceeds according to the reliability mode in use.  The FCN for the last fragment in the last window is an All-1.  It is also important to note that, in the No-ACK mode or when N=1, the last fragment of the packet will carry a FCN equal to 1, while all previous fragments will carry a FCN of 0.</li>
+<li>Fragment Compressed Number (FCN).  The FCN is included in all fragments.  This field can be understood as a truncated, efficient representation of a larger-sized fragment number, and does not carry an absolute fragment number.  There are two FCN reserved values that are used for controlling the fragmentation process, as described next. The FCN value with all the bits equal to 1 (All-1) denotes the last fragment of a packet. The last window of a packet is called an All-1 window.  In ACK-Always or ACK-on-error, the FCN value with all the bits equal to 0 (All-0) denotes the last fragment of a window that is not the last one of the packet. Such a window is called an All-0 window. In the No-ACK mode, All-0 is found in all fragments but the last one. The rest of the FCN values are assigned in a sequentially decreasing order, which has the purpose to avoid possible ambiguity for the receiver that might arise under certain conditions.  In the fragments, this field is an unsigned integer, with a size of N bits. In the No-ACK mode, it is set to 1 bit (N=1). For the other reliability modes, it is recommended to use a number of bits (N) equal to or greater than 3. Nevertheless, the appropriate value will be defined in the corresponding technology documents. The FCN MUST be set sequentially decreasing from the highest FCN in the window (which will be used for the first fragment), and MUST wrap from 0 back to the highest FCN in the window.  &#160; For windows that are not the last one  from a fragmented packet, the FCN for the last fragment in such windows is an All-0. This indicates that the window is finished and communication proceeds according to the reliability mode in use.  The FCN for the last fragment in the last window is an All-1.  It is also important to note that, in the No-ACK mode or when N=1, the last fragment of the packet will carry a FCN equal to 1, while all previous fragments will carry a FCN of 0.</li>
 <li>Datagram Tag (DTag). The DTag field, if present, is set to the same value for all fragments carrying the same IPv6 datagram, and to different values for different datagrams. Using this field, the sender can interleave fragments from different IPv6 datagrams, while the receiver can still tell them apart.  In the fragment formats, the size of the DTag field is T bits, which may be set to a value greater than or equal to 0 bits. For each new IPv6 datagram processed by the sender, DTag MUST be sequentially increased, from 0 to 2^T &#8211; 1 wrapping back from 2^T - 1 to 0.  In the ACK format, DTag carries the same value as the DTag field in the fragments for which this ACK is intended.</li>
 <li>W (window): W is a 1-bit field. This field carries the same value for all fragments of a window, and it is complemented for the next window. The initial value for this field is 0.  In the ACK format, this field also has a size of 1 bit. In all ACKs, the W bit carries the same value as the W bit carried by the fragments whose reception is being positively or negatively acknowledged by the ACK.</li>
 <li>Message Integrity Check (MIC). This field, which has a size of M bits, is computed by the sender over the complete packet (i.e. a SCHC compressed or an uncompressed IPv6 packet) before fragmentation. The MIC allows the receiver to check errors in the reassembled packet, while it also enables compressing the UDP checksum by use of SCHC compression. The CRC32 as 0xEDB88320 is recommended as the default algorithm for computing the MIC. Nevertheless, other algorithm MAY be mandated in the corresponding technology documents (e.g. technology-specific profiles).</li>
@@ -872,10 +872,74 @@ address {
 </pre>
 <p class="figure">Figure 8: Fragment Detailed Format for Fragments except the Last One, Window mode</p>
 <h1 id="rfc.section.5.4.2">
-<a href="#rfc.section.5.4.2">5.4.2.</a> <a href="#ack-format" id="ack-format">ACK format</a>
+<a href="#rfc.section.5.4.2">5.4.2.</a> <a href="#all-1-and-all-0-formats" id="all-1-and-all-0-formats">All-1 and All-0 formats</a>
 </h1>
-<p id="rfc.section.5.4.2.p.1">The format of an ACK that acknowledges a window that is not the last one (denoted as All-0 window) is shown in <a href="#Fig-ACK-Format" class="xref">Figure 9</a>.</p>
+<p id="rfc.section.5.4.2.p.1">The All-0 format is used for sending the last fragment of a window that is not the last window of the packet.</p>
 <div id="rfc.figure.9"></div>
+<div id="Fig-All0"></div>
+<pre>
+     &lt;------------ R -----------&gt;
+                &lt;- T -&gt; 1 &lt;- N -&gt; 
+     +-- ... --+- ... -+-+- ... -+--- ... ---+-+
+     | Rule ID | DTag  |W|  0..0 |  payload  |P|  
+     +-- ... --+- ... -+-+- ... -+--- ... ---+-+
+     
+</pre>
+<p class="figure">Figure 9: All-0 fragment detailed format</p>
+<p id="rfc.section.5.4.2.p.2">The All-0 empty fragment format is used by a sender to request the retransmission of an ACK by the receiver. It is only used in ACK-Always mode.</p>
+<div id="rfc.figure.10"></div>
+<div id="Fig-All0empty"></div>
+<pre>
+ &lt;------------ R -----------&gt;
+            &lt;- T -&gt; 1 &lt;- N -&gt; 
+ +-- ... --+- ... -+-+- ... -+-+
+ | Rule ID | DTag  |W|  0..0 |P| (no payload)  
+ +-- ... --+- ... -+-+- ... -+-+
+              
+</pre>
+<p class="figure">Figure 10: All-0 empty fragment detailed format</p>
+<p id="rfc.section.5.4.2.p.3">In the No-ACK mode, the last fragment of an IPv6 datagram SHALL contain a fragment header that conforms to the detaield format shown in <a href="#Fig-Last" class="xref">Figure 11</a>. The total size of this fragment header is R+M bits.</p>
+<div id="rfc.figure.11"></div>
+<div id="Fig-Last"></div>
+<pre>
+&lt;------------- R ---------&gt;
+              &lt;- T -&gt; &lt;-N-&gt; &lt;---- M ----&gt;
++---- ... ---+- ... -+-----+---- ... ----+---...---+-+
+|   Rule ID  | DTag  |  1  |     MIC     | payload |P|
++---- ... ---+- ... -+-----+---- ... ----+---...---+-+
+    
+</pre>
+<p class="figure">Figure 11: All-1 Fragment Detailed Format for the Last Fragment, No-ACK mode</p>
+<p id="rfc.section.5.4.2.p.4">In any of the Window modes, the last fragment of an IPv6 datagram SHALL contain a fragment header that conforms to the detailed format shown in <a href="#Fig-LastWinMode" class="xref">Figure 12</a>. The total size of the fragment header in this format is R+M bits.</p>
+<div id="rfc.figure.12"></div>
+<div id="Fig-LastWinMode"></div>
+<pre>
+&lt;----------- R ------------&gt;
+           &lt;- T -&gt; 1 &lt;- N -&gt; &lt;---- M ----&gt;
++-- ... --+- ... -+-+- ... -+---- ... ----+---...---+-+
+| Rule ID | DTag  |W| 11..1 |     MIC     | payload |P|
++-- ... --+- ... -+-+- ... -+---- ... ----+---...---+-+
+                      (FCN)
+</pre>
+<p class="figure">Figure 12: All-1 Fragment Detailed Format for the Last Fragment, ACK-Always or ACK-on-Error</p>
+<p id="rfc.section.5.4.2.p.5">In either ACK-Always or ACK-on-Error, in order to request a retransmission of the ACK for the All-1 window, the fragment sender uses the format shown in <a href="#Fig-All1retries" class="xref">Figure 13</a>. The total size of the fragment header in this format is R+M bits.</p>
+<div id="rfc.figure.13"></div>
+<div id="Fig-All1retries"></div>
+<pre>
+&lt;------------ R -----------&gt;
+           &lt;- T -&gt; 1 &lt;- N -&gt; &lt;---- M ----&gt;
++-- ... --+- ... -+-+- ... -+---- ... ----+-+
+| Rule ID | DTag  |W|  1..1 |     MIC     |P| (no payload)  
++-- ... --+- ... -+-+- ... -+---- ... ----+-+
+
+</pre>
+<p class="figure">Figure 13: All-1 for Retries format, also called All-1 empty</p>
+<p id="rfc.section.5.4.2.p.6">The values for R, N, T and M are not specified in this document, and have to be determined in other documents (e.g. technology-specific profile documents).</p>
+<h1 id="rfc.section.5.4.3">
+<a href="#rfc.section.5.4.3">5.4.3.</a> <a href="#ack-format" id="ack-format">ACK format</a>
+</h1>
+<p id="rfc.section.5.4.3.p.1">The format of an ACK that acknowledges a window that is not the last one (denoted as All-0 window) is shown in <a href="#Fig-ACK-Format" class="xref">Figure 14</a>.</p>
+<div id="rfc.figure.14"></div>
 <div id="Fig-ACK-Format"></div>
 <pre>
   &lt;--------  R  -------&gt;
@@ -885,9 +949,9 @@ address {
   +---- ... --+-... -+-+----- ... ---+-+
                 
 </pre>
-<p class="figure">Figure 9: ACK format for All-0 windows</p>
-<p id="rfc.section.5.4.2.p.2">To acknowledge the last window of a packet (denoted as All-1 window), a C bit (i.e. MIC checked) following the W bit is set to 1 to indicate that the MIC check computed by the receiver matches the MIC present in the All-1 fragment. If the MIC check fails, the C bit is set to 0 and the Bitmap for the All-1 window follows.</p>
-<div id="rfc.figure.10"></div>
+<p class="figure">Figure 14: ACK format for All-0 windows</p>
+<p id="rfc.section.5.4.3.p.2">To acknowledge the last window of a packet (denoted as All-1 window), a C bit (i.e. MIC checked) following the W bit is set to 1 to indicate that the MIC check computed by the receiver matches the MIC present in the All-1 fragment. If the MIC check fails, the C bit is set to 0 and the Bitmap for the All-1 window follows.</p>
+<div id="rfc.figure.15"></div>
 <div id="Fig-ACK-Format1"></div>
 <pre>
 &lt;--------  R  -------&gt;  
@@ -902,71 +966,7 @@ address {
                       C
                 
 </pre>
-<p class="figure">Figure 10: Format of an ACK for All-1 windows</p>
-<h1 id="rfc.section.5.4.3">
-<a href="#rfc.section.5.4.3">5.4.3.</a> <a href="#all-1-and-all-0-formats" id="all-1-and-all-0-formats">All-1 and All-0 formats</a>
-</h1>
-<p id="rfc.section.5.4.3.p.1">The All-0 format is used for sending the last fragment of a window that is not the last window of the packet.</p>
-<div id="rfc.figure.11"></div>
-<div id="Fig-All0"></div>
-<pre>
-     &lt;------------ R -----------&gt;
-                &lt;- T -&gt; 1 &lt;- N -&gt; 
-     +-- ... --+- ... -+-+- ... -+--- ... ---+-+
-     | Rule ID | DTag  |W|  0..0 |  payload  |P|  
-     +-- ... --+- ... -+-+- ... -+--- ... ---+-+
-     
-</pre>
-<p class="figure">Figure 11: All-0 fragment detailed format</p>
-<p id="rfc.section.5.4.3.p.2">The All-0 empty fragment format is used by a sender to request the retransmission of an ACK by the receiver. It is only used in ACK-Always mode.</p>
-<div id="rfc.figure.12"></div>
-<div id="Fig-All0empty"></div>
-<pre>
- &lt;------------ R -----------&gt;
-            &lt;- T -&gt; 1 &lt;- N -&gt; 
- +-- ... --+- ... -+-+- ... -+-+
- | Rule ID | DTag  |W|  0..0 |P| (no payload)  
- +-- ... --+- ... -+-+- ... -+-+
-              
-</pre>
-<p class="figure">Figure 12: All-0 empty fragment detailed format</p>
-<p id="rfc.section.5.4.3.p.3">In the No-ACK mode, the last fragment of an IPv6 datagram SHALL contain a fragment header that conforms to the detaield format shown in <a href="#Fig-Last" class="xref">Figure 13</a>. The total size of this fragment header is R+M bits.</p>
-<div id="rfc.figure.13"></div>
-<div id="Fig-Last"></div>
-<pre>
-&lt;------------- R ---------&gt;
-              &lt;- T -&gt; &lt;-N-&gt; &lt;---- M ----&gt;
-+---- ... ---+- ... -+-----+---- ... ----+---...---+-+
-|   Rule ID  | DTag  |  1  |     MIC     | payload |P|
-+---- ... ---+- ... -+-----+---- ... ----+---...---+-+
-    
-</pre>
-<p class="figure">Figure 13: All-1 Fragment Detailed Format for the Last Fragment, No-ACK mode</p>
-<p id="rfc.section.5.4.3.p.4">In any of the Window modes, the last fragment of an IPv6 datagram SHALL contain a fragment header that conforms to the detailed format shown in <a href="#Fig-LastWinMode" class="xref">Figure 14</a>. The total size of the fragment header in this format is R+M bits.</p>
-<div id="rfc.figure.14"></div>
-<div id="Fig-LastWinMode"></div>
-<pre>
-&lt;----------- R ------------&gt;
-           &lt;- T -&gt; 1 &lt;- N -&gt; &lt;---- M ----&gt;
-+-- ... --+- ... -+-+- ... -+---- ... ----+---...---+-+
-| Rule ID | DTag  |W| 11..1 |     MIC     | payload |P|
-+-- ... --+- ... -+-+- ... -+---- ... ----+---...---+-+
-                      (FCN)
-</pre>
-<p class="figure">Figure 14: All-1 Fragment Detailed Format for the Last Fragment, ACK-Always or ACK-on-Error</p>
-<p id="rfc.section.5.4.3.p.5">In either ACK-Always or ACK-on-Error, in order to request a retransmission of the ACK for the All-1 window, the fragment sender uses the format shown in <a href="#Fig-All1retries" class="xref">Figure 15</a>. The total size of the fragment header in this format is R+M bits.</p>
-<div id="rfc.figure.15"></div>
-<div id="Fig-All1retries"></div>
-<pre>
-&lt;------------ R -----------&gt;
-           &lt;- T -&gt; 1 &lt;- N -&gt; &lt;---- M ----&gt;
-+-- ... --+- ... -+-+- ... -+---- ... ----+-+
-| Rule ID | DTag  |W|  1..1 |     MIC     |P| (no payload)  
-+-- ... --+- ... -+-+- ... -+---- ... ----+-+
-
-</pre>
-<p class="figure">Figure 15: All-1 for Retries format, also called All-1 empty</p>
-<p id="rfc.section.5.4.3.p.6">The values for R, N, T and M are not specified in this document, and have to be determined in other documents (e.g. technology-specific profile documents).</p>
+<p class="figure">Figure 15: Format of an ACK for All-1 windows</p>
 <h1 id="rfc.section.5.4.4">
 <a href="#rfc.section.5.4.4">5.4.4.</a> <a href="#abort-formats" id="abort-formats">Abort formats</a>
 </h1>
