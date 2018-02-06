@@ -5,10 +5,10 @@
 lpwan Working Group                                          A. Minaburo
 Internet-Draft                                                    Acklio
 Intended status: Informational                                L. Toutain
-Expires: July 27, 2018                                    IMT-Atlantique
+Expires: August 10, 2018                                  IMT-Atlantique
                                                                 C. Gomez
                                     Universitat Politecnica de Catalunya
-                                                        January 23, 2018
+                                                       February 06, 2018
 
 
   LPWAN Static Context Header Compression (SCHC) and fragmentation for
@@ -53,9 +53,9 @@ Abstract
 
 
 
-Minaburo, et al.          Expires July 27, 2018                 [Page 1]
+Minaburo, et al.         Expires August 10, 2018                [Page 1]
 
-Internet-Draft                 LPWAN SCHC                   January 2018
+Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 Status of This Memo
@@ -73,7 +73,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on July 27, 2018.
+   This Internet-Draft will expire on August 10, 2018.
 
 Copyright Notice
 
@@ -109,9 +109,9 @@ Table of Contents
 
 
 
-Minaburo, et al.          Expires July 27, 2018                 [Page 2]
+Minaburo, et al.         Expires August 10, 2018                [Page 2]
 
-Internet-Draft                 LPWAN SCHC                   January 2018
+Internet-Draft                 LPWAN SCHC                  February 2018
 
 
        4.5.6.  Compute-* . . . . . . . . . . . . . . . . . . . . . .  15
@@ -132,32 +132,32 @@ Internet-Draft                 LPWAN SCHC                   January 2018
      5.7.  Downlink fragment transmission  . . . . . . . . . . . . .  32
    6.  Padding management  . . . . . . . . . . . . . . . . . . . . .  33
    7.  SCHC Compression for IPv6 and UDP headers . . . . . . . . . .  33
-     7.1.  IPv6 version field  . . . . . . . . . . . . . . . . . . .  33
-     7.2.  IPv6 Traffic class field  . . . . . . . . . . . . . . . .  33
+     7.1.  IPv6 version field  . . . . . . . . . . . . . . . . . . .  34
+     7.2.  IPv6 Traffic class field  . . . . . . . . . . . . . . . .  34
      7.3.  Flow label field  . . . . . . . . . . . . . . . . . . . .  34
      7.4.  Payload Length field  . . . . . . . . . . . . . . . . . .  34
-     7.5.  Next Header field . . . . . . . . . . . . . . . . . . . .  34
+     7.5.  Next Header field . . . . . . . . . . . . . . . . . . . .  35
      7.6.  Hop Limit field . . . . . . . . . . . . . . . . . . . . .  35
      7.7.  IPv6 addresses fields . . . . . . . . . . . . . . . . . .  35
-       7.7.1.  IPv6 source and destination prefixes  . . . . . . . .  35
+       7.7.1.  IPv6 source and destination prefixes  . . . . . . . .  36
        7.7.2.  IPv6 source and destination IID . . . . . . . . . . .  36
      7.8.  IPv6 extensions . . . . . . . . . . . . . . . . . . . . .  36
-     7.9.  UDP source and destination port . . . . . . . . . . . . .  36
+     7.9.  UDP source and destination port . . . . . . . . . . . . .  37
      7.10. UDP length field  . . . . . . . . . . . . . . . . . . . .  37
      7.11. UDP Checksum field  . . . . . . . . . . . . . . . . . . .  37
-   8.  Security considerations . . . . . . . . . . . . . . . . . . .  37
-     8.1.  Security considerations for header compression  . . . . .  37
-     8.2.  Security considerations for fragmentation . . . . . . . .  37
+   8.  Security considerations . . . . . . . . . . . . . . . . . . .  38
+     8.1.  Security considerations for header compression  . . . . .  38
+     8.2.  Security considerations for fragmentation . . . . . . . .  38
    9.  Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .  39
    10. References  . . . . . . . . . . . . . . . . . . . . . . . . .  39
      10.1.  Normative References . . . . . . . . . . . . . . . . . .  39
-     10.2.  Informative References . . . . . . . . . . . . . . . . .  39
-   Appendix A.  SCHC Compression Examples  . . . . . . . . . . . . .  39
+     10.2.  Informative References . . . . . . . . . . . . . . . . .  40
+   Appendix A.  SCHC Compression Examples  . . . . . . . . . . . . .  40
    Appendix B.  Fragmentation Examples . . . . . . . . . . . . . . .  42
-   Appendix C.  Fragmentation State Machines . . . . . . . . . . . .  48
-   Appendix D.  Allocation of Rule IDs for fragmentation . . . . . .  55
-   Appendix E.  Note . . . . . . . . . . . . . . . . . . . . . . . .  55
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  55
+   Appendix C.  Fragmentation State Machines . . . . . . . . . . . .  49
+   Appendix D.  Allocation of Rule IDs for fragmentation . . . . . .  56
+   Appendix E.  Note . . . . . . . . . . . . . . . . . . . . . . . .  56
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  56
 
 
 
@@ -165,9 +165,9 @@ Internet-Draft                 LPWAN SCHC                   January 2018
 
 
 
-Minaburo, et al.          Expires July 27, 2018                 [Page 3]
+Minaburo, et al.         Expires August 10, 2018                [Page 3]
 
-Internet-Draft                 LPWAN SCHC                   January 2018
+Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 1.  Introduction
@@ -221,9 +221,9 @@ Internet-Draft                 LPWAN SCHC                   January 2018
 
 
 
-Minaburo, et al.          Expires July 27, 2018                 [Page 4]
+Minaburo, et al.         Expires August 10, 2018                [Page 4]
 
-Internet-Draft                 LPWAN SCHC                   January 2018
+Internet-Draft                 LPWAN SCHC                  February 2018
 
 
    o The Radio Gateway (RGW), which is the end point of the constrained
@@ -277,9 +277,9 @@ Internet-Draft                 LPWAN SCHC                   January 2018
 
 
 
-Minaburo, et al.          Expires July 27, 2018                 [Page 5]
+Minaburo, et al.         Expires August 10, 2018                [Page 5]
 
-Internet-Draft                 LPWAN SCHC                   January 2018
+Internet-Draft                 LPWAN SCHC                  February 2018
 
 
    o  Bi: Bidirectional, a rule entry that applies to headers of packets
@@ -333,9 +333,9 @@ Internet-Draft                 LPWAN SCHC                   January 2018
 
 
 
-Minaburo, et al.          Expires July 27, 2018                 [Page 6]
+Minaburo, et al.         Expires August 10, 2018                [Page 6]
 
-Internet-Draft                 LPWAN SCHC                   January 2018
+Internet-Draft                 LPWAN SCHC                  February 2018
 
 
    o  Inactivity Timer.  A timer to end the fragmentation state machine
@@ -389,9 +389,9 @@ Internet-Draft                 LPWAN SCHC                   January 2018
 
 
 
-Minaburo, et al.          Expires July 27, 2018                 [Page 7]
+Minaburo, et al.         Expires August 10, 2018                [Page 7]
 
-Internet-Draft                 LPWAN SCHC                   January 2018
+Internet-Draft                 LPWAN SCHC                  February 2018
 
 
    means.  The way by which the context is learned by both sides is out
@@ -445,9 +445,9 @@ Internet-Draft                 LPWAN SCHC                   January 2018
 
 
 
-Minaburo, et al.          Expires July 27, 2018                 [Page 8]
+Minaburo, et al.         Expires August 10, 2018                [Page 8]
 
-Internet-Draft                 LPWAN SCHC                   January 2018
+Internet-Draft                 LPWAN SCHC                  February 2018
 
 
    position (FP), a direction indicator (DI), a target value (TV), a
@@ -501,9 +501,9 @@ Internet-Draft                 LPWAN SCHC                   January 2018
 
 
 
-Minaburo, et al.          Expires July 27, 2018                 [Page 9]
+Minaburo, et al.         Expires August 10, 2018                [Page 9]
 
-Internet-Draft                 LPWAN SCHC                   January 2018
+Internet-Draft                 LPWAN SCHC                  February 2018
 
 
    o  Field Position (FP): in case several occurences of a field exist
@@ -557,9 +557,9 @@ Internet-Draft                 LPWAN SCHC                   January 2018
 
 
 
-Minaburo, et al.          Expires July 27, 2018                [Page 10]
+Minaburo, et al.         Expires August 10, 2018               [Page 10]
 
-Internet-Draft                 LPWAN SCHC                   January 2018
+Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 4.3.  Packet processing
@@ -613,9 +613,9 @@ Internet-Draft                 LPWAN SCHC                   January 2018
 
 
 
-Minaburo, et al.          Expires July 27, 2018                [Page 11]
+Minaburo, et al.         Expires August 10, 2018               [Page 11]
 
-Internet-Draft                 LPWAN SCHC                   January 2018
+Internet-Draft                 LPWAN SCHC                  February 2018
 
 
       On LPWAN technologies that are byte-oriented, the compressed
@@ -669,9 +669,9 @@ Internet-Draft                 LPWAN SCHC                   January 2018
 
 
 
-Minaburo, et al.          Expires July 27, 2018                [Page 12]
+Minaburo, et al.         Expires August 10, 2018               [Page 12]
 
-Internet-Draft                 LPWAN SCHC                   January 2018
+Internet-Draft                 LPWAN SCHC                  February 2018
 
 
    /--------------------+-------------+----------------------------\
@@ -725,9 +725,9 @@ Internet-Draft                 LPWAN SCHC                   January 2018
 
 
 
-Minaburo, et al.          Expires July 27, 2018                [Page 13]
+Minaburo, et al.         Expires August 10, 2018               [Page 13]
 
-Internet-Draft                 LPWAN SCHC                   January 2018
+Internet-Draft                 LPWAN SCHC                  February 2018
 
 
    The decompressor restores the field value with the target value
@@ -781,9 +781,9 @@ Internet-Draft                 LPWAN SCHC                   January 2018
 
 
 
-Minaburo, et al.          Expires July 27, 2018                [Page 14]
+Minaburo, et al.         Expires August 10, 2018               [Page 14]
 
-Internet-Draft                 LPWAN SCHC                   January 2018
+Internet-Draft                 LPWAN SCHC                  February 2018
 
 
    Appiid CDA is less common since current LPWAN technologies frames
@@ -793,8 +793,8 @@ Internet-Draft                 LPWAN SCHC                   January 2018
    2 header.  The computation is specific to each LPWAN technology and
    may depend on the Device ID size.
 
-   In the downstream direction, these CDA may be used to determine the
-   L2 addresses used by the LPWAN.
+   In the Downlink direction, these CDA may be used to determine the L2
+   addresses used by the LPWAN.
 
 4.5.6.  Compute-*
 
@@ -837,9 +837,9 @@ Internet-Draft                 LPWAN SCHC                   January 2018
 
 
 
-Minaburo, et al.          Expires July 27, 2018                [Page 15]
+Minaburo, et al.         Expires August 10, 2018               [Page 15]
 
-Internet-Draft                 LPWAN SCHC                   January 2018
+Internet-Draft                 LPWAN SCHC                  February 2018
 
 
    such networks.  This specification assumes that reordering will not
@@ -893,9 +893,9 @@ Internet-Draft                 LPWAN SCHC                   January 2018
 
 
 
-Minaburo, et al.          Expires July 27, 2018                [Page 16]
+Minaburo, et al.         Expires August 10, 2018               [Page 16]
 
-Internet-Draft                 LPWAN SCHC                   January 2018
+Internet-Draft                 LPWAN SCHC                  February 2018
 
 
       is an All-1.  It is also important to note that, in No ACK mode or
@@ -949,9 +949,9 @@ Internet-Draft                 LPWAN SCHC                   January 2018
 
 
 
-Minaburo, et al.          Expires July 27, 2018                [Page 17]
+Minaburo, et al.         Expires August 10, 2018               [Page 17]
 
-Internet-Draft                 LPWAN SCHC                   January 2018
+Internet-Draft                 LPWAN SCHC                  February 2018
 
 
       fragments.  Such a problem could be detected by the receiver not
@@ -1005,9 +1005,9 @@ Internet-Draft                 LPWAN SCHC                   January 2018
 
 
 
-Minaburo, et al.          Expires July 27, 2018                [Page 18]
+Minaburo, et al.         Expires August 10, 2018               [Page 18]
 
-Internet-Draft                 LPWAN SCHC                   January 2018
+Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 5.3.  Delivery Reliability options
@@ -1061,9 +1061,9 @@ Internet-Draft                 LPWAN SCHC                   January 2018
 
 
 
-Minaburo, et al.          Expires July 27, 2018                [Page 19]
+Minaburo, et al.         Expires August 10, 2018               [Page 19]
 
-Internet-Draft                 LPWAN SCHC                   January 2018
+Internet-Draft                 LPWAN SCHC                  February 2018
 
 
    The same reliability option MUST be used for all fragments of a
@@ -1117,9 +1117,9 @@ Internet-Draft                 LPWAN SCHC                   January 2018
 
 
 
-Minaburo, et al.          Expires July 27, 2018                [Page 20]
+Minaburo, et al.         Expires August 10, 2018               [Page 20]
 
-Internet-Draft                 LPWAN SCHC                   January 2018
+Internet-Draft                 LPWAN SCHC                  February 2018
 
 
                <------------ R ---------->
@@ -1173,9 +1173,9 @@ Internet-Draft                 LPWAN SCHC                   January 2018
 
 
 
-Minaburo, et al.          Expires July 27, 2018                [Page 21]
+Minaburo, et al.         Expires August 10, 2018               [Page 21]
 
-Internet-Draft                 LPWAN SCHC                   January 2018
+Internet-Draft                 LPWAN SCHC                  February 2018
 
 
    <--------  R  ------->  <- byte boundary ->
@@ -1229,9 +1229,9 @@ Internet-Draft                 LPWAN SCHC                   January 2018
 
 
 
-Minaburo, et al.          Expires July 27, 2018                [Page 22]
+Minaburo, et al.         Expires August 10, 2018               [Page 22]
 
-Internet-Draft                 LPWAN SCHC                   January 2018
+Internet-Draft                 LPWAN SCHC                  February 2018
 
 
    <------------- R --------->
@@ -1285,9 +1285,9 @@ Internet-Draft                 LPWAN SCHC                   January 2018
 
 
 
-Minaburo, et al.          Expires July 27, 2018                [Page 23]
+Minaburo, et al.         Expires August 10, 2018               [Page 23]
 
-Internet-Draft                 LPWAN SCHC                   January 2018
+Internet-Draft                 LPWAN SCHC                  February 2018
 
 
    <------ byte boundary ------><--- 1 byte --->
@@ -1341,9 +1341,9 @@ Internet-Draft                 LPWAN SCHC                   January 2018
 
 
 
-Minaburo, et al.          Expires July 27, 2018                [Page 24]
+Minaburo, et al.         Expires August 10, 2018               [Page 24]
 
-Internet-Draft                 LPWAN SCHC                   January 2018
+Internet-Draft                 LPWAN SCHC                  February 2018
 
 
    Fragmentation functionality uses the FCN value, which has a length of
@@ -1397,9 +1397,9 @@ Internet-Draft                 LPWAN SCHC                   January 2018
 
 
 
-Minaburo, et al.          Expires July 27, 2018                [Page 25]
+Minaburo, et al.         Expires August 10, 2018               [Page 25]
 
-Internet-Draft                 LPWAN SCHC                   January 2018
+Internet-Draft                 LPWAN SCHC                  February 2018
 
 
    The Window mode is further refined in two different reliability
@@ -1453,9 +1453,9 @@ Internet-Draft                 LPWAN SCHC                   January 2018
 
 
 
-Minaburo, et al.          Expires July 27, 2018                [Page 26]
+Minaburo, et al.         Expires August 10, 2018               [Page 26]
 
-Internet-Draft                 LPWAN SCHC                   January 2018
+Internet-Draft                 LPWAN SCHC                  February 2018
 
 
    current window is discarded.  All fragments belonging to the correct
@@ -1509,9 +1509,9 @@ Internet-Draft                 LPWAN SCHC                   January 2018
 
 
 
-Minaburo, et al.          Expires July 27, 2018                [Page 27]
+Minaburo, et al.         Expires August 10, 2018               [Page 27]
 
-Internet-Draft                 LPWAN SCHC                   January 2018
+Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 5.5.2.2.  ACK-on-error
@@ -1565,9 +1565,9 @@ Internet-Draft                 LPWAN SCHC                   January 2018
 
 
 
-Minaburo, et al.          Expires July 27, 2018                [Page 28]
+Minaburo, et al.         Expires August 10, 2018               [Page 28]
 
-Internet-Draft                 LPWAN SCHC                   January 2018
+Internet-Draft                 LPWAN SCHC                  February 2018
 
 
    Any fragment not belonging to the current window is discarded.  The
@@ -1621,9 +1621,9 @@ Internet-Draft                 LPWAN SCHC                   January 2018
 
 
 
-Minaburo, et al.          Expires July 27, 2018                [Page 29]
+Minaburo, et al.         Expires August 10, 2018               [Page 29]
 
-Internet-Draft                 LPWAN SCHC                   January 2018
+Internet-Draft                 LPWAN SCHC                  February 2018
 
 
    Note that the ACK sent in response to an All-1 fragment includes the
@@ -1677,9 +1677,9 @@ Internet-Draft                 LPWAN SCHC                   January 2018
 
 
 
-Minaburo, et al.          Expires July 27, 2018                [Page 30]
+Minaburo, et al.         Expires August 10, 2018               [Page 30]
 
-Internet-Draft                 LPWAN SCHC                   January 2018
+Internet-Draft                 LPWAN SCHC                  February 2018
 
 
    <------   R  ------>6 5 4 3 2 1   0 (*)
@@ -1733,9 +1733,9 @@ Internet-Draft                 LPWAN SCHC                   January 2018
 
 
 
-Minaburo, et al.          Expires July 27, 2018                [Page 31]
+Minaburo, et al.         Expires August 10, 2018               [Page 31]
 
-Internet-Draft                 LPWAN SCHC                   January 2018
+Internet-Draft                 LPWAN SCHC                  February 2018
 
 
    Note that the same window size MUST be used for the transmission of
@@ -1789,9 +1789,9 @@ Internet-Draft                 LPWAN SCHC                   January 2018
 
 
 
-Minaburo, et al.          Expires July 27, 2018                [Page 32]
+Minaburo, et al.         Expires August 10, 2018               [Page 32]
 
-Internet-Draft                 LPWAN SCHC                   January 2018
+Internet-Draft                 LPWAN SCHC                  February 2018
 
 
    fragment sender assumes that the All-1 fragment has been successfully
@@ -1803,141 +1803,164 @@ Internet-Draft                 LPWAN SCHC                   January 2018
 
 6.  Padding management
 
-   SCHC header, either for compression, fragmentation or acknowledgment
-   does not preserve byte alignment.  Since most of the LPWAN network
-   technologies payload is expressed in an integer number of bytes; the
-   sender will introduce at the end some padding bits while the receiver
-   must be able to eliminate them.
+   The headers specified in this document, be there for compression,
+   fragmentation or acknowledgment, are not necessarily an integer
+   number of bytes in size.  Most of the LPWAN technologies have PDUs
+   that are integer numbers of bytes.  With such a technology, the
+   sender will append padding bits to the messages defined in this
+   document in order to fill up the last byte of the L2 PDU, if it isn't
+   already full.  Examples are shown in Figure 4 and Figure 6.
 
-   The algorithm for padding bit elimination for compressed or
-   fragmented frames is simple.  Based on the following principle: * The
-   SCHC header is not aligned on a byte boundary, but its size in bits
-   is given by the rule.
+   The receiver will tell the header, the payload and the padding apart
+   using the following principles:
 
-   o  The data size is variable, but always a multiple of 8 bits.
+   o  The size of any SCHC header is known from exmining the Rule ID and
+      the content of that header.
 
-   o  Padding bits MUST never exceed 7 bits.
+   o  The payload that follows the header, if it exists, is variable in
+      size, but is always a integer nuber of bytes.
 
-   In that case, a receiver after decoding the SCHC header, must take
-   the maximum multiple of 8 bits as data.  The remaining bits are
-   padding bits.
+   o  Padding MUST not add more than 7 bits.
+
+   Therefore, the algorithm for padding elimination at the receiver is
+   the following:
+
+   o  decode the SCHC header, find its length (in bits) and set a
+      pointer to the end of the header.
+
+   o  from that pointer, extract as many blocks of 8 bits as are
+      available in the L2 PDU.  They are the payload bytes.
+
+   o  the remaining bits, if any, are padding.
 
 7.  SCHC Compression for IPv6 and UDP headers
 
    This section lists the different IPv6 and UDP header fields and how
    they can be compressed.
 
+
+
+
+
+
+
+
+Minaburo, et al.         Expires August 10, 2018               [Page 33]
+
+Internet-Draft                 LPWAN SCHC                  February 2018
+
+
 7.1.  IPv6 version field
 
-   This field always holds the same value.  Therefore, the TV is 6, the
-   MO is "equal" and the "CDA "not-sent".
+   This field always holds the same value.  Therefore, in the rule, TV
+   is set to 6, MO to "equal" and CDA to "not-sent".
 
 7.2.  IPv6 Traffic class field
 
    If the DiffServ field identified by the rest of the rule does not
-   vary and is known by both sides, the TV should contain this well-
-   known value, the MO should be "equal" and the CDA must be "not-sent.
+   vary and is known by both sides, the Field Descriptor in the rule
+   should contain a TV with this well-known value, an "equal" MO and a
+   "not-sent" CDA.
 
-   If the DiffServ field identified by the rest of the rule varies over
-   time or is not known by both sides, then there are two possibilities
-   depending on the variability of the value: The first one is to do not
+   Otherwise, two possibilities can be considered:
 
+   o  One possibility is to not compress the field and send the original
+      value.  In the rule, TV is not set to any particular value, MO is
+      set to "ignore" and CDA is set to "value-sent".
 
-
-
-Minaburo, et al.          Expires July 27, 2018                [Page 33]
-
-Internet-Draft                 LPWAN SCHC                   January 2018
-
-
-   compressed the field and sends the original value.  In the second,
-   where the values can be computed by sending only the LSB bits:
-
-   o  TV is not set to any value, MO is set to "ignore" and CDA is set
-      to "value-sent"
-
-   o  TV contains a stable value, MO is MSB(X) and CDA is set to LSB
+   o  If some upper bits in the field are constant and known, a better
+      option is to only send the LSBs.  In the rule, TV is set to a
+      value with the stable known upper part, MO is set to MSB(X) and
+      CDA to LSB.
 
 7.3.  Flow label field
 
    If the Flow Label field identified by the rest of the rule does not
-   vary and is known by both sides, the TV should contain this well-
-   known value, the MO should be "equal" and the CDA should be "not-
-   sent".
+   vary and is known by both sides, the Field Descriptor in the rule
+   should contain a TV with this well-known value, an "equal" MO and a
+   "not-sent" CDA.
 
-   If the Flow Label field identified by the rest of the rule varies
-   during time or is not known by both sides, there are two
-   possibilities depending on the variability of the value: The first
-   one is without compression and then the value is sent.  In the
-   second, only part of the value is sent and the decompressor needs to
-   compute the original value:
+   Otherwise, two possibilities can be considered:
 
-   o  TV is not set, MO is set to "ignore" and CDA is set to "value-
-      sent"
+   o  One possibility is to not compress the field and send the original
+      value.  In the rule, TV is not set to any particular value, MO is
+      set to "ignore" and CDA is set to "value-sent".
 
-   o  TV contains a stable value, MO is MSB(X) and CDA is set to LSB
+   o  If some upper bits in the field are constant and known, a better
+      option is to only send the LSBs.  In the rule, TV is set to a
+      value with the stable known upper part, MO is set to MSB(X) and
+      CDA to LSB.
 
 7.4.  Payload Length field
 
    If the LPWAN technology does not add padding, this field can be
    elided for the transmission on the LPWAN network.  The SCHC C/D
-   recomputes the original payload length value.  The TV is not set, the
-   MO is set to "ignore" and the CDA is "compute-IPv6-length".
+   recomputes the original payload length value.  In the Field
+   Descriptor, TV is not set, MO is set to "ignore" and CDA is "compute-
+   IPv6-length".
 
-   If the payload length needs to be sent and does not need to be coded
-   in 16 bits, the TV can be set to 0x0000, the MO set to "MSB (16-s)"
-   and the CDA to "LSB".  The 's' parameter depends on the expected
-   maximum packet length.
 
-   In other cases, the payload length field must be sent and the CDA is
+
+Minaburo, et al.         Expires August 10, 2018               [Page 34]
+
+Internet-Draft                 LPWAN SCHC                  February 2018
+
+
+   If the payload length needs to be sent and is known to need less than
+   16 bits for its encoding, the TV can be set to 0x0000, the MO set to
+   "MSB (16-s)" and the CDA to "LSB".  The 's' parameter depends on the
+   expected maximum packet length.
+
+   Otherwise, the payload length field must be sent and the CDA is
    replaced by "value-sent".
 
 7.5.  Next Header field
 
    If the Next Header field identified by the rest of the rule does not
-   vary and is known by both sides, the TV should contain this Next
-   Header value, the MO should be "equal" and the CDA should be "not-
-   sent".
+   vary and is known by both sides, the Field Descriptor in the rule
+   should contain a TV with this Next Header value, the MO should be
+   "equal" and the CDA should be "not-sent".
 
-
-
-Minaburo, et al.          Expires July 27, 2018                [Page 34]
-
-Internet-Draft                 LPWAN SCHC                   January 2018
-
-
-   If the Next Header field identified by the rest of the rule varies
-   during time or is not known by both sides, then TV is not set, MO is
-   set to "ignore" and CDA is set to "value-sent".  A matching-list may
-   also be used.
+   Otherwise, TV is not set in the Field Descriptor, MO is set to
+   "ignore" and CDA is set to "value-sent".  Alternatively, a matching-
+   list may also be used.
 
 7.6.  Hop Limit field
 
-   The End System is generally a device and does not forward packets.
-   Therefore, the Hop Limit value is constant.  So, the TV is set with a
-   default value, the MO is set to "equal" and the CDA is set to "not-
-   sent".
+   Note that the value pattern for this field is different for Uplink
+   and Downlink.  In Uplink, since there is no IP forwarding between the
+   Dev and the SCHC C/D, the value is relatively constant.  On the other
+   hand, the Downlink value depends of Internet routing and may change
+   more frequently.  One neat way of processing this field is to use the
+   Direction Indicator (DI) to distinguish between directions:
 
-   Otherwise the value is sent on the LPWAN: TV is not set, MO is set to
-   ignore and CDA is set to "value-sent".
+   o  in the Uplink, elide the field: the TV in the Field Descriptor is
+      set to the known constant value, the MO is set to "equal" and the
+      CDA is set to "not-sent".
 
-   Note that the field behavior differs in upstream and downstream.  In
-   upstream, since there is no IP forwarding between the Dev and the
-   SCHC C/D, the value is relatively constant.  On the other hand, the
-   downstream value depends of Internet routing and may change more
-   frequently.  One solution could be to use the Direction Indicator
-   (DI) to distinguish both directions to elide the field in the
-   upstream direction and send the value in the downstream direction.
+   o  in the Downlink, send the value: TV is not set, MO is set to
+      "ignore" and CDA is set to "value-sent".
 
 7.7.  IPv6 addresses fields
 
-   As in 6LoWPAN [RFC4944], IPv6 addresses are splitted into two 64-bit
+   As in 6LoWPAN [RFC4944], IPv6 addresses are split into two 64-bit
    long fields; one for the prefix and one for the Interface Identifier
-   (IID).  These fields should be compressed.  To allow a single rule,
-   these values are identified by their role (DEV or APP) and not by
-   their position in the frame (source or destination).  The SCHC C/D
-   must be aware of the traffic direction (upstream, downstream) to
-   select the appropriate field.
+   (IID).  These fields should be compressed.  To allow for a single
+   rule being used for both directions, these values are identified by
+   their role (DEV or APP) and not by their position in the frame
+   (source or destination).  The SCHC C/D must be aware of the traffic
+   direction (Uplink, Downlink) to select the appropriate field.
+
+
+
+
+
+
+
+Minaburo, et al.         Expires August 10, 2018               [Page 35]
+
+Internet-Draft                 LPWAN SCHC                  February 2018
+
 
 7.7.1.  IPv6 source and destination prefixes
 
@@ -1948,21 +1971,12 @@ Internet-Draft                 LPWAN SCHC                   January 2018
    prefixes contain the values, the MO is set to "equal" and the CDA is
    set to "not-sent".
 
-   In case the rule allows several prefixes, mapping-list must be used.
-   The different prefixes are listed in the TV associated with a short
-   ID.  The MO is set to "match-mapping" and the CDA is set to "mapping-
-   sent".
+   If the rule is intended to compress packets with different prefix
+   values, match-mapping should be used.  The different prefixes are
+   listed in the TV associated with a short ID.  The MO is set to
+   "match-mapping" and the CDA is set to "mapping-sent".
 
-
-
-
-
-Minaburo, et al.          Expires July 27, 2018                [Page 35]
-
-Internet-Draft                 LPWAN SCHC                   January 2018
-
-
-   Otherwise the TV contains the prefix, the MO is set to "equal" and
+   Otherwise, the TV contains the prefix, the MO is set to "equal" and
    the CDA is set to "value-sent".
 
 7.7.2.  IPv6 source and destination IID
@@ -1970,9 +1984,9 @@ Internet-Draft                 LPWAN SCHC                   January 2018
    If the DEV or APP IID are based on an LPWAN address, then the IID can
    be reconstructed with information coming from the LPWAN header.  In
    that case, the TV is not set, the MO is set to "ignore" and the CDA
-   is set to "DEViid" or "APPiid".  Note that the LPWAN technology is
-   generally carrying a single device identifier corresponding to the
-   DEV.  The SCHC C/D may also not be aware of these values.
+   is set to "DEViid" or "APPiid".  Note that the LPWAN technology
+   generally carries a single identifier, which corresponds to the DEV.
+   The SCHC C/D may also not be aware of these values.
 
    If the DEV address has a static value that is not derived from an
    IEEE EUI-64, then TV contains the actual Dev address value, the MO
@@ -1982,26 +1996,36 @@ Internet-Draft                 LPWAN SCHC                   January 2018
    possible IIDs, the MO is set to "match-mapping" and the CDA is set to
    "mapping-sent".
 
-   Otherwise the value variation of the IID may be reduced to few bytes.
-   In that case, the TV is set to the stable part of the IID, the MO is
-   set to "MSB" and the CDA is set to "LSB".
+   It may also happen that the IID variability only expresses itself on
+   a few bytes.  In that case, the TV is set to the stable part of the
+   IID, the MO is set to "MSB" and the CDA is set to "LSB".
 
-   Finally, the IID can be sent on the LPWAN.  In that case, the TV is
-   not set, the MO is set to "ignore" and the CDA is set to "value-
-   sent".
+   Finally, the IID can be sent in extenso on the LPWAN.  In that case,
+   the TV is not set, the MO is set to "ignore" and the CDA is set to
+   "value-sent".
 
 7.8.  IPv6 extensions
 
-   No extension rules are currently defined.  They can be based on the
-   MOs and CDAs described above.
+   No rule is currently defined that processes IPv6 extensions.  If such
+   extensions are needed, their compression/decompression rules can be
+   based on the MOs and CDAs described above.
+
+
+
+
+Minaburo, et al.         Expires August 10, 2018               [Page 36]
+
+Internet-Draft                 LPWAN SCHC                  February 2018
+
 
 7.9.  UDP source and destination port
 
-   To allow a single rule, the UDP port values are identified by their
-   role (DEV or APP) and not by their position in the frame (source or
-   destination).  The SCHC C/D must be aware of the traffic direction
-   (upstream, downstream) to select the appropriate field.  The
-   following rules apply for DEV and APP port numbers.
+   To allow for a single rule being used for both directions, the UDP
+   port values are identified by their role (DEV or APP) and not by
+   their position in the frame (source or destination).  The SCHC C/D
+   must be aware of the traffic direction (Uplink, Downlink) to select
+   the appropriate field.  The following rules apply for DEV and APP
+   port numbers.
 
    If both ends know the port number, it can be elided.  The TV contains
    the port number, the MO is set to "equal" and the CDA is set to "not-
@@ -2011,19 +2035,12 @@ Internet-Draft                 LPWAN SCHC                   January 2018
    of the port number, the MO is set to "MSB" and the CDA is set to
    "LSB".
 
-
-
-Minaburo, et al.          Expires July 27, 2018                [Page 36]
-
-Internet-Draft                 LPWAN SCHC                   January 2018
-
-
    If some well-known values are used, the TV can contain the list of
    these values, the MO is set to "match-mapping" and the CDA is set to
    "mapping-sent".
 
-   Otherwise the port numbers are sent on the LPWAN.  The TV is not set,
-   the MO is set to "ignore" and the CDA is set to "value-sent".
+   Otherwise the port numbers are sent over the LPWAN.  The TV is not
+   set, the MO is set to "ignore" and the CDA is set to "value-sent".
 
 7.10.  UDP length field
 
@@ -2035,7 +2052,7 @@ Internet-Draft                 LPWAN SCHC                   January 2018
    If the payload is small, the TV can be set to 0x0000, the MO set to
    "MSB" and the CDA to "LSB".
 
-   On other cases, the length must be sent and the CDA is replaced by
+   In other cases, the length must be sent and the CDA is replaced by
    "value-sent".
 
 7.11.  UDP Checksum field
@@ -2050,12 +2067,19 @@ Internet-Draft                 LPWAN SCHC                   January 2018
    In other cases, the checksum must be explicitly sent.  The TV is not
    set, the MO is set to "ignore" and the CDF is set to "value-sent".
 
+
+
+Minaburo, et al.         Expires August 10, 2018               [Page 37]
+
+Internet-Draft                 LPWAN SCHC                  February 2018
+
+
 8.  Security considerations
 
 8.1.  Security considerations for header compression
 
    A malicious header compression could cause the reconstruction of a
-   wrong packet that does not match with the original one, such
+   wrong packet that does not match with the original one.  Such a
    corruption may be detected with end-to-end authentication and
    integrity mechanisms.  Denial of Service may be produced but its
    arise other security problems that may be solved with or without
@@ -2065,14 +2089,6 @@ Internet-Draft                 LPWAN SCHC                   January 2018
 
    This subsection describes potential attacks to LPWAN fragmentation
    and suggests possible countermeasures.
-
-
-
-
-Minaburo, et al.          Expires July 27, 2018                [Page 37]
-
-Internet-Draft                 LPWAN SCHC                   January 2018
-
 
    A node can perform a buffer reservation attack by sending a first
    fragment to a target.  Then, the receiver will reserve buffer space
@@ -2106,6 +2122,14 @@ Internet-Draft                 LPWAN SCHC                   January 2018
 
    Further attacks may involve sending overlapped fragments (i.e.
    comprising some overlapping parts of the original IPv6 datagram).
+
+
+
+Minaburo, et al.         Expires August 10, 2018               [Page 38]
+
+Internet-Draft                 LPWAN SCHC                  February 2018
+
+
    Implementers should make sure that the correct operation is not
    affected by such event.
 
@@ -2120,15 +2144,6 @@ Internet-Draft                 LPWAN SCHC                   January 2018
    that a high setting for MAX_FRAG_RETRIES benefits fragment delivery
    reliability, therefore the trade-off needs to be carefully
    considered.
-
-
-
-
-
-Minaburo, et al.          Expires July 27, 2018                [Page 38]
-
-Internet-Draft                 LPWAN SCHC                   January 2018
-
 
 9.  Acknowledgements
 
@@ -2159,16 +2174,28 @@ Internet-Draft                 LPWAN SCHC                   January 2018
               Interface Identifiers", RFC 7136, DOI 10.17487/RFC7136,
               February 2014, <https://www.rfc-editor.org/info/rfc7136>.
 
+
+
+
+
+
+
+
+Minaburo, et al.         Expires August 10, 2018               [Page 39]
+
+Internet-Draft                 LPWAN SCHC                  February 2018
+
+
 10.2.  Informative References
 
    [I-D.ietf-lpwan-overview]
               Farrell, S., "LPWAN Overview", draft-ietf-lpwan-
-              overview-07 (work in progress), October 2017.
+              overview-08 (work in progress), January 2018.
 
 Appendix A.  SCHC Compression Examples
 
    This section gives some scenarios of the compression mechanism for
-   IPv6/UDP.  The goal is to illustrate the SCHC behavior.
+   IPv6/UDP.  The goal is to illustrate the behavior of SCHC.
 
    The most common case using the mechanisms defined in this document
    will be a LPWAN Dev that embeds some applications running over CoAP.
@@ -2177,15 +2204,6 @@ Appendix A.  SCHC Compression Examples
    and UDP ports 123 and 124 for Dev and App, respectively.  The second
    flow will be a CoAP server for measurements done by the Device (using
    ports 5683) and Global IPv6 Address prefixes alpha::IID/64 to
-
-
-
-
-Minaburo, et al.          Expires July 27, 2018                [Page 39]
-
-Internet-Draft                 LPWAN SCHC                   January 2018
-
-
    beta::1/64.  The last flow is for legacy applications using different
    ports numbers, the destination IPv6 address prefix is gamma::1/64.
 
@@ -2212,10 +2230,18 @@ Internet-Draft                 LPWAN SCHC                   January 2018
               Figure 22: Simplified Protocol Stack for LP-WAN
 
    Note that in some LPWAN technologies, only the Devs have a device ID.
-   Therefore, when such technologies are used, it is necessary to define
-   statically an IID for the Link Local address for the SCHC C/D.
+   Therefore, when such technologies are used, it is necessary to
+   statically define an IID for the Link Local address for the SCHC C/D.
 
    Rule 0
+
+
+
+Minaburo, et al.         Expires August 10, 2018               [Page 40]
+
+Internet-Draft                 LPWAN SCHC                  February 2018
+
+
     +----------------+--+--+--+---------+--------+------------++------+
     | Field          |FL|FP|DI| Value   | Match  | Comp Decomp|| Sent |
     |                |  |  |  |         | Opera. | Action     ||[bits]|
@@ -2234,14 +2260,6 @@ Internet-Draft                 LPWAN SCHC                   January 2018
     |UDP DEVport     |16|1 |Bi|123      | equal  | not-sent   ||      |
     |UDP APPport     |16|1 |Bi|124      | equal  | not-sent   ||      |
     |UDP Length      |16|1 |Bi|         | ignore | comp-length||      |
-
-
-
-Minaburo, et al.          Expires July 27, 2018                [Page 40]
-
-Internet-Draft                 LPWAN SCHC                   January 2018
-
-
     |UDP checksum    |16|1 |Bi|         | ignore | comp-chk   ||      |
     +================+==+==+==+=========+========+============++======+
 
@@ -2272,9 +2290,17 @@ Internet-Draft                 LPWAN SCHC                   January 2018
 
     Rule 2
     +----------------+--+--+--+---------+--------+------------++------+
+
+
+
+Minaburo, et al.         Expires August 10, 2018               [Page 41]
+
+Internet-Draft                 LPWAN SCHC                  February 2018
+
+
     | Field          |FL|FP|DI| Value   | Match  | Action     || Sent |
     |                |  |  |  |         | Opera. | Action     ||[bits]|
-    +----------------+--+--+--+---------+--------+-------------++------+
+    +----------------+--+--+--+---------+--------+------------++------+
     |IPv6 version    |4 |1 |Bi|6        | equal  | not-sent   ||      |
     |IPv6 DiffServ   |8 |1 |Bi|0        | equal  | not-sent   ||      |
     |IPv6 Flow Label |20|1 |Bi|0        | equal  | not-sent   ||      |
@@ -2290,14 +2316,6 @@ Internet-Draft                 LPWAN SCHC                   January 2018
     |UDP DEVport     |16|1 |Bi|8720     | MSB(12)| LSB(4)     || [4]  |
     |UDP APPport     |16|1 |Bi|8720     | MSB(12)| LSB(4)     || [4]  |
     |UDP Length      |16|1 |Bi|         | ignore | comp-length||      |
-
-
-
-Minaburo, et al.          Expires July 27, 2018                [Page 41]
-
-Internet-Draft                 LPWAN SCHC                   January 2018
-
-
     |UDP checksum    |16|1 |Bi|         | ignore | comp-chk   ||      |
     +================+==+==+==+=========+========+============++======+
 
@@ -2316,11 +2334,25 @@ Internet-Draft                 LPWAN SCHC                   January 2018
 
 Appendix B.  Fragmentation Examples
 
-   This section provides examples of different fragment delivery
-   reliability options possible on the basis of this specification.
+   This section provides examples for the different fragment delivery
+   reliability modes specified in this document.
 
-   Figure 24 illustrates the transmission of an IPv6 packet that needs
-   11 fragments in the No ACK option.  Where FCN is always 1 bit.
+   Figure 24 illustrates the transmission in No-ACK mode of an IPv6
+   packet that needs 11 fragments.  FCN is 1 bit wide.
+
+
+
+
+
+
+
+
+
+
+Minaburo, et al.         Expires August 10, 2018               [Page 42]
+
+Internet-Draft                 LPWAN SCHC                  February 2018
+
 
            Sender               Receiver
              |-------FCN=0-------->|
@@ -2336,23 +2368,15 @@ Appendix B.  Fragmentation Examples
              |-------FCN=1-------->|MIC checked =>
 
 
-   Figure 24: Transmission of an IPv6 packet carried by 11 fragments in
-                             the No ACK option
+    Figure 24: Transmission in No-ACK mode of an IPv6 packet carried by
+                               11 fragments
 
-   Figure 25 illustrates the transmission of an IPv6 packet that needs
-   11 fragments in ACK-on-error, for N=3, without losses.
+   In the following examples, N, the size if the FCN field, is 3 bits.
+   Therefore, the All-1 FCN value is 7.
 
-
-
-
-
-
-
-
-Minaburo, et al.          Expires July 27, 2018                [Page 42]
-
-Internet-Draft                 LPWAN SCHC                   January 2018
-
+   Figure 25 illustrates the transmission in ACK-on-error of an IPv6
+   packet that needs 11 fragments, with MAX_WIND_FCN=6 and no fragment
+   loss.
 
            Sender               Receiver
              |-----W=0, FCN=6----->|
@@ -2370,11 +2394,21 @@ Internet-Draft                 LPWAN SCHC                   January 2018
              |<---- ACK, W=1 ------|
 
 
-   Figure 25: Transmission of an IPv6 packet carried by 11 fragments in
-         ACK-on-error, for N=3 and MAX_WIND_FCN=6, without losses.
+    Figure 25: Transmission ACK-on-error mode of an IPv6 packet carried
+             by 11 fragments, with MAX_WIND_FCN=6 and no loss.
 
-   Figure 26 illustrates the transmission of an IPv6 packet that needs
-   11 fragments ACK-on-error, for N=3, with three losses.
+   Figure 26 illustrates the transmission in ACK-on-error mode of an
+   IPv6 packet that needs 11 fragments, with MAX_WIND_FCN=6 and three
+   lost fragments.
+
+
+
+
+
+Minaburo, et al.         Expires August 10, 2018               [Page 43]
+
+Internet-Draft                 LPWAN SCHC                  February 2018
+
 
             Sender             Receiver
              |-----W=0, FCN=6----->|
@@ -2394,24 +2428,43 @@ Internet-Draft                 LPWAN SCHC                   January 2018
              |-----W=1, FCN=7----->|MIC checked
              |<-----ACK, W=1-------|C=0 Bitmap:1100001
              |-----W=1, FCN=4----->|MIC checked =>
-             |<---- ACK, W=1 ------|
+             |<---- ACK, W=1 ------|C=1, no bitmap
 
 
-   Figure 26: Transmission of an IPv6 packet carried by 11 fragments in
-          ACK-on-error, for N=3 and MAX_WIND_FCN=6, three losses.
+      Figure 26: Transmission in ACK-on-error mode of an IPv6 packet
+        carried by 11 fragments, with MAX_WIND_FCN=6 and three lost
+                                fragments.
 
-   Figure 27 illustrates the transmission of an IPv6 packet that needs
-   11 fragments in ACK-Always, for N=3 and MAX_WIND_FCN=6, without
+   Figure 27 illustrates the transmission in ACK-Always mdoe of an IPv6
+   packet that needs 11 fragments, with MAX_WIND_FCN=6 and no loss.
+   Note: in Window mode, an additional bit will be needed to number
+   windows.
 
 
 
-Minaburo, et al.          Expires July 27, 2018                [Page 43]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Minaburo, et al.         Expires August 10, 2018               [Page 44]
 
-Internet-Draft                 LPWAN SCHC                   January 2018
+Internet-Draft                 LPWAN SCHC                  February 2018
 
-
-   losses.  Note: in Window mode, an additional bit will be needed to
-   number windows.
 
            Sender               Receiver
              |-----W=0, FCN=6----->|
@@ -2430,41 +2483,12 @@ Internet-Draft                 LPWAN SCHC                   January 2018
            (End)
 
 
-   Figure 27: Transmission of an IPv6 packet carried by 11 fragments in
-            ACK-Always, for N=3 and MAX_WIND_FCN=6, no losses.
+   Figure 27: Transmission in ACK-Always mode of an IPv6 packet carried
+        by 11 fragments, with MAX_WIND_FCN=6 and no lost fragment.
 
-   Figure 28 illustrates the transmission of an IPv6 packet that needs
-   11 fragments in ACK-Always, for N=3 and MAX_WIND_FCN=6, with three
-   losses.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Minaburo, et al.          Expires July 27, 2018                [Page 44]
-
-Internet-Draft                 LPWAN SCHC                   January 2018
-
+   Figure 28 illustrates the transmission in ACK-Always mode of an IPv6
+   packet that needs 11 fragments, with MAX_WIND_FCN=6 and three lost
+   fragments.
 
            Sender               Receiver
              |-----W=1, FCN=6----->|
@@ -2488,133 +2512,158 @@ Internet-Draft                 LPWAN SCHC                   January 2018
            (End)
 
 
-   Figure 28: Transmission of an IPv6 packet carried by 11 fragments in
-        ACK-Always, for N=3, and MAX_WIND_FCN=6, with three losses.
-
-   Figure 29 illustrates the transmission of an IPv6 packet that needs 6
-   fragments in ACK-Always, for N=3 and MAX_WIND_FCN=6, with three
-   losses, and only one retry is needed for each lost fragment.  Note
-   that, since a single window is needed for transmission of the IPv6
-   packet in this case, the example illustrates behavior when losses
-   happen in the last window.
+   Figure 28: Transmission in ACK-Always mode of an IPv6 packet carried
+      by 11 fragments, with MAX_WIND_FCN=6 and three lost fragments.
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Minaburo, et al.          Expires July 27, 2018                [Page 45]
+Minaburo, et al.         Expires August 10, 2018               [Page 45]
 
-Internet-Draft                 LPWAN SCHC                   January 2018
+Internet-Draft                 LPWAN SCHC                  February 2018
 
+
+   Figure 29 illustrates the transmission in ACK-Always mode of an IPv6
+   packet that needs 6 fragments, with MAX_WIND_FCN=6, three lost
+   fragments and only one retry needed to recover each lost fragment.
+   Note that, since a single window is needed for transmission of the
+   IPv6 packet in this case, the example illustrates behavior when
+   losses happen in the last window.
 
              Sender                Receiver
-                |-----W=0, CFN=6----->|
-                |-----W=0, CFN=5----->|
-                |-----W=0, CFN=4--X-->|
-                |-----W=0, CFN=3--X-->|
-                |-----W=0, CFN=2--X-->|
-                |-----W=0, CFN=7----->|MIC checked
+                |-----W=0, FCN=6----->|
+                |-----W=0, FCN=5----->|
+                |-----W=0, FCN=4--X-->|
+                |-----W=0, FCN=3--X-->|
+                |-----W=0, FCN=2--X-->|
+                |-----W=0, FCN=7----->|MIC checked
                 |<-----ACK, W=0-------|C= 0 Bitmap:1100001
-                |-----W=0, CFN=4----->|MIC checked: failed
-                |-----W=0, CFN=3----->|MIC checked: failed
-                |-----W=0, CFN=2----->|MIC checked: success
+                |-----W=0, FCN=4----->|MIC checked: failed
+                |-----W=0, FCN=3----->|MIC checked: failed
+                |-----W=0, FCN=2----->|MIC checked: success
                 |<-----ACK, W=0-------|C=1 no Bitmap
               (End)
 
-   Figure 29: Transmission of an IPv6 packet carried by 11 fragments in
-   ACK-Always, for N=3, and MAX_WIND_FCN=6, with three losses, and only
-                one retry is needed for each lost fragment.
+   Figure 29: Transmission in ACK-Always mode of an IPv6 packet carried
+    by 11 fragments, fwith MAX_WIND_FCN=6, three lost framents and only
+                 one retry needed for each lost fragment.
 
-   Figure 30 illustrates the transmission of an IPv6 packet that needs 6
-   fragments in ACK-Always, for N=3 and MAX_WIND_FCN=6, with three
-   losses, and the second ACK is lost.  Note that, since a single window
+   Figure 30 illustrates the transmission in ACK-Always mode of an IPv6
+   packet that needs 6 fragments, with MAX_WIND_FCN=6, three lost
+   fragments, and the second ACK lost.  Note that, since a single window
    is needed for transmission of the IPv6 packet in this case, the
    example illustrates behavior when losses happen in the last window.
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Minaburo, et al.         Expires August 10, 2018               [Page 46]
+
+Internet-Draft                 LPWAN SCHC                  February 2018
+
+
              Sender                Receiver
-                |-----W=0, CFN=6----->|
-                |-----W=0, CFN=5----->|
-                |-----W=0, CFN=4--X-->|
-                |-----W=0, CFN=3--X-->|
-                |-----W=0, CFN=2--X-->|
-                |-----W=0, CFN=7----->|MIC checked
+                |-----W=0, FCN=6----->|
+                |-----W=0, FCN=5----->|
+                |-----W=0, FCN=4--X-->|
+                |-----W=0, FCN=3--X-->|
+                |-----W=0, FCN=2--X-->|
+                |-----W=0, FCN=7----->|MIC checked
                 |<-----ACK, W=0-------|C=0  Bitmap:1100001
-                |-----W=0, CFN=4----->|MIC checked: wrong
-                |-----W=0, CFN=3----->|MIC checked: wrong
-                |-----W=0, CFN=2----->|MIC checked: right
+                |-----W=0, FCN=4----->|MIC checked: wrong
+                |-----W=0, FCN=3----->|MIC checked: wrong
+                |-----W=0, FCN=2----->|MIC checked: right
                 |  X---ACK, W=0-------|C= 1 no Bitmap
        timeout  |                     |
-                |-----W=0, CFN=7----->|
+                |-----W=0, FCN=7----->|
                 |<-----ACK, W=0-------|C= 1 no Bitmap
 
               (End)
 
-   Figure 30: Transmission of an IPv6 packet carried by 11 fragments in
-    ACK-Always, for N=3, and MAX_WIND_FCN=6, with three losses, and the
-                            second ACK is lost.
+   Figure 30: Transmission in ACK-Always mode of an IPv6 packet carried
+    by 11 fragments, with MAX_WIND_FCN=6, three lost fragments, and the
+                             second ACK lost.
 
-   Figure 31 illustrates the transmission of an IPv6 packet that needs 6
-   fragments in ACK-Always, for N=3 and MAX_WIND_FCN=6, with three
+   Figure 31 illustrates the transmission in ACK-Always mode of an IPv6
+   packet that needs 6 fragments, with MAX_WIND_FCN=6, with three lost
+   fragments, and one retransmitted fragment lost again.  Note that,
+   since a single window is needed for transmission of the IPv6 packet
+   in this case, the example illustrates behavior when losses happen in
+   the last window.
 
 
 
-Minaburo, et al.          Expires July 27, 2018                [Page 46]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Minaburo, et al.         Expires August 10, 2018               [Page 47]
 
-Internet-Draft                 LPWAN SCHC                   January 2018
+Internet-Draft                 LPWAN SCHC                  February 2018
 
-
-   losses, and one retransmitted fragment is lost.  Note that, since a
-   single window is needed for transmission of the IPv6 packet in this
-   case, the example illustrates behavior when losses happen in the last
-   window.
 
               Sender                Receiver
-                |-----W=0, CFN=6----->|
-                |-----W=0, CFN=5----->|
-                |-----W=0, CFN=4--X-->|
-                |-----W=0, CFN=3--X-->|
-                |-----W=0, CFN=2--X-->|
-                |-----W=0, CFN=7----->|MIC checked
+                |-----W=0, FCN=6----->|
+                |-----W=0, FCN=5----->|
+                |-----W=0, FCN=4--X-->|
+                |-----W=0, FCN=3--X-->|
+                |-----W=0, FCN=2--X-->|
+                |-----W=0, FCN=7----->|MIC checked
                 |<-----ACK, W=0-------|C=0   Bitmap:1100001
-                |-----W=0, CFN=4----->|MIC checked: wrong
-                |-----W=0, CFN=3----->|MIC checked: wrong
-                |-----W=0, CFN=2--X-->|
+                |-----W=0, FCN=4----->|MIC checked: wrong
+                |-----W=0, FCN=3----->|MIC checked: wrong
+                |-----W=0, FCN=2--X-->|
          timeout|                     |
-                |-----W=0, CFN=7----->|All-0 empty
+                |-----W=0, FCN=7----->|All-0 empty
                 |<-----ACK, W=0-------|C=0 Bitmap: 1111101
-                |-----W=0, CFN=2----->|MIC checked: right
+                |-----W=0, FCN=2----->|MIC checked: right
                 |<-----ACK, W=0-------|C=1 no Bitmap
               (End)
 
-   Figure 31: Transmission of an IPv6 packet carried by 11 fragments in
-    ACK-Always, for N=3, and MAX_WIND_FCN=6, with three losses, and one
-                      retransmitted fragment is lost.
+   Figure 31: Transmission in ACK-Always mode of an IPv6 packet carried
+   by 11 fragments, with MAX_WIND_FCN=6, with three lost fragments, and
+                  one retransmitted fragment lost again.
 
-   Appendix C illustrates the transmission of an IPv6 packet that needs
-   28 fragments in ACK-Always, for N=5 and MAX_WIND_FCN=23, with two
-   losses.  Note that MAX_WIND_FCN=23 may be useful when the maximum
-   possible Bitmap size, considering the maximum lower layer technology
-   payload size and the value of R, is 3 bytes.  Note also that the FCN
-   of the last fragment of the packet is the one with FCN=31 (i.e.
-   FCN=2^N-1 for N=5, or equivalently, all FCN bits set to 1).
-
-
-
+   Figure 32 illustrates the transmission in ACK-Always mode of an IPv6
+   packet that needs 28 fragments, with N=5, MAX_WIND_FCN=23 and two
+   lost fragments.  Note that MAX_WIND_FCN=23 may be useful when the
+   maximum possible Bitmap size, considering the maximum lower layer
+   technology payload size and the value of R, is 3 bytes.  Note also
+   that the FCN of the last fragment of the packet is the one with
+   FCN=31 (i.e.  FCN=2^N-1 for N=5, or equivalently, all FCN bits set to
+   1).
 
 
 
@@ -2629,65 +2678,72 @@ Internet-Draft                 LPWAN SCHC                   January 2018
 
 
 
-Minaburo, et al.          Expires July 27, 2018                [Page 47]
+
+
+
+
+
+
+
+Minaburo, et al.         Expires August 10, 2018               [Page 48]
 
-Internet-Draft                 LPWAN SCHC                   January 2018
+Internet-Draft                 LPWAN SCHC                  February 2018
 
 
            Sender               Receiver
-             |-----W=0, CFN=23----->|
-             |-----W=0, CFN=22----->|
-             |-----W=0, CFN=21--X-->|
-             |-----W=0, CFN=20----->|
-             |-----W=0, CFN=19----->|
-             |-----W=0, CFN=18----->|
-             |-----W=0, CFN=17----->|
-             |-----W=0, CFN=16----->|
-             |-----W=0, CFN=15----->|
-             |-----W=0, CFN=14----->|
-             |-----W=0, CFN=13----->|
-             |-----W=0, CFN=12----->|
-             |-----W=0, CFN=11----->|
-             |-----W=0, CFN=10--X-->|
-             |-----W=0, CFN=9 ----->|
-             |-----W=0, CFN=8 ----->|
-             |-----W=0, CFN=7 ----->|
-             |-----W=0, CFN=6 ----->|
-             |-----W=0, CFN=5 ----->|
-             |-----W=0, CFN=4 ----->|
-             |-----W=0, CFN=3 ----->|
-             |-----W=0, CFN=2 ----->|
-             |-----W=0, CFN=1 ----->|
-             |-----W=0, CFN=0 ----->|
+             |-----W=0, FCN=23----->|
+             |-----W=0, FCN=22----->|
+             |-----W=0, FCN=21--X-->|
+             |-----W=0, FCN=20----->|
+             |-----W=0, FCN=19----->|
+             |-----W=0, FCN=18----->|
+             |-----W=0, FCN=17----->|
+             |-----W=0, FCN=16----->|
+             |-----W=0, FCN=15----->|
+             |-----W=0, FCN=14----->|
+             |-----W=0, FCN=13----->|
+             |-----W=0, FCN=12----->|
+             |-----W=0, FCN=11----->|
+             |-----W=0, FCN=10--X-->|
+             |-----W=0, FCN=9 ----->|
+             |-----W=0, FCN=8 ----->|
+             |-----W=0, FCN=7 ----->|
+             |-----W=0, FCN=6 ----->|
+             |-----W=0, FCN=5 ----->|
+             |-----W=0, FCN=4 ----->|
+             |-----W=0, FCN=3 ----->|
+             |-----W=0, FCN=2 ----->|
+             |-----W=0, FCN=1 ----->|
+             |-----W=0, FCN=0 ----->|
              |                      |lcl-Bitmap:110111111111101111111111
              |<------ACK, W=0-------| Bitmap:1101111111111011
-             |-----W=0, CFN=21----->|
-             |-----W=0, CFN=10----->|
+             |-----W=0, FCN=21----->|
+             |-----W=0, FCN=10----->|
              |<------ACK, W=0-------|no Bitmap
-             |-----W=1, CFN=23----->|
-             |-----W=1, CFN=22----->|
-             |-----W=1, CFN=21----->|
-             |-----W=1, CFN=31----->|MIC checked =>
+             |-----W=1, FCN=23----->|
+             |-----W=1, FCN=22----->|
+             |-----W=1, FCN=21----->|
+             |-----W=1, FCN=31----->|MIC checked =>
              |<------ACK, W=1-------|no Bitmap
            (End)
 
+   Figure 32: Transmission in ACK-Always mode of an IPv6 packet carried
+    by 28 fragments, with N=5, MAX_WIND_FCN=23 and two lost fragments.
+
 Appendix C.  Fragmentation State Machines
 
-   The fragmentation state machines of the sender and the receiver in
-   the different reliability options are next in the following figures:
+   The fragmentation state machines of the sender and the receiver, one
+   for each of the different reliability modes, are described in the
+   following figures:
 
 
 
 
 
 
-
-
-
-
-Minaburo, et al.          Expires July 27, 2018                [Page 48]
+Minaburo, et al.         Expires August 10, 2018               [Page 49]
 
-Internet-Draft                 LPWAN SCHC                   January 2018
+Internet-Draft                 LPWAN SCHC                  February 2018
 
 
                 +===========+
@@ -2708,7 +2764,7 @@ Internet-Draft                 LPWAN SCHC                   January 2018
               |    END     |
               +============+
 
-            Figure 32: Sender State Machine for the No ACK Mode
+            Figure 33: Sender State Machine for the No ACK Mode
 
                          +------+ Not All-1
               +==========+=+    | ~~~~~~~~~~~~~~~~~~~
@@ -2725,7 +2781,7 @@ Internet-Draft                 LPWAN SCHC                   January 2018
                           +===========+
 
 
-           Figure 33: Receiver State Machine for the No ACK Mode
+           Figure 34: Receiver State Machine for the No ACK Mode
 
 
 
@@ -2741,9 +2797,9 @@ Internet-Draft                 LPWAN SCHC                   January 2018
 
 
 
-Minaburo, et al.          Expires July 27, 2018                [Page 49]
+Minaburo, et al.         Expires August 10, 2018               [Page 50]
 
-Internet-Draft                 LPWAN SCHC                   January 2018
+Internet-Draft                 LPWAN SCHC                  February 2018
 
 
                  +=======+
@@ -2790,16 +2846,16 @@ Internet-Draft                 LPWAN SCHC                   January 2018
                 MIC_bit ==0 & +>|    ERROR    |
        Lcl_Bitmap==recv_Bitmap  +=============+
 
-          Figure 34: Sender State Machine for the ACK Always Mode
+          Figure 35: Sender State Machine for the ACK Always Mode
 
     Not All- & w=expected +---+   +---+w = Not expected
     ~~~~~~~~~~~~~~~~~~~~~ |   |   |   |~~~~~~~~~~~~~~~~
 
 
 
-Minaburo, et al.          Expires July 27, 2018                [Page 50]
+Minaburo, et al.         Expires August 10, 2018               [Page 51]
 
-Internet-Draft                 LPWAN SCHC                   January 2018
+Internet-Draft                 LPWAN SCHC                  February 2018
 
 
     Set local_Bitmap(FCN) |   v   v   |discard
@@ -2853,9 +2909,9 @@ Internet-Draft                 LPWAN SCHC                   January 2018
 
 
 
-Minaburo, et al.          Expires July 27, 2018                [Page 51]
+Minaburo, et al.         Expires August 10, 2018               [Page 52]
 
-Internet-Draft                 LPWAN SCHC                   January 2018
+Internet-Draft                 LPWAN SCHC                  February 2018
 
 
                ~~~~~~~
@@ -2866,7 +2922,7 @@ Internet-Draft                 LPWAN SCHC                   January 2018
                 Attemp++
 
 
-         Figure 35: Receiver State Machine for the ACK Always Mode
+         Figure 36: Receiver State Machine for the ACK Always Mode
 
 
 
@@ -2909,9 +2965,9 @@ Internet-Draft                 LPWAN SCHC                   January 2018
 
 
 
-Minaburo, et al.          Expires July 27, 2018                [Page 52]
+Minaburo, et al.         Expires August 10, 2018               [Page 53]
 
-Internet-Draft                 LPWAN SCHC                   January 2018
+Internet-Draft                 LPWAN SCHC                  February 2018
 
 
                       +=======+
@@ -2961,13 +3017,13 @@ Internet-Draft                 LPWAN SCHC                   January 2018
                                     |   ERROR   |
                                     +===========+
 
-         Figure 36: Sender State Machine for the ACK on error Mode
+         Figure 37: Sender State Machine for the ACK on error Mode
 
 
 
-Minaburo, et al.          Expires July 27, 2018                [Page 53]
+Minaburo, et al.         Expires August 10, 2018               [Page 54]
 
-Internet-Draft                 LPWAN SCHC                   January 2018
+Internet-Draft                 LPWAN SCHC                  February 2018
 
 
       Not All- & w=expected +---+   +---+w = Not expected
@@ -3021,21 +3077,22 @@ Internet-Draft                 LPWAN SCHC                   January 2018
 
 
 
-Minaburo, et al.          Expires July 27, 2018                [Page 54]
+Minaburo, et al.         Expires August 10, 2018               [Page 55]
 
-Internet-Draft                 LPWAN SCHC                   January 2018
+Internet-Draft                 LPWAN SCHC                  February 2018
 
 
-        Figure 37: Receiver State Machine for the ACK on error Mode
+        Figure 38: Receiver State Machine for the ACK on error Mode
 
 Appendix D.  Allocation of Rule IDs for fragmentation
 
-   A set of Rule IDs are allocated to support different aspects of
-   fragmentation functionality as per this document.  The allocation of
-   IDs is to be defined in other documents.  The set MAY include:
+   A set of Rule IDs has to be allocated to support different aspects of
+   fragmentation functionality as per this document.  The actual
+   allocation of IDs is to be defined in other documents.  The set MAY
+   include:
 
-   o  one ID or a subset of IDs to identify a fragment as well as its
-      reliability option and its window size, if multiple of these are
+   o  one ID or several IDs to identify a fragment as well as its
+      reliability mode and its window size, if multiple of these are
       supported.
 
    o  one ID to identify the ACK message.
@@ -3076,10 +3133,9 @@ Authors' Addresses
 
 
 
-
-Minaburo, et al.          Expires July 27, 2018                [Page 55]
+Minaburo, et al.         Expires August 10, 2018               [Page 56]
 
-Internet-Draft                 LPWAN SCHC                   January 2018
+Internet-Draft                 LPWAN SCHC                  February 2018
 
 
    Carles Gomez
@@ -3133,4 +3189,4 @@ Internet-Draft                 LPWAN SCHC                   January 2018
 
 
 
-Minaburo, et al.          Expires July 27, 2018                [Page 56]
+Minaburo, et al.         Expires August 10, 2018               [Page 57]

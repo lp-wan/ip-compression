@@ -342,7 +342,7 @@ address {
 
   <meta name="dct.creator" content="Minaburo, A., Toutain, L., and C. Gomez" />
   <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-lpwan-ipv6-static-context-hc-09" />
-  <meta name="dct.issued" scheme="ISO8601" content="2018-1-23" />
+  <meta name="dct.issued" scheme="ISO8601" content="2018-2-06" />
   <meta name="dct.abstract" content="This document describes a header compression scheme and fragmentation functionality for very low bandwidth networks. These techniques are specially tailored for Low Power Wide Area Network (LPWAN)." />
   <meta name="description" content="This document describes a header compression scheme and fragmentation functionality for very low bandwidth networks. These techniques are specially tailored for Low Power Wide Area Network (LPWAN)." />
 
@@ -366,7 +366,7 @@ address {
 <td class="right">L. Toutain</td>
 </tr>
 <tr>
-<td class="left">Expires: July 27, 2018</td>
+<td class="left">Expires: August 10, 2018</td>
 <td class="right">IMT-Atlantique</td>
 </tr>
 <tr>
@@ -379,7 +379,7 @@ address {
 </tr>
 <tr>
 <td class="left"></td>
-<td class="right">January 23, 2018</td>
+<td class="right">February 06, 2018</td>
 </tr>
 
     	
@@ -398,7 +398,7 @@ address {
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at https://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on July 27, 2018.</p>
+<p>This Internet-Draft will expire on August 10, 2018.</p>
 <h1 id="rfc.copyrightnotice"><a href="#rfc.copyrightnotice">Copyright Notice</a></h1>
 <p>Copyright (c) 2018 IETF Trust and the persons identified as the document authors.  All rights reserved.</p>
 <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (https://trustee.ietf.org/license-info) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.</p>
@@ -777,7 +777,7 @@ address {
 </h1>
 <p id="rfc.section.4.5.5.p.1">These functions are used to process respectively the Dev and the App Interface Identifiers (Deviid and Appiid) of the IPv6 addresses. Appiid CDA is less common since current LPWAN technologies frames contain a single address, which is the Dev&#8217;s address.</p>
 <p id="rfc.section.4.5.5.p.2">The IID value may be computed from the Device ID present in the Layer 2 header. The computation is specific to each LPWAN technology and may depend on the Device ID size.</p>
-<p id="rfc.section.4.5.5.p.3">In the downstream direction, these CDA may be used to determine the L2 addresses used by the LPWAN.</p>
+<p id="rfc.section.4.5.5.p.3">In the Downlink direction, these CDA may be used to determine the L2 addresses used by the LPWAN.</p>
 <h1 id="rfc.section.4.5.6">
 <a href="#rfc.section.4.5.6">4.5.6.</a> <a href="#compute-" id="compute-">Compute-*</a>
 </h1>
@@ -1119,15 +1119,23 @@ address {
 <h1 id="rfc.section.6">
 <a href="#rfc.section.6">6.</a> <a href="#Padding" id="Padding">Padding management</a>
 </h1>
-<p id="rfc.section.6.p.1">SCHC header, either for compression, fragmentation or acknowledgment does not preserve byte alignment. Since most of the LPWAN network technologies payload is expressed in an integer number of bytes; the sender will introduce at the end some padding bits while the receiver must be able to eliminate them.</p>
-<p id="rfc.section.6.p.2">The algorithm for padding bit elimination for compressed or fragmented frames is simple. Based on the following principle: * The SCHC header is not aligned on a byte boundary, but its size in bits is given by the rule.</p>
+<p id="rfc.section.6.p.1">The headers specified in this document, be there for compression, fragmentation or acknowledgment, are not necessarily an integer number of bytes in size.  Most of the LPWAN technologies have PDUs that are integer numbers of bytes.  With such a technology, the sender will append padding bits to the messages defined in this document in order to fill up the last byte of the L2 PDU, if it isn&#8217;t already full.  Examples are shown in <a href="#Fig-FormatPckt" class="xref">Figure 4</a> and <a href="#Fig-FragFormat" class="xref">Figure 6</a>.</p>
+<p id="rfc.section.6.p.2">The receiver will tell the header, the payload and the padding apart using the following principles:</p>
 <p></p>
 
 <ul>
-<li>The data size is variable, but always a multiple of 8 bits.</li>
-<li>Padding bits MUST never exceed 7 bits.</li>
+<li>The size of any SCHC header is known from exmining the Rule ID and the content of that header.</li>
+<li>The payload that follows the header, if it exists, is variable in size, but is always a integer nuber of bytes.</li>
+<li>Padding MUST not add more than 7 bits.</li>
 </ul>
-<p id="rfc.section.6.p.4">In that case, a receiver after decoding the SCHC header, must take the maximum multiple of 8 bits as data. The remaining bits are padding bits.</p>
+<p id="rfc.section.6.p.4">Therefore, the algorithm for padding elimination at the receiver is the following:</p>
+<p></p>
+
+<ul>
+<li>decode the SCHC header, find its length (in bits) and set a pointer to the end of the header.</li>
+<li>from that pointer, extract as many blocks of 8 bits as are available in the L2 PDU. They are the payload bytes.</li>
+<li>the remaining bits, if any, are padding.</li>
+</ul>
 <h1 id="rfc.section.7">
 <a href="#rfc.section.7">7.</a> <a href="#schc-compression-for-ipv6-and-udp-headers" id="schc-compression-for-ipv6-and-udp-headers">SCHC Compression for IPv6 and UDP headers</a>
 </h1>
@@ -1135,82 +1143,86 @@ address {
 <h1 id="rfc.section.7.1">
 <a href="#rfc.section.7.1">7.1.</a> <a href="#ipv6-version-field" id="ipv6-version-field">IPv6 version field</a>
 </h1>
-<p id="rfc.section.7.1.p.1">This field always holds the same value. Therefore, the TV is 6, the MO is &#8220;equal&#8221; and the &#8220;CDA &#8220;not-sent&#8221;.</p>
+<p id="rfc.section.7.1.p.1">This field always holds the same value. Therefore, in the rule, TV is set to 6, MO to &#8220;equal&#8221; and CDA to &#8220;not-sent&#8221;.</p>
 <h1 id="rfc.section.7.2">
 <a href="#rfc.section.7.2">7.2.</a> <a href="#ipv6-traffic-class-field" id="ipv6-traffic-class-field">IPv6 Traffic class field</a>
 </h1>
-<p id="rfc.section.7.2.p.1">If the DiffServ field identified by the rest of the rule does not vary and is known by both sides, the TV should contain this well-known value, the MO should be &#8220;equal&#8221; and the CDA must be &#8220;not-sent.</p>
-<p id="rfc.section.7.2.p.2">If the DiffServ field identified by the rest of the rule varies over time or is not known by both sides, then there are two possibilities depending on the variability of the value: The first one is to do not compressed the field and sends the original value. In the second, where the values can be computed by sending only the LSB bits:</p>
+<p id="rfc.section.7.2.p.1">If the DiffServ field identified by the rest of the rule does not vary and is known by both sides, the Field Descriptor in the rule should contain a TV with this well-known value, an &#8220;equal&#8221; MO and a &#8220;not-sent&#8221; CDA.</p>
+<p id="rfc.section.7.2.p.2">Otherwise, two possibilities can be considered:</p>
 <p></p>
 
 <ul>
-<li>TV is not set to any value, MO is set to &#8220;ignore&#8221; and CDA is set to &#8220;value-sent&#8221;</li>
-<li>TV contains a stable value, MO is MSB(X) and CDA is set to LSB</li>
+<li>One possibility is to not compress the field and send the original value. In the rule, TV is not set to any particular value, MO is set to &#8220;ignore&#8221; and CDA is set to &#8220;value-sent&#8221;.</li>
+<li>If some upper bits in the field are constant and known, a better option is to only send the LSBs. In the rule, TV is set to a value with the stable known upper part, MO is set to MSB(X) and CDA to LSB.</li>
 </ul>
 <h1 id="rfc.section.7.3">
 <a href="#rfc.section.7.3">7.3.</a> <a href="#flow-label-field" id="flow-label-field">Flow label field</a>
 </h1>
-<p id="rfc.section.7.3.p.1">If the Flow Label field identified by the rest of the rule does not vary and is known by both sides, the TV should contain this well-known value, the MO should be &#8220;equal&#8221; and the CDA should be &#8220;not-sent&#8221;.</p>
-<p id="rfc.section.7.3.p.2">If the Flow Label field identified by the rest of the rule varies during time or is not known by both sides, there are two possibilities depending on the variability of the value: The first one is without compression and then the value is sent. In the second, only part of the value is sent and the decompressor needs to compute the original value:</p>
+<p id="rfc.section.7.3.p.1">If the Flow Label field identified by the rest of the rule does not vary and is known by both sides, the Field Descriptor in the rule should contain a TV with this well-known value, an &#8220;equal&#8221; MO and a &#8220;not-sent&#8221; CDA.</p>
+<p id="rfc.section.7.3.p.2">Otherwise, two possibilities can be considered:</p>
 <p></p>
 
 <ul>
-<li>TV is not set, MO is set to &#8220;ignore&#8221; and CDA is set to &#8220;value-sent&#8221;</li>
-<li>TV contains a stable value, MO is MSB(X) and CDA is set to LSB</li>
+<li>One possibility is to not compress the field and send the original value. In the rule, TV is not set to any particular value, MO is set to &#8220;ignore&#8221; and CDA is set to &#8220;value-sent&#8221;.</li>
+<li>If some upper bits in the field are constant and known, a better option is to only send the LSBs. In the rule, TV is set to a value with the stable known upper part, MO is set to MSB(X) and CDA to LSB.</li>
 </ul>
 <h1 id="rfc.section.7.4">
 <a href="#rfc.section.7.4">7.4.</a> <a href="#payload-length-field" id="payload-length-field">Payload Length field</a>
 </h1>
-<p id="rfc.section.7.4.p.1">If the LPWAN technology does not add padding, this field can be elided for the transmission on the LPWAN network. The SCHC C/D recomputes the original payload length value. The TV is not set, the MO is set to &#8220;ignore&#8221; and the CDA is &#8220;compute-IPv6-length&#8221;.</p>
-<p id="rfc.section.7.4.p.2">If the payload length needs to be sent and does not need to be coded in 16 bits, the TV can be set to 0x0000, the MO set to &#8220;MSB (16-s)&#8221; and the CDA to &#8220;LSB&#8221;. The &#8216;s&#8217; parameter depends on the expected maximum packet length.</p>
-<p id="rfc.section.7.4.p.3">In other cases, the payload length field must be sent and the CDA is replaced by &#8220;value-sent&#8221;.</p>
+<p id="rfc.section.7.4.p.1">If the LPWAN technology does not add padding, this field can be elided for the transmission on the LPWAN network. The SCHC C/D recomputes the original payload length value. In the Field Descriptor, TV is not set, MO is set to &#8220;ignore&#8221; and CDA is &#8220;compute-IPv6-length&#8221;.</p>
+<p id="rfc.section.7.4.p.2">If the payload length needs to be sent and is known to need less than 16 bits for its encoding, the TV can be set to 0x0000, the MO set to &#8220;MSB (16-s)&#8221; and the CDA to &#8220;LSB&#8221;. The &#8216;s&#8217; parameter depends on the expected maximum packet length.</p>
+<p id="rfc.section.7.4.p.3">Otherwise, the payload length field must be sent and the CDA is replaced by &#8220;value-sent&#8221;.</p>
 <h1 id="rfc.section.7.5">
 <a href="#rfc.section.7.5">7.5.</a> <a href="#next-header-field" id="next-header-field">Next Header field</a>
 </h1>
-<p id="rfc.section.7.5.p.1">If the Next Header field identified by the rest of the rule does not vary and is known by both sides, the TV should contain this Next Header value, the MO should be &#8220;equal&#8221; and the CDA should be &#8220;not-sent&#8221;.</p>
-<p id="rfc.section.7.5.p.2">If the Next Header field identified by the rest of the rule varies during time or is not known by both sides, then TV is not set, MO is set to &#8220;ignore&#8221; and CDA is set to &#8220;value-sent&#8221;. A matching-list may also be used.</p>
+<p id="rfc.section.7.5.p.1">If the Next Header field identified by the rest of the rule does not vary and is known by both sides, the Field Descriptor in the rule should contain a TV with this Next Header value, the MO should be &#8220;equal&#8221; and the CDA should be &#8220;not-sent&#8221;.</p>
+<p id="rfc.section.7.5.p.2">Otherwise, TV is not set in the Field Descriptor, MO is set to &#8220;ignore&#8221; and CDA is set to &#8220;value-sent&#8221;. Alternatively, a matching-list may also be used.</p>
 <h1 id="rfc.section.7.6">
 <a href="#rfc.section.7.6">7.6.</a> <a href="#hop-limit-field" id="hop-limit-field">Hop Limit field</a>
 </h1>
-<p id="rfc.section.7.6.p.1">The End System is generally a device and does not forward packets. Therefore, the Hop Limit value is constant. So, the TV is set with a default value, the MO is set to &#8220;equal&#8221; and the CDA is set to &#8220;not-sent&#8221;.</p>
-<p id="rfc.section.7.6.p.2">Otherwise the value is sent on the LPWAN: TV is not set, MO is set to ignore and CDA is set to &#8220;value-sent&#8221;.</p>
-<p id="rfc.section.7.6.p.3">Note that the field behavior differs in upstream and downstream. In upstream, since there is no IP forwarding between the Dev and the SCHC C/D, the value is relatively constant. On the other hand, the downstream value depends of Internet routing and may change more frequently.  One solution could be to use the Direction Indicator (DI) to distinguish both directions to elide the field in the upstream direction and send the value in the downstream direction.</p>
+<p id="rfc.section.7.6.p.1">Note that the value pattern for this field is different for Uplink and Downlink. In Uplink, since there is no IP forwarding between the Dev and the SCHC C/D, the value is relatively constant. On the other hand, the Downlink value depends of Internet routing and may change more frequently.  One neat way of processing this field is to use the Direction Indicator (DI) to distinguish between directions:</p>
+<p></p>
+
+<ul>
+<li>in the Uplink, elide the field: the TV in the Field Descriptor is set to the known constant value, the MO is set to &#8220;equal&#8221; and the CDA is set to &#8220;not-sent&#8221;.</li>
+<li>in the Downlink, send the value: TV is not set, MO is set to &#8220;ignore&#8221; and CDA is set to &#8220;value-sent&#8221;.</li>
+</ul>
 <h1 id="rfc.section.7.7">
 <a href="#rfc.section.7.7">7.7.</a> <a href="#ipv6-addresses-fields" id="ipv6-addresses-fields">IPv6 addresses fields</a>
 </h1>
-<p id="rfc.section.7.7.p.1">As in 6LoWPAN <a href="#RFC4944" class="xref">[RFC4944]</a>, IPv6 addresses are splitted into two 64-bit long fields; one for the prefix and one for the Interface Identifier (IID). These fields should be compressed. To allow a single rule, these values are identified by their role (DEV or APP) and not by their position in the frame (source or destination). The SCHC C/D must be aware of the traffic direction (upstream, downstream) to select the appropriate field.</p>
+<p id="rfc.section.7.7.p.1">As in 6LoWPAN <a href="#RFC4944" class="xref">[RFC4944]</a>, IPv6 addresses are split into two 64-bit long fields; one for the prefix and one for the Interface Identifier (IID). These fields should be compressed. To allow for a single rule being used for both directions, these values are identified by their role (DEV or APP) and not by their position in the frame (source or destination). The SCHC C/D must be aware of the traffic direction (Uplink, Downlink) to select the appropriate field.</p>
 <h1 id="rfc.section.7.7.1">
 <a href="#rfc.section.7.7.1">7.7.1.</a> <a href="#ipv6-source-and-destination-prefixes" id="ipv6-source-and-destination-prefixes">IPv6 source and destination prefixes</a>
 </h1>
 <p id="rfc.section.7.7.1.p.1">Both ends must be synchronized with the appropriate prefixes. For a specific flow, the source and destination prefixes can be unique and stored in the context. It can be either a link-local prefix or a global prefix. In that case, the TV for the source and destination prefixes contain the values, the MO is set to &#8220;equal&#8221; and the CDA is set to &#8220;not-sent&#8221;.</p>
-<p id="rfc.section.7.7.1.p.2">In case the rule allows several prefixes, mapping-list must be used. The different prefixes are listed in the TV associated with a short ID. The MO is set to &#8220;match-mapping&#8221; and the CDA is set to &#8220;mapping-sent&#8221;.</p>
-<p id="rfc.section.7.7.1.p.3">Otherwise the TV contains the prefix, the MO is set to &#8220;equal&#8221; and the CDA is set to &#8220;value-sent&#8221;.</p>
+<p id="rfc.section.7.7.1.p.2">If the rule is intended to compress packets with different prefix values, match-mapping should be used. The different prefixes are listed in the TV associated with a short ID. The MO is set to &#8220;match-mapping&#8221; and the CDA is set to &#8220;mapping-sent&#8221;.</p>
+<p id="rfc.section.7.7.1.p.3">Otherwise, the TV contains the prefix, the MO is set to &#8220;equal&#8221; and the CDA is set to &#8220;value-sent&#8221;.</p>
 <h1 id="rfc.section.7.7.2">
 <a href="#rfc.section.7.7.2">7.7.2.</a> <a href="#ipv6-source-and-destination-iid" id="ipv6-source-and-destination-iid">IPv6 source and destination IID</a>
 </h1>
-<p id="rfc.section.7.7.2.p.1">If the DEV or APP IID are based on an LPWAN address, then the IID can be reconstructed with information coming from the LPWAN header. In that case, the TV is not set, the MO is set to &#8220;ignore&#8221; and the CDA is set to &#8220;DEViid&#8221; or &#8220;APPiid&#8221;. Note that the LPWAN technology is generally carrying a single device identifier corresponding to the DEV. The SCHC C/D may also not be aware of these values.</p>
+<p id="rfc.section.7.7.2.p.1">If the DEV or APP IID are based on an LPWAN address, then the IID can be reconstructed with information coming from the LPWAN header. In that case, the TV is not set, the MO is set to &#8220;ignore&#8221; and the CDA is set to &#8220;DEViid&#8221; or &#8220;APPiid&#8221;. Note that the LPWAN technology generally carries a single identifier, which corresponds to the DEV. The SCHC C/D may also not be aware of these values.</p>
 <p id="rfc.section.7.7.2.p.2">If the DEV address has a static value that is not derived from an IEEE EUI-64, then TV contains the actual Dev address value, the MO operator is set to &#8220;equal&#8221; and the CDA is set to &#8220;not-sent&#8221;.</p>
 <p id="rfc.section.7.7.2.p.3">If several IIDs are possible, then the TV contains the list of possible IIDs, the MO is set to &#8220;match-mapping&#8221; and the CDA is set to &#8220;mapping-sent&#8221;.</p>
-<p id="rfc.section.7.7.2.p.4">Otherwise the value variation of the IID may be reduced to few bytes. In that case, the TV is set to the stable part of the IID, the MO is set to &#8220;MSB&#8221; and the CDA is set to &#8220;LSB&#8221;.</p>
-<p id="rfc.section.7.7.2.p.5">Finally, the IID can be sent on the LPWAN. In that case, the TV is not set, the MO is set to &#8220;ignore&#8221; and the CDA is set to &#8220;value-sent&#8221;.</p>
+<p id="rfc.section.7.7.2.p.4">It may also happen that the IID variability only expresses itself on a few bytes. In that case, the TV is set to the stable part of the IID, the MO is set to &#8220;MSB&#8221; and the CDA is set to &#8220;LSB&#8221;.</p>
+<p id="rfc.section.7.7.2.p.5">Finally, the IID can be sent in extenso on the LPWAN. In that case, the TV is not set, the MO is set to &#8220;ignore&#8221; and the CDA is set to &#8220;value-sent&#8221;.</p>
 <h1 id="rfc.section.7.8">
 <a href="#rfc.section.7.8">7.8.</a> <a href="#ipv6-extensions" id="ipv6-extensions">IPv6 extensions</a>
 </h1>
-<p id="rfc.section.7.8.p.1">No extension rules are currently defined. They can be based on the MOs and CDAs described above.</p>
+<p id="rfc.section.7.8.p.1">No rule is currently defined that processes IPv6 extensions.  If such extensions are needed, their compression/decompression rules can be based on the MOs and CDAs described above.</p>
 <h1 id="rfc.section.7.9">
 <a href="#rfc.section.7.9">7.9.</a> <a href="#udp-source-and-destination-port" id="udp-source-and-destination-port">UDP source and destination port</a>
 </h1>
-<p id="rfc.section.7.9.p.1">To allow a single rule, the UDP port values are identified by their role (DEV or APP) and not by their position in the frame (source or destination). The SCHC C/D must be aware of the traffic direction (upstream, downstream) to select the appropriate field. The following rules apply for DEV and APP port numbers.</p>
+<p id="rfc.section.7.9.p.1">To allow for a single rule being used for both directions, the UDP port values are identified by their role (DEV or APP) and not by their position in the frame (source or destination). The SCHC C/D must be aware of the traffic direction (Uplink, Downlink) to select the appropriate field. The following rules apply for DEV and APP port numbers.</p>
 <p id="rfc.section.7.9.p.2">If both ends know the port number, it can be elided. The TV contains the port number, the MO is set to &#8220;equal&#8221; and the CDA is set to &#8220;not-sent&#8221;.</p>
 <p id="rfc.section.7.9.p.3">If the port variation is on few bits, the TV contains the stable part of the port number, the MO is set to &#8220;MSB&#8221; and the CDA is set to &#8220;LSB&#8221;.</p>
 <p id="rfc.section.7.9.p.4">If some well-known values are used,  the TV can contain the list of these values, the MO is set to &#8220;match-mapping&#8221; and the CDA is set to &#8220;mapping-sent&#8221;.</p>
-<p id="rfc.section.7.9.p.5">Otherwise the port numbers are sent on the LPWAN. The TV is not set, the MO is set to &#8220;ignore&#8221; and the CDA is set to &#8220;value-sent&#8221;.</p>
+<p id="rfc.section.7.9.p.5">Otherwise the port numbers are sent over the LPWAN. The TV is not set, the MO is set to &#8220;ignore&#8221; and the CDA is set to &#8220;value-sent&#8221;.</p>
 <h1 id="rfc.section.7.10">
 <a href="#rfc.section.7.10">7.10.</a> <a href="#udp-length-field" id="udp-length-field">UDP length field</a>
 </h1>
 <p id="rfc.section.7.10.p.1">If the LPWAN technology does not introduce padding, the UDP length can be computed from the received data. In that case, the TV is not set, the MO is set to &#8220;ignore&#8221; and the CDA is set to &#8220;compute-UDP-length&#8221;.</p>
 <p id="rfc.section.7.10.p.2">If the payload is small, the TV can be set to 0x0000, the MO set to &#8220;MSB&#8221; and the CDA to &#8220;LSB&#8221;.</p>
-<p id="rfc.section.7.10.p.3">On other cases, the length must be sent and the CDA is replaced by &#8220;value-sent&#8221;.</p>
+<p id="rfc.section.7.10.p.3">In other cases, the length must be sent and the CDA is replaced by &#8220;value-sent&#8221;.</p>
 <h1 id="rfc.section.7.11">
 <a href="#rfc.section.7.11">7.11.</a> <a href="#udp-checksum-field" id="udp-checksum-field">UDP Checksum field</a>
 </h1>
@@ -1222,7 +1234,7 @@ address {
 <h1 id="rfc.section.8.1">
 <a href="#rfc.section.8.1">8.1.</a> <a href="#security-considerations-for-header-compression" id="security-considerations-for-header-compression">Security considerations for header compression</a>
 </h1>
-<p id="rfc.section.8.1.p.1">A malicious header compression could cause the reconstruction of a wrong packet that does not match with the original one, such corruption may be detected with end-to-end authentication and integrity mechanisms.  Denial of Service may be produced but its arise other security problems that may be solved with or without header compression.</p>
+<p id="rfc.section.8.1.p.1">A malicious header compression could cause the reconstruction of a wrong packet that does not match with the original one. Such a corruption may be detected with end-to-end authentication and integrity mechanisms.  Denial of Service may be produced but its arise other security problems that may be solved with or without header compression.</p>
 <h1 id="rfc.section.8.2">
 <a href="#rfc.section.8.2">8.2.</a> <a href="#security-considerations-for-fragmentation" id="security-considerations-for-fragmentation">Security considerations for fragmentation</a>
 </h1>
@@ -1266,12 +1278,12 @@ address {
 <table><tbody><tr>
 <td class="reference"><b id="I-D.ietf-lpwan-overview">[I-D.ietf-lpwan-overview]</b></td>
 <td class="top">
-<a>Farrell, S.</a>, "<a href="https://tools.ietf.org/html/draft-ietf-lpwan-overview-07">LPWAN Overview</a>", Internet-Draft draft-ietf-lpwan-overview-07, October 2017.</td>
+<a>Farrell, S.</a>, "<a href="https://tools.ietf.org/html/draft-ietf-lpwan-overview-08">LPWAN Overview</a>", Internet-Draft draft-ietf-lpwan-overview-08, January 2018.</td>
 </tr></tbody></table>
 <h1 id="rfc.appendix.A">
 <a href="#rfc.appendix.A">Appendix A.</a> <a href="#compressIPv6" id="compressIPv6">SCHC Compression Examples</a>
 </h1>
-<p id="rfc.section.A.p.1">This section gives some scenarios of the compression mechanism for IPv6/UDP.  The goal is to illustrate the SCHC behavior.</p>
+<p id="rfc.section.A.p.1">This section gives some scenarios of the compression mechanism for IPv6/UDP.  The goal is to illustrate the behavior of SCHC.</p>
 <p id="rfc.section.A.p.2">The most common case using the mechanisms defined in this document will be a LPWAN Dev that embeds some applications running over CoAP. In this example, three flows are considered. The first flow is for the device management based on CoAP using Link Local IPv6 addresses and UDP ports 123 and 124 for Dev and App, respectively.  The second flow will be a CoAP server for measurements done by the Device (using ports 5683) and Global IPv6 Address prefixes alpha::IID/64 to beta::1/64.  The last flow is for legacy applications using different ports numbers, the destination IPv6 address prefix is gamma::1/64.</p>
 <p><a href="#FigStack" class="xref">Figure 22</a> presents the protocol stack for this Device. IPv6 and UDP are represented with dotted lines since these protocols are compressed on the radio link.</p>
 <div id="rfc.figure.22"></div>
@@ -1294,7 +1306,7 @@ address {
 
 </pre>
 <p class="figure">Figure 22: Simplified Protocol Stack for LP-WAN</p>
-<p id="rfc.section.A.p.4">Note that in some LPWAN technologies, only the Devs have a device ID.  Therefore, when such technologies are used, it is necessary to define statically an IID for the Link Local address for the SCHC C/D.</p>
+<p id="rfc.section.A.p.4">Note that in some LPWAN technologies, only the Devs have a device ID.  Therefore, when such technologies are used, it is necessary to statically define an IID for the Link Local address for the SCHC C/D.</p>
 <div id="rfc.figure.23"></div>
 <div id="Fig-fields"></div>
 <pre>
@@ -1349,7 +1361,7 @@ Rule 0
  +----------------+--+--+--+---------+--------+------------++------+
  | Field          |FL|FP|DI| Value   | Match  | Action     || Sent |
  |                |  |  |  |         | Opera. | Action     ||[bits]|
- +----------------+--+--+--+---------+--------+-------------++------+
+ +----------------+--+--+--+---------+--------+------------++------+
  |IPv6 version    |4 |1 |Bi|6        | equal  | not-sent   ||      |
  |IPv6 DiffServ   |8 |1 |Bi|0        | equal  | not-sent   ||      |
  |IPv6 Flow Label |20|1 |Bi|0        | equal  | not-sent   ||      |
@@ -1377,8 +1389,8 @@ Rule 0
 <h1 id="rfc.appendix.B">
 <a href="#rfc.appendix.B">Appendix B.</a> <a href="#fragmentation-examples" id="fragmentation-examples">Fragmentation Examples</a>
 </h1>
-<p id="rfc.section.B.p.1">This section provides examples of different fragment delivery reliability options possible on the basis of this specification.</p>
-<p><a href="#Fig-Example-Unreliable" class="xref">Figure 24</a> illustrates the transmission of an IPv6 packet that needs 11 fragments in the No ACK option. Where FCN is always 1 bit.</p>
+<p id="rfc.section.B.p.1">This section provides examples for the different fragment delivery reliability modes specified in this document.</p>
+<p><a href="#Fig-Example-Unreliable" class="xref">Figure 24</a> illustrates the transmission in No-ACK mode of an IPv6 packet that needs 11 fragments. FCN is 1 bit wide.</p>
 <div id="rfc.figure.24"></div>
 <div id="Fig-Example-Unreliable"></div>
 <pre>
@@ -1396,8 +1408,9 @@ Rule 0
           |-------FCN=1--------&gt;|MIC checked =&gt;
  &#160; &#160; &#160; &#160; 
 </pre>
-<p class="figure">Figure 24: Transmission of an IPv6 packet carried by 11 fragments in the No ACK option</p>
-<p><a href="#Fig-Example-Win-NoLoss-NACK" class="xref">Figure 25</a> illustrates the transmission of an IPv6 packet that needs 11 fragments in ACK-on-error, for N=3, without losses.</p>
+<p class="figure">Figure 24: Transmission in No-ACK mode of an IPv6 packet carried by 11 fragments</p>
+<p id="rfc.section.B.p.3">In the following examples, N, the size if the FCN field, is 3 bits. Therefore, the All-1 FCN value is 7.</p>
+<p><a href="#Fig-Example-Win-NoLoss-NACK" class="xref">Figure 25</a> illustrates the transmission in ACK-on-error of an IPv6 packet that needs 11 fragments, with MAX_WIND_FCN=6 and no fragment loss.</p>
 <div id="rfc.figure.25"></div>
 <div id="Fig-Example-Win-NoLoss-NACK"></div>
 <pre>
@@ -1417,8 +1430,8 @@ Rule 0
           |&lt;---- ACK, W=1 ------|
 
 </pre>
-<p class="figure">Figure 25: Transmission of an IPv6 packet carried by 11 fragments in ACK-on-error, for N=3 and MAX_WIND_FCN=6, without losses.</p>
-<p><a href="#Fig-Example-Rel-Window-NACK-Loss" class="xref">Figure 26</a> illustrates the transmission of an IPv6 packet that needs 11 fragments ACK-on-error, for N=3, with three losses.</p>
+<p class="figure">Figure 25: Transmission ACK-on-error mode of an IPv6 packet carried by 11 fragments, with MAX_WIND_FCN=6 and no loss.</p>
+<p><a href="#Fig-Example-Rel-Window-NACK-Loss" class="xref">Figure 26</a> illustrates the transmission in ACK-on-error mode of an IPv6 packet that needs 11 fragments, with MAX_WIND_FCN=6 and three lost fragments.</p>
 <div id="rfc.figure.26"></div>
 <div id="Fig-Example-Rel-Window-NACK-Loss"></div>
 <pre>
@@ -1440,11 +1453,11 @@ Rule 0
           |-----W=1, FCN=7-----&gt;|MIC checked
           |&lt;-----ACK, W=1-------|C=0 Bitmap:1100001
           |-----W=1, FCN=4-----&gt;|MIC checked =&gt;
-          |&lt;---- ACK, W=1 ------|    
+          |&lt;---- ACK, W=1 ------|C=1, no bitmap
 
 </pre>
-<p class="figure">Figure 26: Transmission of an IPv6 packet carried by 11 fragments in ACK-on-error, for N=3 and MAX_WIND_FCN=6, three losses.</p>
-<p><a href="#Fig-Example-Rel-Window-ACK-NoLoss" class="xref">Figure 27</a> illustrates the transmission of an IPv6 packet that needs 11 fragments in ACK-Always, for N=3 and MAX_WIND_FCN=6, without losses. Note: in Window mode, an additional bit will be needed to number windows.</p>
+<p class="figure">Figure 26: Transmission in ACK-on-error mode of an IPv6 packet carried by 11 fragments, with MAX_WIND_FCN=6 and three lost fragments.</p>
+<p><a href="#Fig-Example-Rel-Window-ACK-NoLoss" class="xref">Figure 27</a> illustrates the transmission in ACK-Always mdoe of an IPv6 packet that needs 11 fragments, with MAX_WIND_FCN=6 and no loss. Note: in Window mode, an additional bit will be needed to number windows.</p>
 <div id="rfc.figure.27"></div>
 <div id="Fig-Example-Rel-Window-ACK-NoLoss"></div>
 <pre>
@@ -1465,8 +1478,8 @@ Rule 0
         (End)    
 
 </pre>
-<p class="figure">Figure 27: Transmission of an IPv6 packet carried by 11 fragments in ACK-Always, for N=3 and MAX_WIND_FCN=6, no losses.</p>
-<p><a href="#Fig-Example-Rel-Window-ACK-Loss" class="xref">Figure 28</a> illustrates the transmission of an IPv6 packet that needs 11 fragments in ACK-Always, for N=3 and MAX_WIND_FCN=6, with three losses.</p>
+<p class="figure">Figure 27: Transmission in ACK-Always mode of an IPv6 packet carried by 11 fragments, with MAX_WIND_FCN=6 and no lost fragment.</p>
+<p><a href="#Fig-Example-Rel-Window-ACK-Loss" class="xref">Figure 28</a> illustrates the transmission in ACK-Always mode of an IPv6 packet that needs 11 fragments, with MAX_WIND_FCN=6 and three lost fragments.</p>
 <div id="rfc.figure.28"></div>
 <div id="Fig-Example-Rel-Window-ACK-Loss"></div>
 <pre>
@@ -1492,116 +1505,119 @@ Rule 0
         (End)    
 
 </pre>
-<p class="figure">Figure 28: Transmission of an IPv6 packet carried by 11 fragments in ACK-Always, for N=3, and MAX_WIND_FCN=6, with three losses.</p>
-<p><a href="#Fig-Example-Rel-Window-ACK-Loss-Last-A" class="xref">Figure 29</a> illustrates the transmission of an IPv6 packet that needs 6 fragments in ACK-Always, for N=3 and MAX_WIND_FCN=6, with three losses, and only one retry is needed for each lost fragment. Note that, since a single window is needed for transmission of the IPv6 packet in this case, the example illustrates behavior when losses happen in the last window.</p>
+<p class="figure">Figure 28: Transmission in ACK-Always mode of an IPv6 packet carried by 11 fragments, with MAX_WIND_FCN=6 and three lost fragments.</p>
+<p><a href="#Fig-Example-Rel-Window-ACK-Loss-Last-A" class="xref">Figure 29</a> illustrates the transmission in ACK-Always mode of an IPv6 packet that needs 6 fragments, with MAX_WIND_FCN=6, three lost fragments and only one retry needed to recover each lost fragment. Note that, since a single window is needed for transmission of the IPv6 packet in this case, the example illustrates behavior when losses happen in the last window.</p>
 <div id="rfc.figure.29"></div>
 <div id="Fig-Example-Rel-Window-ACK-Loss-Last-A"></div>
 <pre>
           Sender                Receiver
-             |-----W=0, CFN=6-----&gt;|
-             |-----W=0, CFN=5-----&gt;|
-             |-----W=0, CFN=4--X--&gt;|
-             |-----W=0, CFN=3--X--&gt;|
-             |-----W=0, CFN=2--X--&gt;|
-             |-----W=0, CFN=7-----&gt;|MIC checked 
+             |-----W=0, FCN=6-----&gt;|
+             |-----W=0, FCN=5-----&gt;|
+             |-----W=0, FCN=4--X--&gt;|
+             |-----W=0, FCN=3--X--&gt;|
+             |-----W=0, FCN=2--X--&gt;|
+             |-----W=0, FCN=7-----&gt;|MIC checked
              |&lt;-----ACK, W=0-------|C= 0 Bitmap:1100001
-             |-----W=0, CFN=4-----&gt;|MIC checked: failed
-             |-----W=0, CFN=3-----&gt;|MIC checked: failed
-             |-----W=0, CFN=2-----&gt;|MIC checked: success
+             |-----W=0, FCN=4-----&gt;|MIC checked: failed
+             |-----W=0, FCN=3-----&gt;|MIC checked: failed
+             |-----W=0, FCN=2-----&gt;|MIC checked: success
              |&lt;-----ACK, W=0-------|C=1 no Bitmap
            (End) 
 </pre>
-<p class="figure">Figure 29: Transmission of an IPv6 packet carried by 11 fragments in ACK-Always, for N=3, and MAX_WIND_FCN=6, with three losses, and only one retry is needed for each lost fragment.</p>
-<p><a href="#Fig-Example-Rel-Window-ACK-Loss-Last-B" class="xref">Figure 30</a> illustrates the transmission of an IPv6 packet that needs 6 fragments in ACK-Always, for N=3 and MAX_WIND_FCN=6, with three losses, and the second ACK is lost. Note that, since a single window is needed for transmission of the IPv6 packet in this case, the example illustrates behavior when losses happen in the last window.</p>
+<p class="figure">Figure 29: Transmission in ACK-Always mode of an IPv6 packet carried by 11 fragments, fwith MAX_WIND_FCN=6, three lost framents and only one retry needed for each lost fragment.</p>
+<p><a href="#Fig-Example-Rel-Window-ACK-Loss-Last-B" class="xref">Figure 30</a> illustrates the transmission in ACK-Always mode of an IPv6 packet that needs 6 fragments, with MAX_WIND_FCN=6, three lost fragments, and the second ACK lost. Note that, since a single window is needed for transmission of the IPv6 packet in this case, the example illustrates behavior when losses happen in the last window.</p>
 <div id="rfc.figure.30"></div>
 <div id="Fig-Example-Rel-Window-ACK-Loss-Last-B"></div>
 <pre>
           Sender                Receiver
-             |-----W=0, CFN=6-----&gt;|
-             |-----W=0, CFN=5-----&gt;|
-             |-----W=0, CFN=4--X--&gt;|
-             |-----W=0, CFN=3--X--&gt;|
-             |-----W=0, CFN=2--X--&gt;|
-             |-----W=0, CFN=7-----&gt;|MIC checked 
+             |-----W=0, FCN=6-----&gt;|
+             |-----W=0, FCN=5-----&gt;|
+             |-----W=0, FCN=4--X--&gt;|
+             |-----W=0, FCN=3--X--&gt;|
+             |-----W=0, FCN=2--X--&gt;|
+             |-----W=0, FCN=7-----&gt;|MIC checked
              |&lt;-----ACK, W=0-------|C=0  Bitmap:1100001
-             |-----W=0, CFN=4-----&gt;|MIC checked: wrong
-             |-----W=0, CFN=3-----&gt;|MIC checked: wrong
-             |-----W=0, CFN=2-----&gt;|MIC checked: right
+             |-----W=0, FCN=4-----&gt;|MIC checked: wrong
+             |-----W=0, FCN=3-----&gt;|MIC checked: wrong
+             |-----W=0, FCN=2-----&gt;|MIC checked: right
              |  X---ACK, W=0-------|C= 1 no Bitmap
     timeout  |                     |
-             |-----W=0, CFN=7-----&gt;|
+             |-----W=0, FCN=7-----&gt;|
              |&lt;-----ACK, W=0-------|C= 1 no Bitmap  
 
            (End) 
 </pre>
-<p class="figure">Figure 30: Transmission of an IPv6 packet carried by 11 fragments in ACK-Always, for N=3, and MAX_WIND_FCN=6, with three losses, and the second ACK is lost.</p>
-<p><a href="#Fig-Example-Rel-Window-ACK-Loss-Last-C" class="xref">Figure 31</a> illustrates the transmission of an IPv6 packet that needs 6 fragments in ACK-Always, for N=3 and MAX_WIND_FCN=6, with three losses, and one retransmitted fragment is lost. Note that, since a single window is needed for transmission of the IPv6 packet in this case, the example illustrates behavior when losses happen in the last window.</p>
+<p class="figure">Figure 30: Transmission in ACK-Always mode of an IPv6 packet carried by 11 fragments, with MAX_WIND_FCN=6, three lost fragments, and the second ACK lost.</p>
+<p><a href="#Fig-Example-Rel-Window-ACK-Loss-Last-C" class="xref">Figure 31</a> illustrates the transmission in ACK-Always mode of an IPv6 packet that needs 6 fragments, with MAX_WIND_FCN=6, with three lost fragments, and one retransmitted fragment lost again. Note that, since a single window is needed for transmission of the IPv6 packet in this case, the example illustrates behavior when losses happen in the last window.</p>
 <div id="rfc.figure.31"></div>
 <div id="Fig-Example-Rel-Window-ACK-Loss-Last-C"></div>
 <pre>
            Sender                Receiver
-             |-----W=0, CFN=6-----&gt;|
-             |-----W=0, CFN=5-----&gt;|
-             |-----W=0, CFN=4--X--&gt;|
-             |-----W=0, CFN=3--X--&gt;|
-             |-----W=0, CFN=2--X--&gt;|
-             |-----W=0, CFN=7-----&gt;|MIC checked  
+             |-----W=0, FCN=6-----&gt;|
+             |-----W=0, FCN=5-----&gt;|
+             |-----W=0, FCN=4--X--&gt;|
+             |-----W=0, FCN=3--X--&gt;|
+             |-----W=0, FCN=2--X--&gt;|
+             |-----W=0, FCN=7-----&gt;|MIC checked
              |&lt;-----ACK, W=0-------|C=0   Bitmap:1100001
-             |-----W=0, CFN=4-----&gt;|MIC checked: wrong
-             |-----W=0, CFN=3-----&gt;|MIC checked: wrong
-             |-----W=0, CFN=2--X--&gt;| 
+             |-----W=0, FCN=4-----&gt;|MIC checked: wrong
+             |-----W=0, FCN=3-----&gt;|MIC checked: wrong
+             |-----W=0, FCN=2--X--&gt;|
       timeout|                     |
-             |-----W=0, CFN=7-----&gt;|All-0 empty 
+             |-----W=0, FCN=7-----&gt;|All-0 empty
              |&lt;-----ACK, W=0-------|C=0 Bitmap: 1111101
-             |-----W=0, CFN=2-----&gt;|MIC checked: right
+             |-----W=0, FCN=2-----&gt;|MIC checked: right
              |&lt;-----ACK, W=0-------|C=1 no Bitmap
            (End) 
 </pre>
-<p class="figure">Figure 31: Transmission of an IPv6 packet carried by 11 fragments in ACK-Always, for N=3, and MAX_WIND_FCN=6, with three losses, and one retransmitted fragment is lost.</p>
-<p><a href="#Fig-Example-MaxWindFCN" class="xref">Appendix C</a> illustrates the transmission of an IPv6 packet that needs 28 fragments in ACK-Always, for N=5 and MAX_WIND_FCN=23, with two losses. Note that MAX_WIND_FCN=23 may be useful when the maximum possible Bitmap size, considering the maximum lower layer technology payload size and the value of R, is 3 bytes. Note also that the FCN of the last fragment of the packet is the one with FCN=31 (i.e. FCN=2^N-1 for N=5, or equivalently, all FCN bits set to 1).</p>
+<p class="figure">Figure 31: Transmission in ACK-Always mode of an IPv6 packet carried by 11 fragments, with MAX_WIND_FCN=6, with three lost fragments, and one retransmitted fragment lost again.</p>
+<p><a href="#Fig-Example-MaxWindFCN" class="xref">Figure 32</a> illustrates the transmission in ACK-Always mode of an IPv6 packet that needs 28 fragments, with N=5, MAX_WIND_FCN=23 and two lost fragments. Note that MAX_WIND_FCN=23 may be useful when the maximum possible Bitmap size, considering the maximum lower layer technology payload size and the value of R, is 3 bytes. Note also that the FCN of the last fragment of the packet is the one with FCN=31 (i.e. FCN=2^N-1 for N=5, or equivalently, all FCN bits set to 1).</p>
+<div id="rfc.figure.32"></div>
+<div id="Fig-Example-MaxWindFCN"></div>
 <pre>
            Sender               Receiver
-             |-----W=0, CFN=23-----&gt;|
-             |-----W=0, CFN=22-----&gt;|
-             |-----W=0, CFN=21--X--&gt;|
-             |-----W=0, CFN=20-----&gt;|
-             |-----W=0, CFN=19-----&gt;|
-             |-----W=0, CFN=18-----&gt;|
-             |-----W=0, CFN=17-----&gt;|
-             |-----W=0, CFN=16-----&gt;|
-             |-----W=0, CFN=15-----&gt;|
-             |-----W=0, CFN=14-----&gt;|
-             |-----W=0, CFN=13-----&gt;|
-             |-----W=0, CFN=12-----&gt;|
-             |-----W=0, CFN=11-----&gt;|
-             |-----W=0, CFN=10--X--&gt;|
-             |-----W=0, CFN=9 -----&gt;|
-             |-----W=0, CFN=8 -----&gt;|
-             |-----W=0, CFN=7 -----&gt;|
-             |-----W=0, CFN=6 -----&gt;|
-             |-----W=0, CFN=5 -----&gt;|
-             |-----W=0, CFN=4 -----&gt;|
-             |-----W=0, CFN=3 -----&gt;|
-             |-----W=0, CFN=2 -----&gt;|
-             |-----W=0, CFN=1 -----&gt;|
-             |-----W=0, CFN=0 -----&gt;|
+             |-----W=0, FCN=23-----&gt;|
+             |-----W=0, FCN=22-----&gt;|
+             |-----W=0, FCN=21--X--&gt;|
+             |-----W=0, FCN=20-----&gt;|
+             |-----W=0, FCN=19-----&gt;|
+             |-----W=0, FCN=18-----&gt;|
+             |-----W=0, FCN=17-----&gt;|
+             |-----W=0, FCN=16-----&gt;|
+             |-----W=0, FCN=15-----&gt;|
+             |-----W=0, FCN=14-----&gt;|
+             |-----W=0, FCN=13-----&gt;|
+             |-----W=0, FCN=12-----&gt;|
+             |-----W=0, FCN=11-----&gt;|
+             |-----W=0, FCN=10--X--&gt;|
+             |-----W=0, FCN=9 -----&gt;|
+             |-----W=0, FCN=8 -----&gt;|
+             |-----W=0, FCN=7 -----&gt;|
+             |-----W=0, FCN=6 -----&gt;|
+             |-----W=0, FCN=5 -----&gt;|
+             |-----W=0, FCN=4 -----&gt;|
+             |-----W=0, FCN=3 -----&gt;|
+             |-----W=0, FCN=2 -----&gt;|
+             |-----W=0, FCN=1 -----&gt;|
+             |-----W=0, FCN=0 -----&gt;|
              |                      |lcl-Bitmap:110111111111101111111111
              |&lt;------ACK, W=0-------| Bitmap:1101111111111011
-             |-----W=0, CFN=21-----&gt;|
-             |-----W=0, CFN=10-----&gt;|
+             |-----W=0, FCN=21-----&gt;|
+             |-----W=0, FCN=10-----&gt;|
              |&lt;------ACK, W=0-------|no Bitmap
-             |-----W=1, CFN=23-----&gt;|
-             |-----W=1, CFN=22-----&gt;|
-             |-----W=1, CFN=21-----&gt;|
-             |-----W=1, CFN=31-----&gt;|MIC checked =&gt;
+             |-----W=1, FCN=23-----&gt;|
+             |-----W=1, FCN=22-----&gt;|
+             |-----W=1, FCN=21-----&gt;|
+             |-----W=1, FCN=31-----&gt;|MIC checked =&gt;
              |&lt;------ACK, W=1-------|no Bitmap
            (End)
 </pre>
+<p class="figure">Figure 32: Transmission in ACK-Always mode of an IPv6 packet carried by 28 fragments, with N=5, MAX_WIND_FCN=23 and two lost fragments.</p>
 <h1 id="rfc.appendix.C">
-<a href="#rfc.appendix.C">Appendix C.</a> <a href="#Fig-Example-MaxWindFCN" id="Fig-Example-MaxWindFCN">Fragmentation State Machines</a>
+<a href="#rfc.appendix.C">Appendix C.</a> <a href="#fragmentation-state-machines" id="fragmentation-state-machines">Fragmentation State Machines</a>
 </h1>
-<p id="rfc.section.C.p.1">The fragmentation state machines of the sender and the receiver in the different reliability options are next in the following figures:</p>
-<div id="rfc.figure.32"></div>
+<p id="rfc.section.C.p.1">The fragmentation state machines of the sender and the receiver, one for each of the different reliability modes, are described in the following figures:</p>
+<div id="rfc.figure.33"></div>
 <div id="Fig-NoACKModeSnd"></div>
 <pre>
              +===========+
@@ -1622,8 +1638,8 @@ Rule 0
            |    END     |                                             
            +============+                       
 </pre>
-<p class="figure">Figure 32: Sender State Machine for the No ACK Mode</p>
-<div id="rfc.figure.33"></div>
+<p class="figure">Figure 33: Sender State Machine for the No ACK Mode</p>
+<div id="rfc.figure.34"></div>
 <div id="Fig-NoACKModeRcv"></div>
 <pre>
                       +------+ Not All-1
@@ -1641,8 +1657,8 @@ Rule 0
                        +===========+ 
                                            
 </pre>
-<p class="figure">Figure 33: Receiver State Machine for the No ACK Mode</p>
-<div id="rfc.figure.34"></div>
+<p class="figure">Figure 34: Receiver State Machine for the No ACK Mode</p>
+<div id="rfc.figure.35"></div>
 <div id="Fig-ACKAlwaysSnd"></div>
 <pre>
               +=======+  
@@ -1689,8 +1705,8 @@ Lcl_Bitmap==recv_Bitmap &amp;| |   |   all missing frag sent
              MIC_bit ==0 &amp; +&gt;|    ERROR    |
     Lcl_Bitmap==recv_Bitmap  +=============+                                        
 </pre>
-<p class="figure">Figure 34: Sender State Machine for the ACK Always Mode</p>
-<div id="rfc.figure.35"></div>
+<p class="figure">Figure 35: Sender State Machine for the ACK Always Mode</p>
+<div id="rfc.figure.36"></div>
 <div id="Fig-ACKAlwaysRcv"></div>
 <pre>
  Not All- &amp; w=expected +---+   +---+w = Not expected
@@ -1751,8 +1767,8 @@ Lcl_Bitmap==recv_Bitmap &amp;| |   |   all missing frag sent
              Attemp++
  &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160;
 </pre>
-<p class="figure">Figure 35: Receiver State Machine for the ACK Always Mode</p>
-<div id="rfc.figure.36"></div>
+<p class="figure">Figure 36: Receiver State Machine for the ACK Always Mode</p>
+<div id="rfc.figure.37"></div>
 <div id="Fig-ACKonerrorSnd"></div>
 <pre>
                    +=======+  
@@ -1802,8 +1818,8 @@ Lcl_Bitmap==recv_Bitmap &amp;| |   |   all missing frag sent
                                  |   ERROR   |
                                  +===========+                                      
 </pre>
-<p class="figure">Figure 36: Sender State Machine for the ACK on error Mode</p>
-<div id="rfc.figure.37"></div>
+<p class="figure">Figure 37: Sender State Machine for the ACK on error Mode</p>
+<div id="rfc.figure.38"></div>
 <div id="Fig-ACKonerrorRcv"></div>
 <pre>
    Not All- &amp; w=expected +---+   +---+w = Not expected
@@ -1855,15 +1871,15 @@ Lcl_Bitmap==recv_Bitmap &amp;| |   |   all missing frag sent
  &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; ~~~~~~~~
                  Inactivity_Timer = expires&#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160;                           
 </pre>
-<p class="figure">Figure 37: Receiver State Machine for the ACK on error Mode</p>
+<p class="figure">Figure 38: Receiver State Machine for the ACK on error Mode</p>
 <h1 id="rfc.appendix.D">
 <a href="#rfc.appendix.D">Appendix D.</a> <a href="#allocation-of-rule-ids-for-fragmentation" id="allocation-of-rule-ids-for-fragmentation">Allocation of Rule IDs for fragmentation</a>
 </h1>
-<p id="rfc.section.D.p.1">A set of Rule IDs are allocated to support different aspects of fragmentation functionality as per this document. The allocation of IDs is to be defined in other documents. The set MAY include:</p>
+<p id="rfc.section.D.p.1">A set of Rule IDs has to be allocated to support different aspects of fragmentation functionality as per this document. The actual allocation of IDs is to be defined in other documents. The set MAY include:</p>
 <p></p>
 
 <ul>
-<li>one ID or a subset of IDs to identify a fragment as well as its reliability option and its window size, if multiple of these are supported.</li>
+<li>one ID or several IDs to identify a fragment as well as its reliability mode and its window size, if multiple of these are supported.</li>
 <li>one ID to identify the ACK message.</li>
 <li>one ID to identify the Abort message as per Section 9.8.</li>
 </ul>
