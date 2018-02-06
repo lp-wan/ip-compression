@@ -1005,8 +1005,8 @@ address {
 <li>DTag (if present).</li>
 </ul>
 <p id="rfc.section.5.5.p.3">Then, the fragment receiver may determine the fragment delivery reliability mode that is used for this fragment based on the Rule ID in that fragment.</p>
-<p id="rfc.section.5.5.p.4">Upon receipt of a link fragment, the receiver starts constructing the original unfragmented packet.  It uses the FCN and the order of arrival of each fragment to determine the location of the individual fragments within the original unfragmented packet. A fragment payload may carry bytes from a SCHC compressed IPv6 header, an uncompressed IPv6 header or an IPv6 datagram data payload. An unfragmented packet could be a SCHC compressed or an uncompressed IPv6 packet (header and data).  For example, the receiver may place the fragment payload within a payload datagram reassembly buffer at the location determined from: the FCN, the arrival order of the fragments, and the fragment payload sizes. In Window mode, the fragment receiver also uses the W bit in the received fragments. Note that the size of the original, unfragmented packet cannot be determined from fragmentation headers.</p>
-<p id="rfc.section.5.5.p.5">Fragmentation functionality uses the FCN value, which has a length of N bits. The All-1 and All-0 FCN values are used to control the fragmentation transmission. The FCN will be assigned sequentially in a decreasing order starting from 2^N-2, i.e. the highest possible FCN value depending on the FCN number of bits, but excluding the All-1 value. In all modes, the last fragment of a packet must contain a MIC which is used to check if there are errors or missing fragments, and must use the corresponding All-1 fragment format.  Also note that a fragment with an All-0 format is considered the last fragment of the current window.</p>
+<p id="rfc.section.5.5.p.4">Upon receipt of a link fragment, the receiver starts constructing the original unfragmented packet.  It uses the FCN and the order of arrival of each fragment to determine the location of the individual fragments within the original unfragmented packet. A fragment payload may carry bytes from a SCHC compressed IPv6 header, an uncompressed IPv6 header or an IPv6 datagram data payload. For example, the receiver may place the fragment payload within a payload datagram reassembly buffer at the location determined from: the FCN, the arrival order of the fragments, and the fragment payload sizes. In Window mode, the fragment receiver also uses the W bit in the received fragments. Note that the size of the original, unfragmented packet cannot be determined from fragmentation headers.</p>
+<p id="rfc.section.5.5.p.5">Fragmentation functionality uses the FCN value, which has a length of N bits. The All-1 and All-0 FCN values are used to control the fragmentation transmission. The FCN MUST be assigned sequentially in a decreasing order. The first FCN of a window is RECOMMENDED to be 2^N-2, i.e. the highest possible FCN value depending on the FCN number of bits, but excluding the All-1 value. In all modes, the last fragment of a packet must contain a MIC which is used to check if there are errors or missing fragments, and must use the corresponding All-1 fragment format.  Also note that a fragment with an All-0 format is considered the last fragment of the current window.</p>
 <p id="rfc.section.5.5.p.6">If the recipient receives the last fragment of a datagram (All-1), it checks for the integrity of the reassembled datagram, based on the MIC received. In No-ACK, if the integrity check indicates that the reassembled datagram does not match the original datagram (prior to fragmentation), the reassembled datagram MUST be discarded. In Window mode, a MIC check is also performed by the fragment receiver after reception of each subsequent fragment retransmitted after the first MIC check.</p>
 <h1 id="rfc.section.5.5.1">
 <a href="#rfc.section.5.5.1">5.5.1.</a> <a href="#no-ack" id="no-ack">No-ACK</a>
@@ -1028,12 +1028,11 @@ address {
 <p id="rfc.section.5.5.2.1.p.6">When an All-0 fragment is received, it indicates that all the fragments have been sent in the current window.  Since the sender is not obliged to always send a full window, some fragment number not set in the receiver memory may not correspond to losses.  The receiver sends the corresponding ACK, the Inactivity Timer is set and the transmission of the next window by the sender can start.</p>
 <p id="rfc.section.5.5.2.1.p.7">If an All-0 fragment has been received and all fragments of the current window have also been received, the receiver then expects a new Window and waits for the next fragment.  Upon receipt of a fragment, if the window value has not changed, the received fragments are part of a retransmission.  A receiver that has already received a fragment should discard it, otherwise, it updates the Bitmap.  If all the bits of the Bitmap are set to one, the receiver may send an ACK without waiting for an All-0 fragment and the Inactivity Timer is initialized.</p>
 <p id="rfc.section.5.5.2.1.p.8">On the other hand, if the window value of the next received fragment is set to the next expected window value, this means that the sender has received a correct Bitmap reporting that all fragments have been received.  The receiver then updates the value of the next expected window.</p>
-<p id="rfc.section.5.5.2.1.p.9">If the receiver receives an All-0 fragment, the sender may send one or more fragments per window. Otherwise, some fragments in the window have been lost.</p>
-<p id="rfc.section.5.5.2.1.p.10">When an All-1 fragment is received, it indicates that the last fragment of the packet has been sent.  Since the last window is not always full, the MIC will be used to detect if all fragments of the packet have been received.  A correct MIC indicates the end of the transmission but the receiver must stay alive for an Inactivity Timer period to answer to any empty All-1 fragments the sender may send if ACKs sent by the receiver are lost. If the MIC is incorrect, some fragments have been lost.  The receiver sends the ACK regardless of successful fragmented packet reception or not, the Inactitivity Timer is set.  In case of an incorrect MIC, the receiver waits for fragments belonging to the same window. After MAX_ACK_REQUESTS, the receiver will abort the on-going fragmented packet transmission.  The receiver also Aborts upon Inactivity Timer expiration.</p>
+<p id="rfc.section.5.5.2.1.p.9">When an All-1 fragment is received, it indicates that the last fragment of the packet has been sent.  Since the last window is not always full, the MIC will be used to detect if all fragments of the packet have been received.  A correct MIC indicates the end of the transmission but the receiver must stay alive for an Inactivity Timer period to answer to any empty All-1 fragments the sender may send if ACKs sent by the receiver are lost. If the MIC is incorrect, some fragments have been lost.  The receiver sends the ACK regardless of successful fragmented packet reception or not, the Inactitivity Timer is set.  In case of an incorrect MIC, the receiver waits for fragments belonging to the same window. After MAX_ACK_REQUESTS, the receiver will abort the on-going fragmented packet transmission.  The receiver also Aborts upon Inactivity Timer expiration.</p>
 <h1 id="rfc.section.5.5.2.2">
 <a href="#rfc.section.5.5.2.2">5.5.2.2.</a> <a href="#ack-on-error" id="ack-on-error">ACK-on-Error</a>
 </h1>
-<p id="rfc.section.5.5.2.2.p.1">The ACK-on-Error sender is similar to ACK-Always, the main difference being that in ACK-on-Error the ACK is not sent at the end of each window but only when at least one fragment of the current window has been lost (with the exception of the last window, see next paragraph).  In Ack-on-Error,  the Retransmission Timer expiration will be considered as a positive acknowledgment. The Retransmission Timer is set when sending an All-0 or an All-1 fragment. When the All-1 fragment has been sent, then the on-going fragmented packet transmission fragmentation is finished and the sender waits for the last ACK. At the receiver side, when the All-1 fragment is sent and the MIC check indicates successful packet reception, an ACK is sent nonetheless, to confirm the end of a correct transmission.  If the Retransmission Timer expires while waiting for the ACK for the last window, an All-1 empty request for the last ACK MUST be sent by the sender to complete the fragmented packet transmission.</p>
+<p id="rfc.section.5.5.2.2.p.1">The ACK-on-Error sender is similar to ACK-Always, the main difference being that in ACK-on-Error the ACK is not sent at the end of each window but only when at least one fragment of the current window has been lost (with the exception of the last window, see later text in this paragraph).  In Ack-on-Error,  the Retransmission Timer expiration will be considered as a positive acknowledgment. The Retransmission Timer is set when sending an All-0 or an All-1 fragment. When the All-1 fragment has been sent, then the on-going fragmented packet transmission fragmentation is finished and the sender waits for the last ACK. At the receiver side, when the All-1 fragment is received and the MIC check indicates successful packet reception, an ACK is sent nonetheless, to confirm the end of a correct transmission.  If the Retransmission Timer expires while waiting for the ACK for the last window, an All-1 empty request for the last ACK MUST be sent by the sender to complete the fragmented packet transmission.</p>
 <p id="rfc.section.5.5.2.2.p.2">If the sender receives an ACK, it checks the window value.  ACKs with an unexpected window number are discarded.  If the window number on the received Bitmap is correct, the sender verifies if the receiver has received all fragments of the current window.  When at least one fragment has been lost, the counter Attempts is increased by one and the sender resends the missing fragments again.  When Attempts reaches MAX_ACK_REQUESTS, the sender sends an Abort message and releases all resources for the on-going fragmented packet transmission.  When the retransmission of missing fragments is finished, the sender starts listening for an ACK (even if an All-0 or an All-1 has not been sent during the retransmission) and initializes and starts the Retransmission Timer.  After sending an All-1 fragment, the sender listens for an ACK, initializes Attempts, and initializes and starts the Retransmission Timer.  If the Retransmission Timer expires, Attempts is increased by one and an empty All-1 fragment is sent to request the ACK for the last window. If Attempts reaches MAX_ACK_REQUESTS, the on-going fragmented packet transmission is aborted.</p>
 <p id="rfc.section.5.5.2.2.p.3">Unlike the sender, the receiver for ACK-on-Error has a larger amount of differences compared with ACK-Always.  First, an ACK is not sent unless there is a lost fragment or an unexpected behavior (with the exception of the last window, where an ACK is always sent regardless of fragment losses or not).  The receiver starts by expecting fragments from window 0 and maintains the information regarding which fragments it receives.  After receiving a fragment, the Inactivity Timer is set, if no fragment has been received and the Inactivity Timer expires the transmission is aborted.</p>
 <p id="rfc.section.5.5.2.2.p.4">Any fragment not belonging to the current window is discarded.  The actual fragment number is computed based on the FCN value.  When an All-0 fragment is received and all fragments have been received, the receiver updates the expected window value.</p>
@@ -1044,7 +1043,7 @@ address {
 <h1 id="rfc.section.5.5.3">
 <a href="#rfc.section.5.5.3">5.5.3.</a> <a href="#Bitmapopt" id="Bitmapopt">Bitmap Optimization</a>
 </h1>
-<p id="rfc.section.5.5.3.p.1">The Bitmap is transmitted by a receiver as part of the ACK format when there are some missing fragments in a window.  An ACK message may introduce padding at the end to align transmitted data to a byte boundary.  The first byte boundary includes one or more complete bytes, depending on the size of Rule ID and DTag.</p>
+<p id="rfc.section.5.5.3.p.1">The Bitmap is transmitted by a receiver as part of the ACK format.  An ACK message may include padding at the end to align its number of transmitted bits to a multiple of 8 bits.</p>
 <p id="rfc.section.5.5.3.p.2">Note that the ACK sent in response to an All-1 fragment includes the C bit. Therefore, the window size and thus the Bitmap size need to be determined taking into account the available space in the layer two frame payload, where there will be 1 bit less for an ACK sent in response to an All-1 fragment than in other ACKs.</p>
 <div id="rfc.figure.18"></div>
 <div id="Fig-Localbitmap"></div>
@@ -1054,9 +1053,9 @@ address {
 |--- byte boundary ----| 1 byte  next  |  1 byte next  |   
       
 </pre>
-<p class="figure">Figure 18: Bitmap</p>
-<p id="rfc.section.5.5.3.p.3">The Bitmap, when transmitted, MUST be optimized in size to reduce the resulting frame size. The right-most bytes with all Bitmap bits set to 1 MUST NOT be transmitted.  As the receiver knows the Bitmap size, it can reconstruct the original Bitmap without this optimization.  In the example shown in <a href="#Fig-transmittedbitmap" class="xref">Figure 19</a>, the last 2 bytes of the Bitmap shown in <a href="#Fig-Localbitmap" class="xref">Figure 18</a> comprise bits that are all set to 1, therefore they are not sent.</p>
-<p id="rfc.section.5.5.3.p.4">In the last window, when the C bit value is 1, it means that the received MIC matches the one computed by the receiver, and thus the Bitmap is not sent.  Otherwise, the Bitmap is sent after the C bit. Note that the introduction of a C bit may force to reduce the number of fragments in a window to allow the bitmap to fit in a frame.</p>
+<p class="figure">Figure 18: A non-optimized Bitmap</p>
+<p id="rfc.section.5.5.3.p.3">In order to reduce the resulting frame size, the Bitmap is shortened by applying the following algorithm: all the right-most contiguous bytes in the Bitmap that have all their bits set to 1 MUST NOT be transmitted.  Because the fragment sender knows the actual Bitmap size, it can reconstruct the original Bitmap even with the trailing 0xFF bytes optimized away.  In the example shown in <a href="#Fig-transmittedbitmap" class="xref">Figure 19</a>, the last 2 bytes of the Bitmap shown in <a href="#Fig-Localbitmap" class="xref">Figure 18</a> comprise bits that are all set to 1, therefore they are not sent.</p>
+<p id="rfc.section.5.5.3.p.4">In the last window, when the C bit value is 1, it means that the received MIC matches the one computed by the receiver, and thus the Bitmap is not sent.  Otherwise, the Bitmap is sent after the C bit. Note that the presence of a C bit may force to reduce the number of fragments in a window to allow the Bitmap to fit in a frame. That is, the maximum number of fragments of the last window is one unit smaller than that of the previous windows.</p>
 <div id="rfc.figure.19"></div>
 <div id="Fig-transmittedbitmap"></div>
 <pre>
@@ -1068,24 +1067,26 @@ address {
      |---- byte boundary -----|    
      
 </pre>
-<p class="figure">Figure 19: Bitmap transmitted fragment format</p>
-<p><a href="#Fig-Bitmap-Win" class="xref">Figure 20</a> shows an example of an ACK (for N=3), where the Bitmap indicates that the second and the fifth fragments have not been correctly received.</p>
+<p class="figure">Figure 19: Optimized Bitmap format</p>
+<p><a href="#Fig-Bitmap-Win" class="xref">Figure 20</a> shows an example of an ACK with FCN ranging from 6 down to 0, where the Bitmap indicates that the second and the fifth fragments have not been correctly received.</p>
 <div id="rfc.figure.20"></div>
 <div id="Fig-Bitmap-Win"></div>
 <pre>
 &lt;------   R  ------&gt;6 5 4 3 2 1   0 (*) 
           &lt;- T -&gt; 1   
-| Rule ID | DTag |W|1|0|1|1|0|1|all-0|padding|  Bitmap (before tx)
-|--- byte boundary ----|     1 byte next     | 
-    (*)=(FCN values indicating the order) 
++---------+------+-+-+-+-+-+-+-+-----+-------+
+| Rule ID | DTag |W|1|0|1|1|0|1|all-0|padding|  Bitmap (not optimized)
++---------+------+-+-+-+-+-+-+-+-----+-------+
+|&lt;-- byte boundary ---&gt;|&lt;----- 1 byte -----&gt; | 
+    (*)=(FCN values) 
     
 +---- ... --+-... -+-+-+-+-+-+-+-+-+-+
 |  Rule ID  | DTag |W|1|0|1|1|0|1|1|P|  transmitted Bitmap
 +---- ... --+-... -+-+-+-+-+-+-+-+-+-+
-|--- byte boundary ----| 1 byte next | 
+|&lt;-- byte boundary ---&gt;|&lt;-- 1 byte--&gt;| 
     
 </pre>
-<p class="figure">Figure 20: Example of a Bitmap before transmission, and the transmitted one, in any window except the last one, for N=3</p>
+<p class="figure">Figure 20: Example of a Bitmap before transmission, and the transmitted one, in any window except the last one</p>
 <p><a href="#Fig-Bitmap-lastWin" class="xref">Figure 21</a> shows an example of an ACK (for N=3), where the Bitmap indicates that the MIC check has failed but there are no missing fragments.</p>
 <div id="rfc.figure.21"></div>
 <div id="Fig-Bitmap-lastWin"></div>
@@ -1405,7 +1406,7 @@ Rule 0
           |-------FCN=0--------&gt;|
           |-------FCN=0--------&gt;|
           |-------FCN=0--------&gt;|
-          |-------FCN=1--------&gt;|MIC checked =&gt;
+          |-----FCN=1 + MIC ---&gt;|MIC checked: success =&gt;
  &#160; &#160; &#160; &#160; 
 </pre>
 <p class="figure">Figure 24: Transmission in No-ACK mode of an IPv6 packet carried by 11 fragments</p>
@@ -1426,7 +1427,7 @@ Rule 0
           |-----W=1, FCN=6-----&gt;|
           |-----W=1, FCN=5-----&gt;|
           |-----W=1, FCN=4-----&gt;|
-          |-----W=1, FCN=7-----&gt;|MIC checked =&gt;
+          |--W=1, FCN=7 + MIC--&gt;|MIC checked: success =&gt;
           |&lt;---- ACK, W=1 ------|
 
 </pre>
@@ -1450,14 +1451,14 @@ Rule 0
           |-----W=1, FCN=6-----&gt;|
           |-----W=1, FCN=5-----&gt;|
           |-----W=1, FCN=4--X--&gt;|
-          |-----W=1, FCN=7-----&gt;|MIC checked
+          |- W=1, FCN=7 + MIC -&gt;|MIC checked: failed
           |&lt;-----ACK, W=1-------|C=0 Bitmap:1100001
-          |-----W=1, FCN=4-----&gt;|MIC checked =&gt;
-          |&lt;---- ACK, W=1 ------|C=1, no bitmap
+          |-----W=1, FCN=4-----&gt;|MIC checked: success =&gt;
+          |&lt;---- ACK, W=1 ------|C=1, no Bitmap
 
 </pre>
 <p class="figure">Figure 26: Transmission in ACK-on-Error mode of an IPv6 packet carried by 11 fragments, with MAX_WIND_FCN=6 and three lost fragments.</p>
-<p><a href="#Fig-Example-Rel-Window-ACK-NoLoss" class="xref">Figure 27</a> illustrates the transmission in ACK-Always mode of an IPv6 packet that needs 11 fragments, with MAX_WIND_FCN=6 and no loss. Note: in Window mode, an additional bit will be needed to number windows.</p>
+<p><a href="#Fig-Example-Rel-Window-ACK-NoLoss" class="xref">Figure 27</a> illustrates the transmission in ACK-Always mode of an IPv6 packet that needs 11 fragments, with MAX_WIND_FCN=6 and no loss.</p>
 <div id="rfc.figure.27"></div>
 <div id="Fig-Example-Rel-Window-ACK-NoLoss"></div>
 <pre>
@@ -1473,7 +1474,7 @@ Rule 0
           |-----W=1, FCN=6-----&gt;|
           |-----W=1, FCN=5-----&gt;|   
           |-----W=1, FCN=4-----&gt;|
-          |-----W=1, FCN=7-----&gt;|MIC checked =&gt;
+          |--W=1, FCN=7 + MIC--&gt;|MIC checked: success =&gt;
           |&lt;-----ACK, W=1-------| C=1 no Bitmap
         (End)    
 
@@ -1498,9 +1499,9 @@ Rule 0
           |-----W=0, FCN=6-----&gt;|
           |-----W=0, FCN=5-----&gt;|   
           |-----W=0, FCN=4--X--&gt;|
-          |-----W=0, FCN=7-----&gt;|MIC checked
+          |--W=0, FCN=7 + MIC--&gt;|MIC checked: failed
           |&lt;-----ACK, W=0-------| C= 0 Bitmap:11000001
-          |-----W=0, FCN=4-----&gt;|MIC checked =&gt;
+          |-----W=0, FCN=4-----&gt;|MIC checked: success =&gt;
           |&lt;-----ACK, W=0-------| C= 1 no Bitmap
         (End)    
 
@@ -1516,7 +1517,7 @@ Rule 0
              |-----W=0, FCN=4--X--&gt;|
              |-----W=0, FCN=3--X--&gt;|
              |-----W=0, FCN=2--X--&gt;|
-             |-----W=0, FCN=7-----&gt;|MIC checked
+             |--W=0, FCN=7 + MIC--&gt;|MIC checked: failed
              |&lt;-----ACK, W=0-------|C= 0 Bitmap:1100001
              |-----W=0, FCN=4-----&gt;|MIC checked: failed
              |-----W=0, FCN=3-----&gt;|MIC checked: failed
@@ -1525,7 +1526,7 @@ Rule 0
            (End) 
 </pre>
 <p class="figure">Figure 29: Transmission in ACK-Always mode of an IPv6 packet carried by 11 fragments, fwith MAX_WIND_FCN=6, three lost framents and only one retry needed for each lost fragment.</p>
-<p><a href="#Fig-Example-Rel-Window-ACK-Loss-Last-B" class="xref">Figure 30</a> illustrates the transmission in ACK-Always mode of an IPv6 packet that needs 6 fragments, with MAX_WIND_FCN=6, three lost fragments, and the second ACK lost. Note that, since a single window is needed for transmission of the IPv6 packet in this case, the example illustrates behavior when losses happen in the last window.</p>
+<p><a href="#Fig-Example-Rel-Window-ACK-Loss-Last-B" class="xref">Figure 30</a> illustrates the transmission in ACK-Always mode of an IPv6 packet that needs 6 fragments, with MAX_WIND_FCN=6, three lost fragments, and the second ACK lost.</p>
 <div id="rfc.figure.30"></div>
 <div id="Fig-Example-Rel-Window-ACK-Loss-Last-B"></div>
 <pre>
@@ -1535,20 +1536,20 @@ Rule 0
              |-----W=0, FCN=4--X--&gt;|
              |-----W=0, FCN=3--X--&gt;|
              |-----W=0, FCN=2--X--&gt;|
-             |-----W=0, FCN=7-----&gt;|MIC checked
+             |--W=0, FCN=7 + MIC--&gt;|MIC checked: failed
              |&lt;-----ACK, W=0-------|C=0  Bitmap:1100001
-             |-----W=0, FCN=4-----&gt;|MIC checked: wrong
-             |-----W=0, FCN=3-----&gt;|MIC checked: wrong
-             |-----W=0, FCN=2-----&gt;|MIC checked: right
+             |-----W=0, FCN=4-----&gt;|MIC checked: failed
+             |-----W=0, FCN=3-----&gt;|MIC checked: failed
+             |-----W=0, FCN=2-----&gt;|MIC checked: success
              |  X---ACK, W=0-------|C= 1 no Bitmap
     timeout  |                     |
-             |-----W=0, FCN=7-----&gt;|
+             |--W=0, FCN=7 + MIC--&gt;|
              |&lt;-----ACK, W=0-------|C= 1 no Bitmap  
 
            (End) 
 </pre>
 <p class="figure">Figure 30: Transmission in ACK-Always mode of an IPv6 packet carried by 11 fragments, with MAX_WIND_FCN=6, three lost fragments, and the second ACK lost.</p>
-<p><a href="#Fig-Example-Rel-Window-ACK-Loss-Last-C" class="xref">Figure 31</a> illustrates the transmission in ACK-Always mode of an IPv6 packet that needs 6 fragments, with MAX_WIND_FCN=6, with three lost fragments, and one retransmitted fragment lost again. Note that, since a single window is needed for transmission of the IPv6 packet in this case, the example illustrates behavior when losses happen in the last window.</p>
+<p><a href="#Fig-Example-Rel-Window-ACK-Loss-Last-C" class="xref">Figure 31</a> illustrates the transmission in ACK-Always mode of an IPv6 packet that needs 6 fragments, with MAX_WIND_FCN=6, with three lost fragments, and one retransmitted fragment lost again.</p>
 <div id="rfc.figure.31"></div>
 <div id="Fig-Example-Rel-Window-ACK-Loss-Last-C"></div>
 <pre>
@@ -1558,15 +1559,15 @@ Rule 0
              |-----W=0, FCN=4--X--&gt;|
              |-----W=0, FCN=3--X--&gt;|
              |-----W=0, FCN=2--X--&gt;|
-             |-----W=0, FCN=7-----&gt;|MIC checked
+             |--W=0, FCN=7 + MIC--&gt;|MIC checked: failed
              |&lt;-----ACK, W=0-------|C=0   Bitmap:1100001
-             |-----W=0, FCN=4-----&gt;|MIC checked: wrong
-             |-----W=0, FCN=3-----&gt;|MIC checked: wrong
+             |-----W=0, FCN=4-----&gt;|MIC checked: failed
+             |-----W=0, FCN=3-----&gt;|MIC checked: failed
              |-----W=0, FCN=2--X--&gt;|
       timeout|                     |
-             |-----W=0, FCN=7-----&gt;|All-0 empty
+             |--W=0, FCN=7 + MIC--&gt;|All-0 empty
              |&lt;-----ACK, W=0-------|C=0 Bitmap: 1111101
-             |-----W=0, FCN=2-----&gt;|MIC checked: right
+             |-----W=0, FCN=2-----&gt;|MIC checked: success
              |&lt;-----ACK, W=0-------|C=1 no Bitmap
            (End) 
 </pre>
@@ -1608,7 +1609,7 @@ Rule 0
              |-----W=1, FCN=23-----&gt;|
              |-----W=1, FCN=22-----&gt;|
              |-----W=1, FCN=21-----&gt;|
-             |-----W=1, FCN=31-----&gt;|MIC checked =&gt;
+             |--W=1, FCN=31 + MIC--&gt;|MIC checked: sucess =&gt;
              |&lt;------ACK, W=1-------|no Bitmap
            (End)
 </pre>
