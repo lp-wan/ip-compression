@@ -342,7 +342,7 @@ address {
 
   <meta name="dct.creator" content="Minaburo, A., Toutain, L., and C. Gomez" />
   <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-lpwan-ipv6-static-context-hc-09" />
-  <meta name="dct.issued" scheme="ISO8601" content="2018-2-06" />
+  <meta name="dct.issued" scheme="ISO8601" content="2018-2-08" />
   <meta name="dct.abstract" content="This document describes a header compression scheme and fragmentation functionality for very low bandwidth networks. These techniques are specially tailored for Low Power Wide Area Network (LPWAN)." />
   <meta name="description" content="This document describes a header compression scheme and fragmentation functionality for very low bandwidth networks. These techniques are specially tailored for Low Power Wide Area Network (LPWAN)." />
 
@@ -366,7 +366,7 @@ address {
 <td class="right">L. Toutain</td>
 </tr>
 <tr>
-<td class="left">Expires: August 10, 2018</td>
+<td class="left">Expires: August 12, 2018</td>
 <td class="right">IMT-Atlantique</td>
 </tr>
 <tr>
@@ -379,7 +379,7 @@ address {
 </tr>
 <tr>
 <td class="left"></td>
-<td class="right">February 06, 2018</td>
+<td class="right">February 08, 2018</td>
 </tr>
 
     	
@@ -391,14 +391,14 @@ address {
   
   <h1 id="rfc.abstract"><a href="#rfc.abstract">Abstract</a></h1>
 <p>This document describes a header compression scheme and fragmentation functionality for very low bandwidth networks. These techniques are specially tailored for Low Power Wide Area Network (LPWAN).</p>
-<p>The Static Context Header Compression (SCHC) offers a great level of flexibility when processing the header fields. SCHC compression is based on a common static context stored in a LPWAN device and in the network. Static context means that the stored information does not change during packet transmission. The context describes the field values and keeps information that will not be transmitted through the constrained network.</p>
-<p>SCHC must be used for LPWAN networks because it avoids complex resynchronization mechanisms, which are incompatible with LPWAN characteristics. And also, because with SCHC, in most cases IPv6/UDP headers can be reduced to a small identifier called Rule ID. Even though, sometimes, a SCHC compressed packet will not fit in one L2 PDU, and the SCHC fragmentation protocol defined in this document may be used.</p>
+<p>The Static Context Header Compression (SCHC) offers a great level of flexibility when processing the header fields. SCHC compression is based on a common static context stored in a LPWAN device and in the network. Static context means that the stored information defined in the context descriptor does not change during packet transmission. The context describes the field values and keeps information that will not be transmitted through the constrained network.</p>
+<p>SCHC is very useful for LPWAN networks because it avoids complex resynchronization mechanisms, which are incompatible with LPWAN characteristics. Also, with SCHC in most cases IPv6/UDP headers can be reduced to a small identifier called a Rule ID. When a SCHC compressed packet cannot fit in one L2 PDU, the SCHC fragmentation protocol defined in this document may be used to transmit the PDU over multiple L2 transmissions.</p>
 <p>This document describes the SCHC compression/decompression framework and applies it to IPv6/UDP headers. This document also specifies a fragmentation and reassembly mechanism that is used to support the IPv6 MTU requirement over LPWAN technologies. Fragmentation is mandatory for IPv6 datagrams that, after SCHC compression or when it has not been possible to apply such compression, still exceed the L2 maximum payload size. Similar solutions for other protocols such as CoAP will be described in separate documents.</p>
 <h1 id="rfc.status"><a href="#rfc.status">Status of This Memo</a></h1>
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at https://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on August 10, 2018.</p>
+<p>This Internet-Draft will expire on August 12, 2018.</p>
 <h1 id="rfc.copyrightnotice"><a href="#rfc.copyrightnotice">Copyright Notice</a></h1>
 <p>Copyright (c) 2018 IETF Trust and the persons identified as the document authors.  All rights reserved.</p>
 <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (https://trustee.ietf.org/license-info) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.</p>
@@ -531,12 +531,12 @@ address {
   <h1 id="rfc.section.1">
 <a href="#rfc.section.1">1.</a> <a href="#Introduction" id="Introduction">Introduction</a>
 </h1>
-<p id="rfc.section.1.p.1">Header compression is mandatory to efficiently bring Internet connectivity to the node within a LPWAN network. Some LPWAN networks properties can be exploited to get an efficient header compression:</p>
+<p id="rfc.section.1.p.1">Header compression is needed to efficiently bring Internet connectivity to the node within a LPWAN network. Some LPWAN networks properties can be exploited to get an efficient header compression:</p>
 <p></p>
 
 <ul>
 <li>Topology is star-oriented; therefore, all the packets follow the same path.  For the needs of this draft, the architecture can be simply described as: Devices (Dev) exchange information with LPWAN Application Servers (App) through Network Gateways (NGW).</li>
-<li>Traffic flows are mostly known in advance since devices embed built-in applications. New applications cannot be easily installed in LPWAN devices, as they would in computers or smartphones.</li>
+<li>Traffic flows can be known in advance since devices embed built-in applications. New applications cannot be easily installed in LPWAN devices, as they would in computers or smartphones.</li>
 </ul>
 <p id="rfc.section.1.p.3">The Static Context Header Compression (SCHC) is defined for this environment.  SCHC uses a context, where header information is kept in the header format order. This context is static: the values of the header fields do not change over time. This avoids complex resynchronization mechanisms, that would be incompatible with LPWAN characteristics. In most cases, a small context identifier is enough to represent the full IPv6/UDP headers.</p>
 <p id="rfc.section.1.p.4">The SCHC header compression mechanism is independent of the specific LPWAN technology over which it is used.</p>
@@ -544,8 +544,8 @@ address {
 <h1 id="rfc.section.2">
 <a href="#rfc.section.2">2.</a> <a href="#LPWAN-Archi" id="LPWAN-Archi">LPWAN Architecture</a>
 </h1>
-<p id="rfc.section.2.p.1">LPWAN technologies have similar architectures but different terminology. We can identify different types of entities in a typical LPWAN network, see <a href="#Fig-LPWANarchi" class="xref">Figure 1</a>:</p>
-<p id="rfc.section.2.p.2">o  Devices (Dev) are the end-devices or hosts (e.g. sensors, actuators, etc.). There can be a high density of devices per radio gateway.</p>
+<p id="rfc.section.2.p.1">LPWAN technologies have similar network architectures but different terminology. We can identify different types of entities in a typical LPWAN network, see <a href="#Fig-LPWANarchi" class="xref">Figure 1</a>:</p>
+<p id="rfc.section.2.p.2">o  Devices (Dev) are the end-devices or hosts (e.g. sensors, actuators, etc.). There can be a very high number of devices per radio gateway.</p>
 <p id="rfc.section.2.p.3">o  The Radio Gateway (RGW), which is the end point of the constrained link.</p>
 <p id="rfc.section.2.p.4">o  The Network Gateway (NGW) is the interconnection node between the Radio Gateway and the Internet.</p>
 <p id="rfc.section.2.p.5">o  LPWAN-AAA Server, which controls the user authentication and the applications.</p>
@@ -586,30 +586,30 @@ address {
 <li>Dev-IID: Device Interface Identifier. Second part of the IPv6 address that identifies the device interface.</li>
 <li>DI: Direction Indicator. This field tells which direction of packet travel (Up, Dw or Bi) a rule applies to. This allows for assymmetric processing.</li>
 <li>DTag: Datagram Tag. This fragmentation header field is set to the same value for all fragments carrying the same IPv6 datagram.</li>
-<li>Dw: Down Link. Indicates the direction from SCHC C/D to Dev.</li>
+<li>Dw: Dw: Downlink direction for compression/decompression, from SCHC C/D in the network to SCHC C/D in the Dev.</li>
 <li>FCN: Fragment Compressed Number. This fragmentation header field carries an efficient representation of a larger-sized fragment number.</li>
 <li>FID: Field Identifier. This is an index to describe the header fields in a Rule.</li>
-<li>FL: Field Length. This tells if the field is of fixed or variable length. In the former case, FL also contains the length value.</li>
-<li>FP: Field Position is a value that is used to distinguish between occurences of a field in the header, when there are several.</li>
+<li>FL: Field Length identifies whether a field has fixed or variable size, and for the latter it indicates its length.</li>
+<li>FP: Field Position is a value that is used to identify the position where each instance of a field appears in the header.</li>
 <li>IID: Interface Identifier. See the IPv6 addressing architecture <a href="#RFC7136" class="xref">[RFC7136]</a>
 </li>
-<li>Inactivity Timer. A timer to end the fragmentation state machine when there is an error and there is no possibility to continue an on-going fragmented packet transmission.</li>
+<li>Inactivity Timer. A timer used at the end of the fragmentation state machine to detect when there is an error and there is no possibility to continue an on-going fragmented packet transmission.</li>
 <li>MIC: Message Integrity Check.  A fragmentation header field computed over an IPv6 packet before fragmentation, used for error detection after IPv6 packet reassembly.</li>
 <li>MO: Matching Operator. An operator used to match a value contained in a header field with a value contained in a Rule.</li>
-<li>Retransmission Timer. A timer used by the fragment sender during an on-going fragmented packet transmission to detect possible link errors when waiting for a possible incoming ACK.</li>
+<li>Retransmission Timer. A timer used by the fragment sender state machine during an on-going fragmented packet transmission to detect possible link errors when waiting for a possible incoming ACK.</li>
 <li>Rule: A set of header field values.</li>
 <li>Rule entry: A row in the rule that describes a header field.</li>
 <li>Rule ID: An identifier for a rule, SCHC C/D, and Dev share the same Rule ID for a specific flow. A set of Rule IDs are used to support fragmentation functionality.</li>
-<li>SCHC C/D: Static Context Header Compression Compressor/Decompressor. A process in the network that performs compression/decompression of the headers, by using SCHC rules.</li>
+<li>SCHC C/D: Static Context Header Compression Compressor/Decompressor. A mechanism used both at the Dev and at the network to achieve compression/Decompression of IP/UDP headers, by using static SCHC rules.</li>
 <li>TV: Target value. A value contained in the Rule that will be matched with the value of a header field.</li>
-<li>Up: Up Link. Direction from Dev to SCHC C/D.</li>
+<li>Up: Uplink direction for compression/decompression, from the Dev SCHC C/D to the network SCHC C/D.</li>
 <li>W: Window bit. A fragment header field used in Window mode (see section 5), which carries the same value for all fragments of a window.</li>
 <li>Window:  A subset of the fragments needed to carry a packet (see section 5)</li>
 </ul>
 <h1 id="rfc.section.4">
 <a href="#rfc.section.4">4.</a> <a href="#static-context-header-compression" id="static-context-header-compression">Static Context Header Compression</a>
 </h1>
-<p id="rfc.section.4.p.1">Static Context Header Compression (SCHC) avoids context synchronization, which is the most bandwidth-consuming operation in other header compression mechanisms such as RoHC <a href="#RFC5795" class="xref">[RFC5795]</a>. Based on the fact that the nature of data flows is highly predictable in LPWAN networks, the context stored on the Device (Dev) may be static. The context must be stored in both ends of the link. It can be installed by a provisioning protocol, by pre-provisioning or by any out of band means.  The way by which the context is learned by both sides is out of the scope of this document.</p>
+<p id="rfc.section.4.p.1">Static Context Header Compression (SCHC) avoids context synchronization, which is the most bandwidth-consuming operation in other header compression mechanisms such as RoHC <a href="#RFC5795" class="xref">[RFC5795]</a>. Since the nature of data flows is highly predictable in LPWAN networks, static contexts may be stored beforehand to omit transmitting some information over the air.  The contexts must be stored at both ends, and they can either be learned by a provisioning protocol, by out of band means, or they can be pre-provisioned. The way the contexts are provisioned on both ends is out of the scope of this document.</p>
 <div id="rfc.figure.2"></div>
 <div id="Fig-archi"></div>
 <pre>
@@ -634,8 +634,8 @@ address {
 <h1 id="rfc.section.4.1">
 <a href="#rfc.section.4.1">4.1.</a> <a href="#schc-rules" id="schc-rules">SCHC Rules</a>
 </h1>
-<p id="rfc.section.4.1.p.1">The main idea of the SCHC compression scheme is to send the Rule ID to the other end instead of sending known header field values. This Rule ID identifies a rule that matches as much as possible the original packet header values. When a value is known by both ends, it is not necessary to send it through the LPWAN network.</p>
-<p id="rfc.section.4.1.p.2">The context contains a list of rules (cf. <a href="#Fig-ctxt" class="xref">Figure 3</a>). Each Rule itself contains a list of Field Description. Each Field Description is composed of a field identifier (FID), a field length (FL), a field position (FP), a direction indicator (DI), a target value (TV), a matching operator (MO) and a Compression/Decompression Action (CDA).</p>
+<p id="rfc.section.4.1.p.1">The main idea of the SCHC compression scheme is to transmit the Rule ID to the other end instead of sending known field values. This Rule ID identifies a rule that matches as much as possible the original packet values. Hence, when a value is known by both ends, it is only necessary to send the Rule ID over the LPWAN network.</p>
+<p id="rfc.section.4.1.p.2">The context contains a list of rules (cf. <a href="#Fig-ctxt" class="xref">Figure 3</a>). Each Rule contains itself a list of field descriptions composed of a field identifier (FID), a field length (FL), a field position (FP), a direction indicator (DI), a target value (TV), a matching operator (MO) and a Compression/Decompression Action (CDA).</p>
 <div id="rfc.figure.3"></div>
 <div id="Fig-ctxt"></div>
 <pre>
@@ -659,7 +659,7 @@ address {
 </pre>
 <p class="figure">Figure 3: Compression/Decompression Context</p>
 <p id="rfc.section.4.1.p.3">The Rule does not describe how to delineate each field in the original packet header. This must be known from the compressor/decompressor. The rule only describes the compression/decompression behavior for each header field. In the rule, the Field Descriptions are listed in the order in which the fields appear in the packet header.</p>
-<p id="rfc.section.4.1.p.4">The Rule also describes the compressed header fields which are transmitted regarding their position in the rule which is used for data serialization on the compressor side and data deserialization on the decompressor side.</p>
+<p id="rfc.section.4.1.p.4">The Rule also describes the compressed header fields that are transmitted and their position in the rule, which is used for data serialization on the compressor side and data deserialization on the decompressor side.</p>
 <p id="rfc.section.4.1.p.5">The Context describes the header fields and its values with the following entries:</p>
 <p></p>
 
@@ -681,8 +681,8 @@ address {
 <a href="#rfc.section.4.2">4.2.</a> <a href="#rule-id" id="rule-id">Rule ID</a>
 </h1>
 <p id="rfc.section.4.2.p.1">Rule IDs are sent between the compression and the decompression elements. The size of the Rule ID is not specified in this document. It is implementation-specific and can vary according to the LPWAN technology and the number of flows, among others.</p>
-<p id="rfc.section.4.2.p.2">Some values in the Rule ID space are reserved for functionalities other than header compression, such as fragmentation. (See <a href="#Frag" class="xref">Section 5</a>).</p>
-<p id="rfc.section.4.2.p.3">Rule IDs are specific to a Dev. Two Devs may use the same Rule ID for different header compression. To identify the correct Rule ID, the SCHC C/D needs to combine the Rule ID with the Dev L2 identifier to find the appropriate Rule.</p>
+<p id="rfc.section.4.2.p.2">Some values in the Rule ID space are reserved for functionalities other than header compression, such as packet fragmentation. (See <a href="#Frag" class="xref">Section 5</a>).</p>
+<p id="rfc.section.4.2.p.3">Rule IDs are specific to a Dev. Hence, multiple Dev instances may use the same Rule ID to define different header compression contexts. To identify the correct Rule ID, the SCHC C/D needs to correlate the Rule ID with the Dev identifier to find the appropriate Rule to be applied.</p>
 <h1 id="rfc.section.4.3">
 <a href="#rfc.section.4.3">4.3.</a> <a href="#packet-processing" id="packet-processing">Packet processing</a>
 </h1>
@@ -1279,7 +1279,7 @@ address {
 <table><tbody><tr>
 <td class="reference"><b id="I-D.ietf-lpwan-overview">[I-D.ietf-lpwan-overview]</b></td>
 <td class="top">
-<a>Farrell, S.</a>, "<a href="https://tools.ietf.org/html/draft-ietf-lpwan-overview-08">LPWAN Overview</a>", Internet-Draft draft-ietf-lpwan-overview-08, January 2018.</td>
+<a>Farrell, S.</a>, "<a href="https://tools.ietf.org/html/draft-ietf-lpwan-overview-10">LPWAN Overview</a>", Internet-Draft draft-ietf-lpwan-overview-10, February 2018.</td>
 </tr></tbody></table>
 <h1 id="rfc.appendix.A">
 <a href="#rfc.appendix.A">Appendix A.</a> <a href="#compressIPv6" id="compressIPv6">SCHC Compression Examples</a>

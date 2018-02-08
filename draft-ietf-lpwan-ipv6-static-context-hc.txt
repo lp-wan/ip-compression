@@ -5,10 +5,10 @@
 lpwan Working Group                                          A. Minaburo
 Internet-Draft                                                    Acklio
 Intended status: Informational                                L. Toutain
-Expires: August 10, 2018                                  IMT-Atlantique
+Expires: August 12, 2018                                  IMT-Atlantique
                                                                 C. Gomez
                                     Universitat Politecnica de Catalunya
-                                                       February 06, 2018
+                                                       February 08, 2018
 
 
   LPWAN Static Context Header Compression (SCHC) and fragmentation for
@@ -24,18 +24,18 @@ Abstract
    The Static Context Header Compression (SCHC) offers a great level of
    flexibility when processing the header fields.  SCHC compression is
    based on a common static context stored in a LPWAN device and in the
-   network.  Static context means that the stored information does not
-   change during packet transmission.  The context describes the field
-   values and keeps information that will not be transmitted through the
-   constrained network.
+   network.  Static context means that the stored information defined in
+   the context descriptor does not change during packet transmission.
+   The context describes the field values and keeps information that
+   will not be transmitted through the constrained network.
 
-   SCHC must be used for LPWAN networks because it avoids complex
+   SCHC is very useful for LPWAN networks because it avoids complex
    resynchronization mechanisms, which are incompatible with LPWAN
-   characteristics.  And also, because with SCHC, in most cases IPv6/UDP
-   headers can be reduced to a small identifier called Rule ID.  Even
-   though, sometimes, a SCHC compressed packet will not fit in one L2
-   PDU, and the SCHC fragmentation protocol defined in this document may
-   be used.
+   characteristics.  Also, with SCHC in most cases IPv6/UDP headers can
+   be reduced to a small identifier called a Rule ID.  When a SCHC
+   compressed packet cannot fit in one L2 PDU, the SCHC fragmentation
+   protocol defined in this document may be used to transmit the PDU
+   over multiple L2 transmissions.
 
    This document describes the SCHC compression/decompression framework
    and applies it to IPv6/UDP headers.  This document also specifies a
@@ -53,7 +53,7 @@ Abstract
 
 
 
-Minaburo, et al.         Expires August 10, 2018                [Page 1]
+Minaburo, et al.         Expires August 12, 2018                [Page 1]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
@@ -73,7 +73,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on August 10, 2018.
+   This Internet-Draft will expire on August 12, 2018.
 
 Copyright Notice
 
@@ -109,7 +109,7 @@ Table of Contents
 
 
 
-Minaburo, et al.         Expires August 10, 2018                [Page 2]
+Minaburo, et al.         Expires August 12, 2018                [Page 2]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
@@ -165,14 +165,14 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.         Expires August 10, 2018                [Page 3]
+Minaburo, et al.         Expires August 12, 2018                [Page 3]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 1.  Introduction
 
-   Header compression is mandatory to efficiently bring Internet
+   Header compression is needed to efficiently bring Internet
    connectivity to the node within a LPWAN network.  Some LPWAN networks
    properties can be exploited to get an efficient header compression:
 
@@ -181,10 +181,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
       simply described as: Devices (Dev) exchange information with LPWAN
       Application Servers (App) through Network Gateways (NGW).
 
-   o  Traffic flows are mostly known in advance since devices embed
-      built-in applications.  New applications cannot be easily
-      installed in LPWAN devices, as they would in computers or
-      smartphones.
+   o  Traffic flows can be known in advance since devices embed built-in
+      applications.  New applications cannot be easily installed in
+      LPWAN devices, as they would in computers or smartphones.
 
    The Static Context Header Compression (SCHC) is defined for this
    environment.  SCHC uses a context, where header information is kept
@@ -211,17 +210,18 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 2.  LPWAN Architecture
 
-   LPWAN technologies have similar architectures but different
+   LPWAN technologies have similar network architectures but different
    terminology.  We can identify different types of entities in a
    typical LPWAN network, see Figure 1:
 
    o Devices (Dev) are the end-devices or hosts (e.g. sensors,
-   actuators, etc.).  There can be a high density of devices per radio
-   gateway.
+   actuators, etc.).  There can be a very high number of devices per
+   radio gateway.
 
 
 
-Minaburo, et al.         Expires August 10, 2018                [Page 4]
+
+Minaburo, et al.         Expires August 12, 2018                [Page 4]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
@@ -277,7 +277,7 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.         Expires August 10, 2018                [Page 5]
+Minaburo, et al.         Expires August 12, 2018                [Page 5]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
@@ -312,7 +312,8 @@ Internet-Draft                 LPWAN SCHC                  February 2018
    o  DTag: Datagram Tag. This fragmentation header field is set to the
       same value for all fragments carrying the same IPv6 datagram.
 
-   o  Dw: Down Link.  Indicates the direction from SCHC C/D to Dev.
+   o  Dw: Dw: Downlink direction for compression/decompression, from
+      SCHC C/D in the network to SCHC C/D in the Dev.
 
    o  FCN: Fragment Compressed Number.  This fragmentation header field
       carries an efficient representation of a larger-sized fragment
@@ -321,26 +322,26 @@ Internet-Draft                 LPWAN SCHC                  February 2018
    o  FID: Field Identifier.  This is an index to describe the header
       fields in a Rule.
 
-   o  FL: Field Length.  This tells if the field is of fixed or variable
-      length.  In the former case, FL also contains the length value.
+   o  FL: Field Length identifies whether a field has fixed or variable
+      size, and for the latter it indicates its length.
 
-   o  FP: Field Position is a value that is used to distinguish between
-      occurences of a field in the header, when there are several.
+   o  FP: Field Position is a value that is used to identify the
+      position where each instance of a field appears in the header.
 
    o  IID: Interface Identifier.  See the IPv6 addressing architecture
       [RFC7136]
 
 
 
-
-Minaburo, et al.         Expires August 10, 2018                [Page 6]
+Minaburo, et al.         Expires August 12, 2018                [Page 6]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
 
-   o  Inactivity Timer.  A timer to end the fragmentation state machine
-      when there is an error and there is no possibility to continue an
-      on-going fragmented packet transmission.
+   o  Inactivity Timer.  A timer used at the end of the fragmentation
+      state machine to detect when there is an error and there is no
+      possibility to continue an on-going fragmented packet
+      transmission.
 
    o  MIC: Message Integrity Check.  A fragmentation header field
       computed over an IPv6 packet before fragmentation, used for error
@@ -349,9 +350,10 @@ Internet-Draft                 LPWAN SCHC                  February 2018
    o  MO: Matching Operator.  An operator used to match a value
       contained in a header field with a value contained in a Rule.
 
-   o  Retransmission Timer.  A timer used by the fragment sender during
-      an on-going fragmented packet transmission to detect possible link
-      errors when waiting for a possible incoming ACK.
+   o  Retransmission Timer.  A timer used by the fragment sender state
+      machine during an on-going fragmented packet transmission to
+      detect possible link errors when waiting for a possible incoming
+      ACK.
 
    o  Rule: A set of header field values.
 
@@ -362,13 +364,15 @@ Internet-Draft                 LPWAN SCHC                  February 2018
       support fragmentation functionality.
 
    o  SCHC C/D: Static Context Header Compression Compressor/
-      Decompressor.  A process in the network that performs compression/
-      decompression of the headers, by using SCHC rules.
+      Decompressor.  A mechanism used both at the Dev and at the network
+      to achieve compression/Decompression of IP/UDP headers, by using
+      static SCHC rules.
 
    o  TV: Target value.  A value contained in the Rule that will be
       matched with the value of a header field.
 
-   o  Up: Up Link.  Direction from Dev to SCHC C/D.
+   o  Up: Uplink direction for compression/decompression, from the Dev
+      SCHC C/D to the network SCHC C/D.
 
    o  W: Window bit.  A fragment header field used in Window mode (see
       section 5), which carries the same value for all fragments of a
@@ -381,21 +385,21 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
    Static Context Header Compression (SCHC) avoids context
    synchronization, which is the most bandwidth-consuming operation in
-   other header compression mechanisms such as RoHC [RFC5795].  Based on
-   the fact that the nature of data flows is highly predictable in LPWAN
-   networks, the context stored on the Device (Dev) may be static.  The
-   context must be stored in both ends of the link.  It can be installed
-   by a provisioning protocol, by pre-provisioning or by any out of band
+   other header compression mechanisms such as RoHC [RFC5795].  Since
 
 
 
-Minaburo, et al.         Expires August 10, 2018                [Page 7]
+Minaburo, et al.         Expires August 12, 2018                [Page 7]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
 
-   means.  The way by which the context is learned by both sides is out
-   of the scope of this document.
+   the nature of data flows is highly predictable in LPWAN networks,
+   static contexts may be stored beforehand to omit transmitting some
+   information over the air.  The contexts must be stored at both ends,
+   and they can either be learned by a provisioning protocol, by out of
+   band means, or they can be pre-provisioned.  The way the contexts are
+   provisioned on both ends is out of the scope of this document.
 
         Dev                                                 App
    +--------------+                                  +--------------+
@@ -433,25 +437,24 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 4.1.  SCHC Rules
 
-   The main idea of the SCHC compression scheme is to send the Rule ID
-   to the other end instead of sending known header field values.  This
-   Rule ID identifies a rule that matches as much as possible the
-   original packet header values.  When a value is known by both ends,
-   it is not necessary to send it through the LPWAN network.
-
-   The context contains a list of rules (cf.  Figure 3).  Each Rule
-   itself contains a list of Field Description.  Each Field Description
-   is composed of a field identifier (FID), a field length (FL), a field
+   The main idea of the SCHC compression scheme is to transmit the Rule
+   ID to the other end instead of sending known field values.  This Rule
+   ID identifies a rule that matches as much as possible the original
+   packet values.  Hence, when a value is known by both ends, it is only
+   necessary to send the Rule ID over the LPWAN network.
 
 
 
-Minaburo, et al.         Expires August 10, 2018                [Page 8]
+Minaburo, et al.         Expires August 12, 2018                [Page 8]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
 
-   position (FP), a direction indicator (DI), a target value (TV), a
-   matching operator (MO) and a Compression/Decompression Action (CDA).
+   The context contains a list of rules (cf.  Figure 3).  Each Rule
+   contains itself a list of field descriptions composed of a field
+   identifier (FID), a field length (FL), a field position (FP), a
+   direction indicator (DI), a target value (TV), a matching operator
+   (MO) and a Compression/Decompression Action (CDA).
 
      /-----------------------------------------------------------------\
      |                         Rule N                                  |
@@ -480,10 +483,10 @@ Internet-Draft                 LPWAN SCHC                  February 2018
    are listed in the order in which the fields appear in the packet
    header.
 
-   The Rule also describes the compressed header fields which are
-   transmitted regarding their position in the rule which is used for
-   data serialization on the compressor side and data deserialization on
-   the decompressor side.
+   The Rule also describes the compressed header fields that are
+   transmitted and their position in the rule, which is used for data
+   serialization on the compressor side and data deserialization on the
+   decompressor side.
 
    The Context describes the header fields and its values with the
    following entries:
@@ -498,10 +501,7 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-
-
-
-Minaburo, et al.         Expires August 10, 2018                [Page 9]
+Minaburo, et al.         Expires August 12, 2018                [Page 9]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
@@ -544,20 +544,20 @@ Internet-Draft                 LPWAN SCHC                  February 2018
    technology and the number of flows, among others.
 
    Some values in the Rule ID space are reserved for functionalities
-   other than header compression, such as fragmentation.  (See
+   other than header compression, such as packet fragmentation.  (See
    Section 5).
 
-   Rule IDs are specific to a Dev. Two Devs may use the same Rule ID for
-   different header compression.  To identify the correct Rule ID, the
-   SCHC C/D needs to combine the Rule ID with the Dev L2 identifier to
-   find the appropriate Rule.
+   Rule IDs are specific to a Dev. Hence, multiple Dev instances may use
+   the same Rule ID to define different header compression contexts.  To
+   identify the correct Rule ID, the SCHC C/D needs to correlate the
+   Rule ID with the Dev identifier to find the appropriate Rule to be
+   applied.
 
 
 
 
 
-
-Minaburo, et al.         Expires August 10, 2018               [Page 10]
+Minaburo, et al.         Expires August 12, 2018               [Page 10]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
@@ -613,7 +613,7 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.         Expires August 10, 2018               [Page 11]
+Minaburo, et al.         Expires August 12, 2018               [Page 11]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
@@ -669,7 +669,7 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.         Expires August 10, 2018               [Page 12]
+Minaburo, et al.         Expires August 12, 2018               [Page 12]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
@@ -725,7 +725,7 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.         Expires August 10, 2018               [Page 13]
+Minaburo, et al.         Expires August 12, 2018               [Page 13]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
@@ -781,7 +781,7 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.         Expires August 10, 2018               [Page 14]
+Minaburo, et al.         Expires August 12, 2018               [Page 14]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
@@ -837,7 +837,7 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.         Expires August 10, 2018               [Page 15]
+Minaburo, et al.         Expires August 12, 2018               [Page 15]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
@@ -893,7 +893,7 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.         Expires August 10, 2018               [Page 16]
+Minaburo, et al.         Expires August 12, 2018               [Page 16]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
@@ -949,7 +949,7 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.         Expires August 10, 2018               [Page 17]
+Minaburo, et al.         Expires August 12, 2018               [Page 17]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
@@ -1005,7 +1005,7 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.         Expires August 10, 2018               [Page 18]
+Minaburo, et al.         Expires August 12, 2018               [Page 18]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
@@ -1061,7 +1061,7 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.         Expires August 10, 2018               [Page 19]
+Minaburo, et al.         Expires August 12, 2018               [Page 19]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
@@ -1117,7 +1117,7 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.         Expires August 10, 2018               [Page 20]
+Minaburo, et al.         Expires August 12, 2018               [Page 20]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
@@ -1173,7 +1173,7 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.         Expires August 10, 2018               [Page 21]
+Minaburo, et al.         Expires August 12, 2018               [Page 21]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
@@ -1229,7 +1229,7 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.         Expires August 10, 2018               [Page 22]
+Minaburo, et al.         Expires August 12, 2018               [Page 22]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
@@ -1285,7 +1285,7 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.         Expires August 10, 2018               [Page 23]
+Minaburo, et al.         Expires August 12, 2018               [Page 23]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
@@ -1341,7 +1341,7 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.         Expires August 10, 2018               [Page 24]
+Minaburo, et al.         Expires August 12, 2018               [Page 24]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
@@ -1397,7 +1397,7 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.         Expires August 10, 2018               [Page 25]
+Minaburo, et al.         Expires August 12, 2018               [Page 25]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
@@ -1453,7 +1453,7 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.         Expires August 10, 2018               [Page 26]
+Minaburo, et al.         Expires August 12, 2018               [Page 26]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
@@ -1509,7 +1509,7 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.         Expires August 10, 2018               [Page 27]
+Minaburo, et al.         Expires August 12, 2018               [Page 27]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
@@ -1565,7 +1565,7 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.         Expires August 10, 2018               [Page 28]
+Minaburo, et al.         Expires August 12, 2018               [Page 28]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
@@ -1621,7 +1621,7 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.         Expires August 10, 2018               [Page 29]
+Minaburo, et al.         Expires August 12, 2018               [Page 29]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
@@ -1677,7 +1677,7 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.         Expires August 10, 2018               [Page 30]
+Minaburo, et al.         Expires August 12, 2018               [Page 30]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
@@ -1733,7 +1733,7 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.         Expires August 10, 2018               [Page 31]
+Minaburo, et al.         Expires August 12, 2018               [Page 31]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
@@ -1789,7 +1789,7 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.         Expires August 10, 2018               [Page 32]
+Minaburo, et al.         Expires August 12, 2018               [Page 32]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
@@ -1845,7 +1845,7 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.         Expires August 10, 2018               [Page 33]
+Minaburo, et al.         Expires August 12, 2018               [Page 33]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
@@ -1901,7 +1901,7 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.         Expires August 10, 2018               [Page 34]
+Minaburo, et al.         Expires August 12, 2018               [Page 34]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
@@ -1957,7 +1957,7 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.         Expires August 10, 2018               [Page 35]
+Minaburo, et al.         Expires August 12, 2018               [Page 35]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
@@ -2013,7 +2013,7 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.         Expires August 10, 2018               [Page 36]
+Minaburo, et al.         Expires August 12, 2018               [Page 36]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
@@ -2069,7 +2069,7 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.         Expires August 10, 2018               [Page 37]
+Minaburo, et al.         Expires August 12, 2018               [Page 37]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
@@ -2125,7 +2125,7 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.         Expires August 10, 2018               [Page 38]
+Minaburo, et al.         Expires August 12, 2018               [Page 38]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
@@ -2181,7 +2181,7 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.         Expires August 10, 2018               [Page 39]
+Minaburo, et al.         Expires August 12, 2018               [Page 39]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
@@ -2190,7 +2190,7 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
    [I-D.ietf-lpwan-overview]
               Farrell, S., "LPWAN Overview", draft-ietf-lpwan-
-              overview-08 (work in progress), January 2018.
+              overview-10 (work in progress), February 2018.
 
 Appendix A.  SCHC Compression Examples
 
@@ -2237,7 +2237,7 @@ Appendix A.  SCHC Compression Examples
 
 
 
-Minaburo, et al.         Expires August 10, 2018               [Page 40]
+Minaburo, et al.         Expires August 12, 2018               [Page 40]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
@@ -2293,7 +2293,7 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.         Expires August 10, 2018               [Page 41]
+Minaburo, et al.         Expires August 12, 2018               [Page 41]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
@@ -2349,7 +2349,7 @@ Appendix B.  Fragmentation Examples
 
 
 
-Minaburo, et al.         Expires August 10, 2018               [Page 42]
+Minaburo, et al.         Expires August 12, 2018               [Page 42]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
@@ -2405,7 +2405,7 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.         Expires August 10, 2018               [Page 43]
+Minaburo, et al.         Expires August 12, 2018               [Page 43]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
@@ -2461,7 +2461,7 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.         Expires August 10, 2018               [Page 44]
+Minaburo, et al.         Expires August 12, 2018               [Page 44]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
@@ -2517,7 +2517,7 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.         Expires August 10, 2018               [Page 45]
+Minaburo, et al.         Expires August 12, 2018               [Page 45]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
@@ -2573,7 +2573,7 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.         Expires August 10, 2018               [Page 46]
+Minaburo, et al.         Expires August 12, 2018               [Page 46]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
@@ -2629,7 +2629,7 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.         Expires August 10, 2018               [Page 47]
+Minaburo, et al.         Expires August 12, 2018               [Page 47]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
@@ -2685,7 +2685,7 @@ Appendix C.  Fragmentation State Machines
 
 
 
-Minaburo, et al.         Expires August 10, 2018               [Page 48]
+Minaburo, et al.         Expires August 12, 2018               [Page 48]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
@@ -2741,7 +2741,7 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.         Expires August 10, 2018               [Page 49]
+Minaburo, et al.         Expires August 12, 2018               [Page 49]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
@@ -2797,7 +2797,7 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.         Expires August 10, 2018               [Page 50]
+Minaburo, et al.         Expires August 12, 2018               [Page 50]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
@@ -2853,7 +2853,7 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.         Expires August 10, 2018               [Page 51]
+Minaburo, et al.         Expires August 12, 2018               [Page 51]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
@@ -2909,7 +2909,7 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.         Expires August 10, 2018               [Page 52]
+Minaburo, et al.         Expires August 12, 2018               [Page 52]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
@@ -2965,7 +2965,7 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.         Expires August 10, 2018               [Page 53]
+Minaburo, et al.         Expires August 12, 2018               [Page 53]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
@@ -3021,7 +3021,7 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.         Expires August 10, 2018               [Page 54]
+Minaburo, et al.         Expires August 12, 2018               [Page 54]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
@@ -3077,7 +3077,7 @@ Authors' Addresses
 
 
 
-Minaburo, et al.         Expires August 10, 2018               [Page 55]
+Minaburo, et al.         Expires August 12, 2018               [Page 55]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
@@ -3133,4 +3133,4 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.         Expires August 10, 2018               [Page 56]
+Minaburo, et al.         Expires August 12, 2018               [Page 56]
