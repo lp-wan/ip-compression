@@ -42,6 +42,7 @@ normative:
   RFC2460: 
   RFC7136:
   RFC5795:
+  RFC7217:
 informative:  
   I-D.ietf-lpwan-overview:
 
@@ -356,13 +357,11 @@ The compression/decompression process follows several steps:
   If no eligible rule is found, then the header must be sent without compression, in which case the fragmentation process 
   may be required.
 
-* sending: The Rule ID is sent to the other end followed by the information resulting
-  from the compression of header fields, directly followed by the payload.
-  The product of field compression is sent in the order expressed in the Rule for the matching
-  fields. The way the Rule ID is sent depends on the specific LPWAN
-  layer two technology. It is out of the scope of this document and will be specified in a specific technology-dependant document.
-  For example, the Rule ID can be included in the Layer 2 header or sent as the first byte of
-  the L2 payload. (Cf. {{Fig-FormatPckt}}). 
+* sending: If an eligible Rule is found, the Rule ID is sent to the other end followed by the information resulting from the    
+  compression of header fields, and directly followed by the payload. The product of field compression is sent in the order expressed 
+  in the Rule for the matching fields. The way the Rule ID is sent depends on the specific LPWAN layer two technology. For
+  example, it can be either included in a Layer 2 header or sent in the first byte of the L2 payload. (Cf. {{Fig-FormatPckt}}).
+  This process will be specified in a LPWAN technology-specific document and is out of the scope of the present document.
 
 * decompression: In both directions, the receiver identifies the sender through its device-id
   (e.g. MAC address) and selects the appropriate Rule through the Rule ID. This
@@ -419,7 +418,7 @@ the original value.
 +--------------------+-------------+----------------------------+
 |not-sent            |elided       |use value stored in ctxt    |
 |value-sent          |send         |build from received value   |
-|mapping-sent        |send index   |value from index in a table |
+|match-mapping       |send index   |value from index on a table |
 |LSB(length)         |send LSB     |TV OR received value        |
 |compute-length      |elided       |compute length              |
 |compute-checksum    |elided       |compute UDP checksum        |
@@ -463,7 +462,7 @@ The value-sent action is generally used when the field value is not known by bot
 The value is sent in the compressed message header. Both Compressor and Decompressor must know the
 size of the field, either implicitly (the size is known by both sides) 
 or explicitly in the compressed header
-field by indicating the length. This function is generally used with the "ignore" MO.
+field by indicating the length, as defined in {{chap-CDA}}. This function is generally used with the "ignore" MO.
 
 ### mapping-sent
 
@@ -482,8 +481,8 @@ A length can be specified in the rule to indicate
 how many bits have to be sent. If the length is not specified, the number of bits sent is the
 original header field length minus the length specified in the MSB MO.
 
-The compressor sends the "length" Least Significant Bits. The decompressor
-combines the value received with the Target Value.
+The compressor sends the Least Significant Bits (e.g. LSB of the length field). The
+decompressor combines the value received with the Target Value.
 
 If this action is made on a variable length field, the remaining size in byte has to be sent before.
 
@@ -494,8 +493,7 @@ These functions are used to process respectively the Dev and the App Interface I
 IPv6 addresses. Appiid CDA is less common since current LPWAN technologies
 frames contain a single address, which is the Dev's address.
 
-The IID value may be computed from the Device ID present in the Layer 2 header. The
-computation is specific to each LPWAN technology and may depend on the Device ID size.
+The IID value MAY be computed from the Device ID present in the Layer 2 header, or from some other stable identifier. The computation is specific for each LPWAN technology and MAY depend on the Device ID size.
 
 In the Downlink direction, these CDA may be used to determine the L2 addresses used by the LPWAN.
 
@@ -517,7 +515,16 @@ Compressed fields are elided during compression and reconstructed during decompr
 
 In LPWAN technologies, the L2 data unit size typically varies from tens to hundreds of bytes.  Be it after applying SCHC header compression or when SCHC header compression is not possible, if the entire IPv6 datagram fits within a single L2 data unit, the fragmentation mechanism is not used and the packet is sent. Otherwise, the datagram SHALL be broken into fragments.
 
-LPWAN technologies impose some strict limitations on traffic, (e.g.) devices are sleeping most of the time and may receive data during a short period of time after transmission to preserve battery. To adapt the SCHC fragmentation to the capabilities of LPWAN technologies, it is desirable to enable optional fragment retransmission and to allow a gradation of fragment delivery reliability. This document does not make any decision with regard to which fragment delivery reliability mode(s) will be used over a specific LPWAN technology.
+LPWAN technologies impose some strict limitations on traffic. For instance, 
+devices are sleeping most of the time and may receive data during a
+short period of time after transmission to preserve battery. To
+adapt the SCHC fragmentation to the capabilities of LPWAN
+technologies, it is desirable to enable optional fragment
+retransmission and to allow a gradation of fragment delivery
+reliability. This document does not make any decision with regard to
+which fragment delivery reliability mode(s) will be used over a
+specific LPWAN technology. These details will be defined in other technology-specific documents.
+
 
    An important consideration is that LPWAN networks typically follow a
    star topology, and therefore data unit reordering is not expected
@@ -528,7 +535,7 @@ LPWAN technologies impose some strict limitations on traffic, (e.g.) devices are
 
 ## Functionalities
 
-This subsection describes the different fields in the fragmentation header frames (see the related formats in {{Fragfor}}), as well as the tools that are used to enable the fragmentation functionalities defined in this document, and the different reliability modes supported. 
+This subsection describes the different fields in the fragmentation header frames (see the related formats in {{Fragfor}}). It also describes the tools that are used to enable the fragmentation functionalities defined in this document, and the different reliability modes supported. 
 
 *  Rule ID. The Rule ID is present in the fragment header and in the ACK header format.  The Rule ID in a fragment header is used to identify that a fragment is being carried, what fragmentation delivery reliability mode is used and what window size is used (if multiple sizes are possible). The Rule ID  in the fragmentation header also allows interleaving non-fragmented IPv6 datagrams and fragments that carry other IPv6 datagrams. The Rule ID in an ACK identifies the message as an ACK.
 
@@ -551,9 +558,9 @@ In the ACK format, DTag carries the same value as the DTag field in the fragment
 *  W (window): W is a 1-bit field. This field carries the same value for all fragments of a window, and it is complemented for the next window. The initial value for this field is 0.
    In the ACK format, this field also has a size of 1 bit. In all ACKs, the W bit carries the same value as the W bit carried by the fragments whose reception is being positively or negatively acknowledged by the ACK.
 
-*  Message Integrity Check (MIC). This field, which has a size of M bits, is computed by the sender over the complete packet (i.e. a SCHC compressed or an uncompressed IPv6 packet) before fragmentation. The MIC allows the receiver to check errors in the reassembled packet, while it also enables compressing the UDP checksum by use of SCHC compression. The CRC32 as 0xEDB88320 is recommended as the default algorithm for computing the MIC. Nevertheless, other algorithm MAY be mandated in the corresponding technology documents (e.g. technology-specific profiles). 
+*  Message Integrity Check (MIC). This field, which has a size of M bits, is computed by the sender over the complete packet (i.e. a SCHC compressed or an uncompressed IPv6 packet) before fragmentation. The MIC allows the receiver to check errors in the reassembled packet, while it also enables compressing the UDP checksum by use of SCHC compression. The CRC32 as 0xEDB88320 is recommended as the default algorithm for computing the MIC. Nevertheless, other algorithms MAY be required in other LPWAN technology-specific documents (e.g. technology-specific profiles). 
 
-*  C (MIC checked): C is a 1-bit field. This field is used in the ACK packets to report the outcome of the MIC check, i.e. whether the reassembled packet was correctly received or not.
+*  C (MIC checked): C is a 1-bit field. This field is used in the ACK packets to report the outcome of the MIC check, i.e. whether the reassembled packet was correctly received or not. A value of 1 represents a positive MIC check at the receiver side (i.e. the MIC computed by the receiver matches the received MIC).
  
 *  Retransmission Timer. It is used by a fragment sender after the transmission of a window to detect a transmission error  of the ACK corresponding to this window. Depending on the reliability mode, it will lead to a request for an ACK retransmission (in ACK-Always mode) or it will trigger the transmission of the next window (in ACK-on-error mode). The duration of this timer is not defined in this document and must be defined in the corresponding technology documents (e.g. technology-specific profiles).
  
@@ -581,7 +588,7 @@ in {{Bitmapopt}}
 This specification defines three delivery reliability modes, namely No-ACK, ACK-Always and ACK-on-Error. ACK-Always and ACK-on-Error operate on windows of fragments. A window of fragments is a subset of the full set of fragments needed to carry an IPv6 packet. The three delivery reliability modes are overviewed next: 
 
 *  No-ACK. 
-   No-ACK is the simplest fragment delivery reliability mode. The receiver does not generate overhead in the form of acknowledgments (ACKs).  However, this mode does not enhance delivery reliability beyond that offered by the underlying LPWAN technology. In the No-ACK mode, the receiver MUST NOT issue ACKs.
+   No-ACK is the simplest fragment delivery reliability mode. The receiver does not generate overhead in the form of acknowledgments (ACKs).  However, this mode does not enhance delivery reliability beyond that offered by the underlying LPWAN technology. In the No-ACK mode, the receiver MUST NOT issue ACKs. See further details in {{No-ACK-subsection}}.
 
 *  ACK-Always.    
    The ACK-Always mode provides flow control.  In
@@ -589,15 +596,14 @@ This specification defines three delivery reliability modes, namely No-ACK, ACK-
    detection of such events can be done before the end of the IPv6 packet
    transmission, as long as the window size is short enough. However,
    such benefit comes at the expense of ACK use.
-   In ACK-always, an ACK is transmitted by the fragment
-   receiver after a window of fragments has been sent.  A window of
+   In ACK-Always, an ACK is transmitted by the fragment receiver every time a window of fragments has been received.  A window of
    fragments is a subset of the full set of fragments needed to carry an
    IPv6 packet.  The ACK informs the sender about received
    and/or missed fragments from one window of fragments.  Upon receipt
    of an ACK that informs about any lost fragments, the sender
    retransmits the lost fragments.  When an ACK is not received by the
    fragment sender after a reasonable time, the latter sends an ACK request using the All-1 empty fragment.
-   The maximum number of ACK requests is MAX_ACK_REQUESTS.  
+   The maximum number of ACK requests is MAX_ACK_REQUESTS. See further details in {{ACK-Always-subsection}}.
 
 *  ACK-on-Error. The ACK-on-Error mode is suitable for links offering relatively low L2
    data unit loss probability.  This mode reduces the number of ACKs
@@ -610,7 +616,7 @@ This specification defines three delivery reliability modes, namely No-ACK, ACK-
    one of the fragments in the window has been lost. The
    ACK informs the sender about received and/or missed fragments from
    the window of fragments. Upon receipt of an ACK that informs about
-   any lost fragments, the sender retransmits the lost fragments. If an ACK is not transmitted back by the receiver at the end of a window, the implicit meaning conveyed is that all fragments have been correctly received. As a consequence,  if an ACK is lost, the sender assumes that all fragments covered by the ACK have been successfully delivered. The sender will then continue transmitting the next window of fragments. If the next fragments received belong to the next window, the receiver will conclude that successful reassembly of the IPv6 packet is not possible. In that case, the receiver will abort the on-going fragmented packet transmission. As an exception to the behavior described above, the receiver MUST transmit an ACK in the last window, even if all the fragments of the last window have been correctly received.
+   any lost fragments, the sender retransmits the lost fragments. If an ACK is not transmitted back by the receiver at the end of a window, the implicit meaning conveyed is that all fragments have been correctly received. As a consequence,  if an ACK is lost, the sender assumes that all fragments covered by the ACK have been successfully delivered. The sender will then continue transmitting the next window of fragments. If the next fragments received belong to the next window, the receiver will conclude that successful reassembly of the IPv6 packet is not possible. In that case, the receiver will abort the on-going fragmented packet transmission. As an exception to the behavior described above, the receiver MUST transmit an ACK in the last window, including the MIC calculation result, even if all the fragments of the last window have been correctly received. See further details in {{ACK-on-Error-subsection}}.
    
    
    One exception to this behavior is in the last window, where the receiver MUST transmit an ACK, even if all the fragments in the last window have been correctly received.  
@@ -641,14 +647,14 @@ This section defines the fragment format, the All-0 and All-1 frame formats, the
    A fragment comprises a fragment header, a fragment payload and padding bits (if any). A fragment conforms
    to the general format shown in {{Fig-FragFormat}}. The fragment payload carries a subset of either a SCHC header
    or an IPv6 header or the original IPv6 packet data payload. 
-   A fragment is the payload of the L2 protocol data unit (PDU).
+   A fragment is the payload of the L2 protocol data unit (PDU). Padding MAY be added if necessary, therefore a padding field is optional (this is explicitly indicated in {{Fig-FragFormat}}, but not in subsequent figures, for the sake of illustration clarity.
       
 ~~~~   
-      +-----------------+-----------------------+---------+
-      | Fragment Header |   Fragment payload    | padding |
-      +-----------------+-----------------------+---------+
+      +-----------------+-----------------------+----------------+
+      | Fragment Header |   Fragment payload    | padding (opt.) |
+      +-----------------+-----------------------+----------------+
 ~~~~
-{: #Fig-FragFormat title='Fragment general format.'}
+{: #Fig-FragFormat title='Fragment general format. Presence of a padding field is optional'}
 
 In the No-ACK mode, fragments except the last one SHALL conform to the detailed format defined in {{Fig-NotLast}}. The total size of the fragment header is R bits.
    
@@ -826,7 +832,7 @@ Fragmentation functionality uses the FCN value, which has a length of N bits. Th
 If the recipient receives the last fragment of a datagram (All-1), it checks for the integrity of the reassembled datagram, based on the MIC received. In No-ACK, if the integrity check indicates that the reassembled datagram does not match the original datagram (prior to fragmentation), the reassembled datagram MUST be discarded. In Window mode, a MIC check is also performed by the fragment receiver after reception of each subsequent fragment retransmitted after the first MIC check. 
 
 
-### No-ACK
+### No-ACK {#No-ACK-subsection}
 In the No-ACK mode, there is no feedback communication from the fragment receiver. The sender will send all the fragments of a packet without any possibility of knowing if errors or losses have occurred. As, in this mode, there is no need to identify specific fragments, a one-bit FCN is used. Consequently, the FCN All-0 value is used in all fragments except the last one, which carries an All-1 FCN and the MIC.
 The receiver will wait for fragments and will set the Inactivity timer. The receiver will use the MIC contained in the last fragment to check for errors.
 When the Inactivity Timer expires or if the MIC check indicates that the reassembled packet does not match the original one, the receiver will release all resources allocated to reassembling this packet. The initial value of the Inactivity Timer will be determined based on the characteristics of the underlying LPWAN technology and will be defined in other documents (e.g. technology-specific profile documents).
@@ -837,7 +843,7 @@ In ACK-Always or ACK-on-Error, a jumping window protocol uses two windows altern
 
 This section is divided in two parts, which define ACK-Always and ACK-on-Error modes, respectively.
 
-#### ACK-Always
+#### ACK-Always {#ACK-Always-subsection}
 In ACK-Always, the sender sends fragments by using the two-jumping-windows procedure. A delay between each fragment can be added to respect local regulations or other constraints imposed by the applications.  Each time a fragment is sent, the FCN is decreased by one.  When the FCN reaches value 0 and there are more fragments to be sent after the one at hand, the sender sends the fragment at hand using the All-0 fragment format. It starts the Retransmission Timer and waits for an ACK. By contrast, if the FCN has reached 0 and the fragment at hand is the last fragment of the packet, it is sent using the All-1 fragment format, which includes a MIC. The sender sets the Retransmission Timer and waits for the ACK.
 
 The Retransmission Timer is dimensioned based on the LPWAN technology in use. On expiry of the Retransmission Timer, the sender sends an All-0 (resp. All-1) empty fragment to again request for the ACK for the window that ended with the All-0 (resp. All-1) fragment just sent. The window number is not changed.
@@ -872,7 +878,7 @@ Timer is set.  In case of an incorrect MIC, the receiver waits for fragments bel
 MAX_ACK_REQUESTS, the receiver will abort the on-going fragmented packet transmission.  The receiver also Aborts upon Inactivity Timer expiration.
 
 
-#### ACK-on-Error
+#### ACK-on-Error {#ACK-on-Error-subsection}
 The ACK-on-Error sender is similar to ACK-Always, the main difference being that in ACK-on-Error the ACK is not sent at the 
 end of each window but only when at least one fragment of the current window has been lost (with the exception of the last 
 window, see later text in this paragraph).  In Ack-on-Error,  the Retransmission Timer expiration will be considered as a positive 
@@ -1046,8 +1052,8 @@ For downlink transmission of a fragmented packet in ACK-Always
 # Padding management {#Padding}
 
 The headers specified in this document, be there for compression, fragmentation or acknowledgment, are not necessarily an integer number of bytes in size.
-Most of the LPWAN technologies have PDUs that are integer numbers of bytes.
-With such a technology, the sender will append padding bits to the messages defined in this document in order to fill up the last byte of the L2 PDU, if it isn't already full.
+Some LPWAN technologies have PDUs that are integer numbers of bytes.
+With such a technology, the sender can append padding bits to the messages defined in this document in order to fill up the last byte of the L2 PDU, if it isn't already full.
 Examples are shown in {{Fig-FormatPckt}} and {{Fig-FragFormat}}.
 
 The receiver will tell the header, the payload and the padding apart using the following principles:
@@ -1167,9 +1173,7 @@ is set to "ignore" and the CDA is set to "DEViid" or "APPiid". Note that the
 LPWAN technology generally carries a single identifier, which corresponds
 to the DEV. The SCHC C/D may also not be aware of these values. 
 
-If the DEV address has a static value that is not derived from an IEEE EUI-64,
-then TV contains the actual Dev address value, the MO operator is set to
-"equal" and the CDA is set to "not-sent". 
+For privacy reasons or if the DEV address is changing over time, a static value that is not equal to the DEV address SHOULD be used.  In that case, the TV contains the static value, the MO operator is set to "equal" and the CDF is set to "not-sent". RFC 7217 provides some methods that MAY be used to derive this static identifier. 
 
 If several IIDs are possible, then the TV contains the list of possible IIDs, the MO is 
 set to "match-mapping" and the CDA is set to "mapping-sent". 
