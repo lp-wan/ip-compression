@@ -50,12 +50,21 @@ informative:
 This document describes a header compression scheme and fragmentation functionality 
 for very low bandwidth networks. These techniques are specially tailored for Low Power Wide Area Network (LPWAN).
 
-The Static Context Header Compression (SCHC) offers a great level of flexibility 
-when processing the header fields. SCHC compression is based on a common static context stored in a LPWAN device and in the network. Static context means that the stored information does not change during packet transmission. The context describes the field values and keeps information that will not be transmitted through the constrained network. 
-
-SCHC must be used for LPWAN networks because it avoids complex resynchronization mechanisms, which are incompatible
-with LPWAN characteristics. And also, because with SCHC, in most cases IPv6/UDP headers can be reduced
-to a small identifier called Rule ID. Even though, sometimes, a SCHC compressed packet will not fit in one L2 PDU, and the SCHC fragmentation protocol defined in this document may be used. 
+The Static Context Header Compression (SCHC) offers a great level of
+flexibility when processing the header fields. SCHC compression is
+based on a common static context stored in a LPWAN device and in the
+network. Static context means that the stored information defined in the context descriptor does not
+change during packet transmission. The context describes the field
+values and keeps information that will not be transmitted through the
+constrained network.
+ 
+SCHC is very useful for LPWAN networks because it avoids complex
+resynchronization mechanisms, which are incompatible with LPWAN
+characteristics. Also, with SCHC in most cases IPv6/UDP
+headers can be reduced to a small identifier called a Rule ID. When
+a SCHC compressed packet cannot fit in one L2
+PDU, the SCHC fragmentation protocol defined in this document may
+be used to transmit the PDU over multiple L2 transmissions.
 
 This document describes the SCHC compression/decompression framework and applies it 
 to IPv6/UDP headers. This document also specifies a fragmentation and reassembly mechanism that is used to support the IPv6 MTU requirement over LPWAN technologies. Fragmentation is mandatory for IPv6 datagrams that, after SCHC compression or when it has not been possible to apply such compression, still exceed the L2 maximum payload size. Similar solutions for other protocols such as CoAP will be described in separate documents. 
@@ -64,7 +73,7 @@ to IPv6/UDP headers. This document also specifies a fragmentation and reassembly
  
 # Introduction {#Introduction}
 
-Header compression is mandatory to efficiently bring Internet connectivity to the node
+Header compression is needed to efficiently bring Internet connectivity to the node
 within a LPWAN network. Some LPWAN networks properties can be exploited to get an efficient header
 compression:
 
@@ -72,7 +81,7 @@ compression:
   For the needs of this draft, the architecture can be simply described as: Devices (Dev)
   exchange information with LPWAN Application Servers (App) through Network Gateways (NGW).
 
-* Traffic flows are mostly known in advance since devices embed built-in
+* Traffic flows can be known in advance since devices embed built-in
   applications. New applications cannot be easily installed in LPWAN devices, as they would in computers or smartphones.
 
 The Static Context Header Compression (SCHC) is defined for this environment.
@@ -96,11 +105,12 @@ technologies. Such functionality has been designed under the assumption that dat
 
 # LPWAN Architecture {#LPWAN-Archi}
 
-LPWAN technologies have similar architectures but different terminology. We can identify different
-types of entities in a typical LPWAN network, see {{Fig-LPWANarchi}}:
+LPWAN technologies have similar network architectures but different
+terminology. We can identify different types of entities in a
+typical LPWAN network, see {{Fig-LPWANarchi}}:
 
    o  Devices (Dev) are the end-devices or hosts (e.g. sensors,
-      actuators, etc.). There can be a high density of devices per radio gateway.
+      actuators, etc.). There can be a very high number of devices per radio gateway.
 
    o  The Radio Gateway (RGW), which is the end point of the constrained link.
 
@@ -158,26 +168,25 @@ This section defines the terminology and acronyms used in this document.
 
 * DTag: Datagram Tag. This fragmentation header field is set to the same value for all fragments carrying the same IPv6 datagram.
 
-* Dw: Down Link. Indicates the direction from SCHC C/D to Dev.
+* Dw: Dw: Downlink direction for compression/decompression, from SCHC C/D in the network to SCHC C/D in the Dev.
 
 * FCN: Fragment Compressed Number. This fragmentation header field carries an efficient representation of a larger-sized fragment number.
 
 * FID: Field Identifier. This is an index to describe the header fields in a Rule.
 
-* FL: Field Length. This tells if the field is of fixed or variable length. In the former case, FL also contains the length value.
+* FL: Field Length identifies whether a field has fixed or variable size, and for the latter it indicates its length.
 
-* FP: Field Position is a value that is used to distinguish between occurences of a field in the header, when there are several.  
+* FP: Field Position is a value that is used to identify the position where each instance of a field appears in the header.  
 
 * IID: Interface Identifier. See the IPv6 addressing architecture {{RFC7136}}
 
-* Inactivity Timer. A timer to end the fragmentation state machine when there is an error and there is no possibility to continue an 
-on-going fragmented packet transmission.
+* Inactivity Timer. A timer used at the end of the fragmentation state machine to detect when there is an error and there is no possibility to continue an on-going fragmented packet transmission.
 
 * MIC: Message Integrity Check.  A fragmentation header field computed over an IPv6 packet before fragmentation, used for error detection after IPv6 packet reassembly. 
 
 * MO: Matching Operator. An operator used to match a value contained in a header field with a value contained in a Rule.
 
-* Retransmission Timer. A timer used by the fragment sender during an on-going fragmented packet transmission to detect possible link errors when waiting for a possible incoming ACK.
+* Retransmission Timer. A timer used by the fragment sender state machine during an on-going fragmented packet transmission to detect possible link errors when waiting for a possible incoming ACK.
 
 * Rule: A set of header field values.
 
@@ -185,11 +194,11 @@ on-going fragmented packet transmission.
 
 * Rule ID: An identifier for a rule, SCHC C/D, and Dev share the same Rule ID for a specific flow. A set of Rule IDs are used to support fragmentation functionality.
 
-* SCHC C/D: Static Context Header Compression Compressor/Decompressor. A process in the network that performs compression/decompression of the headers, by using SCHC rules.
+* SCHC C/D: Static Context Header Compression Compressor/Decompressor. A mechanism used both at the Dev and at the network to achieve compression/Decompression of IP/UDP headers, by using static SCHC rules.
 
 * TV: Target value. A value contained in the Rule that will be matched with the value of a header field.
 
-* Up: Up Link. Direction from Dev to SCHC C/D.
+* Up: Uplink direction for compression/decompression, from the Dev SCHC C/D to the network SCHC C/D.
 
 * W: Window bit. A fragment header field used in Window mode (see section 5), which carries the same value for all fragments of a window.
 
@@ -199,14 +208,12 @@ on-going fragmented packet transmission.
 
 # Static Context Header Compression
 
-Static Context Header Compression (SCHC) avoids context synchronization,
-which is the most bandwidth-consuming operation in other header compression mechanisms
-such as RoHC {{RFC5795}}. Based on the fact
-that the nature of data flows is highly predictable in LPWAN networks, the
-context stored on the Device (Dev) may be static. The context must be stored in both ends of the link. It can
-be installed by a provisioning protocol, by pre-provisioning or by any out of band means.
-The way by which the context is learned by both sides is out of the scope of this document.
-
+Static Context Header Compression (SCHC) avoids context
+synchronization, which is the most bandwidth-consuming operation in
+other header compression mechanisms such as RoHC {{RFC5795}}. Since the nature of data flows is highly predictable in LPWAN
+networks, static contexts may be stored beforehand to omit transmitting some information over the air.
+The contexts must be stored at both ends, and they can either be learned by a provisioning protocol, by out of band means, or they can
+be pre-provisioned. The way the contexts are provisioned on both ends is out of the scope of this document.
 
 ~~~~
      Dev                                                 App
@@ -241,12 +248,17 @@ The SCHC C/D process is symmetrical, therefore the same description applies to t
 
 ## SCHC Rules
 
-The main idea of the SCHC compression scheme is to send the Rule ID to the other end instead
-of sending known header field values. This Rule ID identifies a rule that matches as much as possible the original
-packet header values. When a value is known by both
-ends, it is not necessary to send it through the LPWAN network. 
+The main idea of the SCHC compression scheme is to transmit the Rule ID
+to the other end instead of sending known field values. This Rule ID
+identifies a rule that matches as much as possible the original
+packet values. Hence, when a value is known by both ends, it is only
+necessary to send the Rule ID over the LPWAN network.
 
-The context contains a list of rules (cf. {{Fig-ctxt}}). Each Rule itself contains a list of Field Description. Each Field Description is composed of a field identifier (FID), a field length (FL), a field position (FP), a direction indicator (DI), a target value (TV), a matching operator (MO) and a Compression/Decompression Action (CDA).
+The context contains a list of rules (cf. {{Fig-ctxt}}). Each Rule
+contains itself a list of field descriptions composed of a field
+identifier (FID), a field length (FL), a field position (FP), a
+direction indicator (DI), a target value (TV), a matching operator
+(MO) and a Compression/Decompression Action (CDA).
 
 
 ~~~~
@@ -275,8 +287,10 @@ The Rule does not describe how to delineate each field in the original packet he
 must be known from the compressor/decompressor. The rule only describes the
 compression/decompression behavior for each header field. In the rule, the Field Descriptions are listed in the order in which the fields appear in the packet header.
 
-The Rule also describes the compressed header fields which are transmitted regarding their position
-in the rule which is used for data serialization on the compressor side and data deserialization on the decompressor side.
+The Rule also describes the compressed header fields that are
+transmitted and their position in the rule, which is used for
+data serialization on the compressor side and data deserialization on
+the decompressor side.
 
 The Context describes the header fields and its values with the following entries:
 
@@ -315,11 +329,13 @@ of the Rule ID is not specified in this document. It is implementation-specific 
 LPWAN technology and the number of flows, among others.
 
 Some values in the Rule ID space are reserved for functionalities other than header
-compression, such as fragmentation. (See {{Frag}}).
+compression, such as packet fragmentation. (See {{Frag}}).
 
-Rule IDs are specific to a Dev. Two Devs may use the same Rule ID for different
-header compression. To identify the correct Rule ID, the SCHC C/D needs to combine the Rule ID with the Dev L2 identifier
-to find the appropriate Rule.
+Rule IDs are specific to a Dev. Hence, multiple Dev instances may use the same Rule ID to define
+different header compression contexts. To identify the correct Rule ID, the
+SCHC C/D needs to correlate the Rule ID with the Dev identifier to
+find the appropriate Rule to be applied.
+
 
 ## Packet processing
 
