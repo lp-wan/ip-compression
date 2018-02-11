@@ -48,28 +48,12 @@ informative:
 
 --- abstract
 
-This document defines a header compression scheme and fragmentation functionality, both specially tailored for Low Power Wide Area Networks (LPWAN).
+This document defines the Static Context Header Compression (SCHC) framework, which provides header compression and fragmentation functionality. SCHC has been tailored for Low Power Wide Area Networks (LPWAN).
 
-The Static Context Header Compression (SCHC) offers a great level of
-flexibility when processing the header fields. SCHC compression is
-based on a common static context stored in a LPWAN device and in the
-network. Static context means that the stored information defined in the context descriptor does not
-change during packet transmission. The context describes the field
-values and keeps information that will not be transmitted through the
-constrained network.
- 
-SCHC is very useful for LPWAN networks because it avoids complex
-resynchronization mechanisms, which are incompatible with LPWAN
-characteristics. Also, with SCHC in most cases IPv6/UDP
-headers can be reduced to a small identifier called a Rule ID. When
-a SCHC compressed packet cannot fit in one L2
-PDU, the SCHC fragmentation protocol defined in this document may
-be used to transmit the PDU over multiple L2 transmissions.
-
-This document describes the SCHC compression/decompression framework and applies it 
-to IPv6/UDP headers. This document also specifies a fragmentation and reassembly mechanism that is used to support the IPv6 MTU requirement over LPWAN technologies. Fragmentation is mandatory for IPv6 datagrams that, after SCHC compression or when it has not been possible to apply such compression, still exceed the L2 maximum payload size. Similar solutions for other protocols such as CoAP will be described in separate documents.
+SCHC compression is based on a common static context stored in LPWAN devices and in the network. This document applies SCHC compression to IPv6/UDP headers. This document also specifies a fragmentation and reassembly mechanism that is used to support the IPv6 MTU requirement over LPWAN technologies. Fragmentation is mandatory for IPv6 datagrams that, after SCHC compression or when it has not been possible to apply such compression, still exceed the layer two maximum payload size.
 
 Note that this document defines generic functionality. This document purposefully offers flexibility with regard to parameter settings and mechanism choices, that are expected to be made in other, technology-specific, documents.
+
 
 --- middle
  
@@ -112,6 +96,8 @@ transmitted, header compression is first applied to the packet.
 Subsequently, and if the compressed packet size exceeds the layer 2 
 (L2) MTU, fragmentation is then applied to the packet after header 
 compression.
+
+Note that this document defines generic functionality and purposefully offers flexibility with regard to parameter settings and mechanism choices, that are expected to be made in other, technology-specific, documents.
 
 
 # LPWAN Architecture {#LPWAN-Archi}
@@ -247,10 +233,10 @@ be pre-provisioned. The way the contexts are provisioned on both ends is out of 
 {{Fig-archi}} represents the architecture for compression/decompression. It is based on {{I-D.ietf-lpwan-overview}}
 terminology. The Device sends application flows using IPv6 or IPv6/UDP protocols. These flows are compressed by a
 Static Context Header Compression Compressor/Decompressor (SCHC C/D) to reduce the headers size. (Note that if the resulting data unit exceeds the maximum payload size of the underlying LPWAN technology, fragmentation is performed, see {{Frag}}.) The resulting
-information is sent as one or more layer two (L2) frames to a LPWAN Radio Gateway (RG) which forwards
+data unit is sent as one or more layer two (L2) frames to a LPWAN Radio Gateway (RG) which forwards
 the frame(s) to a Network Gateway (NGW).
 The NGW sends the data to an SCHC C/D for decompression. The SCHC C/D can be
-located in the Network Gateway (NGW) or somewhere else as long as a tunnel is established between the NGW and the SCHC C/D.
+located in the Network Gateway (NGW) or somewhere else as long as a tunnel is established between the NGW and the SCHC C/D. Note that, for some LPWAN technologies, it may be suitable to locate fragmentation and reassembly functionality nearer the NGW, in order to better deal with time constraints of such technologies.
 The SCHC C/Ds on both sides must share the same set of Rules.
 After decompression, the packet can be sent over the Internet to one
 or several LPWAN Application Servers (App). 
@@ -263,7 +249,7 @@ The main idea of the SCHC compression scheme is to transmit the Rule ID
 to the other end instead of sending known field values. This Rule ID
 identifies a rule that provides the closest match to the original
 packet values. Hence, when a value is known by both ends, it is only
-necessary to send the Rule ID over the LPWAN network.
+necessary to send the corresponding Rule ID over the LPWAN network.
 
 The context contains a list of rules (cf. {{Fig-ctxt}}). Each Rule
 contains itself a list of field descriptions composed of a field
@@ -335,7 +321,7 @@ The Context describes the header fields and its values with the following entrie
 
 ## Rule ID
 
-Rule IDs are sent between the compression and the decompression elements. The size
+Rule IDs are sent by the compression element and are intended for the decompression element. The size
 of the Rule ID is not specified in this document. It is implementation-specific and can vary according to the
 LPWAN technology and the number of flows, among others.
 
@@ -354,7 +340,7 @@ The compression/decompression process follows several steps:
 
 * 1. Compression Rule selection: The goal is to identify which Rule(s) to use
   to compress the packet's headers. When doing compression in the NGW side the SCHC C/D needs to find the 
-  correct Rule to be used by identifying its Dev-ID and the Rule-ID. In the Dev, only the Rule-ID may be used. The detailed steps  
+  correct Rule to be used by identifying its Dev-ID and the Rule-ID. In the Dev, only the Rule ID is needed. The detailed steps  
   for Compression Rule selection are the following:
     1.a. The first step is to choose the Field Descriptions by their direction, using the
          direction indicator (DI), so the Field Descriptions that do not correspond to the appropriate DI will be excluded.
