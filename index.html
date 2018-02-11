@@ -532,16 +532,18 @@ address {
   <h1 id="rfc.section.1">
 <a href="#rfc.section.1">1.</a> <a href="#Introduction" id="Introduction">Introduction</a>
 </h1>
-<p id="rfc.section.1.p.1">Header compression is needed to efficiently bring Internet connectivity to the node within a LPWAN network. Some LPWAN networks properties can be exploited to get an efficient header compression:</p>
+<p id="rfc.section.1.p.1">This document defines a header compression scheme and fragmentation functionality, both specially tailored for Low Power Wide Area Networks (LPWAN).</p>
+<p id="rfc.section.1.p.2">Header compression is needed to efficiently bring Internet connectivity to the node within a LPWAN network. Some LPWAN networks properties can be exploited to get an efficient header compression:</p>
 <p></p>
 
 <ul>
 <li>Topology is star-oriented; therefore, all the packets follow the same path.  For the needs of this draft, the architecture can be simply described as: Devices (Dev) exchange information with LPWAN Application Servers (App) through Network Gateways (NGW).</li>
 <li>Traffic flows can be known in advance since devices embed built-in applications. New applications cannot be easily installed in LPWAN devices, as they would in computers or smartphones.</li>
 </ul>
-<p id="rfc.section.1.p.3">The Static Context Header Compression (SCHC) is defined for this environment.  SCHC uses a context, where header information is kept in the header format order. This context is static: the values of the header fields do not change over time. This avoids complex resynchronization mechanisms, that would be incompatible with LPWAN characteristics. In most cases, a small context identifier is enough to represent the full IPv6/UDP headers.</p>
-<p id="rfc.section.1.p.4">The SCHC header compression mechanism is independent of the specific LPWAN technology over which it is used.</p>
-<p id="rfc.section.1.p.5">LPWAN technologies are also characterized, among others, by a very reduced data unit and/or payload size <a href="#I-D.ietf-lpwan-overview" class="xref">[I-D.ietf-lpwan-overview]</a>.  However, some of these technologies do not support layer two fragmentation, therefore the only option for them to support the IPv6 MTU requirement of 1280 bytes <a href="#RFC2460" class="xref">[RFC2460]</a> is to use a fragmentation protocol at the adaptation layer, below IPv6.  In response ot this need, this document also defines a fragmentation/reassembly mechanism, which supports the IPv6 MTU requirement over LPWAN technologies. Such functionality has been designed under the assumption that data unit reordering will not happen between the entity performing fragmentation and the entity performing reassembly.</p>
+<p id="rfc.section.1.p.4">The Static Context Header Compression (SCHC) is defined for this environment.  SCHC uses a context, where header information is kept in the header format order. This context is static: the values of the header fields do not change over time. This avoids complex resynchronization mechanisms, that would be incompatible with LPWAN characteristics. In most cases, a small context identifier is enough to represent the full IPv6/UDP headers.</p>
+<p id="rfc.section.1.p.5">The SCHC header compression mechanism is independent of the specific LPWAN technology over which it is used.</p>
+<p id="rfc.section.1.p.6">LPWAN technologies are also characterized, among others, by a very reduced data unit and/or payload size <a href="#I-D.ietf-lpwan-overview" class="xref">[I-D.ietf-lpwan-overview]</a>.  However, some of these technologies do not provide fragmentation functionality, therefore the only option for them to support the IPv6 MTU requirement of 1280 bytes <a href="#RFC2460" class="xref">[RFC2460]</a> is to use a fragmentation protocol at the adaptation layer, below IPv6.  In response to this need, this document also defines a fragmentation/reassembly mechanism, which supports the IPv6 MTU requirement over LPWAN technologies. Such functionality has been designed under the assumption that data unit out-of-sequence delivery will not happen between the entity performing fragmentation and the entity performing reassembly.</p>
+<p id="rfc.section.1.p.7">As per this document, when a packet (e.g. an IPv6 packet) needs to be transmitted, header compression is first applied to the packet.  Subsequently, and if the compressed packet size exceeds the layer 2 (L2) MTU, fragmentation is then applied to the packet after header compression.</p>
 <h1 id="rfc.section.2">
 <a href="#rfc.section.2">2.</a> <a href="#LPWAN-Archi" id="LPWAN-Archi">LPWAN Architecture</a>
 </h1>
@@ -797,7 +799,7 @@ address {
 </h1>
 <p id="rfc.section.5.1.p.1">In LPWAN technologies, the L2 data unit size typically varies from tens to hundreds of bytes.  Be it after applying SCHC header compression or when SCHC header compression is not possible, if the entire IPv6 datagram fits within a single L2 data unit, the fragmentation mechanism is not used and the packet is sent. Otherwise, the datagram SHALL be broken into fragments.</p>
 <p id="rfc.section.5.1.p.2">LPWAN technologies impose some strict limitations on traffic. For instance, devices are sleeping most of the time and may receive data during a short period of time after transmission to preserve battery. To adapt the SCHC fragmentation to the capabilities of LPWAN technologies, it is desirable to enable optional fragment retransmission and to allow a gradation of fragment delivery reliability. This document does not make any decision with regard to which fragment delivery reliability mode(s) will be used over a specific LPWAN technology. These details will be defined in other technology-specific documents.</p>
-<p id="rfc.section.5.1.p.3">An important consideration is that LPWAN networks typically follow a star topology, and therefore data unit reordering is not expected in such networks.  This specification assumes that reordering will not happen between the entity performing fragmentation and the entity performing reassembly.  This assumption allows reduncing the complexity and overhead of the fragmentation mechanism.</p>
+<p id="rfc.section.5.1.p.3">An important consideration is that LPWAN networks typically follow a star topology, and therefore data unit out-of-sequence delivery is not expected in such networks.  This specification assumes that out-of-sequence delivery will not happen between the entity performing fragmentation and the entity performing reassembly.  This assumption allows reduncing the complexity and overhead of the fragmentation mechanism.</p>
 <h1 id="rfc.section.5.2">
 <a href="#rfc.section.5.2">5.2.</a> <a href="#functionalities" id="functionalities">Functionalities</a>
 </h1>
@@ -1248,7 +1250,7 @@ address {
 <h1 id="rfc.section.9">
 <a href="#rfc.section.9">9.</a> <a href="#acknowledgements" id="acknowledgements">Acknowledgements</a>
 </h1>
-<p id="rfc.section.9.p.1">Thanks to Dominique Barthel, Carsten Bormann, Philippe Clavier, Eduardo Ingles Sanchez, Arunprabhu Kandasamy, Sergio Lopez Bernal, Antony Markovski, Alexander Pelov, Pascal Thubert, Juan Carlos Zuniga and Diego Dujovne for useful design consideration and comments.</p>
+<p id="rfc.section.9.p.1">Thanks to Dominique Barthel, Carsten Bormann, Philippe Clavier, Eduardo Ingles Sanchez, Arunprabhu Kandasamy, Sergio Lopez Bernal, Antony Markovski, Alexander Pelov, Pascal Thubert, Juan Carlos Zuniga, Diego Dujovne and Edgar Ramos for useful design consideration and comments.</p>
 <h1 id="rfc.references">
 <a href="#rfc.references">10.</a> References</h1>
 <h1 id="rfc.references.1">
