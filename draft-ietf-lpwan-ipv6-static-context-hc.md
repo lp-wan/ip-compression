@@ -48,8 +48,7 @@ informative:
 
 --- abstract
 
-This document describes a header compression scheme and fragmentation functionality 
-for very low bandwidth networks. These techniques are specially tailored for Low Power Wide Area Network (LPWAN).
+This document defines a header compression scheme and fragmentation functionality, both specially tailored for Low Power Wide Area Networks (LPWAN).
 
 The Static Context Header Compression (SCHC) offers a great level of
 flexibility when processing the header fields. SCHC compression is
@@ -68,7 +67,9 @@ PDU, the SCHC fragmentation protocol defined in this document may
 be used to transmit the PDU over multiple L2 transmissions.
 
 This document describes the SCHC compression/decompression framework and applies it 
-to IPv6/UDP headers. This document also specifies a fragmentation and reassembly mechanism that is used to support the IPv6 MTU requirement over LPWAN technologies. Fragmentation is mandatory for IPv6 datagrams that, after SCHC compression or when it has not been possible to apply such compression, still exceed the L2 maximum payload size. Similar solutions for other protocols such as CoAP will be described in separate documents. 
+to IPv6/UDP headers. This document also specifies a fragmentation and reassembly mechanism that is used to support the IPv6 MTU requirement over LPWAN technologies. Fragmentation is mandatory for IPv6 datagrams that, after SCHC compression or when it has not been possible to apply such compression, still exceed the L2 maximum payload size. Similar solutions for other protocols such as CoAP will be described in separate documents.
+
+Note that this document defines generic functionality. This document purposefully offers flexibility with regard to parameter settings and mechanism choices, that are expected to be made in other, technology-specific, documents.
 
 --- middle
  
@@ -209,7 +210,7 @@ This section defines the terminology and acronyms used in this document.
 
 # Static Context Header Compression
 
-Static Context Header Compression (SCHC) avoids context
+In order to perform header compression, this document defines a mechanism called Static Context Header Compression (SCHC), which is based on using context, i.e. a set of rules to compress or decompress headers. SCHC avoids context
 synchronization, which is the most bandwidth-consuming operation in
 other header compression mechanisms such as RoHC {{RFC5795}}. Since the nature of data flows is highly predictable in LPWAN
 networks, static contexts may be stored beforehand to omit transmitting some information over the air.
@@ -236,9 +237,9 @@ be pre-provisioned. The way the contexts are provisioned on both ends is out of 
 
 {{Fig-archi}} represents the architecture for compression/decompression. It is based on {{I-D.ietf-lpwan-overview}}
 terminology. The Device sends application flows using IPv6 or IPv6/UDP protocols. These flows are compressed by a
-Static Context Header Compression Compressor/Decompressor (SCHC C/D) to reduce the headers size. The resulting
-information is sent as a layer two (L2) frame to a LPWAN Radio Gateway (RG) which forwards
-the frame to a Network Gateway (NGW).
+Static Context Header Compression Compressor/Decompressor (SCHC C/D) to reduce the headers size. (Note that if the resulting data unit exceeds the maximum payload size of the underlying LPWAN technology, fragmentation is performed, see {{Frag}}.) The resulting
+information is sent as one or more layer two (L2) frames to a LPWAN Radio Gateway (RG) which forwards
+the frame(s) to a Network Gateway (NGW).
 The NGW sends the data to an SCHC C/D for decompression. The SCHC C/D can be
 located in the Network Gateway (NGW) or somewhere else as long as a tunnel is established between the NGW and the SCHC C/D.
 The SCHC C/Ds on both sides must share the same set of Rules.
@@ -251,7 +252,7 @@ The SCHC C/D process is symmetrical, therefore the same description applies to t
 
 The main idea of the SCHC compression scheme is to transmit the Rule ID
 to the other end instead of sending known field values. This Rule ID
-identifies a rule that matches as much as possible the original
+identifies a rule that provides the closest match to the original
 packet values. Hence, when a value is known by both ends, it is only
 necessary to send the Rule ID over the LPWAN network.
 
@@ -317,11 +318,11 @@ The Context describes the header fields and its values with the following entrie
 
 * Matching Operator (MO) is the operator used to compare
   the Field Value and the Target Value. The Matching Operator may require some 
-  parameters. MO is only used during the compression phase.
+  parameters. MO is only used during the compression phase. The set of MOs defined in this document can be found in {{chap-MO}}.
 
 * Compression Decompression Action (CDA) describes the pair of reciprocal compression
   and decompression processes. The CDA may require some
-  parameters. CDA is used in both the compression and the decompression phases.
+  parameters. CDA is used in both the compression and the decompression phases. The set of CDAs defined in this document can be found in {{chap-CDA}}.
 
 ## Rule ID
 
@@ -335,44 +336,44 @@ compression, such as packet fragmentation. (See {{Frag}}).
 Rule IDs are specific to a Dev. Hence, multiple Dev instances may use the same Rule ID to define
 different header compression contexts. To identify the correct Rule ID, the
 SCHC C/D needs to correlate the Rule ID with the Dev identifier to
-find the appropriate Rule to be applied.
+find the appropriate Rule to be applied. For Devs with different LPWAN radio interfaces, several approaches are allowed. For example, the same set of Rule IDs may be used for packet transmission over the different interfaces. However, fragmentation may benefit from using specific Rule IDs (which are tied to specific modes and settings) for a particular underlying LPWAN technology.  
 
 
 ## Packet processing
 
 The compression/decompression process follows several steps:
 
-* compression Rule selection: The goal is to identify which Rule(s) to use
+* 1. Compression Rule selection: The goal is to identify which Rule(s) to use
   to compress the packet's headers. When doing compression in the NGW side the SCHC C/D needs to find the 
-  correct Rule to be used by identifying its Dev-ID and the Rule-ID. In the Dev, only the Rule-ID may be used. 
-  The next step is to choose the Field Descriptions by their direction, using the
-  direction indicator (DI), so the Field Descriptions that do not correspond to the appropriated DI will be excluded.
-  Next, the fields are identified according to their field identifier (FID) and field position (FP).
-  If the field position does not correspond, then the Rule is not used and the SCHC proceeds to consider the next Rule.
-  Once the DI and the FP correspond to the header information, each field's value is then compared to the corresponding 
-  target value (TV) stored in the Rule for that specific field using the matching operator (MO).
-  If all the fields in the packet's header satisfy all the matching operators (MOs) of a Rule (i.e. all results are True),
-  the fields of the header are then processed according to the Compression/Decompression Actions (CDAs) 
-  and a compressed header is obtained. Otherwise, the next rule is tested. 
-  If no eligible rule is found, then the header must be sent without compression, in which case the fragmentation process 
+  correct Rule to be used by identifying its Dev-ID and the Rule-ID. In the Dev, only the Rule-ID may be used. The detailed steps  
+  for Compression Rule selection are the following:
+    1.a. The first step is to choose the Field Descriptions by their direction, using the
+         direction indicator (DI), so the Field Descriptions that do not correspond to the appropriate DI will be excluded.
+    1.b. Next, the fields are identified according to their field identifier (FID) and field position (FP).
+         If the field position does not correspond, then the Rule is not used and the SCHC proceeds to consider the next Rule.
+    1.c. Once the DI and the FP correspond to the header information, each field's value is then compared to the corresponding 
+         target value (TV) stored in the Rule for that specific field using the matching operator (MO).
+    1.d. If all the fields in the packet's header satisfy all the matching operators (MOs) of a Rule (i.e. all results are True),
+         the fields of the header are then processed according to the Compression/Decompression Actions (CDAs) 
+         and a compressed header is obtained. Otherwise, the next rule is tested. 
+  If no eligible Rule is found, then the header must be sent without compression, in which case the fragmentation process 
   may be required.
 
-* sending: If an eligible Rule is found, the Rule ID is sent to the other end followed by the information resulting from the    
+* 2. Sending: If an eligible Rule is found, the Rule ID is sent to the other end followed by the information resulting from the    
   compression of header fields, and directly followed by the payload. The product of field compression is sent in the order expressed 
   in the Rule for the matching fields. The way the Rule ID is sent depends on the specific LPWAN layer two technology. For
   example, it can be either included in a Layer 2 header or sent in the first byte of the L2 payload. (Cf. {{Fig-FormatPckt}}).
-  This process will be specified in a LPWAN technology-specific document and is out of the scope of the present document.
+  This process will be specified in a LPWAN technology-specific document and is out of the scope of the present document. On LPWAN technologies that are byte-oriented, the compressed header concatenated with the original packet payload are padded to a multiple of 8 bits, if needed. See {{Padding}} for details.
 
-* decompression: In both directions, the receiver identifies the sender through its device-id
+
+* 3. Decompression: In both directions, the receiver identifies the sender through its device-id
   (e.g. MAC address) and selects the appropriate Rule through the Rule ID. This
   Rule describes the compressed header format and associates the values to the header fields.
   The receiver applies the CDA action to reconstruct the original
   header fields. The CDA application order can be different from the order given by the Rule. For instance,
   Compute-\* may be applied at the end, after all the other CDAs.
   
-  On LPWAN technologies that are byte-oriented, the compressed header concatenated with the original packet payload are padded to a multiple of 8 bits,
-  if needed. See {{Padding}} for details.
-
+  
 ~~~~
 
    +--- ... --+-------------- ... --------------+------------------+--...--+
@@ -391,7 +392,7 @@ Matching Operators (MOs) are functions used by both SCHC C/D endpoints involved 
 compression/decompression. They are not typed and can be indifferently applied to integer, string
 or any other data type. The result of the operation can either be True or False. MOs are defined as follows: 
 
-* equal: A field value in a packet matches a TV in a Rule if they are equal.
+* equal: Results in true if a field value in a packet and a TV are equal.
 
 * ignore: No check is done between a field value in a packet and a TV
   in the Rule. The result of the matching is always true.
@@ -452,7 +453,7 @@ therefore known by both the Compressor and the Decompressor. This action is gene
 "equal" MO. If MO is "ignore", there is a risk to have a decompressed field
 value different from the compressed field.
 
-The compressor does not send any value in the compressed header for the field on which not-sent compression is applied.
+The compressor does not send any value in the compressed header for a field on which not-sent compression is applied.
 
 The decompressor restores the field value with the target value stored in the matched rule.
 
@@ -484,7 +485,7 @@ original header field length minus the length specified in the MSB MO.
 The compressor sends the Least Significant Bits (e.g. LSB of the length field). The
 decompressor combines the value received with the Target Value.
 
-If this action is made on a variable length field, the remaining size in byte has to be sent before.
+If this action is made on a variable length field, the remaining size in bytes must be sent before.
 
 
 ### DEViid, APPiid CDA
@@ -564,7 +565,7 @@ In the ACK format, DTag carries the same value as the DTag field in the fragment
  
 *  Retransmission Timer. It is used by a fragment sender after the transmission of a window to detect a transmission error  of the ACK corresponding to this window. Depending on the reliability mode, it will lead to a request for an ACK retransmission (in ACK-Always mode) or it will trigger the transmission of the next window (in ACK-on-error mode). The duration of this timer is not defined in this document and must be defined in the corresponding technology documents (e.g. technology-specific profiles).
  
-*  Inactivity Timer. This timer is used by a fragment receiver to take action when there is a problem in the transmission of fragments. Such a problem could be detected by the receiver not getting a single fragment during a given period of time or not getting a given number of packets in a given period of time. When this happens, an Abort message will be sent. Initially, and each time a fragment is received, the timer is reinitialized. The duration of this timer is not defined in this document and must be defined in the specific technology document (e.g. technology-specific profiles).
+*  Inactivity Timer. This timer is used by a fragment receiver to take action when there is a problem in the transmission of fragments. Such a problem could be detected by the receiver not getting a single fragment during a given period of time or not getting a given number of packets in a given period of time. When this happens, an Abort message will be sent (see related text later in this section). Initially, and each time a fragment is received, the timer is reinitialized. The duration of this timer is not defined in this document and must be defined in the specific technology document (e.g. technology-specific profiles).
  
 *  Attempts. This counter counts the requests for a missing ACK. When it reaches the value MAX_ACK_REQUESTS,
 the sender assume there are recurrent fragment transmission errors and determines that an Abort is needed. The default value offered
@@ -581,7 +582,7 @@ in {{Bitmapopt}}
 
 *  Abort. On expiration of the Inactivity timer, on Attempts reaching MAX_ACK_REQUESTS or upon occurence of some other error, the sender or the receiver may use the Abort frames.  When the receiver needs to abort the on-going fragmented packet transmission, it sends an ACK with the Abort format (all the bits set to 1). When the sender needs to abort the transmission, it sends a fragment with the All-1 Abort format. This fragment is not acked.
 
-*  Padding (P). Padding will be used to align the last byte of a fragment with a byte boundary. The number of bits used for padding is not defined and depends on the size of the Rule ID, DTag and FCN fields, and on the layer two payload size. Some ACKs are byte-aligned and do not need padding see {{Bitmapopt}}.
+*  Padding (P). Padding may be used to align the last byte of a fragment with a byte boundary. The number of bits used for padding is not defined and depends on the size of the Rule ID, DTag and FCN fields, and on the layer two payload size. Some ACKs are byte-aligned and do not need padding see {{Bitmapopt}}.
 
 ## Delivery Reliability modes
 
@@ -750,7 +751,7 @@ In the No-ACK mode, the last fragment of an IPv6 datagram SHALL contain a fragme
 ~~~~
 {: #Fig-All1retries title='All-1 for Retries format, also called All-1 empty'}
 
-The values for R, N, T and M are not specified in this document, and have to be determined in other documents (e.g. technology-specific profile documents). 
+The values for R, N, T and M are not specified in this document, and are expected to be determined in other documents (e.g. technology-specific profile documents). 
    
 ### ACK format
 
