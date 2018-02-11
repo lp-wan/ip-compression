@@ -75,6 +75,8 @@ Note that this document defines generic functionality. This document purposefull
  
 # Introduction {#Introduction}
 
+This document defines a header compression scheme and fragmentation functionality, both specially tailored for Low Power Wide Area Networks (LPWAN).
+
 Header compression is needed to efficiently bring Internet connectivity to the node
 within a LPWAN network. Some LPWAN networks properties can be exploited to get an efficient header
 compression:
@@ -97,13 +99,20 @@ The SCHC header compression mechanism is independent of the specific LPWAN techn
 LPWAN technologies are also characterized,
 among others, by a very reduced data unit and/or payload size
 {{I-D.ietf-lpwan-overview}}.  However, some of these technologies
-do not support layer two fragmentation, therefore the only option for
+do not provide fragmentation functionality, therefore the only option for
    them to support the IPv6 MTU requirement of 1280 bytes
  {{RFC2460}} is to use a fragmentation protocol at the
 adaptation layer, below IPv6.
-In response ot this need, this document also defines a fragmentation/reassembly
+In response to this need, this document also defines a fragmentation/reassembly
 mechanism, which supports the IPv6 MTU requirement over LPWAN
-technologies. Such functionality has been designed under the assumption that data unit reordering will not happen between the entity performing fragmentation and the entity performing reassembly.
+technologies. Such functionality has been designed under the assumption that data unit out-of-sequence delivery will not happen between the entity performing fragmentation and the entity performing reassembly.
+
+As per this document, when a packet (e.g. an IPv6 packet) needs to be 
+transmitted, header compression is first applied to the packet. 
+Subsequently, and if the compressed packet size exceeds the layer 2 
+(L2) MTU, fragmentation is then applied to the packet after header 
+compression.
+
 
 # LPWAN Architecture {#LPWAN-Archi}
 
@@ -528,8 +537,8 @@ specific LPWAN technology. These details will be defined in other technology-spe
 
 
    An important consideration is that LPWAN networks typically follow a
-   star topology, and therefore data unit reordering is not expected
-   in such networks.  This specification assumes that reordering will
+   star topology, and therefore data unit out-of-sequence delivery is not expected
+   in such networks.  This specification assumes that out-of-sequence delivery will
    not happen between the entity performing fragmentation and the entity
    performing reassembly.  This assumption allows reduncing the complexity
    and overhead of the fragmentation mechanism.
@@ -1284,7 +1293,7 @@ In Window mode – ACK on error, a malicious node may force a fragment sender to
 # Acknowledgements
 
 Thanks to Dominique Barthel, Carsten Bormann, Philippe Clavier, Eduardo Ingles Sanchez, Arunprabhu Kandasamy, 
-Sergio Lopez Bernal, Antony Markovski, Alexander Pelov, Pascal Thubert, Juan Carlos Zuniga and Diego Dujovne for 
+Sergio Lopez Bernal, Antony Markovski, Alexander Pelov, Pascal Thubert, Juan Carlos Zuniga, Diego Dujovne and Edgar Ramos for 
 useful design consideration and comments. 
 
 --- back
