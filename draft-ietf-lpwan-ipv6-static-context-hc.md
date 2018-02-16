@@ -157,6 +157,8 @@ This section defines the terminology and acronyms used in this document.
 
 * CDA: Compression/Decompression Action. Describes the reciprocal pair of actions that are performed at the compressor to compress a header field and at the decompressor to recover the original header field value.
 
+* Compress Residue. The bytes that need to be sent after applying the SCHC compression, 
+
 * Context: A set of rules used to compress/decompress headers.
 
 * Dev: Device. A node connected to the LPWAN. A Dev may implement SCHC.
@@ -170,6 +172,8 @@ This section defines the terminology and acronyms used in this document.
 * Dw: Dw: Downlink direction for compression/decompression, from SCHC C/D in the network to SCHC C/D in the Dev.
 
 * FCN: Fragment Compressed Number. This fragmentation header field carries an efficient representation of a larger-sized fragment number.
+
+* Field Description. A line in the Rule Table.
 
 * FID: Field Identifier. This is an index to describe the header fields in a Rule.
 
@@ -295,8 +299,7 @@ The Context describes the header fields and its values with the following entrie
 
 * Field ID (FID) is a unique value to define the header field.
 
-* Field Length (FL) describes the length of the field. The field can be of fixed length as in IPv6 or UDP headers or of variable
-  length as in CoAP options. FL for fixed length fields shall contain the actual length value, in bits. FL for variable length fields shall represent a function or a variable.
+* Field Length (FL) is the length of the field in bits for fixed values or a type (variable, token length) for variable values.
 
 * Field Position (FP): in case several occurences of a field exist in the
   header, FP indicatess which one is targeted. The default position is 1.
@@ -373,11 +376,11 @@ The compression/decompression process follows several steps:
   
 ~~~~
 
-   +--- ... --+-------------- ... --------------+------------------+--...--+
-   |  Rule ID |Compressed Hdr Fields information|  packet payload  |padding|
-   +--- ... --+-------------- ... --------------+------------------+--...--+
+   +--- ... --+------- ... -------+------------------+--...--+
+   |  Rule ID |Compression Residue|  packet payload  |padding|
+   +--- ... --+------- ... -------+------------------+--...--+
 
-   <--------- compressed header --------------->
+   <----- compressed header ------>
 
 ~~~~
 {: #Fig-FormatPckt title='LPWAN Compressed Header Packet Format'}
