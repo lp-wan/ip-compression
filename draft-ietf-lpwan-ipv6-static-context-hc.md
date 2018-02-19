@@ -79,8 +79,7 @@ The Static Context Header Compression (SCHC) is defined for this environment.
 SCHC uses a context, where header information is kept in the header format order. This context is
 static: the values of the header fields do not change over time. This avoids
 complex resynchronization mechanisms, that would be incompatible
-with LPWAN characteristics. In most cases, a small context identifier is enough to represent the full IPv6/UDP headers.
-
+with LPWAN characteristics. In most cases, a small context identifier is enough to represent the full IPv6/UDP headers. 
 The SCHC header compression mechanism is independent of the specific LPWAN technology over which it is used.
 
 LPWAN technologies are also characterized,
@@ -93,11 +92,6 @@ adaptation layer, below IPv6.
 In response to this need, this document also defines a fragmentation/reassembly
 mechanism, which supports the IPv6 MTU requirement over LPWAN
 technologies. Such functionality has been designed under the assumption that data unit out-of-sequence delivery will not happen between the entity performing fragmentation and the entity performing reassembly.
-
-As per this document, when a packet (e.g. an IPv6 packet) needs to be 
-transmitted, header compression is first applied to the packet. Note that header compression may result in a smaller packet size or not (the latter happens when for any reason it has not been possible to reduce the packet header size). 
-Subsequently, and if the packet size after (successful or unsuccessful) header compression exceeds the layer 2 
-(L2) MTU, fragmentation is then applied to the packet.
 
 Note that this document defines generic functionality and purposefully offers flexibility with regard to parameter settings and mechanism choices, that are expected to be made in other, technology-specific, documents (e.g. {{I-D.zuniga-lpwan-schc-over-sigfox}}, {{I-D.petrov-lpwan-ipv6-schc-over-lorawan}}).
 
@@ -185,6 +179,8 @@ This section defines the terminology and acronyms used in this document.
 
 * FP: Field Position is a value that is used to identify the position where each instance of a field appears in the header.  
 
+* Fragment: A data unit that carries a subset of a SCHC packet. Fragmentation is needed when the size of a SCHC packet exceeds the available payload size of the underlying L2 technology data unit.
+
 * IID: Interface Identifier. See the IPv6 addressing architecture {{RFC7136}}
 
 * Inactivity Timer. A timer used at the end of the fragmentation state machine to detect when there is an error and there is no possibility to continue an on-going fragmented packet transmission.
@@ -205,6 +201,8 @@ This section defines the terminology and acronyms used in this document.
 
 * SCHC C/D: Static Context Header Compression Compressor/Decompressor. A mechanism used in both sides, at the Dev and at the network to achieve Compression/Decompression of headers. SCHC C/D uses SCHC rules to perform compression and decompression.
 
+* SCHC packet: A packet (e.g. an IPv6 packet) whose header has been compressed as per the header compression mechanism defined in this document. If the header compression process is unable to actually compress the packet header, the packet with the uncompressed header is still called a SCHC packet (in this case, a Rule ID is used to indicate that the packet header has not been compressed).
+
 * TV: Target value. A value contained in the Rule that will be matched with the value of a header field.
 
 * Up: Uplink direction for compression/decompression, from the Dev SCHC C/D to the network SCHC C/D.
@@ -213,7 +211,50 @@ This section defines the terminology and acronyms used in this document.
 
 * Window:  A subset of the fragments needed to carry a packet (see section 5)
 
+# SCHC overview
 
+SCHC can be abstracted as an adaptation layer below IPv6 and the underlying LPWAN technology. SCHC that comprises two sublayers (i.e. the Compression sublayer and the Fragmentation sublayer), as shown in {{Fig-IntroLayers}}. 
+
+~~~~
+ 
+                  +----------------+
+                  |      IPv6      | 
+                / +----------------+            
+               /  |   Compression  |  
+         SCHC <   +----------------+   
+               \  |  Fragmentation |
+                \ +----------------+         
+                  |LPWAN technology|
+                  +----------------+ 
+
+~~~~
+{: #Fig-IntroLayers title='Protocol stack comprising IPv6, SCHC and an LPWAN technology'} 
+
+As per this document, when a packet (e.g. an IPv6 packet) needs to be 
+transmitted, header compression is first applied to the packet. The resulting packet after header compression (whose header may actually be smaller than that of the original packet or not) is called a SCHC packet. Subsequently, and if the SCHC packet size  exceeds the layer 2 (L2) MTU, fragmentation is then applied to the SCHC packet. This process is illustrated by {{Fig-Operations}}
+
+~~~~
+ 
+                         A packet (e.g. an IPv6 packet)
+                             |
+                             V   
+                    +-----------------+
+                    |   Compression   |
+                    +-----------------+            
+                             |
+                        SCHC packet              
+                             |
+                             V 
+                   +------------------+    
+                   |   Fragmentation  |  (if needed)
+                   +------------------+     
+                             |
+                             V     
+                         Fragment(s)    (if needed)
+
+
+~~~~
+{: #Fig-Operations title='SCHC operations from a sender point of view: header compression and fragmentation'}
 
 # Static Context Header Compression
 
@@ -1295,8 +1336,7 @@ In Window mode – ACK on error, a malicious node may force a fragment sender to
 # Acknowledgements
 
 Thanks to Dominique Barthel, Carsten Bormann, Philippe Clavier, Eduardo Ingles Sanchez, Arunprabhu Kandasamy, 
-Sergio Lopez Bernal, Antony Markovski, Alexander Pelov, Pascal Thubert, Juan Carlos Zuniga, Diego Dujovne and Edgar Ramos for 
-useful design consideration and comments. 
+Sergio Lopez Bernal, Antony Markovski, Alexander Pelov, Pascal Thubert, Juan Carlos Zuniga, Diego Dujovne, Edgar Ramos, and Shoichi Sakane for useful design consideration and comments. 
 
 --- back
 
