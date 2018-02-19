@@ -590,9 +590,9 @@ is provided by the bit in the left-most position of the Bitmap. In the Bitmap, a
 has been correctly sent and received. The text above describes the internal representation of the Bitmap. When inserted in the ACK for transmission from the receiver to the sender, the Bitmap may be truncated for energy/bandwidth optimisation, see more details 
 in {{Bitmapopt}}
 
-*  Abort. On expiration of the Inactivity timer, on Attempts reaching MAX_ACK_REQUESTS or upon occurence of some other error, the sender or the receiver may use the Abort frames.  When the receiver needs to abort the on-going fragmented packet transmission, it sends an ACK with the Abort format (all the bits set to 1). When the sender needs to abort the transmission, it sends a fragment with the All-1 Abort format. This fragment is not acked.
+*  Abort. On expiration of the Inactivity timer, on Attempts reaching MAX_ACK_REQUESTS or upon occurence of some other error, the sender or the receiver may use the Abort frames.  When the receiver needs to abort the on-going fragmented packet transmission, it sends a data unit with the Receiver-Abort format. When the sender needs to abort the transmission, it sends a data unit with the Sender-Abort format. The Sender-Abort data unit is not acknowledged.
 
-*  Padding (P). Padding may be used to align the last byte of a fragment with a byte boundary. The number of bits used for padding is not defined and depends on the size of the Rule ID, DTag and FCN fields, and on the layer two payload size. Some ACKs are byte-aligned and do not need padding see {{Bitmapopt}}.
+*  Padding (P). Padding may be used to align the last byte of a fragment with a byte boundary (see {{Padding}}). The number of bits used for padding is not defined and depends on the size of the Rule ID, DTag and FCN fields, and on the L2 payload size. Some ACKs are byte-aligned and do not need padding (see {{Bitmapopt}}).
 
 ## Delivery Reliability modes
 
@@ -798,7 +798,7 @@ to 1 to indicate that the MIC check computed by the receiver matches the MIC pre
    
 ### Abort formats
 
-When a fragment sender needs to abort the transmission, it sends the All-1 Abort format {{Fig-All1Abort}}.  When a fragment receiver needs to abort the on-going fragmented packet transmission, it transmits the ACK Abort format {{Fig-ACKabort}}. 
+When a fragment sender needs to abort the transmission, it sends the Sender-Abort format {{Fig-All1Abort}}, with all FCN bits set to 1.  When a fragment receiver needs to abort the on-going fragmented packet transmission, it transmits the Receiver-Abort format {{Fig-ACKabort}}. 
 
 ~~~~
 <------------- R -----------><--- 1 byte --->
@@ -807,7 +807,7 @@ When a fragment sender needs to abort the transmission, it sends the All-1 Abort
 +--- ... ---+- ... -+-+-...-+-+-+-+-+-+-+-+-+
    
 ~~~~
-{: #Fig-All1Abort title='All-1 Abort format'}
+{: #Fig-All1Abort title='Sender-Abort format. All FCN fields in this format are set to 1'}
 
 
 ~~~~
@@ -819,7 +819,7 @@ When a fragment sender needs to abort the transmission, it sends the All-1 Abort
  +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+-+-+
  
 ~~~~
-{: #Fig-ACKabort title='ACK Abort format'}
+{: #Fig-ACKabort title='Receiver-Abort format'}
 
 
 ## Baseline mechanism
@@ -887,7 +887,7 @@ indicates the end of the transmission but the receiver must stay alive for an In
 empty All-1 fragments the sender may send if ACKs sent by the receiver are lost. If the MIC is incorrect, some fragments 
 have been lost.  The receiver sends the ACK regardless of successful fragmented packet reception or not, the Inactitivity 
 Timer is set.  In case of an incorrect MIC, the receiver waits for fragments belonging to the same window. After 
-MAX_ACK_REQUESTS, the receiver will abort the on-going fragmented packet transmission.  The receiver also Aborts upon Inactivity Timer expiration.
+MAX_ACK_REQUESTS, the receiver will abort the on-going fragmented packet transmission by transmitting a data unit with the Receiver-Abort format.  The receiver also aborts upon Inactivity Timer expiration.
 
 
 #### ACK-on-Error {#ACK-on-Error-subsection}
@@ -909,13 +909,13 @@ sender starts listening for an ACK (even if an All-0 or an All-1 has not been se
 initializes and starts the Retransmission Timer.  After sending an All-1 fragment, the sender listens for an ACK, 
 initializes Attempts, and initializes and starts the Retransmission Timer.  If the Retransmission Timer expires, Attempts 
 is increased by one and an empty All-1 fragment is sent to request the ACK for the last window. If Attempts reaches 
-MAX_ACK_REQUESTS, the on-going fragmented packet transmission is aborted.
+MAX_ACK_REQUESTS, the sender aborts the on-going fragmented packet transmission by transmitting the Sender-Abort data unit.
 
 Unlike the sender, the receiver for ACK-on-Error has a larger amount of differences compared with ACK-Always.  First, an 
 ACK is not sent unless there is a lost fragment or an unexpected behavior (with the exception of the last window, where an 
 ACK is always sent regardless of fragment losses or not).  The receiver starts by expecting fragments from window 0 and 
-maintains the information regarding which fragments it receives.  After receiving a fragment, the Inactivity Timer is set, 
-if no fragment has been received and the Inactivity Timer expires the transmission is aborted.
+maintains the information regarding which fragments it receives.  After receiving a fragment, the Inactivity Timer is set. 
+If no further fragment is received and the Inactivity Timer expires, the fragment receiver aborts the on-going fragmented packet transmission by transmitting the Receiver-Abort data unit.
 
 Any fragment not belonging to the current window is discarded.  The actual fragment number is computed based on the FCN 
 value.  When an All-0 fragment is received and all fragments have been received, the receiver updates the expected window 
@@ -943,7 +943,7 @@ indicates the end of the fragmented packet transmission. An ACK is sent by the f
 MIC, the receiver waits for fragments belonging to the same window or the expiration of the Inactivity Timer. The latter 
 will lead the receiver to abort the on-going fragmented packet transmission.
 
-### Bitmap Optimization {#Bitmapopt}
+### Bitmap Encoding {#Bitmapopt}
 
 The Bitmap is transmitted by a receiver as part of the ACK format.  An ACK message may include padding at the end to align its number of transmitted bits to a multiple of 8 bits.  
 
@@ -1764,7 +1764,7 @@ Lcl_Bitmap==recv_Bitmap &| |   |   all missing frag sent
 +---------------------+     Rcv      +--->* ABORT 
 |  +------------------+   Window     |
 |  |                  +=====+==+=====+  
-|  |       All-0 & w=expect |  ^ w =next & not-All
+|  |       All-0 & w=expect |  | w =next & not-All
 |  |     ~~~~~~~~~~~~~~~~~~ |  |~~~~~~~~~~~~~~~~~~~~~
 |  |     set lcl_Bitmap(FCN)|  |expected = next window
 |  |      send local_Bitmap |  |Clear local_Bitmap
