@@ -40,6 +40,7 @@ author:
 normative:
   RFC4944: 
   RFC2460: 
+  RFC3385:
   RFC7136:
   RFC5795:
   RFC7217:
@@ -94,10 +95,9 @@ mechanism, which supports the IPv6 MTU requirement over LPWAN
 technologies. Such functionality has been designed under the assumption that data unit out-of-sequence delivery will not happen between the entity performing fragmentation and the entity performing reassembly.
 
 As per this document, when a packet (e.g. an IPv6 packet) needs to be 
-transmitted, header compression is first applied to the packet. 
-Subsequently, and if the compressed packet size exceeds the layer 2 
-(L2) MTU, fragmentation is then applied to the packet after header 
-compression.
+transmitted, header compression is first applied to the packet. Note that header compression may result in a smaller packet size or not (the latter happens when for any reason it has not been possible to reduce the packet header size). 
+Subsequently, and if the packet size after (successful or unsuccessful) header compression exceeds the layer 2 
+(L2) MTU, fragmentation is then applied to the packet.
 
 Note that this document defines generic functionality and purposefully offers flexibility with regard to parameter settings and mechanism choices, that are expected to be made in other, technology-specific, documents (e.g. {{I-D.zuniga-lpwan-schc-over-sigfox}}, {{I-D.petrov-lpwan-ipv6-schc-over-lorawan}}).
 
@@ -136,6 +136,10 @@ typical LPWAN network, see {{Fig-LPWANarchi}}:
 
 # Terminology
 This section defines the terminology and acronyms used in this document.
+
+* Abort. A type of data unit used by an endpoint involved in on-going fragmented packet transmission or reception in order to signal the other endpoint that the on-going fragmented packet transmission process is being aborted. 
+
+* ACK. Acknowledgment. A data unit used in two of the fragmentation modes defined in this specification, which is sent by a fragment receiver to report on successful or unsuccessful reception of a set of fragments.
 
 * All-0. The fragment format for the last frame of a window that is not the last one of a packet (see Window in this glossary).
 
@@ -184,6 +188,8 @@ This section defines the terminology and acronyms used in this document.
 * IID: Interface Identifier. See the IPv6 addressing architecture {{RFC7136}}
 
 * Inactivity Timer. A timer used at the end of the fragmentation state machine to detect when there is an error and there is no possibility to continue an on-going fragmented packet transmission.
+
+* L2: Layer two. The immediate lower layer SCHC interfaces with. It is provided by an underlying LPWAN technology. 
 
 * MIC: Message Integrity Check.  A fragmentation header field computed over an IPv6 packet before fragmentation, used for error detection after IPv6 packet reassembly. 
 
@@ -243,7 +249,7 @@ terminology. The Device sends application flows using IPv6 or IPv6/UDP protocols
 Static Context Header Compression Compressor/Decompressor (SCHC C/D) to reduce the headers size. (Note that if the 
 resulting data unit exceeds the maximum payload size of the underlying LPWAN technology, fragmentation is performed, see 
 {{Frag}}.) The resulting
-data unit is sent as one or more layer two (L2) frames to a LPWAN Radio Gateway (RG) which forwards
+data unit is sent as one or more L2 frames to a LPWAN Radio Gateway (RG) which forwards
 the frame(s) to a Network Gateway (NGW).
 The NGW sends the data to an SCHC C/D for decompression. The SCHC C/D can be
 located in the Network Gateway (NGW) or somewhere else as long as a tunnel is established between the NGW and the SCHC C/D. 
@@ -441,7 +447,7 @@ a field. The first column lists the actions name. The second and third
 columns outline the reciprocal compression/decompression behavior for each action.
 
 Compression is done in the rule order and compressed values are sent in that order in the compressed
-message. The receiver must be able to find the size of each compressed field
+message. The receiver is assumed to know the size of each compressed field
 which can be given by the rule or may be sent with the compressed header. 
 
 If the field is identified as being variable, then its size must be sent first using the following coding:
@@ -534,15 +540,13 @@ specific LPWAN technology. These details will be defined in other technology-spe
 
 
    An important consideration is that LPWAN networks typically follow a
-   star topology, and therefore data unit out-of-sequence delivery is not expected
-   in such networks.  This specification assumes that out-of-sequence delivery will
-   not happen between the entity performing fragmentation and the entity
-   performing reassembly.  This assumption allows reduncing the complexity
+   star topology. The fragmentation functionality defined in this document has been designed under the assumption that data unit out-of-sequence delivery will not happen between the entity performing fragmentation and the entity
+   performing reassembly.  This assumption allows reducing the complexity
    and overhead of the fragmentation mechanism.
 
-## Functionalities
+## Tools
 
-This subsection describes the different fields in the fragmentation header frames (see the related formats in {{Fragfor}}). It also describes the tools that are used to enable the fragmentation functionalities defined in this document, and the different reliability modes supported. 
+This subsection describes the different tools that are used to enable the fragmentation functionality defined in this document, such as fields in the fragmentation header frames (see the related formats in {{Fragfor}}), timers and parameters.  
 
 *  Rule ID. The Rule ID is present in the fragment header and in the ACK header format.  The Rule ID in a fragment header is used to identify that a fragment is being carried, what fragmentation delivery reliability mode is used and what window size is used (if multiple sizes are possible). The Rule ID  in the fragmentation header also allows interleaving non-fragmented IPv6 datagrams and fragments that carry other IPv6 datagrams. The Rule ID in an ACK identifies the message as an ACK.
 
@@ -565,7 +569,7 @@ In the ACK format, DTag carries the same value as the DTag field in the fragment
 *  W (window): W is a 1-bit field. This field carries the same value for all fragments of a window, and it is complemented for the next window. The initial value for this field is 0.
    In the ACK format, this field also has a size of 1 bit. In all ACKs, the W bit carries the same value as the W bit carried by the fragments whose reception is being positively or negatively acknowledged by the ACK.
 
-*  Message Integrity Check (MIC). This field, which has a size of M bits, is computed by the sender over the complete packet (i.e. a SCHC compressed or an uncompressed IPv6 packet) before fragmentation. The MIC allows the receiver to check errors in the reassembled packet, while it also enables compressing the UDP checksum by use of SCHC compression. The CRC32 as 0xEDB88320 (i.e. the reverse representation of the polynomial used e.g. in the Ethernet standard) is recommended as the default algorithm for computing the MIC. Nevertheless, other algorithms MAY be required in other LPWAN technology-specific documents (e.g. technology-specific profiles). 
+*  Message Integrity Check (MIC). This field, which has a size of M bits, is computed by the sender over the complete packet (i.e. a SCHC compressed or an uncompressed IPv6 packet) before fragmentation. The MIC allows the receiver to check errors in the reassembled packet, while it also enables compressing the UDP checksum by use of SCHC compression. The CRC32 as 0xEDB88320 (i.e. the reverse representation of the polynomial used e.g. in the Ethernet standard {{RFC3385}}) is recommended as the default algorithm for computing the MIC. Nevertheless, other algorithms MAY be required in other LPWAN technology-specific documents (e.g. technology-specific profiles). 
 
 *  C (MIC checked): C is a 1-bit field. This field is used in the ACK packets to report the outcome of the MIC check, i.e. whether the reassembled packet was correctly received or not. A value of 1 represents a positive MIC check at the receiver side (i.e. the MIC computed by the receiver matches the received MIC).
  
@@ -794,10 +798,10 @@ to 1 to indicate that the MIC check computed by the receiver matches the MIC pre
    
 ### Abort formats
 
-The All-1 Abort and the ACK abort messages have the following formats. 
+When a fragment sender needs to abort the transmission, it sends the All-1 Abort format {{Fig-All1Abort}}.  When a fragment receiver needs to abort the on-going fragmented packet transmission, it transmits the ACK Abort format {{Fig-ACKabort}}. 
 
 ~~~~
-<------ byte boundary ------><--- 1 byte --->
+<------------- R -----------><--- 1 byte --->
 +--- ... ---+- ... -+-+-...-+-+-+-+-+-+-+-+-+
 |  Rule ID  | DTag  |W| FCN |       FF      | (no MIC & no payload)  
 +--- ... ---+- ... -+-+-...-+-+-+-+-+-+-+-+-+
@@ -808,7 +812,7 @@ The All-1 Abort and the ACK abort messages have the following formats.
 
 ~~~~
 
- <------ byte boundary -----><--- 1 byte --->
+ <----- byte boundary ------><--- 1 byte --->
 
  +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+-+-+
  |  Rule ID  | DTag |W| 1..1|       FF      |  
@@ -820,6 +824,7 @@ The All-1 Abort and the ACK abort messages have the following formats.
 
 ## Baseline mechanism
 
+If after applying SCHC header compression (or when SCHC header compression is not possible) the entire datagram does not fit within the payload of a single L2 data unit, the datagram SHALL be broken into fragments and the fragments SHALL be sent to the fragment receiver.
 The fragment receiver needs to identify all the fragments that belong to a given IPv6 datagram. To this end, the receiver SHALL use: 
 
  * The sender's L2 source address (if present), 
