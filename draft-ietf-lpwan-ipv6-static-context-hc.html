@@ -294,7 +294,7 @@ address {
 <link href="#rfc.section.4.5.6" rel="Chapter" title="4.5.6 Compute-*">
 <link href="#rfc.section.5" rel="Chapter" title="5 Fragmentation">
 <link href="#rfc.section.5.1" rel="Chapter" title="5.1 Overview">
-<link href="#rfc.section.5.2" rel="Chapter" title="5.2 Functionalities">
+<link href="#rfc.section.5.2" rel="Chapter" title="5.2 Tools">
 <link href="#rfc.section.5.3" rel="Chapter" title="5.3 Delivery Reliability modes">
 <link href="#rfc.section.5.4" rel="Chapter" title="5.4 Fragmentation Frame Formats">
 <link href="#rfc.section.5.4.1" rel="Chapter" title="5.4.1 Fragment format">
@@ -337,12 +337,12 @@ address {
 <link href="#rfc.authors" rel="Chapter">
 
 
-  <meta name="generator" content="xml2rfc version 2.9.3 - https://tools.ietf.org/tools/xml2rfc" />
+  <meta name="generator" content="xml2rfc version 2.9.4 - https://tools.ietf.org/tools/xml2rfc" />
   <link rel="schema.dct" href="http://purl.org/dc/terms/" />
 
   <meta name="dct.creator" content="Minaburo, A., Toutain, L., and C. Gomez" />
   <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-lpwan-ipv6-static-context-hc-09" />
-  <meta name="dct.issued" scheme="ISO8601" content="2018-02-16" />
+  <meta name="dct.issued" scheme="ISO8601" content="2018-02-19" />
   <meta name="dct.abstract" content="This document defines the Static Context Header Compression (SCHC) framework, which provides header compression and fragmentation functionality. SCHC has been tailored for Low Power Wide Area Networks (LPWAN)." />
   <meta name="description" content="This document defines the Static Context Header Compression (SCHC) framework, which provides header compression and fragmentation functionality. SCHC has been tailored for Low Power Wide Area Networks (LPWAN)." />
 
@@ -366,7 +366,7 @@ address {
 <td class="right">L. Toutain</td>
 </tr>
 <tr>
-<td class="left">Expires: August 20, 2018</td>
+<td class="left">Expires: August 23, 2018</td>
 <td class="right">IMT-Atlantique</td>
 </tr>
 <tr>
@@ -379,7 +379,7 @@ address {
 </tr>
 <tr>
 <td class="left"></td>
-<td class="right">February 16, 2018</td>
+<td class="right">February 19, 2018</td>
 </tr>
 
     	
@@ -397,7 +397,7 @@ address {
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at https://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on August 20, 2018.</p>
+<p>This Internet-Draft will expire on August 23, 2018.</p>
 <h1 id="rfc.copyrightnotice"><a href="#rfc.copyrightnotice">Copyright Notice</a></h1>
 <p>Copyright (c) 2018 IETF Trust and the persons identified as the document authors.  All rights reserved.</p>
 <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (https://trustee.ietf.org/license-info) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.</p>
@@ -441,7 +441,7 @@ address {
 </li>
 <ul><li>5.1.   <a href="#rfc.section.5.1">Overview</a>
 </li>
-<li>5.2.   <a href="#rfc.section.5.2">Functionalities</a>
+<li>5.2.   <a href="#rfc.section.5.2">Tools</a>
 </li>
 <li>5.3.   <a href="#rfc.section.5.3">Delivery Reliability modes</a>
 </li>
@@ -541,7 +541,7 @@ address {
 <p id="rfc.section.1.p.4">The Static Context Header Compression (SCHC) is defined for this environment.  SCHC uses a context, where header information is kept in the header format order. This context is static: the values of the header fields do not change over time. This avoids complex resynchronization mechanisms, that would be incompatible with LPWAN characteristics. In most cases, a small context identifier is enough to represent the full IPv6/UDP headers.</p>
 <p id="rfc.section.1.p.5">The SCHC header compression mechanism is independent of the specific LPWAN technology over which it is used.</p>
 <p id="rfc.section.1.p.6">LPWAN technologies are also characterized, among others, by a very reduced data unit and/or payload size <a href="#I-D.ietf-lpwan-overview" class="xref">[I-D.ietf-lpwan-overview]</a>.  However, some of these technologies do not provide fragmentation functionality, therefore the only option for them to support the IPv6 MTU requirement of 1280 bytes <a href="#RFC2460" class="xref">[RFC2460]</a> is to use a fragmentation protocol at the adaptation layer, below IPv6.  In response to this need, this document also defines a fragmentation/reassembly mechanism, which supports the IPv6 MTU requirement over LPWAN technologies. Such functionality has been designed under the assumption that data unit out-of-sequence delivery will not happen between the entity performing fragmentation and the entity performing reassembly.</p>
-<p id="rfc.section.1.p.7">As per this document, when a packet (e.g. an IPv6 packet) needs to be transmitted, header compression is first applied to the packet.  Subsequently, and if the compressed packet size exceeds the layer 2 (L2) MTU, fragmentation is then applied to the packet after header compression.</p>
+<p id="rfc.section.1.p.7">As per this document, when a packet (e.g. an IPv6 packet) needs to be transmitted, header compression is first applied to the packet. Note that header compression may result in a smaller packet size or not (the latter happens when for any reason it has not been possible to reduce the packet header size).  Subsequently, and if the packet size after (successful or unsuccessful) header compression exceeds the layer 2 (L2) MTU, fragmentation is then applied to the packet.</p>
 <p id="rfc.section.1.p.8">Note that this document defines generic functionality and purposefully offers flexibility with regard to parameter settings and mechanism choices, that are expected to be made in other, technology-specific, documents (e.g. <a href="#I-D.zuniga-lpwan-schc-over-sigfox" class="xref">[I-D.zuniga-lpwan-schc-over-sigfox]</a>, <a href="#I-D.petrov-lpwan-ipv6-schc-over-lorawan" class="xref">[I-D.petrov-lpwan-ipv6-schc-over-lorawan]</a>).</p>
 <h1 id="rfc.section.2">
 <a href="#rfc.section.2">2.</a> <a href="#LPWAN-Archi" id="LPWAN-Archi">LPWAN Architecture</a>
@@ -573,6 +573,8 @@ address {
 <p></p>
 
 <ul>
+<li>Abort. A type of data unit used by an endpoint involved in on-going fragmented packet transmission or reception in order to signal the other endpoint that the on-going fragmented packet transmission process is being aborted.</li>
+<li>ACK. Acknowledgment. A data unit used in two of the fragmentation modes defined in this specification, which is sent by a fragment receiver to report on successful or unsuccessful reception of a set of fragments.</li>
 <li>All-0. The fragment format for the last frame of a window that is not the last one of a packet (see Window in this glossary).</li>
 <li>All-1. The fragment format for the last frame of the packet.</li>
 <li>All-0 empty. An All-0 fragment without a payload. It is used to request the Bitmap when the Retransmission Timer expires, in a window that is not the last one of a packet.</li>
@@ -598,6 +600,7 @@ address {
 <li>IID: Interface Identifier. See the IPv6 addressing architecture <a href="#RFC7136" class="xref">[RFC7136]</a>
 </li>
 <li>Inactivity Timer. A timer used at the end of the fragmentation state machine to detect when there is an error and there is no possibility to continue an on-going fragmented packet transmission.</li>
+<li>L2: Layer two. The immediate lower layer SCHC interfaces with. It is provided by an underlying LPWAN technology.</li>
 <li>MIC: Message Integrity Check.  A fragmentation header field computed over an IPv6 packet before fragmentation, used for error detection after IPv6 packet reassembly.</li>
 <li>MO: Matching Operator. An operator used to match a value contained in a header field with a value contained in a Rule.</li>
 <li>Retransmission Timer. A timer used by the fragment sender state machine during an on-going fragmented packet transmission to detect possible link errors when waiting for a possible incoming ACK.</li>
@@ -633,7 +636,7 @@ address {
                                  +---------+
 </pre>
 <p class="figure">Figure 2: Architecture</p>
-<p><a href="#Fig-archi" class="xref">Figure 2</a> represents the architecture for compression/decompression. It is based on <a href="#I-D.ietf-lpwan-overview" class="xref">[I-D.ietf-lpwan-overview]</a> terminology. The Device sends application flows using IPv6 or IPv6/UDP protocols. These flows are compressed by a Static Context Header Compression Compressor/Decompressor (SCHC C/D) to reduce the headers size. (Note that if the resulting data unit exceeds the maximum payload size of the underlying LPWAN technology, fragmentation is performed, see <a href="#Frag" class="xref">Section 5</a>.) The resulting data unit is sent as one or more layer two (L2) frames to a LPWAN Radio Gateway (RG) which forwards the frame(s) to a Network Gateway (NGW).  The NGW sends the data to an SCHC C/D for decompression. The SCHC C/D can be located in the Network Gateway (NGW) or somewhere else as long as a tunnel is established between the NGW and the SCHC C/D.  Note that, for some LPWAN technologies, it may be suitable to locate fragmentation and reassembly functionality nearer the NGW, in order to better deal with time constraints of such technologies.  The SCHC C/Ds on both sides must share the same set of Rules.  After decompression, the packet can be sent over the Internet to one or several LPWAN Application Servers (App).</p>
+<p><a href="#Fig-archi" class="xref">Figure 2</a> represents the architecture for compression/decompression. It is based on <a href="#I-D.ietf-lpwan-overview" class="xref">[I-D.ietf-lpwan-overview]</a> terminology. The Device sends application flows using IPv6 or IPv6/UDP protocols. These flows are compressed by a Static Context Header Compression Compressor/Decompressor (SCHC C/D) to reduce the headers size. (Note that if the resulting data unit exceeds the maximum payload size of the underlying LPWAN technology, fragmentation is performed, see <a href="#Frag" class="xref">Section 5</a>.) The resulting data unit is sent as one or more L2 frames to a LPWAN Radio Gateway (RG) which forwards the frame(s) to a Network Gateway (NGW).  The NGW sends the data to an SCHC C/D for decompression. The SCHC C/D can be located in the Network Gateway (NGW) or somewhere else as long as a tunnel is established between the NGW and the SCHC C/D.  Note that, for some LPWAN technologies, it may be suitable to locate fragmentation and reassembly functionality nearer the NGW, in order to better deal with time constraints of such technologies.  The SCHC C/Ds on both sides must share the same set of Rules.  After decompression, the packet can be sent over the Internet to one or several LPWAN Application Servers (App).</p>
 <p id="rfc.section.4.p.3">The SCHC C/D process is symmetrical, therefore the same description applies to the reverse direction.</p>
 <h1 id="rfc.section.4.1">
 <a href="#rfc.section.4.1">4.1.</a> <a href="#schc-rules" id="schc-rules">SCHC Rules</a>
@@ -745,7 +748,7 @@ address {
 </pre>
 <p class="figure">Figure 5: Compression and Decompression Functions</p>
 <p><a href="#Fig-function" class="xref">Figure 5</a> summarizes the basic functions that can be used to compress and decompress a field. The first column lists the actions name. The second and third columns outline the reciprocal compression/decompression behavior for each action.</p>
-<p id="rfc.section.4.5.p.3">Compression is done in the rule order and compressed values are sent in that order in the compressed message. The receiver must be able to find the size of each compressed field which can be given by the rule or may be sent with the compressed header.</p>
+<p id="rfc.section.4.5.p.3">Compression is done in the rule order and compressed values are sent in that order in the compressed message. The receiver is assumed to know the size of each compressed field which can be given by the rule or may be sent with the compressed header.</p>
 <p id="rfc.section.4.5.p.4">If the field is identified as being variable, then its size must be sent first using the following coding:</p>
 <p></p>
 
@@ -800,11 +803,11 @@ address {
 </h1>
 <p id="rfc.section.5.1.p.1">In LPWAN technologies, the L2 data unit size typically varies from tens to hundreds of bytes.  Be it after applying SCHC header compression or when SCHC header compression is not possible, if the entire IPv6 datagram fits within a single L2 data unit, the fragmentation mechanism is not used and the packet is sent. Otherwise, the datagram SHALL be broken into fragments.</p>
 <p id="rfc.section.5.1.p.2">LPWAN technologies impose some strict limitations on traffic. For instance, devices are sleeping most of the time and may receive data during a short period of time after transmission to preserve battery. To adapt the SCHC fragmentation to the capabilities of LPWAN technologies, it is desirable to enable optional fragment retransmission and to allow a gradation of fragment delivery reliability. This document does not make any decision with regard to which fragment delivery reliability mode(s) will be used over a specific LPWAN technology. These details will be defined in other technology-specific documents.</p>
-<p id="rfc.section.5.1.p.3">An important consideration is that LPWAN networks typically follow a star topology, and therefore data unit out-of-sequence delivery is not expected in such networks.  This specification assumes that out-of-sequence delivery will not happen between the entity performing fragmentation and the entity performing reassembly.  This assumption allows reduncing the complexity and overhead of the fragmentation mechanism.</p>
+<p id="rfc.section.5.1.p.3">An important consideration is that LPWAN networks typically follow a star topology. The fragmentation functionality defined in this document has been designed under the assumption that data unit out-of-sequence delivery will not happen between the entity performing fragmentation and the entity performing reassembly.  This assumption allows reducing the complexity and overhead of the fragmentation mechanism.</p>
 <h1 id="rfc.section.5.2">
-<a href="#rfc.section.5.2">5.2.</a> <a href="#functionalities" id="functionalities">Functionalities</a>
+<a href="#rfc.section.5.2">5.2.</a> <a href="#tools" id="tools">Tools</a>
 </h1>
-<p id="rfc.section.5.2.p.1">This subsection describes the different fields in the fragmentation header frames (see the related formats in <a href="#Fragfor" class="xref">Section 5.4</a>). It also describes the tools that are used to enable the fragmentation functionalities defined in this document, and the different reliability modes supported.</p>
+<p id="rfc.section.5.2.p.1">This subsection describes the different tools that are used to enable the fragmentation functionality defined in this document, such as fields in the fragmentation header frames (see the related formats in <a href="#Fragfor" class="xref">Section 5.4</a>), timers and parameters.</p>
 <p></p>
 
 <ul>
@@ -812,7 +815,7 @@ address {
 <li>Fragment Compressed Number (FCN).  The FCN is included in all fragments.  This field can be understood as a truncated, efficient representation of a larger-sized fragment number, and does not carry an absolute fragment number.  There are two FCN reserved values that are used for controlling the fragmentation process, as described next. The FCN value with all the bits equal to 1 (All-1) denotes the last fragment of a packet. The last window of a packet is called an All-1 window.  In ACK-Always or ACK-on-error, the FCN value with all the bits equal to 0 (All-0) denotes the last fragment of a window that is not the last one of the packet. Such a window is called an All-0 window. In the No-ACK mode, All-0 is found in all fragments but the last one. The rest of the FCN values are assigned in a sequentially decreasing order, which has the purpose to avoid possible ambiguity for the receiver that might arise under certain conditions.  In the fragments, this field is an unsigned integer, with a size of N bits. In the No-ACK mode, it is set to 1 bit (N=1). For the other reliability modes, it is recommended to use a number of bits (N) equal to or greater than 3. Nevertheless, the appropriate value will be defined in the corresponding technology documents. The FCN MUST be set sequentially decreasing from the highest FCN in the window (which will be used for the first fragment), and MUST wrap from 0 back to the highest FCN in the window.  &#160; For windows that are not the last one  from a fragmented packet, the FCN for the last fragment in such windows is an All-0. This indicates that the window is finished and communication proceeds according to the reliability mode in use.  The FCN for the last fragment in the last window is an All-1.  It is also important to note that, in the No-ACK mode or when N=1, the last fragment of the packet will carry a FCN equal to 1, while all previous fragments will carry a FCN of 0.</li>
 <li>Datagram Tag (DTag). The DTag field, if present, is set to the same value for all fragments carrying the same IPv6 datagram, and to different values for different datagrams. Using this field, the sender can interleave fragments from different IPv6 datagrams, while the receiver can still tell them apart.  In the fragment formats, the size of the DTag field is T bits, which may be set to a value greater than or equal to 0 bits. For each new IPv6 datagram processed by the sender, DTag MUST be sequentially increased, from 0 to 2^T &#8211; 1 wrapping back from 2^T - 1 to 0.  In the ACK format, DTag carries the same value as the DTag field in the fragments for which this ACK is intended.</li>
 <li>W (window): W is a 1-bit field. This field carries the same value for all fragments of a window, and it is complemented for the next window. The initial value for this field is 0.  In the ACK format, this field also has a size of 1 bit. In all ACKs, the W bit carries the same value as the W bit carried by the fragments whose reception is being positively or negatively acknowledged by the ACK.</li>
-<li>Message Integrity Check (MIC). This field, which has a size of M bits, is computed by the sender over the complete packet (i.e. a SCHC compressed or an uncompressed IPv6 packet) before fragmentation. The MIC allows the receiver to check errors in the reassembled packet, while it also enables compressing the UDP checksum by use of SCHC compression. The CRC32 as 0xEDB88320 (i.e. the reverse representation of the polynomial used e.g. in the Ethernet standard) is recommended as the default algorithm for computing the MIC. Nevertheless, other algorithms MAY be required in other LPWAN technology-specific documents (e.g. technology-specific profiles).</li>
+<li>Message Integrity Check (MIC). This field, which has a size of M bits, is computed by the sender over the complete packet (i.e. a SCHC compressed or an uncompressed IPv6 packet) before fragmentation. The MIC allows the receiver to check errors in the reassembled packet, while it also enables compressing the UDP checksum by use of SCHC compression. The CRC32 as 0xEDB88320 (i.e. the reverse representation of the polynomial used e.g. in the Ethernet standard <a href="#RFC3385" class="xref">[RFC3385]</a>) is recommended as the default algorithm for computing the MIC. Nevertheless, other algorithms MAY be required in other LPWAN technology-specific documents (e.g. technology-specific profiles).</li>
 <li>C (MIC checked): C is a 1-bit field. This field is used in the ACK packets to report the outcome of the MIC check, i.e. whether the reassembled packet was correctly received or not. A value of 1 represents a positive MIC check at the receiver side (i.e. the MIC computed by the receiver matches the received MIC).</li>
 <li>Retransmission Timer. It is used by a fragment sender after the transmission of a window to detect a transmission error  of the ACK corresponding to this window. Depending on the reliability mode, it will lead to a request for an ACK retransmission (in ACK-Always mode) or it will trigger the transmission of the next window (in ACK-on-error mode). The duration of this timer is not defined in this document and must be defined in the corresponding technology documents (e.g. technology-specific profiles).</li>
 <li>Inactivity Timer. This timer is used by a fragment receiver to take action when there is a problem in the transmission of fragments. Such a problem could be detected by the receiver not getting a single fragment during a given period of time or not getting a given number of packets in a given period of time. When this happens, an Abort message will be sent (see related text later in this section). Initially, and each time a fragment is received, the timer is reinitialized. The duration of this timer is not defined in this document and must be defined in the specific technology document (e.g. technology-specific profiles).</li>
@@ -974,11 +977,11 @@ address {
 <h1 id="rfc.section.5.4.4">
 <a href="#rfc.section.5.4.4">5.4.4.</a> <a href="#abort-formats" id="abort-formats">Abort formats</a>
 </h1>
-<p id="rfc.section.5.4.4.p.1">The All-1 Abort and the ACK abort messages have the following formats.</p>
+<p id="rfc.section.5.4.4.p.1">When a fragment sender needs to abort the transmission, it sends the All-1 Abort format <a href="#Fig-All1Abort" class="xref">Figure 16</a>.  When a fragment receiver needs to abort the on-going fragmented packet transmission, it transmits the ACK Abort format <a href="#Fig-ACKabort" class="xref">Figure 17</a>.</p>
 <div id="rfc.figure.16"></div>
 <div id="Fig-All1Abort"></div>
 <pre>
-&lt;------ byte boundary ------&gt;&lt;--- 1 byte ---&gt;
+&lt;------------- R -----------&gt;&lt;--- 1 byte ---&gt;
 +--- ... ---+- ... -+-+-...-+-+-+-+-+-+-+-+-+
 |  Rule ID  | DTag  |W| FCN |       FF      | (no MIC &amp; no payload)  
 +--- ... ---+- ... -+-+-...-+-+-+-+-+-+-+-+-+
@@ -988,7 +991,7 @@ address {
 <div id="rfc.figure.17"></div>
 <div id="Fig-ACKabort"></div>
 <pre>
- &lt;------ byte boundary -----&gt;&lt;--- 1 byte ---&gt;
+ &lt;----- byte boundary ------&gt;&lt;--- 1 byte ---&gt;
 
  +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+-+-+
  |  Rule ID  | DTag |W| 1..1|       FF      |  
@@ -999,7 +1002,7 @@ address {
 <h1 id="rfc.section.5.5">
 <a href="#rfc.section.5.5">5.5.</a> <a href="#baseline-mechanism" id="baseline-mechanism">Baseline mechanism</a>
 </h1>
-<p id="rfc.section.5.5.p.1">The fragment receiver needs to identify all the fragments that belong to a given IPv6 datagram. To this end, the receiver SHALL use:</p>
+<p id="rfc.section.5.5.p.1">If after applying SCHC header compression (or when SCHC header compression is not possible) the entire datagram does not fit within the payload of a single L2 data unit, the datagram SHALL be broken into fragments and the fragments SHALL be sent to the fragment receiver.  The fragment receiver needs to identify all the fragments that belong to a given IPv6 datagram. To this end, the receiver SHALL use:</p>
 <p></p>
 
 <ul>
@@ -1261,6 +1264,11 @@ address {
 <td class="reference"><b id="RFC2460">[RFC2460]</b></td>
 <td class="top">
 <a>Deering, S.</a> and <a>R. Hinden</a>, "<a href="https://tools.ietf.org/html/rfc2460">Internet Protocol, Version 6 (IPv6) Specification</a>", RFC 2460, DOI 10.17487/RFC2460, December 1998.</td>
+</tr>
+<tr>
+<td class="reference"><b id="RFC3385">[RFC3385]</b></td>
+<td class="top">
+<a>Sheinwald, D.</a>, <a>Satran, J.</a>, <a>Thaler, P.</a> and <a>V. Cavanna</a>, "<a href="https://tools.ietf.org/html/rfc3385">Internet Protocol Small Computer System Interface (iSCSI) Cyclic Redundancy Check (CRC)/Checksum Considerations</a>", RFC 3385, DOI 10.17487/RFC3385, September 2002.</td>
 </tr>
 <tr>
 <td class="reference"><b id="RFC4944">[RFC4944]</b></td>
