@@ -104,7 +104,7 @@ Table of Contents
      5.5.  Baseline mechanism  . . . . . . . . . . . . . . . . . . .  26
        5.5.1.  No-ACK  . . . . . . . . . . . . . . . . . . . . . . .  27
        5.5.2.  ACK-Always and ACK-on-Error . . . . . . . . . . . . .  27
-       5.5.3.  Bitmap Optimization . . . . . . . . . . . . . . . . .  31
+       5.5.3.  Bitmap Encoding . . . . . . . . . . . . . . . . . . .  31
      5.6.  Supporting multiple window sizes  . . . . . . . . . . . .  33
 
 
@@ -1074,16 +1074,16 @@ Internet-Draft                 LPWAN SCHC                  February 2018
       reaching MAX_ACK_REQUESTS or upon occurence of some other error,
       the sender or the receiver may use the Abort frames.  When the
       receiver needs to abort the on-going fragmented packet
-      transmission, it sends an ACK with the Abort format (all the bits
-      set to 1).  When the sender needs to abort the transmission, it
-      sends a fragment with the All-1 Abort format.  This fragment is
-      not acked.
+      transmission, it sends a data unit with the Receiver-Abort format.
+      When the sender needs to abort the transmission, it sends a data
+      unit with the Sender-Abort format.  The Sender-Abort data unit is
+      not acknowledged.
 
    o  Padding (P).  Padding may be used to align the last byte of a
-      fragment with a byte boundary.  The number of bits used for
-      padding is not defined and depends on the size of the Rule ID,
-      DTag and FCN fields, and on the layer two payload size.  Some ACKs
-      are byte-aligned and do not need padding see Section 5.5.3.
+      fragment with a byte boundary (see Section 6).  The number of bits
+      used for padding is not defined and depends on the size of the
+      Rule ID, DTag and FCN fields, and on the L2 payload size.  Some
+      ACKs are byte-aligned and do not need padding (see Section 5.5.3).
 
 5.3.  Delivery Reliability modes
 
@@ -1378,9 +1378,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 5.4.4.  Abort formats
 
    When a fragment sender needs to abort the transmission, it sends the
-   All-1 Abort format Figure 16.  When a fragment receiver needs to
-   abort the on-going fragmented packet transmission, it transmits the
-   ACK Abort format Figure 17.
+   Sender-Abort format Figure 16, with all FCN bits set to 1.  When a
+   fragment receiver needs to abort the on-going fragmented packet
+   transmission, it transmits the Receiver-Abort format Figure 17.
 
    <------------- R -----------><--- 1 byte --->
    +--- ... ---+- ... -+-+-...-+-+-+-+-+-+-+-+-+
@@ -1388,8 +1388,8 @@ Internet-Draft                 LPWAN SCHC                  February 2018
    +--- ... ---+- ... -+-+-...-+-+-+-+-+-+-+-+-+
 
 
-                       Figure 16: All-1 Abort format
-
+    Figure 16: Sender-Abort format.  All FCN fields in this format are
+                                 set to 1
 
 
 
@@ -1409,7 +1409,7 @@ Internet-Draft                 LPWAN SCHC                  February 2018
     +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+-+-+
 
 
-                        Figure 17: ACK Abort format
+                     Figure 17: Receiver-Abort format
 
 5.5.  Baseline mechanism
 
@@ -1609,15 +1609,15 @@ Internet-Draft                 LPWAN SCHC                  February 2018
    successful fragmented packet reception or not, the Inactitivity Timer
    is set.  In case of an incorrect MIC, the receiver waits for
    fragments belonging to the same window.  After MAX_ACK_REQUESTS, the
-   receiver will abort the on-going fragmented packet transmission.  The
-   receiver also Aborts upon Inactivity Timer expiration.
+   receiver will abort the on-going fragmented packet transmission by
+   transmitting a data unit with the Receiver-Abort format.  The
+   receiver also aborts upon Inactivity Timer expiration.
 
 5.5.2.2.  ACK-on-Error
 
    The ACK-on-Error sender is similar to ACK-Always, the main difference
    being that in ACK-on-Error the ACK is not sent at the end of each
    window but only when at least one fragment of the current window has
-   been lost (with the exception of the last window, see later text in
 
 
 
@@ -1626,6 +1626,7 @@ Minaburo, et al.         Expires August 23, 2018               [Page 29]
 Internet-Draft                 LPWAN SCHC                  February 2018
 
 
+   been lost (with the exception of the last window, see later text in
    this paragraph).  In Ack-on-Error, the Retransmission Timer
    expiration will be considered as a positive acknowledgment.  The
    Retransmission Timer is set when sending an All-0 or an All-1
@@ -1655,8 +1656,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
    initializes and starts the Retransmission Timer.  If the
    Retransmission Timer expires, Attempts is increased by one and an
    empty All-1 fragment is sent to request the ACK for the last window.
-   If Attempts reaches MAX_ACK_REQUESTS, the on-going fragmented packet
-   transmission is aborted.
+   If Attempts reaches MAX_ACK_REQUESTS, the sender aborts the on-going
+   fragmented packet transmission by transmitting the Sender-Abort data
+   unit.
 
    Unlike the sender, the receiver for ACK-on-Error has a larger amount
    of differences compared with ACK-Always.  First, an ACK is not sent
@@ -1665,14 +1667,12 @@ Internet-Draft                 LPWAN SCHC                  February 2018
    of fragment losses or not).  The receiver starts by expecting
    fragments from window 0 and maintains the information regarding which
    fragments it receives.  After receiving a fragment, the Inactivity
-   Timer is set, if no fragment has been received and the Inactivity
-   Timer expires the transmission is aborted.
+   Timer is set.  If no further fragment is received and the Inactivity
+   Timer expires, the fragment receiver aborts the on-going fragmented
+   packet transmission by transmitting the Receiver-Abort data unit.
 
    Any fragment not belonging to the current window is discarded.  The
    actual fragment number is computed based on the FCN value.  When an
-   All-0 fragment is received and all fragments have been received, the
-   receiver updates the expected window value.
-
 
 
 
@@ -1681,6 +1681,9 @@ Minaburo, et al.         Expires August 23, 2018               [Page 30]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
+
+   All-0 fragment is received and all fragments have been received, the
+   receiver updates the expected window value.
 
    If an All-0 fragment is received, even if another fragment is
    missing, all fragments from the current window have been sent.  Since
@@ -1716,7 +1719,7 @@ Internet-Draft                 LPWAN SCHC                  February 2018
    latter will lead the receiver to abort the on-going fragmented packet
    transmission.
 
-5.5.3.  Bitmap Optimization
+5.5.3.  Bitmap Encoding
 
    The Bitmap is transmitted by a receiver as part of the ACK format.
    An ACK message may include padding at the end to align its number of
@@ -1727,9 +1730,6 @@ Internet-Draft                 LPWAN SCHC                  February 2018
    be determined taking into account the available space in the layer
    two frame payload, where there will be 1 bit less for an ACK sent in
    response to an All-1 fragment than in other ACKs.
-
-
-
 
 
 
@@ -2975,7 +2975,7 @@ Internet-Draft                 LPWAN SCHC                  February 2018
    +---------------------+     Rcv      +--->* ABORT
    |  +------------------+   Window     |
    |  |                  +=====+==+=====+
-   |  |       All-0 & w=expect |  ^ w =next & not-All
+   |  |       All-0 & w=expect |  | w =next & not-All
    |  |     ~~~~~~~~~~~~~~~~~~ |  |~~~~~~~~~~~~~~~~~~~~~
    |  |     set lcl_Bitmap(FCN)|  |expected = next window
    |  |      send local_Bitmap |  |Clear local_Bitmap

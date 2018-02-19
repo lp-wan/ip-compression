@@ -304,7 +304,7 @@ address {
 <link href="#rfc.section.5.5" rel="Chapter" title="5.5 Baseline mechanism">
 <link href="#rfc.section.5.5.1" rel="Chapter" title="5.5.1 No-ACK">
 <link href="#rfc.section.5.5.2" rel="Chapter" title="5.5.2 ACK-Always and ACK-on-Error">
-<link href="#rfc.section.5.5.3" rel="Chapter" title="5.5.3 Bitmap Optimization">
+<link href="#rfc.section.5.5.3" rel="Chapter" title="5.5.3 Bitmap Encoding">
 <link href="#rfc.section.5.6" rel="Chapter" title="5.6 Supporting multiple window sizes">
 <link href="#rfc.section.5.7" rel="Chapter" title="5.7 Downlink fragment transmission">
 <link href="#rfc.section.6" rel="Chapter" title="6 Padding management">
@@ -461,7 +461,7 @@ address {
 </li>
 <li>5.5.2.   <a href="#rfc.section.5.5.2">ACK-Always and ACK-on-Error</a>
 </li>
-<li>5.5.3.   <a href="#rfc.section.5.5.3">Bitmap Optimization</a>
+<li>5.5.3.   <a href="#rfc.section.5.5.3">Bitmap Encoding</a>
 </li>
 </ul><li>5.6.   <a href="#rfc.section.5.6">Supporting multiple window sizes</a>
 </li>
@@ -822,8 +822,8 @@ address {
 <li>Attempts. This counter counts the requests for a missing ACK. When it reaches the value MAX_ACK_REQUESTS, the sender assume there are recurrent fragment transmission errors and determines that an Abort is needed. The default value offered MAX_ACK_REQUESTS is not stated in this document, and it is expected to be defined in other documents (e.g. technology- specific profiles). The Attempts counter is defined per window. It is initialized each time a new window is used.</li>
 <li>Bitmap. The Bitmap is a sequence of bits carried in an ACK. Each bit in the Bitmap corresponds to a fragment of the current window, and provides feedback on whether the fragment has been received or not. The right-most position on the Bitmap reports if the All-0 or All-1 fragment has been received or not. Feedback on the fragment with the highest FCN value is provided by the bit in the left-most position of the Bitmap. In the Bitmap, a bit set to 1 indicates that the fragment of FCN corresponding to that bit position has been correctly sent and received. The text above describes the internal representation of the Bitmap. When inserted in the ACK for transmission from the receiver to the sender, the Bitmap may be truncated for energy/bandwidth optimisation, see more details in <a href="#Bitmapopt" class="xref">Section 5.5.3</a>
 </li>
-<li>Abort. On expiration of the Inactivity timer, on Attempts reaching MAX_ACK_REQUESTS or upon occurence of some other error, the sender or the receiver may use the Abort frames.  When the receiver needs to abort the on-going fragmented packet transmission, it sends an ACK with the Abort format (all the bits set to 1). When the sender needs to abort the transmission, it sends a fragment with the All-1 Abort format. This fragment is not acked.</li>
-<li>Padding (P). Padding may be used to align the last byte of a fragment with a byte boundary. The number of bits used for padding is not defined and depends on the size of the Rule ID, DTag and FCN fields, and on the layer two payload size. Some ACKs are byte-aligned and do not need padding see <a href="#Bitmapopt" class="xref">Section 5.5.3</a>.</li>
+<li>Abort. On expiration of the Inactivity timer, on Attempts reaching MAX_ACK_REQUESTS or upon occurence of some other error, the sender or the receiver may use the Abort frames.  When the receiver needs to abort the on-going fragmented packet transmission, it sends a data unit with the Receiver-Abort format. When the sender needs to abort the transmission, it sends a data unit with the Sender-Abort format. The Sender-Abort data unit is not acknowledged.</li>
+<li>Padding (P). Padding may be used to align the last byte of a fragment with a byte boundary (see <a href="#Padding" class="xref">Section 6</a>). The number of bits used for padding is not defined and depends on the size of the Rule ID, DTag and FCN fields, and on the L2 payload size. Some ACKs are byte-aligned and do not need padding (see <a href="#Bitmapopt" class="xref">Section 5.5.3</a>).</li>
 </ul>
 <h1 id="rfc.section.5.3">
 <a href="#rfc.section.5.3">5.3.</a> <a href="#delivery-reliability-modes" id="delivery-reliability-modes">Delivery Reliability modes</a>
@@ -977,7 +977,7 @@ address {
 <h1 id="rfc.section.5.4.4">
 <a href="#rfc.section.5.4.4">5.4.4.</a> <a href="#abort-formats" id="abort-formats">Abort formats</a>
 </h1>
-<p id="rfc.section.5.4.4.p.1">When a fragment sender needs to abort the transmission, it sends the All-1 Abort format <a href="#Fig-All1Abort" class="xref">Figure 16</a>.  When a fragment receiver needs to abort the on-going fragmented packet transmission, it transmits the ACK Abort format <a href="#Fig-ACKabort" class="xref">Figure 17</a>.</p>
+<p id="rfc.section.5.4.4.p.1">When a fragment sender needs to abort the transmission, it sends the Sender-Abort format <a href="#Fig-All1Abort" class="xref">Figure 16</a>, with all FCN bits set to 1.  When a fragment receiver needs to abort the on-going fragmented packet transmission, it transmits the Receiver-Abort format <a href="#Fig-ACKabort" class="xref">Figure 17</a>.</p>
 <div id="rfc.figure.16"></div>
 <div id="Fig-All1Abort"></div>
 <pre>
@@ -987,7 +987,7 @@ address {
 +--- ... ---+- ... -+-+-...-+-+-+-+-+-+-+-+-+
    
 </pre>
-<p class="figure">Figure 16: All-1 Abort format</p>
+<p class="figure">Figure 16: Sender-Abort format. All FCN fields in this format are set to 1</p>
 <div id="rfc.figure.17"></div>
 <div id="Fig-ACKabort"></div>
 <pre>
@@ -998,7 +998,7 @@ address {
  +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+-+-+
  
 </pre>
-<p class="figure">Figure 17: ACK Abort format</p>
+<p class="figure">Figure 17: Receiver-Abort format</p>
 <h1 id="rfc.section.5.5">
 <a href="#rfc.section.5.5">5.5.</a> <a href="#baseline-mechanism" id="baseline-mechanism">Baseline mechanism</a>
 </h1>
@@ -1035,20 +1035,20 @@ address {
 <p id="rfc.section.5.5.2.1.p.6">When an All-0 fragment is received, it indicates that all the fragments have been sent in the current window.  Since the sender is not obliged to always send a full window, some fragment number not set in the receiver memory may not correspond to losses.  The receiver sends the corresponding ACK, the Inactivity Timer is set and the transmission of the next window by the sender can start.</p>
 <p id="rfc.section.5.5.2.1.p.7">If an All-0 fragment has been received and all fragments of the current window have also been received, the receiver then expects a new Window and waits for the next fragment.  Upon receipt of a fragment, if the window value has not changed, the received fragments are part of a retransmission.  A receiver that has already received a fragment should discard it, otherwise, it updates the Bitmap.  If all the bits of the Bitmap are set to one, the receiver may send an ACK without waiting for an All-0 fragment and the Inactivity Timer is initialized.</p>
 <p id="rfc.section.5.5.2.1.p.8">On the other hand, if the window value of the next received fragment is set to the next expected window value, this means that the sender has received a correct Bitmap reporting that all fragments have been received.  The receiver then updates the value of the next expected window.</p>
-<p id="rfc.section.5.5.2.1.p.9">When an All-1 fragment is received, it indicates that the last fragment of the packet has been sent.  Since the last window is not always full, the MIC will be used to detect if all fragments of the packet have been received.  A correct MIC indicates the end of the transmission but the receiver must stay alive for an Inactivity Timer period to answer to any empty All-1 fragments the sender may send if ACKs sent by the receiver are lost. If the MIC is incorrect, some fragments have been lost.  The receiver sends the ACK regardless of successful fragmented packet reception or not, the Inactitivity Timer is set.  In case of an incorrect MIC, the receiver waits for fragments belonging to the same window. After MAX_ACK_REQUESTS, the receiver will abort the on-going fragmented packet transmission.  The receiver also Aborts upon Inactivity Timer expiration.</p>
+<p id="rfc.section.5.5.2.1.p.9">When an All-1 fragment is received, it indicates that the last fragment of the packet has been sent.  Since the last window is not always full, the MIC will be used to detect if all fragments of the packet have been received.  A correct MIC indicates the end of the transmission but the receiver must stay alive for an Inactivity Timer period to answer to any empty All-1 fragments the sender may send if ACKs sent by the receiver are lost. If the MIC is incorrect, some fragments have been lost.  The receiver sends the ACK regardless of successful fragmented packet reception or not, the Inactitivity Timer is set.  In case of an incorrect MIC, the receiver waits for fragments belonging to the same window. After MAX_ACK_REQUESTS, the receiver will abort the on-going fragmented packet transmission by transmitting a data unit with the Receiver-Abort format.  The receiver also aborts upon Inactivity Timer expiration.</p>
 <h1 id="rfc.section.5.5.2.2">
 <a href="#rfc.section.5.5.2.2">5.5.2.2.</a> <a href="#ACK-on-Error-subsection" id="ACK-on-Error-subsection">ACK-on-Error</a>
 </h1>
 <p id="rfc.section.5.5.2.2.p.1">The ACK-on-Error sender is similar to ACK-Always, the main difference being that in ACK-on-Error the ACK is not sent at the end of each window but only when at least one fragment of the current window has been lost (with the exception of the last window, see later text in this paragraph).  In Ack-on-Error,  the Retransmission Timer expiration will be considered as a positive acknowledgment. The Retransmission Timer is set when sending an All-0 or an All-1 fragment. When the All-1 fragment has been sent, then the on-going fragmented packet transmission fragmentation is finished and the sender waits for the last ACK. At the receiver side, when the All-1 fragment is received and the MIC check indicates successful packet reception, an ACK is sent nonetheless, to confirm the end of a correct transmission.  If the Retransmission Timer expires while waiting for the ACK for the last window, an All-1 empty request for the last ACK MUST be sent by the sender to complete the fragmented packet transmission.</p>
-<p id="rfc.section.5.5.2.2.p.2">If the sender receives an ACK, it checks the window value.  ACKs with an unexpected window number are discarded.  If the window number on the received Bitmap is correct, the sender verifies if the receiver has received all fragments of the current window.  When at least one fragment has been lost, the counter Attempts is increased by one and the sender resends the missing fragments again.  When Attempts reaches MAX_ACK_REQUESTS, the sender sends an Abort message and releases all resources for the on-going fragmented packet transmission.  When the retransmission of missing fragments is finished, the sender starts listening for an ACK (even if an All-0 or an All-1 has not been sent during the retransmission) and initializes and starts the Retransmission Timer.  After sending an All-1 fragment, the sender listens for an ACK, initializes Attempts, and initializes and starts the Retransmission Timer.  If the Retransmission Timer expires, Attempts is increased by one and an empty All-1 fragment is sent to request the ACK for the last window. If Attempts reaches MAX_ACK_REQUESTS, the on-going fragmented packet transmission is aborted.</p>
-<p id="rfc.section.5.5.2.2.p.3">Unlike the sender, the receiver for ACK-on-Error has a larger amount of differences compared with ACK-Always.  First, an ACK is not sent unless there is a lost fragment or an unexpected behavior (with the exception of the last window, where an ACK is always sent regardless of fragment losses or not).  The receiver starts by expecting fragments from window 0 and maintains the information regarding which fragments it receives.  After receiving a fragment, the Inactivity Timer is set, if no fragment has been received and the Inactivity Timer expires the transmission is aborted.</p>
+<p id="rfc.section.5.5.2.2.p.2">If the sender receives an ACK, it checks the window value.  ACKs with an unexpected window number are discarded.  If the window number on the received Bitmap is correct, the sender verifies if the receiver has received all fragments of the current window.  When at least one fragment has been lost, the counter Attempts is increased by one and the sender resends the missing fragments again.  When Attempts reaches MAX_ACK_REQUESTS, the sender sends an Abort message and releases all resources for the on-going fragmented packet transmission.  When the retransmission of missing fragments is finished, the sender starts listening for an ACK (even if an All-0 or an All-1 has not been sent during the retransmission) and initializes and starts the Retransmission Timer.  After sending an All-1 fragment, the sender listens for an ACK, initializes Attempts, and initializes and starts the Retransmission Timer.  If the Retransmission Timer expires, Attempts is increased by one and an empty All-1 fragment is sent to request the ACK for the last window. If Attempts reaches MAX_ACK_REQUESTS, the sender aborts the on-going fragmented packet transmission by transmitting the Sender-Abort data unit.</p>
+<p id="rfc.section.5.5.2.2.p.3">Unlike the sender, the receiver for ACK-on-Error has a larger amount of differences compared with ACK-Always.  First, an ACK is not sent unless there is a lost fragment or an unexpected behavior (with the exception of the last window, where an ACK is always sent regardless of fragment losses or not).  The receiver starts by expecting fragments from window 0 and maintains the information regarding which fragments it receives.  After receiving a fragment, the Inactivity Timer is set.  If no further fragment is received and the Inactivity Timer expires, the fragment receiver aborts the on-going fragmented packet transmission by transmitting the Receiver-Abort data unit.</p>
 <p id="rfc.section.5.5.2.2.p.4">Any fragment not belonging to the current window is discarded.  The actual fragment number is computed based on the FCN value.  When an All-0 fragment is received and all fragments have been received, the receiver updates the expected window value.</p>
 <p id="rfc.section.5.5.2.2.p.5">If an All-0 fragment is received, even if another fragment is missing, all fragments from the current window have been sent.  Since the sender is not obligated to send a full window, a fragment number not used may not necessarily correspond to losses.  As the receiver does not know if the missing fragments are lost or not, it sends an ACK and reinitialises the Inactivity Timer.</p>
 <p id="rfc.section.5.5.2.2.p.6">On the other hand, after receiving an All-0 fragment, the receiver expects a new window and waits for the next fragment.<br> If the window value of the next fragment has not changed, the received fragment is a retransmission.  A receiver that has already received a fragment should discard it.  If all fragments of a window (that is not the last one) have been received, the receiver does not send an ACK.  While the receiver waits for the next window and if the window value is set to the next value, and if an All-1 fragment with the next value window arrived the receiver aborts the on-going fragmented packet transmission, and it drops the fragments of the aborted packet transmission.</p>
 <p id="rfc.section.5.5.2.2.p.7">If the receiver receives an All-1 fragment, this means that the transmission should be finished.  If the MIC is incorrect some fragments have been lost.  Regardless of fragment losses, the receiver sends an ACK and initializes the Inactivity Timer.</p>
 <p id="rfc.section.5.5.2.2.p.8">Reception of an All-1 fragment indicates the last fragment of the packet has been sent.  Since the last window is not always full, the MIC will be used to detect if all fragments of the window have been received.  A correct MIC check indicates the end of the fragmented packet transmission. An ACK is sent by the fragment receiver. In case of an incorrect MIC, the receiver waits for fragments belonging to the same window or the expiration of the Inactivity Timer. The latter will lead the receiver to abort the on-going fragmented packet transmission.</p>
 <h1 id="rfc.section.5.5.3">
-<a href="#rfc.section.5.5.3">5.5.3.</a> <a href="#Bitmapopt" id="Bitmapopt">Bitmap Optimization</a>
+<a href="#rfc.section.5.5.3">5.5.3.</a> <a href="#Bitmapopt" id="Bitmapopt">Bitmap Encoding</a>
 </h1>
 <p id="rfc.section.5.5.3.p.1">The Bitmap is transmitted by a receiver as part of the ACK format.  An ACK message may include padding at the end to align its number of transmitted bits to a multiple of 8 bits.</p>
 <p id="rfc.section.5.5.3.p.2">Note that the ACK sent in response to an All-1 fragment includes the C bit. Therefore, the window size and thus the Bitmap size need to be determined taking into account the available space in the layer two frame payload, where there will be 1 bit less for an ACK sent in response to an All-1 fragment than in other ACKs.</p>
@@ -1746,7 +1746,7 @@ Lcl_Bitmap==recv_Bitmap &amp;| |   |   all missing frag sent
 +---------------------+ &#160; &#160; Rcv &#160; &#160;  +---&gt;* ABORT 
 |  +------------------+ &#160; Window &#160; &#160; |
 |  | &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160;  +=====+==+=====+  
-|  |       All-0 &amp; w=expect |  ^ w =next &amp; not-All
+|  |       All-0 &amp; w=expect |  | w =next &amp; not-All
 |  |     ~~~~~~~~~~~~~~~~~~ |  |~~~~~~~~~~~~~~~~~~~~~
 |  |     set lcl_Bitmap(FCN)|  |expected = next window
 |  |      send local_Bitmap |  |Clear local_Bitmap
