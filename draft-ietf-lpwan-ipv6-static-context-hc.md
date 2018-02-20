@@ -268,14 +268,18 @@ Rule ID are identifiers used to select either the correct context to be used for
 for Fragmentation. The size of the Rule ID is not specified in this document. It is implementation-specific and can vary 
 according to the LPWAN technology and the number of packets, among others. 
 
-The Rule ID space needs at least to be divided in two parts, some values are reserved for functionalities other than header
-compression (see {{IDComp}}), such as fragmentation (see {{Frag}}).
-
 The Rule ID for the SCHC C/D identifies the context used to keep the Field Description of the header packet. However, 
 fragmentation may benefit from using specific Rule IDs (which are tied to specific modes and settings) for a particular 
 underlying LPWAN technology.
 
-The size in bits of the Rule ID is based on many parameters. In SCHC C/D the size SHOULD be reduced to a minimal size of some bits, by default 4. In the fragmentation the Rule ID size depends on the reliable modes, and the L2 PDU size in order to ACK the complete fragments in the Bitmap, the default value is implementation dependant and may be defined in the technology-specific documents.
+The Rule ID space needs at least to be divided to represent some values for the case when compression has not been possible 
+and the packet may be not used fragmentation, some values are  used for SCHC C/D contexts identifiers (see {{IDComp}}) and 
+some vallues are reserved for functionalities other than header compression, such as fragmentation (see {{Frag}}).
+
+The size in bits of the Rule ID is based on many parameters. In SCHC C/D the size SHOULD be reduced to a minimal size of some 
+bits, by default 4. In the fragmentation, the Rule ID size depends on the reliable modes, and the L2 PDU size in order to ACK 
+the complete fragments in the Bitmap. The default value is implementation dependant and may be defined in the technology-
+specific documents.
 
 
 # Static Context Header Compression
@@ -400,7 +404,7 @@ position is 1.
   and decompression processes. The CDA may require some
   parameters. CDA is used in both the compression and the decompression phases. The set of CDAs defined in this document can be found in {{chap-CDA}}.
   
-## Rule ID for SCHC C/D {IDComp}
+## Rule ID for SCHC C/D {#IDComp}
 
 Rule ID are sent by the compression element and are intended for the decompression element.
 In SCHC C/D, the Rule IDs are specific to a Dev Hence, multiple Dev instances may use the same Rule ID to define
