@@ -395,45 +395,36 @@ find the appropriate Rule to be applied. For Devs with different LPWAN radio int
 
 The compression/decompression process follows several steps:
 
-* 1. Compression Rule selection: The goal is to identify which Rule(s) to use
-  to compress the packet's headers. When doing compression in the NGW side the SCHC C/D needs to find the 
-  correct Rule based on the packet and in this way, finds the Dev-ID and the Rule-ID. In the Dev, only the Rule 
-  ID is needed to identify the correct Rule since Dev only holds rules that apply to itself. The detailed steps  
-  for Compression Rule selection are the following:
-    1.a. The first step is to choose the Fields Description by their direction, using the
-         direction indicator (DI), so the Fields Description that do not correspond to the appropriate DI will be ignored, the Rule is discarded and SCHC C/D proceeds to explore the next Rule          .
-    1.b. Next, the fields are identified according to their field identifier (FID) and field position (FP).
-         If the field position does not correspond, then the Rule is not used and the SCHC proceeds to consider the next Rule.
-    1.c. Once the DI and the FP correspond to the header information, each field's value is then compared to the corresponding 
-         target value (TV) stored in the Rule for that specific field using the matching operator (MO).
-    1.d. If all the fields in the packet's header satisfy all the matching operators (MOs) of a Rule (i.e. all results are True),
-         the fields of the header are then processed according to the Compression/Decompression Actions (CDAs) 
-         and a compressed header is obtained. Otherwise, the next rule is tested. 
-  If no eligible Rule is found, then the header must be sent without compression, in which case the fragmentation process 
-  may be required.
+* 1. Compression Rule selection: The goal is to identify which Rule(s) will be used
+  to compress the packet's headers. When doing compression, the Rule will be selected by matching the Field Description to the packet header as described below. When the selection of a Rule is done, the Rule-ID is used to compress the header. 
+The detailed steps for compression Rule selection are the following:
+  * The first step is to choose the Field Description by its direction, using the direction indicator (DI). A Field Description that does not correspond to the appropriate DI will be ignored, if all the fields of the packet do not have a Field Description with the correct DI the Rule is discarded and SCHC C/D proceeds to explore the next Rule.
+  * When the DI has matched, then the next step is to identify the fields according to field position (FP). If the field position does not correspond, then the Rule is not used and the SCHC proceeds to consider the next Rule.
+  * Once the DI and the FP correspond to the header information, each field's value is then compared to the corresponding target value (TV) stored in the Rule for that specific field using the matching operator (MO).
+  * If all the fields in the packet's header satisfy all the matching operators (MO) of a Rule (i.e. all MO results are True), the fields of the header are then compressed according to the Compression/Decompression Actions (CDAs) and a compressed header (with possibly a compressed residue) may be obtained. Otherwise, the next Rule is tested. 
+  * If no eligible Rule is found, then the header must be sent without compression, in which case the fragmentation process may be required.
 
-* 2. Sending: If an eligible Rule is found, the Rule ID is sent to the other end followed by the information resulting from the    
-  compression of header fields, and directly followed by the payload. The product of field compression is sent in the order expressed 
-  in the Rule for the matching fields. The way the Rule ID is sent depends on the specific LPWAN layer two technology. For
-  example, it can be either included in a Layer 2 header or sent in the first byte of the L2 payload. (Cf. {{Fig-FormatPckt}}).
-  This process will be specified in a LPWAN technology-specific document and is out of the scope of the present document. On LPWAN technologies that are byte-oriented, the compressed header concatenated with the original packet payload are padded to a multiple of 8 bits, if needed. See {{Padding}} for details.
+* 2. Sending: If an eligible Rule is found, the Rule ID is sent to the other end followed by the Compression Residue (which could be empty) and directly followed by the payload. The product of the Compression Residue is sent in the order expressed in the Rule for the matching fields. 
+
+The way the Rule ID is sent depends on the specific LPWAN layer two technology. For example, it can be either included in a Layer 2 header or sent in the first byte of the L2 payload. (Cf. {{Fig-FormatPckt}}).
+  
+This process will be specified in the LPWAN technology-specific document and is out of the scope of the present document. On LPWAN technologies that are byte-oriented, the compressed header concatenated with the original packet payload is padded to a multiple of 8 bits, if needed. See {{Padding}} for details.
 
 
-* 3. Decompression: In both directions, the receiver identifies the sender through its device-id
-  (e.g. MAC address) and selects the appropriate Rule through the Rule ID. This
-  Rule describes the compressed header format and associates the values to the header fields.
-  The receiver applies the CDA action to reconstruct the original
-  header fields. The CDA application order can be different from the order given by the Rule. For instance,
+* 3. Decompression: 
+When doing decompression, in the NGW side the SCHC C/D needs to find the correct Rule based on the L2 PDU and in this way, it can find the Dev-ID and the Rule-ID. In the Dev side, only the Rule ID is needed to identify the correct Rule since the Dev only holds rules that apply to itself. 
+
+The receiver identifies the sender through its device-id (e.g. MAC address, if exist) and selects the appropriate Rule from the Rule ID. ThisRule describes the compressed header format and associates the values to the header fields.  The receiver applies the CDA action to reconstruct the original header fields. The CDA application order can be different from the order given by the Rule. For instance,
   Compute-\* may be applied at the end, after all the other CDAs.
   
   
 ~~~~
 
-   +--- ... --+------- ... -------+------------------+--...--+
-   |  Rule ID |Compression Residue|  packet payload  |padding|
-   +--- ... --+------- ... -------+------------------+--...--+
++--- ... --+------- ... -------+------------------+--...--
+|  Rule ID |Compression Residue|  packet payload  |{padding}
++--- ... --+------- ... -------+------------------+-optional-
 
-   <----- compressed header ------>
+<----- compressed header ------>
 
 ~~~~
 {: #Fig-FormatPckt title='LPWAN Compressed Header Packet Format'}
