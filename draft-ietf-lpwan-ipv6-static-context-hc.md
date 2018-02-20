@@ -197,17 +197,23 @@ This section defines the terminology and acronyms used in this document.
 
 * Rule entry: A row in the rule that describes a header field.
 
-* Rule ID: An identifier for a rule, SCHC C/D, and Dev share the same Rule ID for a specific flow. A set of Rule IDs are used to support fragmentation functionality.
+* Rule ID: An identifier for a rule, SCHC C/D in both sides share the same Rule ID for a specific packet. A set of Rule IDs 
+are used to support fragmentation functionality.
 
-* SCHC C/D: Static Context Header Compression Compressor/Decompressor. A mechanism used in both sides, at the Dev and at the network to achieve Compression/Decompression of headers. SCHC C/D uses SCHC rules to perform compression and decompression.
+* SCHC C/D: Static Context Header Compression Compressor/Decompressor. A mechanism used in both sides, at the Dev and at the 
+network to achieve Compression/Decompression of headers. SCHC C/D uses SCHC rules to perform compression and decompression.
 
-* SCHC packet: A packet (e.g. an IPv6 packet) whose header has been compressed as per the header compression mechanism defined in this document. If the header compression process is unable to actually compress the packet header, the packet with the uncompressed header is still called a SCHC packet (in this case, a Rule ID is used to indicate that the packet header has not been compressed).
+* SCHC packet: A packet (e.g. an IPv6 packet) whose header has been compressed as per the header compression mechanism 
+defined in this document. If the header compression process is unable to actually compress the packet header, the packet with 
+the uncompressed header is still called a SCHC packet (in this case, a Rule ID is used to indicate that the packet header has 
+not been compressed).
 
 * TV: Target value. A value contained in the Rule that will be matched with the value of a header field.
 
 * Up: Uplink direction for compression/decompression, from the Dev SCHC C/D to the network SCHC C/D.
 
-* W: Window bit. A fragment header field used in Window mode (see section 5), which carries the same value for all fragments of a window.
+* W: Window bit. A fragment header field used in Window mode (see section 5), which carries the same value for all fragments 
+of a window.
 
 * Window:  A subset of the fragments needed to carry a packet (see section 5)
 
@@ -238,9 +244,9 @@ transmitted, header compression is first applied to the packet. The resulting pa
                          A packet (e.g. an IPv6 packet)
                              |
                              V   
-                    +-----------------+
-                    |   Compression   |
-                    +-----------------+            
+               +------------------------------+
+               |SCHC Compression/Decompression|
+               +------------------------------+            
                              |
                         SCHC packet              
                              |
@@ -255,6 +261,22 @@ transmitted, header compression is first applied to the packet. The resulting pa
 
 ~~~~
 {: #Fig-Operations title='SCHC operations from a sender point of view: header compression and fragmentation'}
+
+# Rule ID
+
+Rule ID are identifiers used to select either the correct context to be used for Compression/Decompression functionalities or 
+for Fragmentation. The size of the Rule ID is not specified in this document. It is implementation-specific and can vary 
+according to the LPWAN technology and the number of packets, among others. 
+
+The Rule ID space needs at least to be divided in two parts, some values are reserved for functionalities other than header
+compression (see {{IDComp}}), such as fragmentation (see {{Frag}}).
+
+The Rule ID for the SCHC C/D identifies the context used to keep the Field Description of the header packet. However, 
+fragmentation may benefit from using specific Rule IDs (which are tied to specific modes and settings) for a particular 
+underlying LPWAN technology.
+
+The size in bits of the Rule ID is based on many parameters. In SCHC C/D the size SHOULD be reduced to a minimal size of some bits, by default 4. In the fragmentation the Rule ID size depends on the reliable modes, and the L2 PDU size in order to ACK the complete fragments in the Bitmap, the default value is implementation dependant and may be defined in the technology-specific documents.
+
 
 # Static Context Header Compression
 
@@ -377,20 +399,15 @@ position is 1.
 * Compression Decompression Action (CDA) describes the pair of reciprocal compression
   and decompression processes. The CDA may require some
   parameters. CDA is used in both the compression and the decompression phases. The set of CDAs defined in this document can be found in {{chap-CDA}}.
+  
+## Rule ID for SCHC C/D {IDComp}
 
-## Rule ID
-
-Rule IDs are sent by the compression element and are intended for the decompression element. The size
-of the Rule ID is not specified in this document. It is implementation-specific and can vary according to the
-LPWAN technology and the number of flows, among others. 
-
-Some values in the Rule ID space are reserved for functionalities other than header
-compression, such as packet fragmentation. (See {{Frag}}).
-
-Rule IDs are specific to a Dev. Hence, multiple Dev instances may use the same Rule ID to define
+Rule ID are sent by the compression element and are intended for the decompression element.
+In SCHC C/D, the Rule IDs are specific to a Dev Hence, multiple Dev instances may use the same Rule ID to define
 different header compression contexts. To identify the correct Rule ID, the
 SCHC C/D needs to correlate the Rule ID with the Dev identifier to
-find the appropriate Rule to be applied. For Devs with different LPWAN radio interfaces, several approaches are allowed. For example, the same set of Rule IDs may be used for packet transmission over the different interfaces. However, fragmentation may benefit from using specific Rule IDs (which are tied to specific modes and settings) for a particular underlying LPWAN technology.  
+find the appropriate Rule to be applied. For Devs with different LPWAN radio interfaces, several approaches are allowed. For 
+example, the same set of Rule IDs may be used for packet transmission over the different interfaces.  
 
 
 ## Packet processing
@@ -399,10 +416,17 @@ The compression/decompression process follows several steps:
 
 * 1. Compression Rule selection: The goal is to identify which Rule(s) will be used
   to compress the packet's headers. When doing compression in the NGW side the SCHC C/D needs to find the correct
-  Rule to be used by identifying the Dev-ID and the Rule-ID on the packet. In the Dev side, only the Rule-ID may be used. the 
-  Rule will be selected by matching the Fields Descriptions to the packet header as described below. When the selection of a 
-  Rule is done, the Rule-ID is used to compress the header. 
+  Rule to be used by identifying the Dev-ID (of the L2 address) and the Rule-ID on the packet. In the Dev side, only the 
+  Rule-ID may be used. the Rule will be selected by matching the Fields Descriptions to the packet header as described below. 
+  When the selection of a Rule is done, the Rule-ID is used to compress the header. 
   
+  When doing decompression, in the NGW side the SCHC C/D needs to find the correct Rule based on the L2 
+address and in this way, it can find the Dev-ID and the Rule-ID. In the Dev side, only the Rule ID is needed to identify the 
+correct Rule since the Dev only holds Rules that apply to itself.
+  
+  When doing decompression, in the NGW side the SCHC C/D needs to find the correct Rule based on the L2 
+address and in this way, it can find the Dev-ID and the Rule-ID. In the Dev side, only the Rule ID is needed to identify the 
+correct Rule since the Dev only holds Rules that apply to itself.
 The detailed steps for compression Rule selection are the following:
   * The first step is to choose the Fields Descriptions by their direction, using the direction indicator (DI). A Field Description that does not correspond to the appropriate DI will be ignored, if all the fields of the packet do not have a Field Description with the correct DI the Rule is discarded and SCHC C/D proceeds to explore the next Rule.
   * When the DI has matched, then the next step is to identify the fields according to Field Position (FP). If the Field Position does not correspond, the Rule is not used and the SCHC C/D proceeds to consider the next Rule.
@@ -422,12 +446,12 @@ LPWAN technologies that are byte-oriented, the compressed header concatenated wi
 multiple of 8 bits, if needed. See {{Padding}} for details.
 
 
-* 3. Decompression: When doing decompression, in the NGW side the SCHC C/D needs to find the correct Rule based on the L2 PDU 
-and in this way, it can find the Dev-ID and the Rule-ID. In the Dev side, only the Rule ID is needed to identify the correct 
-Rule since the Dev only holds rules that apply to itself. 
+* 3. Decompression: When doing decompression, in the NGW side the SCHC C/D needs to find the correct Rule based on the L2 
+address and in this way, it can find the Dev-ID and the Rule-ID. In the Dev side, only the Rule ID is needed to identify the 
+correct Rule since the Dev only holds Rules that apply to itself. 
 
 The receiver identifies the sender through its device-id (e.g. MAC address, if exists) and selects the appropriate Rule from 
-the Rule ID. If a source identifier is present in the L2 technology, it is used to select the namespace for the Rule ID. 
+the Rule ID. If a source identifier is present in the L2 technology, it is used to select the Rule ID. 
 This Rule describes the compressed header format and associates the values to the header fields.  The receiver applies the 
 CDA action to reconstruct the original header fields. The CDA application order can be different from the order given by the 
 Rule. For instance,
@@ -480,13 +504,13 @@ the original value.
 |not-sent            |elided       |use value stored in ctxt    |
 |value-sent          |send         |build from received value   |
 |match-mapping       |send index   |value from index on a table |
-|LSB(length)         |send LSB     |TV OR received value        |
+|LSB(y)              |send LSB     |TV,  received value         |
 |compute-length      |elided       |compute length              |
 |compute-checksum    |elided       |compute UDP checksum        |
 |Deviid              |elided       |build IID from L2 Dev addr  |
 |Appiid              |elided       |build IID from L2 App addr  |
 \--------------------+-------------+----------------------------/
-
+y=size of the transmitted bits
 ~~~~
 {: #Fig-function title='Compression and Decompression Functions'}
 
@@ -494,28 +518,28 @@ the original value.
 a field. The first column lists the actions name. The second and third
 columns outline the reciprocal compression/decompression behavior for each action.
 
-Compression is done in the rule order and compressed values are sent in that order in the compressed
-message. The receiver is assumed to know the size of each compressed field
-which can be given by the rule or may be sent with the compressed header. 
+Compression is done in order that Fields Descriptions appear in the Rule. The result of each Compression/Decompression Action is appended to the working Compression Residue in that same order. The receiver is assumed to know the size of each compressed field which can be given by the rule or may be sent with the compressed header. 
 
-If the field is identified as being variable, then its size must be sent first using the following coding:
+If the field is identified as being variable in the Field Description, then the size of the Compression Residue value in bytes must be sent first using the following coding:
 
-* If the size is between 0 and 14 bytes, it is sent as a 4-bit integer.
+* If the size is between 0 and 14 bytes, it is sent as a 4-bits integer.
 
-* For values between 15 and 255, the first 4 bits sent are set to 1 and the size is sent using 8 bits. 
+* For values between 15 and 255, the first 4 bits sent are set to 1 and the size is sent using 8 bits integer. 
 
 * For higher values of size, the first 12 bits are set to 1 and the next two bytes contain the size value as a 16 bits integer. 
 
+* If a field does not exist in the packet but in the Rule and its FL is variable, the size zero may be used.
+
 ### not-sent CDA
 
-The not-sent function is generally used when the field value is specified in the rule and
+The not-sent function is generally used when the field value is specified in the Rule and
 therefore known by both the Compressor and the Decompressor. This action is generally used with the
 "equal" MO. If MO is "ignore", there is a risk to have a decompressed field
 value different from the compressed field.
 
-The compressor does not send any value in the compressed header for a field on which not-sent compression is applied.
+The compressor does not send any value in the Compressed Residue for a field on which not-sent compression is applied.
 
-The decompressor restores the field value with the target value stored in the matched rule.
+The decompressor restores the field value with the Target Value stored in the matched Rule identified by the received Rule ID.
 
 ### value-sent CDA
 
@@ -525,7 +549,7 @@ size of the field, either implicitly (the size is known by both sides)
 or explicitly in the compression residue by indicating the length, as defined in {{chap-CDA}}. This function is generally 
 used with the "ignore" MO.
 
-### mapping-sent
+### mapping-sent CDA
 
 The mapping-sent is used to send a smaller index (the index into
 the Target Value list of values) instead of the original value. This function is used together with the "match-mapping" MO.
@@ -542,10 +566,10 @@ A length can be specified in the rule to indicate
 how many bits have to be sent. If the length is not specified, the number of bits sent is the
 original header field length minus the length specified in the MSB MO.
 
-The compressor sends the Least Significant Bits (e.g. LSB of the length field). The
-decompressor combines the value received with the Target Value.
+The compressor sends the 'y' Least Significant Bits (e.g. LSB of the length field). The
+decompressor combines the value received with the Target Value depending on the field type. 
 
-If this action is made on a variable length field, the remaining size in bytes must be sent before.
+If this action is made on a variable length field, the size of the Compressed Residue in bytes has to be sent as described in {{#chap-CDA}}.
 
 
 ### DEViid, APPiid CDA
@@ -556,17 +580,16 @@ frames contain a single address, which is the Dev's address.
 
 The IID value MAY be computed from the Device ID present in the Layer 2 header, or from some other stable identifier. The computation is specific for each LPWAN technology and MAY depend on the Device ID size.
 
-In the Downlink direction, these CDA may be used to determine the L2 addresses used by the LPWAN.
+In the Downlink direction, these Deviid CDA may be used to determine the L2 addresses used by the LPWAN.
 
 ### Compute-\*
 
-These classes of functions are used by the decompressor to compute the compressed field value based on received information. 
-Compressed fields are elided during compression and reconstructed during decompression.
+Some fields are elided during compression and reconstructed during decompression. This is the case for length and Checksum, so:
 
-* compute-length: compute the length assigned to this field. For instance, regarding
-  the field ID, this CDA may be used to compute IPv6 length or UDP length.
+* compute-length: computes the length assigned to this field. This CDA may be used to compute IPv6 length or UDP 
+length.
 
-* compute-checksum: compute a checksum from the information already received by the SCHC C/D.
+* compute-checksum: computes a checksum from the information already received by the SCHC C/D.
   This field may be used to compute UDP checksum.
 
 
