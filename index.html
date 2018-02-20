@@ -596,7 +596,7 @@ address {
 <li>FCN: Fragment Compressed Number. This fragmentation header field carries an efficient representation of a larger-sized fragment number.</li>
 <li>Field Description. A line in the Rule Table.</li>
 <li>FID: Field Identifier. This is an index to describe the header fields in a Rule.</li>
-<li>FL: Field Length identifies whether a field has fixed or variable size, and for the latter it indicates its length.</li>
+<li>FL: Field Length is the length of the field in bits for fixed values or a type (variable, token length, &#8230;) for length unknown at the rule creation. The length of a header field is defined in the specific protocol standard.</li>
 <li>FP: Field Position is a value that is used to identify the position where each instance of a field appears in the header.</li>
 <li>Fragment: A data unit that carries a subset of a SCHC packet. Fragmentation is needed when the size of a SCHC packet exceeds the available payload size of the underlying L2 technology data unit.</li>
 <li>IID: Interface Identifier. See the IPv6 addressing architecture <a href="#RFC7136" class="xref">[RFC7136]</a>
@@ -624,15 +624,15 @@ address {
 <div id="Fig-IntroLayers"></div>
 <pre>
  
-                  +----------------+
-                  |      IPv6      | 
-                / +----------------+            
-               /  |   Compression  |  
-         SCHC &lt;   +----------------+   
-               \  |  Fragmentation |
-                \ +----------------+         
-                  |LPWAN technology|
-                  +----------------+ 
+             +----------------+
+             |      IPv6      | 
+          +- +----------------+            
+          |  |   Compression  |  
+    SCHC &lt;   +----------------+   
+          |  |  Fragmentation |
+          +- +----------------+         
+             |LPWAN technology|
+             +----------------+ 
 
 </pre>
 <p class="figure">Figure 2: Protocol stack comprising IPv6, SCHC and an LPWAN technology</p>
@@ -684,12 +684,13 @@ address {
                                  +---------+
 </pre>
 <p class="figure">Figure 4: Architecture</p>
-<p><a href="#Fig-archi" class="xref">Figure 4</a> represents the architecture for compression/decompression. It is based on <a href="#I-D.ietf-lpwan-overview" class="xref">[I-D.ietf-lpwan-overview]</a> terminology. The Device sends application flows using IPv6 or IPv6/UDP protocols. These flows are compressed by a Static Context Header Compression Compressor/Decompressor (SCHC C/D) to reduce the headers size. (Note that if the resulting data unit exceeds the maximum payload size of the underlying LPWAN technology, fragmentation is performed, see <a href="#Frag" class="xref">Section 6</a>.) The resulting data unit is sent as one or more L2 frames to a LPWAN Radio Gateway (RG) which forwards the frame(s) to a Network Gateway (NGW).  The NGW sends the data to an SCHC C/D for decompression. The SCHC C/D can be located in the Network Gateway (NGW) or somewhere else as long as a tunnel is established between the NGW and the SCHC C/D.  Note that, for some LPWAN technologies, it may be suitable to locate fragmentation and reassembly functionality nearer the NGW, in order to better deal with time constraints of such technologies.  The SCHC C/Ds on both sides must share the same set of Rules.  After decompression, the packet can be sent over the Internet to one or several LPWAN Application Servers (App).</p>
-<p id="rfc.section.5.p.3">The SCHC C/D process is symmetrical, therefore the same description applies to the reverse direction.</p>
+<p><a href="#Fig-archi" class="xref">Figure 4</a> represents the architecture for compression/decompression. It is based on <a href="#I-D.ietf-lpwan-overview" class="xref">[I-D.ietf-lpwan-overview]</a> terminology. The Device sends application flows using IPv6 or IPv6/UDP protocols. These flows are compressed by a Static Context Header Compression Compressor/Decompressor (SCHC C/D) to reduce the headers size. SCHC C/D is located in both sides of the transmission in the Dev and in the Network side. Note that if the resulting data unit exceeds the maximum payload size of the underlying LPWAN technology, fragmentation is performed, see <a href="#Frag" class="xref">Section 6</a>. The resulting data unit is sent as one or more L2 frames to a LPWAN Radio Gateway (RG) which forwards the frame(s) to a Network Gateway (NGW).</p>
+<p id="rfc.section.5.p.3">The NGW sends the data to an SCHC C/D for decompression. The SCHC C/D in the Network side can be located in the Network Gateway (NGW) or somewhere else as long as a tunnel is established between the NGW and the SCHC C/D.  Note that, for some LPWAN technologies, it may be suitable to locate fragmentation and reassembly functionality nearer the NGW, in order to better deal with time constraints of such technologies.  The SCHC C/Ds on both sides must share the same set of Rules.  After decompression, the packet can be sent over the Internet to one or several LPWAN Application Servers (App).</p>
+<p id="rfc.section.5.p.4">The SCHC C/D process is symmetrical, therefore the same description applies to the reverse direction.</p>
 <h1 id="rfc.section.5.1">
 <a href="#rfc.section.5.1">5.1.</a> <a href="#schc-rules" id="schc-rules">SCHC Rules</a>
 </h1>
-<p id="rfc.section.5.1.p.1">The main idea of the SCHC compression scheme is to transmit the Rule ID to the other end instead of sending known field values. This Rule ID identifies a rule that provides the closest match to the original packet values. Hence, when a value is known by both ends, it is only necessary to send the corresponding Rule ID over the LPWAN network.</p>
+<p id="rfc.section.5.1.p.1">The main idea of the SCHC compression scheme is to transmit the Rule ID to the other end instead of sending known field values. This Rule ID identifies a rule that provides the closest match to the original packet values. Hence, when a value is known by both ends, it is only necessary to send the corresponding Rule ID over the LPWAN network.  How Rules are generated is out of the scope of this document.</p>
 <p id="rfc.section.5.1.p.2">The context contains a list of rules (cf. <a href="#Fig-ctxt" class="xref">Figure 5</a>). Each Rule contains itself a list of Field Descriptions composed of a field identifier (FID), a field length (FL), a field position (FP), a direction indicator (DI), a target value (TV), a matching operator (MO) and a Compression/Decompression Action (CDA).</p>
 <div id="rfc.figure.5"></div>
 <div id="Fig-ctxt"></div>
@@ -714,14 +715,14 @@ address {
 </pre>
 <p class="figure">Figure 5: Compression/Decompression Context</p>
 <p id="rfc.section.5.1.p.3">The Rule does not describe how to delineate each field in the original packet header. This must be known from the compressor/decompressor. The rule only describes the compression/decompression behavior for each header field. In the rule, the Field Descriptions are listed in the order in which the fields appear in the packet header.</p>
-<p id="rfc.section.5.1.p.4">The Rule also describes the compression residue which is transmitted in the same order as the one used by the Field Description in the Rule.</p>
+<p id="rfc.section.5.1.p.4">The Rule also describes the Compression Residue is sent based on the regarding the same order as the one used by the Field Description in the Rule.</p>
 <p id="rfc.section.5.1.p.5">The Context describes the header fields and its values with the following entries:</p>
 <p></p>
 
 <ul>
 <li>Field ID (FID) is a unique value to define the header field.</li>
-<li>Field Length (FL) is the length of the field in bits for fixed values or a type (variable, token length) for variable values. The length of a header field is defined in the specific standard document.</li>
-<li>Field Position (FP): in case several occurences of a field exist in the header, FP indicatess which one is targeted. The default position is 1.</li>
+<li>Field Length (FL) is the length of the field in bits for fixed values or a type (variable, token length, &#8230;) for Field Description length unknown at the rule creation. The length of a header field is defined in the specific protocol standard.</li>
+<li>Field Position (FP): indicating if several instances of a field exist in the headers which one is targeted. The default position is 1.</li>
 <li>A direction indicator (DI) indicating the packet direction(s) this Field Description applies to. Three values are possible:  <ul>
 <li>UPLINK (Up): this Field Description is only applicable to packets sent by the Dev to the App,</li>
 <li>DOWNLINK (Dw): this Field Description is only applicable to packets sent from the App to the Dev,</li>
@@ -744,23 +745,24 @@ address {
 <p id="rfc.section.5.3.p.1">The compression/decompression process follows several steps:</p>
 <p></p>
 
-<ul>
-<li><ol><li>Compression Rule selection: The goal is to identify which Rule(s) will be used to compress the packet&#8217;s headers. When doing compression, the Rule will be selected by matching the Field Description to the packet header as described below. When the selection of a Rule is done, the Rule-ID is used to compress the header.  The detailed steps for compression Rule selection are the following: * The first step is to choose the Field Description by its direction, using the direction indicator (DI). A Field Description that does not correspond to the appropriate DI will be ignored, if all the fields of the packet do not have a Field Description with the correct DI the Rule is discarded and SCHC C/D proceeds to explore the next Rule.  * When the DI has matched, then the next step is to identify the fields according to field position (FP). If the field position does not correspond, then the Rule is not used and the SCHC proceeds to consider the next Rule.  * Once the DI and the FP correspond to the header information, each field&#8217;s value is then compared to the corresponding target value (TV) stored in the Rule for that specific field using the matching operator (MO).  * If all the fields in the packet&#8217;s header satisfy all the matching operators (MO) of a Rule (i.e. all MO results are True), the fields of the header are then compressed according to the Compression/Decompression Actions (CDAs) and a compressed header (with possibly a compressed residue) may be obtained. Otherwise, the next Rule is tested.  * If no eligible Rule is found, then the header must be sent without compression, in which case the fragmentation process may be required.</li></ol></li>
-<li><ol><li>Sending: If an eligible Rule is found, the Rule ID is sent to the other end followed by the Compression Residue (which could be empty) and directly followed by the payload. The product of the Compression Residue is sent in the order expressed in the Rule for the matching fields.</li></ol></li>
-</ul>
-<p id="rfc.section.5.3.p.3">The way the Rule ID is sent depends on the specific LPWAN layer two technology. For example, it can be either included in a Layer 2 header or sent in the first byte of the L2 payload. (Cf. <a href="#Fig-FormatPckt" class="xref">Figure 6</a>).</p>
-<p id="rfc.section.5.3.p.4">This process will be specified in the LPWAN technology-specific document and is out of the scope of the present document. On LPWAN technologies that are byte-oriented, the compressed header concatenated with the original packet payload is padded to a multiple of 8 bits, if needed. See <a href="#Padding" class="xref">Section 7</a> for details.</p>
+<ul><li><ol><li>Compression Rule selection: The goal is to identify which Rule(s) will be used to compress the packet&#8217;s headers. When doing compression in the NGW side the SCHC C/D needs to find the correct Rule to be used by identifying the Dev-ID and the Rule-ID on the packet. In the Dev side, only the Rule-ID may be used. the Rule will be selected by matching the Fields Descriptions to the packet header as described below. When the selection of a Rule is done, the Rule-ID is used to compress the header.</li></ol></li></ul>
+<p id="rfc.section.5.3.p.3">The detailed steps for compression Rule selection are the following: * The first step is to choose the Fields Descriptions by their direction, using the direction indicator (DI). A Field Description that does not correspond to the appropriate DI will be ignored, if all the fields of the packet do not have a Field Description with the correct DI the Rule is discarded and SCHC C/D proceeds to explore the next Rule.  * When the DI has matched, then the next step is to identify the fields according to Field Position (FP). If the Field Position does not correspond, the Rule is not used and the SCHC C/D proceeds to consider the next Rule.  * Once the DI and the FP correspond to the header information, each field&#8217;s value of the packet is then compared to the corresponding Target Value (TV) stored in the Rule for that specific field using the matching operator (MO).  * If all the fields in the packet&#8217;s header satisfy all the matching operators (MO) of a Rule (i.e. all MO results are True), the fields of the header are then compressed according to the Compression/Decompression Actions (CDAs) and a compressed header (with possibly a Compressed Residue) may be obtained. Otherwise, the next Rule is tested.  * If no eligible Rule is found, then the header must be sent without compression, depending on the L2 this is one of the case that may require the fragmentation process.</p>
+<p></p>
+
+<ul><li><ol><li>Sending: If an eligible Rule is found, the Rule ID is sent to the other end followed by the Compression Residue (which could be empty) and directly followed by the payload. The product of the Compression Residue is sent in the order expressed in the Rule for the matching fields.</li></ol></li></ul>
+<p id="rfc.section.5.3.p.5">The way the Rule ID is sent depends on the specific LPWAN layer two technology. For example, it can be either included in a Layer 2 header or sent in the first byte of the L2 payload. (Cf. <a href="#Fig-FormatPckt" class="xref">Figure 6</a>).</p>
+<p id="rfc.section.5.3.p.6">This process will be specified in the LPWAN technology-specific document and is out of the scope of the present document. On LPWAN technologies that are byte-oriented, the compressed header concatenated with the original packet payload is padded to a multiple of 8 bits, if needed. See <a href="#Padding" class="xref">Section 7</a> for details.</p>
 <p></p>
 
 <ul><li><ol><li>Decompression: When doing decompression, in the NGW side the SCHC C/D needs to find the correct Rule based on the L2 PDU and in this way, it can find the Dev-ID and the Rule-ID. In the Dev side, only the Rule ID is needed to identify the correct Rule since the Dev only holds rules that apply to itself.</li></ol></li></ul>
-<p id="rfc.section.5.3.p.6">The receiver identifies the sender through its device-id (e.g. MAC address, if exist) and selects the appropriate Rule from the Rule ID. ThisRule describes the compressed header format and associates the values to the header fields.  The receiver applies the CDA action to reconstruct the original header fields. The CDA application order can be different from the order given by the Rule. For instance, Compute-* may be applied at the end, after all the other CDAs.</p>
+<p id="rfc.section.5.3.p.8">The receiver identifies the sender through its device-id (e.g. MAC address, if exists) and selects the appropriate Rule from the Rule ID. If a source identifier is present in the L2 technology, it is used to select the namespace for the Rule ID.  This Rule describes the compressed header format and associates the values to the header fields.  The receiver applies the CDA action to reconstruct the original header fields. The CDA application order can be different from the order given by the Rule. For instance, Compute-* may be applied at the end, after all the other CDAs.</p>
 <div id="rfc.figure.6"></div>
 <div id="Fig-FormatPckt"></div>
 <pre>
-+--- ... --+------- ... -------+------------------+--...--
-|  Rule ID |Compression Residue|  packet payload  |{padding}
-+--- ... --+------- ... -------+------------------+-optional-
-
++--- ... --+------- ... -------+------------------+~~~~~~~
+|  Rule ID |Compression Residue|  packet payload  |padding 
++--- ... --+------- ... -------+------------------+~~~~~~~
+                                                   (optional)
 &lt;----- compressed header ------&gt;
 
 </pre>
@@ -774,7 +776,7 @@ address {
 <ul>
 <li>equal: Results in true if a field value in a packet and a TV are equal.</li>
 <li>ignore: No check is done between a field value in a packet and a TV in the Rule. The result of the matching is always true.</li>
-<li>MSB(length): A match is obtained if the most significant bits of the header are equal to the TV in the rule. The &#8220;length&#8221; parameter of the MSB Matching Operator indicates how many bits are involved in the comparison.</li>
+<li>MSB(x): A match is obtained if the most significant x bits of the field value in the header packet are equal to the TV in the Rule. The x parameter of the MSB Matching Operator indicates how many bits are involved in the comparison.</li>
 <li>match-mapping: With match-mapping, the Target Value is a list of values. Each value of the list is identified by a short ID (or index). Compression is achieved by sending the index instead of the original header field value.  This operator matches if the header field value is equal to one of the values in the target list.</li>
 </ul>
 <h1 id="rfc.section.5.5">
