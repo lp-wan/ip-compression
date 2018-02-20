@@ -175,7 +175,7 @@ This section defines the terminology and acronyms used in this document.
 
 * FID: Field Identifier. This is an index to describe the header fields in a Rule.
 
-* FL: Field Length identifies whether a field has fixed or variable size, and for the latter it indicates its length.
+* FL: Field Length is the length of the field in bits for fixed values or a type (variable, token length, ...) for length unknown at the rule creation. The length of a header field is defined in the specific protocol standard.
 
 * FP: Field Position is a value that is used to identify the position where each instance of a field appears in the header.  
 
@@ -217,15 +217,15 @@ SCHC can be abstracted as an adaptation layer below IPv6 and the underlying LPWA
 
 ~~~~
  
-                  +----------------+
-                  |      IPv6      | 
-                / +----------------+            
-               /  |   Compression  |  
-         SCHC <   +----------------+   
-               \  |  Fragmentation |
-                \ +----------------+         
-                  |LPWAN technology|
-                  +----------------+ 
+             +----------------+
+             |      IPv6      | 
+          +- +----------------+            
+          |  |   Compression  |  
+    SCHC <   +----------------+   
+          |  |  Fragmentation |
+          +- +----------------+         
+             |LPWAN technology|
+             +----------------+ 
 
 ~~~~
 {: #Fig-IntroLayers title='Protocol stack comprising IPv6, SCHC and an LPWAN technology'} 
@@ -287,12 +287,12 @@ be pre-provisioned. The way the contexts are provisioned on both ends is out of 
 
 {{Fig-archi}} represents the architecture for compression/decompression. It is based on {{I-D.ietf-lpwan-overview}}
 terminology. The Device sends application flows using IPv6 or IPv6/UDP protocols. These flows are compressed by a
-Static Context Header Compression Compressor/Decompressor (SCHC C/D) to reduce the headers size. (Note that if the 
+Static Context Header Compression Compressor/Decompressor (SCHC C/D) to reduce the headers size. SCHC C/D is located in both sides of the transmission in the Dev and in the Network side. Note that if the 
 resulting data unit exceeds the maximum payload size of the underlying LPWAN technology, fragmentation is performed, see 
-{{Frag}}.) The resulting
-data unit is sent as one or more L2 frames to a LPWAN Radio Gateway (RG) which forwards
+{{Frag}}. The resulting data unit is sent as one or more L2 frames to a LPWAN Radio Gateway (RG) which forwards
 the frame(s) to a Network Gateway (NGW).
-The NGW sends the data to an SCHC C/D for decompression. The SCHC C/D can be
+
+The NGW sends the data to an SCHC C/D for decompression. The SCHC C/D in the Network side can be
 located in the Network Gateway (NGW) or somewhere else as long as a tunnel is established between the NGW and the SCHC C/D. 
 Note that, for some LPWAN technologies, it may be suitable to locate fragmentation and reassembly functionality nearer the 
 NGW, in order to better deal with time constraints of such technologies.
@@ -308,7 +308,8 @@ The main idea of the SCHC compression scheme is to transmit the Rule ID
 to the other end instead of sending known field values. This Rule ID
 identifies a rule that provides the closest match to the original
 packet values. Hence, when a value is known by both ends, it is only
-necessary to send the corresponding Rule ID over the LPWAN network.
+necessary to send the corresponding Rule ID over the LPWAN network. 
+How Rules are generated is out of the scope of this document.
 
 The context contains a list of rules (cf. {{Fig-ctxt}}). Each Rule
 contains itself a list of Field Descriptions composed of a field
@@ -344,17 +345,18 @@ must be known from the compressor/decompressor. The rule only describes the
 compression/decompression behavior for each header field. In the rule, the Field Descriptions are listed in the order in 
 which the fields appear in the packet header.
 
-The Rule also describes the compression residue which is
-transmitted in the same order as the one used by the Field Description in the Rule.
+The Rule also describes the Compression Residue is sent based on the regarding the same order as the one used by the Field 
+Description in the Rule.
 
 The Context describes the header fields and its values with the following entries:
 
 * Field ID (FID) is a unique value to define the header field.
 
-* Field Length (FL) is the length of the field in bits for fixed values or a type (variable, token length) for variable values. The length of a header field is defined in the specific standard document. 
+* Field Length (FL) is the length of the field in bits for fixed values or a type (variable, token length, ...) for Field 
+Description length unknown at the rule creation. The length of a header field is defined in the specific protocol standard. 
 
-* Field Position (FP): in case several occurences of a field exist in the
-  header, FP indicatess which one is targeted. The default position is 1.
+* Field Position (FP): indicating if several instances of a field exist in the headers which one is targeted. The default 
+position is 1.
   
 * A direction indicator (DI) indicating the packet direction(s) this Field Description applies to. Three values are possible:
 
@@ -380,7 +382,7 @@ The Context describes the header fields and its values with the following entrie
 
 Rule IDs are sent by the compression element and are intended for the decompression element. The size
 of the Rule ID is not specified in this document. It is implementation-specific and can vary according to the
-LPWAN technology and the number of flows, among others.
+LPWAN technology and the number of flows, among others. 
 
 Some values in the Rule ID space are reserved for functionalities other than header
 compression, such as packet fragmentation. (See {{Frag}}).
@@ -396,34 +398,48 @@ find the appropriate Rule to be applied. For Devs with different LPWAN radio int
 The compression/decompression process follows several steps:
 
 * 1. Compression Rule selection: The goal is to identify which Rule(s) will be used
-  to compress the packet's headers. When doing compression, the Rule will be selected by matching the Field Description to the packet header as described below. When the selection of a Rule is done, the Rule-ID is used to compress the header. 
-The detailed steps for compression Rule selection are the following:
-  * The first step is to choose the Field Description by its direction, using the direction indicator (DI). A Field Description that does not correspond to the appropriate DI will be ignored, if all the fields of the packet do not have a Field Description with the correct DI the Rule is discarded and SCHC C/D proceeds to explore the next Rule.
-  * When the DI has matched, then the next step is to identify the fields according to field position (FP). If the field position does not correspond, then the Rule is not used and the SCHC proceeds to consider the next Rule.
-  * Once the DI and the FP correspond to the header information, each field's value is then compared to the corresponding target value (TV) stored in the Rule for that specific field using the matching operator (MO).
-  * If all the fields in the packet's header satisfy all the matching operators (MO) of a Rule (i.e. all MO results are True), the fields of the header are then compressed according to the Compression/Decompression Actions (CDAs) and a compressed header (with possibly a compressed residue) may be obtained. Otherwise, the next Rule is tested. 
-  * If no eligible Rule is found, then the header must be sent without compression, in which case the fragmentation process may be required.
-
-* 2. Sending: If an eligible Rule is found, the Rule ID is sent to the other end followed by the Compression Residue (which could be empty) and directly followed by the payload. The product of the Compression Residue is sent in the order expressed in the Rule for the matching fields. 
-
-The way the Rule ID is sent depends on the specific LPWAN layer two technology. For example, it can be either included in a Layer 2 header or sent in the first byte of the L2 payload. (Cf. {{Fig-FormatPckt}}).
+  to compress the packet's headers. When doing compression in the NGW side the SCHC C/D needs to find the correct
+  Rule to be used by identifying the Dev-ID and the Rule-ID on the packet. In the Dev side, only the Rule-ID may be used. the 
+  Rule will be selected by matching the Fields Descriptions to the packet header as described below. When the selection of a 
+  Rule is done, the Rule-ID is used to compress the header. 
   
-This process will be specified in the LPWAN technology-specific document and is out of the scope of the present document. On LPWAN technologies that are byte-oriented, the compressed header concatenated with the original packet payload is padded to a multiple of 8 bits, if needed. See {{Padding}} for details.
+The detailed steps for compression Rule selection are the following:
+  * The first step is to choose the Fields Descriptions by their direction, using the direction indicator (DI). A Field Description that does not correspond to the appropriate DI will be ignored, if all the fields of the packet do not have a Field Description with the correct DI the Rule is discarded and SCHC C/D proceeds to explore the next Rule.
+  * When the DI has matched, then the next step is to identify the fields according to Field Position (FP). If the Field Position does not correspond, the Rule is not used and the SCHC C/D proceeds to consider the next Rule.
+  * Once the DI and the FP correspond to the header information, each field's value of the packet is then compared to the corresponding Target Value (TV) stored in the Rule for that specific field using the matching operator (MO).
+  * If all the fields in the packet's header satisfy all the matching operators (MO) of a Rule (i.e. all MO results are True), the fields of the header are then compressed according to the Compression/Decompression Actions (CDAs) and a compressed header (with possibly a Compressed Residue) may be obtained. Otherwise, the next Rule is tested. 
+  * If no eligible Rule is found, then the header must be sent without compression, depending on the L2 this is one of the case that may require the fragmentation process.
+
+* 2. Sending: If an eligible Rule is found, the Rule ID is sent to the other end followed by the Compression Residue (which 
+could be empty) and directly followed by the payload. The product of the Compression Residue is sent in the order expressed 
+in the Rule for the matching fields. 
+
+The way the Rule ID is sent depends on the specific LPWAN layer two technology. For example, it can be either included in a 
+Layer 2 header or sent in the first byte of the L2 payload. (Cf. {{Fig-FormatPckt}}).
+  
+This process will be specified in the LPWAN technology-specific document and is out of the scope of the present document. On 
+LPWAN technologies that are byte-oriented, the compressed header concatenated with the original packet payload is padded to a 
+multiple of 8 bits, if needed. See {{Padding}} for details.
 
 
-* 3. Decompression: 
-When doing decompression, in the NGW side the SCHC C/D needs to find the correct Rule based on the L2 PDU and in this way, it can find the Dev-ID and the Rule-ID. In the Dev side, only the Rule ID is needed to identify the correct Rule since the Dev only holds rules that apply to itself. 
+* 3. Decompression: When doing decompression, in the NGW side the SCHC C/D needs to find the correct Rule based on the L2 PDU 
+and in this way, it can find the Dev-ID and the Rule-ID. In the Dev side, only the Rule ID is needed to identify the correct 
+Rule since the Dev only holds rules that apply to itself. 
 
-The receiver identifies the sender through its device-id (e.g. MAC address, if exist) and selects the appropriate Rule from the Rule ID. ThisRule describes the compressed header format and associates the values to the header fields.  The receiver applies the CDA action to reconstruct the original header fields. The CDA application order can be different from the order given by the Rule. For instance,
+The receiver identifies the sender through its device-id (e.g. MAC address, if exists) and selects the appropriate Rule from 
+the Rule ID. If a source identifier is present in the L2 technology, it is used to select the namespace for the Rule ID. 
+This Rule describes the compressed header format and associates the values to the header fields.  The receiver applies the 
+CDA action to reconstruct the original header fields. The CDA application order can be different from the order given by the 
+Rule. For instance,
   Compute-\* may be applied at the end, after all the other CDAs.
   
   
 ~~~~
 
-+--- ... --+------- ... -------+------------------+--...--
-|  Rule ID |Compression Residue|  packet payload  |{padding}
-+--- ... --+------- ... -------+------------------+-optional-
-
++--- ... --+------- ... -------+------------------+~~~~~~~
+|  Rule ID |Compression Residue|  packet payload  |padding 
++--- ... --+------- ... -------+------------------+~~~~~~~
+                                                   (optional)
 <----- compressed header ------>
 
 ~~~~
@@ -441,8 +457,8 @@ or any other data type. The result of the operation can either be True or False.
 * ignore: No check is done between a field value in a packet and a TV
   in the Rule. The result of the matching is always true.
 
-* MSB(length): A match is obtained if the most significant bits
-  of the header are equal to the TV in the rule. The "length" parameter of the MSB Matching Operator
+* MSB(x): A match is obtained if the most significant x bits
+  of the field value in the header packet are equal to the TV in the Rule. The x parameter of the MSB Matching Operator
   indicates how many bits are involved in the comparison.
   
 * match-mapping: With match-mapping,
