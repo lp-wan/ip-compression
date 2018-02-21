@@ -250,11 +250,11 @@ transmitted, header compression is first applied to the packet. The resulting pa
                   |
                   V 
         +------------------+    
-        |   Fragmentation  |  (if needed)
+        |SCHC Fragmentation|  (if needed)
         +------------------+     
                   |
                   V     
-              Fragment(s)    (if needed)
+           SCHC Fragment(s) (if needed)
 
 
 ~~~~
@@ -599,37 +599,40 @@ assumption allows reducing the complexity and overhead of the fragmentation mech
 
 To adapt the SCHC fragmentation to the capabilities of LPWAN technologies is required to enable optional fragment
 retransmission and to allow a stepper delivery for the reliability of fragments. This document does not make any decision 
-with regard to which fragment delivery reliability mode(s) will be used over a
+with regard to which fragment delivery reliability mode will be used over a
 specific LPWAN technology. These details will be defined in other technology-specific documents.
-
-
 
 ## Tools
 
-This subsection describes the different tools that are used to enable the fragmentation functionality defined in this document, such as fields in the fragmentation header frames (see the related formats in {{Fragfor}}), and the different reliability modes supported such as timers and parameters.  
+This subsection describes the different tools that are used to enable the SCHC fragmentation functionality defined in this 
+document, such as fields in the SCHC fragmentation header frames (see the related formats in {{Fragfor}}), and the different 
+reliability modes supported such as timers and parameters.  
 
-*  Rule ID. The Rule ID is present in the fragment header and in the ACK header format.  The Rule ID in a fragment header is used to identify that a fragment is being carried, what fragmentation delivery reliability mode is used and what window size is used (if multiple sizes are possible). The Rule ID  in the fragmentation header also allows interleaving non-fragmented IPv6 datagrams and fragments that carry other IPv6 datagrams. The Rule ID in an ACK identifies the message as an ACK.
+* Rule ID. The Rule ID is present in the SCHC fragment header and in the ACK header format.  The Rule ID in a SCHC fragment 
+header is used to identify that a SCHC fragment is being carried, which fragmentation delivery reliability mode is used and which window size is used. The Rule ID  in the fragmentation header also allows interleaving non-fragmented packets and SCHC fragments that carry other SCHC packets. The Rule ID in an ACK identifies the message as an ACK.
 
-*  Fragment Compressed Number (FCN).  The FCN is included in all fragments.  This field can be understood as a truncated, 
-efficient representation of a larger-sized fragment number, and does not carry an absolute fragment number.  There are two FCN reserved values that are used for controlling the fragmentation process, as described next. The FCN value with all the bits equal to 1 (All-1) denotes the last
-fragment of a packet. The last window of a packet is called an All-1 window.  In ACK-Always or ACK-on-error, the FCN value with all the bits equal to 0 (All-0) denotes the last
-fragment of a window that is not the last one of the packet. Such a window is called an All-0 window. In the No-ACK mode, All-0 is found in all fragments but the last one. The rest of the FCN values are assigned in a sequentially
-decreasing order, which has the purpose to avoid possible ambiguity for the receiver that might arise under certain
-conditions.
-In the fragments, this field is an unsigned integer, with a size of N bits. In the No-ACK mode, it is set to 1 bit (N=1). For the other reliability modes, it is recommended to use a number of bits (N) equal to or greater than 3. Nevertheless, the appropriate value will be defined in the corresponding technology documents. The FCN MUST be set sequentially decreasing from the highest FCN in the window (which will be used for the first fragment), and MUST wrap from 0 back to the highest FCN in the window.
-   For windows that are not the last one  from a fragmented packet, the FCN for the last fragment in such windows is an All-0. This indicates that the window is finished and communication proceeds according to the reliability mode in use.
-   The FCN for the last fragment in the last window is an All-1.  It is also 
-   important to note that, in the No-ACK mode or when N=1, the last fragment of the packet will carry a FCN equal to 1, while all previous fragments
-   will carry a FCN of 0.
+* Fragment Compressed Number (FCN).  The FCN is included in all SCHC fragments.  This field can be understood as a truncated, 
+efficient representation of a larger-sized fragment number, and does not carry an absolute fragment number.  There are two 
+FCN reserved values that are used for controlling the fragmentation process, as described next:
+  * The FCN value with all the bits equal to 1 (All-1) denotes the last SCHC fragment of a packet. The last window of a 
+  packet is called an All-1 window.  
+  * The FCN value with all the bits equal to 0 (All-0) denotes the last SCHC fragment of a window that is not the last one of 
+  the packet. Such a window is called an All-0 window.
+
+The rest of the FCN values are assigned in a sequentially decreasing order, which has the purpose to avoid possible ambiguity 
+for the receiver that might arise under certain conditions. In the SCHC fragments, this field is an unsigned integer, with a 
+size of N bits. In the No-ACK mode, it is set to 1 bit (N=1), All-0 is found in all SCHC fragments and All-1 for the last one. For the other reliability modes, it is recommended to use a number of bits (N) equal to or greater than 3. Nevertheless, the appropriate value will be defined in the corresponding technology documents. 
+
+For windows that are not the last one from a fragmented packet, the FCN for the last SCHC fragment in such windows is an All-0. This indicates that the window is finished and communication proceeds according to the reliability mode in use. The FCN for the last SCHC fragment in the last window is an All-1.  It is also important to note that, in the No-ACK mode or when N=1, the last fragment of the packet will carry a FCN equal to 1, while all previous fragments will carry a FCN of 0.
    
-*  Datagram Tag (DTag). The DTag field, if present, is set to the same value for all fragments carrying the same SCHC packet, and to different values for different datagrams. Using this field, the sender can interleave fragments from different SCHC packets, while the receiver can still tell them apart.
+*  Datagram Tag (DTag). The DTag field, if present, is set to the same value for all SCHC fragments carrying the same SCHC packet, and to different values for different datagrams. Using this field, the sender can interleave fragments from different SCHC packets, while the receiver can still tell them apart.
 In the fragment formats, the size of the DTag field is T bits, which may be set to a value greater than or equal to 0 bits. For each new SCHC packet processed by the sender, DTag MUST be sequentially increased, from 0 to 2^T – 1 wrapping back from 2^T - 1 to 0.
 In the ACK format, DTag carries the same value as the DTag field in the fragments for which this ACK is intended.
 
-*  W (window): W is a 1-bit field. This field carries the same value for all fragments of a window, and it is complemented for the next window. The initial value for this field is 0.
-   In the ACK format, this field also has a size of 1 bit. In all ACKs, the W bit carries the same value as the W bit carried by the fragments whose reception is being positively or negatively acknowledged by the ACK.
+*  W (window): W is a 1-bit field. This field carries the same value for all SCHC fragments of a window, and it is complemented for the next window. The initial value for this field is 0.
+   In the ACK format, this field also has a size of 1 bit. In all ACKs, the W bit carries the same value as the W bit carried by the SCHC fragments whose reception is being positively or negatively acknowledged by the ACK.
 
-*  Message Integrity Check (MIC). This field, which has a size of M bits, is computed by the sender over the complete packet (i.e. a SCHC compressed or an uncompressed IPv6 packet) before fragmentation. The MIC allows the receiver to check errors in the reassembled packet, while it also enables compressing the UDP checksum by use of SCHC compression. The CRC32 as 0xEDB88320 (i.e. the reverse representation of the polynomial used e.g. in the Ethernet standard {{RFC3385}}) is recommended as the default algorithm for computing the MIC. Nevertheless, other algorithms MAY be required in other LPWAN technology-specific documents (e.g. technology-specific profiles). 
+*  Message Integrity Check (MIC). This field, which has a size of M bits, is computed by the sender over the complete SCHC packet before fragmentation. The MIC allows the receiver to check errors in the reassembled packet, while it also enables compressing the UDP checksum by use of SCHC compression. The CRC32 as 0xEDB88320 (i.e. the reverse representation of the polynomial used e.g. in the Ethernet standard {{RFC3385}}) is recommended as the default algorithm for computing the MIC. Nevertheless, other algorithms MAY be required in other LPWAN technology-specific documents (e.g. technology-specific profiles). 
 
 *  C (MIC checked): C is a 1-bit field. This field is used in the ACK packets to report the outcome of the MIC check, i.e. whether the reassembled packet was correctly received or not. A value of 1 represents a positive MIC check at the receiver side (i.e. the MIC computed by the receiver matches the received MIC).
  
