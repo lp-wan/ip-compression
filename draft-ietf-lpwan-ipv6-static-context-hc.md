@@ -648,14 +648,14 @@ specific profiles). The Attempts counter is defined per window. It is initialize
 *  Bitmap. The Bitmap is a sequence of bits carried in an ACK. Each bit in the Bitmap corresponds to a
 fragment of the current window, and provides feedback on whether the fragment has been received or not. The right-most 
 position on the Bitmap reports if the All-0 or All-1 fragment has been received or not. Feedback on the
-fragment with the highest FCN value
-is provided by the bit in the left-most position of the Bitmap. In the Bitmap, a bit set to 1 indicates that the fragment of FCN corresponding to that bit position
-has been correctly sent and received. The text above describes the internal representation of the Bitmap. When inserted in the ACK for transmission from the receiver to the sender, the Bitmap may be truncated for energy/bandwidth optimisation, see more details 
-in {{Bitmapopt}}
+fragment with the highest FCN value is provided by the bit in the left-most position of the Bitmap. In the Bitmap, a bit set 
+to 1 indicates that the fragment of FCN corresponding to that bit position has been correctly sent and received. The text 
+above describes the internal representation of the Bitmap. When inserted in the ACK for transmission from the receiver to the 
+sender, the Bitmap may be truncated for energy/bandwidth optimisation, see more details in {{Bitmapopt}}
 
 *  Abort. On expiration of the Inactivity timer, on Attempts reaching MAX_ACK_REQUESTS or upon occurence of some other error, the sender or the receiver may use the Abort frames.  When the receiver needs to abort the on-going fragmented packet transmission, it sends a data unit with the Receiver-Abort format. When the sender needs to abort the transmission, it sends a data unit with the Sender-Abort format. The Sender-Abort data unit is not acknowledged.
 
-*  Padding (P). If it is needed, the number of bits used for padding is not defined and depends on the size of the Rule ID, DTag and FCN fields, and on the L2 payload size. Some ACKs are byte-aligned and do not need padding (see {{Bitmapopt}}).
+*  Padding (P). If it is needed, the number of bits used for padding is not defined and depends on the size of the Rule ID, DTag and FCN fields, and on the L2 payload size (see {{PADDING}}). Some ACKs are byte-aligned and do not need padding (see {{Bitmapopt}}).
 
 ## Delivery Reliability modes
 
