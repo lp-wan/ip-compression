@@ -264,21 +264,14 @@ transmitted, header compression is first applied to the packet. The resulting pa
 
 Rule ID are identifiers used to select either the correct context to be used for Compression/Decompression functionalities or 
 for Fragmentation or after trying to do SCHC C/D and fragmentation the packet is sent as is. The size of the Rule ID is not specified in this document. It is implementation-specific and can vary 
-according to the LPWAN technology and the number of packets, among others. 
+according to the LPWAN technology and the number of Rules, among others. 
 
-The Rule ID for the SCHC C/D identifies the context used to keep the Field Description of the header packet. However, 
-fragmentation may benefit from using specific Rule IDs (which are tied to specific modes and settings) for a particular 
-underlying LPWAN technology, at least one Rule ID may be reserved to the case where no SCHC C/D nor fragmentation were possible.
+The Rule ID for the SCHC identifies:
+* In the SCHC C/D context the Rule used to keep the Field Description of the header packet. 
 
-The Rule ID space needs at least to be divided to represent some values for the case when compression has not been possible 
-and the packet may be not used fragmentation, some values are  used for SCHC C/D contexts identifiers (see {{IDComp}}) and 
-some vallues are reserved for functionalities other than header compression, such as fragmentation (see {{Frag}}).
+* In Fragmentation the specific modes and settings.
 
-The size in bits of the Rule ID is based on many parameters. In SCHC C/D the size SHOULD be reduced to a minimal size of some 
-bits, by default 4. In the fragmentation, the Rule ID size depends on the reliable modes, and the L2 PDU size in order to ACK 
-the complete fragments in the Bitmap. The default value is implementation dependant and may be defined in the technology-
-specific documents.
-
+* And at least one Rule ID may be reserved to the case where no SCHC C/D nor fragmentation were possible.
 
 # Static Context Header Compression
 
@@ -370,8 +363,7 @@ must be known from the compressor/decompressor. The rule only describes the
 compression/decompression behavior for each header field. In the rule, the Field Descriptions are listed in the order in 
 which the fields appear in the packet header.
 
-The Rule also describes the Compression Residue is sent based on the regarding the same order as the one used by the Field 
-Description in the Rule.
+The Rule also describes the Compression Residue sent regarding the order of the Fields Descriptions in the Rule.
 
 The Context describes the header fields and its values with the following entries:
 
@@ -406,11 +398,10 @@ position is 1.
 ## Rule ID for SCHC C/D {#IDComp}
 
 Rule ID are sent by the compression element and are intended for the decompression element.
-In SCHC C/D, the Rule IDs are specific to a Dev Hence, multiple Dev instances may use the same Rule ID to define
+In SCHC C/D, the Rule IDs are specific to a Dev. Hence, multiple Dev instances may use the same Rule ID to define
 different header compression contexts. To identify the correct Rule ID, the
 SCHC C/D needs to correlate the Rule ID with the Dev identifier to
-find the appropriate Rule to be applied. For Devs with different LPWAN radio interfaces, several approaches are allowed. For 
-example, the same set of Rule IDs may be used for packet transmission over the different interfaces.  
+find the appropriate Rule to be applied.  
 
 
 ## Packet processing
@@ -419,17 +410,14 @@ The compression/decompression process follows several steps:
 
 * 1. Compression Rule selection: The goal is to identify which Rule(s) will be used
   to compress the packet's headers. When doing compression in the NGW side the SCHC C/D needs to find the correct
-  Rule to be used by identifying the Dev-ID (of the L2 address) and the Rule-ID on the packet. In the Dev side, only the 
-  Rule-ID may be used. the Rule will be selected by matching the Fields Descriptions to the packet header as described below. 
-  When the selection of a Rule is done, the Rule-ID is used to compress the header. 
+  Rule to be used by identifying the Dev-ID (the L2 address) and the Rule-ID on the packet. In the Dev side, only the 
+  Rule-ID may be used. The Rule will be selected by matching the Fields Descriptions to the packet header as described below. 
+  When the selection of a Rule is done, this Rule is used to compress the header. 
   
   When doing decompression, in the NGW side the SCHC C/D needs to find the correct Rule based on the L2 
-address and in this way, it can find the Dev-ID and the Rule-ID. In the Dev side, only the Rule ID is needed to identify the 
+address and in this way, it can use the Dev-ID and the Rule-ID. In the Dev side, only the Rule ID is needed to identify the 
 correct Rule since the Dev only holds Rules that apply to itself.
   
-  When doing decompression, in the NGW side the SCHC C/D needs to find the correct Rule based on the L2 
-address and in this way, it can find the Dev-ID and the Rule-ID. In the Dev side, only the Rule ID is needed to identify the 
-correct Rule since the Dev only holds Rules that apply to itself.
 The detailed steps for compression Rule selection are the following:
   * The first step is to choose the Fields Descriptions by their direction, using the direction indicator (DI). A Field Description that does not correspond to the appropriate DI will be ignored, if all the fields of the packet do not have a Field Description with the correct DI the Rule is discarded and SCHC C/D proceeds to explore the next Rule.
   * When the DI has matched, then the next step is to identify the fields according to Field Position (FP). If the Field Position does not correspond, the Rule is not used and the SCHC C/D proceeds to consider the next Rule.
@@ -450,7 +438,7 @@ multiple of 8 bits, if needed. See {{Padding}} for details.
 
 
 * 3. Decompression: When doing decompression, in the NGW side the SCHC C/D needs to find the correct Rule based on the L2 
-address and in this way, it can find the Dev-ID and the Rule-ID. In the Dev side, only the Rule ID is needed to identify the 
+address and in this way, it can use the Dev-ID and the Rule-ID. In the Dev side, only the Rule ID is needed to identify the 
 correct Rule since the Dev only holds Rules that apply to itself. 
 
 The receiver identifies the sender through its device-id (e.g. MAC address, if exists) and selects the appropriate Rule from 
@@ -507,7 +495,7 @@ the original value.
 |not-sent            |elided       |use value stored in ctxt    |
 |value-sent          |send         |build from received value   |
 |match-mapping       |send index   |value from index on a table |
-|LSB(y)              |send LSB     |TV,  received value         |
+|LSB(y)              |send LSB     |TV, received value          |
 |compute-length      |elided       |compute length              |
 |compute-checksum    |elided       |compute UDP checksum        |
 |Deviid              |elided       |build IID from L2 Dev addr  |
@@ -565,12 +553,12 @@ The number of bits sent is the minimal size for coding all the possible indices.
 
 ### LSB CDA
 
-The LSB action is used together with the "MSB" MO to avoid sending the higher part of the packet field if that part is already known by the receiving end.
+The LSB(y) action is used together with the "MSB(x)" MO to avoid sending the higher part of the packet field if that part is already known by the receiving end.
 A length can be specified in the rule to indicate
 how many bits have to be sent. If the length is not specified, the number of bits sent is the
-original header field length minus the length specified in the MSB MO.
+original header field length minus the length specified in the MSB(x) MO.
 
-The compressor sends the 'y' Least Significant Bits (e.g. LSB of the length field). The
+The compressor sends the Least Significant Bits (e.g. LSB of the length field). The
 decompressor combines the value received with the Target Value depending on the field type. 
 
 If this action is made on a variable length field, the size of the Compressed Residue in bytes has to be sent as described in {{#chap-CDA}}.
@@ -584,7 +572,7 @@ frames contain a single address, which is the Dev's address.
 
 The IID value MAY be computed from the Device ID present in the Layer 2 header, or from some other stable identifier. The computation is specific for each LPWAN technology and MAY depend on the Device ID size.
 
-In the Downlink direction, these Deviid CDA may be used to determine the L2 addresses used by the LPWAN.
+In the Downlink direction, these Deviid CDA is used to determine the L2 addresses used by the LPWAN.
 
 ### Compute-\*
 
@@ -634,8 +622,8 @@ In the fragments, this field is an unsigned integer, with a size of N bits. In t
    important to note that, in the No-ACK mode or when N=1, the last fragment of the packet will carry a FCN equal to 1, while all previous fragments
    will carry a FCN of 0.
    
-*  Datagram Tag (DTag). The DTag field, if present, is set to the same value for all fragments carrying the same IPv6 datagram, and to different values for different datagrams. Using this field, the sender can interleave fragments from different IPv6 datagrams, while the receiver can still tell them apart.
-In the fragment formats, the size of the DTag field is T bits, which may be set to a value greater than or equal to 0 bits. For each new IPv6 datagram processed by the sender, DTag MUST be sequentially increased, from 0 to 2^T – 1 wrapping back from 2^T - 1 to 0.
+*  Datagram Tag (DTag). The DTag field, if present, is set to the same value for all fragments carrying the same SCHC packet, and to different values for different datagrams. Using this field, the sender can interleave fragments from different SCHC packets, while the receiver can still tell them apart.
+In the fragment formats, the size of the DTag field is T bits, which may be set to a value greater than or equal to 0 bits. For each new SCHC packet processed by the sender, DTag MUST be sequentially increased, from 0 to 2^T – 1 wrapping back from 2^T - 1 to 0.
 In the ACK format, DTag carries the same value as the DTag field in the fragments for which this ACK is intended.
 
 *  W (window): W is a 1-bit field. This field carries the same value for all fragments of a window, and it is complemented for the next window. The initial value for this field is 0.
@@ -664,7 +652,7 @@ in {{Bitmapopt}}
 
 *  Abort. On expiration of the Inactivity timer, on Attempts reaching MAX_ACK_REQUESTS or upon occurence of some other error, the sender or the receiver may use the Abort frames.  When the receiver needs to abort the on-going fragmented packet transmission, it sends a data unit with the Receiver-Abort format. When the sender needs to abort the transmission, it sends a data unit with the Sender-Abort format. The Sender-Abort data unit is not acknowledged.
 
-*  Padding (P). Padding may be used to align the last byte of a fragment with a byte boundary (see {{Padding}}). The number of bits used for padding is not defined and depends on the size of the Rule ID, DTag and FCN fields, and on the L2 payload size. Some ACKs are byte-aligned and do not need padding (see {{Bitmapopt}}).
+*  Padding (P). If it is needed, the number of bits used for padding is not defined and depends on the size of the Rule ID, DTag and FCN fields, and on the L2 payload size. Some ACKs are byte-aligned and do not need padding (see {{Bitmapopt}}).
 
 ## Delivery Reliability modes
 
