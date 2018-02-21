@@ -65,15 +65,11 @@ Note that this document defines generic functionality. This document purposefull
 This document defines a header compression scheme and fragmentation functionality, both specially tailored for Low Power Wide Area Networks (LPWAN).
 
 Header compression is needed to efficiently bring Internet connectivity to the node
-within a LPWAN network. Some LPWAN networks properties can be exploited to get an efficient header
-compression:
+within an LPWAN network. Some LPWAN networks properties can be exploited to get an efficient header compression:
 
-* Topology is star-oriented; therefore, all the packets follow the same path.
-  For the needs of this draft, the architecture can be simply described as: Devices (Dev)
-  exchange information with LPWAN Application Servers (App) through Network Gateways (NGW).
+* The topology is star-oriented which means that all packets follow the same path. For the necessity of this draft, the architecture is simple and is described as Devices (Dev) exchanging information with LPWAN Application Servers (App) through Network Gateways (NGW).
 
-* Traffic flows can be known in advance since devices embed built-in
-  applications. New applications cannot be easily installed in LPWAN devices, as they would in computers or smartphones.
+* The traffic flows can be known in advance since devices embed built-in applications. New applications cannot be easily installed in LPWAN devices, as they would in computers or smartphones.
 
 The Static Context Header Compression (SCHC) is defined for this environment.
 SCHC uses a context, where header information is kept in the header format order. This context is
@@ -82,13 +78,15 @@ complex resynchronization mechanisms, that would be incompatible
 with LPWAN characteristics. In most cases, a small context identifier is enough to represent the full IPv6/UDP headers. 
 The SCHC header compression mechanism is independent of the specific LPWAN technology over which it is used.
 
-LPWAN technologies are also characterized,
+LPWAN technologies impose some strict limitations on traffic. For instance, 
+devices are sleeping most of the time and may receive data during short periods
+of time after transmission to preserve battery. LPWAN technologies are also characterized,
 among others, by a very reduced data unit and/or payload size
 {{I-D.ietf-lpwan-overview}}.  However, some of these technologies
 do not provide fragmentation functionality, therefore the only option for
    them to support the IPv6 MTU requirement of 1280 bytes
  {{RFC2460}} is to use a fragmentation protocol at the
-adaptation layer, below IPv6.
+adaptation layer, below IPv6. 
 In response to this need, this document also defines a fragmentation/reassembly
 mechanism, which supports the IPv6 MTU requirement over LPWAN
 technologies. Such functionality has been designed under the assumption that data unit out-of-sequence delivery will not happen between the entity performing fragmentation and the entity performing reassembly.
@@ -241,22 +239,22 @@ transmitted, header compression is first applied to the packet. The resulting pa
 
 ~~~~
  
-                         A packet (e.g. an IPv6 packet)
-                             |
-                             V   
-               +------------------------------+
-               |SCHC Compression/Decompression|
-               +------------------------------+            
-                             |
-                        SCHC packet              
-                             |
-                             V 
-                   +------------------+    
-                   |   Fragmentation  |  (if needed)
-                   +------------------+     
-                             |
-                             V     
-                         Fragment(s)    (if needed)
+       A packet (e.g. an IPv6 packet)
+                  |
+                  V   
+    +------------------------------+
+    |SCHC Compression/Decompression|
+    +------------------------------+            
+                  |
+              SCHC packet              
+                  |
+                  V 
+        +------------------+    
+        |   Fragmentation  |  (if needed)
+        +------------------+     
+                  |
+                  V     
+              Fragment(s)    (if needed)
 
 
 ~~~~
@@ -265,12 +263,12 @@ transmitted, header compression is first applied to the packet. The resulting pa
 # Rule ID
 
 Rule ID are identifiers used to select either the correct context to be used for Compression/Decompression functionalities or 
-for Fragmentation. The size of the Rule ID is not specified in this document. It is implementation-specific and can vary 
+for Fragmentation or after trying to do SCHC C/D and fragmentation the packet is sent as is. The size of the Rule ID is not specified in this document. It is implementation-specific and can vary 
 according to the LPWAN technology and the number of packets, among others. 
 
 The Rule ID for the SCHC C/D identifies the context used to keep the Field Description of the header packet. However, 
 fragmentation may benefit from using specific Rule IDs (which are tied to specific modes and settings) for a particular 
-underlying LPWAN technology.
+underlying LPWAN technology, at least one Rule ID may be reserved to the case where no SCHC C/D nor fragmentation were possible.
 
 The Rule ID space needs at least to be divided to represent some values for the case when compression has not been possible 
 and the packet may be not used fragmentation, some values are  used for SCHC C/D contexts identifiers (see {{IDComp}}) and 
@@ -362,6 +360,7 @@ direction indicator (DI), a target value (TV), a matching operator
 |+-------+--+--+--+------------+-----------------+---------------+|/
 |                                                                 |
 \-----------------------------------------------------------------/
+
 ~~~~
 {: #Fig-ctxt title='Compression/Decompression Context'}
 
@@ -471,7 +470,7 @@ Rule. For instance,
 <----- compressed header ------>
 
 ~~~~
-{: #Fig-FormatPckt title='LPWAN Compressed Header Packet Format'}
+{: #Fig-FormatPckt title='SCHC C/D Packet Format'}
 
 
 ## Matching operators {#chap-MO}
@@ -515,6 +514,7 @@ the original value.
 |Appiid              |elided       |build IID from L2 App addr  |
 \--------------------+-------------+----------------------------/
 y=size of the transmitted bits
+
 ~~~~
 {: #Fig-function title='Compression and Decompression Functions'}
 
@@ -601,27 +601,24 @@ length.
 
 ## Overview
 
-In LPWAN technologies, the L2 data unit size typically varies from tens to hundreds of bytes.  Be it after applying SCHC header compression or when SCHC header compression is not possible, if the entire IPv6 datagram fits within a single L2 data unit, the fragmentation mechanism is not used and the packet is sent. Otherwise, the datagram SHALL be broken into fragments.
+In LPWAN technologies, the L2 data unit size typically varies from tens to hundreds of bytes. The SCHC fragmentation may be 
+used either because after applying SCHC C/D or when SCHC C/D is not possible the entire SCHC packet still exceeds the L2 data 
+unit.
 
-LPWAN technologies impose some strict limitations on traffic. For instance, 
-devices are sleeping most of the time and may receive data during a
-short period of time after transmission to preserve battery. To
-adapt the SCHC fragmentation to the capabilities of LPWAN
-technologies, it is desirable to enable optional fragment
-retransmission and to allow a gradation of fragment delivery
-reliability. This document does not make any decision with regard to
-which fragment delivery reliability mode(s) will be used over a
+The fragmentation functionality defined in this document has been designed under the assumption that data unit out-of-
+sequence delivery will not happen between the entity performing fragmentation and the entity performing reassembly.  This 
+assumption allows reducing the complexity and overhead of the fragmentation mechanism.
+
+To adapt the SCHC fragmentation to the capabilities of LPWAN technologies is required to enable optional fragment
+retransmission and to allow a stepper delivery for the reliability of fragments. This document does not make any decision 
+with regard to which fragment delivery reliability mode(s) will be used over a
 specific LPWAN technology. These details will be defined in other technology-specific documents.
 
 
-   An important consideration is that LPWAN networks typically follow a
-   star topology. The fragmentation functionality defined in this document has been designed under the assumption that data unit out-of-sequence delivery will not happen between the entity performing fragmentation and the entity
-   performing reassembly.  This assumption allows reducing the complexity
-   and overhead of the fragmentation mechanism.
 
 ## Tools
 
-This subsection describes the different tools that are used to enable the fragmentation functionality defined in this document, such as fields in the fragmentation header frames (see the related formats in {{Fragfor}}), timers and parameters.  
+This subsection describes the different tools that are used to enable the fragmentation functionality defined in this document, such as fields in the fragmentation header frames (see the related formats in {{Fragfor}}), and the different reliability modes supported such as timers and parameters.  
 
 *  Rule ID. The Rule ID is present in the fragment header and in the ACK header format.  The Rule ID in a fragment header is used to identify that a fragment is being carried, what fragmentation delivery reliability mode is used and what window size is used (if multiple sizes are possible). The Rule ID  in the fragmentation header also allows interleaving non-fragmented IPv6 datagrams and fragments that carry other IPv6 datagrams. The Rule ID in an ACK identifies the message as an ACK.
 
@@ -736,36 +733,43 @@ This section defines the fragment format, the All-0 and All-1 frame formats, the
    A fragment is the payload of the L2 protocol data unit (PDU). Padding MAY be added if necessary, therefore a padding field is optional (this is explicitly indicated in {{Fig-FragFormat}}, but not in subsequent figures, for the sake of illustration clarity.
       
 ~~~~   
-      +-----------------+-----------------------+----------------+
-      | Fragment Header |   Fragment payload    | padding (opt.) |
-      +-----------------+-----------------------+----------------+
+      +-----------------+-----------------------+~~~~~~~~~~~~~~~
+      | Fragment Header |   Fragment payload    | padding (opt.) 
+      +-----------------+-----------------------+~~~~~~~~~~~~~~~
 ~~~~
 {: #Fig-FragFormat title='Fragment general format. Presence of a padding field is optional'}
 
 In the No-ACK mode, fragments except the last one SHALL conform to the detailed format defined in {{Fig-NotLast}}. The total size of the fragment header is R bits.
-   
+  
+  
 ~~~~
-             <------------ R ---------->
-                         <--T--> <--N-->
-             +-- ... --+- ...  -+- ... -+--------...-------+---------+
-             | Rule ID |  DTag  |  FCN  | Fragment payload | padding |
-             +-- ... --+- ...  -+- ... -+--------...-------+---------+
+
+ <------------ R ---------->
+             <--T--> <--N-->
+ +-- ... --+- ...  -+- ... -+--------...-------+~~~~~~~~~~~~~~~
+ | Rule ID |  DTag  |  FCN  | Fragment payload | padding (opt.)
+ +-- ... --+- ...  -+- ... -+--------...-------+~~~~~~~~~~~~~~~
+             
 
 ~~~~
+
 {: #Fig-NotLast title='Fragment Detailed Format for Fragments except the Last One, No-ACK mode'}
 
 
 
 In ACK-Always or ACK-on-Error, fragments except the last one SHALL conform the detailed format defined in {{Fig-NotLastWin}}. The total size of the fragment header is R bits.
-   
+ 
+ 
 ~~~~
-             <------------ R ---------->
-                       <--T--> 1 <--N-->
-            +-- ... --+- ... -+-+- ... -+--------...-------+---------+
-            | Rule ID | DTag  |W|  FCN  | Fragment payload | padding |
-            +-- ... --+- ... -+-+- ... -+--------...-------+---------+
+
+ <------------ R ----------->
+            <--T--> 1 <--N-->
+ +-- ... --+- ... -+-+- ... -+--------...-------+~~~~~~~~~~~~~~~
+ | Rule ID | DTag  |W|  FCN  | Fragment payload | padding (opt.)
+ +-- ... --+- ... -+-+- ... -+--------...-------+~~~~~~~~~~~~~~~
 
 ~~~~
+
 {: #Fig-NotLastWin title='Fragment Detailed Format for Fragments except the Last One, Window mode'}
    
 ### All-1 and All-0 formats
@@ -1054,9 +1058,9 @@ indicates that the second and the fifth fragments have not been correctly receiv
 ~~~~                                                  
 <------   R  ------>6 5 4 3 2 1   0 (*) 
           <- T -> 1   
-+---------+------+-+-+-+-+-+-+-+-----+-------+
-| Rule ID | DTag |W|1|0|1|1|0|1|all-0|padding|  Bitmap (not optimized)
-+---------+------+-+-+-+-+-+-+-+-----+-------+
++---------+------+-+-+-+-+-+-+-+-----+~~~~~~~~~~~~~~
+| Rule ID | DTag |W|1|0|1|1|0|1|all-0|padding (opt.)  Bitmap (not optimized)
++---------+------+-+-+-+-+-+-+-+-----+~~~~~~~
 |<-- byte boundary --->|<----- 1 byte -----> | 
     (*)=(FCN values) 
     
