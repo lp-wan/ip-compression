@@ -263,15 +263,16 @@ transmitted, header compression is first applied to the packet. The resulting pa
 # Rule ID
 
 Rule ID are identifiers used to select either the correct context to be used for Compression/Decompression functionalities or 
-for Fragmentation or after trying to do SCHC C/D and fragmentation the packet is sent as is. The size of the Rule ID is not specified in this document. It is implementation-specific and can vary 
-according to the LPWAN technology and the number of Rules, among others. 
+for Fragmentation or after trying to do SCHC C/D and fragmentation the packet is sent as is. The size of the Rule ID is not 
+specified in this document. It is implementation-specific and can vary according to the LPWAN technology and the number of 
+Rules, among others. 
 
 The Rule ID for the SCHC identifies:
 * In the SCHC C/D context the Rule used to keep the Field Description of the header packet. 
 
-* In Fragmentation the specific modes and settings.
+* In SCHC Fragmentation the specific modes and settings.
 
-* And at least one Rule ID may be reserved to the case where no SCHC C/D nor fragmentation were possible.
+* And at least one Rule ID may be reserved to the case where no SCHC C/D nor SCHC fragmentation were possible.
 
 # Static Context Header Compression
 
@@ -609,7 +610,7 @@ document, such as fields in the SCHC fragmentation header frames (see the relate
 reliability modes supported such as timers and parameters.  
 
 * Rule ID. The Rule ID is present in the SCHC fragment header and in the ACK header format.  The Rule ID in a SCHC fragment 
-header is used to identify that a SCHC fragment is being carried, which fragmentation delivery reliability mode is used and which window size is used. The Rule ID  in the fragmentation header also allows interleaving non-fragmented packets and SCHC fragments that carry other SCHC packets. The Rule ID in an ACK identifies the message as an ACK.
+header is used to identify that a SCHC fragment is being carried, which fragmentation reliability mode is used and which window size is used. The Rule ID  in the fragmentation header also allows interleaving non-fragmented packets and SCHC fragments that carry other SCHC packets. The Rule ID in an ACK identifies the message as an ACK.
 
 * Fragment Compressed Number (FCN).  The FCN is included in all SCHC fragments.  This field can be understood as a truncated, 
 efficient representation of a larger-sized fragment number, and does not carry an absolute fragment number.  There are two 
@@ -655,47 +656,43 @@ sender, the Bitmap may be truncated for energy/bandwidth optimisation, see more 
 
 *  Abort. On expiration of the Inactivity timer, on Attempts reaching MAX_ACK_REQUESTS or upon occurence of some other error, the sender or the receiver may use the Abort frames.  When the receiver needs to abort the on-going fragmented packet transmission, it sends a data unit with the Receiver-Abort format. When the sender needs to abort the transmission, it sends a data unit with the Sender-Abort format. The Sender-Abort data unit is not acknowledged.
 
-*  Padding (P). If it is needed, the number of bits used for padding is not defined and depends on the size of the Rule ID, DTag and FCN fields, and on the L2 payload size (see {{PADDING}}). Some ACKs are byte-aligned and do not need padding (see {{Bitmapopt}}).
+*  Padding (P). If it is needed, the number of bits used for padding is not defined and depends on the size of the Rule ID, DTag and FCN fields, and on the L2 payload size (see {{Padding}}). Some ACKs are byte-aligned and do not need padding (see {{Bitmapopt}}).
 
-## Delivery Reliability modes
+## Reliability modes
 
-This specification defines three delivery reliability modes, namely No-ACK, ACK-Always and ACK-on-Error. ACK-Always and ACK-on-Error operate on windows of fragments. A window of fragments is a subset of the full set of fragments needed to carry an IPv6 packet. The three delivery reliability modes are overviewed next: 
+This specification defines three reliability modes: No-ACK, ACK-Always and ACK-on-Error. ACK-Always and ACK-on-Error operate on windows of fragments. A window of fragments is a subset of the full set of fragments needed to carry a packet or an SCHC packet. 
 
-*  No-ACK. 
-   No-ACK is the simplest fragment delivery reliability mode. The receiver does not generate overhead in the form of acknowledgments (ACKs).  However, this mode does not enhance delivery reliability beyond that offered by the underlying LPWAN technology. In the No-ACK mode, the receiver MUST NOT issue ACKs. See further details in {{No-ACK-subsection}}.
+* No-ACK. No-ACK is the simplest fragment reliability mode. The receiver does not generate overhead in the form of 
+  acknowledgments (ACKs).  However, this mode does not enhance reliability beyond that offered by the underlying LPWAN 
+  technology. In the No-ACK mode, the receiver MUST NOT issue ACKs. See further details in {{No-ACK-subsection}}.
 
-*  ACK-Always.    
-   The ACK-Always mode provides flow control.  In
-   addition, this mode is able to handle long bursts of lost fragments, since
-   detection of such events can be done before the end of the IPv6 packet
-   transmission, as long as the window size is short enough. However,
-   such benefit comes at the expense of ACK use.
-   In ACK-Always, an ACK is transmitted by the fragment receiver every time a window of fragments has been received.  A window of
-   fragments is a subset of the full set of fragments needed to carry an
-   IPv6 packet.  The ACK informs the sender about received
-   and/or missed fragments from one window of fragments.  Upon receipt
-   of an ACK that informs about any lost fragments, the sender
-   retransmits the lost fragments.  When an ACK is not received by the
-   fragment sender after a reasonable time, the latter sends an ACK request using the All-1 empty fragment.
-   The maximum number of ACK requests is MAX_ACK_REQUESTS. See further details in {{ACK-Always-subsection}}.
+* ACK-Always. The ACK-Always mode provides flow control. In addition, this mode is able to handle long bursts of lost 
+  fragments, since detection of such events can be done before the end of the SCHC packet transmission, as long as the   
+  window size is short enough. However, such benefit comes at the expense of ACK use.
+  In ACK-Always, an ACK is transmitted by the fragment receiver every time a window of fragments has been received.  A 
+  window of fragments is a subset of the full set of fragments needed to carry a SCHC packet.  The ACK informs the sender 
+  about received and/or missed fragments from one window of fragments.  Upon receipt of an ACK that informs about any lost 
+  fragments, the sender retransmits the lost fragments.  When an ACK is not received by the fragment sender and the 
+  Inactivity Timer expires the receiver sends an ACK request using the All-1 empty fragment. The maximum number of ACK 
+  requests is MAX_ACK_REQUESTS. If the MAX_ACK_REQUEST is reached the transmission needs to be Aborted. See further details 
+  in {{ACK-Always-subsection}}.
 
-*  ACK-on-Error. The ACK-on-Error mode is suitable for links offering relatively low L2
-   data unit loss probability.  This mode reduces the number of ACKs
-   transmitted by the fragment receiver. This may be especially beneficial in asymmetric
-   scenarios, e.g. where fragmented data are sent uplink and the
-   underlying LPWAN technology downlink capacity or message rate is
-   lower than the uplink one.  
-   In ACK-on-Error, an ACK is transmitted by the fragment
-   receiver after a window of fragments have been sent, only if at least
-   one of the fragments in the window has been lost. The
-   ACK informs the sender about received and/or missed fragments from
-   the window of fragments. Upon receipt of an ACK that informs about
-   any lost fragments, the sender retransmits the lost fragments. If an ACK is not transmitted back by the receiver at the end of a window, the implicit meaning conveyed is that all fragments have been correctly received. As a consequence,  if an ACK is lost, the sender assumes that all fragments covered by the ACK have been successfully delivered. The sender will then continue transmitting the next window of fragments. If the next fragments received belong to the next window, the receiver will conclude that successful reassembly of the IPv6 packet is not possible. In that case, the receiver will abort the on-going fragmented packet transmission. As an exception to the behavior described above, the receiver MUST transmit an ACK in the last window, including the MIC calculation result, even if all the fragments of the last window have been correctly received. See further details in {{ACK-on-Error-subsection}}.
+* ACK-on-Error. The ACK-on-Error mode is suitable for links offering relatively low L2 data unit loss probability.  This mode 
+  reduces the number of ACKs transmitted by the fragment receiver. This may be especially beneficial in asymmetric scenarios, 
+  e.g. where fragmented data are sent uplink and the underlying LPWAN technology downlink capacity or message rate is lower 
+  than the uplink one. In ACK-on-Error, an ACK is transmitted by the fragment receiver after a window of fragments have been 
+  sent, only if at least one of the fragments in the window has been lost. The ACK informs the sender about received and/or 
+  missed fragments from the window of fragments. Upon receipt of an ACK that informs about any lost fragments, the sender 
+  retransmits the lost fragments. If an ACK is not transmitted back by the receiver at the end of a window, the implicit 
+  meaning conveyed is that all fragments have been correctly received. As a consequence, if an ACK is lost, the sender 
+  assumes that all fragments covered by the ACK have been successfully delivered. The sender will then continue transmitting 
+  the next window of fragments. If the next fragments received belong to the next window, the receiver will conclude that 
+  successful reassembly of the SCHC packet is not possible. In that case, the receiver will abort the on-going fragmented 
+  packet transmission. An exception to the behavior described above is in the last window, where the receiver MUST transmit 
+  an ACK, including the MIC calculation result, even if all the fragments of the last window have been correctly received. 
+  See further details in {{ACK-on-Error-subsection}}.
    
-   
-   One exception to this behavior is in the last window, where the receiver MUST transmit an ACK, even if all the fragments in the last window have been correctly received.  
- 
-The same reliability mode MUST be used for all fragments of a
+  The same reliability mode MUST be used for all fragments of a
    packet.  It is up to implementers and/or representatives of the
    underlying LPWAN technology to decide which reliability mode to use
    and whether the same reliability mode applies to all IPv6 packets
@@ -705,7 +702,7 @@ The same reliability mode MUST be used for all fragments of a
    on top of an L2 LPWAN technology with symmetric characteristics for
    uplink and downlink).    
 This document does not make any decision as to which fragment
-   delivery reliability mode(s) are supported by a specific LPWAN
+   reliability mode(s) are supported by a specific LPWAN
    technology. 
 
 Examples of the different reliability modes described are provided
@@ -905,7 +902,7 @@ The fragment receiver needs to identify all the fragments that belong to a given
  
  * DTag (if present).
  
-Then, the fragment receiver may determine the fragment delivery reliability mode that is used for this fragment based on the Rule ID in that fragment.
+Then, the fragment receiver may determine the fragment reliability mode that is used for this fragment based on the Rule ID in that fragment.
 
 Upon receipt of a link fragment, the receiver starts constructing the original unfragmented packet.  It uses the FCN and the order of arrival of each fragment to determine the location of the individual fragments within the original unfragmented packet. A fragment payload may carry bytes from a SCHC compressed IPv6 header, an uncompressed IPv6 header or an IPv6 datagram data payload. For example, the receiver may place the fragment payload within a payload datagram reassembly buffer at the location determined from: the FCN, the arrival order of the fragments, and the fragment payload sizes. In Window mode, the fragment receiver also uses the W bit in the received fragments. Note that the size of the original, unfragmented packet cannot be determined from fragmentation headers.
 
@@ -1360,7 +1357,7 @@ comprising some overlapping parts of the original IPv6 datagram).
 Implementers should make sure that the correct operation is not affected
 by such event.
 
-In Window mode – ACK on error, a malicious node may force a fragment sender to resend a fragment a number of times, with the aim to increase consumption of the fragment sender’s resources. To this end, the malicious node may repeatedly send a fake ACK to the fragment sender, with a Bitmap that reports that one or more fragments have been lost. In order to mitigate this possible attack, MAX_FRAG_RETRIES may be set to a safe value which allows to limit the maximum damage of the attack to an acceptable extent. However, note that a high setting for MAX_FRAG_RETRIES benefits fragment delivery reliability, therefore the trade-off needs to be carefully considered.
+In Window mode – ACK on error, a malicious node may force a fragment sender to resend a fragment a number of times, with the aim to increase consumption of the fragment sender’s resources. To this end, the malicious node may repeatedly send a fake ACK to the fragment sender, with a Bitmap that reports that one or more fragments have been lost. In order to mitigate this possible attack, MAX_FRAG_RETRIES may be set to a safe value which allows to limit the maximum damage of the attack to an acceptable extent. However, note that a high setting for MAX_FRAG_RETRIES benefits fragment reliability modes, therefore the trade-off needs to be carefully considered.
 
 # Acknowledgements
 
@@ -1500,7 +1497,7 @@ The third rule compresses port numbers to 4 bits.
 
 # Fragmentation Examples 
 
-This section provides examples for the different fragment delivery reliability modes specified in this document.
+This section provides examples for the different fragment reliability modes specified in this document.
 
 {{Fig-Example-Unreliable}} illustrates the transmission in No-ACK mode of an IPv6 packet that needs 11 fragments. FCN is 1 bit wide.
 
