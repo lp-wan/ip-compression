@@ -666,47 +666,40 @@ This specification defines three reliability modes: No-ACK, ACK-Always and ACK-o
   acknowledgments (ACKs).  However, this mode does not enhance reliability beyond that offered by the underlying LPWAN 
   technology. In the No-ACK mode, the receiver MUST NOT issue ACKs. See further details in {{No-ACK-subsection}}.
 
-* ACK-Always. The ACK-Always mode provides flow control. In addition, this mode is able to handle long bursts of lost 
-  fragments, since detection of such events can be done before the end of the SCHC packet transmission, as long as the   
-  window size is short enough. However, such benefit comes at the expense of ACK use.
-  In ACK-Always, an ACK is transmitted by the fragment receiver every time a window of fragments has been received.  A 
-  window of fragments is a subset of the full set of fragments needed to carry a SCHC packet.  The ACK informs the sender 
-  about received and/or missed fragments from one window of fragments.  Upon receipt of an ACK that informs about any lost 
-  fragments, the sender retransmits the lost fragments.  When an ACK is not received by the fragment sender and the 
-  Inactivity Timer expires the receiver sends an ACK request using the All-1 empty fragment. The maximum number of ACK 
-  requests is MAX_ACK_REQUESTS. If the MAX_ACK_REQUEST is reached the transmission needs to be Aborted. See further details 
-  in {{ACK-Always-subsection}}.
+* ACK-Always. The ACK-Always mode provides flow control using a window scheme. This mode is also able to handle long bursts 
+  of lost fragments since detection of such events can be done before the end of the SCHC packet transmission as long as the 
+  window size is short enough. However, such benefit comes at the expense of ACK use. In ACK-Always the receiver sends an ACK 
+  after a window of fragments has been received, where a window of fragments is a subset of the whole number of fragments 
+  needed to carry a complete SCHC packet. The ACK is used to inform the sender if a fragment in the actual window has been 
+  lost or well received. Upon an ACK reception, the sender retransmits the lost fragments. When an ACK is lost and the sender 
+  has not received it before the expiration of the Inactivity Timer, the sender uses an ACK request by sending the All-1 
+  empty fragment. The maximum number of ACK requests is MAX_ACK_REQUESTS. If the MAX_ACK_REQUEST is reached the transmission 
+  needs to be Aborted. See further details in {{ACK-Always-subsection}}.
 
-* ACK-on-Error. The ACK-on-Error mode is suitable for links offering relatively low L2 data unit loss probability.  This mode 
-  reduces the number of ACKs transmitted by the fragment receiver. This may be especially beneficial in asymmetric scenarios, 
-  e.g. where fragmented data are sent uplink and the underlying LPWAN technology downlink capacity or message rate is lower 
-  than the uplink one. In ACK-on-Error, an ACK is transmitted by the fragment receiver after a window of fragments have been 
-  sent, only if at least one of the fragments in the window has been lost. The ACK informs the sender about received and/or 
-  missed fragments from the window of fragments. Upon receipt of an ACK that informs about any lost fragments, the sender 
-  retransmits the lost fragments. If an ACK is not transmitted back by the receiver at the end of a window, the implicit 
-  meaning conveyed is that all fragments have been correctly received. As a consequence, if an ACK is lost, the sender 
-  assumes that all fragments covered by the ACK have been successfully delivered. The sender will then continue transmitting 
-  the next window of fragments. If the next fragments received belong to the next window, the receiver will conclude that 
-  successful reassembly of the SCHC packet is not possible. In that case, the receiver will abort the on-going fragmented 
-  packet transmission. An exception to the behavior described above is in the last window, where the receiver MUST transmit 
-  an ACK, including the MIC calculation result, even if all the fragments of the last window have been correctly received. 
-  See further details in {{ACK-on-Error-subsection}}.
+* ACK-on-Error. The ACK-on-Error mode is suitable for links offering relatively low L2 data unit loss probability. In this 
+  mode, the fragment receiver reduces the number of ACKs transmitted, which may be especially beneficial in asymmetric 
+  scenarios. Because the fragments use the uplink of the underlying LPWAN technology, which has higher capacity than 
+  downlink. The receiver transmits an ACK only after the complete window transmission and if at least one fragment of this 
+  window has been lost. The ACK gives the state of all the fragments (received or lost). Upon an ACK reception, the sender 
+  retransmits the lost fragments. If an ACK is not transmitted back after, the sender assumes that all fragments have been 
+  correctly received.
+  When the ACK is lost, the sender assumes that all fragments covered by the lost ACK have been successfully delivered, so 
+  the sender continues transmitting the next window of fragments. If the next fragments received belong to the next window, 
+  the receiver will conclude that successful reassembly of the SCHC packet is not possible. In that case, the receiver will 
+  abort the on-going fragmented packet transmission. An exception to the behavior described above is in the last window, 
+  where the receiver must transmit an ACK, including the MIC calculation result, even if all the fragments of the last window 
+  have been correctly received. See further details in {{ACK-on-Error-subsection}}.
    
-  The same reliability mode MUST be used for all fragments of a
-   packet.  It is up to implementers and/or representatives of the
-   underlying LPWAN technology to decide which reliability mode to use
-   and whether the same reliability mode applies to all IPv6 packets
-   or not.  Note that the reliability mode to be used is not
-   necessarily tied to the particular characteristics of the underlying
-   L2 LPWAN technology (e.g. the No-ACK mode may be used
-   on top of an L2 LPWAN technology with symmetric characteristics for
-   uplink and downlink).    
-This document does not make any decision as to which fragment
-   reliability mode(s) are supported by a specific LPWAN
-   technology. 
+The same reliability mode must be used for all fragments of an SCHC packet. The decision on which reliability mode will be 
+used and whether the same reliability mode applies to all SCHC packets is an implementation problem and is out of the scope 
+of this document.  
 
-Examples of the different reliability modes described are provided
-   in Appendix B.
+Note that the reliability mode choice is not necessarily tied to a particular characteristic of the underlying L2 LPWAN 
+technology, e.g. the No-ACK mode may be used on top of an L2 LPWAN technology with symmetric characteristics for uplink and 
+downlink. This document does not make any decision as to which fragment reliability mode(s) are supported by a specific LPWAN 
+technology. 
+
+Examples of the different reliability modes described are provided in Appendix B.
 
 
 ## Fragmentation Frame Formats {#Fragfor}
