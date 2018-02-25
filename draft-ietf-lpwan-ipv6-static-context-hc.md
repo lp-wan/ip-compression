@@ -129,7 +129,7 @@ typical LPWAN network, see {{Fig-LPWANarchi}}:
 # Terminology
 This section defines the terminology and acronyms used in this document.
 
-* Abort. A message used Atype of data unit used by an endpoint involved in on-going fragmented packet transmission or reception in order to signal the other endpoint that the on-going fragmented packet transmission process is being aborted. 
+* Abort. A type of data unit used by an endpoint involved in on-going fragmented packet transmission or reception in order to signal the other endpoint that the on-going fragmented packet transmission process is being aborted. 
 
 * ACK. Acknowledgment. A data unit used in two of the fragmentation modes defined in this specification, which is sent by a fragment receiver to report on successful or unsuccessful reception of a set of fragments.
 
@@ -1217,52 +1217,47 @@ and CDA to "not-sent".
 
 ## IPv6 Traffic class field
 
-If the DiffServ field identified by the rest of the rule does not vary and is known 
-by both sides, the Field Descriptor in the rule should contain a TV with this well-known value, an "equal" MO
-and a "not-sent" CDA.
+If the DiffServ field does not vary and is known by both sides, the Field Descriptor in the rule should contain a TV with 
+this well-known value, an "equal" MO and a "not-sent" CDA.
 
-Otherwise, two possibilities can be considered:
+Otherwise, two possibilities can be considered depending on the variability of the value:
 
 * One possibility is to not compress the field and send the original value. In the rule, TV is not set to any particular value, MO is set to "ignore" and CDA is set to "value-sent".
 
-* If some upper bits in the field are constant and known, a better option is to only send the LSBs. In the rule, TV is set to a value with the stable known upper part, MO is set to MSB(X) and CDA to LSB.
+* If some upper bits in the field are constant and known, a better option is to only send the LSBs. In the rule, TV is set to a value with the stable known upper part, MO is set to MSB(x) and CDA to LSB(y).
 
 ## Flow label field
 
-If the Flow Label field identified by the rest of the rule does not vary and is known 
-by both sides, the Field Descriptor in the rule should contain a TV with this well-known value, an "equal" MO
-and a "not-sent" CDA.
+If the Flow Label field does not vary and is known by both sides, the Field Descriptor in the rule should contain a TV with 
+this well-known value, an "equal" MO and a "not-sent" CDA.
 
 Otherwise, two possibilities can be considered:
 
 * One possibility is to not compress the field and send the original value. In the rule, TV is not set to any particular value, MO is set to "ignore" and CDA is set to "value-sent".
 
-* If some upper bits in the field are constant and known, a better option is to only send the LSBs. In the rule, TV is set to a value with the stable known upper part, MO is set to MSB(X) and CDA to LSB.
+* If some upper bits in the field are constant and known, a better option is to only send the LSBs. In the rule, TV is set to a value with the stable known upper part, MO is set to MSB(x) and CDA to LSB(y).
 
 ## Payload Length field
 
-If the LPWAN technology does not add padding, this field can be elided for the 
-transmission on the LPWAN network. The SCHC C/D recomputes the original payload length
+This field can be elided for the transmission on the LPWAN network. The SCHC C/D recomputes the original payload length
 value. In the Field Descriptor, TV is not set, MO is set to "ignore" and CDA is "compute-IPv6-length".
 
 If the payload length needs to be sent and is known to need less than 16 bits for its encoding, the TV can be set to 0x0000,
-the MO set to "MSB (16-s)" and the
-CDA to "LSB". The 's' parameter depends on the expected maximum packet length.
+the MO set to "MSB (16-s)" and the CDA to "LSB(s-y)". The 's' parameter depends on the expected maximum packet length.
 
 Otherwise, the payload length field must be sent and the CDA is replaced by "value-sent".
 
 ## Next Header field
 
-If the Next Header field identified by the rest of the rule does not vary and is known 
-by both sides, the Field Descriptor in the rule should contain a TV with this Next Header value, the MO should be "equal"
-and the CDA should be "not-sent".
+If the Next Header field does not vary and is known by both sides, the Field Descriptor in the rule should contain a TV with 
+this Next Header value, the MO should be "equal" and the CDA should be "not-sent".
 
 Otherwise, TV is not set in the Field Descriptor, MO is set to "ignore" and CDA is set to
 "value-sent". Alternatively, a matching-list may also be used.
 
 ## Hop Limit field
 
-Note that the value pattern for this field is different for Uplink and Downlink. In Uplink, since there is
+The field behavior differs Note that the value pattern for this field is different for Uplink and Downlink. In Uplink, since there is
 no IP forwarding between the Dev and the SCHC C/D, the value is relatively constant. On the
 other hand, the Downlink value depends of Internet routing and may change more frequently.
 One neat way of processing this field is to use the Direction Indicator (DI) to distinguish between directions:
