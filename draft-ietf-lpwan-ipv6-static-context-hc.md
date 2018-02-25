@@ -1356,8 +1356,9 @@ In other cases, the checksum must be explicitly sent. The TV is not set, the MO 
 A malicious header compression could cause the reconstruction of a 
 wrong packet that does not match with the original one. Such a corruption
 may be detected with end-to-end authentication and integrity mechanisms. 
-Denial of Service may be produced but its arise other security problems 
-that may be solved with or without header compression.
+Header Compression does not add more security problem than what is already needed in a transmission. 
+For instance, to avoid an attack, never re-construct a packet bigger than some configured size (with 1500 bytes as generic 
+default).
 
 ## Security considerations for fragmentation
 This subsection describes potential attacks to LPWAN fragmentation 
@@ -1656,7 +1657,7 @@ In the following examples, N (i.e. the size if the FCN field) is 3 bits. Therefo
 ~~~~
 {: #Fig-Example-Rel-Window-ACK-Loss title='Transmission in ACK-Always mode of an IPv6 packet carried by 11 fragments, with MAX_WIND_FCN=6 and three lost fragments.'}
 
-{{Fig-Example-Rel-Window-ACK-Loss-Last-A}} illustrates the transmission in ACK-Always mode of an IPv6 packet that needs 6 fragments, with MAX_WIND_FCN=6, three lost fragments and only one retry needed to recover each lost fragment. Note that, since a single window is needed for transmission of the IPv6 packet in this case, the example illustrates behavior when losses happen in the last window.
+{{Fig-Example-Rel-Window-ACK-Loss-Last-A}} illustrates the transmission in ACK-Always mode of an IPv6 packet that needs 6 fragments, with MAX_WIND_FCN=6, three lost fragments and only one retry needed to recover each lost fragment. 
 
 ~~~~
           Sender                Receiver
@@ -1708,7 +1709,7 @@ In the following examples, N (i.e. the size if the FCN field) is 3 bits. Therefo
              |-----W=0, FCN=3--X-->|
              |-----W=0, FCN=2--X-->|
              |--W=0, FCN=7 + MIC-->|MIC checked: failed
-             |<-----ACK, W=0-------|C=0   Bitmap:1100001
+             |<-----ACK, W=0-------|C=0 Bitmap:1100001
              |-----W=0, FCN=4----->|MIC checked: failed
              |-----W=0, FCN=3----->|MIC checked: failed
              |-----W=0, FCN=2--X-->|
@@ -1751,7 +1752,7 @@ In the following examples, N (i.e. the size if the FCN field) is 3 bits. Therefo
              |-----W=0, FCN=1 ----->|
              |-----W=0, FCN=0 ----->|
              |                      |lcl-Bitmap:110111111111101111111111
-             |<------ACK, W=0-------| Bitmap:1101111111111011
+             |<------ACK, W=0-------|encoded Bitmap:1101111111111011
              |-----W=0, FCN=21----->|
              |-----W=0, FCN=10----->|
              |<------ACK, W=0-------|no Bitmap
@@ -1814,6 +1815,7 @@ The fragmentation state machines of the sender and the receiver, one for each of
 
 
 ~~~~
+
               +=======+  
               | INIT  |       FCN!=0 & more frags
               |       |       ~~~~~~~~~~~~~~~~~~~~~~
@@ -1856,7 +1858,9 @@ Lcl_Bitmap==recv_Bitmap &| |   |   all missing frag sent
               All-1 Window |   v Send Abort
               ~~~~~~~~~~~~ | +=+===========+
              MIC_bit ==0 & +>|    ERROR    |
-    Lcl_Bitmap==recv_Bitmap  +=============+                                        
+    Lcl_Bitmap==recv_Bitmap  +=============+ 
+    
+    
 ~~~~
 {: #Fig-ACKAlwaysSnd title='Sender State Machine for the ACK-Always Mode'}
 
@@ -1870,7 +1874,7 @@ Lcl_Bitmap==recv_Bitmap &| |   |   all missing frag sent
 +---------------------+     Rcv      +--->* ABORT 
 |  +------------------+   Window     |
 |  |                  +=====+==+=====+  
-|  |       All-0 & w=expect |  | w =next & not-All
+|  |       All-0 & w=expect |  ^ w =next & not-All
 |  |     ~~~~~~~~~~~~~~~~~~ |  |~~~~~~~~~~~~~~~~~~~~~
 |  |     set lcl_Bitmap(FCN)|  |expected = next window
 |  |      send local_Bitmap |  |Clear local_Bitmap
@@ -1880,10 +1884,10 @@ Lcl_Bitmap==recv_Bitmap &| |   |   all missing frag sent
 |  | set lcl_Bitmap(FCN)+-+ |  | +--+ w=next & All-0
 |  | if lcl_Bitmap full | | |  | |  | ~~~~~~~~~~~~~~~
 |  | send lcl_Bitmap    | | |  | |  | expct = nxt wnd
-|  |                    v | v  v v  |
-|  |  w=expct & All-1 +=+=+=+==+=++ | Clear lcl_Bitmap    
-|  |  ~~~~~~~~~~~  +->+    Wait   +<+ set lcl_Bitmap(FCN)         
-|  |    discard    +--|    Next   |   send lcl_Bitmap
+|  |                    v | v  | |  | Clear lcl_Bitmap
+|  |  w=expct & All-1 +=+=+=+==+=++ | set lcl_Bitmap(FCN)     
+|  |  ~~~~~~~~~~~  +->+    Wait   +<+ send lcl_Bitmap       
+|  |    discard    +--|    Next   |   
 |  | All-0  +---------+  Window   +--->* ABORT  
 |  | ~~~~~  +-------->+========+=++        
 |  | snd lcl_bm  All-1 & w=next| |  All-1 & w=nxt
@@ -1906,12 +1910,14 @@ Lcl_Bitmap==recv_Bitmap &| |   |   all missing frag sent
 |        set local_Bitmap(FCN)| | | ~~~~~~~~~           |
 |            send local_Bitmap| | |  discard            |
 |                             | | |                     | 
-|All-1 & w=expctd & MIC right | | |   +-+ All-1         |
+|All-1 & w=expctd & MIC right | | | +-+ All-1           |
 |~~~~~~~~~~~~~~~~~~~~~~~~~~~~ v | v | v ~~~~~~~~~       |
 |set local_Bitmap(FCN)      +=+=+=+=+=++Send lcl_btmp   |
 |send local_Bitmap          |          |                |
 +-------------------------->+    END   +<---------------+
-                            ++==+======+  
+                            ++==+======+ 
+                            
+                            
        --->* ABORT
             ~~~~~~~
             Inactivity_Timer = expires
@@ -1998,18 +2004,18 @@ Lcl_Bitmap==recv_Bitmap &| |   |   all missing frag sent
 |  |                        |   |  |Send abort ++=======+
 |  |                        v   |  |             ^ w=expct
 |  |            All-0     +=+===+==+======+      | & all-1  
-|  |     ~~~~~~~~~~~~~<---+    Wait       +------+ ~~~~~~~
-|  |     send lcl_btmp    | Next Window   |     Send abort
-|  |                      +=======+===+==++    
-|  |  All-1 & w=next & MIC wrong  |   |  +---->* ABORT  
-|  |  ~~~~~~~~~~~~~~~~~~~~~~~~~~  |   +----------------+
+|  |     ~~~~~~~~~~~~~ +--+    Wait       +------+ ~~~~~~~
+|  |     send lcl_btmp +->| Missing Fragm.|     Send abort
+|  |                      +===========+==++    
+|  |   All-1 & w=next & MIC wrong ^   |  +---->* ABORT  
+|  |   ~~~~~~~~~~~~~~~~~~~~~~~~~~~|   +----------------+
 |  |       set local_Bitmap(FCN)  |      All-1 & w=next| 
 |  |       send local_Bitmap      |         & MIC right|
 |  |                              |  ~~~~~~~~~~~~~~~~~~|
 |  |                              | set lcl_Bitmap(FCN)|                                    
 |  |All-1 & w=expect & MIC wrong  |                    |
-|  |~~~~~~~~~~~~~~~~~~~~~~~~~~~~  |   +-+  All-1            |
-|  |set local_Bitmap(FCN)         v   | v  ~~~~~~~~~~  |
+|  |~~~~~~~~~~~~~~~~~~~~~~~~~~~~  |   +-+  All-1       |
+|  |set local_Bitmap(FCN)         |   | v  ~~~~~~~~~~  |
 |  |send local_Bitmap     +=======+==+===+ snd lcl_btmp|
 |  +--------------------->+   Wait End   +-+           |
 |                         +=====+=+===+=+ | w=expct &  |
