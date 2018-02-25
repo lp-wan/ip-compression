@@ -598,22 +598,24 @@ The fragmentation functionality defined in this document has been designed under
 sequence delivery will not happen between the entity performing fragmentation and the entity performing reassembly.  This 
 assumption allows reducing the complexity and overhead of the fragmentation mechanism.
 
-To adapt the SCHC fragmentation to the capabilities of LPWAN technologies is required to enable optional fragment
+To adapt the SCHC fragmentation to the capabilities of LPWAN technologies is required to enable optional fragment 
 retransmission and to allow a stepper delivery for the reliability of fragments. This document does not make any decision 
-with regard to which fragment delivery reliability mode will be used over a
-specific LPWAN technology. These details will be defined in other technology-specific documents.
+with regard to which fragment delivery reliability mode will be used over a specific LPWAN technology. These details will be 
+defined in other technology-specific documents.
 
-## Tools
+## Fragmentation Tools
 
 This subsection describes the different tools that are used to enable the SCHC fragmentation functionality defined in this 
 document, such as fields in the SCHC fragmentation header frames (see the related formats in {{Fragfor}}), and the different 
-reliability modes supported such as timers and parameters.  
+parameters supported in the reliability modes such as timers and parameters.  
 
 * Rule ID. The Rule ID is present in the SCHC fragment header and in the ACK header format.  The Rule ID in a SCHC fragment 
-header is used to identify that a SCHC fragment is being carried, which fragmentation reliability mode is used and which window size is used. The Rule ID  in the fragmentation header also allows interleaving non-fragmented packets and SCHC fragments that carry other SCHC packets. The Rule ID in an ACK identifies the message as an ACK.
+  header is used to identify that a SCHC fragment is being carried, which fragmentation reliability mode is used and which 
+  window size is used. The Rule ID  in the fragmentation header also allows interleaving non-fragmented packets and SCHC 
+  fragments that carry other SCHC packets. The Rule ID in an ACK identifies the message as an ACK.
 
-* Fragment Compressed Number (FCN).  The FCN is included in all SCHC fragments.  This field can be understood as a truncated, 
-  efficient representation of a larger-sized fragment number, and does not carry an absolute fragment number.  There are two 
+* Fragment Compressed Number (FCN).  The FCN is included in all SCHC fragments. This field can be understood as a truncated, 
+  efficient representation of a larger-sized fragment number, and does not carry an absolute fragment number. There are two 
   FCN reserved values that are used for controlling the fragmentation process, as described next:
   * The FCN value with all the bits equal to 1 (All-1) denotes the last SCHC fragment of a packet. The last window of a 
   packet is called an All-1 window.  
@@ -623,12 +625,13 @@ header is used to identify that a SCHC fragment is being carried, which fragment
   ambiguity for the receiver that might arise under certain conditions. In the SCHC fragments, this field is an unsigned 
   integer, with a size of N bits. In the No-ACK mode, it is set to 1 bit (N=1), All-0 is used in all SCHC fragments and 
   All-1 for the last one. 
-  For the other reliability modes, it is recommended to use a number of bits (N) equal to or greater 
-  than 3. Nevertheless, the appropriate value will be defined in the corresponding technology documents. 
-  For windows that are not the last one from a fragmented packet, the FCN for the last SCHC fragment in such windows is an 
-  All-0. This indicates that the window is finished and communication proceeds according to the reliability mode in use. The 
-  FCN for the last SCHC fragment in the last window is an All-1.  It is also important to note that, in the No-ACK mode or 
-  when N=1, the last fragment of the packet will carry a FCN equal to 1, while all previous fragments will carry a FCN of 0.
+  For the other reliability modes, it is recommended to use a number of bits (N) equal to or greater than 3. Nevertheless, 
+  the appropriate value will be defined in the corresponding technology documents. For windows that are not the last one from 
+  a fragmented packet, the FCN for the last SCHC fragment in such windows is an All-0. This indicates that the window is 
+  finished and communication proceeds according to the reliability mode in use. The FCN for the last SCHC fragment in the 
+  last window is an All-1.  It is also important to note that, in the No-ACK mode or when N=1, the last fragment of the 
+  packet will carry a FCN equal to 1, while all previous fragments will carry a FCN of 0. For further details see 
+  {{FragModes}}.
    
 * Datagram Tag (DTag). The DTag field, if present, is set to the same value for all SCHC fragments carrying the same SCHC   
   packet, and to different values for different datagrams. Using this field, the sender can interleave fragments from 
@@ -678,9 +681,9 @@ header is used to identify that a SCHC fragment is being carried, which fragment
   to the sender, the Bitmap may be truncated for energy/bandwidth optimisation, see more details in {{Bitmapopt}}
 
 * Abort. On expiration of the Inactivity timer, or when Attempts reached MAX_ACK_REQUESTS or upon an occurrence of some other 
-  error, the sender or the receiver MUST use the Abort frames. When the receiver needs to abort the on-going fragmented 
+  error, the sender or the receiver MUST use the Abort. When the receiver needs to abort the on-going fragmented 
   packet transmission, it sends the Receiver-Abort format. When the sender needs to abort the transmission, it sends the 
-  Sender-Abort format. None of the Abort frames are acknowledged.
+  Sender-Abort format. None of the Abort are acknowledged.
 
 * Padding (P). If it is needed, the number of bits used for padding is not defined and depends on the size of the Rule ID, 
   DTag and FCN fields, and on the L2 payload size (see {{Padding}}). Some ACKs are byte-aligned and do not need padding (see 
@@ -711,8 +714,8 @@ This specification defines three reliability modes: No-ACK, ACK-Always and ACK-o
   window has been lost. An exception to this behavior is in the last window, where the receiver MUST transmit an ACK, 
   including the MIC calculation result, even if all the fragments of the last window have been correctly received.
   The ACK gives the state of all the fragments (received or lost). Upon an ACK reception, the sender retransmits the lost 
-  fragments. If an ACK is not transmitted back after, the sender assumes that all fragments have been 
-  correctly received.
+  fragments. If an ACK is not transmitted back by the receiver at the end of a window, the sender assumes that all fragments 
+  have been correctly received.
   When the ACK is lost, the sender assumes that all fragments covered by the lost ACK have been successfully delivered, so 
   the sender continues transmitting the next window of fragments. If the next fragments received belong to the next window, 
   the receiver will discard this fragments and the receiver will abort the on-going fragmented packet transmission. 
@@ -730,17 +733,17 @@ technology.
 Examples of the different reliability modes described are provided in Appendix B.
 
 
-## Fragmentation Frame Formats {#Fragfor}
+## Fragmentation Formats {#Fragfor}
 
-This section defines the fragment format, the All-0 and All-1 frame formats, the ACK frame format and the Abort frame formats.
+This section defines the fragment format, the All-0 and All-1 formats, the ACK format and the Abort formats.
 
 ### Fragment format 
 
-A fragment comprises a fragment header, a fragment payload and padding bits (if any). A fragment conforms to the general 
+A fragment comprises a fragment header, a fragment payload and padding bits (if needed). A fragment conforms to the general 
 format shown in {{Fig-FragFormat}}. The fragment payload carries a subset of SCHC packet. 
-A fragment is the payload of the L2 protocol data unit (PDU). Padding MAY be added if necessary, therefore a padding field is 
-optional (this is explicitly indicated in {{Fig-FragFormat}}, but not in subsequent figures, for the sake of illustration 
-clarity.
+A fragment is the payload of the L2 protocol data unit (PDU). Padding MAY be added in fragments and in ACKs if necessary, 
+therefore a padding field is optional (this is explicitly indicated in {{Fig-FragFormat}}, but not in subsequent figures, for 
+the sake of illustration clarity.
       
 ~~~~   
       +-----------------+-----------------------+~~~~~~~~~~~~~~~
@@ -749,16 +752,33 @@ clarity.
 ~~~~
 {: #Fig-FragFormat title='Fragment general format. Presence of a padding field is optional'}
 
-In the No-ACK mode, fragments except the last one SHALL conform to the detailed format defined in {{Fig-NotLast}}. The total size of the fragment header is R bits.
-  
-  
+In ACK-Always or ACK-on-Error, fragments except the last one SHALL conform the detailed format defined in {{Fig-NotLastWin}}. 
+The total size of the fragment header is R bits. Where is R is not a multiple of 8 bits.
+ 
+ 
 ~~~~
 
- <------------ R ---------->
+ <------------ R ----------->
+            <--T--> 1 <--N-->
+ +-- ... --+- ... -+-+- ... -+--------...-------+
+ | Rule ID | DTag  |W|  FCN  | Fragment payload | 
+ +-- ... --+- ... -+-+- ... -+--------...-------+
+
+~~~~
+
+{: #Fig-NotLastWin title='Fragment Detailed Format for Fragments except the Last One, Window mode'}
+
+
+
+
+In the No-ACK mode, fragments except the last one SHALL conform to the detailed format defined in {{Fig-NotLast}}. The total size of the fragment header is R bits.
+    
+~~~~
+
              <--T--> <--N-->
- +-- ... --+- ...  -+- ... -+--------...-------+~~~~~~~~~~~~~~~
- | Rule ID |  DTag  |  FCN  | Fragment payload | padding (opt.)
- +-- ... --+- ...  -+- ... -+--------...-------+~~~~~~~~~~~~~~~
+ +-- ... --+- ...  -+- ... -+--------...-------+
+ | Rule ID |  DTag  |  FCN  | Fragment payload | 
+ +-- ... --+- ...  -+- ... -+--------...-------+
              
 
 ~~~~
@@ -766,32 +786,17 @@ In the No-ACK mode, fragments except the last one SHALL conform to the detailed 
 {: #Fig-NotLast title='Fragment Detailed Format for Fragments except the Last One, No-ACK mode'}
 
 
-
-In ACK-Always or ACK-on-Error, fragments except the last one SHALL conform the detailed format defined in {{Fig-NotLastWin}}. The total size of the fragment header is R bits.
- 
- 
-~~~~
-
- <------------ R ----------->
-            <--T--> 1 <--N-->
- +-- ... --+- ... -+-+- ... -+--------...-------+~~~~~~~~~~~~~~~
- | Rule ID | DTag  |W|  FCN  | Fragment payload | padding (opt.)
- +-- ... --+- ... -+-+- ... -+--------...-------+~~~~~~~~~~~~~~~
-
-~~~~
-
-{: #Fig-NotLastWin title='Fragment Detailed Format for Fragments except the Last One, Window mode'}
    
 ### All-1 and All-0 formats
 
 The All-0 format is used for sending the last fragment of a window that is not the last window of the packet.
 
 ~~~~
-     <------------ R ----------->
+
                 <- T -> 1 <- N -> 
-     +-- ... --+- ... -+-+- ... -+--- ... ---+-+
-     | Rule ID | DTag  |W|  0..0 |  payload  |P|  
-     +-- ... --+- ... -+-+- ... -+--- ... ---+-+
+     +-- ... --+- ... -+-+- ... -+--- ... ---+
+     | Rule ID | DTag  |W|  0..0 |  payload  |  
+     +-- ... --+- ... -+-+- ... -+--- ... ---+
      
 ~~~~
 {: #Fig-All0 title='All-0 fragment detailed format'}
@@ -800,11 +805,10 @@ The All-0 format is used for sending the last fragment of a window that is not t
 The All-0 empty fragment format is used by a sender to request the retransmission of an ACK by the receiver. It is only used in ACK-Always mode.
 
 ~~~~
- <------------ R ----------->
             <- T -> 1 <- N -> 
- +-- ... --+- ... -+-+- ... -+-+
- | Rule ID | DTag  |W|  0..0 |P| (no payload)  
- +-- ... --+- ... -+-+- ... -+-+
+ +-- ... --+- ... -+-+- ... -+
+ | Rule ID | DTag  |W|  0..0 | (no payload)  
+ +-- ... --+- ... -+-+- ... -+
               
 ~~~~
 {: #Fig-All0empty title='All-0 empty fragment detailed format'}
@@ -814,11 +818,10 @@ In the No-ACK mode, the last fragment of an IPv6 datagram SHALL contain a fragme
    the detaield format shown in {{Fig-Last}}. The total size of this fragment header is R+M bits.
    
 ~~~~
-<------------- R --------->
               <- T -> <-N-> <---- M ---->
-+---- ... ---+- ... -+-----+---- ... ----+---...---+-+
-|   Rule ID  | DTag  |  1  |     MIC     | payload |P|
-+---- ... ---+- ... -+-----+---- ... ----+---...---+-+
++---- ... ---+- ... -+-----+---- ... ----+---...---+
+|   Rule ID  | DTag  |  1  |     MIC     | payload |
++---- ... ---+- ... -+-----+---- ... ----+---...---+
     
 ~~~~
 {: #Fig-Last title='All-1 Fragment Detailed Format for the Last Fragment, No-ACK mode'}
@@ -829,11 +832,10 @@ In the No-ACK mode, the last fragment of an IPv6 datagram SHALL contain a fragme
    header in this format is R+M bits.
    
 ~~~~
-<----------- R ------------>
            <- T -> 1 <- N -> <---- M ---->
-+-- ... --+- ... -+-+- ... -+---- ... ----+---...---+-+
-| Rule ID | DTag  |W| 11..1 |     MIC     | payload |P|
-+-- ... --+- ... -+-+- ... -+---- ... ----+---...---+-+
++-- ... --+- ... -+-+- ... -+---- ... ----+---...---+
+| Rule ID | DTag  |W| 11..1 |     MIC     | payload |
++-- ... --+- ... -+-+- ... -+---- ... ----+---...---+
                       (FCN)
 ~~~~
 {: #Fig-LastWinMode title='All-1 Fragment Detailed Format for the Last Fragment, ACK-Always or ACK-on-Error'}
@@ -841,11 +843,10 @@ In the No-ACK mode, the last fragment of an IPv6 datagram SHALL contain a fragme
  In either ACK-Always or ACK-on-Error, in order to request a retransmission of the ACK for the All-1 window, the fragment sender uses the format shown in {{Fig-All1retries}}. The total size of the fragment header in this format is R+M bits.
 
 ~~~~
-<------------ R ----------->
            <- T -> 1 <- N -> <---- M ---->
-+-- ... --+- ... -+-+- ... -+---- ... ----+-+
-| Rule ID | DTag  |W|  1..1 |     MIC     |P| (no payload)  
-+-- ... --+- ... -+-+- ... -+---- ... ----+-+
++-- ... --+- ... -+-+- ... -+---- ... ----+
+| Rule ID | DTag  |W|  1..1 |     MIC     | (no payload)  
++-- ... --+- ... -+-+- ... -+---- ... ----+
 
 ~~~~
 {: #Fig-All1retries title='All-1 for Retries format, also called All-1 empty'}
@@ -857,11 +858,10 @@ The values for R, N, T and M are not specified in this document, and are expecte
 The format of an ACK that acknowledges a window that is not the last one (denoted as All-0 window) is shown in {{Fig-ACK-Format}}.
 
 ~~~~
-  <--------  R  ------->
               <- T -> 1  
-  +---- ... --+-... -+-+----- ... ---+-+
-  |  Rule ID  | DTag |W|   Bitmap    |P| (no payload)
-  +---- ... --+-... -+-+----- ... ---+-+
+  +---- ... --+-... -+-+---- ... -----+
+  |  Rule ID  | DTag |W|encoded Bitmap| (no payload)
+  +---- ... --+-... -+-+---- ... -----+
                 
 ~~~~
 {: #Fig-ACK-Format title='ACK format for All-0 windows'}
@@ -869,16 +869,15 @@ The format of an ACK that acknowledges a window that is not the last one (denote
 To acknowledge the last window of a packet (denoted as All-1 window), a C bit (i.e. MIC checked) following the W bit is set
 to 1 to indicate that the MIC check computed by the receiver matches the MIC present in the All-1 fragment. If the MIC check fails, the C bit is set to 0 and the Bitmap for the All-1 window follows.
 
-~~~~
-<--------  R  ------->  
+~~~~ 
             <- T -> 1 1
-+---- ... --+-... -+-+-+-+
-|  Rule ID  | DTag |W|1|P| (MIC correct)
-+---- ... --+-... -+-+-+-+
-                
-+---- ... --+-... -+-+-+------- ... -------+-+
-|  Rule ID  | DTag |W|0|      Bitmap       |P|(MIC Incorrect)
-+---- ... --+-... -+-+-+------- ... -------+-+
++---- ... --+-... -+-+-+
+|  Rule ID  | DTag |W|1| (MIC correct)
++---- ... --+-... -+-+-+
+                                       
++---- ... --+-... -+-+-+----- ... -----+
+|  Rule ID  | DTag |W|0|encoded Bitmap |(MIC Incorrect)
++---- ... --+-... -+-+-+----- ... -----+
                       C
                 
 ~~~~
@@ -890,6 +889,9 @@ to 1 to indicate that the MIC check computed by the receiver matches the MIC pre
 When a fragment sender needs to abort the transmission, it sends the Sender-Abort format {{Fig-All1Abort}}, with all FCN bits 
 set to 1.  When a fragment receiver needs to abort the on-going fragmented packet transmission, it transmits the Receiver-
 Abort format {{Fig-ACKabort}}. None of these messages are acknowledgement nor retransmitted.
+
+The sender uses the Sender-Abort when the MAX_ACK_REQUEST is reached. The receiver uses the Receiver-Abort when the 
+Inactivity timer expires, or in the ACK-on-Error mode, ACK is lost and the sender transmits fragments of a new window.
 
 ~~~~
 <------------- R -----------><--- 1 byte --->
@@ -913,10 +915,13 @@ Abort format {{Fig-ACKabort}}. None of these messages are acknowledgement nor re
 {: #Fig-ACKabort title='Receiver-Abort format'}
 
 
-## Baseline mechanism
+## Baseline mechanism {#FragModes}
 
-If after applying SCHC header compression (or when SCHC header compression is not possible) the entire datagram does not fit within the payload of a single L2 data unit, the datagram SHALL be broken into fragments and the fragments SHALL be sent to the fragment receiver.
-The fragment receiver needs to identify all the fragments that belong to a given IPv6 datagram. To this end, the receiver SHALL use: 
+If after applying SCHC header compression (or when SCHC header compression is not possible) the entire datagram does not fit 
+within the payload of a single L2 data unit, the datagram SHALL be broken into fragments and the fragments SHALL be sent to 
+the fragment receiver.
+The fragment receiver needs to identify all the fragments that belong to a given IPv6 datagram. To this end, the receiver 
+SHALL use: 
 
  * The sender's L2 source address (if present), 
  
@@ -926,9 +931,15 @@ The fragment receiver needs to identify all the fragments that belong to a given
  
  * DTag (if present).
  
-Then, the fragment receiver may determine the fragment reliability mode that is used for this fragment based on the Rule ID in that fragment.
+Then, the fragment receiver may determine the fragment reliability mode that is used for this fragment based on the Rule ID 
+in that fragment.
 
-Upon receipt of a link fragment, the receiver starts constructing the original unfragmented packet.  It uses the FCN and the order of arrival of each fragment to determine the location of the individual fragments within the original unfragmented packet. A fragment payload may carry bytes from a SCHC compressed IPv6 header, an uncompressed IPv6 header or an IPv6 datagram data payload. For example, the receiver may place the fragment payload within a payload datagram reassembly buffer at the location determined from: the FCN, the arrival order of the fragments, and the fragment payload sizes. In Window mode, the fragment receiver also uses the W bit in the received fragments. Note that the size of the original, unfragmented packet cannot be determined from fragmentation headers.
+After a fragment reception, the receiver starts constructing the original unfragmented packet. It uses the FCN and the 
+arrival order of each fragment to determine the location of the individual fragments within the original unfragmented packet. 
+A fragment payload carries bytes from an SCHC packet. For example, the receiver may place the fragment payload within a 
+payload datagram reassembly buffer at the location determined from the FCN, the arrival order of the fragments, and the 
+fragment payload sizes. In Window mode, the fragment receiver also uses the W bit in the received fragments. Note that the 
+size of the original, unfragmented packet cannot be determined from fragmentation headers.
 
 Fragmentation functionality uses the FCN value, which has a length of N bits. The All-1 and All-0 FCN values are used to control the fragmentation transmission. The FCN MUST be assigned sequentially in a decreasing order. The first FCN of a window is RECOMMENDED to be 2^N-2, i.e. the highest possible FCN value depending on the FCN number of bits, but excluding the All-1 value. In all modes, the last fragment of a packet must contain a MIC which is used to check if there are errors or missing fragments, and must use the corresponding All-1 fragment format.  Also note that a fragment with an All-0 format is considered the last fragment of the current window.
 
