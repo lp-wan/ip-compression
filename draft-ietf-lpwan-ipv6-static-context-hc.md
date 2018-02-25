@@ -1242,11 +1242,6 @@ Otherwise, two possibilities can be considered:
 This field can be elided for the transmission on the LPWAN network. The SCHC C/D recomputes the original payload length
 value. In the Field Descriptor, TV is not set, MO is set to "ignore" and CDA is "compute-IPv6-length".
 
-If the payload length needs to be sent and is known to need less than 16 bits for its encoding, the TV can be set to 0x0000,
-the MO set to "MSB (16-s)" and the CDA to "LSB(s-y)". The 's' parameter depends on the expected maximum packet length.
-
-Otherwise, the payload length field must be sent and the CDA is replaced by "value-sent".
-
 ## Next Header field
 
 If the Next Header field does not vary and is known by both sides, the Field Descriptor in the rule should contain a TV with 
@@ -1257,10 +1252,10 @@ Otherwise, TV is not set in the Field Descriptor, MO is set to "ignore" and CDA 
 
 ## Hop Limit field
 
-The field behavior differs Note that the value pattern for this field is different for Uplink and Downlink. In Uplink, since there is
+The field behavior for this field is different for Uplink and Downlink. In Uplink, since there is
 no IP forwarding between the Dev and the SCHC C/D, the value is relatively constant. On the
 other hand, the Downlink value depends of Internet routing and may change more frequently.
-One neat way of processing this field is to use the Direction Indicator (DI) to distinguish between directions:
+One neat way of processing this field is to use the Direction Indicator (DI) to distinguish both directions:
 
 * in the Uplink, elide the field: the TV in the Field Descriptor is set to the known constant value, the MO
 is set to "equal" and the CDA is set to "not-sent".
@@ -1273,9 +1268,7 @@ CDA is set to "value-sent".
 As in 6LoWPAN {{RFC4944}}, IPv6 addresses are split into two 64-bit long fields;
 one for the prefix and one for the Interface Identifier (IID). These fields should
 be compressed. To allow for a single rule being used for both directions, these values are identified by their role
-(DEV or APP) and not by their position in the frame (source or destination). The SCHC C/D
-must be aware of the traffic direction (Uplink, Downlink) to select the appropriate
-field.
+(DEV or APP) and not by their position in the frame (source or destination). 
 
 ### IPv6 source and destination prefixes
 
@@ -1286,8 +1279,7 @@ source and destination prefixes contain the values, the MO is set to "equal" and
 the CDA is set to "not-sent".
 
 If the rule is intended to compress packets with different prefix values, match-mapping should be used. The
-different prefixes are listed in the TV associated with a short ID. The MO is set 
-to "match-mapping" and the CDA is set to "mapping-sent".
+different prefixes are listed in the TV, the MO is set to "match-mapping" and the CDA is set to "mapping-sent". See {{Fig-fields}}
 
 Otherwise, the TV contains the prefix, the MO is set to "equal" and the CDA is set to
 "value-sent".
@@ -1297,10 +1289,11 @@ Otherwise, the TV contains the prefix, the MO is set to "equal" and the CDA is s
 If the DEV or APP IID are based on an LPWAN address, then the IID can be reconstructed 
 with information coming from the LPWAN header. In that case, the TV is not set, the MO 
 is set to "ignore" and the CDA is set to "DEViid" or "APPiid". Note that the 
-LPWAN technology generally carries a single identifier, which corresponds
-to the DEV. The SCHC C/D may also not be aware of these values. 
+LPWAN technology generally carries a single identifier corresponding to the DEV. Therefore Appiid cannot be used.
 
-For privacy reasons or if the DEV address is changing over time, a static value that is not equal to the DEV address SHOULD be used.  In that case, the TV contains the static value, the MO operator is set to "equal" and the CDF is set to "not-sent". RFC 7217 provides some methods that MAY be used to derive this static identifier. 
+For privacy reasons or if the DEV address is changing over time, a static value that is not equal to the DEV address SHOULD 
+be used.  In that case, the TV contains the static value, the MO operator is set to "equal" and the CDF is set to "not-sent". 
+RFC 7217 provides some methods that MAY be used to derive this static identifier. 
 
 If several IIDs are possible, then the TV contains the list of possible IIDs, the MO is 
 set to "match-mapping" and the CDA is set to "mapping-sent". 
@@ -1338,9 +1331,8 @@ set to "ignore" and the CDA is set to "value-sent".
 
 ## UDP length field
 
-If the LPWAN technology does not introduce padding, the UDP length can be computed
-from the received data. In that case, the TV is not set, the MO is set to "ignore" and
-the CDA is set to "compute-UDP-length".
+The UDP length can be computed from the received data. In that case, the TV is not set, the MO is set to "ignore" and
+the CDA is set to "compute-length".
 
 If the payload is small, the TV can be set to 0x0000, the MO set to "MSB" and the
 CDA to "LSB". 
@@ -1353,7 +1345,7 @@ IPv6 mandates a checksum in the protocol above IP. Nevertheless, if a more effic
 mechanism such as L2 CRC or MIC is carried by or over the L2 (such as in the
 LPWAN fragmentation process (see {{Frag}})), the UDP checksum transmission can be avoided.
 In that case, the TV is not set, the MO is set to "ignore" and the CDA is set to
-"compute-UDP-checksum".
+"compute-checksum".
 
 In other cases, the checksum must be explicitly sent. The TV is not set, the MO is set to
 "ignore" and the CDF is set to "value-sent".
