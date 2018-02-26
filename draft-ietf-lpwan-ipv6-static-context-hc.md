@@ -472,9 +472,7 @@ or any other data type. The result of the operation can either be True or False.
   of the field value in the header packet are equal to the TV in the Rule. The x parameter of the MSB Matching Operator
   indicates how many bits are involved in the comparison.
   
-* match-mapping: With match-mapping,
-  the Target Value is a list of values. Each value of the list is identified by a short ID (or index). Compression is 
-  achieved by sending the index instead of the original header field value.
+* match-mapping: With match-mapping, the Target Value is a list of values. Each value of the list is identified by a short ID (or index). Compression is achieved by sending the index instead of the original header field value.
   This operator matches if the header field value is equal to one of the values in the target list.
   
 
@@ -897,7 +895,7 @@ to 1 to indicate that the MIC check computed by the receiver matches the MIC pre
 {: #Fig-ACK-Format1 title='Format of an ACK for All-1 windows'}
 
 
-### Bitmap Encoding {#Bitmapopt}
+#### Bitmap Encoding {#Bitmapopt}
 
 The Bitmap is transmitted by a receiver as part of the ACK format. An ACK message may include padding at the end to align its 
 number of transmitted bits to a multiple of 8 bits.  
@@ -910,8 +908,8 @@ When the receiver transmits an encoded Bitmap with a fragment that has not been 
 Abort the transmission.
 
 ~~~~                                                  
-                      <----       Bitmap bits      ---->   
-| Rule ID | DTag |W|C|0|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|   
+                    <----         Bitmap bits      ---->   
+| Rule ID | DTag |W|1|0|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|   
 |--- byte boundary ----| 1 byte  next  |  1 byte next  |   
       
 ~~~~
@@ -922,7 +920,7 @@ right-most contiguous bytes in the encoded Bitmap that have all their bits set t
 
 ~~~~   
      <-------   R  ------->  
-                 <- T -> 1 C
+                 <- T -> 1 
      +---- ... --+-... -+-+-+-+
      |  Rule ID  | DTag |W|1|0|
      +---- ... --+-... -+-+-+-+
@@ -937,16 +935,16 @@ indicates that the second and the fifth fragments have not been correctly receiv
 ~~~~                                                  
 <------   R  ------>6 5 4 3 2 1   0 (*) 
           <- T -> 1   
-+---------+------+-+-+-+-+-+-+-+-----+~~~~~~~
-| Rule ID | DTag |W|1|0|1|1|0|1|all-0|padding(opt.) Bitmap(before tx)
-+---------+------+-+-+-+-+-+-+-+-----+~~~~~~~
-|<-- byte boundary ->|<----- 1 byte ------>| 
++---------+------+-+-+-+-+-+-+-+-----+
+| Rule ID | DTag |W|1|0|1|1|0|1|all-0| Bitmap(before tx)
++---------+------+-+-+-+-+-+-+-+-----+
+|<-- byte boundary ->|<---- 1 byte---->| 
     (*)=(FCN values) 
     
-+---- ... --+-... -+-+-+-+-+-+-+-+-+~~
-|  Rule ID  | DTag |W|1|0|1|1|0|1|1|P| encoded Bitmap
-+---- ... --+-... -+-+-+-+-+-+-+-+-+~~
-|<-- byte boundary --->|<-- 1 byte-->| 
++---------+------+-+-+-+-+-+-+-+-----+~~
+| Rule ID | DTag |W|1|0|1|1|0|1|all-0|Padding(opt.) encoded Bitmap
++---------+------+-+-+-+-+-+-+-+-----+~~
+|<-- byte boundary ->|<---- 1 byte---->| 
     
 ~~~~
 {: #Fig-Bitmap-Win title='Example of a Bitmap before transmission, and the transmitted one, in any window except the last one'}
@@ -1263,6 +1261,8 @@ Otherwise, two possibilities can be considered:
 
 This field can be elided for the transmission on the LPWAN network. The SCHC C/D recomputes the original payload length
 value. In the Field Descriptor, TV is not set, MO is set to "ignore" and CDA is "compute-IPv6-length".
+
+If the payload length needs to be sent and does not need to be coded in 16 bits, the TV can be set to 0x0000, the MO set to MSB(16-s) where 's' is the number of bits to code the maximum length, and CDA is set to LSB(s).
 
 ## Next Header field
 
