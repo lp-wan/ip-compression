@@ -413,30 +413,33 @@ The compression/decompression process follows several steps:
   the Dev only holds Rules that apply to itself. The Rule will be selected by matching the Fields Descriptions to the packet 
   header as described below. When the selection of a Rule is done, this Rule is used to compress the header. 
   The detailed steps for compression Rule selection are the following:
+
   * The first step is to choose the Fields Descriptions by their direction, using the direction indicator (DI). A Field 
     Description that does not correspond to the appropriate DI will be ignored, if all the fields of the packet do not have a 
     Field Description with the correct DI the Rule is discarded and SCHC C/D proceeds to explore the next Rule.
+
   * When the DI has matched, then the next step is to identify the fields according to Field Position (FP). If the Field 
     Position does not correspond, the Rule is not used and the SCHC C/D proceeds to consider the next Rule.
+
   * Once the DI and the FP correspond to the header information, each field's value of the packet is then compared to the 
     corresponding Target Value (TV) stored in the Rule for that specific field using the matching operator (MO).
+
   * If all the fields in the packet's header satisfy all the matching operators (MO) of a Rule (i.e. all MO results are 
     True), the fields of the header are then compressed according to the Compression/Decompression Actions (CDAs) and a 
     compressed header (with possibly a Compressed Residue) may be obtained. Otherwise, the next Rule is tested. 
+
   * If no eligible Rule is found, then the header must be sent without compression, depending on the L2 PDU size, this is one 
     of the case that may require the use of the fragmentation process.
 
 * 2. Sending: If an eligible Rule is found, the Rule ID is sent to the other end followed by the Compression Residue (which 
   could be empty) and directly followed by the payload. The product of the Compression Residue is sent in the order expressed 
   in the Rule for all the fields. 
-
   The way the Rule ID is sent depends on the specific LPWAN layer two technology. For example, it can be either included in a 
   Layer 2 header or sent in the first byte of the L2 payload. (Cf. {{Fig-FormatPckt}}). This process will be specified in the 
   LPWAN technology-specific document and is out of the scope of the present document. On LPWAN technologies that are byte-
   oriented, the compressed header concatenated with the original packet payload is padded to a multiple of 8 bits, if needed. 
   See {{Padding}} for details.
-
-
+  
 * 3. Decompression: When doing decompression, in the network side the SCHC C/D needs to find the correct Rule based on the L2 
   address and in this way, it can use the Dev-ID and the Rule-ID. In the Dev side, only the Rule ID is needed to identify the 
   correct Rule since the Dev only holds Rules that apply to itself. 
@@ -559,7 +562,7 @@ The compressor sends the Least Significant Bits (e.g. LSB of the length field). 
 decompressor combines the value received with the Target Value depending on the field type. 
 
 If this action is made on a variable length field, the size of the Compressed Residue in bytes has to be sent as described in 
-{{#chap-CDA}}.
+{{chap-CDA}}.
 
 
 ### DEViid, APPiid CDA
@@ -763,7 +766,6 @@ The total size of the fragment header is R bits. Where is R is not a multiple of
  +-- ... --+- ... -+-+- ... -+--------...-------+
 
 ~~~~
-
 {: #Fig-NotLastWin title='Fragment Detailed Format for Fragments except the Last One, Window mode'}
 
 
@@ -782,7 +784,6 @@ size of the fragment header is R bits.
              
 
 ~~~~
-
 {: #Fig-NotLast title='Fragment Detailed Format for Fragments except the Last One, No-ACK mode'}
 
 In all these cases, R may not be a multiple of 8 bits.
