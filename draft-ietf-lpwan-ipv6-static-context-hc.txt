@@ -3071,9 +3071,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
        Lcl_Bitmap==recv_Bitmap  +=============+
 
 
-
           Figure 37: Sender State Machine for the ACK-Always Mode
 
+    Not All- & w=expected +---+   +---+w = Not expected
 
 
 
@@ -3082,7 +3082,6 @@ Minaburo, et al.         Expires August 30, 2018               [Page 55]
 Internet-Draft                 LPWAN SCHC                  February 2018
 
 
-    Not All- & w=expected +---+   +---+w = Not expected
     ~~~~~~~~~~~~~~~~~~~~~ |   |   |   |~~~~~~~~~~~~~~~~
     Set local_Bitmap(FCN) |   v   v   |discard
                          ++===+===+===+=+
@@ -3130,15 +3129,13 @@ Internet-Draft                 LPWAN SCHC                  February 2018
    |set local_Bitmap(FCN)      +=+=+=+=+=++Send lcl_btmp   |
    |send local_Bitmap          |          |                |
    +-------------------------->+    END   +<---------------+
+                               ++==+======+
 
 
 
 Minaburo, et al.         Expires August 30, 2018               [Page 56]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
-
-
-                               ++==+======+
 
 
           --->* ABORT
@@ -3151,6 +3148,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
          Figure 38: Receiver State Machine for the ACK-Always Mode
+
+
+
 
 
 
@@ -3257,47 +3257,47 @@ Internet-Draft                 LPWAN SCHC                  February 2018
    +-----------------------+              +--+ All-0 & full
    |            ABORT *<---+  Rcv Window  |  | ~~~~~~~~~~~~
    |  +--------------------+              +<-+ w =next
-   |  |                    +===+===+======+ clear lcl_Bitmap
-   |  |                        |   ^
-   |  |        All-0 & w=expect|   |w=expct & not-All & full
-   |  |        & no_full Bitmap|   |~~~~~~~~~~~~~~~~~~~~~~~~
-   |  |       ~~~~~~~~~~~~~~~~~|   |clear lcl_Bitmap; w =nxt
-   |  |       send local_Bitmap|   |
-   |  |                        |   |              +========+
-   |  |                        |   |  +---------->+        |
-   |  |                        |   |  |w=next     | Error/ |
-   |  |                        |   |  |~~~~~~~~   | Abort  |
-   |  |                        |   |  |Send abort ++=======+
-   |  |                        v   |  |             ^ w=expct
-   |  |            All-0     +=+===+==+======+      | & all-1
-   |  |     ~~~~~~~~~~~~~ +--+    Wait       +------+ ~~~~~~~
-   |  |     send lcl_btmp +->| Missing Fragm.|     Send abort
-   |  |                      +===========+==++
-   |  |   All-1 & w=next & MIC wrong ^   |  +---->* ABORT
-   |  |   ~~~~~~~~~~~~~~~~~~~~~~~~~~~|   +----------------+
-   |  |       set local_Bitmap(FCN)  |      All-1 & w=next|
-   |  |       send local_Bitmap      |         & MIC right|
-   |  |                              |  ~~~~~~~~~~~~~~~~~~|
-   |  |                              | set lcl_Bitmap(FCN)|
-   |  |All-1 & w=expect & MIC wrong  |                    |
-   |  |~~~~~~~~~~~~~~~~~~~~~~~~~~~~  |   +-+  All-1       |
-   |  |set local_Bitmap(FCN)         |   | v  ~~~~~~~~~~  |
-   |  |send local_Bitmap     +=======+==+===+ snd lcl_btmp|
-   |  +--------------------->+   Wait End   +-+           |
-   |                         +=====+=+===+=+ | w=expct &  |
-   |       w=expected & MIC right  | |    ^   | MIC wrong |
-   |       ~~~~~~~~~~~~~~~~~~~~~~  | |    +---+ ~~~~~~~~~ |
-   |        set local_Bitmap(FCN)  | | set lcl_Bitmap(FCN)|
-   |                               | |                    |
-   |All-1 & w=expected & MIC right | +-->* ABORT          |
-   |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ v                      |
-   |set local_Bitmap(FCN)        +=+==========+           |
-   +---------------------------->+     END    +<----------+
+   |  |     All-0 empty +->+=+=+===+======+ clear lcl_Bitmap
+   |  |     ~~~~~~~~~~~ |    | |   ^
+   |  |     send bitmap +----+ |   |w=expct & not-All & full
+   |  |                        |   |~~~~~~~~~~~~~~~~~~~~~~~~
+   |  |                        |   |set lcl_Bitmap; w =nxt
+   |  |                        |   |
+   |  |      All-0 & w=expect  |   |     w=next   +=+======+
+   |  |      & no_full Bitmap  |   |    ~~~~~~~~  |        |
+   |  |      ~~~~~~~~~~~~~~~~~ |   |  +---------->+ Error/ |
+   |  |      send local_Bitmap |   |  | Send abort| Abort  |
+   |  |                        |   |  |     +---->++=======+
+   |  |                        v   |  | +---+ w=expct   ^
+   |  |    All-0 empty    +=+===+==+==+=+=+  & all-1    |
+   |  |  ~~~~~~~~~~~~~ +--+    Wait       |  ~~~~~~~    |
+   |  |  send lcl_btmp +->| Missing Fragm.|  Send abort |
+   |  |                   +==============++             |
+   |  |                                  +--------------+
+   |  |                                   Uplink Only &
+   |  |                             Inactivity_Timer = expires
+   |  |                             ~~~~~~~~~~~~~~~~~~~~~~~~~~
+   |  |                              Send Abort
+   |  |All-1 & w=expect & MIC wrong
+   |  |~~~~~~~~~~~~~~~~~~~~~~~~~~~~      +-+  All-1
+   |  |set local_Bitmap(FCN)             | v  ~~~~~~~~~~
+   |  |send local_Bitmap     +===========+==+ snd lcl_btmp
+   |  +--------------------->+   Wait End   +-+
+   |                         +=====+=+====+=+ | w=expct &
+   |       w=expected & MIC right  | |    ^   | MIC wrong
+   |       ~~~~~~~~~~~~~~~~~~~~~~  | |    +---+ ~~~~~~~~~
+   |        set local_Bitmap(FCN)  | | set lcl_Bitmap(FCN)
+   |                               | |
+   |All-1 & w=expected & MIC right | +-->* ABORT
+   |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ v
+   |set local_Bitmap(FCN)        +=+==========+
+   +---------------------------->+     END    |
                                  +============+
                --->* Only Uplink
                     ABORT
                     ~~~~~~~~
                     Inactivity_Timer = expires
+
 
 
 
