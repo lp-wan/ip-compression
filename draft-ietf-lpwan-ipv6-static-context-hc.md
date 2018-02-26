@@ -235,8 +235,10 @@ SCHC can be abstracted as an adaptation layer below IPv6 and the underlying LPWA
 ~~~~
 {: #Fig-IntroLayers title='Protocol stack comprising IPv6, SCHC and an LPWAN technology'} 
 
-As per this document, when a packet (e.g. an IPv6 packet) needs to be 
-transmitted, header compression is first applied to the packet. The resulting packet after header compression (whose header may actually be smaller than that of the original packet or not) is called a SCHC packet. Subsequently, and if the SCHC packet size  exceeds the layer 2 (L2) MTU, fragmentation is then applied to the SCHC packet. This process is illustrated by {{Fig-Operations}}
+As per this document, when a packet (e.g. an IPv6 packet) needs to be transmitted, header compression is first applied to the 
+packet. The resulting packet after header compression (whose header may actually be smaller than that of the original packet 
+or not) is called a SCHC packet. Subsequently, and if the SCHC packet size exceeds the layer 2 (L2) MTU, fragmentation is 
+then applied to the SCHC packet. This process is illustrated by {{Fig-Operations}}
 
 ~~~~
  
