@@ -740,8 +740,8 @@ This section defines the fragment format, the All-0 and All-1 formats, the ACK f
 A fragment comprises a fragment header, a fragment payload and padding bits (if needed). A fragment conforms to the general 
 format shown in {{Fig-FragFormat}}. The fragment payload carries a subset of SCHC packet. 
 A fragment is the payload of the L2 protocol data unit (PDU). Padding MAY be added in fragments and in ACKs if necessary, 
-therefore a padding field is optional (this is explicitly indicated in {{Fig-FragFormat}}, but not in subsequent figures, for 
-the sake of illustration clarity.
+therefore a padding field is optional (this is explicitly indicated in {{Fig-FragFormat}} for the sake of illustration 
+clarity.
       
 ~~~~   
       +-----------------+-----------------------+~~~~~~~~~~~~~~~
@@ -769,10 +769,12 @@ The total size of the fragment header is R bits. Where is R is not a multiple of
 
 
 
-In the No-ACK mode, fragments except the last one SHALL conform to the detailed format defined in {{Fig-NotLast}}. The total size of the fragment header is R bits.
+In the No-ACK mode, fragments except the last one SHALL conform to the detailed format defined in {{Fig-NotLast}}. The total 
+size of the fragment header is R bits.
     
 ~~~~
 
+<------------ R ----------->
              <--T--> <--N-->
  +-- ... --+- ...  -+- ... -+--------...-------+
  | Rule ID |  DTag  |  FCN  | Fragment payload | 
@@ -783,7 +785,7 @@ In the No-ACK mode, fragments except the last one SHALL conform to the detailed 
 
 {: #Fig-NotLast title='Fragment Detailed Format for Fragments except the Last One, No-ACK mode'}
 
-
+In all these cases, R may not be a multiple of 8 bits.
    
 ### All-1 and All-0 formats
 
@@ -791,6 +793,7 @@ The All-0 format is used for sending the last fragment of a window that is not t
 
 ~~~~
 
+     <------------ R ----------->
                 <- T -> 1 <- N -> 
      +-- ... --+- ... -+-+- ... -+--- ... ---+
      | Rule ID | DTag  |W|  0..0 |  payload  |  
@@ -803,6 +806,8 @@ The All-0 format is used for sending the last fragment of a window that is not t
 The All-0 empty fragment format is used by a sender to request the retransmission of an ACK by the receiver. It is only used in ACK-Always mode.
 
 ~~~~
+
+ <------------ R ----------->
             <- T -> 1 <- N -> 
  +-- ... --+- ... -+-+- ... -+
  | Rule ID | DTag  |W|  0..0 | (no payload)  
@@ -813,10 +818,12 @@ The All-0 empty fragment format is used by a sender to request the retransmissio
 
 
 In the No-ACK mode, the last fragment of an IPv6 datagram SHALL contain a fragment header that conforms to 
-   the detaield format shown in {{Fig-Last}}. The total size of this fragment header is R+M bits.
+the detaield format shown in {{Fig-Last}}. The total size of this fragment header is R+M bits.
    
 ~~~~
-              <- T -> <-N-> <---- M ---->
+
+<------------ R ----------->
+              <- T -> <N=1> <---- M ---->
 +---- ... ---+- ... -+-----+---- ... ----+---...---+
 |   Rule ID  | DTag  |  1  |     MIC     | payload |
 +---- ... ---+- ... -+-----+---- ... ----+---...---+
@@ -830,6 +837,8 @@ In the No-ACK mode, the last fragment of an IPv6 datagram SHALL contain a fragme
    header in this format is R+M bits.
    
 ~~~~
+
+<------------ R ----------->
            <- T -> 1 <- N -> <---- M ---->
 +-- ... --+- ... -+-+- ... -+---- ... ----+---...---+
 | Rule ID | DTag  |W| 11..1 |     MIC     | payload |
@@ -841,6 +850,8 @@ In the No-ACK mode, the last fragment of an IPv6 datagram SHALL contain a fragme
  In either ACK-Always or ACK-on-Error, in order to request a retransmission of the ACK for the All-1 window, the fragment sender uses the format shown in {{Fig-All1retries}}. The total size of the fragment header in this format is R+M bits.
 
 ~~~~
+
+<------------ R ----------->
            <- T -> 1 <- N -> <---- M ---->
 +-- ... --+- ... -+-+- ... -+---- ... ----+
 | Rule ID | DTag  |W|  1..1 |     MIC     | (no payload)  
@@ -856,6 +867,8 @@ The values for R, N, T and M are not specified in this document, and are expecte
 The format of an ACK that acknowledges a window that is not the last one (denoted as All-0 window) is shown in {{Fig-ACK-Format}}.
 
 ~~~~
+
+  <--------- R -------->
               <- T -> 1  
   +---- ... --+-... -+-+---- ... -----+
   |  Rule ID  | DTag |W|encoded Bitmap| (no payload)
@@ -868,6 +881,8 @@ To acknowledge the last window of a packet (denoted as All-1 window), a C bit (i
 to 1 to indicate that the MIC check computed by the receiver matches the MIC present in the All-1 fragment. If the MIC check fails, the C bit is set to 0 and the Bitmap for the All-1 window follows.
 
 ~~~~ 
+
+<---------- R --------->
             <- T -> 1 1
 +---- ... --+-... -+-+-+
 |  Rule ID  | DTag |W|1| (MIC correct)
@@ -881,15 +896,97 @@ to 1 to indicate that the MIC check computed by the receiver matches the MIC pre
 ~~~~
 {: #Fig-ACK-Format1 title='Format of an ACK for All-1 windows'}
 
+
+### Bitmap Encoding {#Bitmapopt}
+
+The Bitmap is transmitted by a receiver as part of the ACK format. An ACK message may include padding at the end to align its 
+number of transmitted bits to a multiple of 8 bits.  
+
+Note that the ACK sent in response to an All-1 fragment includes the C bit. Therefore, the window size and thus the encoded 
+Bitmap size need to be determined taking into account the available space in the layer two frame payload, where there will be 
+1 bit less for an ACK sent in response to an All-1 fragment than in other ACKs. Note that the maximum number of fragments of the last window is one unit smaller than that of the previous windows. 
+
+When the receiver transmits an encoded Bitmap with a fragment that has not been sent during the transmission, the sender will 
+Abort the transmission.
+
+~~~~                                                  
+                      <----       Bitmap bits      ---->   
+| Rule ID | DTag |W|C|0|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|   
+|--- byte boundary ----| 1 byte  next  |  1 byte next  |   
+      
+~~~~
+{: #Fig-Localbitmap title='A non-encoded Bitmap'}
+
+In order to reduce the resulting frame size, the encoded Bitmap is shortened by applying the following algorithm: all the 
+right-most contiguous bytes in the encoded Bitmap that have all their bits set to 1 MUST NOT be transmitted.  Because the fragment sender knows the actual Bitmap size, it can reconstruct the original Bitmap with the trailing 1 bit optimized away.  In the example shown in {{Fig-transmittedbitmap}}, the last 2 bytes of the Bitmap shown in {{Fig-Localbitmap}} comprise bits that are all set to 1, therefore they are not sent.
+
+~~~~   
+     <-------   R  ------->  
+                 <- T -> 1 C
+     +---- ... --+-... -+-+-+-+
+     |  Rule ID  | DTag |W|1|0|
+     +---- ... --+-... -+-+-+-+
+     |---- byte boundary -----|    
+     
+~~~~
+{: #Fig-transmittedbitmap title='Optimized Bitmap format'}
+
+{{Fig-Bitmap-Win}} shows an example of an ACK with FCN ranging from 6 down to 0, where the Bitmap
+indicates that the second and the fifth fragments have not been correctly received. 
+
+~~~~                                                  
+<------   R  ------>6 5 4 3 2 1   0 (*) 
+          <- T -> 1   
++---------+------+-+-+-+-+-+-+-+-----+~~~~~~~
+| Rule ID | DTag |W|1|0|1|1|0|1|all-0|padding(opt.) Bitmap(before tx)
++---------+------+-+-+-+-+-+-+-+-----+~~~~~~~
+|<-- byte boundary ->|<----- 1 byte ------>| 
+    (*)=(FCN values) 
+    
++---- ... --+-... -+-+-+-+-+-+-+-+-+~~
+|  Rule ID  | DTag |W|1|0|1|1|0|1|1|P| encoded Bitmap
++---- ... --+-... -+-+-+-+-+-+-+-+-+~~
+|<-- byte boundary --->|<-- 1 byte-->| 
+    
+~~~~
+{: #Fig-Bitmap-Win title='Example of a Bitmap before transmission, and the transmitted one, in any window except the last one'}
+
+{{Fig-Bitmap-lastWin}} shows an example of an ACK with FCN ranging from 6 down to 0, where the Bitmap indicates that the MIC check has failed but there are no missing fragments. 
+
+~~~~                                                  
+ <-------   R  ------->  6 5 4 3 2 1 7 (*) 
+             <- T -> 1 1
+ |  Rule ID  | DTag |W|0|1|1|1|1|1|1|1|padding|  Bitmap (before tx)
+ |---- byte boundary -----|  1 byte next |  
+                       C
+ +---- ... --+-... -+-+-+-+
+ |  Rule ID  | DTag |W|0|1| encoded Bitmap
+ +---- ... --+-... -+-+-+-+
+ |<--- byte boundary ---->| 
+   (*) = (FCN values indicating the order)
    
+~~~~
+{: #Fig-Bitmap-lastWin title='Example of the Bitmap in ACK-always or ACK-on-error for the last window, for N=3)'}
+
+
+
+
 ### Abort formats
 
-When a fragment sender needs to abort the transmission, it sends the Sender-Abort format {{Fig-All1Abort}}, with all FCN bits 
-set to 1.  When a fragment receiver needs to abort the on-going fragmented packet transmission, it transmits the Receiver-
-Abort format {{Fig-ACKabort}}. None of these messages are acknowledgement nor retransmitted.
+Abort are coded as exceptions to the previous coding, a specific format is defined for each direction. When a fragment sender 
+needs to abort the transmission, it sends the Sender-Abort format {{Fig-All1Abort}}, that is an All-1 fragment with no MIC or 
+payload. In regular cases All-1 fragment contains at least a MIC value. This absence of the MIC value indicates an Abort.
+
+When a fragment receiver needs to abort the on-going fragmented packet transmission, it transmits the Receiver-Abort format 
+{{Fig-ACKabort}}, creating an exception in the encoded Bitmap coding. Encoded Bitmap avoid sending the rigth most bits of the 
+Bitmap set to 1. Abort is coded as an ACK message with a Bitmap set to 1 until the byte boundary, followed by an extra 0xFF 
+byte. Such message never occurs in a regular acknowledgement and is view as an abort.
+
+None of these messages are acknowledgement nor retransmitted.
 
 The sender uses the Sender-Abort when the MAX_ACK_REQUEST is reached. The receiver uses the Receiver-Abort when the 
-Inactivity timer expires, or in the ACK-on-Error mode, ACK is lost and the sender transmits fragments of a new window. Some other cases for Abort are explained in the {{FragModes}}.
+Inactivity timer expires, or in the ACK-on-Error mode, ACK is lost and the sender transmits fragments of a new window. Some 
+other cases for Abort are explained in the {{FragModes}} or {{FSM}}.
 
 ~~~~
 <------------- R -----------><--- 1 byte --->
@@ -1065,79 +1162,6 @@ always full, the MIC will be used to detect if all fragments of the window have 
 indicates the end of the fragmented packet transmission. An ACK is sent by the fragment receiver. In case of an incorrect 
 MIC, the receiver waits for fragments belonging to the same window or the expiration of the Inactivity Timer. The latter 
 will lead the receiver to abort the on-going fragmented packet transmission.
-
-### Bitmap Encoding {#Bitmapopt}
-
-The Bitmap is transmitted by a receiver as part of the ACK format. An ACK message may include padding at the end to align its 
-number of transmitted bits to a multiple of 8 bits.  
-
-Note that the ACK sent in response to an All-1 fragment includes the C bit. Therefore, the window size and thus the Bitmap 
-size need to be determined taking into account the available space in the layer two frame payload, where there will be 1 bit 
-less for an ACK sent in response to an All-1 fragment than in other ACKs. 
-
-When the receiver transmits an encoded Bitmap with a fragment that has not been sent during the transmission, the sender will Abort the transmission.
-
-~~~~                                                  
-                      <----       Bitmap bits      ---->   
-| Rule ID | DTag |W|C|0|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|   
-|--- byte boundary ----| 1 byte  next  |  1 byte next  |   
-      
-~~~~
-{: #Fig-Localbitmap title='A non-optimized Bitmap'}
-
-In order to reduce the resulting frame size, the Bitmap is shortened by applying the following algorithm: all the right-most contiguous bytes in the Bitmap that have all their bits set to 1 MUST NOT be transmitted.  Because the fragment sender knows the actual Bitmap size, it can reconstruct the original Bitmap even with the trailing 0xFF bytes optimized away.  In the example shown in {{Fig-transmittedbitmap}}, the last 2 bytes of the Bitmap shown in {{Fig-Localbitmap}} comprise bits that are all set to 1, therefore they are not sent.
-
-In the last window, when the C bit value is 1, it means that the received MIC matches the one computed by the receiver, and thus the Bitmap is not sent.  Otherwise, the Bitmap is sent after the C bit. Note that the presence of a C bit may force to reduce the number of fragments in a window to allow the Bitmap to fit in a frame. That is, the maximum number of fragments of the last window is one unit smaller than that of the previous windows. 
-
-
-~~~~   
-     <-------   R  ------->  
-                 <- T -> 1 
-     +---- ... --+-... -+-+-+-+
-     |  Rule ID  | DTag |W|1|0|
-     +---- ... --+-... -+-+-+-+
-     |---- byte boundary -----|    
-     
-~~~~
-{: #Fig-transmittedbitmap title='Optimized Bitmap format'}
-
-{{Fig-Bitmap-Win}} shows an example of an ACK with FCN ranging from 6 down to 0, where the Bitmap
-indicates that the second and the fifth fragments have not been correctly received. 
-
-~~~~                                                  
-<------   R  ------>6 5 4 3 2 1   0 (*) 
-          <- T -> 1   
-+---------+------+-+-+-+-+-+-+-+-----+~~~~~~~
-| Rule ID | DTag |W|1|0|1|1|0|1|all-0|padding (opt.)  Bitmap (not optimized)
-+---------+------+-+-+-+-+-+-+-+-----+~~~~~~~
-|<-- byte boundary --->|<----- 1 byte -----> | 
-    (*)=(FCN values) 
-    
-+---- ... --+-... -+-+-+-+-+-+-+-+-+~~
-|  Rule ID  | DTag |W|1|0|1|1|0|1|1|P|  transmitted Bitmap
-+---- ... --+-... -+-+-+-+-+-+-+-+-+~~
-|<-- byte boundary --->|<-- 1 byte-->| 
-    
-~~~~
-{: #Fig-Bitmap-Win title='Example of a Bitmap before transmission, and the transmitted one, in any window except the last one'}
-
-{{Fig-Bitmap-lastWin}} shows an example of an ACK with FCN ranging from 6 down to 0, where the Bitmap indicates that the MIC check has failed but there are no missing fragments. 
-
-~~~~                                                  
- <-------   R  ------->  6 5 4 3 2 1 7 (*) 
-             <- T -> 1 1
- |  Rule ID  | DTag |W|0|1|1|1|1|1|1|1|padding|  Bitmap (before tx)
- |---- byte boundary ----|  1 byte next |  1 byte next  |
-                       C
- +---- ... --+-... -+-+-+-+
- |  Rule ID  | DTag |W|0|1| transmitted Bitmap
- +---- ... --+-... -+-+-+-+
- |<--- byte boundary ---->| 
-   (*) = (FCN values indicating the order)
-   
-~~~~
-{: #Fig-Bitmap-lastWin title='Example of the Bitmap in ACK-always or ACK-on-error for the last window, for N=3)'}
-
 
 ## Supporting multiple window sizes
 
@@ -1764,7 +1788,7 @@ In the following examples, N (i.e. the size if the FCN field) is 3 bits. Therefo
 {: #Fig-Example-MaxWindFCN title='Transmission in ACK-Always mode of an IPv6 packet carried by 28 fragments, with N=5, MAX_WIND_FCN=23 and two lost fragments.'}
 
 
-# Fragmentation State Machines
+# Fragmentation State Machines {#FSM}
 
 The fragmentation state machines of the sender and the receiver, one for each of the different reliability modes, are described in the following figures:
 
