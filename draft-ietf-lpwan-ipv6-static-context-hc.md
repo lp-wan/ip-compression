@@ -55,6 +55,7 @@ This document defines the Static Context Header Compression (SCHC) framework, wh
 
 SCHC compression is based on a common static context stored in LPWAN devices and in the network. This document applies SCHC compression to IPv6/UDP headers. This document also specifies a fragmentation and reassembly mechanism that is used to support the IPv6 MTU requirement over LPWAN technologies. Fragmentation is mandatory for IPv6 datagrams that, after SCHC compression or when it has not been possible to apply such compression, still exceed the layer two maximum payload size.
 
+The SCHC header compression mechanism is independent of the specific LPWAN technology over which it will be used.
 Note that this document defines generic functionality. This document purposefully offers flexibility with regard to parameter settings and mechanism choices, that are expected to be made in other, technology-specific, documents.
 
 
@@ -322,7 +323,8 @@ to the other end instead of sending known field values. This Rule ID
 identifies a rule that provides the closest match to the original
 packet values. Hence, when a value is known by both ends, it is only
 necessary to send the corresponding Rule ID over the LPWAN network. 
-How Rules are generated is out of the scope of this document.
+How Rules are generated is out of the scope of this document. The rule may be changed 
+but it will be specified in another document.
 
 The context contains a list of rules (cf. {{Fig-ctxt}}). Each Rule
 contains itself a list of Field Descriptions composed of a field
@@ -357,7 +359,7 @@ direction indicator (DI), a target value (TV), a matching operator
 The Rule does not describe how to delineate each field in the original packet header. This
 must be known from the compressor/decompressor. The rule only describes the
 compression/decompression behavior for each header field. In the rule, the Field Descriptions are listed in the order in 
-which the fields appear in the packet header.
+which the fields appear in the packet header. 
 
 The Rule also describes the Compression Residue sent regarding the order of the Fields Descriptions in the Rule.
 
@@ -393,10 +395,10 @@ position is 1.
   
 ## Rule ID for SCHC C/D {#IDComp}
 
-Rule IDs are sent by the compression function in one side and are received for the decompression function in the other side. In SCHC C/D, the Rule IDs are 
-specific to a Dev. Hence, multiple Dev instances may use the same Rule ID to define different header compression contexts. To 
-identify the correct Rule ID, the SCHC C/D needs to correlate the Rule ID with the Dev identifier to find the appropriate 
-Rule to be applied.  
+Rule IDs are sent by the compression function in one side and are received for the decompression function in the other side. 
+In SCHC C/D, the Rule IDs are specific to a Dev. Hence, multiple Dev instances may use the same Rule ID to define different 
+header compression contexts. To identify the correct Rule ID, the SCHC C/D needs to correlate the Rule ID with the Dev 
+identifier to find the appropriate Rule to be applied.  
 
 
 ## Packet processing
@@ -566,7 +568,7 @@ These functions are used to process respectively the Dev and the App Interface I
 IPv6 addresses. Appiid CDA is less common since current LPWAN technologies
 frames contain a single address, which is the Dev's address.
 
-The IID value MAY be computed from the Device ID present in the Layer 2 header, or from some other stable identifier. The computation is specific for each LPWAN technology and MAY depend on the Device ID size.
+The IID value MAY be computed from the Device ID present in the Layer 2 header, or from some other stable identifier. The computation is specific for each LPWAN technology and MAY depend on the Device ID size. 
 
 In the Downlink direction, these Deviid CDA is used to determine the L2 addresses used by the LPWAN.
 
