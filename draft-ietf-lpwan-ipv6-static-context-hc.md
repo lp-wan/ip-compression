@@ -129,17 +129,17 @@ typical LPWAN network, see {{Fig-LPWANarchi}}:
 # Terminology
 This section defines the terminology and acronyms used in this document.
 
-* Abort. A type of data unit used by an endpoint involved in on-going fragmented packet transmission or reception in order to signal the other endpoint that the on-going fragmented packet transmission process is being aborted. 
+* Abort. A fragment format to signal the other end-point that the on-going fragment transmission is stopped and finished. 
 
-* ACK. Acknowledgment. A data unit used in two of the fragmentation modes defined in this specification, which is sent by a fragment receiver to report on successful or unsuccessful reception of a set of fragments.
+* ACK (Acknowledgment). A fragment format used to report the success or unsuccess reception of a set of fragments.
 
 * All-0. The fragment format for the last frame of a window that is not the last one of a packet (see Window in this glossary).
 
 * All-1. The fragment format for the last frame of the packet.
 
-* All-0 empty. An All-0 fragment without a payload. It is used to request the Bitmap when the Retransmission Timer expires, in a window that is not the last one of a packet.
+* All-0 empty. An All-0 fragment without a payload. It is used to request the ACK with the encoded Bitmap when the Retransmission Timer expires, in a window that is not the last one of a packet.
 
-* All-1 empty. An All-1 fragment without a payload. It is used to request the Bitmap when the Retransmission Timer expires in the last window of a packet.
+* All-1 empty. An All-1 fragment without a payload. It is used to request the ACK with the encoded Bitmap when the Retransmission Timer expires in the last window of a packet.
 
 * App: LPWAN Application. An application sending/receiving IPv6 packets to/from the Device.
 
@@ -279,11 +279,10 @@ The Rule ID for the SCHC identifies:
 In order to perform header compression, this document defines a mechanism called Static Context Header Compression (SCHC), 
 which is based on using context, i.e. a set of rules to compress or decompress headers. SCHC avoids context
 synchronization, which is the most bandwidth-consuming operation in
-other header compression mechanisms such as RoHC {{RFC5795}}. Since the nature of data flows is highly predictable in LPWAN
+other header compression mechanisms such as RoHC {{RFC5795}}. Since the nature of packets are highly predictable in LPWAN
 networks, static contexts may be stored beforehand to omit transmitting some information over the air.
 The contexts must be stored at both ends, and they can either be learned by a provisioning protocol, by out of band means, 
-or they can
-be pre-provisioned. The way the contexts are provisioned on both ends is out of the scope of this document.
+or they can be pre-provisioned. The way the contexts are provisioned on both ends is out of the scope of this document.
 
 ~~~~
      Dev                                                 App
@@ -304,11 +303,11 @@ be pre-provisioned. The way the contexts are provisioned on both ends is out of 
 {: #Fig-archi title='Architecture'}
 
 {{Fig-archi}} represents the architecture for compression/decompression. It is based on {{I-D.ietf-lpwan-overview}}
-terminology. The Device sends application flows using IPv6 or IPv6/UDP protocols. These flows are compressed by a
-Static Context Header Compression Compressor/Decompressor (SCHC C/D) to reduce the headers size. SCHC C/D is located in both sides of the transmission in the Dev and in the Network side. Note that if the 
-resulting data unit exceeds the maximum payload size of the underlying LPWAN technology, fragmentation is performed, see 
-{{Frag}}. The resulting data unit is sent as one or more L2 frames to a LPWAN Radio Gateway (RG) which forwards
-the frame(s) to a Network Gateway (NGW).
+terminology. The Device sends application packets using IPv6 or IPv6/UDP protocols. These packets are compressed by a
+Static Context Header Compression Compressor/Decompressor (SCHC C/D) to reduce the headers size. SCHC C/D is located in both 
+sides of the transmission in the Dev and in the Network side. Note that if the resulting data unit exceeds the maximum 
+payload size of the underlying LPWAN technology, fragmentation is performed, see {{Frag}}. The resulting data unit is sent as 
+one or more L2 frames to a LPWAN Radio Gateway (RG) which forwards the frame(s) to a Network Gateway (NGW).
 
 The NGW sends the data to an SCHC C/D for decompression. The SCHC C/D in the Network side can be
 located in the Network Gateway (NGW) or somewhere else as long as a tunnel is established between the NGW and the SCHC C/D. 
@@ -384,25 +383,24 @@ position is 1.
 
   * BIDIRECTIONAL (Bi): this Field Description is applicable to packets travelling both Up and Dw.
 
-* Target Value (TV) is the value to compare
-  the packet header field to. The Target Value can be of any type (integer, strings, etc.).
-  For instance, it can be a single value or a more complex structure (array, list, etc.), such as a JSON or a CBOR structure.
+* Target Value (TV) is the value used to make the match with the packet header field. The Target Value can be of any type 
+  (integer, strings, etc.). For instance, it can be a single value or a more complex structure (array, list, etc.), such as a
+  JSON or a CBOR structure.
 
-* Matching Operator (MO) is the operator used to compare
-  the Field Value and the Target Value. The Matching Operator may require some 
-  parameters. MO is only used during the compression phase. The set of MOs defined in this document can be found in {{chap-MO}}.
+* Matching Operator (MO) is the operator used to match the Field Value and the Target Value. The Matching Operator may 
+  require some parameters. MO is only used during the compression phase. The set of MOs defined in this document can be found 
+  in {{chap-MO}}.
 
-* Compression Decompression Action (CDA) describes the pair of reciprocal compression
-  and decompression processes. The CDA may require some
-  parameters. CDA is used in both the compression and the decompression phases. The set of CDAs defined in this document can be found in {{chap-CDA}}.
+* Compression Decompression Action (CDA) describes the compression and decompression processes. The CDA may require some
+  parameters. CDA is used in both the compression and the decompression phases. The set of CDAs defined in this document can 
+  be found in {{chap-CDA}}.
   
 ## Rule ID for SCHC C/D {#IDComp}
 
-Rule ID are sent by the compression element and are intended for the decompression element.
-In SCHC C/D, the Rule IDs are specific to a Dev. Hence, multiple Dev instances may use the same Rule ID to define
-different header compression contexts. To identify the correct Rule ID, the
-SCHC C/D needs to correlate the Rule ID with the Dev identifier to
-find the appropriate Rule to be applied.  
+Rule IDs are sent by the compression element and are received for the decompression element. In SCHC C/D, the Rule IDs are 
+specific to a Dev. Hence, multiple Dev instances may use the same Rule ID to define different header compression contexts. To 
+identify the correct Rule ID, the SCHC C/D needs to correlate the Rule ID with the Dev identifier to find the appropriate 
+Rule to be applied.  
 
 
 ## Packet processing
@@ -2046,7 +2044,7 @@ A set of Rule IDs has to be allocated to support different aspects of fragmentat
    
    *  one ID to identify the ACK message.
    
-   *  one ID to identify the Abort message as per Section 9.8.
+   *  one ID to identify the Abort message.
 
 
 # Note
