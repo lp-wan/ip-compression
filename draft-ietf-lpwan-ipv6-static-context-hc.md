@@ -1884,11 +1884,13 @@ Lcl_Bitmap==recv_Bitmap &| |   |   all missing frag sent
              MIC_bit ==0 & +>|    ERROR    |
     Lcl_Bitmap==recv_Bitmap  +=============+ 
     
+    
 ~~~~
 {: #Fig-ACKAlwaysSnd title='Sender State Machine for the ACK-Always Mode'}
 
 
 ~~~~
+
  Not All- & w=expected +---+   +---+w = Not expected
  ~~~~~~~~~~~~~~~~~~~~~ |   |   |   |~~~~~~~~~~~~~~~~
  Set local_Bitmap(FCN) |   v   v   |discard
@@ -1926,19 +1928,18 @@ Lcl_Bitmap==recv_Bitmap &| |   |   all missing frag sent
 |  +--------------------->+          +--->* ABORT       |
 |                         +===+====+=+-+ All-1&MIC wrong|
 |                             |    ^   | ~~~~~~~~~~~~~~~|
-|                             |    +---+ send lcl_btmp  |                
-|       w=expected & MIC right|         |               |
-|       ~~~~~~~~~~~~~~~~~~~~~~| +-+ Not All-1           |
-|        set local_Bitmap(FCN)| | | ~~~~~~~~~           |
-|            send local_Bitmap| | |  discard            |
-|                             | | |                     | 
-|All-1 & w=expctd & MIC right | | | +-+ All-1           |
-|~~~~~~~~~~~~~~~~~~~~~~~~~~~~ v | v | v ~~~~~~~~~       |
-|set local_Bitmap(FCN)      +=+=+=+=+=++Send lcl_btmp   |
-|send local_Bitmap          |          |                |
-+-------------------------->+    END   +<---------------+
-                            ++==+======+ 
-                           
+|      w=expected & MIC right |    +---+ send lcl_btmp  |                
+|      ~~~~~~~~~~~~~~~~~~~~~~ |                         |
+|       set local_Bitmap(FCN) | +-+ Not All-1           |
+|        send local_Bitmap    | | | ~~~~~~~~~           |
+|                             | | |  discard            |
+|All-1 & w=expctd & MIC right | | |                     |
+|~~~~~~~~~~~~~~~~~~~~~~~~~~~~ v | v +----+All-1         |
+|set local_Bitmap(FCN)      +=+=+=+=+==+ |~~~~~~~~~     |
+|send local_Bitmap          |          +<+Send lcl_btmp |
++-------------------------->+    END   |                |
+                            +==========+<---------------+
+                            
        --->* ABORT
             ~~~~~~~
             Inactivity_Timer = expires
