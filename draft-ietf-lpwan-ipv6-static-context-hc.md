@@ -642,23 +642,26 @@ parameters supported in the reliability modes such as timers and parameters.
   fragments that carry other SCHC packets. The Rule ID in an ACK identifies the message as an ACK.
 
 * Fragment Compressed Number (FCN).  The FCN is included in all SCHC fragments. This field can be understood as a truncated, 
-  efficient representation of a larger-sized fragment number, and does not carry an absolute fragment number. There are two 
+  efficient representation of a larger-sized fragment number, and does not carry an absolute fragment number. There are two 
   FCN reserved values that are used for controlling the fragmentation process, as described next:
   * The FCN value with all the bits equal to 1 (All-1) denotes the last SCHC fragment of a packet. The last window of a 
   packet is called an All-1 window.  
   * The FCN value with all the bits equal to 0 (All-0) denotes the last SCHC fragment of a window that is not the last one of 
   the packet. Such a window is called an All-0 window.
+  
   The rest of the FCN values are assigned in a sequentially decreasing order, which has the purpose to avoid possible 
   ambiguity for the receiver that might arise under certain conditions. In the SCHC fragments, this field is an unsigned 
   integer, with a size of N bits. In the No-ACK mode, it is set to 1 bit (N=1), All-0 is used in all SCHC fragments and 
   All-1 for the last one. 
   For the other reliability modes, it is recommended to use a number of bits (N) equal to or greater than 3. Nevertheless, 
-  the appropriate value will be defined in the corresponding technology documents. For windows that are not the last one from 
-  a fragmented packet, the FCN for the last SCHC fragment in such windows is an All-0. This indicates that the window is 
-  finished and communication proceeds according to the reliability mode in use. The FCN for the last SCHC fragment in the 
-  last window is an All-1.  It is also important to note that, in the No-ACK mode or when N=1, the last fragment of the 
-  packet will carry a FCN equal to 1, while all previous fragments will carry a FCN of 0. For further details see 
-  {{FragModes}}.
+  the appropriate value of N must be defined in the corresponding technology-specific profile documents. For windows that are 
+  not the last one from a fragmented packet, the FCN for the last SCHC fragment in such windows is an All-0. This indicates 
+  that the window is finished and communication proceeds according to the reliability mode in use. The FCN for the last SCHC 
+  fragment in the last window is an All-1, indicating the last fragment of the SCHC packet. It is also important to note 
+  that, in the No-ACK mode or when N=1, the last fragment of the packet will carry a FCN equal to 1, while all previous 
+  fragments will carry a FCN of 0. For further details see {{FragModes}}. The highest FCN in the window, denoted 
+  MAX_WIND_FCN, MUST be a value equal to or smaller than 2^N-2. (Example for N=5, MAX_WIND_FCN may be set to 23, then 
+  subsequent FCNs are set sequentially and in decreasing order, and the FCN will wrap from 0 back to 23).
    
 * Datagram Tag (DTag). The DTag field, if present, is set to the same value for all SCHC fragments carrying the same SCHC   
   packet, and to different values for different datagrams. Using this field, the sender can interleave fragments from 
@@ -1065,8 +1068,8 @@ fragments. Note that the size of the original, unfragmented packet cannot be det
 
 Fragmentation functionality uses the FCN value to transmit the fragments. It has a length of N bits where the All-1 and All-0 
 FCN values are used to control the fragmentation transmission. The rest of the FCN numbers MUST be assigned sequentially in a 
-decreasing order, the first FCN of a window is RECOMMENDED to be 2^N-2, i.e. the highest possible FCN value depending on the 
-FCN number of bits.
+decreasing order, the first FCN of a window is RECOMMENDED to be MAX_WIND_FCN, i.e. the highest possible FCN value depending 
+on the FCN number of bits.
 
 In all modes, the last fragment of a packet must contain a MIC which is used to check if there are errors or missing 
 fragments and must use the corresponding All-1 fragment format.  Note that a fragment with an All-0 format is considered the 
@@ -2046,15 +2049,15 @@ Lcl_Bitmap==recv_Bitmap &| |   |   all missing frag sent
 |  |                        |   |~~~~~~~~~~~~~~~~~~~~~~~~
 |  |                        |   |set lcl_Bitmap; w =nxt
 |  |                        |   |     
-|  |      All-0 & w=expect  |   |     w=next   +=+======+
-|  |      & no_full Bitmap  |   |    ~~~~~~~~  |        | 
-|  |      ~~~~~~~~~~~~~~~~~ |   |  +---------->+ Error/ |
-|  |      send local_Bitmap |   |  | Send abort| Abort  |
-|  |                        |   |  |     +---->++=======+
-|  |                        v   |  | +---+ w=expct   ^
-|  |    All-0 empty    +=+===+==+==+=+=+  & all-1    |
-|  |  ~~~~~~~~~~~~~ +--+    Wait       |  ~~~~~~~    |
-|  |  send lcl_btmp +->| Missing Fragm.|  Send abort |
+|  |      All-0 & w=expect  |   |     w=next   
+|  |      & no_full Bitmap  |   |    ~~~~~~~~  +========+ 
+|  |      ~~~~~~~~~~~~~~~~~ |   |    Send abort| Error/ |
+|  |      send local_Bitmap |   |  +---------->+ Abort  |
+|  |                        |   |  | +-------->+========+
+|  |                        v   |  | |   all-1       ^
+|  |    All-0 empty    +====+===+==+=+=+ ~~~~~~~     |        
+|  |  ~~~~~~~~~~~~~ +--+    Wait       | Send abort  |
+|  |  send lcl_btmp +->| Missing Fragm.|             |
 |  |                   +==============++             |
 |  |                                  +--------------+
 |  |                                   Uplink Only &
@@ -2069,17 +2072,18 @@ Lcl_Bitmap==recv_Bitmap &| |   |   all missing frag sent
 |                         +=====+=+====+=+ | w=expct &  
 |       w=expected & MIC right  | |    ^   | MIC wrong 
 |       ~~~~~~~~~~~~~~~~~~~~~~  | |    +---+ ~~~~~~~~~ 
-|        set local_Bitmap(FCN)  | | set lcl_Bitmap(FCN)
+|  set & send local_Bitmap(FCN) | | set lcl_Bitmap(FCN)
 |                               | |                    
 |All-1 & w=expected & MIC right | +-->* ABORT          
 |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ v                      
-|set local_Bitmap(FCN)        +=+==========+           
+|set & send local_Bitmap(FCN) +=+==========+           
 +---------------------------->+     END    |
                               +============+   
-            --->* Only Uplink
-                 ABORT
-                 ~~~~~~~~
-                 Inactivity_Timer = expires                                                      
+            --->* ABORT
+                 Only Uplink
+                 Inactivity_Timer = expires 
+                 ~~~~~~~~~~~~~~~~~~~~~~~~~~
+                 Send Abort                                                     
 ~~~~
 {: #Fig-ACKonerrorRcv title='Receiver State Machine for the ACK-on-Error Mode'}
 
