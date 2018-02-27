@@ -86,7 +86,7 @@ Table of Contents
    4.  SCHC overview . . . . . . . . . . . . . . . . . . . . . . . .   8
    5.  Rule ID . . . . . . . . . . . . . . . . . . . . . . . . . . .  10
    6.  Static Context Header Compression . . . . . . . . . . . . . .  10
-     6.1.  SCHC Rules  . . . . . . . . . . . . . . . . . . . . . . .  11
+     6.1.  SCHC C/D Rules  . . . . . . . . . . . . . . . . . . . . .  11
      6.2.  Rule ID for SCHC C/D  . . . . . . . . . . . . . . . . . .  13
      6.3.  Packet processing . . . . . . . . . . . . . . . . . . . .  13
      6.4.  Matching operators  . . . . . . . . . . . . . . . . . . .  15
@@ -590,7 +590,7 @@ Internet-Draft                 LPWAN SCHC                  February 2018
    The SCHC Compression / Fragmentation process is symmetrical,
    therefore the same description applies to the reverse direction.
 
-6.1.  SCHC Rules
+6.1.  SCHC C/D Rules
 
    The main idea of the SCHC compression scheme is to transmit the Rule
    ID to the other end instead of sending known field values.  This Rule
@@ -716,12 +716,12 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
    The compression/decompression process follows several steps:
 
-   o
-
-      1.  Compression Rule selection: The goal is to identify which
-          Rule(s) will be used to compress the packet's headers.  When
-          doing decompression, in the network side the SCHC C/D needs to
-          find the correct Rule based on the L2 address and in this way,
+   o  Compression Rule selection: The goal is to identify which Rule(s)
+      will be used to compress the packet's headers.  When
+      doing decompression, in the network side the SCHC C/D needs to
+      find the correct Rule based on the L2 address and in this way, it
+      can use the Dev-ID and the Rule-ID.  In the Dev side, only the
+      Rule ID is needed to identify the correct Rule since the Dev only
 
 
 
@@ -730,13 +730,11 @@ Minaburo, et al.         Expires August 31, 2018               [Page 13]
 Internet-Draft                 LPWAN SCHC                  February 2018
 
 
-          it can use the Dev-ID and the Rule-ID.  In the Dev side, only
-          the Rule ID is needed to identify the correct Rule since the
-          Dev only holds Rules that apply to itself.  The Rule will be
-          selected by matching the Fields Descriptions to the packet
-          header as described below.  When the selection of a Rule is
-          done, this Rule is used to compress the header.  The detailed
-          steps for compression Rule selection are the following:
+      holds Rules that apply to itself.  The Rule will be selected by
+      matching the Fields Descriptions to the packet header as described
+      below.  When the selection of a Rule is done, this Rule is used to
+      compress the header.  The detailed steps for compression Rule
+      selection are the following:
 
       *  The first step is to choose the Fields Descriptions by their
          direction, using the direction indicator (DI).  A Field
@@ -767,17 +765,19 @@ Internet-Draft                 LPWAN SCHC                  February 2018
          of the case that may require the use of the fragmentation
          process.
 
-   o
-
-      1.  Sending: If an eligible Rule is found, the Rule ID is sent to
-          the other end followed by the Compression Residue (which could
-          be empty) and directly followed by the payload.  The product
-          of the Compression Residue is sent in the order expressed in
-          the Rule for all the fields.  The way the Rule ID is sent
-          depends on the specific LPWAN layer two technology.  For
-          example, it can be either included in a Layer 2 header or sent
-          in the first byte of the L2 payload.  (Cf.  Figure 6).  This
-          process will be specified in the LPWAN technology-specific
+   o  Sending: If an eligible Rule is found, the Rule ID is sent to the
+      other end followed by the Compression Residue (which could be
+      empty) and directly followed by the payload.  The product of the
+      Compression Residue is sent in the order expressed in the Rule for
+      all the fields.  The way the Rule ID is sent depends on the
+      specific LPWAN layer two technology.  For example, it can be
+      either included in a Layer 2 header or sent in the first byte of
+      the L2 payload.  (Cf.  Figure 6).  This process will be specified
+      in the LPWAN technology-specific document and is out of the scope
+      of the present document.  On LPWAN technologies that are byte-
+      oriented, the compressed header concatenated with the original
+      packet payload is padded to a multiple of 8 bits, if needed.  See
+      Section 8 for details.
 
 
 
@@ -786,20 +786,11 @@ Minaburo, et al.         Expires August 31, 2018               [Page 14]
 Internet-Draft                 LPWAN SCHC                  February 2018
 
 
-          document and is out of the scope of the present document.  On
-          LPWAN technologies that are byte- oriented, the compressed
-          header concatenated with the original packet payload is padded
-          to a multiple of 8 bits, if needed.  See Section 8 for
-          details.
-
-   o
-
-      1.  Decompression: When doing decompression, in the network side
-          the SCHC C/D needs to find the correct Rule based on the L2
-          address and in this way, it can use the Dev-ID and the Rule-
-          ID.  In the Dev side, only the Rule ID is needed to identify
-          the correct Rule since the Dev only holds Rules that apply to
-          itself.
+   o  Decompression: When doing decompression, in the network side the
+      SCHC C/D needs to find the correct Rule based on the L2 address
+      and in this way, it can use the Dev-ID and the Rule-ID.  In the
+      Dev side, only the Rule ID is needed to identify the correct Rule
+      since the Dev only holds Rules that apply to itself.
 
       The receiver identifies the sender through its device-id (e.g.
       MAC address, if exists) and selects the appropriate Rule
@@ -828,19 +819,11 @@ Internet-Draft                 LPWAN SCHC                  February 2018
    other data type.  The result of the operation can either be True or
    False.  MOs are defined as follows:
 
-   o  equal: Results in true if a field value in a packet and a TV are
-      equal.
+   o  equal: The match result is True if a field value in a packet and
+      the value in the TV are equal.
 
    o  ignore: No check is done between a field value in a packet and a
       TV in the Rule.  The result of the matching is always true.
-
-
-
-
-Minaburo, et al.         Expires August 31, 2018               [Page 15]
-
-Internet-Draft                 LPWAN SCHC                  February 2018
-
 
    o  MSB(x): A match is obtained if the most significant x bits of the
       field value in the header packet are equal to the TV in the Rule.
@@ -851,6 +834,14 @@ Internet-Draft                 LPWAN SCHC                  February 2018
       values.  Each value of the list is identified by a short ID (or
       index).  Compression is achieved by sending the index instead of
       the original header field value.  This operator matches if the
+
+
+
+Minaburo, et al.         Expires August 31, 2018               [Page 15]
+
+Internet-Draft                 LPWAN SCHC                  February 2018
+
+
       header field value is equal to one of the values in the target
       list.
 
@@ -886,17 +877,8 @@ Internet-Draft                 LPWAN SCHC                  February 2018
    Compression is done in order that Fields Descriptions appear in the
    Rule.  The result of each Compression/Decompression Action is
    appended to the working Compression Residue in that same order.  The
-   receiver is assumed to know the size of each compressed field which
-   can be given by the rule or may be sent with the compressed header.
-
-
-
-
-
-Minaburo, et al.         Expires August 31, 2018               [Page 16]
-
-Internet-Draft                 LPWAN SCHC                  February 2018
-
+   receiver knows the size of each compressed field which can be given
+   by the rule or may be sent with the compressed header.
 
    If the field is identified as being variable in the Field
    Description, then the size of the Compression Residue value in bytes
@@ -907,6 +889,14 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
    o  For values between 15 and 255, the first 4 bits sent are set to 1
       and the size is sent using 8 bits integer.
+
+
+
+
+Minaburo, et al.         Expires August 31, 2018               [Page 16]
+
+Internet-Draft                 LPWAN SCHC                  February 2018
+
 
    o  For higher values of size, the first 12 bits are set to 1 and the
       next two bytes contain the size value as a 16 bits integer.
@@ -946,6 +936,16 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
    On the compressor side, the match-mapping Matching Operator searches
    the TV for a match with the header field value and the mapping-sent
+   CDA appends the corresponding index to the Compression Residue to be
+   sent.  On the decompressor side, the CDA uses the received index to
+   restore the field value by looking up the list in the TV.
+
+   The number of bits sent is the minimal size for coding all the
+   possible indices.
+
+
+
+
 
 
 
@@ -953,13 +953,6 @@ Minaburo, et al.         Expires August 31, 2018               [Page 17]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
-
-   CDA appends the corresponding index to the Compression Residue to be
-   sent.  On the decompressor side, the CDA uses the received index to
-   restore the field value by looking up the list in the TV.
-
-   The number of bits sent is the minimal size for coding all the
-   possible indices.
 
 6.5.4.  LSB(y) CDA
 
@@ -974,8 +967,8 @@ Internet-Draft                 LPWAN SCHC                  February 2018
    length field).  The decompressor combines the value received with the
    Target Value depending on the field type.
 
-   If this action is made on a variable length field, the size of the
-   Compressed Residue in bytes has to be sent as described in
+   If this action needs to be done on a variable length field, the size
+   of the Compressed Residue in bytes must be sent as described in
    Section 6.5.
 
 6.5.5.  DEViid, APPiid CDA
@@ -1001,6 +994,13 @@ Internet-Draft                 LPWAN SCHC                  February 2018
    o  compute-length: computes the length assigned to this field.  This
       CDA may be used to compute IPv6 length or UDP length.
 
+   o  compute-checksum: computes a checksum from the information already
+      received by the SCHC C/D.  This field may be used to compute UDP
+      checksum.
+
+
+
+
 
 
 
@@ -1009,10 +1009,6 @@ Minaburo, et al.         Expires August 31, 2018               [Page 18]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
-
-   o  compute-checksum: computes a checksum from the information already
-      received by the SCHC C/D.  This field may be used to compute UDP
-      checksum.
 
 7.  Fragmentation
 
@@ -1058,6 +1054,10 @@ Internet-Draft                 LPWAN SCHC                  February 2018
       fragments.  This field can be understood as a truncated, efficient
       representation of a larger-sized fragment number, and does not
       carry an absolute fragment number.  There are two FCN reserved
+      values that are used for controlling the fragmentation process, as
+      described next:
+
+
 
 
 
@@ -1065,9 +1065,6 @@ Minaburo, et al.         Expires August 31, 2018               [Page 19]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
-
-      values that are used for controlling the fragmentation process, as
-      described next:
 
       *  The FCN value with all the bits equal to 1 (All-1) denotes the
          last SCHC fragment of a packet.  The last window of a packet is
@@ -1113,6 +1110,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
       next window.  The initial value for this field is 0.  In the ACK
       format, this field also has a size of 1 bit.  In all ACKs, the W
       bit carries the same value as the W bit carried by the SCHC
+      fragments whose reception is being positively or negatively
+      acknowledged by the ACK.
+
 
 
 
@@ -1121,9 +1121,6 @@ Minaburo, et al.         Expires August 31, 2018               [Page 20]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
-
-      fragments whose reception is being positively or negatively
-      acknowledged by the ACK.
 
    o  Message Integrity Check (MIC).  This field, which has a size of M
       bits, is computed by the sender over the complete SCHC packet
@@ -1171,6 +1168,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
       Attempts counter is defined per window.  It is initialized each
       time a new window is used.
 
+   o  Bitmap.  The Bitmap is a sequence of bits carried in an ACK.  Each
+      bit in the Bitmap corresponds to a fragment of the current window,
+
 
 
 Minaburo, et al.         Expires August 31, 2018               [Page 21]
@@ -1178,8 +1178,6 @@ Minaburo, et al.         Expires August 31, 2018               [Page 21]
 Internet-Draft                 LPWAN SCHC                  February 2018
 
 
-   o  Bitmap.  The Bitmap is a sequence of bits carried in an ACK.  Each
-      bit in the Bitmap corresponds to a fragment of the current window,
       and provides feedback on whether the fragment has been received or
       not.  The right-most position on the Bitmap reports if the All-0
       or All-1 fragment has been received or not.  Feedback on the
@@ -1226,6 +1224,8 @@ Internet-Draft                 LPWAN SCHC                  February 2018
       is short enough.  However, such benefit comes at the expense of
       ACK use.  In ACK-Always the receiver sends an ACK after a window
       of fragments has been received, where a window of fragments is a
+      subset of the whole number of fragments needed to carry a complete
+      SCHC packet.  The ACK is used to inform the sender if a fragment
 
 
 
@@ -1234,8 +1234,6 @@ Minaburo, et al.         Expires August 31, 2018               [Page 22]
 Internet-Draft                 LPWAN SCHC                  February 2018
 
 
-      subset of the whole number of fragments needed to carry a complete
-      SCHC packet.  The ACK is used to inform the sender if a fragment
       in the actual window has been lost or well received.  Upon an ACK
       reception, the sender retransmits the lost fragments.  When an ACK
       is lost and the sender has not received it before the expiration
@@ -1281,6 +1279,8 @@ Internet-Draft                 LPWAN SCHC                  February 2018
    does not make any decision as to which fragment reliability mode(s)
    are supported by a specific LPWAN technology.
 
+   Examples of the different reliability modes described are provided in
+   Appendix B.
 
 
 
@@ -1289,9 +1289,6 @@ Minaburo, et al.         Expires August 31, 2018               [Page 23]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
-
-   Examples of the different reliability modes described are provided in
-   Appendix B.
 
 7.4.  Fragmentation Formats
 
@@ -1333,6 +1330,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
    In the No-ACK mode, fragments except the last one SHALL conform to
    the detailed format defined in Figure 10.  The total size of the
    fragment header is R bits.
+
+
+
 
 
 
@@ -1442,8 +1442,8 @@ Internet-Draft                 LPWAN SCHC                  February 2018
        Figure 15: All-1 for Retries format, also called All-1 empty
 
    The values for R, N, T and M are not specified in this document, and
-   are expected to be determined in other documents (e.g. technology-
-   specific profile documents).
+   SHOULD be determined in other documents (e.g. technology-specific
+   profile documents).
 
 7.4.3.  ACK format
 
@@ -1647,8 +1647,8 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 7.5.  Baseline mechanism
 
    If after applying SCHC header compression (or when SCHC header
-   compression is not possible) the entire datagram does not fit within
-   the payload of a single L2 data unit, the datagram SHALL be broken
+   compression is not possible) the SCHC packet does not fit within the
+   payload of a single L2 data unit, the SCHC packet SHALL be broken
    into fragments and the fragments SHALL be sent to the fragment
    receiver.  The fragment receiver needs to identify all the fragments
    that belong to a given SCHC packet.  To this end, the receiver SHALL
@@ -2374,10 +2374,10 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 11.  Acknowledgements
 
    Thanks to Dominique Barthel, Carsten Bormann, Philippe Clavier,
-   Eduardo Ingles Sanchez, Arunprabhu Kandasamy, Sergio Lopez Bernal,
-   Antony Markovski, Alexander Pelov, Pascal Thubert, Juan Carlos
-   Zuniga, Diego Dujovne, Edgar Ramos, and Shoichi Sakane for useful
-   design consideration and comments.
+   Eduardo Ingles Sanchez, Arunprabhu Kandasamy, Rahul Jadhav, Sergio
+   Lopez Bernal, Antony Markovski, Alexander Pelov, Pascal Thubert, Juan
+   Carlos Zuniga, Diego Dujovne, Edgar Ramos, and Shoichi Sakane for
+   useful design consideration and comments.
 
 12.  References
 
