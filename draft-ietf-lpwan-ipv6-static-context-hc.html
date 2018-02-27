@@ -342,7 +342,7 @@ address {
 
   <meta name="dct.creator" content="Minaburo, A., Toutain, L., and C. Gomez" />
   <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-lpwan-ipv6-static-context-hc-10" />
-  <meta name="dct.issued" scheme="ISO8601" content="2018-02-26" />
+  <meta name="dct.issued" scheme="ISO8601" content="2018-02-27" />
   <meta name="dct.abstract" content="This document defines the Static Context Header Compression (SCHC) framework, which provides header compression and fragmentation functionality. SCHC has been tailored for Low Power Wide Area Networks (LPWAN)." />
   <meta name="description" content="This document defines the Static Context Header Compression (SCHC) framework, which provides header compression and fragmentation functionality. SCHC has been tailored for Low Power Wide Area Networks (LPWAN)." />
 
@@ -366,7 +366,7 @@ address {
 <td class="right">L. Toutain</td>
 </tr>
 <tr>
-<td class="left">Expires: August 30, 2018</td>
+<td class="left">Expires: August 31, 2018</td>
 <td class="right">IMT-Atlantique</td>
 </tr>
 <tr>
@@ -379,7 +379,7 @@ address {
 </tr>
 <tr>
 <td class="left"></td>
-<td class="right">February 26, 2018</td>
+<td class="right">February 27, 2018</td>
 </tr>
 
     	
@@ -397,7 +397,7 @@ address {
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at https://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on August 30, 2018.</p>
+<p>This Internet-Draft will expire on August 31, 2018.</p>
 <h1 id="rfc.copyrightnotice"><a href="#rfc.copyrightnotice">Copyright Notice</a></h1>
 <p>Copyright (c) 2018 IETF Trust and the persons identified as the document authors.  All rights reserved.</p>
 <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (https://trustee.ietf.org/license-info) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.</p>
@@ -540,7 +540,7 @@ address {
 </ul>
 <p id="rfc.section.1.p.4">The Static Context Header Compression (SCHC) is defined for this environment.  SCHC uses a context, where header information is kept in the header format order. This context is static: the values of the header fields do not change over time. This avoids complex resynchronization mechanisms, that would be incompatible with LPWAN characteristics. In most cases, a small context identifier is enough to represent the full IPv6/UDP headers.  The SCHC header compression mechanism is independent of the specific LPWAN technology over which it is used.</p>
 <p id="rfc.section.1.p.5">LPWAN technologies impose some strict limitations on traffic. For instance, devices are sleeping most of the time and may receive data during short periods of time after transmission to preserve battery. LPWAN technologies are also characterized, among others, by a very reduced data unit and/or payload size <a href="#I-D.ietf-lpwan-overview" class="xref">[I-D.ietf-lpwan-overview]</a>.  However, some of these technologies do not provide fragmentation functionality, therefore the only option for them to support the IPv6 MTU requirement of 1280 bytes <a href="#RFC2460" class="xref">[RFC2460]</a> is to use a fragmentation protocol at the adaptation layer, below IPv6.  In response to this need, this document also defines a fragmentation/reassembly mechanism, which supports the IPv6 MTU requirement over LPWAN technologies. Such functionality has been designed under the assumption that data unit out-of-sequence delivery will not happen between the entity performing fragmentation and the entity performing reassembly.</p>
-<p id="rfc.section.1.p.6">Note that this document defines generic functionality and purposefully offers flexibility with regard to parameter settings and mechanism choices, that are expected to be made in other, technology-specific documents (e.g. <a href="#I-D.zuniga-lpwan-schc-over-sigfox" class="xref">[I-D.zuniga-lpwan-schc-over-sigfox]</a>, <a href="#I-D.petrov-lpwan-ipv6-schc-over-lorawan" class="xref">[I-D.petrov-lpwan-ipv6-schc-over-lorawan]</a>).</p>
+<p id="rfc.section.1.p.6">Note that this document defines generic functionality and purposefully offers flexibility with regard to parameter settings and mechanism choices, that are expected to be made in other, technology-specific documents (e.g. {{I-D.zuniga-lpwan-schc- over-sigfox}}, <a href="#I-D.petrov-lpwan-ipv6-schc-over-lorawan" class="xref">[I-D.petrov-lpwan-ipv6-schc-over-lorawan]</a>).</p>
 <h1 id="rfc.section.2">
 <a href="#rfc.section.2">2.</a> <a href="#LPWAN-Archi" id="LPWAN-Archi">LPWAN Architecture</a>
 </h1>
@@ -556,7 +556,7 @@ address {
                                            +------+
  ()   ()   ()       |                      |LPWAN-|
   ()  () () ()     / \       +---------+   | AAA  |
-() () () () () ()  /   \=====|    ^    |===|Server|  +-----------+
+() () () () () () /   \======|    ^    |===|Server|  +-----------+
  ()  ()   ()     |           | &lt;--|--&gt; |   +------+  |APPLICATION|
 ()  ()  ()  ()  / \==========|    v    |=============|   (App)   |
   ()  ()  ()   /   \         +---------+             +-----------+
@@ -677,24 +677,23 @@ address {
 <div id="Fig-archi"></div>
 <pre>
      Dev                                                 App
-+--------------+                                  +--------------+
-|APP1 APP2 APP3|                                  |APP1 APP2 APP3|
-|              |                                  |              |
-|      UDP     |                                  |     UDP      | 
-|     IPv6     |                                  |    IPv6      |   
-|              |                                  |              |  
-|   SCHC C/D   |                                  |              |  
-|   (context)  |                                  |              | 
-+-------+------+                                  +-------+------+ 
-         |   +--+     +----+     +---------+              .
-         +~~ |RG| === |NGW | === |SCHC C/D |... Internet ..
-             +--+     +----+     |(context)| 
-                                 +---------+
++----------------+                                  +--------------+
+| APP1 APP2 APP3 |                                  |APP1 APP2 APP3|
+|                |                                  |              |
+|       UDP      |                                  |     UDP      | 
+|      IPv6      |                                  |    IPv6      |   
+|                |                                  |              |  
+|SCHC Comp / Frag|                                  |              |  
++--------+-------+                                  +-------+------+ 
+         |   +--+     +----+     +-----------+              .
+         +~~ |RG| === |NGW | === |   SCHC    |... Internet ..
+             +--+     +----+     |Comp / Frag| 
+                                 +-----------+
 </pre>
 <p class="figure">Figure 4: Architecture</p>
-<p><a href="#Fig-archi" class="xref">Figure 4</a> represents the architecture for compression/decompression. It is based on <a href="#I-D.ietf-lpwan-overview" class="xref">[I-D.ietf-lpwan-overview]</a> terminology. In the Uplink direction, the Device sends application packets using IPv6 or IPv6/UDP protocols. These packets are compressed by a Static Context Header Compression Compressor/Decompressor (SCHC C/D) to reduce the headers&#8217; size. SCHC C/D is located in both sides of the transmission in the Dev and in the Network side. Note that if the resulting data unit exceeds the maximum payload size of the underlying LPWAN technology, fragmentation is performed, see <a href="#Frag" class="xref">Section 7</a>. The resulting data unit is sent as one or more L2 frames to a LPWAN Radio Gateway (RG) which forwards the frame(s) to a Network Gateway (NGW).</p>
-<p id="rfc.section.6.p.3">The NGW sends the data to an SCHC C/D for decompression. The SCHC C/D in the Network side can be located in the Network Gateway (NGW) or somewhere else as long as a tunnel is established between the NGW and the SCHC C/D.  Note that, for some LPWAN technologies, it may be suitable to locate fragmentation and reassembly functionality nearer the NGW, in order to better deal with time constraints of such technologies.  The SCHC C/Ds on both sides must share the same set of Rules.  After decompression, the packet can be sent over the Internet to one or several LPWAN Application Servers (App).</p>
-<p id="rfc.section.6.p.4">The SCHC C/D process is symmetrical, therefore the same description applies to the reverse direction.</p>
+<p><a href="#Fig-archi" class="xref">Figure 4</a> The figure represents the architecture for SCHC (Static Context Header Compression) Compression / Fragmentation where SCHC C/D (Compressor/Decompressor) and SCHC Fragmentation are performed. It is based on <a href="#I-D.ietf-lpwan-overview" class="xref">[I-D.ietf-lpwan-overview]</a> terminology.  SCHC Compression / Fragmentation is located on both sides of the transmission in the Dev and in the Network side.  In the Uplink direction, the Device application packets use IPv6 or IPv6/UDP protocols. Before sending these packets, the Dev compresses their headers using SCHC C/D and if the SCHC packet resulting from the compression exceeds the maximum payload size of the underlying LPWAN technology, SCHC fragmentation is performed, see <a href="#Frag" class="xref">Section 7</a>. The resulting SCHC fragments are sent as one or more L2 frames to an LPWAN Radio Gateway (RG) which forwards the frame(s) to a Network Gateway (NGW).</p>
+<p id="rfc.section.6.p.3">The NGW sends the data to an SCHC Fragmentation and then to the SCHC C/D for decompression. The SCHC C/D in the Network side can be located in the Network Gateway (NGW) or somewhere else as long as a tunnel is established between the NGW and the SCHC Compression / Fragmentation. Note that, for some LPWAN technologies, it may be suitable to locate fragmentation and reassembly functionality nearer the NGW, in order to better deal with time constraints of such technologies.  The SCHC C/Ds on both sides must share the same set of Rules. After decompression, the packet can be sent over the Internet to one or several LPWAN Application Servers (App).</p>
+<p id="rfc.section.6.p.4">The SCHC Compression / Fragmentation process is symmetrical, therefore the same description applies to the reverse direction.</p>
 <h1 id="rfc.section.6.1">
 <a href="#rfc.section.6.1">6.1.</a> <a href="#schc-rules" id="schc-rules">SCHC Rules</a>
 </h1>
