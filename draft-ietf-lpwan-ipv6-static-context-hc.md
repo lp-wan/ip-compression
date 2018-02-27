@@ -51,12 +51,17 @@ informative:
 
 --- abstract
 
-This document defines the Static Context Header Compression (SCHC) framework, which provides header compression and fragmentation functionality. SCHC has been tailored for Low Power Wide Area Networks (LPWAN).
+This document defines the Static Context Header Compression (SCHC) framework, which provides header compression and 
+fragmentation functionality. SCHC has been tailored for Low Power Wide Area Networks (LPWAN).
 
-SCHC compression is based on a common static context stored in LPWAN devices and in the network. This document applies SCHC compression to IPv6/UDP headers. This document also specifies a fragmentation and reassembly mechanism that is used to support the IPv6 MTU requirement over LPWAN technologies. Fragmentation is mandatory for IPv6 datagrams that, after SCHC compression or when it has not been possible to apply such compression, still exceed the layer two maximum payload size.
+SCHC compression is based on a common static context stored in LPWAN devices and in the network. This document applies SCHC 
+compression to IPv6/UDP headers. This document also specifies a fragmentation and reassembly mechanism that is used to 
+support the IPv6 MTU requirement over LPWAN technologies. Fragmentation is mandatory for IPv6 datagrams that, after SCHC 
+compression or when it has not been possible to apply such compression, still exceed the layer two maximum payload size.
 
 The SCHC header compression mechanism is independent of the specific LPWAN technology over which it will be used.
-Note that this document defines generic functionality. This document purposefully offers flexibility with regard to parameter settings and mechanism choices, that are expected to be made in other, technology-specific, documents.
+Note that this document defines generic functionality. This document purposefully offers flexibility with regard to parameter 
+settings and mechanism choices, that are expected to be made in other, technology-specific, documents.
 
 
 --- middle
@@ -337,7 +342,7 @@ to one or several LPWAN Application Servers (App).
 
 The SCHC Compression / Fragmentation process is symmetrical, therefore the same description applies to the reverse direction.
 
-## SCHC Rules
+## SCHC C/D Rules
 
 The main idea of the SCHC compression scheme is to transmit the Rule ID
 to the other end instead of sending known field values. This Rule ID
@@ -426,7 +431,7 @@ identifier to find the appropriate Rule to be applied.
 
 The compression/decompression process follows several steps:
 
-* 1. Compression Rule selection: The goal is to identify which Rule(s) will be used to compress the packet's headers. When   
+* Compression Rule selection: The goal is to identify which Rule(s) will be used to compress the packet's headers. When   
   doing decompression, in the network side the SCHC C/D needs to find the correct Rule based on the L2 address and in this 
   way, it can use the Dev-ID and the Rule-ID. In the Dev side, only the Rule ID is needed to identify the correct Rule since 
   the Dev only holds Rules that apply to itself. The Rule will be selected by matching the Fields Descriptions to the packet 
@@ -450,7 +455,7 @@ The compression/decompression process follows several steps:
   * If no eligible Rule is found, then the header must be sent without compression, depending on the L2 PDU size, this is one 
     of the case that may require the use of the fragmentation process.
 
-* 2. Sending: If an eligible Rule is found, the Rule ID is sent to the other end followed by the Compression Residue (which 
+* Sending: If an eligible Rule is found, the Rule ID is sent to the other end followed by the Compression Residue (which 
   could be empty) and directly followed by the payload. The product of the Compression Residue is sent in the order expressed 
   in the Rule for all the fields. 
   The way the Rule ID is sent depends on the specific LPWAN layer two technology. For example, it can be either included in a 
@@ -459,7 +464,7 @@ The compression/decompression process follows several steps:
   oriented, the compressed header concatenated with the original packet payload is padded to a multiple of 8 bits, if needed. 
   See {{Padding}} for details.
   
-* 3. Decompression: When doing decompression, in the network side the SCHC C/D needs to find the correct Rule based on the L2 
+* Decompression: When doing decompression, in the network side the SCHC C/D needs to find the correct Rule based on the L2 
   address and in this way, it can use the Dev-ID and the Rule-ID. In the Dev side, only the Rule ID is needed to identify the 
   correct Rule since the Dev only holds Rules that apply to itself. 
 
@@ -487,7 +492,7 @@ Matching Operators (MOs) are functions used by both SCHC C/D endpoints involved 
 compression/decompression. They are not typed and can be indifferently applied to integer, string
 or any other data type. The result of the operation can either be True or False. MOs are defined as follows: 
 
-* equal: Results in true if a field value in a packet and a TV are equal.
+* equal: The match result is True if a field value in a packet and the value in the TV are equal.
 
 * ignore: No check is done between a field value in a packet and a TV
   in the Rule. The result of the matching is always true.
@@ -529,7 +534,7 @@ y=size of the transmitted bits
 a field. The first column lists the actions name. The second and third
 columns outline the reciprocal compression/decompression behavior for each action.
 
-Compression is done in order that Fields Descriptions appear in the Rule. The result of each Compression/Decompression Action is appended to the working Compression Residue in that same order. The receiver is assumed to know the size of each compressed field which can be given by the rule or may be sent with the compressed header. 
+Compression is done in order that Fields Descriptions appear in the Rule. The result of each Compression/Decompression Action is appended to the working Compression Residue in that same order. The receiver knows the size of each compressed field which can be given by the rule or may be sent with the compressed header. 
 
 If the field is identified as being variable in the Field Description, then the size of the Compression Residue value in bytes must be sent first using the following coding:
 
@@ -565,7 +570,8 @@ used with the "ignore" MO.
 The mapping-sent is used to send a smaller index (the index into
 the Target Value list of values) instead of the original value. This function is used together with the "match-mapping" MO.
 
-On the compressor side, the match-mapping Matching Operator searches the TV for a match with the header field value and the mapping-sent CDA appends the corresponding index to the Compression Residue to be sent.
+On the compressor side, the match-mapping Matching Operator searches the TV for a match with the header field value and the 
+mapping-sent CDA appends the corresponding index to the Compression Residue to be sent.
 On the decompressor side, the CDA uses the received index to restore the field value by looking up the list in the TV.
 
 The number of bits sent is the minimal size for coding all the possible indices.
@@ -580,8 +586,8 @@ original header field length minus the length specified in the MSB(x) MO.
 The compressor sends the Least Significant Bits (e.g. LSB of the length field). The
 decompressor combines the value received with the Target Value depending on the field type. 
 
-If this action is made on a variable length field, the size of the Compressed Residue in bytes has to be sent as described in 
-{{chap-CDA}}.
+If this action needs to be done on a variable length field, the size of the Compressed Residue in bytes must be sent as 
+described in {{chap-CDA}}.
 
 
 ### DEViid, APPiid CDA
@@ -880,7 +886,7 @@ the detaield format shown in {{Fig-Last}}. The total size of this fragment heade
 ~~~~
 {: #Fig-All1retries title='All-1 for Retries format, also called All-1 empty'}
 
-The values for R, N, T and M are not specified in this document, and are expected to be determined in other documents (e.g. technology-specific profile documents). 
+The values for R, N, T and M are not specified in this document, and SHOULD be determined in other documents (e.g. technology-specific profile documents). 
    
 ### ACK format
 
@@ -1032,9 +1038,9 @@ other cases for Abort are explained in the {{FragModes}} or {{FSM}}.
 
 ## Baseline mechanism {#FragModes}
 
-If after applying SCHC header compression (or when SCHC header compression is not possible) the entire datagram does not fit 
-within the payload of a single L2 data unit, the datagram SHALL be broken into fragments and the fragments SHALL be sent to 
-the fragment receiver.
+If after applying SCHC header compression (or when SCHC header compression is not possible) the SCHC packet does not fit 
+within the payload of a single L2 data unit, the SCHC packet SHALL be broken into fragments and the fragments SHALL be sent 
+to the fragment receiver.
 The fragment receiver needs to identify all the fragments that belong to a given SCHC packet. To this end, the receiver 
 SHALL use: 
 
@@ -1446,7 +1452,7 @@ In Window mode – ACK on error, a malicious node may force a fragment sender to
 
 # Acknowledgements
 
-Thanks to Dominique Barthel, Carsten Bormann, Philippe Clavier, Eduardo Ingles Sanchez, Arunprabhu Kandasamy, 
+Thanks to Dominique Barthel, Carsten Bormann, Philippe Clavier, Eduardo Ingles Sanchez, Arunprabhu Kandasamy, Rahul Jadhav,
 Sergio Lopez Bernal, Antony Markovski, Alexander Pelov, Pascal Thubert, Juan Carlos Zuniga, Diego Dujovne, Edgar Ramos, and Shoichi Sakane for useful design consideration and comments. 
 
 --- back
