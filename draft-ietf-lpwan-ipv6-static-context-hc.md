@@ -290,12 +290,14 @@ for Fragmentation or after trying to do SCHC C/D and fragmentation the packet is
 specified in this document, as it is implementation-specific and can vary according to the LPWAN technology and the number of 
 Rules, among others. 
 
-The Rule ID the SCHC identifies are:
-* In the SCHC C/D context the Rule used to keep the Field Description of the header packet. 
+The Rule IDs identified are:
+* In the SCHC C/D context the Rule used to keep the Field Description of the header packet.
 
-* In SCHC Fragmentation the specific modes and settings.
+* In SCHC Fragmentation to identify the specific modes and settings. In bidirectional fragmentation at least two Rules Id are 
+needed. 
 
 * And at least one Rule ID may be reserved to the case where no SCHC C/D nor SCHC fragmentation were possible.
+
 
 # Static Context Header Compression
 
@@ -1094,7 +1096,7 @@ the receiver will release all resources allocated to reassembling this packet. T
 be determined based on the characteristics of the underlying LPWAN technology and will be defined in other documents (e.g. 
 technology-specific profile documents).    
 
-#### ACK-Always {#ACK-Always-subsection}
+### ACK-Always {#ACK-Always-subsection}
 In ACK-Always, the sender transmits fragments by using the two-jumping-windows procedure. A delay between each fragment can 
 be added to respect local regulations or other constraints imposed by the applications.  Each time a fragment is sent, the 
 FCN is decreased by one.  When the FCN reaches value 0 and there are more fragments to be sent after, the sender transmits 
@@ -1154,7 +1156,7 @@ MAX_ACK_REQUESTS, the receiver will abort the on-going fragmented packet transmi
 Receiver-Abort format.  The receiver also aborts upon Inactivity Timer expiration.
 
 
-#### ACK-on-Error {#ACK-on-Error-subsection}
+### ACK-on-Error {#ACK-on-Error-subsection}
 The ACK-on-Error sender is similar to ACK-Always, the main difference being that in ACK-on-Error the ACK with the encoded Bitmap is not sent at the end of each window but only when at least one fragment of the current window has been lost (with the exception of the last window).  In Ack-on-Error, the Retransmission Timer expiration will be considered as a positive acknowledgment. The Retransmission Timer is set when sending an All-0 or an All-1 fragment. When the All-1 fragment has been sent, then the on-going fragmented packet transmission fragmentation is finished and the sender waits for the last ACK. At the receiver side, when the All-1 fragment is received and the MIC check indicates successful packet reception, an ACK is sent anyway, to confirm the end of a correct transmission.  If the Retransmission Timer expires while waiting for the ACK for the last window, an All-1 empty request for the last ACK MUST be sent by the sender to complete the fragmented packet transmission.
 
 If the sender receives an ACK, it checks the window value.  ACKs with an unexpected window number are discarded.  If the 
@@ -2080,19 +2082,6 @@ Lcl_Bitmap==recv_Bitmap &| |   |   all missing frag sent
                  Inactivity_Timer = expires                                                      
 ~~~~
 {: #Fig-ACKonerrorRcv title='Receiver State Machine for the ACK-on-Error Mode'}
-
-
-
-
-# Allocation of Rule IDs for fragmentation
-
-A set of Rule IDs has to be allocated to support different aspects of fragmentation functionality as per this document. The actual allocation of IDs is to be defined in other documents. The set MAY include:
-
-   *  one ID or several IDs to identify a fragment as well as its reliability mode and its window size, if multiple of these are supported.
-   
-   *  one ID to identify the ACK message.
-   
-   *  one ID to identify the Abort message.
 
 
 # Note
