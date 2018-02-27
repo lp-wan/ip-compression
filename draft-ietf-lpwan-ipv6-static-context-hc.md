@@ -84,15 +84,16 @@ devices are sleeping most of the time and may receive data during short periods
 of time after transmission to preserve battery. LPWAN technologies are also characterized,
 among others, by a very reduced data unit and/or payload size
 {{I-D.ietf-lpwan-overview}}.  However, some of these technologies
-do not provide fragmentation functionality, therefore the only option for
-   them to support the IPv6 MTU requirement of 1280 bytes
- {{RFC2460}} is to use a fragmentation protocol at the
-adaptation layer, below IPv6. 
+do not provide fragmentation functionality, therefore the only option for them to support the IPv6 MTU requirement of 1280 
+bytes {{RFC2460}} is to use a fragmentation protocol at the adaptation layer, below IPv6. 
 In response to this need, this document also defines a fragmentation/reassembly
 mechanism, which supports the IPv6 MTU requirement over LPWAN
-technologies. Such functionality has been designed under the assumption that data unit out-of-sequence delivery will not happen between the entity performing fragmentation and the entity performing reassembly.
+technologies. Such functionality has been designed under the assumption that data unit out-of-sequence delivery will not 
+happen between the entity performing fragmentation and the entity performing reassembly.
 
-Note that this document defines generic functionality and purposefully offers flexibility with regard to parameter settings and mechanism choices, that are expected to be made in other, technology-specific documents (e.g. {{I-D.zuniga-lpwan-schc-over-sigfox}}, {{I-D.petrov-lpwan-ipv6-schc-over-lorawan}}).
+Note that this document defines generic functionality and purposefully offers flexibility with regard to parameter settings 
+and mechanism choices, that are expected to be made in other, technology-specific documents (e.g. {{I-D.zuniga-lpwan-schc-
+over-sigfox}}, {{I-D.petrov-lpwan-ipv6-schc-over-lorawan}}).
 
 
 # LPWAN Architecture {#LPWAN-Archi}
@@ -117,7 +118,7 @@ typical LPWAN network, see {{Fig-LPWANarchi}}:
                                            +------+
  ()   ()   ()       |                      |LPWAN-|
   ()  () () ()     / \       +---------+   | AAA  |
-() () () () () ()  /   \=====|    ^    |===|Server|  +-----------+
+() () () () () () /   \======|    ^    |===|Server|  +-----------+
  ()  ()   ()     |           | <--|--> |   +------+  |APPLICATION|
 ()  ()  ()  ()  / \==========|    v    |=============|   (App)   |
   ()  ()  ()   /   \         +---------+             +-----------+
@@ -134,25 +135,32 @@ This section defines the terminology and acronyms used in this document.
 
 * ACK (Acknowledgment). A fragment format used to report the success or unsuccess reception of a set of fragments.
 
-* All-0. The fragment format for the last frame of a window that is not the last one of a packet (see Window in this glossary).
+* All-0. The fragment format for the last frame of a window that is not the last one of a packet (see Window in this 
+  glossary).
 
 * All-1. The fragment format for the last frame of the packet.
 
-* All-0 empty. An All-0 fragment without a payload. It is used to request the ACK with the encoded Bitmap when the Retransmission Timer expires, in a window that is not the last one of a packet.
+* All-0 empty. An All-0 fragment without a payload. It is used to request the ACK with the encoded Bitmap when the 
+  Retransmission Timer expires, in a window that is not the last one of a packet.
 
-* All-1 empty. An All-1 fragment without a payload. It is used to request the ACK with the encoded Bitmap when the Retransmission Timer expires in the last window of a packet.
+* All-1 empty. An All-1 fragment without a payload. It is used to request the ACK with the encoded Bitmap when the 
+  Retransmission Timer expires in the last window of a packet.
 
 * App: LPWAN Application. An application sending/receiving IPv6 packets to/from the Device.
 
-* APP-IID: Application Interface Identifier. Second part of the IPv6 address that identifies the application server interface.
+* APP-IID: Application Interface Identifier. Second part of the IPv6 address that identifies the application server 
+  interface.
 
 * Bi: Bidirectional, a rule entry that applies to headers of packets travelling in both directions (Up and Dw).
 
-* Bitmap: a field of bits in an acknowledgment message that tells the sender which fragments of a window were correctly received.
+* Bitmap: a field of bits in an acknowledgment message that tells the sender which fragments of a window were correctly 
+  received.
 
-* C: Checked bit. Used in an acknowledgment (ACK) header to determine if the MIC locally computed by the receiver matches (1) the received MIC or not (0).
+* C: Checked bit. Used in an acknowledgment (ACK) header to determine if the MIC locally computed by the receiver matches (1) 
+  the received MIC or not (0).
 
-* CDA: Compression/Decompression Action. Describes the reciprocal pair of actions that are performed at the compressor to compress a header field and at the decompressor to recover the original header field value.
+* CDA: Compression/Decompression Action. Describes the reciprocal pair of actions that are performed at the compressor to 
+  compress a header field and at the decompressor to recover the original header field value.
 
 * Compress Residue. The bytes that need to be sent after applying the SCHC compression over each header field 
 
@@ -162,23 +170,29 @@ This section defines the terminology and acronyms used in this document.
 
 * Dev-IID: Device Interface Identifier. Second part of the IPv6 address that identifies the device interface.
 
-* DI: Direction Indicator. This field tells which direction of packet travel (Up, Dw or Bi) a rule applies to. This allows for assymmetric processing.
+* DI: Direction Indicator. This field tells which direction of packet travel (Up, Dw or Bi) a rule applies to. This allows 
+  for assymmetric processing.
 
-* DTag: Datagram Tag. This fragmentation header field is set to the same value for all fragments carrying the same IPv6 datagram.
+* DTag: Datagram Tag. This fragmentation header field is set to the same value for all fragments carrying the same IPv6 
+  datagram.
 
-* Dw: Dw: Downlink direction for compression/decompression in both sides, from SCHC C/D in the network to SCHC C/D in the Dev.
+* Dw: Dw: Downlink direction for compression/decompression in both sides, from SCHC C/D in the network to SCHC C/D in the 
+  Dev.
 
-* FCN: Fragment Compressed Number. This fragmentation header field carries an efficient representation of a larger-sized fragment number.
+* FCN: Fragment Compressed Number. This fragmentation header field carries an efficient representation of a larger-sized 
+  fragment number.
 
 * Field Description. A line in the Rule Table.
 
 * FID: Field Identifier. This is an index to describe the header fields in a Rule.
 
-* FL: Field Length is the length of the field in bits for fixed values or a type (variable, token length, ...) for length unknown at the rule creation. The length of a header field is defined in the specific protocol standard.
+* FL: Field Length is the length of the field in bits for fixed values or a type (variable, token length, ...) for length 
+  unknown at the rule creation. The length of a header field is defined in the specific protocol standard.
 
 * FP: Field Position is a value that is used to identify the position where each instance of a field appears in the header.  
 
-* Fragment: A data unit that carries a subset of a SCHC packet. Fragmentation is needed when the size of a SCHC packet exceeds the available payload size of the underlying L2 technology data unit.
+* Fragment: A data unit that carries a subset of a SCHC packet. Fragmentation is needed when the size of a SCHC packet 
+  exceeds the available payload size of the underlying L2 technology data unit.
 
 * IID: Interface Identifier. See the IPv6 addressing architecture {{RFC7136}}
 
@@ -218,7 +232,8 @@ of a window.
 
 # SCHC overview
 
-SCHC can be abstracted as an adaptation layer below IPv6 and the underlying LPWAN technology. SCHC that comprises two sublayers (i.e. the Compression sublayer and the Fragmentation sublayer), as shown in {{Fig-IntroLayers}}. 
+SCHC can be abstracted as an adaptation layer below IPv6 and the underlying LPWAN technology. SCHC that comprises two 
+sublayers (i.e. the Compression sublayer and the Fragmentation sublayer), as shown in {{Fig-IntroLayers}}. 
 
 ~~~~
  
@@ -289,34 +304,38 @@ or they can be pre-provisioned. The way the contexts are provisioned on both end
 
 ~~~~
      Dev                                                 App
-+--------------+                                  +--------------+
-|APP1 APP2 APP3|                                  |APP1 APP2 APP3|
-|              |                                  |              |
-|      UDP     |                                  |     UDP      | 
-|     IPv6     |                                  |    IPv6      |   
-|              |                                  |              |  
-|   SCHC C/D   |                                  |              |  
-|   (context)  |                                  |              | 
-+-------+------+                                  +-------+------+ 
-         |   +--+     +----+     +---------+              .
-         +~~ |RG| === |NGW | === |SCHC C/D |... Internet ..
-             +--+     +----+     |(context)| 
-                                 +---------+
++----------------+                                  +--------------+
+| APP1 APP2 APP3 |                                  |APP1 APP2 APP3|
+|                |                                  |              |
+|       UDP      |                                  |     UDP      | 
+|      IPv6      |                                  |    IPv6      |   
+|                |                                  |              |  
+|SCHC Comp / Frag|                                  |              |  
++--------+-------+                                  +-------+------+ 
+         |   +--+     +----+     +-----------+              .
+         +~~ |RG| === |NGW | === |   SCHC    |... Internet ..
+             +--+     +----+     |Comp / Frag| 
+                                 +-----------+
 ~~~~
 {: #Fig-archi title='Architecture'}
 
-{{Fig-archi}} represents the architecture for compression/decompression. It is based on {{I-D.ietf-lpwan-overview}}
-terminology. In the Uplink direction, the Device sends application packets using IPv6 or IPv6/UDP protocols. These packets are compressed by a Static Context Header Compression Compressor/Decompressor (SCHC C/D) to reduce the headers' size. SCHC C/D is located in both sides of the transmission in the Dev and in the Network side. Note that if the resulting data unit exceeds the maximum payload size of the underlying LPWAN technology, fragmentation is performed, see {{Frag}}. The resulting data unit is sent as one or more L2 frames to a LPWAN Radio Gateway (RG) which forwards the frame(s) to a Network Gateway (NGW).
+{{Fig-archi}} The figure represents the architecture for SCHC (Static Context Header Compression) Compression / Fragmentation 
+where SCHC C/D (Compressor/Decompressor) and SCHC Fragmentation are performed. It is based on {{I-D.ietf-lpwan-overview}} 
+terminology. 
+SCHC Compression / Fragmentation is located on both sides of the transmission in the Dev and in the Network side.
+In the Uplink direction, the Device application packets use IPv6 or IPv6/UDP protocols. Before sending these packets, the Dev 
+compresses their headers using SCHC C/D and if the SCHC packet resulting from the compression exceeds the maximum payload 
+size of the underlying LPWAN technology, SCHC fragmentation is performed, see {{Frag}}. The resulting SCHC fragments are sent 
+as one or more L2 frames to an LPWAN Radio Gateway (RG) which forwards the frame(s) to a Network Gateway (NGW).
+ 
+The NGW sends the data to an SCHC Fragmentation and then to the SCHC C/D for decompression. The SCHC C/D in the Network side 
+can be located in the Network Gateway (NGW) or somewhere else as long as a tunnel is established between the NGW and the SCHC 
+Compression / Fragmentation. Note that, for some LPWAN technologies, it may be suitable to locate fragmentation and 
+reassembly functionality nearer the NGW, in order to better deal with time constraints of such technologies.
+The SCHC C/Ds on both sides must share the same set of Rules. After decompression, the packet can be sent over the Internet 
+to one or several LPWAN Application Servers (App). 
 
-The NGW sends the data to an SCHC C/D for decompression. The SCHC C/D in the Network side can be
-located in the Network Gateway (NGW) or somewhere else as long as a tunnel is established between the NGW and the SCHC C/D. 
-Note that, for some LPWAN technologies, it may be suitable to locate fragmentation and reassembly functionality nearer the 
-NGW, in order to better deal with time constraints of such technologies.
-The SCHC C/Ds on both sides must share the same set of Rules.
-After decompression, the packet can be sent over the Internet to one
-or several LPWAN Application Servers (App). 
-
-The SCHC C/D process is symmetrical, therefore the same description applies to the reverse direction.
+The SCHC Compression / Fragmentation process is symmetrical, therefore the same description applies to the reverse direction.
 
 ## SCHC Rules
 
