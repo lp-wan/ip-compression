@@ -102,8 +102,8 @@ Table of Contents
      7.2.  Fragmentation Tools . . . . . . . . . . . . . . . . . . .  20
      7.3.  Reliability modes . . . . . . . . . . . . . . . . . . . .  23
      7.4.  Fragmentation Formats . . . . . . . . . . . . . . . . . .  24
-       7.4.1.  Fragment format . . . . . . . . . . . . . . . . . . .  24
-       7.4.2.  All-1 and All-0 formats . . . . . . . . . . . . . . .  25
+       7.4.1.  Fragment format . . . . . . . . . . . . . . . . . . .  25
+       7.4.2.  All-1 and All-0 formats . . . . . . . . . . . . . . .  26
        7.4.3.  ACK format  . . . . . . . . . . . . . . . . . . . . .  27
        7.4.4.  Abort formats . . . . . . . . . . . . . . . . . . . .  30
 
@@ -1095,11 +1095,11 @@ Internet-Draft                 LPWAN SCHC                  February 2018
       as an ACK.
 
    o  Fragment Compressed Number (FCN).  The FCN is included in all SCHC
-      fragments.  This field can be understood as a truncated, efficient
-      representation of a larger-sized fragment number, and does not
-      carry an absolute fragment number.  There are two FCN reserved
-      values that are used for controlling the fragmentation process, as
-      described next:
+      fragments.  This field can be understood as a truncated,
+       efficient representation of a larger-sized fragment number, and
+      does not carry an absolute fragment number.  There are two FCN
+      reserved values that are used for controlling the fragmentation
+      process, as described next:
 
       *  The FCN value with all the bits equal to 1 (All-1) denotes the
          last SCHC fragment of a packet.  The last window of a packet is
@@ -1107,13 +1107,13 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
       *  The FCN value with all the bits equal to 0 (All-0) denotes the
          last SCHC fragment of a window that is not the last one of the
-         packet.  Such a window is called an All-0 window.  The rest of
-         the FCN values are assigned in a sequentially decreasing order,
-         which has the purpose to avoid possible ambiguity for the
-         receiver that might arise under certain conditions.  In the
-         SCHC fragments, this field is an unsigned integer, with a size
-         of N bits.  In the No-ACK mode, it is set to 1 bit (N=1), All-0
-         is used in all SCHC fragments and All-1 for the last one.  For
+         packet.  Such a window is called an All-0 window.
+
+      The rest of the FCN values are assigned in a sequentially
+      decreasing order, which has the purpose to avoid possible
+      ambiguity for the receiver that might arise under certain
+      conditions.  In the SCHC fragments, this field is an unsigned
+      integer, with a size of N bits.  In the No-ACK mode, it is set to
 
 
 
@@ -1122,19 +1122,24 @@ Minaburo, et al.         Expires August 31, 2018               [Page 20]
 Internet-Draft                 LPWAN SCHC                  February 2018
 
 
-         the other reliability modes, it is recommended to use a number
-         of bits (N) equal to or greater than 3.  Nevertheless, the
-         appropriate value will be defined in the corresponding
-         technology documents.  For windows that are not the last one
-         from a fragmented packet, the FCN for the last SCHC fragment in
-         such windows is an All-0.  This indicates that the window is
-         finished and communication proceeds according to the
-         reliability mode in use.  The FCN for the last SCHC fragment in
-         the last window is an All-1.  It is also important to note
-         that, in the No-ACK mode or when N=1, the last fragment of the
-         packet will carry a FCN equal to 1, while all previous
-         fragments will carry a FCN of 0.  For further details see
-         Section 7.5.
+      1 bit (N=1), All-0 is used in all SCHC fragments and All-1 for the
+      last one.  For the other reliability modes, it is recommended to
+      use a number of bits (N) equal to or greater than 3.
+      Nevertheless, the appropriate value of N must be defined in the
+      corresponding technology-specific profile documents.  For windows
+      that are not the last one from a fragmented packet, the FCN for
+      the last SCHC fragment in such windows is an All-0.  This
+      indicates that the window is finished and communication proceeds
+      according to the reliability mode in use.  The FCN for the last
+      SCHC fragment in the last window is an All-1, indicating the last
+      fragment of the SCHC packet.  It is also important to note that,
+      in the No-ACK mode or when N=1, the last fragment of the packet
+      will carry a FCN equal to 1, while all previous fragments will
+      carry a FCN of 0.  For further details see Section 7.5.  The
+      highest FCN in the window, denoted MAX_WIND_FCN, MUST be a value
+      equal to or smaller than 2^N-2.  (Example for N=5, MAX_WIND_FCN
+      may be set to 23, then subsequent FCNs are set sequentially and in
+      decreasing order, and the FCN will wrap from 0 back to 23).
 
    o  Datagram Tag (DTag).  The DTag field, if present, is set to the
       same value for all SCHC fragments carrying the same SCHC
@@ -1164,12 +1169,7 @@ Internet-Draft                 LPWAN SCHC                  February 2018
       (i.e. the reverse representation of the polynomial used e.g. in
       the Ethernet standard [RFC3385]) is recommended as the default
       algorithm for computing the MIC.  Nevertheless, other algorithms
-      MAY be required and are defined in the technology-specific
-      documents.
 
-   o  C (MIC checked): C is a 1-bit field.  This field is used in the
-      ACK packets to report the outcome of the MIC check, i.e.  whether
-      the reassembled packet was correctly received or not.  A value of
 
 
 
@@ -1178,6 +1178,12 @@ Minaburo, et al.         Expires August 31, 2018               [Page 21]
 Internet-Draft                 LPWAN SCHC                  February 2018
 
 
+      MAY be required and are defined in the technology-specific
+      documents.
+
+   o  C (MIC checked): C is a 1-bit field.  This field is used in the
+      ACK packets to report the outcome of the MIC check, i.e.  whether
+      the reassembled packet was correctly received or not.  A value of
       1 represents a positive MIC check at the receiver side (i.e. the
       MIC computed by the receiver matches the received MIC).
 
@@ -1220,12 +1226,6 @@ Internet-Draft                 LPWAN SCHC                  February 2018
       indicates that the fragment of FCN corresponding to that bit
       position has been correctly sent and received.  The text above
       describes the internal representation of the Bitmap.  When
-      inserted in the ACK for transmission from the receiver to the
-      sender, the Bitmap may be truncated for energy/bandwidth
-      optimisation, see more details in Section 7.4.3.1
-
-   o  Abort.  On expiration of the Inactivity timer, or when Attempts
-      reached MAX_ACK_REQUESTS or upon an occurrence of some other
 
 
 
@@ -1234,6 +1234,12 @@ Minaburo, et al.         Expires August 31, 2018               [Page 22]
 Internet-Draft                 LPWAN SCHC                  February 2018
 
 
+      inserted in the ACK for transmission from the receiver to the
+      sender, the Bitmap may be truncated for energy/bandwidth
+      optimisation, see more details in Section 7.4.3.1
+
+   o  Abort.  On expiration of the Inactivity timer, or when Attempts
+      reached MAX_ACK_REQUESTS or upon an occurrence of some other
       error, the sender or the receiver MUST use the Abort.  When the
       receiver needs to abort the on-going fragmented packet
       transmission, it sends the Receiver-Abort format.  When the sender
@@ -1277,12 +1283,6 @@ Internet-Draft                 LPWAN SCHC                  February 2018
       transmission needs to be Aborted.  See further details in
       Section 7.5.2.
 
-   o  ACK-on-Error.  The ACK-on-Error mode is suitable for links
-      offering relatively low L2 data unit loss probability.  In this
-      mode, the fragment receiver reduces the number of ACKs
-      transmitted, which may be especially beneficial in asymmetric
-      scenarios.  Because the fragments use the uplink of the underlying
-
 
 
 Minaburo, et al.         Expires August 31, 2018               [Page 23]
@@ -1290,6 +1290,11 @@ Minaburo, et al.         Expires August 31, 2018               [Page 23]
 Internet-Draft                 LPWAN SCHC                  February 2018
 
 
+   o  ACK-on-Error.  The ACK-on-Error mode is suitable for links
+      offering relatively low L2 data unit loss probability.  In this
+      mode, the fragment receiver reduces the number of ACKs
+      transmitted, which may be especially beneficial in asymmetric
+      scenarios.  Because the fragments use the uplink of the underlying
       LPWAN technology, which has higher capacity than downlink.  The
       receiver transmits an ACK only after the complete window
       transmission and if at least one fragment of this window has been
@@ -1329,6 +1334,18 @@ Internet-Draft                 LPWAN SCHC                  February 2018
    This section defines the fragment format, the All-0 and All-1
    formats, the ACK format and the Abort formats.
 
+
+
+
+
+
+
+
+Minaburo, et al.         Expires August 31, 2018               [Page 24]
+
+Internet-Draft                 LPWAN SCHC                  February 2018
+
+
 7.4.1.  Fragment format
 
    A fragment comprises a fragment header, a fragment payload and
@@ -1338,13 +1355,6 @@ Internet-Draft                 LPWAN SCHC                  February 2018
    (PDU).  Padding MAY be added in fragments and in ACKs if necessary,
    therefore a padding field is optional (this is explicitly indicated
    in Figure 8 for the sake of illustration clarity.
-
-
-
-Minaburo, et al.         Expires August 31, 2018               [Page 24]
-
-Internet-Draft                 LPWAN SCHC                  February 2018
-
 
          +-----------------+-----------------------+~~~~~~~~~~~~~~~
          | Fragment Header |   Fragment payload    | padding (opt.)
@@ -1385,22 +1395,17 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
    In all these cases, R may not be a multiple of 8 bits.
 
-7.4.2.  All-1 and All-0 formats
-
-   The All-0 format is used for sending the last fragment of a window
-   that is not the last window of the packet.
-
-
-
-
-
-
 
 
 Minaburo, et al.         Expires August 31, 2018               [Page 25]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
+
+7.4.2.  All-1 and All-0 formats
+
+   The All-0 format is used for sending the last fragment of a window
+   that is not the last window of the packet.
 
         <------------ R ----------->
                    <- T -> 1 <- N ->
@@ -1442,11 +1447,6 @@ Internet-Draft                 LPWAN SCHC                  February 2018
    SHALL contain a fragment header that conforms to the detailed format
    shown in Figure 14.  The total size of the fragment header in this
    format is R+M bits.
-
-
-
-
-
 
 
 
@@ -1728,8 +1728,8 @@ Internet-Draft                 LPWAN SCHC                  February 2018
    fragments.  It has a length of N bits where the All-1 and All-0 FCN
    values are used to control the fragmentation transmission.  The rest
    of the FCN numbers MUST be assigned sequentially in a decreasing
-   order, the first FCN of a window is RECOMMENDED to be 2^N-2, i.e. the
-   highest possible FCN value depending on the FCN number of bits.
+   order, the first FCN of a window is RECOMMENDED to be MAX_WIND_FCN,
+
 
 
 
@@ -1737,6 +1737,9 @@ Minaburo, et al.         Expires August 31, 2018               [Page 31]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
+
+   i.e. the highest possible FCN value depending on the FCN number of
+   bits.
 
    In all modes, the last fragment of a packet must contain a MIC which
    is used to check if there are errors or missing fragments and must
@@ -1781,9 +1784,6 @@ Internet-Draft                 LPWAN SCHC                  February 2018
    characteristics of the underlying LPWAN technology and will be
    defined in other documents (e.g.  technology-specific profile
    documents).
-
-
-
 
 
 
@@ -3319,15 +3319,15 @@ Internet-Draft                 LPWAN SCHC                  February 2018
    |  |                        |   |~~~~~~~~~~~~~~~~~~~~~~~~
    |  |                        |   |set lcl_Bitmap; w =nxt
    |  |                        |   |
-   |  |      All-0 & w=expect  |   |     w=next   +=+======+
-   |  |      & no_full Bitmap  |   |    ~~~~~~~~  |        |
-   |  |      ~~~~~~~~~~~~~~~~~ |   |  +---------->+ Error/ |
-   |  |      send local_Bitmap |   |  | Send abort| Abort  |
-   |  |                        |   |  |     +---->++=======+
-   |  |                        v   |  | +---+ w=expct   ^
-   |  |    All-0 empty    +=+===+==+==+=+=+  & all-1    |
-   |  |  ~~~~~~~~~~~~~ +--+    Wait       |  ~~~~~~~    |
-   |  |  send lcl_btmp +->| Missing Fragm.|  Send abort |
+   |  |      All-0 & w=expect  |   |     w=next
+   |  |      & no_full Bitmap  |   |    ~~~~~~~~  +========+
+   |  |      ~~~~~~~~~~~~~~~~~ |   |    Send abort| Error/ |
+   |  |      send local_Bitmap |   |  +---------->+ Abort  |
+   |  |                        |   |  | +-------->+========+
+   |  |                        v   |  | |   all-1       ^
+   |  |    All-0 empty    +====+===+==+=+=+ ~~~~~~~     |
+   |  |  ~~~~~~~~~~~~~ +--+    Wait       | Send abort  |
+   |  |  send lcl_btmp +->| Missing Fragm.|             |
    |  |                   +==============++             |
    |  |                                  +--------------+
    |  |                                   Uplink Only &
@@ -3342,18 +3342,18 @@ Internet-Draft                 LPWAN SCHC                  February 2018
    |                         +=====+=+====+=+ | w=expct &
    |       w=expected & MIC right  | |    ^   | MIC wrong
    |       ~~~~~~~~~~~~~~~~~~~~~~  | |    +---+ ~~~~~~~~~
-   |        set local_Bitmap(FCN)  | | set lcl_Bitmap(FCN)
+   |  set & send local_Bitmap(FCN) | | set lcl_Bitmap(FCN)
    |                               | |
    |All-1 & w=expected & MIC right | +-->* ABORT
    |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ v
-   |set local_Bitmap(FCN)        +=+==========+
+   |set & send local_Bitmap(FCN) +=+==========+
    +---------------------------->+     END    |
                                  +============+
-               --->* Only Uplink
-                    ABORT
-                    ~~~~~~~~
+               --->* ABORT
+                    Only Uplink
                     Inactivity_Timer = expires
-
+                    ~~~~~~~~~~~~~~~~~~~~~~~~~~
+                    Send Abort
 
 
 
