@@ -136,19 +136,20 @@ typical LPWAN network, see {{Fig-LPWANarchi}}:
 # Terminology
 This section defines the terminology and acronyms used in this document.
 
-* Abort. A fragment format to signal the other end-point that the on-going fragment transmission is stopped and finished. 
+* Abort. A SCHC fragment format to signal the other end-point that the on-going fragment transmission is stopped and 
+  finished. 
 
-* ACK (Acknowledgment). A fragment format used to report the success or unsuccess reception of a set of fragments.
+* ACK (Acknowledgment). A SCHC fragment format used to report the success or unsuccess reception of a set of SCHC fragments.
 
-* All-0. The fragment format for the last frame of a window that is not the last one of a packet (see Window in this 
+* All-0. The SCHC fragment format for the last frame of a window that is not the last one of a packet (see Window in this 
   glossary).
 
-* All-1. The fragment format for the last frame of the packet.
+* All-1. The SCHC fragment format for the last frame of the packet.
 
-* All-0 empty. An All-0 fragment without a payload. It is used to request the ACK with the encoded Bitmap when the 
+* All-0 empty. An All-0 SCHC fragment without a payload. It is used to request the ACK with the encoded Bitmap when the 
   Retransmission Timer expires, in a window that is not the last one of a packet.
 
-* All-1 empty. An All-1 fragment without a payload. It is used to request the ACK with the encoded Bitmap when the 
+* All-1 empty. An All-1 SCHC fragment without a payload. It is used to request the ACK with the encoded Bitmap when the 
   Retransmission Timer expires in the last window of a packet.
 
 * App: LPWAN Application. An application sending/receiving IPv6 packets to/from the Device.
@@ -158,7 +159,7 @@ This section defines the terminology and acronyms used in this document.
 
 * Bi: Bidirectional, a rule entry that applies to headers of packets travelling in both directions (Up and Dw).
 
-* Bitmap: a field of bits in an acknowledgment message that tells the sender which fragments of a window were correctly 
+* Bitmap: a field of bits in an acknowledgment message that tells the sender which SCHC fragments of a window were correctly 
   received.
 
 * C: Checked bit. Used in an acknowledgment (ACK) header to determine if the MIC locally computed by the receiver matches (1) 
@@ -178,13 +179,13 @@ This section defines the terminology and acronyms used in this document.
 * DI: Direction Indicator. This field tells which direction of packet travel (Up, Dw or Bi) a rule applies to. This allows 
   for assymmetric processing.
 
-* DTag: Datagram Tag. This fragmentation header field is set to the same value for all fragments carrying the same IPv6 
-  datagram.
+* DTag: Datagram Tag. This SCHC fragmentation header field is set to the same value for all SCHC fragments carrying the same 
+  IPv6 datagram.
 
 * Dw: Dw: Downlink direction for compression/decompression in both sides, from SCHC C/D in the network to SCHC C/D in the 
   Dev.
 
-* FCN: Fragment Compressed Number. This fragmentation header field carries an efficient representation of a larger-sized 
+* FCN: Fragment Compressed Number. This SCHC fragmentation header field carries an efficient representation of a larger-sized 
   fragment number.
 
 * Field Description. A line in the Rule Table.
@@ -196,44 +197,47 @@ This section defines the terminology and acronyms used in this document.
 
 * FP: Field Position is a value that is used to identify the position where each instance of a field appears in the header.  
 
-* Fragment: A data unit that carries a subset of a SCHC packet. Fragmentation is needed when the size of a SCHC packet 
-  exceeds the available payload size of the underlying L2 technology data unit.
+* SCHC Fragment: A data unit that carries a subset of a SCHC packet. SCHC Fragmentation is needed when the size of a SCHC 
+  packet exceeds the available payload size of the underlying L2 technology data unit.
 
 * IID: Interface Identifier. See the IPv6 addressing architecture {{RFC7136}}
 
-* Inactivity Timer. A timer used after receiving a fragment to detect when there is an error and there is no possibility to continue an on-going fragmented packet transmission.
+* Inactivity Timer. A timer used after receiving a SCHC fragment to detect when there is an error and there is no possibility 
+  to continue an on-going SCHC fragmented packet transmission.
 
 * L2: Layer two. The immediate lower layer SCHC interfaces with. It is provided by an underlying LPWAN technology. 
 
-* MIC: Message Integrity Check.  A fragmentation header field computed over an IPv6 packet before fragmentation, used for error detection after IPv6 packet reassembly. 
+* MIC: Message Integrity Check.  A SCHC fragmentation header field computed over an IPv6 packet before fragmentation, used 
+for error detection after IPv6 packet reassembly. 
 
 * MO: Matching Operator. An operator used to match a value contained in a header field with a value contained in a Rule.
 
-* Retransmission Timer. A timer used by the fragment sender during an on-going fragmented packet transmission to detect possible link errors when waiting for a possible incoming ACK.
+* Retransmission Timer. A timer used by the SCHC fragment sender during an on-going SCHC fragmented packet transmission to 
+  detect possible link errors when waiting for a possible incoming ACK.
 
 * Rule: A set of header field values.
 
 * Rule entry: A row in the rule that describes a header field.
 
 * Rule ID: An identifier for a rule, SCHC C/D in both sides share the same Rule ID for a specific packet. A set of Rule IDs 
-are used to support fragmentation functionality.
+  are used to support SCHC fragmentation functionality.
 
 * SCHC C/D: Static Context Header Compression Compressor/Decompressor. A mechanism used in both sides, at the Dev and at the 
-network to achieve Compression/Decompression of headers. SCHC C/D uses SCHC rules to perform compression and decompression.
+  network to achieve Compression/Decompression of headers. SCHC C/D uses SCHC rules to perform compression and decompression.
 
 * SCHC packet: A packet (e.g. an IPv6 packet) whose header has been compressed as per the header compression mechanism 
-defined in this document. If the header compression process is unable to actually compress the packet header, the packet with 
-the uncompressed header is still called a SCHC packet (in this case, a Rule ID is used to indicate that the packet header has 
-not been compressed).
+  defined in this document. If the header compression process is unable to actually compress the packet header, the packet 
+  with the uncompressed header is still called a SCHC packet (in this case, a Rule ID is used to indicate that the packet 
+  header has not been compressed).
 
 * TV: Target value. A value contained in the Rule that will be matched with the value of a header field.
 
 * Up: Uplink direction for compression/decompression in both sides, from the Dev SCHC C/D to the network SCHC C/D.
 
-* W: Window bit. A fragment header field used in Window mode (see section 5), which carries the same value for all fragments 
-of a window.
+* W: Window bit. A SCHC fragment header field used in Window mode ({Frag}), which carries the same value for all 
+  SCHC fragments of a window.
 
-* Window:  A subset of the fragments needed to carry a packet (see section 5)
+* Window: A subset of the SCHC fragments needed to carry a packet ({Frag}).
 
 # SCHC overview
 
@@ -286,15 +290,15 @@ then applied to the SCHC packet. This process is illustrated by {{Fig-Operations
 # Rule ID
 
 Rule ID are identifiers used to select either the correct context to be used for Compression/Decompression functionalities or 
-for Fragmentation or after trying to do SCHC C/D and fragmentation the packet is sent as is. The size of the Rule ID is not 
-specified in this document, as it is implementation-specific and can vary according to the LPWAN technology and the number of 
-Rules, among others. 
+for SCHC Fragmentation or after trying to do SCHC C/D and SCHC fragmentation the packet is sent as is. The size of the Rule 
+ID is not specified in this document, as it is implementation-specific and can vary according to the LPWAN technology and the 
+number of Rules, among others. 
 
-The Rule IDs identified are:
+The Rule IDs identifiers are:
 * In the SCHC C/D context the Rule used to keep the Field Description of the header packet.
 
-* In SCHC Fragmentation to identify the specific modes and settings. In bidirectional fragmentation at least two Rules Id are 
-needed. 
+* In SCHC Fragmentation to identify the specific modes and settings. In bidirectional SCHC fragmentation at least two Rules   
+  ID are needed. 
 
 * And at least one Rule ID may be reserved to the case where no SCHC C/D nor SCHC fragmentation were possible.
 
@@ -337,7 +341,7 @@ as one or more L2 frames to an LPWAN Radio Gateway (RG) which forwards the frame
  
 The NGW sends the data to an SCHC Fragmentation and then to the SCHC C/D for decompression. The SCHC C/D in the Network side 
 can be located in the Network Gateway (NGW) or somewhere else as long as a tunnel is established between the NGW and the SCHC 
-Compression / Fragmentation. Note that, for some LPWAN technologies, it may be suitable to locate fragmentation and 
+Compression / Fragmentation. Note that, for some LPWAN technologies, it may be suitable to locate SCHC fragmentation and 
 reassembly functionality nearer the NGW, in order to better deal with time constraints of such technologies.
 The SCHC C/Ds on both sides must share the same set of Rules. After decompression, the packet can be sent over the Internet 
 to one or several LPWAN Application Servers (App). 
@@ -355,7 +359,7 @@ How Rules are generated is out of the scope of this document. The rule may be ch
 but it will be specified in another document.
 
 The context contains a list of rules (cf. {{Fig-ctxt}}). Each Rule
-contains itself a list of Field Descriptions composed of a field
+contains itself a list of Fields Descriptions composed of a field
 identifier (FID), a field length (FL), a field position (FP), a
 direction indicator (DI), a target value (TV), a matching operator
 (MO) and a Compression/Decompression Action (CDA).
@@ -386,7 +390,7 @@ direction indicator (DI), a target value (TV), a matching operator
 
 The Rule does not describe how to delineate each field in the original packet header. This
 must be known from the compressor/decompressor. The rule only describes the
-compression/decompression behavior for each header field. In the rule, the Field Descriptions are listed in the order in 
+compression/decompression behavior for each header field. In the rule, the Fields Descriptions are listed in the order in 
 which the fields appear in the packet header. 
 
 The Rule also describes the Compression Residue sent regarding the order of the Fields Descriptions in the Rule.
@@ -455,7 +459,7 @@ The compression/decompression process follows several steps:
     compressed header (with possibly a Compressed Residue) may be obtained. Otherwise, the next Rule is tested. 
 
   * If no eligible Rule is found, then the header must be sent without compression, depending on the L2 PDU size, this is one 
-    of the case that may require the use of the fragmentation process.
+    of the case that may require the use of the SCHC fragmentation process.
 
 * Sending: If an eligible Rule is found, the Rule ID is sent to the other end followed by the Compression Residue (which 
   could be empty) and directly followed by the payload. The product of the Compression Residue is sent in the order expressed 
@@ -621,14 +625,14 @@ In LPWAN technologies, the L2 data unit size typically varies from tens to hundr
 used either because after applying SCHC C/D or when SCHC C/D is not possible the entire SCHC packet still exceeds the L2 data 
 unit.
 
-The fragmentation functionality defined in this document has been designed under the assumption that data unit out-of-
+The SCHC fragmentation functionality defined in this document has been designed under the assumption that data unit out-of-
 sequence delivery will not happen between the entity performing fragmentation and the entity performing reassembly.  This 
-assumption allows reducing the complexity and overhead of the fragmentation mechanism.
+assumption allows reducing the complexity and overhead of the SCHC fragmentation mechanism.
 
-To adapt the SCHC fragmentation to the capabilities of LPWAN technologies is required to enable optional fragment 
-retransmission and to allow a stepper delivery for the reliability of fragments. This document does not make any decision 
-with regard to which fragment delivery reliability mode will be used over a specific LPWAN technology. These details will be 
-defined in other technology-specific documents.
+To adapt the SCHC fragmentation to the capabilities of LPWAN technologies is required to enable optional SCHC fragment 
+retransmission and to allow a stepper delivery for the reliability of SCHC fragments. This document does not make any 
+decision with regard to which SCHC fragment delivery reliability mode will be used over a specific LPWAN technology. These 
+details will be defined in other technology-specific documents.
 
 ## Fragmentation Tools
 
@@ -637,13 +641,13 @@ document, such as fields in the SCHC fragmentation header frames (see the relate
 parameters supported in the reliability modes such as timers and parameters.  
 
 * Rule ID. The Rule ID is present in the SCHC fragment header and in the ACK header format.  The Rule ID in a SCHC fragment 
-  header is used to identify that a SCHC fragment is being carried, which fragmentation reliability mode is used and which 
-  window size is used. The Rule ID  in the fragmentation header also allows interleaving non-fragmented packets and SCHC 
-  fragments that carry other SCHC packets. The Rule ID in an ACK identifies the message as an ACK.
+  header is used to identify that a SCHC fragment is being carried, which SCHC fragmentation reliability mode is used and 
+  which window size is used. The Rule ID  in the SCHC fragmentation header also allows interleaving non-fragmented packets 
+  and SCHC fragments that carry other SCHC packets. The Rule ID in an ACK identifies the message as an ACK.
 
 * Fragment Compressed Number (FCN).  The FCN is included in all SCHC fragments. This field can be understood as a truncated, 
-  efficient representation of a larger-sized fragment number, and does not carry an absolute fragment number. There are two 
-  FCN reserved values that are used for controlling the fragmentation process, as described next:
+  efficient representation of a larger-sized fragment number, and does not carry an absolute SCHC fragment number. There are 
+  two FCN reserved values that are used for controlling the SCHC fragmentation process, as described next:
   * The FCN value with all the bits equal to 1 (All-1) denotes the last SCHC fragment of a packet. The last window of a 
   packet is called an All-1 window.  
   * The FCN value with all the bits equal to 0 (All-0) denotes the last SCHC fragment of a window that is not the last one of 
@@ -655,21 +659,21 @@ parameters supported in the reliability modes such as timers and parameters.
   All-1 for the last one. 
   For the other reliability modes, it is recommended to use a number of bits (N) equal to or greater than 3. Nevertheless, 
   the appropriate value of N must be defined in the corresponding technology-specific profile documents. For windows that are 
-  not the last one from a fragmented packet, the FCN for the last SCHC fragment in such windows is an All-0. This indicates 
-  that the window is finished and communication proceeds according to the reliability mode in use. The FCN for the last SCHC 
-  fragment in the last window is an All-1, indicating the last fragment of the SCHC packet. It is also important to note 
-  that, in the No-ACK mode or when N=1, the last fragment of the packet will carry a FCN equal to 1, while all previous 
-  fragments will carry a FCN of 0. For further details see {{FragModes}}. The highest FCN in the window, denoted 
-  MAX_WIND_FCN, MUST be a value equal to or smaller than 2^N-2. (Example for N=5, MAX_WIND_FCN may be set to 23, then 
-  subsequent FCNs are set sequentially and in decreasing order, and the FCN will wrap from 0 back to 23).
+  not the last one from a SCHC fragmented packet, the FCN for the last SCHC fragment in such windows is an All-0. This 
+  indicates that the window is finished and communication proceeds according to the reliability mode in use. The FCN for the 
+  last SCHC fragment in the last window is an All-1, indicating the last SCHC fragment of the SCHC packet. It is also 
+  important to note that, in the No-ACK mode or when N=1, the last SCHC fragment of the packet will carry a FCN equal to 1, 
+  while all previous  SCHC fragments will carry a FCN of 0. For further details see {{FragModes}}. The highest FCN in the 
+  window, denoted MAX_WIND_FCN, MUST be a value equal to or smaller than 2^N-2. (Example for N=5, MAX_WIND_FCN may be set to 
+  23, then subsequent FCNs are set sequentially and in decreasing order, and the FCN will wrap from 0 back to 23).
    
 * Datagram Tag (DTag). The DTag field, if present, is set to the same value for all SCHC fragments carrying the same SCHC   
   packet, and to different values for different datagrams. Using this field, the sender can interleave fragments from 
   different SCHC packets, while the receiver can still tell them apart.
-  In the fragment formats, the size of the DTag field is T bits, which may be set to a value greater than or equal to 0 bits. 
-  For each new SCHC packet processed by the sender, DTag MUST be sequentially increased, from 0 to 2^T – 1 wrapping back from 
-  2^T - 1 to 0.
-  In the ACK format, DTag carries the same value as the DTag field in the fragments for which this ACK is intended.
+  In the SCHC fragment formats, the size of the DTag field is T bits, which may be set to a value greater than or equal to 0 
+  bits. For each new SCHC packet processed by the sender, DTag MUST be sequentially increased, from 0 to 2^T – 1 wrapping 
+  back from 2^T - 1 to 0.
+  In the ACK format, DTag carries the same value as the DTag field in the SCHC fragments for which this ACK is intended.
 
 * W (window): W is a 1-bit field. This field carries the same value for all SCHC fragments of a window, and it is 
   complemented for the next window. The initial value for this field is 0.
@@ -677,41 +681,41 @@ parameters supported in the reliability modes such as timers and parameters.
   by the SCHC fragments whose reception is being positively or negatively acknowledged by the ACK.
 
 * Message Integrity Check (MIC). This field, which has a size of M bits, is computed by the sender over the complete SCHC 
-  packet before fragmentation. The MIC allows the receiver to check errors in the reassembled packet, while it also enables 
-  compressing the UDP checksum by use of SCHC compression. The CRC32 as 0xEDB88320 (i.e. the reverse representation of the 
-  polynomial used e.g. in the Ethernet standard {{RFC3385}}) is recommended as the default algorithm for computing the MIC. 
-  Nevertheless, other algorithms MAY be required and are defined in the technology-specific documents. 
+  packet before SCHC fragmentation. The MIC allows the receiver to check errors in the reassembled packet, while it also 
+  enables compressing the UDP checksum by use of SCHC compression. The CRC32 as 0xEDB88320 (i.e. the reverse representation 
+  of the polynomial used e.g. in the Ethernet standard {{RFC3385}}) is recommended as the default algorithm for computing the 
+  MIC. Nevertheless, other algorithms MAY be required and are defined in the technology-specific documents. 
 
 * C (MIC checked): C is a 1-bit field. This field is used in the ACK packets to report the outcome of the MIC check, i.e. 
   whether the reassembled packet was correctly received or not. A value of 1 represents a positive MIC check at the receiver 
   side (i.e. the MIC computed by the receiver matches the received MIC).
  
-* Retransmission Timer. A fragment sender uses it after the transmission of a window to detect a transmission error of 
+* Retransmission Timer. A SCHC fragment sender uses it after the transmission of a window to detect a transmission error of 
   the ACK corresponding to this window. Depending on the reliability mode, it will lead to a request an ACK 
-  retransmission (in ACK-Always mode) or it will trigger the transmission of the next window (in ACK-on-error mode). The 
+  retransmission (in ACK-Always mode) or it will trigger the transmission of the next window (in ACK-on-Error mode). The 
   duration of this timer is not defined in this document and must be defined in the corresponding technology documents.
  
-* Inactivity Timer. A fragment receiver uses it to take action when there is a problem in the transmission of 
-  fragments. Such a problem could be detected by the receiver not getting a single fragment during a given period of time or 
-  not getting a given number of packets in a given period of time. When this happens, an Abort message will be sent (see 
-  related text later in this section). Initially, and each time a fragment is received, the timer is reinitialized. The 
-  duration of this timer is not defined in this document and must be defined in the specific technology document.
+* Inactivity Timer. A SCHC fragment receiver uses it to take action when there is a problem in the transmission of SCHC
+  fragments. Such a problem could be detected by the receiver not getting a single SCHC fragment during a given period of 
+  time or not getting a given number of packets in a given period of time. When this happens, an Abort message will be sent 
+  (see related text later in this section). Initially, and each time a SCHC fragment is received, the timer is reinitialized. 
+  The duration of this timer is not defined in this document and must be defined in the specific technology document.
  
 * Attempts. This counter counts the requests for a missing ACK. When it reaches the value MAX_ACK_REQUESTS,
-  the sender assume there are recurrent fragment transmission errors and determines that an Abort is needed. The default 
+  the sender assume there are recurrent SCHC fragment transmission errors and determines that an Abort is needed. The default 
   value offered MAX_ACK_REQUESTS is not stated in this document, and it is expected to be defined in the specific technology 
   document. The Attempts counter is defined per window. It is initialized each time a new window is used.
 
-* Bitmap. The Bitmap is a sequence of bits carried in an ACK. Each bit in the Bitmap corresponds to a
-  fragment of the current window, and provides feedback on whether the fragment has been received or not. The right-most 
-  position on the Bitmap reports if the All-0 or All-1 fragment has been received or not. Feedback on the
+* Bitmap. The Bitmap is a sequence of bits carried in an ACK. Each bit in the Bitmap corresponds to a SCHC
+  fragment of the current window, and provides feedback on whether the SCHC fragment has been received or not. The right-most 
+  position on the Bitmap reports if the All-0 or All-1 fragment has been received or not. Feedback on the SCHC
   fragment with the highest FCN value is provided by the bit in the left-most position of the Bitmap. In the Bitmap, a bit 
-  set to 1 indicates that the fragment of FCN corresponding to that bit position has been correctly sent and received. The 
-  text above describes the internal representation of the Bitmap. When inserted in the ACK for transmission from the receiver 
-  to the sender, the Bitmap may be truncated for energy/bandwidth optimisation, see more details in {{Bitmapopt}}
+  set to 1 indicates that the SCHC fragment of FCN corresponding to that bit position has been correctly sent and received. 
+  The text above describes the internal representation of the Bitmap. When inserted in the ACK for transmission from the 
+  receiver to the sender, the Bitmap may be truncated for energy/bandwidth optimisation, see more details in {{Bitmapopt}}.
 
 * Abort. On expiration of the Inactivity timer, or when Attempts reached MAX_ACK_REQUESTS or upon an occurrence of some other 
-  error, the sender or the receiver MUST use the Abort. When the receiver needs to abort the on-going fragmented 
+  error, the sender or the receiver MUST use the Abort. When the receiver needs to abort the on-going SCHC fragmented 
   packet transmission, it sends the Receiver-Abort format. When the sender needs to abort the transmission, it sends the 
   Sender-Abort format. None of the Abort are acknowledged.
 
@@ -721,60 +725,62 @@ parameters supported in the reliability modes such as timers and parameters.
 
 ## Reliability modes
 
-This specification defines three reliability modes: No-ACK, ACK-Always and ACK-on-Error. ACK-Always and ACK-on-Error operate on windows of fragments. A window of fragments is a subset of the full set of fragments needed to carry a packet or an SCHC packet. 
+This specification defines three reliability modes: No-ACK, ACK-Always and ACK-on-Error. ACK-Always and ACK-on-Error operate 
+on windows of SCHC fragments. A window of SCHC fragments is a subset of the full set of SCHC fragments needed to carry a 
+packet or an SCHC packet. 
 
-* No-ACK. No-ACK is the simplest fragment reliability mode. The receiver does not generate overhead in the form of 
+* No-ACK. No-ACK is the simplest SCHC fragment reliability mode. The receiver does not generate overhead in the form of 
   acknowledgments (ACKs).  However, this mode does not enhance reliability beyond that offered by the underlying LPWAN 
   technology. In the No-ACK mode, the receiver MUST NOT issue ACKs. See further details in {{No-ACK-subsection}}.
 
 * ACK-Always. The ACK-Always mode provides flow control using a window scheme. This mode is also able to handle long bursts 
-  of lost fragments since detection of such events can be done before the end of the SCHC packet transmission as long as the 
-  window size is short enough. However, such benefit comes at the expense of ACK use. In ACK-Always the receiver sends an ACK 
-  after a window of fragments has been received, where a window of fragments is a subset of the whole number of fragments 
-  needed to carry a complete SCHC packet. The ACK is used to inform the sender if a fragment in the actual window has been 
-  lost or well received. Upon an ACK reception, the sender retransmits the lost fragments. When an ACK is lost and the sender 
-  has not received it before the expiration of the Inactivity Timer, the sender uses an ACK request by sending the All-1 
-  empty fragment. The maximum number of ACK requests is MAX_ACK_REQUESTS. If the MAX_ACK_REQUEST is reached the transmission 
-  needs to be Aborted. See further details in {{ACK-Always-subsection}}.
+  of lost SCHC fragments since detection of such events can be done before the end of the SCHC packet transmission as long as 
+  the window size is short enough. However, such benefit comes at the expense of ACK use. In ACK-Always the receiver sends an 
+  ACK after a window of SCHC fragments has been received, where a window of SCHC fragments is a subset of the whole number of 
+  SCHC fragments needed to carry a complete SCHC packet. The ACK is used to inform the sender if a SCHC fragment in the 
+  actual window has been lost or well received. Upon an ACK reception, the sender retransmits the lost SCHC fragments. When 
+  an ACK is lost and the sender has not received it before the expiration of the Inactivity Timer, the sender uses an ACK 
+  request by sending the All-1 empty SCHC fragment. The maximum number of ACK requests is MAX_ACK_REQUESTS. If the 
+  MAX_ACK_REQUEST is reached the transmission needs to be Aborted. See further details in {{ACK-Always-subsection}}.
 
 * ACK-on-Error. The ACK-on-Error mode is suitable for links offering relatively low L2 data unit loss probability. In this 
-  mode, the fragment receiver reduces the number of ACKs transmitted, which may be especially beneficial in asymmetric 
-  scenarios. Because the fragments use the uplink of the underlying LPWAN technology, which has higher capacity than 
-  downlink. The receiver transmits an ACK only after the complete window transmission and if at least one fragment of this 
-  window has been lost. An exception to this behavior is in the last window, where the receiver MUST transmit an ACK, 
-  including the C bit set based on the MIC checked result, even if all the fragments of the last window have been correctly 
-  received.
-  The ACK gives the state of all the fragments (received or lost). Upon an ACK reception, the sender retransmits the lost 
-  fragments. If an ACK is not transmitted back by the receiver at the end of a window, the sender assumes that all fragments 
-  have been correctly received.
-  When the ACK is lost, the sender assumes that all fragments covered by the lost ACK have been successfully delivered, so 
-  the sender continues transmitting the next window of fragments. If the next fragments received belong to the next window, 
-  the receiver will discard this fragments and the receiver will abort the on-going fragmented packet transmission. 
-  See further details in {{ACK-on-Error-subsection}}.
+  mode, the SCHC fragment receiver reduces the number of ACKs transmitted, which may be especially beneficial in asymmetric 
+  scenarios. Because the SCHC fragments use the uplink of the underlying LPWAN technology, which has higher capacity than 
+  downlink. The receiver transmits an ACK only after the complete window transmission and if at least one SCHC fragment of 
+  this window has been lost. An exception to this behavior is in the last window, where the receiver MUST transmit an ACK, 
+  including the C bit set based on the MIC checked result, even if all the SCHC fragments of the last window have been 
+  correctly received.
+  The ACK gives the state of all the SCHC fragments (received or lost). Upon an ACK reception, the sender retransmits the 
+  lost SCHC fragments. If an ACK is not transmitted back by the receiver at the end of a window, the sender assumes that all 
+  SCHC fragments have been correctly received.
+  When the ACK is lost, the sender assumes that all SCHC fragments covered by the lost ACK have been successfully delivered, 
+  so the sender continues transmitting the next window of SCHC fragments. If the next SCHC fragments received belong to the 
+  next window, the receiver will discard these SCHC fragments and the receiver will abort the on-going fragmented packet 
+  transmission. See further details in {{ACK-on-Error-subsection}}.
    
-The same reliability mode must be used for all fragments of an SCHC packet. The decision on which reliability mode will be 
-used and whether the same reliability mode applies to all SCHC packets is an implementation problem and is out of the scope 
-of this document.  
+The same reliability mode must be used for all SCHC fragments of an SCHC packet. The decision on which reliability mode will 
+be used and whether the same reliability mode applies to all SCHC packets is an implementation problem and is out of the 
+scope of this document.  
 
 Note that the reliability mode choice is not necessarily tied to a particular characteristic of the underlying L2 LPWAN 
 technology, e.g. the No-ACK mode may be used on top of an L2 LPWAN technology with symmetric characteristics for uplink and 
-downlink. This document does not make any decision as to which fragment reliability mode(s) are supported by a specific LPWAN 
-technology. 
+downlink. This document does not make any decision as to which SCHC fragment reliability mode(s) are supported by a specific 
+LPWAN technology. 
 
 Examples of the different reliability modes described are provided in Appendix B.
 
 
 ## Fragmentation Formats {#Fragfor}
 
-This section defines the fragment format, the All-0 and All-1 formats, the ACK format and the Abort formats.
+This section defines the SCHC fragment format, the All-0 and All-1 formats, the ACK format and the Abort formats.
 
 ### Fragment format 
 
-A fragment comprises a fragment header, a fragment payload and padding bits (if needed). A fragment conforms to the general 
-format shown in {{Fig-FragFormat}}. The fragment payload carries a subset of SCHC packet. 
-A fragment is the payload of the L2 protocol data unit (PDU). Padding MAY be added in fragments and in ACKs if necessary, 
-therefore a padding field is optional (this is explicitly indicated in {{Fig-FragFormat}} for the sake of illustration 
-clarity.
+A SCHC fragment comprises a SCHC fragment header, a SCHC fragment payload and padding bits (if needed). A SCHC fragment 
+conforms to the general format shown in {{Fig-FragFormat}}. The SCHC fragment payload carries a subset of SCHC packet. 
+A SCHC fragment is the payload of the L2 protocol data unit (PDU). Padding MAY be added in SCHC fragments and in ACKs if 
+necessary, therefore a padding field is optional (this is explicitly indicated in {{Fig-FragFormat}} for the sake of 
+illustration clarity.
       
 ~~~~   
       +-----------------+-----------------------+~~~~~~~~~~~~~~~
@@ -783,8 +789,8 @@ clarity.
 ~~~~
 {: #Fig-FragFormat title='Fragment general format. Presence of a padding field is optional'}
 
-In ACK-Always or ACK-on-Error, fragments except the last one SHALL conform the detailed format defined in {{Fig-NotLastWin}}. 
-The total size of the fragment header is R bits. Where is R is not a multiple of 8 bits.
+In ACK-Always or ACK-on-Error, SCHC fragments except the last one SHALL conform the detailed format defined in {{Fig-
+NotLastWin}}. The total size of the fragment header is R bits. Where is R is not a multiple of 8 bits.
  
  
 ~~~~
@@ -801,8 +807,7 @@ The total size of the fragment header is R bits. Where is R is not a multiple of
 
 
 
-In the No-ACK mode, fragments except the last one SHALL conform to the detailed format defined in {{Fig-NotLast}}. The total 
-size of the fragment header is R bits.
+In the No-ACK mode, SCHC fragments except the last one SHALL conform to the detailed format defined in {{Fig-NotLast}}. The total size of the fragment header is R bits.
     
 ~~~~
 
@@ -820,7 +825,7 @@ In all these cases, R may not be a multiple of 8 bits.
    
 ### All-1 and All-0 formats
 
-The All-0 format is used for sending the last fragment of a window that is not the last window of the packet.
+The All-0 format is used for sending the last SCHC fragment of a window that is not the last window of the packet.
 
 ~~~~
 
@@ -848,8 +853,8 @@ The All-0 empty fragment format is used by a sender to request the retransmissio
 {: #Fig-All0empty title='All-0 empty fragment detailed format'}
 
 
-In the No-ACK mode, the last fragment of an IPv6 datagram SHALL contain a fragment header that conforms to 
-the detaield format shown in {{Fig-Last}}. The total size of this fragment header is R+M bits.
+In the No-ACK mode, the last SCHC fragment of an IPv6 datagram SHALL contain a SCHC fragment header that conforms to 
+the detaield format shown in {{Fig-Last}}. The total size of this SCHC fragment header is R+M bits.
    
 ~~~~
 
@@ -863,8 +868,8 @@ the detaield format shown in {{Fig-Last}}. The total size of this fragment heade
 {: #Fig-Last title='All-1 Fragment Detailed Format for the Last Fragment, No-ACK mode'}
 
 
-   In any of the Window modes, the last fragment of an IPv6 datagram SHALL contain a fragment header that conforms to 
-   the detailed format shown in {{Fig-LastWinMode}}. The total size of the fragment
+   In any of the Window modes, the last fragment of an IPv6 datagram SHALL contain a SCHC fragment header that conforms to 
+   the detailed format shown in {{Fig-LastWinMode}}. The total size of the SCHC fragment
    header in this format is R+M bits.
    
 ~~~~
@@ -878,7 +883,8 @@ the detaield format shown in {{Fig-Last}}. The total size of this fragment heade
 ~~~~
 {: #Fig-LastWinMode title='All-1 Fragment Detailed Format for the Last Fragment, ACK-Always or ACK-on-Error'}
        
- In either ACK-Always or ACK-on-Error, in order to request a retransmission of the ACK for the All-1 window, the fragment sender uses the format shown in {{Fig-All1retries}}. The total size of the fragment header in this format is R+M bits.
+ In either ACK-Always or ACK-on-Error, in order to request a retransmission of the ACK for the All-1 window, the fragment 
+ sender uses the format shown in {{Fig-All1retries}}. The total size of the SCHC fragment header in this format is R+M bits.
 
 ~~~~
 
@@ -935,10 +941,11 @@ number of transmitted bits to a multiple of 8 bits.
 
 Note that the ACK sent in response to an All-1 fragment includes the C bit. Therefore, the window size and thus the encoded 
 Bitmap size need to be determined taking into account the available space in the layer two frame payload, where there will be 
-1 bit less for an ACK sent in response to an All-1 fragment than in other ACKs. Note that the maximum number of fragments of the last window is one unit smaller than that of the previous windows. 
+1 bit less for an ACK sent in response to an All-1 fragment than in other ACKs. Note that the maximum number of SCHC 
+fragments of the last window is one unit smaller than that of the previous windows. 
 
-When the receiver transmits an encoded Bitmap with a fragment that has not been sent during the transmission, the sender will 
-Abort the transmission.
+When the receiver transmits an encoded Bitmap with a SCHC fragment that has not been sent during the transmission, the sender 
+will Abort the transmission.
 
 ~~~~                                                  
                     <----         Bitmap bits      ---->   
@@ -949,7 +956,10 @@ Abort the transmission.
 {: #Fig-Localbitmap title='A non-encoded Bitmap'}
 
 In order to reduce the resulting frame size, the encoded Bitmap is shortened by applying the following algorithm: all the 
-right-most contiguous bytes in the encoded Bitmap that have all their bits set to 1 MUST NOT be transmitted.  Because the fragment sender knows the actual Bitmap size, it can reconstruct the original Bitmap with the trailing 1 bit optimized away.  In the example shown in {{Fig-transmittedbitmap}}, the last 2 bytes of the Bitmap shown in {{Fig-Localbitmap}} comprise bits that are all set to 1, therefore they are not sent.
+right-most contiguous bytes in the encoded Bitmap that have all their bits set to 1 MUST NOT be transmitted.  Because the 
+SCHC fragment sender knows the actual Bitmap size, it can reconstruct the original Bitmap with the trailing 1 bit optimized 
+away.  In the example shown in {{Fig-transmittedbitmap}}, the last 2 bytes of the Bitmap shown in {{Fig-Localbitmap}} 
+comprise bits that are all set to 1, therefore they are not sent.
 
 ~~~~   
      <-------   R  ------->  
@@ -963,7 +973,7 @@ right-most contiguous bytes in the encoded Bitmap that have all their bits set t
 {: #Fig-transmittedbitmap title='Optimized Bitmap format'}
 
 {{Fig-Bitmap-Win}} shows an example of an ACK with FCN ranging from 6 down to 0, where the Bitmap
-indicates that the second and the fifth fragments have not been correctly received. 
+indicates that the second and the fifth SCHC fragments have not been correctly received. 
 
 ~~~~                                                  
 <------   R  ------>6 5 4 3 2 1   0 (*) 
@@ -982,7 +992,7 @@ indicates that the second and the fifth fragments have not been correctly receiv
 ~~~~
 {: #Fig-Bitmap-Win title='Example of a Bitmap before transmission, and the transmitted one, in any window except the last one'}
 
-{{Fig-Bitmap-lastWin}} shows an example of an ACK with FCN ranging from 6 down to 0, where the Bitmap indicates that the MIC check has failed but there are no missing fragments. 
+{{Fig-Bitmap-lastWin}} shows an example of an ACK with FCN ranging from 6 down to 0, where the Bitmap indicates that the MIC check has failed but there are no missing SCHC fragments. 
 
 ~~~~                                                  
  <-------   R  ------->  6 5 4 3 2 1 7 (*) 
@@ -997,27 +1007,28 @@ indicates that the second and the fifth fragments have not been correctly receiv
    (*) = (FCN values indicating the order)
    
 ~~~~
-{: #Fig-Bitmap-lastWin title='Example of the Bitmap in ACK-always or ACK-on-error for the last window, for N=3)'}
+{: #Fig-Bitmap-lastWin title='Example of the Bitmap in ACK-Always or ACK-on-Error for the last window, for N=3)'}
 
 
 
 
 ### Abort formats
 
-Abort are coded as exceptions to the previous coding, a specific format is defined for each direction. When a fragment sender 
-needs to abort the transmission, it sends the Sender-Abort format {{Fig-All1Abort}}, that is an All-1 fragment with no MIC or 
-payload. In regular cases All-1 fragment contains at least a MIC value. This absence of the MIC value indicates an Abort.
+Abort are coded as exceptions to the previous coding, a specific format is defined for each direction. When a SCHC fragment 
+sender needs to abort the transmission, it sends the Sender-Abort format {{Fig-All1Abort}}, that is an All-1 fragment with no 
+MIC or payload. In regular cases All-1 fragment contains at least a MIC value. This absence of the MIC value indicates an 
+Abort.
 
-When a fragment receiver needs to abort the on-going fragmented packet transmission, it transmits the Receiver-Abort format 
-{{Fig-ACKabort}}, creating an exception in the encoded Bitmap coding. Encoded Bitmap avoid sending the rigth most bits of the 
-Bitmap set to 1. Abort is coded as an ACK message with a Bitmap set to 1 until the byte boundary, followed by an extra 0xFF 
-byte. Such message never occurs in a regular acknowledgement and is view as an abort.
+When a SCHC fragment receiver needs to abort the on-going SCHC fragmented packet transmission, it transmits the Receiver-
+Abort format {{Fig-ACKabort}}, creating an exception in the encoded Bitmap coding. Encoded Bitmap avoid sending the rigth 
+most bits of the Bitmap set to 1. Abort is coded as an ACK message with a Bitmap set to 1 until the byte boundary, followed 
+by an extra 0xFF byte. Such message never occurs in a regular acknowledgement and is view as an abort.
 
-None of these messages are acknowledgement nor retransmitted.
+None of these messages are not acknowledged nor retransmitted.
 
 The sender uses the Sender-Abort when the MAX_ACK_REQUEST is reached. The receiver uses the Receiver-Abort when the 
-Inactivity timer expires, or in the ACK-on-Error mode, ACK is lost and the sender transmits fragments of a new window. Some 
-other cases for Abort are explained in the {{FragModes}} or {{FSM}}.
+Inactivity timer expires, or in the ACK-on-Error mode, ACK is lost and the sender transmits SCHC fragments of a new window. 
+Some other cases for Abort are explained in the {{FragModes}} or {{FSM}}.
 
 ~~~~
 <------------- R -----------><--- 1 byte --->
@@ -1044,9 +1055,8 @@ other cases for Abort are explained in the {{FragModes}} or {{FSM}}.
 ## Baseline mechanism {#FragModes}
 
 If after applying SCHC header compression (or when SCHC header compression is not possible) the SCHC packet does not fit 
-within the payload of a single L2 data unit, the SCHC packet SHALL be broken into fragments and the fragments SHALL be sent 
-to the fragment receiver.
-The fragment receiver needs to identify all the fragments that belong to a given SCHC packet. To this end, the receiver 
+within the payload of a single L2 data unit, the SCHC packet SHALL be broken into SCHC fragments and the fragments SHALL be sent to the fragment receiver.
+The fragment receiver needs to identify all the SCHC fragments that belong to a given SCHC packet. To this end, the receiver 
 SHALL use: 
 
  * The sender's L2 source address (if present), 
@@ -1057,189 +1067,193 @@ SHALL use:
  
  * DTag (if present).
  
-Then, the fragment receiver may determine the fragment reliability mode that is used for this fragment based on the Rule ID 
-in that fragment.
+Then, the fragment receiver may determine the SCHC fragment reliability mode that is used for this SCHC fragment based on the 
+Rule ID in that fragment.
 
-After a fragment reception, the receiver starts constructing the SCHC packet. It uses the FCN and the arrival order of each 
-fragment to determine the location of the individual fragments within the SCHC packet. For example, the receiver may place 
-the fragment payload within a payload datagram reassembly buffer at the location determined from the FCN, the arrival order 
-of the fragments, and the fragment payload sizes. In Window mode, the fragment receiver also uses the W bit in the received 
-fragments. Note that the size of the original, unfragmented packet cannot be determined from fragmentation headers.
+After a SCHC fragment reception, the receiver starts constructing the SCHC packet. It uses the FCN and the arrival order of 
+each SCHC fragment to determine the location of the individual fragments within the SCHC packet. For example, the receiver 
+may place the fragment payload within a payload datagram reassembly buffer at the location determined from the FCN, the 
+arrival order of the SCHC fragments, and the fragment payload sizes. In Window mode, the fragment receiver also uses the W 
+bit in the received SCHC fragments. Note that the size of the original, unfragmented packet cannot be determined from 
+fragmentation headers.
 
-Fragmentation functionality uses the FCN value to transmit the fragments. It has a length of N bits where the All-1 and All-0 
-FCN values are used to control the fragmentation transmission. The rest of the FCN numbers MUST be assigned sequentially in a 
-decreasing order, the first FCN of a window is RECOMMENDED to be MAX_WIND_FCN, i.e. the highest possible FCN value depending 
-on the FCN number of bits.
+Fragmentation functionality uses the FCN value to transmit the SCHC fragments. It has a length of N bits where the All-1 and 
+All-0 FCN values are used to control the fragmentation transmission. The rest of the FCN numbers MUST be assigned 
+sequentially in a decreasing order, the first FCN of a window is RECOMMENDED to be MAX_WIND_FCN, i.e. the highest possible 
+FCN value depending on the FCN number of bits.
 
-In all modes, the last fragment of a packet must contain a MIC which is used to check if there are errors or missing 
-fragments and must use the corresponding All-1 fragment format.  Note that a fragment with an All-0 format is considered the 
-last fragment of the current window.
+In all modes, the last SCHC fragment of a packet must contain a MIC which is used to check if there are errors or missing 
+SCHC fragments and must use the corresponding All-1 fragment format.  Note that a SCHC fragment with an All-0 format is 
+considered the last SCHC fragment of the current window.
 
 If the receiver receives the last fragment of a datagram (All-1), it checks for the integrity of the reassembled datagram, 
 based on the MIC received. In No-ACK, if the integrity check indicates that the reassembled datagram does not match the 
 original datagram (prior to fragmentation), the reassembled datagram MUST be discarded. In Window mode, a MIC check is also 
-performed by the fragment receiver after reception of each subsequent fragment retransmitted after the first MIC check. 
+performed by the fragment receiver after reception of each subsequent SCHC fragment retransmitted after the first MIC check. 
 
 There are three reliability modes: No-ACK, ACK-Always and ACK-on-Error. In ACK-Always and ACK-on-Error, a jumping window 
-protocol uses two windows alternatively, identified as 0 and 1.  A fragment with all FCN bits set to 0 (i.e. an All-0 
-fragment) indicates that the window is over (i.e. the fragment is the last one of the window) and allows to switch from one 
-window to the next one.  The All-1 FCN in a fragment indicates that it is the last fragment of the packet being transmitted 
-and therefore there will not be another window for this packet.
+protocol uses two windows alternatively, identified as 0 and 1.  A SCHC fragment with all FCN bits set to 0 (i.e. an All-0 
+fragment) indicates that the window is over (i.e. the SCHC fragment is the last one of the window) and allows to switch from 
+one window to the next one.  The All-1 FCN in a SCHC fragment indicates that it is the last fragment of the packet being 
+transmitted and therefore there will not be another window for this packet.
 
 
 ### No-ACK {#No-ACK-subsection}
-In the No-ACK mode, there is no feedback communication from the fragment receiver. The sender will send all the fragments of 
-a packet without any possibility of knowing if errors or losses have occurred. As, in this mode, there is no need to identify 
-specific fragments, a one-bit FCN may be used. Consequently, the FCN All-0 value is used in all fragments except the last 
-one, which carries an All-1 FCN and the MIC.
-The receiver will wait for fragments and will set the Inactivity timer. The receiver will use the MIC contained in the last 
-fragment to check for errors.
+In the No-ACK mode, there is no feedback communication from the fragment receiver. The sender will send all the SCHC 
+fragments of a packet without any possibility of knowing if errors or losses have occurred. As, in this mode, there is no 
+need to identify specific SCHC fragments, a one-bit FCN may be used. Consequently, the FCN All-0 value is used in all SCHC 
+fragments except the last one, which carries an All-1 FCN and the MIC.
+The receiver will wait for SCHC fragments and will set the Inactivity timer. The receiver will use the MIC contained in the 
+last SCHC fragment to check for errors.
 When the Inactivity Timer expires or if the MIC check indicates that the reassembled packet does not match the original one, 
 the receiver will release all resources allocated to reassembling this packet. The initial value of the Inactivity Timer will 
 be determined based on the characteristics of the underlying LPWAN technology and will be defined in other documents (e.g. 
 technology-specific profile documents).    
 
 ### ACK-Always {#ACK-Always-subsection}
-In ACK-Always, the sender transmits fragments by using the two-jumping-windows procedure. A delay between each fragment can 
-be added to respect local regulations or other constraints imposed by the applications.  Each time a fragment is sent, the 
-FCN is decreased by one.  When the FCN reaches value 0 and there are more fragments to be sent after, the sender transmits 
-the last fragment of this window using the All-0 fragment format, it starts the Retransmission Timer and waits for an ACK. On 
-the other hand, if the FCN has reached 0 and this fragment to be transmitted is the last fragment of the SCHC packet, the 
-sender uses the All-1 fragment format, which includes a MIC. The sender sets the Retransmission Timer and waits for the ACK 
-to know if transmission errors have occured.
+In ACK-Always, the sender transmits SCHC fragments by using the two-jumping-windows procedure. A delay between each SCHC 
+fragment can be added to respect local regulations or other constraints imposed by the applications.  Each time a SCHC 
+fragment is sent, the FCN is decreased by one.  When the FCN reaches value 0 and there are more SCHC fragments to be sent 
+after, the sender transmits the last SCHC fragment of this window using the All-0 fragment format, it starts the 
+Retransmission Timer and waits for an ACK. On the other hand, if the FCN has reached 0 and this SCHC fragment to be 
+transmitted is the last SCHC fragment of the SCHC packet, the sender uses the All-1 fragment format, which includes a MIC. 
+The sender sets the Retransmission Timer and waits for the ACK to know if transmission errors have occured.
 
 The Retransmission Timer is dimensioned based on the LPWAN technology in use. When the Retransmission Timer expires, the 
 sender sends an All-0 empty (resp. All-1 empty) fragment to request again the ACK for the window that ended with the All-0 
 (resp. All-1) fragment just sent. The window number is not changed.
 
-After receiving an All-0 or All-1 fragment, the receiver sends an ACK with an encoded Bitmap reporting whether any fragments 
-have been lost or not. When the sender receives an ACK, it checks the W bit carried by the ACK. Any ACK carrying an 
+After receiving an All-0 or All-1 fragment, the receiver sends an ACK with an encoded Bitmap reporting whether any SCHC 
+fragments have been lost or not. When the sender receives an ACK, it checks the W bit carried by the ACK. Any ACK carrying an 
 unexpected W bit value is discarded. If the W bit value of the received ACK is correct, the sender analyzes the rest of the 
-ACK message, such as the encoded Bitmap and the MIC.  If all the fragments sent for this window have been well received, and 
-if at least one more fragment needs to be sent, the sender advances its sending window to the next window value and sends the 
-next fragments.  If no more fragments have to be sent, then the fragmented packet transmission is finished.
+ACK message, such as the encoded Bitmap and the MIC. If all the SCHC fragments sent for this window have been well received, 
+and if at least one more SCHC fragment needs to be sent, the sender advances its sending window to the next window value and 
+sends the next SCHC fragments. If no more SCHC fragments have to be sent, then the SCHC fragmented packet transmission is 
+finished.
 
-However, if one or more fragments have not been received as per the ACK (i.e. the corresponding bits are not set in the 
-encoded Bitmap) then the sender resends the missing fragments.  When all missing fragments have been retransmitted, the 
-sender starts the Retransmission Timer, even if an All-0 or an All-1 has not been sent as part of this retransmission and 
-waits for an ACK. Upon receipt of the ACK, if one or more fragments have not yet been received, the counter Attempts is 
-increased and the sender resends the missing fragments again. When Attempts reaches MAX_ACK_REQUESTS, the sender aborts the 
-on-going fragmented packet transmission by sending an Abort message and releases any resources for transmission of the 
-packet. The sender also aborts an on-going fragmented packet transmission when a failed MIC check is reported by the receiver 
-or when a fragment that has not been sent is reported in the encoded Bitmap.
+However, if one or more SCHC fragments have not been received as per the ACK (i.e. the corresponding bits are not set in the 
+encoded Bitmap) then the sender resends the missing SCHC fragments.  When all missing SCHC fragments have been retransmitted, 
+the sender starts the Retransmission Timer, even if an All-0 or an All-1 has not been sent as part of this retransmission and 
+waits for an ACK. Upon receipt of the ACK, if one or more SCHC fragments have not yet been received, the counter Attempts is 
+increased and the sender resends the missing SCHC fragments again. When Attempts reaches MAX_ACK_REQUESTS, the sender aborts 
+the on-going SCHC fragmented packet transmission by sending an Abort message and releases any resources for transmission of 
+the packet. The sender also aborts an on-going SCHC fragmented packet transmission when a failed MIC check is reported by the 
+receiver or when a SCHC fragment that has not been sent is reported in the encoded Bitmap.
 
-On the other hand, at the beginning, the receiver side expects to receive window 0.  Any fragment received but not belonging 
-to the current window is discarded.  All fragments belonging to the correct window are accepted, and the actual fragment 
-number managed by the receiver is computed based on the FCN value.  The receiver prepares the encoded Bitmap to report the 
-correctly received and the missing fragments for the current window. After each fragment is received the receiver initializes 
-the Inactivity timer, if the Inactivity Timer expires the transmission is aborted. 
+On the other hand, at the beginning, the receiver side expects to receive window 0. Any SCHC fragment received but not 
+belonging to the current window is discarded.  All SCHC fragments belonging to the correct window are accepted, and the 
+actual SCHC fragment number managed by the receiver is computed based on the FCN value.  The receiver prepares the encoded 
+Bitmap to report the correctly received and the missing SCHC fragments for the current window. After each SCHC fragment is 
+received the receiver initializes the Inactivity timer, if the Inactivity Timer expires the transmission is aborted. 
 
-When an All-0 fragment is received, it indicates that all the fragments have been sent in the current window.  Since the 
-sender is not obliged to always send a full window, some fragment number not set in the receiver memory may not correspond 
-to losses.  The receiver sends the corresponding ACK, the Inactivity Timer is set and the transmission of the next window 
-by the sender can start.
+When an All-0 fragment is received, it indicates that all the SCHC fragments have been sent in the current window.  Since the 
+sender is not obliged to always send a full window, some SCHC fragment number not set in the receiver memory may not 
+correspond to losses.  The receiver sends the corresponding ACK, the Inactivity Timer is set and the transmission of the next 
+window by the sender can start.
 
-If an All-0 fragment has been received and all fragments of the current window have also been received, the receiver then 
-expects a new Window and waits for the next fragment.  Upon receipt of a fragment, if the window value has not changed, the 
-received fragments are part of a retransmission. A receiver that has already received a fragment should discard it, 
-otherwise, it updates the encoded Bitmap.  If all the bits of the encoded Bitmap are set to one, the receiver may send an ACK 
-without waiting for an All-0 fragment and the Inactivity Timer is initialized.
+If an All-0 fragment has been received and all SCHC fragments of the current window have also been received, the receiver 
+then expects a new Window and waits for the next SCHC fragment.  Upon receipt of a SCHC fragment, if the window value has not 
+changed, the received SCHC fragments are part of a retransmission. A receiver that has already received a SCHC fragment 
+should discard it, otherwise, it updates the encoded Bitmap.  If all the bits of the encoded Bitmap are set to one, the 
+receiver may send an ACK without waiting for an All-0 fragment and the Inactivity Timer is initialized.
 
-On the other hand, if the window value of the next received fragment is set to the next expected window value, this means 
-that the sender has received a correct encoded Bitmap reporting that all fragments have been received.  The receiver then 
-updates the value of the next expected window.
+On the other hand, if the window value of the next received SCHC fragment is set to the next expected window value, this 
+means that the sender has received a correct encoded Bitmap reporting that all SCHC fragments have been received.  The 
+receiver then updates the value of the next expected window.
 
-When an All-1 fragment is received, it indicates that the last fragment of the packet has been sent.  Since the last window 
-is not always full, the MIC will be used to detect if all fragments of the packet have been received.  A correct MIC 
-indicates the end of the transmission but the receiver must stay alive for an Inactivity Timer period to answer to any 
-empty All-1 fragments the sender may send if ACKs sent by the receiver are lost. If the MIC is incorrect, some fragments 
-have been lost.  The receiver sends the ACK regardless of successful fragmented packet reception or not, the Inactitivity 
-Timer is set.  In case of an incorrect MIC, the receiver waits for fragments belonging to the same window. After 
-MAX_ACK_REQUESTS, the receiver will abort the on-going fragmented packet transmission by transmitting a data unit with the 
-Receiver-Abort format.  The receiver also aborts upon Inactivity Timer expiration.
-
+When an All-1 fragment is received, it indicates that the last SCHC fragment of the packet has been sent.  Since the last 
+window is not always full, the MIC will be used to detect if all SCHC fragments of the packet have been received.  A correct 
+MIC indicates the end of the transmission but the receiver must stay alive for an Inactivity Timer period to answer to any 
+empty All-1 fragments the sender may send if ACKs sent by the receiver are lost. If the MIC is incorrect, some SCHC fragments 
+have been lost.  The receiver sends the ACK regardless of successful SCHC fragmented packet reception or not, the 
+Inactitivity Timer is set.  In case of an incorrect MIC, the receiver waits for SCHC fragments belonging to the same window. 
+After MAX_ACK_REQUESTS, the receiver will abort the on-going SCHC fragmented packet transmission by transmitting a data unit 
+with the Receiver-Abort format.  The receiver also aborts upon Inactivity Timer expiration.
 
 ### ACK-on-Error {#ACK-on-Error-subsection}
-The ACK-on-Error sender is similar to ACK-Always, the main difference being that in ACK-on-Error the ACK with the encoded Bitmap is not sent at the end of each window but only when at least one fragment of the current window has been lost (with the exception of the last window).  In Ack-on-Error, the Retransmission Timer expiration will be considered as a positive acknowledgment. The Retransmission Timer is set when sending an All-0 or an All-1 fragment. When the All-1 fragment has been sent, then the on-going fragmented packet transmission fragmentation is finished and the sender waits for the last ACK. At the receiver side, when the All-1 fragment is received and the MIC check indicates successful packet reception, an ACK is sent anyway, to confirm the end of a correct transmission.  If the Retransmission Timer expires while waiting for the ACK for the last window, an All-1 empty request for the last ACK MUST be sent by the sender to complete the fragmented packet transmission.
+The ACK-on-Error sender is similar to ACK-Always, the main difference being that in ACK-on-Error the ACK with the encoded Bitmap is not sent at the end of each window but only when at least one SCHC fragment of the current window has been lost (with the exception of the last window).  In Ack-on-Error, the Retransmission Timer expiration will be considered as a positive acknowledgment. The Retransmission Timer is set when sending an All-0 or an All-1 fragment. When the All-1 fragment has been sent, then the on-going SCHC fragmented packet transmission SCHC fragmentation is finished and the sender waits for the last ACK. At the receiver side, when the All-1 fragment is received and the MIC check indicates successful packet reception, an ACK is sent anyway, to confirm the end of a correct transmission.  If the Retransmission Timer expires while waiting for the ACK for the last window, an All-1 empty request for the last ACK MUST be sent by the sender to complete the SCHC fragmented packet transmission.
 
 If the sender receives an ACK, it checks the window value.  ACKs with an unexpected window number are discarded.  If the 
-window number on the received encoded Bitmap is correct, the sender verifies if the receiver has received all fragments of the current window.  When at least one fragment has been lost, the counter Attempts is increased by one and the sender resends the missing fragments again.  When Attempts reaches MAX_ACK_REQUESTS, the sender sends an Abort message and releases all resources for the on-going fragmented packet transmission.  When the retransmission of the missing fragments is finished, the sender starts listening for an ACK (even if an All-0 or an All-1 has not been sent during the retransmission) and 
-initializes the Retransmission Timer. After sending an All-1 fragment, the sender listens for an ACK, 
+window number on the received encoded Bitmap is correct, the sender verifies if the receiver has received all SCHC fragments of the current window.  When at least one SCHC fragment has been lost, the counter Attempts is increased by one and the sender resends the missing SCHC fragments again.  When Attempts reaches MAX_ACK_REQUESTS, the sender sends an Abort message and releases all resources for the on-going SCHC fragmented packet transmission.  When the retransmission of the missing SCHC fragments is finished, the sender starts listening for an ACK (even if an All-0 or an All-1 has not been sent during the retransmission) and initializes the Retransmission Timer. After sending an All-1 fragment, the sender listens for an ACK, 
 initializes Attempts, and starts the Retransmission Timer. If the Retransmission Timer expires, Attempts 
 is increased by one and an empty All-1 fragment is sent to request the ACK for the last window. If Attempts reaches 
-MAX_ACK_REQUESTS, the sender aborts the on-going fragmented packet transmission by transmitting the Sender-Abort data unit.
+MAX_ACK_REQUESTS, the sender aborts the on-going SCHC fragmented packet transmission by transmitting the Sender-Abort data unit.
 
 Unlike the sender, the receiver for ACK-on-Error has a larger amount of differences compared with ACK-Always.  First, an 
-ACK is not sent unless there is a lost fragment or an unexpected behavior (with the exception of the last window, where an 
-ACK is always sent regardless of fragment losses or not).  The receiver starts by expecting fragments from window 0 and 
-maintains the information regarding which fragments it receives.  After receiving a fragment, the Inactivity Timer is set. 
-If no further fragment is received and the Inactivity Timer expires, the fragment receiver aborts the on-going fragmented packet transmission by transmitting the Receiver-Abort data unit.
+ACK is not sent unless there is a lost SCHC fragment or an unexpected behavior (with the exception of the last window, where an 
+ACK is always sent regardless of SCHC fragment losses or not).  The receiver starts by expecting SCHC fragments from window 0 and 
+maintains the information regarding which SCHC fragments it receives.  After receiving a SCHC fragment, the Inactivity Timer is set. 
+If no further SCHC fragment is received and the Inactivity Timer expires, the SCHC fragment receiver aborts the on-going SCHC fragmented packet transmission by transmitting the Receiver-Abort data unit.
 
-Any fragment not belonging to the current window is discarded. The actual fragment number is computed based on the FCN 
-value.  When an All-0 fragment is received and all fragments have been received, the receiver updates the expected window 
-value and expects a new window and waits for the next fragment.  
-If the window value of the next fragment has not changed, the received fragment is a retransmission.  A receiver that has 
-already received a fragment should discard it.  If all fragments of a window (that is not the last one) have been received, 
+Any SCHC fragment not belonging to the current window is discarded. The actual SCHC fragment number is computed based on the FCN 
+value.  When an All-0 fragment is received and all SCHC fragments have been received, the receiver updates the expected window 
+value and expects a new window and waits for the next SCHC fragment.  
+If the window value of the next SCHC fragment has not changed, the received SCHC fragment is a retransmission.  A receiver that has 
+already received a SCHC fragment should discard it. If all SCHC fragments of a window (that is not the last one) have been received, 
 the receiver does not send an ACK.  While the receiver waits for the next window and if the window value is set to the next 
-value, and if an All-1 fragment with the next value window arrived the receiver aborts the on-going fragmented packet 
-transmission, and it drops the fragments of the aborted packet transmission.
+value, and if an All-1 fragment with the next value window arrived the receiver aborts the on-going SCHC fragmented packet 
+transmission, and it drops the SCHC fragments of the aborted packet transmission.
 
 If the receiver receives an All-1 fragment, this means that the transmission should be finished.  If the MIC is incorrect 
 some fragments have been lost.  Regardless of fragment losses, the receiver sends an ACK and initializes the Inactivity 
 Timer.
 
-Reception of an All-1 fragment indicates the last fragment of the packet has been sent.  Since the last window is not 
-always full, the MIC will be used to detect if all fragments of the window have been received.  A correct MIC check 
-indicates the end of the fragmented packet transmission. An ACK is sent by the fragment receiver. In case of an incorrect 
-MIC, the receiver waits for fragments belonging to the same window or the expiration of the Inactivity Timer. The latter 
-will lead the receiver to abort the on-going fragmented packet transmission.
+Reception of an All-1 fragment indicates the last SCHC fragment of the packet has been sent.  Since the last window is not 
+always full, the MIC will be used to detect if all SCHC fragments of the window have been received.  A correct MIC check 
+indicates the end of the SCHC fragmented packet transmission. An ACK is sent by the SCHC fragment receiver. In case of an incorrect 
+MIC, the receiver waits for SCHC fragments belonging to the same window or the expiration of the Inactivity Timer. The latter 
+will lead the receiver to abort the on-going SCHC fragmented packet transmission.
 
 ## Supporting multiple window sizes
 
-For ACK-Always or ACK-on-Error, implementers may opt to support a single window size or multiple window sizes.  The latter, when feasible, may provide performance optimizations.  For example, a large window size may be used for packets that need to be carried by a large number of fragments.  However, when the number of fragments required to carry a packet is low, a smaller window size, and thus a shorter Bitmap, may be sufficient to provide feedback on all fragments.  If multiple window sizes are supported, the Rule ID may be used to signal the window size in use for a specific packet transmission.
+For ACK-Always or ACK-on-Error, implementers may opt to support a single window size or multiple window sizes.  The latter, 
+when feasible, may provide performance optimizations.  For example, a large window size may be used for packets that need to 
+be carried by a large number of SCHC fragments. However, when the number of SCHC fragments required to carry a packet is low, 
+a smaller window size, and thus a shorter Bitmap, may be sufficient to provide feedback on all SCHC fragments. If multiple 
+window sizes are supported, the Rule ID may be used to signal the window size in use for a specific packet transmission.
 
-Note that the same window size MUST be used for the transmission of all fragments that belong to the same SCHC packet.
+Note that the same window size MUST be used for the transmission of all SCHC fragments that belong to the same SCHC packet.
 
 
-## Downlink fragment transmission
+## Downlink SCHC fragment transmission
 
 In some LPWAN technologies, as part of energy-saving techniques, downlink transmission is only possible immediately after an 
-uplink transmission. In order to avoid potentially high delay in the downlink transmission of a fragmented datagram, the 
-fragment receiver MAY perform an uplink transmission as soon as possible after reception of a fragment that is not the last 
-one. Such uplink transmission may be triggered by the L2 (e.g. an L2 ACK sent in response to a fragment encapsulated in a L2 
-frame that requires an L2 ACK) or it may be triggered from an upper layer.
+uplink transmission. In order to avoid potentially high delay in the downlink transmission of a SCHC fragmented datagram, the 
+SCHC fragment receiver MAY perform an uplink transmission as soon as possible after reception of a SCHC fragment that is not 
+the last one. Such uplink transmission may be triggered by the L2 (e.g. an L2 ACK sent in response to a SCHC fragment 
+encapsulated in a L2 frame that requires an L2 ACK) or it may be triggered from an upper layer.
 
-For downlink transmission of a fragmented packet in ACK-Always mode, the fragment receiver MAY support timer-based ACK
-retransmission. In this mechanism, the fragment receiver initializes and starts a timer (the Inactivity Timer is used) after 
-the transmission of an ACK, except when the ACK is sent in response to the last fragment of a packet (All-1 fragment). In the 
-latter case, the fragment receiver does not start a timer after transmission of the ACK.
+For downlink transmission of a SCHC fragmented packet in ACK-Always mode, the SCHC fragment receiver MAY support timer-based 
+ACKretransmission. In this mechanism, the SCHC fragment receiver initializes and starts a timer (the Inactivity Timer is 
+used) after the transmission of an ACK, except when the ACK is sent in response to the last SCHC fragment of a packet (All-1 
+fragment). In the latter case, the SCHC fragment receiver does not start a timer after transmission of the ACK.
 
 If, after transmission of an ACK that is not an All-1 fragment, and before expiration of the corresponding Inactivity timer, 
-the fragment receiver receives a fragment that belongs to the current window (e.g. a missing fragment from the current 
-window) or to the next window, the Inactivity timer for the ACK is stopped. However, if the Inactivity timer expires, the ACK 
-is resent and the Inactivity timer is reinitialized and restarted.
+the SCHC fragment receiver receives a SCHC fragment that belongs to the current window (e.g. a missing SCHC fragment from the 
+current window) or to the next window, the Inactivity timer for the ACK is stopped. However, if the Inactivity timer expires, 
+the ACK is resent and the Inactivity timer is reinitialized and restarted.
 
 The default initial value for the Inactivity timer, as well as the maximum number of retries for a specific ACK, denoted 
 MAX_ACK_RETRIES, are not defined in this document, and need to be defined in other documents (e.g. technology-specific 
 profiles). The initial value of the Inactivity timer is expected to be greater than that of the Retransmission timer, in 
-order to make sure that a (buffered) fragment to be retransmitted can find an opportunity for that transmission.
+order to make sure that a (buffered) SCHC fragment to be retransmitted can find an opportunity for that transmission.
 
-When the fragment sender transmits the All-1 fragment, it starts its Retransmission Timer with a large timeout value (e.g. 
-several times that of the initial Inactivity timer). If an ACK is received before expiration of this timer, the fragment 
-sender retransmits any lost fragments reported by the ACK, or if the ACK confirms successful reception of all fragments of 
-the last window, the transmission of the fragmented packet is considered complete. If the timer expires, and no ACK has been 
-received since the start of the timer, the fragment sender assumes that the All-1 fragment has been successfully received 
-(and possibly, the last ACK has been lost: this mechanism assumes that the retransmission timer for the All-1 fragment is 
-long enough to allow several ACK retries if the All-1 fragment has not been received by the fragment receiver, and it also 
-assumes that it is unlikely that several ACKs become all lost).
+When the SCHC fragment sender transmits the All-1 fragment, it starts its Retransmission Timer with a large timeout value 
+(e.g. several times that of the initial Inactivity timer). If an ACK is received before expiration of this timer, the SCHC 
+fragment sender retransmits any lost SCHC fragments reported by the ACK, or if the ACK confirms successful reception of all 
+SCHC fragments of the last window, the transmission of the SCHC fragmented packet is considered complete. If the timer 
+expires, and no ACK has been received since the start of the timer, the SCHC fragment sender assumes that the All-1 fragment 
+has been successfully received (and possibly, the last ACK has been lost: this mechanism assumes that the retransmission 
+timer for the All-1 fragment is long enough to allow several ACK retries if the All-1 fragment has not been received by the 
+SCHC fragment receiver, and it also assumes that it is unlikely that several ACKs become all lost).
 
 
 # Padding management {#Padding}
 
-The headers specified in this document, be there for compression, fragmentation or acknowledgment, are not necessarily an 
-integer number of bytes in size. Some LPWAN technologies have PDUs that are integer numbers of bytes. With such a technology, 
-the sender can append padding bits to the messages defined in this document in order to fill up the last byte of the L2 PDU, 
-if it isn't already full.
+The headers specified in this document, be there for SCHC compression, SCHC fragmentation or acknowledgment, are not 
+necessarily an integer number of bytes in size. Some LPWAN technologies have PDUs that are integer numbers of bytes. With 
+such a technology, the sender can append padding bits to the messages defined in this document in order to fill up the last 
+byte of the L2 PDU, if it isn't already full.
 Examples are shown in {{Fig-FormatPckt}} and {{Fig-FragFormat}}.
 
 The receiver will tell the header, the payload and the padding apart using the following principles:
@@ -1398,7 +1412,7 @@ In other cases, the length must be sent and the CDA is replaced by "value-sent".
 
 IPv6 mandates a checksum in the protocol above IP. Nevertheless, if a more efficient
 mechanism such as L2 CRC or MIC is carried by or over the L2 (such as in the
-LPWAN fragmentation process (see {{Frag}})), the UDP checksum transmission can be avoided.
+LPWAN SCHC fragmentation process (see {{Frag}})), the UDP checksum transmission can be avoided.
 In that case, the TV is not set, the MO is set to "ignore" and the CDA is set to
 "compute-checksum".
 
@@ -1415,50 +1429,56 @@ Header Compression does not add more security problem than what is already neede
 For instance, to avoid an attack, never re-construct a packet bigger than some configured size (with 1500 bytes as generic 
 default).
 
-## Security considerations for fragmentation
-This subsection describes potential attacks to LPWAN fragmentation 
+## Security considerations for SCHC fragmentation
+This subsection describes potential attacks to LPWAN SCHC fragmentation 
 and suggests possible countermeasures.
 
 A node can perform a buffer reservation attack by sending a first
-fragment to a target.  Then, the receiver will reserve buffer space
-for the IPv6 packet.  Other incoming fragmented packets will be
+SCHC fragment to a target.  Then, the receiver will reserve buffer space
+for the IPv6 packet.  Other incoming SCHC fragmented packets will be
 dropped while the reassembly buffer is occupied during the reassembly
 timeout.  Once that timeout expires, the attacker can repeat the same
 procedure, and iterate, thus creating a denial of service attack.
 The (low) cost to mount this attack is linear with the number of
 buffers at the target node.  However, the cost for an attacker can be
-increased if individual fragments of multiple packets can be stored
+increased if individual SCHC fragments of multiple packets can be stored
 in the reassembly buffer.  To further increase the attack cost, the
-reassembly buffer can be splitted into fragment-sized buffer slots.
+reassembly buffer can be splitted into SCHC fragment-sized buffer slots.
 Once a packet is complete, it is processed normally.  If buffer
 overload occurs, a receiver can discard packets based on the sender
-behavior, which may help identify which fragments have been sent by
+behavior, which may help identify which SCHC fragments have been sent by
 an attacker.
 
 In another type of attack, the malicious node is required to have
-overhearing capabilities.  If an attacker can overhear a fragment, it
+overhearing capabilities.  If an attacker can overhear a SCHC fragment, it
 can send a spoofed duplicate (e.g. with random payload) to the
 destination. If the LPWAN technology does not support suitable protection 
 (e.g. source authentication and frame counters to prevent replay attacks), 
-a receiver cannot distinguish legitimate from spoofed fragments.  Therefore, 
+a receiver cannot distinguish legitimate from spoofed SCHC fragments.  Therefore, 
 the original IPv6 packet will be considered corrupt and will be dropped.
 To protect resource-constrained nodes from this attack, it has been proposed
-to establish a binding among the fragments to be transmitted by a node, 
-by applying content-chaining to the different fragments, based on cryptographic
+to establish a binding among the SCHC fragments to be transmitted by a node, 
+by applying content-chaining to the different SCHC fragments, based on cryptographic
 hash functionality.  The aim of this technique is to allow a receiver to
-identify illegitimate fragments.
+identify illegitimate SCHC fragments.
 
 Further attacks may involve sending overlapped fragments (i.e.
 comprising some overlapping parts of the original IPv6 datagram).
 Implementers should make sure that the correct operation is not affected
 by such event.
 
-In Window mode – ACK on error, a malicious node may force a fragment sender to resend a fragment a number of times, with the aim to increase consumption of the fragment sender’s resources. To this end, the malicious node may repeatedly send a fake ACK to the fragment sender, with a Bitmap that reports that one or more fragments have been lost. In order to mitigate this possible attack, MAX_FRAG_RETRIES may be set to a safe value which allows to limit the maximum damage of the attack to an acceptable extent. However, note that a high setting for MAX_FRAG_RETRIES benefits fragment reliability modes, therefore the trade-off needs to be carefully considered.
+In Window mode – ACK on error, a malicious node may force a SCHC fragment sender to resend a SCHC fragment a number of times, 
+with the aim to increase consumption of the SCHC fragment sender’s resources. To this end, the malicious node may repeatedly 
+send a fake ACK to the SCHC fragment sender, with a Bitmap that reports that one or more SCHC fragments have been lost. In 
+order to mitigate this possible attack, MAX_FRAG_RETRIES may be set to a safe value which allows to limit the maximum damage 
+of the attack to an acceptable extent. However, note that a high setting for MAX_FRAG_RETRIES benefits SCHC fragment 
+reliability modes, therefore the trade-off needs to be carefully considered.
 
 # Acknowledgements
 
 Thanks to Dominique Barthel, Carsten Bormann, Philippe Clavier, Eduardo Ingles Sanchez, Arunprabhu Kandasamy, Rahul Jadhav,
-Sergio Lopez Bernal, Antony Markovski, Alexander Pelov, Pascal Thubert, Juan Carlos Zuniga, Diego Dujovne, Edgar Ramos, and Shoichi Sakane for useful design consideration and comments. 
+Sergio Lopez Bernal, Antony Markovski, Alexander Pelov, Pascal Thubert, Juan Carlos Zuniga, Diego Dujovne, Edgar Ramos, and 
+Shoichi Sakane for useful design consideration and comments. 
 
 --- back
 
@@ -1635,9 +1655,11 @@ In the following examples, N (i.e. the size if the FCN field) is 3 bits. Therefo
           |<---- ACK, W=1 ------|
 
 ~~~~
-{: #Fig-Example-Win-NoLoss-NACK title='Transmission in ACK-on-Error mode of an IPv6 packet carried by 11 fragments, with MAX_WIND_FCN=6 and no loss.'}
+{: #Fig-Example-Win-NoLoss-NACK title='Transmission in ACK-on-Error mode of an IPv6 packet carried by 11 fragments, with 
+MAX_WIND_FCN=6 and no loss.'}
 
-{{Fig-Example-Rel-Window-NACK-Loss}} illustrates the transmission in ACK-on-Error mode of an IPv6 packet that needs 11 fragments, with MAX_WIND_FCN=6 and three lost fragments.
+{{Fig-Example-Rel-Window-NACK-Loss}} illustrates the transmission in ACK-on-Error mode of an IPv6 packet that needs 11 
+fragments, with MAX_WIND_FCN=6 and three lost fragments.
 
 ~~~~
          Sender             Receiver
@@ -1683,9 +1705,11 @@ In the following examples, N (i.e. the size if the FCN field) is 3 bits. Therefo
         (End)    
 
 ~~~~
-{: #Fig-Example-Rel-Window-ACK-NoLoss title='Transmission in ACK-Always mode of an IPv6 packet carried by 11 fragments, with MAX_WIND_FCN=6 and no lost fragment.'}
+{: #Fig-Example-Rel-Window-ACK-NoLoss title='Transmission in ACK-Always mode of an IPv6 packet carried by 11 fragments, with 
+MAX_WIND_FCN=6 and no lost fragment.'}
 
-{{Fig-Example-Rel-Window-ACK-Loss}} illustrates the transmission in ACK-Always mode of an IPv6 packet that needs 11 fragments, with MAX_WIND_FCN=6 and three lost fragments.
+{{Fig-Example-Rel-Window-ACK-Loss}} illustrates the transmission in ACK-Always mode of an IPv6 packet that needs 11 
+fragments, with MAX_WIND_FCN=6 and three lost fragments.
 
 ~~~~
         Sender               Receiver
@@ -1710,9 +1734,11 @@ In the following examples, N (i.e. the size if the FCN field) is 3 bits. Therefo
         (End)    
 
 ~~~~
-{: #Fig-Example-Rel-Window-ACK-Loss title='Transmission in ACK-Always mode of an IPv6 packet carried by 11 fragments, with MAX_WIND_FCN=6 and three lost fragments.'}
+{: #Fig-Example-Rel-Window-ACK-Loss title='Transmission in ACK-Always mode of an IPv6 packet carried by 11 fragments, with 
+MAX_WIND_FCN=6 and three lost fragments.'}
 
-{{Fig-Example-Rel-Window-ACK-Loss-Last-A}} illustrates the transmission in ACK-Always mode of an IPv6 packet that needs 6 fragments, with MAX_WIND_FCN=6, three lost fragments and only one retry needed to recover each lost fragment. 
+{{Fig-Example-Rel-Window-ACK-Loss-Last-A}} illustrates the transmission in ACK-Always mode of an IPv6 packet that needs 6 
+fragments, with MAX_WIND_FCN=6, three lost fragments and only one retry needed to recover each lost fragment. 
 
 ~~~~
           Sender                Receiver
@@ -1729,9 +1755,11 @@ In the following examples, N (i.e. the size if the FCN field) is 3 bits. Therefo
              |<-----ACK, W=0-------|C=1 no Bitmap
            (End) 
 ~~~~
-{: #Fig-Example-Rel-Window-ACK-Loss-Last-A title='Transmission in ACK-Always mode of an IPv6 packet carried by 11 fragments, fwith MAX_WIND_FCN=6, three lost framents and only one retry needed for each lost fragment.'}
+{: #Fig-Example-Rel-Window-ACK-Loss-Last-A title='Transmission in ACK-Always mode of an IPv6 packet carried by 11 fragments, 
+with MAX_WIND_FCN=6, three lost framents and only one retry needed for each lost fragment.'}
 
-{{Fig-Example-Rel-Window-ACK-Loss-Last-B}} illustrates the transmission in ACK-Always mode of an IPv6 packet that needs 6 fragments, with MAX_WIND_FCN=6, three lost fragments, and the second ACK lost. 
+{{Fig-Example-Rel-Window-ACK-Loss-Last-B}} illustrates the transmission in ACK-Always mode of an IPv6 packet that needs 6 
+fragments, with MAX_WIND_FCN=6, three lost fragments, and the second ACK lost. 
 
 ~~~~
           Sender                Receiver
@@ -1752,9 +1780,11 @@ In the following examples, N (i.e. the size if the FCN field) is 3 bits. Therefo
 
            (End) 
 ~~~~
-{: #Fig-Example-Rel-Window-ACK-Loss-Last-B title='Transmission in ACK-Always mode of an IPv6 packet carried by 11 fragments, with MAX_WIND_FCN=6, three lost fragments, and the second ACK lost.'}
+{: #Fig-Example-Rel-Window-ACK-Loss-Last-B title='Transmission in ACK-Always mode of an IPv6 packet carried by 11 fragments, 
+with MAX_WIND_FCN=6, three lost fragments, and the second ACK lost.'}
 
-{{Fig-Example-Rel-Window-ACK-Loss-Last-C}} illustrates the transmission in ACK-Always mode of an IPv6 packet that needs 6 fragments, with MAX_WIND_FCN=6, with three lost fragments, and one retransmitted fragment lost again. 
+{{Fig-Example-Rel-Window-ACK-Loss-Last-C}} illustrates the transmission in ACK-Always mode of an IPv6 packet that needs 6 
+fragments, with MAX_WIND_FCN=6, with three lost fragments, and one retransmitted fragment lost again. 
 
 ~~~~
            Sender                Receiver
@@ -1775,10 +1805,14 @@ In the following examples, N (i.e. the size if the FCN field) is 3 bits. Therefo
              |<-----ACK, W=0-------|C=1 no Bitmap
            (End) 
 ~~~~
-{: #Fig-Example-Rel-Window-ACK-Loss-Last-C title='Transmission in ACK-Always mode of an IPv6 packet carried by 11 fragments, with MAX_WIND_FCN=6, with three lost fragments, and one retransmitted fragment lost again.'}
+{: #Fig-Example-Rel-Window-ACK-Loss-Last-C title='Transmission in ACK-Always mode of an IPv6 packet carried by 11 fragments, 
+with MAX_WIND_FCN=6, with three lost fragments, and one retransmitted fragment lost again.'}
 
 
-{{Fig-Example-MaxWindFCN}} illustrates the transmission in ACK-Always mode of an IPv6 packet that needs 28 fragments, with N=5, MAX_WIND_FCN=23 and two lost fragments. Note that MAX_WIND_FCN=23 may be useful when the maximum possible Bitmap size, considering the maximum lower layer technology payload size and the value of R, is 3 bytes. Note also that the FCN of the last fragment of the packet is the one with FCN=31 (i.e. FCN=2^N-1 for N=5, or equivalently, all FCN bits set to 1).
+{{Fig-Example-MaxWindFCN}} illustrates the transmission in ACK-Always mode of an IPv6 packet that needs 28 fragments, with 
+N=5, MAX_WIND_FCN=23 and two lost fragments. Note that MAX_WIND_FCN=23 may be useful when the maximum possible Bitmap size, 
+considering the maximum lower layer technology payload size and the value of R, is 3 bytes. Note also that the FCN of the 
+last fragment of the packet is the one with FCN=31 (i.e. FCN=2^N-1 for N=5, or equivalently, all FCN bits set to 1).
 
 ~~~~
            Sender               Receiver
@@ -1818,12 +1852,14 @@ In the following examples, N (i.e. the size if the FCN field) is 3 bits. Therefo
              |<------ACK, W=1-------|no Bitmap
            (End)
 ~~~~
-{: #Fig-Example-MaxWindFCN title='Transmission in ACK-Always mode of an IPv6 packet carried by 28 fragments, with N=5, MAX_WIND_FCN=23 and two lost fragments.'}
+{: #Fig-Example-MaxWindFCN title='Transmission in ACK-Always mode of an IPv6 packet carried by 28 fragments, with N=5, 
+MAX_WIND_FCN=23 and two lost fragments.'}
 
 
 # Fragmentation State Machines {#FSM}
 
-The fragmentation state machines of the sender and the receiver, one for each of the different reliability modes, are described in the following figures:
+The fragmentation state machines of the sender and the receiver, one for each of the different reliability modes, are 
+described in the following figures:
 
 
 ~~~~
@@ -1998,15 +2034,15 @@ Lcl_Bitmap==recv_Bitmap &| |   |   all missing frag sent
  +-------------------------> |              |
  |                           ++=====+=======+
  |         FCN==0 & more frags|     |last frag
- |     ~~~~~~~~~~~~~~~~~~~~~~~|     |~~~~~~~~~~~~~~~~~~~~~~~~
+ |     ~~~~~~~~~~~~~~~~~~~~~~~|     |~~~~~~~~~~~~~~~~~
  |            set local-Bitmap|     |set local-Bitmap
  |      send wnd + frag(all-0)|     |send wnd+frag(all-1)+MIC
  |           set Retrans_Timer|     |set Retrans_Timer
  |                            |     |
- |Retrans_Timer expires &     |     | local-Bitmap!=rcv-Bitmap 
- |more fragments              |     |  +-----------------+
- |~~~~~~~~~~~~~~~~~~~~        |     |  | ~~~~~~~~~~~~~   |
- |stop Retrans_Timer          |     |  | Attemp++        |
+ |Retrans_Timer expires &     |     |   lcl-Bitmap!=rcv-Bitmap 
+ |more fragments              |     |   ~~~~~~~~~~~~~~~~~~~~~~ 
+ |~~~~~~~~~~~~~~~~~~~~        |     |   Attemp++        
+ |stop Retrans_Timer          |     |  +-----------------+
  |clear local-Bitmap          v     v  |                 v
  |window = next window  +=====+=====+==+==+         +====+====+
  +----------------------+                 +         | Resend  |
