@@ -46,8 +46,6 @@ normative:
   RFC7217:
 informative:  
   I-D.ietf-lpwan-overview:
-  I-D.zuniga-lpwan-schc-over-sigfox:
-  I-D.petrov-lpwan-ipv6-schc-over-lorawan:
 
 --- abstract
 
@@ -97,8 +95,7 @@ technologies. Such functionality has been designed under the assumption that dat
 happen between the entity performing fragmentation and the entity performing reassembly.
 
 Note that this document defines generic functionality and purposefully offers flexibility with regard to parameter settings 
-and mechanism choices, that are expected to be made in other, technology-specific documents (e.g. {{I-D.zuniga-lpwan-schc-
-over-sigfox}}, {{I-D.petrov-lpwan-ipv6-schc-over-lorawan}}).
+and mechanism choices, that are expected to be made in other, technology-specific documents.
 
 
 # LPWAN Architecture {#LPWAN-Archi}
