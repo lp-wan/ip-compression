@@ -122,7 +122,7 @@ Internet-Draft                 LPWAN SCHC                  February 2018
      7.7.  Downlink SCHC fragment transmission . . . . . . . . . . .  37
    8.  Padding management  . . . . . . . . . . . . . . . . . . . . .  38
    9.  SCHC Compression for IPv6 and UDP headers . . . . . . . . . .  38
-     9.1.  IPv6 version field  . . . . . . . . . . . . . . . . . . .  39
+     9.1.  IPv6 version field  . . . . . . . . . . . . . . . . . . .  38
      9.2.  IPv6 Traffic class field  . . . . . . . . . . . . . . . .  39
      9.3.  Flow label field  . . . . . . . . . . . . . . . . . . . .  39
      9.4.  Payload Length field  . . . . . . . . . . . . . . . . . .  39
@@ -132,11 +132,11 @@ Internet-Draft                 LPWAN SCHC                  February 2018
        9.7.1.  IPv6 source and destination prefixes  . . . . . . . .  40
        9.7.2.  IPv6 source and destination IID . . . . . . . . . . .  41
      9.8.  IPv6 extensions . . . . . . . . . . . . . . . . . . . . .  41
-     9.9.  UDP source and destination port . . . . . . . . . . . . .  42
+     9.9.  UDP source and destination port . . . . . . . . . . . . .  41
      9.10. UDP length field  . . . . . . . . . . . . . . . . . . . .  42
      9.11. UDP Checksum field  . . . . . . . . . . . . . . . . . . .  42
-   10. Security considerations . . . . . . . . . . . . . . . . . . .  43
-     10.1.  Security considerations for header compression . . . . .  43
+   10. Security considerations . . . . . . . . . . . . . . . . . . .  42
+     10.1.  Security considerations for header compression . . . . .  42
      10.2.  Security considerations for SCHC fragmentation . . . . .  43
    11. Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .  44
    12. References  . . . . . . . . . . . . . . . . . . . . . . . . .  44
@@ -2088,39 +2088,39 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 8.  Padding management
 
-   The headers specified in this document, for either SCHC compression
-   or SCHC fragmentation or acknowledgment, are not necessarily an
-   integer number of bytes in size.  Some LPWAN technologies have PDUs
-   that are integer numbers of bytes.  With such a technology, the
-   sender can append padding bits to the messages defined in this
-   document in order to fill up the last byte of the L2 PDU, if it isn't
-   already full.  Padding is not mandatory and is technology dependent.
-   Examples are shown in Figure 6 and Figure 8.
+   Default padding is defined for L2 frame with a variable length of
+   bytes.  Padding is done twice, after compression and in the all-1
+   fragmentation.
 
-   The receiver will tell the header, the payload and the padding apart
-   using the following principles: * The size of any SCHC header is
-   known from examining the Rule ID and the content of that header.
+   In compression, the rule and the compression residues are not aligned
+   on a byte, but payload following the residue is always a multiple of
+   8 bits.  In that case, padding bits can be added after the payload to
+   reach the first byte boundary.  Since the rule and the residue give
+   the length of the SCHC header and payload is always a multiple of 8
+   bits, the receiver can without ambiguity remove the padding bits
+   which never excide 7 bits.
 
-   o  The payload that follows the header, if it exists, is variable in
-      size, but is always a integer number of bytes.
+   SCHC fragmentation works on a byte aligned (i.e. padded SCHC packet).
+   Fragmentation header may not be aligned on byte boundary, but each
+   fragment except the last one (All-1 fragment) must sent the maximum
+   bits as possible.  Only the last fragment need to introduce padding
+   to reach the next boundary limit.  Since the SCHC is known to be a
+   multiple of 8 bits, the receiver can remove the extra bit to reach
+   this limit.
 
-   o  Padding MUST not add more than 7 bits.
-
-   Therefore, the algorithm for padding elimination at the receiver is
-   the following:
-
-   o  decode the SCHC header, find its length (in bits) and set a
-      pointer to the end of the header.
-
-   o  from that pointer, extract as many blocks of 8 bits as are
-      available in the L2 PDU.  They are the payload bytes.
-
-   o  the remaining bits, if any, are padding.
+   Default padding mechanism do not need to send the padding length and
+   can lead to a maximum of 14 bits of padding.
 
 9.  SCHC Compression for IPv6 and UDP headers
 
    This section lists the different IPv6 and UDP header fields and how
    they can be compressed.
+
+9.1.  IPv6 version field
+
+   This field always holds the same value.  Therefore, in the rule, TV
+   is set to 6, MO to "equal" and CDA to "not-sent".
+
 
 
 
@@ -2129,11 +2129,6 @@ Minaburo, et al.        Expires September 1, 2018              [Page 38]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
-
-9.1.  IPv6 version field
-
-   This field always holds the same value.  Therefore, in the rule, TV
-   is set to 6, MO to "equal" and CDA to "not-sent".
 
 9.2.  IPv6 Traffic class field
 
@@ -2177,6 +2172,11 @@ Internet-Draft                 LPWAN SCHC                  February 2018
    Field Descriptor, TV is not set, MO is set to "ignore" and CDA is
    "compute-IPv6-length".
 
+   If the payload length needs to be sent and does not need to be coded
+   in 16 bits, the TV can be set to 0x0000, the MO set to MSB(16-s)
+   where 's' is the number of bits to code the maximum length, and CDA
+   is set to LSB(s).
+
 
 
 
@@ -2185,11 +2185,6 @@ Minaburo, et al.        Expires September 1, 2018              [Page 39]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
-
-   If the payload length needs to be sent and does not need to be coded
-   in 16 bits, the TV can be set to 0x0000, the MO set to MSB(16-s)
-   where 's' is the number of bits to code the maximum length, and CDA
-   is set to LSB(s).
 
 9.5.  Next Header field
 
@@ -2233,6 +2228,11 @@ Internet-Draft                 LPWAN SCHC                  February 2018
    specific flow, the source and destination prefixes can be unique and
    stored in the context.  It can be either a link-local prefix or a
    global prefix.  In that case, the TV for the source and destination
+   prefixes contain the values, the MO is set to "equal" and the CDA is
+   set to "not-sent".
+
+   If the rule is intended to compress packets with different prefix
+   values, match-mapping SHOULD be used.  The different prefixes are
 
 
 
@@ -2242,11 +2242,6 @@ Minaburo, et al.        Expires September 1, 2018              [Page 40]
 Internet-Draft                 LPWAN SCHC                  February 2018
 
 
-   prefixes contain the values, the MO is set to "equal" and the CDA is
-   set to "not-sent".
-
-   If the rule is intended to compress packets with different prefix
-   values, match-mapping SHOULD be used.  The different prefixes are
    listed in the TV, the MO is set to "match-mapping" and the CDA is set
    to "mapping-sent".  See Figure 25
 
@@ -2286,18 +2281,6 @@ Internet-Draft                 LPWAN SCHC                  February 2018
    extensions are needed, their compression/decompression rules can be
    based on the MOs and CDAs described above.
 
-
-
-
-
-
-
-
-Minaburo, et al.        Expires September 1, 2018              [Page 41]
-
-Internet-Draft                 LPWAN SCHC                  February 2018
-
-
 9.9.  UDP source and destination port
 
    To allow for a single rule being used for both directions, the UDP
@@ -2306,6 +2289,14 @@ Internet-Draft                 LPWAN SCHC                  February 2018
    MUST be aware of the traffic direction (Uplink, Downlink) to select
    the appropriate field.  The following rules apply for DEV and APP
    port numbers.
+
+
+
+
+Minaburo, et al.        Expires September 1, 2018              [Page 41]
+
+Internet-Draft                 LPWAN SCHC                  February 2018
+
 
    If both ends know the port number, it can be elided.  The TV contains
    the port number, the MO is set to "equal" and the CDA is set to "not-
@@ -2347,13 +2338,6 @@ Internet-Draft                 LPWAN SCHC                  February 2018
    not set, the MO is set to "ignore" and the CDF is set to "value-
    sent".
 
-
-
-Minaburo, et al.        Expires September 1, 2018              [Page 42]
-
-Internet-Draft                 LPWAN SCHC                  February 2018
-
-
 10.  Security considerations
 
 10.1.  Security considerations for header compression
@@ -2362,6 +2346,14 @@ Internet-Draft                 LPWAN SCHC                  February 2018
    wrong packet that does not match with the original one.  Such a
    corruption MAY be detected with end-to-end authentication and
    integrity mechanisms.  Header Compression does not add more security
+
+
+
+Minaburo, et al.        Expires September 1, 2018              [Page 42]
+
+Internet-Draft                 LPWAN SCHC                  February 2018
+
+
    problem than what is already needed in a transmission.  For instance,
    to avoid an attack, never re-construct a packet bigger than some
    configured size (with 1500 bytes as generic default).
@@ -2401,15 +2393,6 @@ Internet-Draft                 LPWAN SCHC                  February 2018
    cryptographic hash functionality.  The aim of this technique is to
    allow a receiver to identify illegitimate SCHC fragments.
 
-
-
-
-
-Minaburo, et al.        Expires September 1, 2018              [Page 43]
-
-Internet-Draft                 LPWAN SCHC                  February 2018
-
-
    Further attacks MAY involve sending overlapped fragments (i.e.
    comprising some overlapping parts of the original IPv6 datagram).
    Implementers SHOULD make sure that the correct operation is not
@@ -2419,6 +2402,14 @@ Internet-Draft                 LPWAN SCHC                  February 2018
    fragment sender to resend a SCHC fragment a number of times, with the
    aim to increase consumption of the SCHC fragment sender's resources.
    To this end, the malicious node MAY repeatedly send a fake ACK to the
+
+
+
+Minaburo, et al.        Expires September 1, 2018              [Page 43]
+
+Internet-Draft                 LPWAN SCHC                  February 2018
+
+
    SCHC fragment sender, with a Bitmap that reports that one or more
    SCHC fragments have been lost.  In order to mitigate this possible
    attack, MAX_ACK_RETRIES MAY be set to a safe value which allows to
@@ -2459,16 +2450,21 @@ Internet-Draft                 LPWAN SCHC                  February 2018
               DOI 10.17487/RFC5795, March 2010,
               <https://www.rfc-editor.org/info/rfc5795>.
 
+   [RFC7136]  Carpenter, B. and S. Jiang, "Significance of IPv6
+              Interface Identifiers", RFC 7136, DOI 10.17487/RFC7136,
+              February 2014, <https://www.rfc-editor.org/info/rfc7136>.
+
+
+
+
+
+
 
 
 Minaburo, et al.        Expires September 1, 2018              [Page 44]
 
 Internet-Draft                 LPWAN SCHC                  February 2018
 
-
-   [RFC7136]  Carpenter, B. and S. Jiang, "Significance of IPv6
-              Interface Identifiers", RFC 7136, DOI 10.17487/RFC7136,
-              February 2014, <https://www.rfc-editor.org/info/rfc7136>.
 
    [RFC7217]  Gont, F., "A Method for Generating Semantically Opaque
               Interface Identifiers with IPv6 Stateless Address
@@ -2510,6 +2506,10 @@ Appendix A.  SCHC Compression Examples
    Figure 24 presents the protocol stack for this Device.  IPv6 and UDP
    are represented with dotted lines since these protocols are
    compressed on the radio link.
+
+
+
+
 
 
 
