@@ -755,8 +755,8 @@ packet or an SCHC packet.
   SCHC fragments have been correctly received.
   When the ACK is lost, the sender assumes that all SCHC fragments covered by the lost ACK have been successfully delivered, 
   so the sender continues transmitting the next window of SCHC fragments. If the next SCHC fragments received belong to the 
-  next window, the receiver will discard these SCHC fragments and the receiver will abort the on-going fragmented packet 
-  transmission. See further details in {{ACK-on-Error-subsection}}.
+  next window, the receiver will abort the on-going fragmented packet transmission. See further details in {{ACK-on-Error-
+  subsection}}.
    
 The same reliability mode must be used for all SCHC fragments of an SCHC packet. The decision on which reliability mode will 
 be used and whether the same reliability mode applies to all SCHC packets is an implementation problem and is out of the 
@@ -1055,7 +1055,8 @@ Some other cases for Abort are explained in the {{FragModes}} or {{FSM}}.
 ## Baseline mechanism {#FragModes}
 
 If after applying SCHC header compression (or when SCHC header compression is not possible) the SCHC packet does not fit 
-within the payload of a single L2 data unit, the SCHC packet SHALL be broken into SCHC fragments and the fragments SHALL be sent to the fragment receiver.
+within the payload of a single L2 data unit, the SCHC packet SHALL be broken into SCHC fragments and the fragments SHALL be 
+sent to the fragment receiver.
 The fragment receiver needs to identify all the SCHC fragments that belong to a given SCHC packet. To this end, the receiver 
 SHALL use: 
 
@@ -1115,7 +1116,7 @@ In ACK-Always, the sender transmits SCHC fragments by using the two-jumping-wind
 fragment can be added to respect local regulations or other constraints imposed by the applications.  Each time a SCHC 
 fragment is sent, the FCN is decreased by one.  When the FCN reaches value 0 and there are more SCHC fragments to be sent 
 after, the sender transmits the last SCHC fragment of this window using the All-0 fragment format, it starts the 
-Retransmission Timer and waits for an ACK. On the other hand, if the FCN has reached 0 and this SCHC fragment to be 
+Retransmission Timer and waits for an ACK. On the other hand, if the FCN has reached 0 and the SCHC fragment to be 
 transmitted is the last SCHC fragment of the SCHC packet, the sender uses the All-1 fragment format, which includes a MIC. 
 The sender sets the Retransmission Timer and waits for the ACK to know if transmission errors have occured.
 
@@ -1167,42 +1168,27 @@ MIC indicates the end of the transmission but the receiver must stay alive for a
 empty All-1 fragments the sender may send if ACKs sent by the receiver are lost. If the MIC is incorrect, some SCHC fragments 
 have been lost.  The receiver sends the ACK regardless of successful SCHC fragmented packet reception or not, the 
 Inactitivity Timer is set.  In case of an incorrect MIC, the receiver waits for SCHC fragments belonging to the same window. 
-After MAX_ACK_REQUESTS, the receiver will abort the on-going SCHC fragmented packet transmission by transmitting a data unit 
-with the Receiver-Abort format.  The receiver also aborts upon Inactivity Timer expiration.
+After MAX_ACK_REQUESTS, the receiver will abort the on-going SCHC fragmented packet transmission by transmitting a the 
+Receiver-Abort format.  The receiver also aborts upon Inactivity Timer expiration.
 
 ### ACK-on-Error {#ACK-on-Error-subsection}
-The ACK-on-Error sender is similar to ACK-Always, the main difference being that in ACK-on-Error the ACK with the encoded Bitmap is not sent at the end of each window but only when at least one SCHC fragment of the current window has been lost (with the exception of the last window).  In Ack-on-Error, the Retransmission Timer expiration will be considered as a positive acknowledgment. The Retransmission Timer is set when sending an All-0 or an All-1 fragment. When the All-1 fragment has been sent, then the on-going SCHC fragmented packet transmission SCHC fragmentation is finished and the sender waits for the last ACK. At the receiver side, when the All-1 fragment is received and the MIC check indicates successful packet reception, an ACK is sent anyway, to confirm the end of a correct transmission.  If the Retransmission Timer expires while waiting for the ACK for the last window, an All-1 empty request for the last ACK MUST be sent by the sender to complete the SCHC fragmented packet transmission.
+The ACK-on-Error sender is similar to ACK-Always, the main difference being that in ACK-on-Error the ACK with the encoded Bitmap is not sent at the end of each window but only when at least one SCHC fragment of the current window has been lost (with the exception of the last window).  In Ack-on-Error, the Retransmission Timer expiration will be considered as a positive acknowledgment. The Retransmission Timer is set when sending an All-0 or an All-1 fragment. When the All-1 fragment has been sent, then the on-going SCHC fragmentation is finished and the sender waits for the last ACK. At the receiver side, when the All-1 fragment is received and the MIC check indicates successful packet reception, an ACK is sent anyway, to confirm the end of a correct transmission.  If the Retransmission Timer expires while waiting for the ACK for the last window, an All-1 empty MUST be sent to request the last ACK by the sender to complete the SCHC fragmented packet transmission.
 
-If the sender receives an ACK, it checks the window value.  ACKs with an unexpected window number are discarded.  If the 
+If the sender receives an ACK, it checks the window value. ACKs with an unexpected window number are discarded.  If the 
 window number on the received encoded Bitmap is correct, the sender verifies if the receiver has received all SCHC fragments of the current window.  When at least one SCHC fragment has been lost, the counter Attempts is increased by one and the sender resends the missing SCHC fragments again.  When Attempts reaches MAX_ACK_REQUESTS, the sender sends an Abort message and releases all resources for the on-going SCHC fragmented packet transmission.  When the retransmission of the missing SCHC fragments is finished, the sender starts listening for an ACK (even if an All-0 or an All-1 has not been sent during the retransmission) and initializes the Retransmission Timer. After sending an All-1 fragment, the sender listens for an ACK, 
 initializes Attempts, and starts the Retransmission Timer. If the Retransmission Timer expires, Attempts 
 is increased by one and an empty All-1 fragment is sent to request the ACK for the last window. If Attempts reaches 
-MAX_ACK_REQUESTS, the sender aborts the on-going SCHC fragmented packet transmission by transmitting the Sender-Abort data unit.
+MAX_ACK_REQUESTS, the sender aborts the on-going SCHC fragmented packet transmission by transmitting the Sender-Abort fragment.
 
 Unlike the sender, the receiver for ACK-on-Error has a larger amount of differences compared with ACK-Always.  First, an 
-ACK is not sent unless there is a lost SCHC fragment or an unexpected behavior (with the exception of the last window, where an 
-ACK is always sent regardless of SCHC fragment losses or not).  The receiver starts by expecting SCHC fragments from window 0 and 
-maintains the information regarding which SCHC fragments it receives.  After receiving a SCHC fragment, the Inactivity Timer is set. 
-If no further SCHC fragment is received and the Inactivity Timer expires, the SCHC fragment receiver aborts the on-going SCHC fragmented packet transmission by transmitting the Receiver-Abort data unit.
+ACK is not sent unless there is a lost SCHC fragment or an unexpected behavior. With the exception of the last window, where an ACK is always sent regardless of SCHC fragment losses or not. The receiver starts by expecting SCHC fragments from window 0 and maintains the information regarding which SCHC fragments it receives.  After receiving a SCHC fragment, the Inactivity Timer is set. If no further SCHC fragment is received and the Inactivity Timer expires, the SCHC fragment receiver aborts the on-going SCHC fragmented packet transmission by transmitting the Receiver-Abort data unit.
 
-Any SCHC fragment not belonging to the current window is discarded. The actual SCHC fragment number is computed based on the FCN 
-value.  When an All-0 fragment is received and all SCHC fragments have been received, the receiver updates the expected window 
-value and expects a new window and waits for the next SCHC fragment.  
-If the window value of the next SCHC fragment has not changed, the received SCHC fragment is a retransmission.  A receiver that has 
-already received a SCHC fragment should discard it. If all SCHC fragments of a window (that is not the last one) have been received, 
-the receiver does not send an ACK.  While the receiver waits for the next window and if the window value is set to the next 
-value, and if an All-1 fragment with the next value window arrived the receiver aborts the on-going SCHC fragmented packet 
-transmission, and it drops the SCHC fragments of the aborted packet transmission.
-
-If the receiver receives an All-1 fragment, this means that the transmission should be finished.  If the MIC is incorrect 
-some fragments have been lost.  Regardless of fragment losses, the receiver sends an ACK and initializes the Inactivity 
-Timer.
-
-Reception of an All-1 fragment indicates the last SCHC fragment of the packet has been sent.  Since the last window is not 
+Any SCHC fragment not belonging to the current window is discarded. The actual SCHC fragment number is computed based on the FCN value.  When an All-0 fragment is received and all SCHC fragments have been received, if no error the receiver updates the expected window value and expects a new window and waits for the next SCHC fragment.  
+If the window value of the next SCHC fragment has not changed, the received SCHC fragment is a retransmission.  A receiver that has already received a SCHC fragment should discard it. If all SCHC fragments of a window (that is not the last one) have been received, the receiver does not send an ACK.  While the receiver waits for the next window and if the window value is set to the next value, and if an All-1 fragment with the next value window arrived the receiver knows that the last SCHC fragment of the packet has been sent.  Since the last window is not 
 always full, the MIC will be used to detect if all SCHC fragments of the window have been received.  A correct MIC check 
-indicates the end of the SCHC fragmented packet transmission. An ACK is sent by the SCHC fragment receiver. In case of an incorrect 
-MIC, the receiver waits for SCHC fragments belonging to the same window or the expiration of the Inactivity Timer. The latter 
-will lead the receiver to abort the on-going SCHC fragmented packet transmission.
+indicates the end of the SCHC fragmented packet transmission. An ACK is sent by the SCHC fragment receiver. In case of an incorrect MIC, the receiver waits for SCHC fragments belonging to the same window or the expiration of the Inactivity Timer. The latter will lead the receiver to abort the on-going SCHC fragmented packet transmission.
+
+If after receiving an All-0 fragment the receiver missed some SCHC fragments, the receiver uses an ACK with the encoded Bitmap to ask the retransmission of the missing fragments and expect to receive SCHC fragments with the actual window. Whike waiting the retransmission an All-0 empty fragment is received, the receiver sends again the ACK with the encoded Bitmap, if the SCHC fragments received belongs to another window or an All-1 fragment is received, the transmission is aborted by sending a Receiver-Abort fragment. Once it has received all the missing fragments it waits for the new window fragments.
 
 ## Supporting multiple window sizes
 
