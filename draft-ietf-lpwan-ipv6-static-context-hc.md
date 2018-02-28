@@ -1264,31 +1264,22 @@ has been successfully received (and possibly, the last ACK has been lost: this m
 timer for the All-1 fragment is long enough to allow several ACK retries if the All-1 fragment has not been received by the 
 SCHC fragment receiver, and it also assumes that it is unlikely that several ACKs become all lost).
 
-
 # Padding management {#Padding}
 
-The headers specified in this document, for either SCHC compression or SCHC fragmentation or acknowledgment, are not 
-necessarily an integer number of bytes in size. Some LPWAN technologies have PDUs that are integer numbers of bytes. With 
-such a technology, the sender can append padding bits to the messages defined in this document in order to fill up the last 
-byte of the L2 PDU, if it isn't already full. Padding is not mandatory and is technology dependent. 
-Examples are shown in {{Fig-FormatPckt}} and {{Fig-FragFormat}}.
+Default padding is defined for L2 frame with a variable length of bytes. Padding is done twice, after compression and in the 
+all-1 fragmentation.
 
-The receiver will tell the header, the payload and the padding apart using the following principles:
-* The size of any SCHC header is known from examining the Rule ID and the content of that header.
- 
-* The payload that follows the header, if it exists, is variable in size, but is always a integer number of bytes.
- 
-* Padding MUST not add more than 7 bits.
+In compression, the rule and the compression residues are not aligned on a byte, but payload following the residue is always 
+a multiple of 8 bits. In that case, padding bits can be added after the payload to reach the first byte boundary. Since the 
+rule and the residue give the length of the SCHC header and payload is always a multiple of 8 bits, the receiver can without 
+ambiguity remove the padding bits which never excide 7 bits.
 
-Therefore, the algorithm for padding elimination at the receiver is the following:
+SCHC fragmentation works on a byte aligned (i.e. padded SCHC packet). Fragmentation header may not be aligned on byte 
+boundary, but each fragment except the last one (All-1 fragment) must sent the maximum bits as possible. Only the last 
+fragment need to introduce padding to reach the next boundary limit. Since the SCHC is known to be a multiple of 8 bits, the 
+receiver can remove the extra bit to reach this limit.
 
-* decode the SCHC header, find its length (in bits) and set a pointer to the end of the header.
-
-* from that pointer, extract as many blocks of 8 bits as are available in the L2 PDU. They are the payload bytes.
-
-* the remaining bits, if any, are padding.
-
-
+Default padding mechanism do not need to send the padding length and can lead to a maximum of 14 bits of padding.
 
 # SCHC Compression for IPv6 and UDP headers
 
