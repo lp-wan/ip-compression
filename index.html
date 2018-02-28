@@ -1754,21 +1754,21 @@ Rule 0
 |       set Retrans_Timer  |   | set Retrans_Timer 
 |                          |   | 
 |Recv_wnd == wnd &amp;         |   |  
-|Lcl_Bitmap==recv_Bitmap&amp;  |   |  +------------------------+
-|more frag                 |   |  |local-Bitmap!=rcv-Bitmap|
-|~~~~~~~~~~~~~~~~~~~~~~    |   |  | ~~~~~~~~~              |
-|Stop Retrans_Timer        |   |  | Attemp++               v
-|clear local_Bitmap        v   v  |                 +======++
-|window=next_window   +====+===+==+===+             |Resend |
-+---------------------+               |             |Missing|
-                 +----+     Wait      |             |Frag   |
-not expected wnd |    |    Bitmap     |             +=======+
-~~~~~~~~~~~~~~~~ +---&gt;+               +-+Retrans_Timer Exp  |          
-    discard frag      +==+=+===+=+==+=+ |~~~~~~~~~~~~~~~~~  |
-                         | |   | ^  ^   |reSend(empty)All-* |   
-                         | |   | |  |   |Set Retrans_Timer  |
-MIC_bit==1 &amp;             | |   | |  +---+Attemp++           |
-Recv_window==window &amp;    | |   | +--------------------------+   
+|Lcl_Bitmap==recv_Bitmap&amp;  |   |  +----------------------+
+|more frag                 |   |  |lcl-Bitmap!=rcv-Bitmap|
+|~~~~~~~~~~~~~~~~~~~~~~    |   |  | ~~~~~~~~~            |
+|Stop Retrans_Timer        |   |  | Attemp++             v
+|clear local_Bitmap        v   v  |               +======++
+|window=next_window   +====+===+==+===+           |Resend |
++---------------------+               |           |Missing|
+                 +----+     Wait      |           |Frag   |
+not expected wnd |    |    Bitmap     |           +=======+
+~~~~~~~~~~~~~~~~ +---&gt;+               ++Retrans_Timer Exp |          
+    discard frag      +==+=+===+=+==+=+| ~~~~~~~~~~~~~~~~~|
+                         | |   | ^  ^  |reSend(empty)All-*|   
+                         | |   | |  |  |Set Retrans_Timer |
+MIC_bit==1 &amp;             | |   | |  +--+Attemp++          |
+Recv_window==window &amp;    | |   | +------------------------+   
 Lcl_Bitmap==recv_Bitmap &amp;| |   |   all missing frag sent
              no more frag| |   |   ~~~~~~~~~~~~~~~~~~~~~~ 
  ~~~~~~~~~~~~~~~~~~~~~~~~| |&#160;  | &#160; Set Retrans_Timer &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; 
