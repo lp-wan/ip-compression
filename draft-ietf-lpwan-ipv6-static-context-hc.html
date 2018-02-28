@@ -1651,42 +1651,42 @@ Rule 0
 <div id="rfc.figure.34"></div>
 <div id="Fig-Example-MaxWindFCN"></div>
 <pre>
-           Sender               Receiver
-             |-----W=0, FCN=23-----&gt;|
-             |-----W=0, FCN=22-----&gt;|
-             |-----W=0, FCN=21--X--&gt;|
-             |-----W=0, FCN=20-----&gt;|
-             |-----W=0, FCN=19-----&gt;|
-             |-----W=0, FCN=18-----&gt;|
-             |-----W=0, FCN=17-----&gt;|
-             |-----W=0, FCN=16-----&gt;|
-             |-----W=0, FCN=15-----&gt;|
-             |-----W=0, FCN=14-----&gt;|
-             |-----W=0, FCN=13-----&gt;|
-             |-----W=0, FCN=12-----&gt;|
-             |-----W=0, FCN=11-----&gt;|
-             |-----W=0, FCN=10--X--&gt;|
-             |-----W=0, FCN=9 -----&gt;|
-             |-----W=0, FCN=8 -----&gt;|
-             |-----W=0, FCN=7 -----&gt;|
-             |-----W=0, FCN=6 -----&gt;|
-             |-----W=0, FCN=5 -----&gt;|
-             |-----W=0, FCN=4 -----&gt;|
-             |-----W=0, FCN=3 -----&gt;|
-             |-----W=0, FCN=2 -----&gt;|
-             |-----W=0, FCN=1 -----&gt;|
-             |-----W=0, FCN=0 -----&gt;|
-             |                      |lcl-Bitmap:110111111111101111111111
-             |&lt;------ACK, W=0-------|encoded Bitmap:1101111111111011
-             |-----W=0, FCN=21-----&gt;|
-             |-----W=0, FCN=10-----&gt;|
-             |&lt;------ACK, W=0-------|no Bitmap
-             |-----W=1, FCN=23-----&gt;|
-             |-----W=1, FCN=22-----&gt;|
-             |-----W=1, FCN=21-----&gt;|
-             |--W=1, FCN=31 + MIC--&gt;|MIC checked: sucess =&gt;
-             |&lt;------ACK, W=1-------|no Bitmap
-           (End)
+      Sender               Receiver
+        |-----W=0, FCN=23-----&gt;|
+        |-----W=0, FCN=22-----&gt;|
+        |-----W=0, FCN=21--X--&gt;|
+        |-----W=0, FCN=20-----&gt;|
+        |-----W=0, FCN=19-----&gt;|
+        |-----W=0, FCN=18-----&gt;|
+        |-----W=0, FCN=17-----&gt;|
+        |-----W=0, FCN=16-----&gt;|
+        |-----W=0, FCN=15-----&gt;|
+        |-----W=0, FCN=14-----&gt;|
+        |-----W=0, FCN=13-----&gt;|
+        |-----W=0, FCN=12-----&gt;|
+        |-----W=0, FCN=11-----&gt;|
+        |-----W=0, FCN=10--X--&gt;|
+        |-----W=0, FCN=9 -----&gt;|
+        |-----W=0, FCN=8 -----&gt;|
+        |-----W=0, FCN=7 -----&gt;|
+        |-----W=0, FCN=6 -----&gt;|
+        |-----W=0, FCN=5 -----&gt;|
+        |-----W=0, FCN=4 -----&gt;|
+        |-----W=0, FCN=3 -----&gt;|
+        |-----W=0, FCN=2 -----&gt;|
+        |-----W=0, FCN=1 -----&gt;|
+        |-----W=0, FCN=0 -----&gt;|
+        |                      |lcl-Bitmap:110111111111101111111111
+        |&lt;------ACK, W=0-------|encoded Bitmap:1101111111111011
+        |-----W=0, FCN=21-----&gt;|
+        |-----W=0, FCN=10-----&gt;|
+        |&lt;------ACK, W=0-------|no Bitmap
+        |-----W=1, FCN=23-----&gt;|
+        |-----W=1, FCN=22-----&gt;|
+        |-----W=1, FCN=21-----&gt;|
+        |--W=1, FCN=31 + MIC--&gt;|MIC checked: sucess =&gt;
+        |&lt;------ACK, W=1-------|no Bitmap
+      (End)
 </pre>
 <p class="figure">Figure 34: Transmission in ACK-Always mode of an IPv6 packet carried by 28 fragments, with N=5,  MAX_WIND_FCN=23 and two lost fragments.</p>
 <h1 id="rfc.appendix.C">
@@ -1758,17 +1758,17 @@ Rule 0
 |more frag                 |   |  |lcl-Bitmap!=rcv-Bitmap|
 |~~~~~~~~~~~~~~~~~~~~~~    |   |  | ~~~~~~~~~            |
 |Stop Retrans_Timer        |   |  | Attemp++             v
-|clear local_Bitmap        v   v  |               +======++
-|window=next_window   +====+===+==+===+           |Resend |
-+---------------------+               |           |Missing|
-                 +----+     Wait      |           |Frag   |
-not expected wnd |    |    Bitmap     |           +=======+
-~~~~~~~~~~~~~~~~ +---&gt;+               ++Retrans_Timer Exp |          
-    discard frag      +==+=+===+=+==+=+| ~~~~~~~~~~~~~~~~~|
-                         | |   | ^  ^  |reSend(empty)All-*|   
-                         | |   | |  |  |Set Retrans_Timer |
-MIC_bit==1 &amp;             | |   | |  +--+Attemp++          |
-Recv_window==window &amp;    | |   | +------------------------+   
+|clear local_Bitmap        v   v  |                +=====+=+
+|window=next_window   +====+===+==+===+            |Resend |
++---------------------+               |            |Missing|
+                 +----+     Wait      |            |Frag   |
+not expected wnd |    |    Bitmap     |            +=======+
+~~~~~~~~~~~~~~~~ +---&gt;+               ++Retrans_Timer Exp  |          
+    discard frag      +==+=+===+=+==+=+| ~~~~~~~~~~~~~~~~~ |
+                         | |   | ^  ^  |reSend(empty)All-* |   
+                         | |   | |  |  |Set Retrans_Timer  |
+MIC_bit==1 &amp;             | |   | |  +--+Attemp++           |
+Recv_window==window &amp;    | |   | +-------------------------+   
 Lcl_Bitmap==recv_Bitmap &amp;| |   |   all missing frag sent
              no more frag| |   |   ~~~~~~~~~~~~~~~~~~~~~~ 
  ~~~~~~~~~~~~~~~~~~~~~~~~| |&#160;  | &#160; Set Retrans_Timer &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; 

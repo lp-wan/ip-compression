@@ -2914,42 +2914,42 @@ Minaburo, et al.        Expires September 1, 2018              [Page 52]
 Internet-Draft                 LPWAN SCHC                  February 2018
 
 
-           Sender               Receiver
-             |-----W=0, FCN=23----->|
-             |-----W=0, FCN=22----->|
-             |-----W=0, FCN=21--X-->|
-             |-----W=0, FCN=20----->|
-             |-----W=0, FCN=19----->|
-             |-----W=0, FCN=18----->|
-             |-----W=0, FCN=17----->|
-             |-----W=0, FCN=16----->|
-             |-----W=0, FCN=15----->|
-             |-----W=0, FCN=14----->|
-             |-----W=0, FCN=13----->|
-             |-----W=0, FCN=12----->|
-             |-----W=0, FCN=11----->|
-             |-----W=0, FCN=10--X-->|
-             |-----W=0, FCN=9 ----->|
-             |-----W=0, FCN=8 ----->|
-             |-----W=0, FCN=7 ----->|
-             |-----W=0, FCN=6 ----->|
-             |-----W=0, FCN=5 ----->|
-             |-----W=0, FCN=4 ----->|
-             |-----W=0, FCN=3 ----->|
-             |-----W=0, FCN=2 ----->|
-             |-----W=0, FCN=1 ----->|
-             |-----W=0, FCN=0 ----->|
-             |                      |lcl-Bitmap:110111111111101111111111
-             |<------ACK, W=0-------|encoded Bitmap:1101111111111011
-             |-----W=0, FCN=21----->|
-             |-----W=0, FCN=10----->|
-             |<------ACK, W=0-------|no Bitmap
-             |-----W=1, FCN=23----->|
-             |-----W=1, FCN=22----->|
-             |-----W=1, FCN=21----->|
-             |--W=1, FCN=31 + MIC-->|MIC checked: sucess =>
-             |<------ACK, W=1-------|no Bitmap
-           (End)
+         Sender               Receiver
+           |-----W=0, FCN=23----->|
+           |-----W=0, FCN=22----->|
+           |-----W=0, FCN=21--X-->|
+           |-----W=0, FCN=20----->|
+           |-----W=0, FCN=19----->|
+           |-----W=0, FCN=18----->|
+           |-----W=0, FCN=17----->|
+           |-----W=0, FCN=16----->|
+           |-----W=0, FCN=15----->|
+           |-----W=0, FCN=14----->|
+           |-----W=0, FCN=13----->|
+           |-----W=0, FCN=12----->|
+           |-----W=0, FCN=11----->|
+           |-----W=0, FCN=10--X-->|
+           |-----W=0, FCN=9 ----->|
+           |-----W=0, FCN=8 ----->|
+           |-----W=0, FCN=7 ----->|
+           |-----W=0, FCN=6 ----->|
+           |-----W=0, FCN=5 ----->|
+           |-----W=0, FCN=4 ----->|
+           |-----W=0, FCN=3 ----->|
+           |-----W=0, FCN=2 ----->|
+           |-----W=0, FCN=1 ----->|
+           |-----W=0, FCN=0 ----->|
+           |                      |lcl-Bitmap:110111111111101111111111
+           |<------ACK, W=0-------|encoded Bitmap:1101111111111011
+           |-----W=0, FCN=21----->|
+           |-----W=0, FCN=10----->|
+           |<------ACK, W=0-------|no Bitmap
+           |-----W=1, FCN=23----->|
+           |-----W=1, FCN=22----->|
+           |-----W=1, FCN=21----->|
+           |--W=1, FCN=31 + MIC-->|MIC checked: sucess =>
+           |<------ACK, W=1-------|no Bitmap
+         (End)
 
    Figure 34: Transmission in ACK-Always mode of an IPv6 packet carried
     by 28 fragments, with N=5, MAX_WIND_FCN=23 and two lost fragments.
@@ -3047,17 +3047,17 @@ Internet-Draft                 LPWAN SCHC                  February 2018
    |more frag                 |   |  |lcl-Bitmap!=rcv-Bitmap|
    |~~~~~~~~~~~~~~~~~~~~~~    |   |  | ~~~~~~~~~            |
    |Stop Retrans_Timer        |   |  | Attemp++             v
-   |clear local_Bitmap        v   v  |               +======++
-   |window=next_window   +====+===+==+===+           |Resend |
-   +---------------------+               |           |Missing|
-                    +----+     Wait      |           |Frag   |
-   not expected wnd |    |    Bitmap     |           +=======+
-   ~~~~~~~~~~~~~~~~ +--->+               ++Retrans_Timer Exp |
-       discard frag      +==+=+===+=+==+=+| ~~~~~~~~~~~~~~~~~|
-                            | |   | ^  ^  |reSend(empty)All-*|
-                            | |   | |  |  |Set Retrans_Timer |
-   MIC_bit==1 &             | |   | |  +--+Attemp++          |
-   Recv_window==window &    | |   | +------------------------+
+   |clear local_Bitmap        v   v  |                +=====+=+
+   |window=next_window   +====+===+==+===+            |Resend |
+   +---------------------+               |            |Missing|
+                    +----+     Wait      |            |Frag   |
+   not expected wnd |    |    Bitmap     |            +=======+
+   ~~~~~~~~~~~~~~~~ +--->+               ++Retrans_Timer Exp  |
+       discard frag      +==+=+===+=+==+=+| ~~~~~~~~~~~~~~~~~ |
+                            | |   | ^  ^  |reSend(empty)All-* |
+                            | |   | |  |  |Set Retrans_Timer  |
+   MIC_bit==1 &             | |   | |  +--+Attemp++           |
+   Recv_window==window &    | |   | +-------------------------+
    Lcl_Bitmap==recv_Bitmap &| |   |   all missing frag sent
                 no more frag| |   |   ~~~~~~~~~~~~~~~~~~~~~~
     ~~~~~~~~~~~~~~~~~~~~~~~~| |   |   Set Retrans_Timer
