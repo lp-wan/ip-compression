@@ -270,7 +270,10 @@ then applied to the SCHC packet. The SCHC packet or the SCHC fragments are then 
         +------------------+                      +------------------+            
                   |                                         |
               SCHC packet                                   |
-                  |------------                ------------>|
+                  |                                         | 
+                  | No Fragmentation                        | 
+                  +------------+              +------------>|
+                  |            |              |             |
                   V            |              |             |
         +------------------+   |              |   +------------------+
         |SCHC Fragmentation|   |              |   | SCHC Reassembly  |
@@ -278,12 +281,11 @@ then applied to the SCHC packet. The SCHC packet or the SCHC fragments are then 
                   |            |              |             ^
            SCHC Fragment(s)    |              |             |
                   |            |              |             |
-                  |<-----------                -------------|
-                  |                                         |
-                  v                                         ^
-                           transmission over LPWAN 
+                  |<-----------+              +-------------+
+                  |                         No Fragmentation|
+                  v                                         ^
+                  ---------------transmission---------------- 
 
-               Sender                                    Receiver
 
 ~~~~
 {: #Fig-Operations title='SCHC operations taking place at the sender and the receiver'}
