@@ -280,7 +280,8 @@ then applied to the SCHC packet. The SCHC packet or the SCHC fragments are then 
                   |            |              |             |
                   |<-----------                -------------|
                   |                                         |
-                   -------> transmission over LPWAN --------
+                  v                                         ^
+                           transmission over LPWAN 
 
                Sender                                    Receiver
 
