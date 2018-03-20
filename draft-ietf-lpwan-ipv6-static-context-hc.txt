@@ -5,10 +5,10 @@
 lpwan Working Group                                          A. Minaburo
 Internet-Draft                                                    Acklio
 Intended status: Informational                                L. Toutain
-Expires: September 1, 2018                                IMT-Atlantique
+Expires: September 21, 2018                               IMT-Atlantique
                                                                 C. Gomez
                                     Universitat Politecnica de Catalunya
-                                                       February 28, 2018
+                                                          March 20, 2018
 
 
   LPWAN Static Context Header Compression (SCHC) and fragmentation for
@@ -53,15 +53,15 @@ Status of This Memo
 
 
 
-Minaburo, et al.        Expires September 1, 2018               [Page 1]
+Minaburo, et al.       Expires September 21, 2018               [Page 1]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
 
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on September 1, 2018.
+   This Internet-Draft will expire on September 21, 2018.
 
 Copyright Notice
 
@@ -109,9 +109,9 @@ Table of Contents
 
 
 
-Minaburo, et al.        Expires September 1, 2018               [Page 2]
+Minaburo, et al.       Expires September 21, 2018               [Page 2]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
 
      7.5.  Baseline mechanism  . . . . . . . . . . . . . . . . . . .  30
@@ -165,9 +165,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.        Expires September 1, 2018               [Page 3]
+Minaburo, et al.       Expires September 21, 2018               [Page 3]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
 
       with LPWAN Application Servers (App) through Network Gateways
@@ -221,9 +221,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.        Expires September 1, 2018               [Page 4]
+Minaburo, et al.       Expires September 21, 2018               [Page 4]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
 
    o The Radio Gateway (RGW), which is the end point of the constrained
@@ -277,9 +277,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.        Expires September 1, 2018               [Page 5]
+Minaburo, et al.       Expires September 21, 2018               [Page 5]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
 
    o  App: LPWAN Application.  An application sending/receiving IPv6
@@ -333,9 +333,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.        Expires September 1, 2018               [Page 6]
+Minaburo, et al.       Expires September 21, 2018               [Page 6]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
 
    o  Field Description.  A line in the Rule Table.
@@ -389,9 +389,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.        Expires September 1, 2018               [Page 7]
+Minaburo, et al.       Expires September 21, 2018               [Page 7]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
 
    o  SCHC C/D: Static Context Header Compression Compressor/
@@ -421,11 +421,10 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 4.  SCHC overview
 
-   SCHC can be abstracted as an adaptation layer below IPv6 and the
-   underlying LPWAN technology.  SCHC that comprises two sublayers (i.e.
-   the Compression sublayer and the Fragmentation sublayer), as shown in
+   SCHC can be abstracted as an adaptation layer between IPv6 and the
+   underlying LPWAN technology.  SCHC comprises two sublayers (i.e. the
+   Compression sublayer and the Fragmentation sublayer), as shown in
    Figure 2.
-
 
                 +----------------+
                 |      IPv6      |
@@ -441,45 +440,48 @@ Internet-Draft                 LPWAN SCHC                  February 2018
         Figure 2: Protocol stack comprising IPv6, SCHC and an LPWAN
                                 technology
 
-
-
-
-
-Minaburo, et al.        Expires September 1, 2018               [Page 8]
-
-Internet-Draft                 LPWAN SCHC                  February 2018
-
-
    As per this document, when a packet (e.g. an IPv6 packet) needs to be
    transmitted, header compression is first applied to the packet.  The
-   resulting packet after header compression (whose header MAY actually
-   be smaller than that of the original packet or not) is called a SCHC
-   packet.  Subsequently, and if the SCHC packet size exceeds the layer
-   2 (L2) MTU, fragmentation is then applied to the SCHC packet.  This
-   process is illustrated by Figure 3
-
-
-          A packet (e.g. an IPv6 packet)
-                     |
-                     V
-       +------------------------------+
-       |SCHC Compression/Decompression|
-       +------------------------------+
-                     |
-                 SCHC packet
-                     |
-                     V
-           +------------------+
-           |SCHC Fragmentation|  (if needed)
-           +------------------+
-                     |
-                     V
-              SCHC Fragment(s) (if needed)
 
 
 
-       Figure 3: SCHC operations from a sender point of view: header
-                       compression and fragmentation
+Minaburo, et al.       Expires September 21, 2018               [Page 8]
+
+Internet-Draft                 LPWAN SCHC                     March 2018
+
+
+   resulting packet after header compression (whose header may or may
+   not actually be smaller than that of the original packet) is called a
+   SCHC packet.  If the SCHC packet size exceeds the layer 2 (L2) MTU,
+   fragmentation is then applied to the SCHC packet.  The SCHC packet or
+   the SCHC fragments are then transmitted over the LPWAN.  The
+   reciprocal operations take place at the receiver.  This process is
+   illustrated by Figure 3.
+
+         A packet (e.g. an IPv6 packet)
+                    |                                         ^
+                    V                                         |
+          +------------------+                      +------------------+
+          | SCHC Compression |                      |SCHC Decompression|
+          +------------------+                      +------------------+
+                    |                                         |
+                SCHC packet                                   |
+                    |------------                ------------>|
+                    V            |              |             |
+          +------------------+   |              |   +------------------+
+          |SCHC Fragmentation|   |              |   | SCHC Reassembly  |
+          +------------------+   |              |   +------------------+
+                    |            |              |             ^
+             SCHC Fragment(s)    |              |             |
+                    |            |              |             |
+                    |<-----------                -------------|
+                    |                                         |
+                     -------> transmission over LPWAN --------
+
+                 Sender                                    Receiver
+
+
+   Figure 3: SCHC operations taking place at the sender and the receiver
 
 5.  Rule ID
 
@@ -496,15 +498,15 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
    o  In SCHC Fragmentation to identify the specific modes and settings.
       In bidirectional SCHC fragmentation at least two Rules
-      ID are needed.
 
 
 
-
-Minaburo, et al.        Expires September 1, 2018               [Page 9]
+Minaburo, et al.       Expires September 21, 2018               [Page 9]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
+
+      ID are needed.
 
    o  And at least one Rule ID MAY be reserved to the case where no SCHC
       C/D nor SCHC fragmentation were possible.
@@ -551,16 +553,17 @@ Internet-Draft                 LPWAN SCHC                  February 2018
    the SCHC packet resulting from the compression exceeds the maximum
    payload size of the underlying LPWAN technology, SCHC fragmentation
    is performed, see Section 7.  The resulting SCHC fragments are sent
+
+
+
+
+Minaburo, et al.       Expires September 21, 2018              [Page 10]
+
+Internet-Draft                 LPWAN SCHC                     March 2018
+
+
    as one or more L2 frames to an LPWAN Radio Gateway (RG) which
    forwards the frame(s) to a Network Gateway (NGW).
-
-
-
-
-Minaburo, et al.        Expires September 1, 2018              [Page 10]
-
-Internet-Draft                 LPWAN SCHC                  February 2018
-
 
    The NGW sends the data to an SCHC Fragmentation and then to the SCHC
    C/D for decompression.  The SCHC C/D in the Network side can be
@@ -610,12 +613,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-
-
-
-Minaburo, et al.        Expires September 1, 2018              [Page 11]
+Minaburo, et al.       Expires September 21, 2018              [Page 11]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
 
      /-----------------------------------------------------------------\
@@ -669,9 +669,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.        Expires September 1, 2018              [Page 12]
+Minaburo, et al.       Expires September 21, 2018              [Page 12]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
 
       *  UPLINK (Up): this Field Description is only applicable to
@@ -725,9 +725,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.        Expires September 1, 2018              [Page 13]
+Minaburo, et al.       Expires September 21, 2018              [Page 13]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
 
       holds Rules that apply to itself.  The Rule will be selected by
@@ -781,9 +781,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.        Expires September 1, 2018              [Page 14]
+Minaburo, et al.       Expires September 21, 2018              [Page 14]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
 
    o  Decompression: When doing decompression, in the network side the
@@ -837,9 +837,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.        Expires September 1, 2018              [Page 15]
+Minaburo, et al.       Expires September 21, 2018              [Page 15]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
 
       header field value is equal to one of the values in the target
@@ -893,9 +893,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.        Expires September 1, 2018              [Page 16]
+Minaburo, et al.       Expires September 21, 2018              [Page 16]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
 
    o  For higher values of size, the first 12 bits are set to 1 and the
@@ -949,9 +949,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.        Expires September 1, 2018              [Page 17]
+Minaburo, et al.       Expires September 21, 2018              [Page 17]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
 
 6.5.4.  LSB(y) CDA
@@ -1005,9 +1005,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.        Expires September 1, 2018              [Page 18]
+Minaburo, et al.       Expires September 21, 2018              [Page 18]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
 
 7.  Fragmentation
@@ -1061,9 +1061,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.        Expires September 1, 2018              [Page 19]
+Minaburo, et al.       Expires September 21, 2018              [Page 19]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
 
       *  The FCN value with all the bits equal to 1 (All-1) denotes the
@@ -1117,9 +1117,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.        Expires September 1, 2018              [Page 20]
+Minaburo, et al.       Expires September 21, 2018              [Page 20]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
 
       format, this field also has a size of 1 bit.  In all ACKs, the W
@@ -1173,9 +1173,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.        Expires September 1, 2018              [Page 21]
+Minaburo, et al.       Expires September 21, 2018              [Page 21]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
 
       Attempts counter is defined per window.  It is initialized each
@@ -1229,9 +1229,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.        Expires September 1, 2018              [Page 22]
+Minaburo, et al.       Expires September 21, 2018              [Page 22]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
 
       before the end of the SCHC packet transmission as long as the
@@ -1285,9 +1285,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.        Expires September 1, 2018              [Page 23]
+Minaburo, et al.       Expires September 21, 2018              [Page 23]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
 
    does not make any decision as to which SCHC fragment reliability
@@ -1341,9 +1341,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.        Expires September 1, 2018              [Page 24]
+Minaburo, et al.       Expires September 21, 2018              [Page 24]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
 
    <------------ R ----------->
@@ -1397,9 +1397,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.        Expires September 1, 2018              [Page 25]
+Minaburo, et al.       Expires September 21, 2018              [Page 25]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
 
    <------------ R ----------->
@@ -1453,9 +1453,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.        Expires September 1, 2018              [Page 26]
+Minaburo, et al.       Expires September 21, 2018              [Page 26]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
 
      <--------- R -------->
@@ -1509,9 +1509,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.        Expires September 1, 2018              [Page 27]
+Minaburo, et al.       Expires September 21, 2018              [Page 27]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
 
                        <----         Bitmap bits      ---->
@@ -1565,9 +1565,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.        Expires September 1, 2018              [Page 28]
+Minaburo, et al.       Expires September 21, 2018              [Page 28]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
 
    Figure 21 shows an example of an ACK with FCN ranging from 6 down to
@@ -1621,9 +1621,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.        Expires September 1, 2018              [Page 29]
+Minaburo, et al.       Expires September 21, 2018              [Page 29]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
 
    <------------- R -----------><--- 1 byte --->
@@ -1677,9 +1677,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.        Expires September 1, 2018              [Page 30]
+Minaburo, et al.       Expires September 21, 2018              [Page 30]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
 
    size of the original, unfragmented packet cannot be determined from
@@ -1733,9 +1733,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.        Expires September 1, 2018              [Page 31]
+Minaburo, et al.       Expires September 21, 2018              [Page 31]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
 
    the reassembled packet does not match the original one, the receiver
@@ -1789,9 +1789,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.        Expires September 1, 2018              [Page 32]
+Minaburo, et al.       Expires September 21, 2018              [Page 32]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
 
    the ACK, if one or more SCHC fragments have not yet been received,
@@ -1845,9 +1845,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.        Expires September 1, 2018              [Page 33]
+Minaburo, et al.       Expires September 21, 2018              [Page 33]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
 
    Timer period to answer to any empty All-1 fragments the sender MAY
@@ -1901,9 +1901,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.        Expires September 1, 2018              [Page 34]
+Minaburo, et al.       Expires September 21, 2018              [Page 34]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
 
    Unlike the sender, the receiver for ACK-on-Error has a larger amount
@@ -1957,9 +1957,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.        Expires September 1, 2018              [Page 35]
+Minaburo, et al.       Expires September 21, 2018              [Page 35]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
 
 7.6.  Supporting multiple window sizes
@@ -2013,9 +2013,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.        Expires September 1, 2018              [Page 36]
+Minaburo, et al.       Expires September 21, 2018              [Page 36]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
 
    defined in other documents (e.g. technology-specific profiles).  The
@@ -2069,9 +2069,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.        Expires September 1, 2018              [Page 37]
+Minaburo, et al.       Expires September 21, 2018              [Page 37]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
 
 9.  SCHC Compression for IPv6 and UDP headers
@@ -2125,9 +2125,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.        Expires September 1, 2018              [Page 38]
+Minaburo, et al.       Expires September 21, 2018              [Page 38]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
 
 9.4.  Payload Length field
@@ -2181,9 +2181,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.        Expires September 1, 2018              [Page 39]
+Minaburo, et al.       Expires September 21, 2018              [Page 39]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
 
 9.7.1.  IPv6 source and destination prefixes
@@ -2237,9 +2237,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.        Expires September 1, 2018              [Page 40]
+Minaburo, et al.       Expires September 21, 2018              [Page 40]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
 
 9.8.  IPv6 extensions
@@ -2293,9 +2293,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.        Expires September 1, 2018              [Page 41]
+Minaburo, et al.       Expires September 21, 2018              [Page 41]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
 
    case, the TV is not set, the MO is set to "ignore" and the CDA is set
@@ -2349,9 +2349,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.        Expires September 1, 2018              [Page 42]
+Minaburo, et al.       Expires September 21, 2018              [Page 42]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
 
    constrained nodes from this attack, it has been proposed to establish
@@ -2405,9 +2405,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.        Expires September 1, 2018              [Page 43]
+Minaburo, et al.       Expires September 21, 2018              [Page 43]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
 
    [RFC4944]  Montenegro, G., Kushalnagar, N., Hui, J., and D. Culler,
@@ -2461,9 +2461,9 @@ Appendix A.  SCHC Compression Examples
 
 
 
-Minaburo, et al.        Expires September 1, 2018              [Page 44]
+Minaburo, et al.       Expires September 21, 2018              [Page 44]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
 
     Management   Data
@@ -2517,9 +2517,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.        Expires September 1, 2018              [Page 45]
+Minaburo, et al.       Expires September 21, 2018              [Page 45]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
 
     +----------------+--+--+--+---------+--------+------------++------+
@@ -2573,9 +2573,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.        Expires September 1, 2018              [Page 46]
+Minaburo, et al.       Expires September 21, 2018              [Page 46]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
 
    All the fields described in the three rules depicted on Figure 25 are
@@ -2629,9 +2629,9 @@ Appendix B.  Fragmentation Examples
 
 
 
-Minaburo, et al.        Expires September 1, 2018              [Page 47]
+Minaburo, et al.       Expires September 21, 2018              [Page 47]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
 
            Sender               Receiver
@@ -2685,9 +2685,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.        Expires September 1, 2018              [Page 48]
+Minaburo, et al.       Expires September 21, 2018              [Page 48]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
 
    Figure 29 illustrates the transmission in ACK-Always mode of an IPv6
@@ -2741,9 +2741,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.        Expires September 1, 2018              [Page 49]
+Minaburo, et al.       Expires September 21, 2018              [Page 49]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
 
            Sender               Receiver
@@ -2797,9 +2797,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.        Expires September 1, 2018              [Page 50]
+Minaburo, et al.       Expires September 21, 2018              [Page 50]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
 
    Figure 32 illustrates the transmission in ACK-Always mode of an IPv6
@@ -2853,9 +2853,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.        Expires September 1, 2018              [Page 51]
+Minaburo, et al.       Expires September 21, 2018              [Page 51]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
 
               Sender                Receiver
@@ -2909,9 +2909,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.        Expires September 1, 2018              [Page 52]
+Minaburo, et al.       Expires September 21, 2018              [Page 52]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
 
          Sender               Receiver
@@ -2965,9 +2965,9 @@ Appendix C.  Fragmentation State Machines
 
 
 
-Minaburo, et al.        Expires September 1, 2018              [Page 53]
+Minaburo, et al.       Expires September 21, 2018              [Page 53]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
 
                 +===========+
@@ -3021,9 +3021,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.        Expires September 1, 2018              [Page 54]
+Minaburo, et al.       Expires September 21, 2018              [Page 54]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
 
                  +=======+
@@ -3077,9 +3077,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.        Expires September 1, 2018              [Page 55]
+Minaburo, et al.       Expires September 21, 2018              [Page 55]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
 
     Not All- & w=expected +---+   +---+w = Not expected
@@ -3133,9 +3133,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.        Expires September 1, 2018              [Page 56]
+Minaburo, et al.       Expires September 21, 2018              [Page 56]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
 
           --->* ABORT
@@ -3189,9 +3189,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.        Expires September 1, 2018              [Page 57]
+Minaburo, et al.       Expires September 21, 2018              [Page 57]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
 
                       +=======+
@@ -3245,9 +3245,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.        Expires September 1, 2018              [Page 58]
+Minaburo, et al.       Expires September 21, 2018              [Page 58]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
 
       Not All- & w=expected +---+   +---+w = Not expected
@@ -3301,9 +3301,9 @@ Internet-Draft                 LPWAN SCHC                  February 2018
 
 
 
-Minaburo, et al.        Expires September 1, 2018              [Page 59]
+Minaburo, et al.       Expires September 21, 2018              [Page 59]
 
-Internet-Draft                 LPWAN SCHC                  February 2018
+Internet-Draft                 LPWAN SCHC                     March 2018
 
 
         Figure 40: Receiver State Machine for the ACK-on-Error Mode
@@ -3357,4 +3357,4 @@ Authors' Addresses
 
 
 
-Minaburo, et al.        Expires September 1, 2018              [Page 60]
+Minaburo, et al.       Expires September 21, 2018              [Page 60]

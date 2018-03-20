@@ -343,7 +343,7 @@ address {
 
   <meta name="dct.creator" content="Minaburo, A., Toutain, L., and C. Gomez" />
   <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-lpwan-ipv6-static-context-hc-10" />
-  <meta name="dct.issued" scheme="ISO8601" content="2018-02-28" />
+  <meta name="dct.issued" scheme="ISO8601" content="2018-03-20" />
   <meta name="dct.abstract" content="This document defines the Static Context Header Compression (SCHC) framework, which provides header compression and fragmentation functionality. SCHC has been tailored for Low Power Wide Area Networks (LPWAN)." />
   <meta name="description" content="This document defines the Static Context Header Compression (SCHC) framework, which provides header compression and fragmentation functionality. SCHC has been tailored for Low Power Wide Area Networks (LPWAN)." />
 
@@ -367,7 +367,7 @@ address {
 <td class="right">L. Toutain</td>
 </tr>
 <tr>
-<td class="left">Expires: September 1, 2018</td>
+<td class="left">Expires: September 21, 2018</td>
 <td class="right">IMT-Atlantique</td>
 </tr>
 <tr>
@@ -380,7 +380,7 @@ address {
 </tr>
 <tr>
 <td class="left"></td>
-<td class="right">February 28, 2018</td>
+<td class="right">March 20, 2018</td>
 </tr>
 
     	
@@ -398,7 +398,7 @@ address {
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at https://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on September 1, 2018.</p>
+<p>This Internet-Draft will expire on September 21, 2018.</p>
 <h1 id="rfc.copyrightnotice"><a href="#rfc.copyrightnotice">Copyright Notice</a></h1>
 <p>Copyright (c) 2018 IETF Trust and the persons identified as the document authors.  All rights reserved.</p>
 <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (https://trustee.ietf.org/license-info) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.</p>
@@ -619,48 +619,50 @@ address {
 <h1 id="rfc.section.4">
 <a href="#rfc.section.4">4.</a> <a href="#schc-overview" id="schc-overview">SCHC overview</a>
 </h1>
-<p id="rfc.section.4.p.1">SCHC can be abstracted as an adaptation layer below IPv6 and the underlying LPWAN technology. SCHC that comprises two sublayers (i.e. the Compression sublayer and the Fragmentation sublayer), as shown in <a href="#Fig-IntroLayers" class="xref">Figure 2</a>.</p>
+<p id="rfc.section.4.p.1">SCHC can be abstracted as an adaptation layer between IPv6 and the underlying LPWAN technology. SCHC comprises two sublayers (i.e. the Compression sublayer and the Fragmentation sublayer), as shown in <a href="#Fig-IntroLayers" class="xref">Figure 2</a>.</p>
 <div id="rfc.figure.2"></div>
 <div id="Fig-IntroLayers"></div>
 <pre>
- 
              +----------------+
-             |      IPv6      | 
+             |      IPv6      |
           +- +----------------+            
           |  |   Compression  |  
     SCHC &lt;   +----------------+   
           |  |  Fragmentation |
           +- +----------------+         
              |LPWAN technology|
-             +----------------+ 
+             +----------------+
 
 </pre>
 <p class="figure">Figure 2: Protocol stack comprising IPv6, SCHC and an LPWAN technology</p>
-<p id="rfc.section.4.p.2">As per this document, when a packet (e.g. an IPv6 packet) needs to be transmitted, header compression is first applied to the packet. The resulting packet after header compression (whose header MAY actually be smaller than that of the original packet or not) is called a SCHC packet. Subsequently, and if the SCHC packet size exceeds the layer 2 (L2) MTU, fragmentation is then applied to the SCHC packet. This process is illustrated by <a href="#Fig-Operations" class="xref">Figure 3</a></p>
+<p id="rfc.section.4.p.2">As per this document, when a packet (e.g. an IPv6 packet) needs to be transmitted, header compression is first applied to the packet. The resulting packet after header compression (whose header may or may not actually be smaller than that of the original packet) is called a SCHC packet. If the SCHC packet size exceeds the layer 2 (L2) MTU, fragmentation is then applied to the SCHC packet. The SCHC packet or the SCHC fragments are then transmitted over the LPWAN. The reciprocal operations take place at the receiver. This process is illustrated by <a href="#Fig-Operations" class="xref">Figure 3</a>.</p>
 <div id="rfc.figure.3"></div>
 <div id="Fig-Operations"></div>
 <pre>
- 
        A packet (e.g. an IPv6 packet)
-                  |
-                  V   
-    +------------------------------+
-    |SCHC Compression/Decompression|
-    +------------------------------+            
-                  |
-              SCHC packet              
-                  |
-                  V 
-        +------------------+    
-        |SCHC Fragmentation|  (if needed)
-        +------------------+     
-                  |
-                  V     
-           SCHC Fragment(s) (if needed)
+                  |                                         ^
+                  V                                         |
+        +------------------+                      +------------------+
+        | SCHC Compression |                      |SCHC Decompression|
+        +------------------+                      +------------------+            
+                  |                                         |
+              SCHC packet                                   |
+                  |------------                ------------&gt;|
+                  V            |              |             |
+        +------------------+   |              |   +------------------+
+        |SCHC Fragmentation|   |              |   | SCHC Reassembly  |
+        +------------------+   |              |   +------------------+
+                  |            |              |             ^
+           SCHC Fragment(s)    |              |             |
+                  |            |              |             |
+                  |&lt;-----------                -------------|
+                  |                                         |
+                   -------&gt; transmission over LPWAN --------
 
+               Sender                                    Receiver
 
 </pre>
-<p class="figure">Figure 3: SCHC operations from a sender point of view: header compression and fragmentation</p>
+<p class="figure">Figure 3: SCHC operations taking place at the sender and the receiver</p>
 <h1 id="rfc.section.5">
 <a href="#rfc.section.5">5.</a> <a href="#rule-id" id="rule-id">Rule ID</a>
 </h1>
@@ -683,14 +685,14 @@ address {
 +----------------+                                  +--------------+
 | APP1 APP2 APP3 |                                  |APP1 APP2 APP3|
 |                |                                  |              |
-|       UDP      |                                  |     UDP      | 
+|       UDP      |                                  |     UDP      |
 |      IPv6      |                                  |    IPv6      |   
 |                |                                  |              |  
 |SCHC Comp / Frag|                                  |              |  
-+--------+-------+                                  +-------+------+ 
++--------+-------+                                  +-------+------+
          |   +--+     +----+     +-----------+              .
          +~~ |RG| === |NGW | === |   SCHC    |... Internet ..
-             +--+     +----+     |Comp / Frag| 
+             +--+     +----+     |Comp / Frag|
                                  +-----------+
 </pre>
 <p class="figure">Figure 4: Architecture</p>
@@ -770,7 +772,7 @@ address {
 <div id="Fig-FormatPckt"></div>
 <pre>
 +--- ... --+------- ... -------+------------------+~~~~~~~
-|  Rule ID |Compression Residue|  packet payload  |padding 
+|  Rule ID |Compression Residue|  packet payload  |padding
 +--- ... --+------- ... -------+------------------+~~~~~~~
                                                    (optional)
 &lt;----- compressed header ------&gt;
@@ -922,7 +924,7 @@ y=size of the transmitted bits
 <div id="Fig-FragFormat"></div>
 <pre>
  &#160; &#160; &#160;+-----------------+-----------------------+~~~~~~~~~~~~~~~
- &#160; &#160; &#160;| Fragment Header | &#160; Fragment payload    | padding (opt.) 
+ &#160; &#160; &#160;| Fragment Header | &#160; Fragment payload    | padding (opt.)
  &#160; &#160; &#160;+-----------------+-----------------------+~~~~~~~~~~~~~~~
 </pre>
 <p class="figure">Figure 8: Fragment general format. Presence of a padding field is optional</p>
@@ -933,7 +935,7 @@ y=size of the transmitted bits
  &lt;------------ R -----------&gt;
             &lt;--T--&gt; 1 &lt;--N--&gt;
  +-- ... --+- ... -+-+- ... -+--------...-------+
- | Rule ID | DTag  |W|  FCN  | Fragment payload | 
+ | Rule ID | DTag  |W|  FCN  | Fragment payload |
  +-- ... --+- ... -+-+- ... -+--------...-------+
 
 </pre>
@@ -945,9 +947,9 @@ y=size of the transmitted bits
 &lt;------------ R -----------&gt;
              &lt;--T--&gt; &lt;--N--&gt;
  +-- ... --+- ...  -+- ... -+--------...-------+
- | Rule ID |  DTag  |  FCN  | Fragment payload | 
+ | Rule ID |  DTag  |  FCN  | Fragment payload |
  +-- ... --+- ...  -+- ... -+--------...-------+
- &#160; &#160; &#160; &#160; &#160; &#160; 
+ &#160; &#160; &#160; &#160; &#160; &#160;
 
 </pre>
 <p class="figure">Figure 10: Fragment Detailed Format for Fragments except the Last One, No-ACK mode</p>
@@ -960,11 +962,11 @@ y=size of the transmitted bits
 <div id="Fig-All0"></div>
 <pre>
      &lt;------------ R -----------&gt;
-                &lt;- T -&gt; 1 &lt;- N -&gt; 
+                &lt;- T -&gt; 1 &lt;- N -&gt;
      +-- ... --+- ... -+-+- ... -+--- ... ---+
      | Rule ID | DTag  |W|  0..0 |  payload  |  
      +-- ... --+- ... -+-+- ... -+--- ... ---+
-     
+
 </pre>
 <p class="figure">Figure 11: All-0 fragment detailed format</p>
 <p id="rfc.section.7.4.2.p.2">The All-0 empty fragment format is used by a sender to request the retransmission of an ACK by the receiver. It is only used in ACK-Always mode.</p>
@@ -972,11 +974,11 @@ y=size of the transmitted bits
 <div id="Fig-All0empty"></div>
 <pre>
  &lt;------------ R -----------&gt;
-            &lt;- T -&gt; 1 &lt;- N -&gt; 
+            &lt;- T -&gt; 1 &lt;- N -&gt;
  +-- ... --+- ... -+-+- ... -+
  | Rule ID | DTag  |W|  0..0 | (no payload)  
  +-- ... --+- ... -+-+- ... -+
-              
+
 </pre>
 <p class="figure">Figure 12: All-0 empty fragment detailed format</p>
 <p id="rfc.section.7.4.2.p.3">In the No-ACK mode, the last SCHC fragment of an IPv6 datagram SHALL contain a SCHC fragment header that conforms to the detaield format shown in <a href="#Fig-Last" class="xref">Figure 13</a>. The total size of this SCHC fragment header is R+M bits.</p>
@@ -988,7 +990,7 @@ y=size of the transmitted bits
 +---- ... ---+- ... -+-----+---- ... ----+---...---+
 |   Rule ID  | DTag  |  1  |     MIC     | payload |
 +---- ... ---+- ... -+-----+---- ... ----+---...---+
-    
+
 </pre>
 <p class="figure">Figure 13: All-1 Fragment Detailed Format for the Last Fragment, No-ACK mode</p>
 <p id="rfc.section.7.4.2.p.4">In any of the Window modes, the last fragment of an IPv6 datagram SHALL contain a SCHC fragment header that conforms to the detailed format shown in <a href="#Fig-LastWinMode" class="xref">Figure 14</a>. The total size of the SCHC fragment header in this format is R+M bits.</p>
@@ -1028,7 +1030,7 @@ y=size of the transmitted bits
   +---- ... --+-... -+-+---- ... -----+
   |  Rule ID  | DTag |W|encoded Bitmap| (no payload)
   +---- ... --+-... -+-+---- ... -----+
-                
+
 </pre>
 <p class="figure">Figure 16: ACK format for All-0 windows</p>
 <p id="rfc.section.7.4.3.p.2">To acknowledge the last window of a packet (denoted as All-1 window), a C bit (i.e. MIC checked) following the W bit is set to 1 to indicate that the MIC check computed by the receiver matches the MIC present in the All-1 fragment. If the MIC check fails, the C bit is set to 0 and the Bitmap for the All-1 window follows.</p>
@@ -1040,12 +1042,12 @@ y=size of the transmitted bits
 +---- ... --+-... -+-+-+
 |  Rule ID  | DTag |W|1| (MIC correct)
 +---- ... --+-... -+-+-+
-                                       
+
 +---- ... --+-... -+-+-+----- ... -----+
 |  Rule ID  | DTag |W|0|encoded Bitmap |(MIC Incorrect)
 +---- ... --+-... -+-+-+----- ... -----+
                       C
-                
+
 </pre>
 <p class="figure">Figure 17: Format of an ACK for All-1 windows</p>
 <h1 id="rfc.section.7.4.3.1">
@@ -1060,7 +1062,7 @@ y=size of the transmitted bits
                     &lt;----         Bitmap bits      ----&gt;   
 | Rule ID | DTag |W|1|0|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|   
 |--- byte boundary ----| 1 byte  next  |  1 byte next  |   
-      
+
 </pre>
 <p class="figure">Figure 18: A non-encoded Bitmap</p>
 <p id="rfc.section.7.4.3.1.p.4">In order to reduce the resulting frame size, the encoded Bitmap is shortened by applying the following algorithm: all the right-most contiguous bytes in the encoded Bitmap that have all their bits set to 1 MUST NOT be transmitted.  Because the SCHC fragment sender knows the actual Bitmap size, it can reconstruct the original Bitmap with the trailing 1 bit optimized away.  In the example shown in <a href="#Fig-transmittedbitmap" class="xref">Figure 19</a>, the last 2 bytes of the Bitmap shown in <a href="#Fig-Localbitmap" class="xref">Figure 18</a> comprise bits that are all set to 1, therefore they are not sent.</p>
@@ -1068,38 +1070,38 @@ y=size of the transmitted bits
 <div id="Fig-transmittedbitmap"></div>
 <pre>
      &lt;-------   R  -------&gt;  
-                 &lt;- T -&gt; 1 
+                 &lt;- T -&gt; 1
      +---- ... --+-... -+-+-+-+
      |  Rule ID  | DTag |W|1|0|
      +---- ... --+-... -+-+-+-+
      |---- byte boundary -----|    
-     
+
 </pre>
 <p class="figure">Figure 19: Optimized Bitmap format</p>
 <p><a href="#Fig-Bitmap-Win" class="xref">Figure 20</a> shows an example of an ACK with FCN ranging from 6 down to 0, where the Bitmap indicates that the second and the fifth SCHC fragments have not been correctly received.</p>
 <div id="rfc.figure.20"></div>
 <div id="Fig-Bitmap-Win"></div>
 <pre>
-&lt;------   R  ------&gt;6 5 4 3 2 1   0 (*) 
+&lt;------   R  ------&gt;6 5 4 3 2 1   0 (*)
           &lt;- T -&gt; 1   
 +---------+------+-+-+-+-+-+-+-+-----+
 | Rule ID | DTag |W|1|0|1|1|0|1|all-0| Bitmap(before tx)
 +---------+------+-+-+-+-+-+-+-+-----+
-|&lt;-- byte boundary -&gt;|&lt;---- 1 byte----&gt;| 
-    (*)=(FCN values) 
-    
+|&lt;-- byte boundary -&gt;|&lt;---- 1 byte----&gt;|
+    (*)=(FCN values)
+
 +---------+------+-+-+-+-+-+-+-+-----+~~
 | Rule ID | DTag |W|1|0|1|1|0|1|all-0|Padding(opt.) encoded Bitmap
 +---------+------+-+-+-+-+-+-+-+-----+~~
-|&lt;-- byte boundary -&gt;|&lt;---- 1 byte----&gt;| 
-    
+|&lt;-- byte boundary -&gt;|&lt;---- 1 byte----&gt;|
+
 </pre>
 <p class="figure">Figure 20: Example of a Bitmap before transmission, and the transmitted one, in any window except the last one</p>
 <p><a href="#Fig-Bitmap-lastWin" class="xref">Figure 21</a> shows an example of an ACK with FCN ranging from 6 down to 0, where the Bitmap indicates that the MIC check has failed but there are no missing SCHC fragments.</p>
 <div id="rfc.figure.21"></div>
 <div id="Fig-Bitmap-lastWin"></div>
 <pre>
- &lt;-------   R  -------&gt;  6 5 4 3 2 1 7 (*) 
+ &lt;-------   R  -------&gt;  6 5 4 3 2 1 7 (*)
              &lt;- T -&gt; 1 1
  |  Rule ID  | DTag |W|0|1|1|1|1|1|1|1|padding|  Bitmap (before tx)
  |---- byte boundary -----|  1 byte next |  
@@ -1107,9 +1109,9 @@ y=size of the transmitted bits
  +---- ... --+-... -+-+-+-+
  |  Rule ID  | DTag |W|0|1| encoded Bitmap
  +---- ... --+-... -+-+-+-+
- |&lt;--- byte boundary ----&gt;| 
+ |&lt;--- byte boundary ----&gt;|
    (*) = (FCN values indicating the order)
-   
+
 </pre>
 <p class="figure">Figure 21: Example of the Bitmap in ACK-Always or ACK-on-Error for the last window, for N=3)</p>
 <h1 id="rfc.section.7.4.4">
@@ -1126,7 +1128,7 @@ y=size of the transmitted bits
 +--- ... ---+- ... -+-+-...-+-+-+-+-+-+-+-+-+
 |  Rule ID  | DTag  |W| FCN |       FF      | (no MIC &amp; no payload)  
 +--- ... ---+- ... -+-+-...-+-+-+-+-+-+-+-+-+
-   
+
 </pre>
 <p class="figure">Figure 22: Sender-Abort format. All FCN fields in this format are set to 1</p>
 <div id="rfc.figure.23"></div>
@@ -1137,7 +1139,7 @@ y=size of the transmitted bits
  +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+-+-+
  |  Rule ID  | DTag |W| 1..1|       FF      |  
  +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+-+-+
- 
+
 </pre>
 <p class="figure">Figure 23: Receiver-Abort format</p>
 <h1 id="rfc.section.7.5">
@@ -1432,7 +1434,7 @@ Rule 0
  |UDP Length      |16|1 |Bi|         | ignore | comp-length||      |
  |UDP checksum    |16|1 |Bi|         | ignore | comp-chk   ||      |
  +================+==+==+==+=========+========+============++======+
- 
+
  Rule 2
  +----------------+--+--+--+---------+--------+------------++------+
  | Field          |FL|FP|DI| Value   | Match  | Action     || Sent |
@@ -1482,7 +1484,7 @@ Rule 0
           |-------FCN=0--------&gt;|
           |-------FCN=0--------&gt;|
           |-----FCN=1 + MIC ---&gt;|MIC checked: success =&gt;
- &#160; &#160; &#160; &#160; 
+ &#160; &#160; &#160; &#160;
 </pre>
 <p class="figure">Figure 26: Transmission in No-ACK mode of an IPv6 packet carried by 11 fragments</p>
 <p id="rfc.section.B.p.3">In the following examples, N (i.e. the size if the FCN field) is 3 bits. Therefore, the All-1 FCN value is 7.</p>
@@ -1506,7 +1508,7 @@ Rule 0
           |&lt;---- ACK, W=1 ------|
 
 </pre>
-<p class="figure">Figure 27: Transmission in ACK-on-Error mode of an IPv6 packet carried by 11 fragments, with  MAX_WIND_FCN=6 and no loss.</p>
+<p class="figure">Figure 27: Transmission in ACK-on-Error mode of an IPv6 packet carried by 11 fragments, with MAX_WIND_FCN=6 and no loss.</p>
 <p><a href="#Fig-Example-Rel-Window-NACK-Loss" class="xref">Figure 28</a> illustrates the transmission in ACK-on-Error mode of an IPv6 packet that needs 11 fragments, with MAX_WIND_FCN=6 and three lost fragments.</p>
 <div id="rfc.figure.28"></div>
 <div id="Fig-Example-Rel-Window-NACK-Loss"></div>
@@ -1554,7 +1556,7 @@ Rule 0
         (End)    
 
 </pre>
-<p class="figure">Figure 29: Transmission in ACK-Always mode of an IPv6 packet carried by 11 fragments, with  MAX_WIND_FCN=6 and no lost fragment.</p>
+<p class="figure">Figure 29: Transmission in ACK-Always mode of an IPv6 packet carried by 11 fragments, with MAX_WIND_FCN=6 and no lost fragment.</p>
 <p><a href="#Fig-Example-Rel-Window-ACK-Loss" class="xref">Figure 30</a> illustrates the transmission in ACK-Always mode of an IPv6 packet that needs 11 fragments, with MAX_WIND_FCN=6 and three lost fragments.</p>
 <div id="rfc.figure.30"></div>
 <div id="Fig-Example-Rel-Window-ACK-Loss"></div>
@@ -1581,7 +1583,7 @@ Rule 0
         (End)    
 
 </pre>
-<p class="figure">Figure 30: Transmission in ACK-Always mode of an IPv6 packet carried by 11 fragments, with  MAX_WIND_FCN=6 and three lost fragments.</p>
+<p class="figure">Figure 30: Transmission in ACK-Always mode of an IPv6 packet carried by 11 fragments, with MAX_WIND_FCN=6 and three lost fragments.</p>
 <p><a href="#Fig-Example-Rel-Window-ACK-Loss-Last-A" class="xref">Figure 31</a> illustrates the transmission in ACK-Always mode of an IPv6 packet that needs 6 fragments, with MAX_WIND_FCN=6, three lost fragments and only one retry needed to recover each lost fragment.</p>
 <div id="rfc.figure.31"></div>
 <div id="Fig-Example-Rel-Window-ACK-Loss-Last-A"></div>
@@ -1598,9 +1600,9 @@ Rule 0
              |-----W=0, FCN=3-----&gt;|MIC checked: failed
              |-----W=0, FCN=2-----&gt;|MIC checked: success
              |&lt;-----ACK, W=0-------|C=1 no Bitmap
-           (End) 
+           (End)
 </pre>
-<p class="figure">Figure 31: Transmission in ACK-Always mode of an IPv6 packet carried by 11 fragments,  with MAX_WIND_FCN=6, three lost framents and only one retry needed for each lost fragment.</p>
+<p class="figure">Figure 31: Transmission in ACK-Always mode of an IPv6 packet carried by 11 fragments, with MAX_WIND_FCN=6, three lost framents and only one retry needed for each lost fragment.</p>
 <p><a href="#Fig-Example-Rel-Window-ACK-Loss-Last-B" class="xref">Figure 32</a> illustrates the transmission in ACK-Always mode of an IPv6 packet that needs 6 fragments, with MAX_WIND_FCN=6, three lost fragments, and the second ACK lost.</p>
 <div id="rfc.figure.32"></div>
 <div id="Fig-Example-Rel-Window-ACK-Loss-Last-B"></div>
@@ -1621,9 +1623,9 @@ Rule 0
              |--W=0, FCN=7 + MIC--&gt;|
              |&lt;-----ACK, W=0-------|C= 1 no Bitmap  
 
-           (End) 
+           (End)
 </pre>
-<p class="figure">Figure 32: Transmission in ACK-Always mode of an IPv6 packet carried by 11 fragments,  with MAX_WIND_FCN=6, three lost fragments, and the second ACK lost.</p>
+<p class="figure">Figure 32: Transmission in ACK-Always mode of an IPv6 packet carried by 11 fragments, with MAX_WIND_FCN=6, three lost fragments, and the second ACK lost.</p>
 <p><a href="#Fig-Example-Rel-Window-ACK-Loss-Last-C" class="xref">Figure 33</a> illustrates the transmission in ACK-Always mode of an IPv6 packet that needs 6 fragments, with MAX_WIND_FCN=6, with three lost fragments, and one retransmitted fragment lost again.</p>
 <div id="rfc.figure.33"></div>
 <div id="Fig-Example-Rel-Window-ACK-Loss-Last-C"></div>
@@ -1644,9 +1646,9 @@ Rule 0
              |&lt;-----ACK, W=0-------|C=0 Bitmap: 1111101
              |-----W=0, FCN=2-----&gt;|MIC checked: success
              |&lt;-----ACK, W=0-------|C=1 no Bitmap
-           (End) 
+           (End)
 </pre>
-<p class="figure">Figure 33: Transmission in ACK-Always mode of an IPv6 packet carried by 11 fragments,  with MAX_WIND_FCN=6, with three lost fragments, and one retransmitted fragment lost again.</p>
+<p class="figure">Figure 33: Transmission in ACK-Always mode of an IPv6 packet carried by 11 fragments, with MAX_WIND_FCN=6, with three lost fragments, and one retransmitted fragment lost again.</p>
 <p><a href="#Fig-Example-MaxWindFCN" class="xref">Figure 34</a> illustrates the transmission in ACK-Always mode of an IPv6 packet that needs 28 fragments, with N=5, MAX_WIND_FCN=23 and two lost fragments. Note that MAX_WIND_FCN=23 may be useful when the maximum possible Bitmap size, considering the maximum lower layer technology payload size and the value of R, is 3 bytes. Note also that the FCN of the last fragment of the packet is the one with FCN=31 (i.e. FCN=2^N-1 for N=5, or equivalently, all FCN bits set to 1).</p>
 <div id="rfc.figure.34"></div>
 <div id="Fig-Example-MaxWindFCN"></div>
@@ -1688,7 +1690,7 @@ Rule 0
         |&lt;------ACK, W=1-------|no Bitmap
       (End)
 </pre>
-<p class="figure">Figure 34: Transmission in ACK-Always mode of an IPv6 packet carried by 28 fragments, with N=5,  MAX_WIND_FCN=23 and two lost fragments.</p>
+<p class="figure">Figure 34: Transmission in ACK-Always mode of an IPv6 packet carried by 28 fragments, with N=5, MAX_WIND_FCN=23 and two lost fragments.</p>
 <h1 id="rfc.appendix.C">
 <a href="#rfc.appendix.C">Appendix C.</a> <a href="#FSM" id="FSM">Fragmentation State Machines</a>
 </h1>
@@ -1706,10 +1708,10 @@ Rule 0
 |          |           | &lt;--+ ~~~~~~~~~~~~~~~~~~~~                          
 +--------&gt; |   Send    |      send Fragment (FCN=0)                            
            +===+=======+                                                                      
-               |  last fragment 
+               |  last fragment
                |  ~~~~~~~~~~~~                               
                |  FCN = 1                               
-               v  send fragment+MIC 
+               v  send fragment+MIC
            +============+                                             
            |    END     |                                             
            +============+                       
@@ -1730,8 +1732,8 @@ Rule 0
   +==========++  |              v
   |   Error   |&lt;-+     +========+==+
   +===========+        |    END    |
-                       +===========+ 
-                                           
+                       +===========+
+
 </pre>
 <p class="figure">Figure 36: Receiver State Machine for the No-ACK Mode</p>
 <div id="rfc.figure.37"></div>
@@ -1746,13 +1748,13 @@ Rule 0
        FCN=max value |  ++==+========+
                      +&gt; |            |
 +---------------------&gt; |    SEND    |
-|                       +==+===+=====+ 
+|                       +==+===+=====+
 |      FCN==0 &amp; more frags |   | last frag
 |    ~~~~~~~~~~~~~~~~~~~~~ |   | ~~~~~~~~~~~~~~~
-|         set local-Bitmap |   | set local-Bitmap 
-|   send wnd + frag(all-0) |   | send wnd+frag(all-1)+MIC 
-|       set Retrans_Timer  |   | set Retrans_Timer 
-|                          |   | 
+|         set local-Bitmap |   | set local-Bitmap
+|   send wnd + frag(all-0) |   | send wnd+frag(all-1)+MIC
+|       set Retrans_Timer  |   | set Retrans_Timer
+|                          |   |
 |Recv_wnd == wnd &amp;         |   |  
 |Lcl_Bitmap==recv_Bitmap&amp;  |   |  +----------------------+
 |more frag                 |   |  |lcl-Bitmap!=rcv-Bitmap|
@@ -1770,8 +1772,8 @@ not expected wnd |    |    Bitmap     |            +=======+
 MIC_bit==1 &amp;             | |   | |  +--+Attemp++           |
 Recv_window==window &amp;    | |   | +-------------------------+   
 Lcl_Bitmap==recv_Bitmap &amp;| |   |   all missing frag sent
-             no more frag| |   |   ~~~~~~~~~~~~~~~~~~~~~~ 
- ~~~~~~~~~~~~~~~~~~~~~~~~| |&#160;  | &#160; Set Retrans_Timer &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; 
+             no more frag| |   |   ~~~~~~~~~~~~~~~~~~~~~~
+ ~~~~~~~~~~~~~~~~~~~~~~~~| |&#160;  | &#160; Set Retrans_Timer &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160;
        Stop Retrans_Timer| |   |    
  +=============+         | |   |
  |     END     +&lt;--------+ |   | Attemp &gt; MAX_ACK_REQUESTS
@@ -1779,9 +1781,9 @@ Lcl_Bitmap==recv_Bitmap &amp;| |   |   all missing frag sent
               All-1 Window |   v Send Abort
  &#160; &#160; &#160; &#160; &#160; &#160;  ~~~~~~~~~~~~ | +=+===========+
              MIC_bit ==0 &amp; +&gt;|    ERROR    |
-    Lcl_Bitmap==recv_Bitmap  +=============+ 
-    
-    
+    Lcl_Bitmap==recv_Bitmap  +=============+
+
+
 </pre>
 <p class="figure">Figure 37: Sender State Machine for the ACK-Always Mode</p>
 <div id="rfc.figure.38"></div>
@@ -1791,7 +1793,7 @@ Lcl_Bitmap==recv_Bitmap &amp;| |   |   all missing frag sent
  ~~~~~~~~~~~~~~~~~~~~~ |   |   |   |~~~~~~~~~~~~~~~~
  Set local_Bitmap(FCN) |   v   v   |discard
                       ++===+===+===+=+      
-+---------------------+ &#160; &#160; Rcv &#160; &#160;  +---&gt;* ABORT 
++---------------------+ &#160; &#160; Rcv &#160; &#160;  +---&gt;* ABORT
 |  +------------------+ &#160; Window &#160; &#160; |
 |  | &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160;  +=====+==+=====+  
 |  | &#160; &#160; &#160; All-0 &amp; w=expect | &#160;^ w =next &amp; not-All
@@ -1800,7 +1802,7 @@ Lcl_Bitmap==recv_Bitmap &amp;| |   |   all missing frag sent
 |  |      send local_Bitmap |  |Clear local_Bitmap
 |  |                        |  |    
 |  | w=expct &amp; not-All      |  |    
-|  | ~~~~~~~~~~~~~~~~~~     |  | 
+|  | ~~~~~~~~~~~~~~~~~~     |  |
 |  | set lcl_Bitmap(FCN)+-+ |  | +--+ w=next &amp; All-0
 |  | if lcl_Bitmap full | | |  | |  | ~~~~~~~~~~~~~~~
 |  | send lcl_Bitmap    | | |  | |  | expct = nxt wnd
@@ -1812,9 +1814,9 @@ Lcl_Bitmap==recv_Bitmap &amp;| |   |   all missing frag sent
 |  | ~~~~~  +--------&gt;+========+=++        
 |  | snd lcl_bm  All-1 &amp; w=next| |  All-1 &amp; w=nxt
 |  |                &amp; MIC wrong| |  &amp; MIC right      
-|  |          ~~~~~~~~~~~~~~~~~| | ~~~~~~~~~~~~~~~~~~ 
+|  |          ~~~~~~~~~~~~~~~~~| | ~~~~~~~~~~~~~~~~~~
 |  |      set local_Bitmap(FCN)| |set lcl_Bitmap(FCN)       
-|  |          send local_Bitmap| |send local_Bitmap 
+|  |          send local_Bitmap| |send local_Bitmap
 |  |                           | +----------------------+
 |  |All-1 &amp; w=expct            |                        |
 |  |&amp; MIC wrong                v   +---+ w=expctd &amp;     |
@@ -1835,7 +1837,7 @@ Lcl_Bitmap==recv_Bitmap &amp;| |   |   all missing frag sent
 |send local_Bitmap          |          +&lt;+Send lcl_btmp |
 +--------------------------&gt;+    END   |                |
                             +==========+&lt;---------------+
-                            
+
        ---&gt;* ABORT
  &#160; &#160; &#160; &#160; &#160; &#160;~~~~~~~
             Inactivity_Timer = expires
@@ -1868,8 +1870,8 @@ Lcl_Bitmap==recv_Bitmap &amp;| |   |   all missing frag sent
  |      send wnd + frag(all-0)|     |send wnd+frag(all-1)+MIC
  |           set Retrans_Timer|     |set Retrans_Timer
  |                            |     |
- |Retrans_Timer expires &amp;     |     |   lcl-Bitmap!=rcv-Bitmap 
- |more fragments &#160; &#160; &#160; &#160; &#160; &#160;  | &#160; &#160; | &#160; ~~~~~~~~~~~~~~~~~~~~~~ 
+ |Retrans_Timer expires &amp;     |     |   lcl-Bitmap!=rcv-Bitmap
+ |more fragments &#160; &#160; &#160; &#160; &#160; &#160;  | &#160; &#160; | &#160; ~~~~~~~~~~~~~~~~~~~~~~
  |~~~~~~~~~~~~~~~~~~~~        |     |   Attemp++        
  |stop Retrans_Timer          |     |  +-----------------+
  |clear local-Bitmap          v     v  |                 v
@@ -1881,12 +1883,12 @@ Lcl_Bitmap==recv_Bitmap &amp;| |   |   all missing frag sent
  | ~~~~~~~~~~~~~~~~ |    ^ |   |   |   ^                   |
  |    discard frag  +----+ |   |   |   +-------------------+
  |                         |   |   |     all missing frag sent
- |Retrans_Timer expires &amp;  |   |   |     ~~~~~~~~~~~~~~~~~~~~~ 
+ |Retrans_Timer expires &amp;  |   |   |     ~~~~~~~~~~~~~~~~~~~~~
  |       No more Frag      |   |   |     Set Retrans_Timer
  | ~~~~~~~~~~~~~~~~~~~~~~~ |   |   |   
  |  Stop Retrans_Timer     | &#160; | &#160; | &#160;
- |  Send ALL-1-empty       |   |   | 
- +-------------------------+   |   | 
+ |  Send ALL-1-empty       |   |   |
+ +-------------------------+   |   |
                                |   |
       Local_Bitmap==Recv_Bitmap|   |
  &#160; &#160;  ~~~~~~~~~~~~~~~~~~~~~~~~~| &#160; |Attemp &gt; MAX_ACK_REQUESTS
@@ -1901,11 +1903,11 @@ Lcl_Bitmap==recv_Bitmap &amp;| |   |   all missing frag sent
 <div id="Fig-ACKonerrorRcv"></div>
 <pre>
    Not All- &amp; w=expected +---+   +---+w = Not expected
-   ~~~~~~~~~~~~~~~~~~~~~ |   |   |   |~~~~~~~~~~~~~~~~ 
+   ~~~~~~~~~~~~~~~~~~~~~ |   |   |   |~~~~~~~~~~~~~~~~
    Set local_Bitmap(FCN) |   v   v   |discard
                         ++===+===+===+=+
-+-----------------------+              +--+ All-0 &amp; full 
-|            ABORT *&lt;---+  Rcv Window  |  | ~~~~~~~~~~~~ 
++-----------------------+              +--+ All-0 &amp; full
+|            ABORT *&lt;---+  Rcv Window  |  | ~~~~~~~~~~~~
 |  +--------------------+              +&lt;-+ w =next
 |  | &#160; &#160; All-0 empty +-&gt;+=+=+===+======+ clear lcl_Bitmap
 |  | &#160; &#160; ~~~~~~~~~~~ | &#160;  | | &#160; ^
@@ -1914,7 +1916,7 @@ Lcl_Bitmap==recv_Bitmap &amp;| |   |   all missing frag sent
 |  |                        |   |set lcl_Bitmap; w =nxt
 |  |                        |   |     
 |  |      All-0 &amp; w=expect  |   |     w=next   
-|  |      &amp; no_full Bitmap  |   |    ~~~~~~~~  +========+ 
+|  |      &amp; no_full Bitmap  |   |    ~~~~~~~~  +========+
 |  |      ~~~~~~~~~~~~~~~~~ |   |    Send abort| Error/ |
 |  |      send local_Bitmap |   |  +----------&gt;+ Abort  |
 |  |                        |   |  | +--------&gt;+========+
@@ -1934,8 +1936,8 @@ Lcl_Bitmap==recv_Bitmap &amp;| |   |   all missing frag sent
 |  |send local_Bitmap     +===========+==+ snd lcl_btmp
 |  +---------------------&gt;+   Wait End   +-+           
 |                         +=====+=+====+=+ | w=expct &amp;  
-|       w=expected &amp; MIC right  | |    ^   | MIC wrong 
-|       ~~~~~~~~~~~~~~~~~~~~~~  | |    +---+ ~~~~~~~~~ 
+|       w=expected &amp; MIC right  | |    ^   | MIC wrong
+|       ~~~~~~~~~~~~~~~~~~~~~~  | |    +---+ ~~~~~~~~~
 |  set &amp; send local_Bitmap(FCN) | | set lcl_Bitmap(FCN)
 |                               | |                    
 |All-1 &amp; w=expected &amp; MIC right | +--&gt;* ABORT          
@@ -1947,7 +1949,7 @@ Lcl_Bitmap==recv_Bitmap &amp;| |   |   all missing frag sent
                  Only Uplink
                  Inactivity_Timer = expires&#160;
  &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; ~~~~~~~~~~~~~~~~~~~~~~~~~~
- &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; Send Abort &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; 
+ &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; Send Abort &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160;
 </pre>
 <p class="figure">Figure 40: Receiver State Machine for the ACK-on-Error Mode</p>
 <h1 id="rfc.appendix.D">
