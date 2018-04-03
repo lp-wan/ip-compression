@@ -262,29 +262,33 @@ then applied to the SCHC packet. The SCHC packet or the SCHC fragments are then 
 
 ~~~~
 
-       A packet (e.g. an IPv6 packet)
-                  |                                         ^
-                  V                                         |
-        +------------------+                      +------------------+
-        | SCHC Compression |                      |SCHC Decompression|
-        +------------------+                      +------------------+            
-                  |                                         |
-              SCHC packet                                   |
-                  |                                         | 
-                  | No Fragmentation                        | 
-                  +------------+              +------------>|
-                  |            |              |             |
-                  V            |              |             |
-        +------------------+   |              |   +------------------+
-        |SCHC Fragmentation|   |              |   | SCHC Reassembly  |
-        +------------------+   |              |   +------------------+
-                  |            |              |             ^
-           SCHC Fragment(s)    |              |             |
-                  |            |              |             |
-                  |<-----------+              +-------------+
-                  |                         No Fragmentation|
-                  v                                         ^
-                  ---------------transmission---------------- 
+A packet (e.g. an IPv6 packet) 
+           |                                           ^ 
+           v                                           | 
+  +—-----------------+                      +--------------------+ 
+  | SCHC Compression |                      | SCHC Decompression | 
+  +------------------+                      +--------------------+ 
+           |                                           | 
+           |                                           | 
+           |                                           | 
+           |   If no fragmentation (*)                 | 
+           +----------------- SCHC Packet ------------>| 
+           |                                           | 
+           |                                           | 
+ +--------------------+                       +-----------------+ 
+ | SCHC Fragmentation |                       | SCHC Reassembly | 
+ +--------------------+                       +-----------------+ 
+        ^     |                                    ^     |
+        |     |                                    |     |
+        |     |                                    |     |
+        |     |                                    |     |
+        |     |                                    |     |
+        |     |                                    |     |
+        |     +---------- SCHC Fragments ----------+     |
+        +-------------- SCHC ACK ------------------------+
+SENDER                                                RECEIVER
+
+*: see {{#Frag}} for the decision.
 
 
 ~~~~
@@ -671,7 +675,7 @@ parameters supported in the reliability modes such as timers and parameters.
   23, then subsequent FCNs are set sequentially and in decreasing order, and the FCN will wrap from 0 back to 23).
 
 * Datagram Tag (DTag). The DTag field, if present, is set to the same value for all SCHC fragments carrying the same SCHC   
-  packet, and to different values for different datagrams. Using this field, the sender can interleave fragments from
+  packet, and to different values for different SCHC packets. Using this field, the sender can interleave fragments from
   different SCHC packets, while the receiver can still tell them apart.
   In the SCHC fragment formats, the size of the DTag field is T bits, which MAY be set to a value greater than or equal to 0
   bits. For each new SCHC packet processed by the sender, DTag MUST be sequentially increased, from 0 to 2^T – 1 wrapping
