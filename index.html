@@ -343,7 +343,7 @@ address {
 
   <meta name="dct.creator" content="Minaburo, A., Toutain, L., and C. Gomez" />
   <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-lpwan-ipv6-static-context-hc-10" />
-  <meta name="dct.issued" scheme="ISO8601" content="2018-03-20" />
+  <meta name="dct.issued" scheme="ISO8601" content="2018-04-03" />
   <meta name="dct.abstract" content="This document defines the Static Context Header Compression (SCHC) framework, which provides header compression and fragmentation functionality. SCHC has been tailored for Low Power Wide Area Networks (LPWAN)." />
   <meta name="description" content="This document defines the Static Context Header Compression (SCHC) framework, which provides header compression and fragmentation functionality. SCHC has been tailored for Low Power Wide Area Networks (LPWAN)." />
 
@@ -367,7 +367,7 @@ address {
 <td class="right">L. Toutain</td>
 </tr>
 <tr>
-<td class="left">Expires: September 21, 2018</td>
+<td class="left">Expires: October 5, 2018</td>
 <td class="right">IMT-Atlantique</td>
 </tr>
 <tr>
@@ -380,7 +380,7 @@ address {
 </tr>
 <tr>
 <td class="left"></td>
-<td class="right">March 20, 2018</td>
+<td class="right">April 03, 2018</td>
 </tr>
 
     	
@@ -398,7 +398,7 @@ address {
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at https://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on September 21, 2018.</p>
+<p>This Internet-Draft will expire on October 5, 2018.</p>
 <h1 id="rfc.copyrightnotice"><a href="#rfc.copyrightnotice">Copyright Notice</a></h1>
 <p>Copyright (c) 2018 IETF Trust and the persons identified as the document authors.  All rights reserved.</p>
 <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (https://trustee.ietf.org/license-info) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.</p>
@@ -639,29 +639,33 @@ address {
 <div id="rfc.figure.3"></div>
 <div id="Fig-Operations"></div>
 <pre>
-       A packet (e.g. an IPv6 packet)
-                  |                                         ^
-                  V                                         |
-        +------------------+                      +------------------+
-        | SCHC Compression |                      |SCHC Decompression|
-        +------------------+                      +------------------+            
-                  |                                         |
-              SCHC packet                                   |
-                  |                                         | 
-                  | No Fragmentation                        | 
-                  +------------+              +------------&gt;|
-                  |            |              |             |
-                  V            |              |             |
-        +------------------+   |              |   +------------------+
-        |SCHC Fragmentation|   |              |   | SCHC Reassembly  |
-        +------------------+   |              |   +------------------+
-                  |            |              |             ^
-           SCHC Fragment(s)    |              |             |
-                  |            |              |             |
-                  |&lt;-----------+              +-------------+
-                  |                         No Fragmentation|
-                  v                                         ^
-                  ---------------transmission---------------- 
+A packet (e.g. an IPv6 packet) 
+           |                                           ^ 
+           v                                           | 
+  +&#8212;-----------------+                      +--------------------+ 
+  | SCHC Compression |                      | SCHC Decompression | 
+  +------------------+                      +--------------------+ 
+           |                                           | 
+           |                                           | 
+           |                                           | 
+           |   If no fragmentation (*)                 | 
+           +----------------- SCHC Packet ------------&gt;| 
+           |                                           | 
+           |                                           | 
+ +--------------------+                       +-----------------+ 
+ | SCHC Fragmentation |                       | SCHC Reassembly | 
+ +--------------------+                       +-----------------+ 
+        ^     |                                    ^     |
+        |     |                                    |     |
+        |     |                                    |     |
+        |     |                                    |     |
+        |     |                                    |     |
+        |     |                                    |     |
+        |     +---------- SCHC Fragments ----------+     |
+        +-------------- SCHC ACK ------------------------+
+SENDER                                                RECEIVER
+
+*: see {{#Frag}} for the decision.
 
 
 </pre>
@@ -890,7 +894,7 @@ y=size of the transmitted bits
 </ul>
 <p> The rest of the FCN values are assigned in a sequentially decreasing order, which has the purpose to avoid possible ambiguity for the receiver that might arise under certain conditions. In the SCHC fragments, this field is an unsigned integer, with a size of N bits. In the No-ACK mode, it is set to 1 bit (N=1), All-0 is used in all SCHC fragments and All-1 for the last one.  For the other reliability modes, it is recommended to use a number of bits (N) equal to or greater than 3. Nevertheless, the appropriate value of N MUST be defined in the corresponding technology-specific profile documents. For windows that are not the last one from a SCHC fragmented packet, the FCN for the last SCHC fragment in such windows is an All-0. This indicates that the window is finished and communication proceeds according to the reliability mode in use. The FCN for the last SCHC fragment in the last window is an All-1, indicating the last SCHC fragment of the SCHC packet. It is also important to note that, in the No-ACK mode or when N=1, the last SCHC fragment of the packet will carry a FCN equal to 1, while all previous  SCHC fragments will carry a FCN of 0. For further details see </p>
 <a href="#FragModes" class="xref">Section 7.5</a>. The highest FCN in the window, denoted MAX_WIND_FCN, MUST be a value equal to or smaller than 2^N-2. (Example for N=5, MAX_WIND_FCN MAY be set to 23, then subsequent FCNs are set sequentially and in decreasing order, and the FCN will wrap from 0 back to 23).</li>
-<li>Datagram Tag (DTag). The DTag field, if present, is set to the same value for all SCHC fragments carrying the same SCHC <br> packet, and to different values for different datagrams. Using this field, the sender can interleave fragments from different SCHC packets, while the receiver can still tell them apart.  In the SCHC fragment formats, the size of the DTag field is T bits, which MAY be set to a value greater than or equal to 0 bits. For each new SCHC packet processed by the sender, DTag MUST be sequentially increased, from 0 to 2^T &#8211; 1 wrapping back from 2^T - 1 to 0.  In the ACK format, DTag carries the same value as the DTag field in the SCHC fragments for which this ACK is intended.</li>
+<li>Datagram Tag (DTag). The DTag field, if present, is set to the same value for all SCHC fragments carrying the same SCHC <br> packet, and to different values for different SCHC packets. Using this field, the sender can interleave fragments from different SCHC packets, while the receiver can still tell them apart.  In the SCHC fragment formats, the size of the DTag field is T bits, which MAY be set to a value greater than or equal to 0 bits. For each new SCHC packet processed by the sender, DTag MUST be sequentially increased, from 0 to 2^T &#8211; 1 wrapping back from 2^T - 1 to 0.  In the ACK format, DTag carries the same value as the DTag field in the SCHC fragments for which this ACK is intended.</li>
 <li>W (window): W is a 1-bit field. This field carries the same value for all SCHC fragments of a window, and it is complemented for the next window. The initial value for this field is 0.  In the ACK format, this field also has a size of 1 bit. In all ACKs, the W bit carries the same value as the W bit carried by the SCHC fragments whose reception is being positively or negatively acknowledged by the ACK.</li>
 <li>Message Integrity Check (MIC). This field, which has a size of M bits, is computed by the sender over the complete SCHC packet before SCHC fragmentation. The MIC allows the receiver to check errors in the reassembled packet, while it also enables compressing the UDP checksum by use of SCHC compression. The CRC32 as 0xEDB88320 (i.e. the reverse representation of the polynomial used e.g. in the Ethernet standard <a href="#RFC3385" class="xref">[RFC3385]</a>) is recommended as the default algorithm for computing the MIC. Nevertheless, other algorithms MAY be required and are defined in the technology-specific documents.</li>
 <li>C (MIC checked): C is a 1-bit field. This field is used in the ACK packets to report the outcome of the MIC check, i.e.  whether the reassembled packet was correctly received or not. A value of 1 represents a positive MIC check at the receiver side (i.e. the MIC computed by the receiver matches the received MIC).</li>
