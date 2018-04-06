@@ -49,18 +49,12 @@ informative:
 
 --- abstract
 
-This document defines the Static Context Header Compression (SCHC) framework, which provides header compression and
-fragmentation functionality. SCHC has been tailored for Low Power Wide Area Networks (LPWAN).
+This document defines the Static Context Header Compression (SCHC) framework, which provides header compression and fragmentation functionality. SCHC has been tailored for Low Power Wide Area Networks (LPWAN).
 
-SCHC compression is based on a common static context stored in LPWAN devices and in the network. This document applies SCHC
-compression to IPv6/UDP headers. This document also specifies a fragmentation and reassembly mechanism that is used to
-support the IPv6 MTU requirement over LPWAN technologies. Fragmentation is mandatory for IPv6 datagrams that, after SCHC
-compression or when it has not been possible to apply such compression, still exceed the layer two maximum payload size.
+SCHC compression is based on a common static context stored in both LPWAN devices and in the network sides. This document defines SCHC header compression mechanism and its deployment for IPv6/UDP headers. This document also specifies a fragmentation and reassembly mechanism that is used to support the IPv6 MTU requirement over the LPWAN technologies. The Fragmentation is needed for IPv6 datagrams that, after SCHC compression or when it has not been possible to apply such compression, still exceed the layer two maximum payload size.
 
 The SCHC header compression mechanism is independent of the specific LPWAN technology over which it will be used.
-Note that this document defines generic functionality. This document purposefully offers flexibility with regard to parameter
-settings and mechanism choices, that are expected to be made in other, technology-specific, documents.
-
+Note that this document defines generic functionalities and advisedly offers flexibility with regard to parameters settings and mechanism choices, that are expected to be made in other technology-specific documents.
 
 --- middle
 
@@ -135,8 +129,6 @@ This section defines the terminology and acronyms used in this document.
 
 * Abort. A SCHC fragment format to signal the other end-point that the on-going fragment transmission is stopped and
   finished.
-
-* ACK (Acknowledgment). A SCHC fragment format used to report the success or unsuccess reception of a set of SCHC fragments.
 
 * All-0. The SCHC fragment format for the last frame of a window that is not the last one of a packet (see Window in this
   glossary).
@@ -218,14 +210,49 @@ for error detection after IPv6 packet reassembly.
 
 * Rule ID: An identifier for a rule, SCHC C/D in both sides share the same Rule ID for a specific packet. A set of Rule IDs
   are used to support SCHC fragmentation functionality.
+  
+* SCHC ACK: A SCHC acknowledgement for fragmentation, this format used to report the success or unsuccess reception of a set 
+  of SCHC fragments. See {{#Frag}} for more details. 
+
+~~~~
+
+|Rule ID + DTag + W|             
++------------------+-------- ... ---------+
+|    ACK Header    |    encoded Bitmap    |
++------------------+-------- ... ---------+
+
+~~~~ 
+{: #Fig-SCHCack title='SCHC ACK'}
 
 * SCHC C/D: Static Context Header Compression Compressor/Decompressor. A mechanism used in both sides, at the Dev and at the
   network to achieve Compression/Decompression of headers. SCHC C/D uses SCHC rules to perform compression and decompression.
+  
+* SCHC Fragment: A SCHC packet that has been split using the fragmentation protocol defined in this document, see {{#Frag}}.
+
+~~~~
+
+| Rule ID + DTAG + W + FCN [+ MIC ] |  Comp. Header | Payload |
++-----------------------------------+-------------------------+ 
+|        Fragment Header            |         Fragment        |
++-----------------------------------+-------------------------+
+
+~~~~ 
+{: #Fig-SCHCfragment title='SCHC Fragment'}
 
 * SCHC packet: A packet (e.g. an IPv6 packet) whose header has been compressed as per the header compression mechanism
   defined in this document. If the header compression process is unable to actually compress the packet header, the packet
   with the uncompressed header is still called a SCHC packet (in this case, a Rule ID is used to indicate that the packet
-  header has not been compressed).
+  header has not been compressed). See {{#Frag}} for more details
+  
+~~~~
+
+|  Rule ID   +   Comp.  Residue   |
++---------------------------------+--------------------+ 
+|      Compressed Header          |      Payload       |
++---------------------------------+--------------------+
+
+~~~~ 
+{: #Fig-SCHCpckt title='SCHC Packet'}
 
 * TV: Target value. A value contained in the Rule that will be matched with the value of a header field.
 
@@ -1458,7 +1485,7 @@ The (low) cost to mount this attack is linear with the number of
 buffers at the target node.  However, the cost for an attacker can be
 increased if individual SCHC fragments of multiple packets can be stored
 in the reassembly buffer.  To further increase the attack cost, the
-reassembly buffer can be splitted into SCHC fragment-sized buffer slots.
+reassembly buffer can be split into SCHC fragment-sized buffer slots.
 Once a packet is complete, it is processed normally.  If buffer
 overload occurs, a receiver can discard packets based on the sender
 behavior, which MAY help identify which SCHC fragments have been sent by
