@@ -212,7 +212,7 @@ for error detection after IPv6 packet reassembly.
   are used to support SCHC fragmentation functionality.
   
 * SCHC ACK: A SCHC acknowledgement for fragmentation, this format used to report the success or unsuccess reception of a set 
-  of SCHC fragments. See ({#Frag}) for more details. 
+  of SCHC fragments. See {{Frag}} for more details. 
 
 ~~~~
 
@@ -227,7 +227,7 @@ for error detection after IPv6 packet reassembly.
 * SCHC C/D: Static Context Header Compression Compressor/Decompressor. A mechanism used in both sides, at the Dev and at the
   network to achieve Compression/Decompression of headers. SCHC C/D uses SCHC rules to perform compression and decompression.
   
-* SCHC Fragment: A SCHC packet that has been split using the fragmentation protocol defined in this document, see ({#Frag}).
+* SCHC Fragment: A SCHC packet that has been split using the fragmentation protocol defined in this document, see {{Frag}}.
 
 ~~~~
 
@@ -242,7 +242,7 @@ for error detection after IPv6 packet reassembly.
 * SCHC packet: A packet (e.g. an IPv6 packet) whose header has been compressed as per the header compression mechanism
   defined in this document. If the header compression process is unable to actually compress the packet header, the packet
   with the uncompressed header is still called a SCHC packet (in this case, a Rule ID is used to indicate that the packet
-  header has not been compressed). See ({#Frag}) for more details
+  header has not been compressed). See {{Frag}} for more details
   
 ~~~~
 
@@ -258,10 +258,10 @@ for error detection after IPv6 packet reassembly.
 
 * Up: Uplink direction for compression/decompression in both sides, from the Dev SCHC C/D to the network SCHC C/D.
 
-* W: Window bit. A SCHC fragment header field used in Window mode ({Frag}), which carries the same value for all
+* W: Window bit. A SCHC fragment header field used in Window mode {{Frag}}, which carries the same value for all
   SCHC fragments of a window.
 
-* Window: A subset of the SCHC fragments needed to carry a packet ({Frag}).
+* Window: A subset of the SCHC fragments needed to carry a packet {{Frag}}.
 
 # SCHC overview
 
