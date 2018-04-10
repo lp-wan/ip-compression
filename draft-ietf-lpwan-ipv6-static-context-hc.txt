@@ -145,8 +145,9 @@ Internet-Draft                 LPWAN SCHC                     April 2018
    Appendix A.  SCHC Compression Examples  . . . . . . . . . . . . .  45
    Appendix B.  Fragmentation Examples . . . . . . . . . . . . . . .  48
    Appendix C.  Fragmentation State Machines . . . . . . . . . . . .  54
-   Appendix D.  Note . . . . . . . . . . . . . . . . . . . . . . . .  61
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  61
+   Appendix D.  SCHC Parameters  . . . . . . . . . . . . . . . . . .  61
+   Appendix E.  Note . . . . . . . . . . . . . . . . . . . . . . . .  62
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  62
 
 1.  Introduction
 
@@ -161,7 +162,6 @@ Internet-Draft                 LPWAN SCHC                     April 2018
 
    o  The topology is star-oriented which means that all packets follow
       the same path.  For the necessity of this draft, the architecture
-      is simple and is described as Devices (Dev) exchanging information
 
 
 
@@ -170,6 +170,7 @@ Minaburo, et al.        Expires October 12, 2018                [Page 3]
 Internet-Draft                 LPWAN SCHC                     April 2018
 
 
+      is simple and is described as Devices (Dev) exchanging information
       with LPWAN Application Servers (App) through Network Gateways
       (NGW).
 
@@ -215,9 +216,8 @@ Internet-Draft                 LPWAN SCHC                     April 2018
    terminology.  We can identify different types of entities in a
    typical LPWAN network, see Figure 1:
 
-   o Devices (Dev) are the end-devices or hosts (e.g. sensors,
-   actuators, etc.).  There can be a very high density of devices per
-   radio gateway.
+
+
 
 
 
@@ -225,6 +225,10 @@ Minaburo, et al.        Expires October 12, 2018                [Page 4]
 
 Internet-Draft                 LPWAN SCHC                     April 2018
 
+
+   o Devices (Dev) are the end-devices or hosts (e.g. sensors,
+   actuators, etc.).  There can be a very high density of devices per
+   radio gateway.
 
    o The Radio Gateway (RGW), which is the end point of the constrained
    link.
@@ -268,12 +272,8 @@ Internet-Draft                 LPWAN SCHC                     April 2018
       Retransmission Timer expires, in a window that is not the last one
       of a packet.
 
-   o  All-1 empty.  An All-1 SCHC fragment without a payload.  It is
-      used to request the SCHC ACK with the encoded Bitmap when the
-      Retransmission Timer expires in the last window of a packet.
 
-   o  App: LPWAN Application.  An application sending/receiving IPv6
-      packets to/from the Device.
+
 
 
 
@@ -281,6 +281,13 @@ Minaburo, et al.        Expires October 12, 2018                [Page 5]
 
 Internet-Draft                 LPWAN SCHC                     April 2018
 
+
+   o  All-1 empty.  An All-1 SCHC fragment without a payload.  It is
+      used to request the SCHC ACK with the encoded Bitmap when the
+      Retransmission Timer expires in the last window of a packet.
+
+   o  App: LPWAN Application.  An application sending/receiving IPv6
+      packets to/from the Device.
 
    o  APP-IID: Application Interface Identifier.  Second part of the
       IPv6 address that identifies the application server interface.
@@ -323,13 +330,6 @@ Internet-Draft                 LPWAN SCHC                     April 2018
    o  Dw: Dw: Downlink direction for compression/decompression in both
       sides, from SCHC C/D in the network to SCHC C/D in the Dev.
 
-   o  FCN: Fragment Compressed Number.  This SCHC fragmentation header
-      field carries an efficient representation of a larger-sized
-      fragment number.
-
-   o  Field Description.  A line in the Rule Table.
-
-
 
 
 
@@ -337,6 +337,12 @@ Minaburo, et al.        Expires October 12, 2018                [Page 6]
 
 Internet-Draft                 LPWAN SCHC                     April 2018
 
+
+   o  FCN: Fragment Compressed Number.  This SCHC fragmentation header
+      field carries an efficient representation of a larger-sized
+      fragment number.
+
+   o  Field Description.  A line in the Rule Table.
 
    o  FID: Field Identifier.  This is an index to describe the header
       fields in a Rule.
@@ -380,12 +386,6 @@ Internet-Draft                 LPWAN SCHC                     April 2018
       the same Rule ID for a specific packet.  A set of Rule IDs are
       used to support SCHC fragmentation functionality.
 
-   o  SCHC ACK: A SCHC acknowledgement for fragmentation, this format
-      used to report the success or unsuccess reception of a set of SCHC
-      fragments.  See Section 7 for more details.
-
-
-
 
 
 
@@ -393,6 +393,10 @@ Minaburo, et al.        Expires October 12, 2018                [Page 7]
 
 Internet-Draft                 LPWAN SCHC                     April 2018
 
+
+   o  SCHC ACK: A SCHC acknowledgement for fragmentation, this format
+      used to report the success or unsuccess reception of a set of SCHC
+      fragments.  See Section 7 for more details.
 
    |Rule ID + DTag + W|
    +------------------+-------- ... ---------+
@@ -439,16 +443,15 @@ Internet-Draft                 LPWAN SCHC                     April 2018
    o  TV: Target value.  A value contained in the Rule that will be
       matched with the value of a header field.
 
-   o  Up: Uplink direction for compression/decompression in both sides,
-      from the Dev SCHC C/D to the network SCHC C/D.
-
-
 
 
 Minaburo, et al.        Expires October 12, 2018                [Page 8]
 
 Internet-Draft                 LPWAN SCHC                     April 2018
 
+
+   o  Up: Uplink direction for compression/decompression in both sides,
+      from the Dev SCHC C/D to the network SCHC C/D.
 
    o  W: Window bit.  A SCHC fragment header field used in Window mode
       Section 7, which carries the same value for all SCHC fragments of
@@ -487,9 +490,6 @@ Internet-Draft                 LPWAN SCHC                     April 2018
    the SCHC fragments are then transmitted over the LPWAN.  The
    reciprocal operations take place at the receiver.  This process is
    illustrated by Figure 6.
-
-
-
 
 
 
@@ -3364,7 +3364,61 @@ Internet-Draft                 LPWAN SCHC                     April 2018
 
         Figure 43: Receiver State Machine for the ACK-on-Error Mode
 
-Appendix D.  Note
+Appendix D.  SCHC Parameters
+
+   This gives the list of parameters that need to be defined in the
+   technology-specific documents, technology developper must evaluate
+   that L2 has strong enough integrity checking to match SCHC's
+   assumption:
+
+   o  LPWAN Architecture.  Explain the SCHC entities, how/where are they
+      be represented in the corresponding technology architecture.
+
+   o  Rule ID number of rules
+
+   o  Size of the Rule ID
+
+   o  The way the Rule id is sent (L2 or L3) and how (describe)
+
+   o  Fragmentation delivery reliability mode used in which cases
+
+   o  Define the number of bits FCN (N) and DTag (T)
+
+   o  The MIC algorithm to be used and the size if different from the
+      default CRC32
+
+   o  Retransmission Timer duration
+
+   o  Inactivity Timer duration
+
+   o  Define the MAX_ACK_REQUEST (number of attemps)
+
+   o  Use of padding or not and how and when to use it
+
+   o  Take into account that the length of rule-id + N + T + W when
+      possible is good to have a multiple of 8 bits to complete a byte
+      and avoid padding
+
+   o  In the ACK format to have a length for Rule-ID + T + W bit into a
+      complete number of byte to do optimization more easily
+
+   And the following parameters need to be addressed in another document
+   but not forcely in the technology-specific one:
+
+   o  The way the contexts are provisioning
+
+   o  The way the Rules as generated
+
+
+
+
+
+Minaburo, et al.        Expires October 12, 2018               [Page 61]
+
+Internet-Draft                 LPWAN SCHC                     April 2018
+
+
+Appendix E.  Note
 
    Carles Gomez has been funded in part by the Spanish Government
    (Ministerio de Educacion, Cultura y Deporte) through the Jose
@@ -3413,4 +3467,6 @@ Authors' Addresses
 
 
 
-Minaburo, et al.        Expires October 12, 2018               [Page 61]
+
+
+Minaburo, et al.        Expires October 12, 2018               [Page 62]
