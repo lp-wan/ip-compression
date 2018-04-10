@@ -2177,6 +2177,46 @@ Lcl_Bitmap==recv_Bitmap &| |   |   all missing frag sent
 {: #Fig-ACKonerrorRcv title='Receiver State Machine for the ACK-on-Error Mode'}
 
 
+# SCHC Parameters  
+
+This gives the list of parameters that need to be defined in the technology-specific documents, technology developper must 
+evaluate that L2 has strong enough integrity checking to match SCHC's assumption: 
+
+* LPWAN Architecture. Explain the SCHC entities, how/where are they be represented in the corresponding technology 
+  architecture.
+
+* Rule ID number of rules
+
+* Size of the Rule ID
+
+* The way the Rule id is sent (L2 or L3) and how (describe)
+
+* Fragmentation delivery reliability mode used in which cases
+
+* Define the number of bits FCN (N) and DTag (T)
+
+* The MIC algorithm to be used and the size if different from the default CRC32
+
+* Retransmission Timer duration
+
+* Inactivity Timer duration
+
+* Define the MAX_ACK_REQUEST (number of attemps)
+
+* Use of padding or not and how and when to use it
+
+* Take into account that the length of rule-id + N + T + W when possible is good to have a multiple of 8 bits to complete a 
+  byte and avoid padding
+
+* In the ACK format to have a length for Rule-ID + T + W bit into a complete number of byte to do optimization more easily
+
+And the following parameters need to be addressed in another document but not forcely in the technology-specific one:
+
+* The way the contexts are provisioning
+
+* The way the Rules as generated
+
+
 # Note
 Carles Gomez has been funded in part by the Spanish Government
 (Ministerio de Educacion, Cultura y Deporte) through the Jose
