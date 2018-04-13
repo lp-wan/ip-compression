@@ -283,8 +283,8 @@ A packet (e.g. an IPv6 packet)
         +-------------- SCHC ACK ------------------------+
 SENDER                                                RECEIVER
 
-*: see {{Frag}} to define the use of Fragmentation and the technology-specific documents for the L2 decision.
-
+*: see {{Frag}} to define the use of Fragmentation and the 
+         technology-specific documents for the L2 decision.
 
 ~~~~
 {: #Fig-Operations title='SCHC operations taking place at the sender and the receiver'}
