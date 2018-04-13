@@ -2187,7 +2187,7 @@ Lcl_Bitmap==recv_Bitmap &| |   |   all missing frag sent
 {: #Fig-ACKonerrorRcv title='Receiver State Machine for the ACK-on-Error Mode'}
 
 
-# SCHC Parameters  
+# SCHC Parameters - Ticket #15
 
 This gives the list of parameters that need to be defined in the technology-specific documents, technology developper must 
 evaluate that L2 has strong enough integrity checking to match SCHC's assumption: 
