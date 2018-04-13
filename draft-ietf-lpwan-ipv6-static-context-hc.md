@@ -2189,8 +2189,8 @@ Lcl_Bitmap==recv_Bitmap &| |   |   all missing frag sent
 
 # SCHC Parameters - Ticket #15
 
-This gives the list of parameters that need to be defined in the technology-specific documents, technology developper must 
-evaluate that L2 has strong enough integrity checking to match SCHC's assumption: 
+This section gives the list of parameters that need to be defined in the technology-specific documents, technology developers 
+must evaluate that L2 has strong enough integrity checking to match SCHC's assumption: 
 
 * LPWAN Architecture. Explain the SCHC entities (Compression and Fragmentation), how/where are they be represented in the 
 corresponding technology architecture.
@@ -2213,7 +2213,7 @@ corresponding technology architecture.
 
 * Inactivity Timer duration
 
-* Define the MAX_ACK_REQUEST (number of attemps)
+* Define the MAX_ACK_REQUEST (number of attempts)
 
 * Use of padding or not and how and when to use it
 
