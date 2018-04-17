@@ -369,10 +369,10 @@ or they can be pre-provisioned. The way the contexts are provisioned on both end
 ~~~~
 {: #Fig-archi title='Architecture'}
 
-{{Fig-archi}} The figure represents the architecture for SCHC (Static Context Header Compression) Compression / Fragmentation
+{{Fig-archi}} The figure represents the architecture for SCHC (Static Context Header Compression) Compression/Fragmentation
 where SCHC C/D (Compressor/Decompressor) and SCHC Fragmentation are performed. It is based on {{I-D.ietf-lpwan-overview}}
 terminology.
-SCHC Compression / Fragmentation is located on both sides of the transmission in the Dev and in the Network side.
+SCHC Compression/Fragmentation is located on both sides of the transmission in the Dev and in the Network side.
 In the Uplink direction, the Device application packets use IPv6 or IPv6/UDP protocols. Before sending these packets, the Dev
 compresses their headers using SCHC C/D and if the SCHC Packet resulting from the compression exceeds the maximum payload
 size of the underlying LPWAN technology, SCHC Fragmentation is performed, see {{Frag}}. The resulting SCHC Fragments are sent
@@ -380,12 +380,12 @@ as one or more L2 frames to an LPWAN Radio Gateway (RG) which forwards the frame
 
 The NGW sends the data to an SCHC Fragmentation and then to the SCHC C/D for decompression. The SCHC C/D in the Network side
 can be located in the Network Gateway (NGW) or somewhere else as long as a tunnel is established between the NGW and the SCHC
-Compression / Fragmentation. Note that, for some LPWAN technologies, it MAY be suitable to locate SCHC Fragmentation and
+Compression/Fragmentation. Note that, for some LPWAN technologies, it MAY be suitable to locate SCHC Fragmentation and
 reassembly functionality nearer the NGW, in order to better deal with time constraints of such technologies.
 The SCHC C/Ds on both sides MUST share the same set of Rules. After decompression, the packet can be sent over the Internet
 to one or several LPWAN Application Servers (App).
 
-The SCHC Compression / Fragmentation process is symmetrical, therefore the same description applies to the reverse direction.
+The SCHC Compression/Fragmentation process is symmetrical, therefore the same description applies to the reverse direction.
 
 ## SCHC C/D Rules
 
