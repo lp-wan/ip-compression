@@ -794,10 +794,11 @@ packet or an SCHC Packet.
   sends an SCHC ACK after a window of SCHC Fragments has been received, where a window of SCHC Fragments is a subset of the 
   whole number of SCHC Fragments needed to carry a complete SCHC Packet. The SCHC ACK is used to inform the sender if a SCHC 
   fragment in the actual window has been lost or well received. Upon an SCHC ACK reception, the sender retransmits the lost 
-  SCHC Fragments. When an SCHC ACK is lost and the sender has not received it before the expiration of the Inactivity Timer, 
-  the sender uses an SCHC ACK request by sending the All-1 empty SCHC Fragment. The maximum number of SCHC ACK requests is 
-  MAX_ACK_REQUESTS. If the MAX_ACK_REQUEST is reached the transmission needs to be Aborted. See further details in {{ACK-
-  Always-subsection}}.
+  SCHC Fragments. When an SCHC ACK is lost and the sender has not received it before the expiration of the Retransmission 
+  Timer, the sender uses an SCHC ACK request by sending the All-0 empty SCHC Fragment when it is not the last windown and the 
+  ALL-1 empty Fragment when it is the last window. The maximum number of SCHC ACK requests is MAX_ACK_REQUESTS. If the 
+  MAX_ACK_REQUEST is reached the transmission needs to be Aborted. See further details 
+  in {{ACK-Always-subsection}}.
 
 * ACK-on-Error. The ACK-on-Error mode is suitable for links offering relatively low L2 data unit loss probability. In this
   mode, the SCHC Fragment receiver reduces the number of SCHC ACKs transmitted, which MAY be especially beneficial in 
@@ -858,7 +859,7 @@ In ACK-Always or ACK-on-Error, SCHC Fragments except the last one SHALL conform 
  +-- ... --+- ... -+-+- ... -+--------...-------+
 
 ~~~~
-{: #Fig-NotLastWin title='Fragment Detailed Format for Fragments except the Last One, Window mode'}
+{: #Fig-NotLastWin title='Fragment Detailed Format for Fragments except the Last One, ACK-Always and ACK-on-Error'}
 
 
 
