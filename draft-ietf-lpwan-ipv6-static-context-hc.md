@@ -1048,7 +1048,7 @@ indicates that the second and the fifth SCHC Fragments have not been correctly r
 MIC check has failed but there are no missing SCHC Fragments.
 
 ~~~~                                                  
- <-------   R  ------->  6 5 4 3 2 1 7 (*)
+ |-Fragmentation Header-|6 5 4 3 2 1 7 (*)
             |-- T --|1|
  |  Rule ID |  DTag |W|0|1|1|1|1|1|1|1|padding|  Bitmap (before tx)
  |---- byte boundary -----|  1 byte next |  
