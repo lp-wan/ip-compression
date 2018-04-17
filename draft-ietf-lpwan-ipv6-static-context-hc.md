@@ -135,10 +135,10 @@ This section defines the terminology and acronyms used in this document.
 
 * All-1. The SCHC Fragment format for the last frame of the packet.
 
-* All-0 empty. An All-0 SCHC Fragment without a payload. It is used to request the SCHC ACK with the encoded Bitmap when the
+* All-0 empty. An All-0 SCHC Fragment without payload. It is used to request the SCHC ACK with the encoded Bitmap when the
   Retransmission Timer expires, in a window that is not the last one of a packet.
 
-* All-1 empty. An All-1 SCHC Fragment without a payload. It is used to request the SCHC ACK with the encoded Bitmap when the
+* All-1 empty. An All-1 SCHC Fragment without payload. It is used to request the SCHC ACK with the encoded Bitmap when the
   Retransmission Timer expires in the last window of a packet.
 
 * App: LPWAN Application. An application sending/receiving IPv6 packets to/from the Device.
@@ -171,7 +171,7 @@ This section defines the terminology and acronyms used in this document.
 * DTag: Datagram Tag. This SCHC Fragmentation header field is set to the same value for all SCHC Fragments carrying the same
   IPv6 datagram.
 
-* Dw: Dw: Downlink direction for compression/decompression in both sides, from SCHC C/D in the network to SCHC C/D in the
+* Dw: Downlink direction for compression/decompression in both sides, from SCHC C/D in the network to SCHC C/D in the
   Dev.
 
 * FCN: Fragment Compressed Number. This SCHC Fragmentation header field carries an efficient representation of a larger-sized
@@ -215,7 +215,7 @@ for error detection after IPv6 packet reassembly.
   network to achieve Compression/Decompression of headers. SCHC C/D uses SCHC rules to perform compression and decompression.
   
 * SCHC Fragment: A data unit that carries a subset of a SCHC Packet. SCHC Fragmentation is needed when the size of a SCHC
-  packet exceeds the available payload size of the underlying L2 technology data unit.see {{Frag}}.
+  packet exceeds the available payload size of the underlying L2 technology data unit. See {{Frag}}.
 
 * SCHC Packet: A packet (e.g. an IPv6 packet) whose header has been compressed as per the header compression mechanism
   defined in this document. If the header compression process is unable to actually compress the packet header, the packet
@@ -253,7 +253,7 @@ sublayers (i.e. the Compression sublayer and the Fragmentation sublayer), as sho
 
 As per this document, when a packet (e.g. an IPv6 packet) needs to be transmitted, header compression is first applied to the
 packet. The resulting packet after header compression (whose header may or may not actually be smaller than that of the original packet) is called a SCHC Packet. If the SCHC Packet size exceeds the layer 2 (L2) MTU, fragmentation is
-then applied to the SCHC Packet. The SCHC Packet or the SCHC Fragments are then transmitted over the LPWAN. The reciprocal operations take place at the receiver. This process is illustrated by {{Fig-Operations}}.
+then applied to the SCHC Packet. The SCHC Packet or the SCHC Fragments are then transmitted over the LPWAN. The reciprocal operations take place at the receiver. This process is illustrated in {{Fig-Operations}}.
 
 ~~~~
 
@@ -264,26 +264,19 @@ A packet (e.g. an IPv6 packet)
   | SCHC Compression |                      | SCHC Decompression | 
   +------------------+                      +--------------------+ 
            |                                           | 
-           |                                           | 
-           |                                           | 
            |   If no fragmentation (*)                 | 
            +----------------- SCHC Packet ------------>| 
-           |                                           | 
            |                                           | 
  +--------------------+                       +-----------------+ 
  | SCHC Fragmentation |                       | SCHC Reassembly | 
  +--------------------+                       +-----------------+ 
         ^     |                                    ^     |
         |     |                                    |     |
-        |     |                                    |     |
-        |     |                                    |     |
-        |     |                                    |     |
-        |     |                                    |     |
         |     +---------- SCHC Fragments ----------+     |
         +-------------- SCHC ACK ------------------------+
 SENDER                                                RECEIVER
 
-*: see {{Frag}} to define the use of Fragmentation and the 
+*: see Section 7 to define the use of Fragmentation and the 
          technology-specific documents for the L2 decision.
 
 ~~~~
