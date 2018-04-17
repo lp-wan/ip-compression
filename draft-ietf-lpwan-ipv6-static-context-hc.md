@@ -2222,6 +2222,9 @@ corresponding technology architecture.
 
 * In the ACK format to have a length for Rule-ID + T + W bit into a complete number of byte to do optimization more easily
 
+* The technology documents will describe if Rule ID is constrained by any alignment
+
+
 And the following parameters need to be addressed in another document but not forcely in the technology-specific one:
 
 * The way the contexts are provisioning
