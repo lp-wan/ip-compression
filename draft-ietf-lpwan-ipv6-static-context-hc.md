@@ -284,7 +284,7 @@ SENDER                                                RECEIVER
 
 
 The SCHC Packet is composed of the Compressed Header followed by the payload from the original packet (see {{Fig-SCHCpckt}}).
-The Compressed Header itself is composed of a Rule ID and a Compression Residue. The Compression Residue may be absent, see {{SCHComp}}. Both the Rule ID and the Compression Residue potentially have a variable size, and are generally not a mutiple of bytes in size.
+The Compressed Header itself is composed of a Rule ID and a Compression Residue. The Compression Residue may be absent, see {{SCHComp}}. Both the Rule ID and the Compression Residue potentially have a variable size, and generally are not a mutiple of bytes in size.
   
 ~~~~
 
@@ -1314,9 +1314,9 @@ been received by the SCHC Fragment receiver, and it also assumes that it is unli
 Default padding is defined for L2 frame with a variable length of bytes. Padding is done twice, after compression and in the
 all-1 fragmentation.
 
-In compression, the Rule ID and the Compression Residue are generally not a multiple of bytes in size, but the payload following the residue is always
-a multiple of 8 bits. If needed, padding bits can be added after the payload to reach the next byte boundary. Since the
-Rule ID and the Compression Residue tell the length of the SCHC header and payload is always a multiple of 8 bits, the receiver can without
+In compression, the Compressed Header is generally not a multiple of bytes in size, but the payload following the Compressed Header is always
+a multiple of 8 bits (see {{Fig-SCHCpckt}}). If needed, padding bits can be added after the payload to reach the next byte boundary. Since the Compressed Header (through the
+Rule ID and the Compression Residue) tells its length and the payload is always a multiple of 8 bits, the receiver can without
 ambiguity remove the padding bits, which never exceed 7 bits.
 
 SCHC Fragmentation works on a byte aligned (i.e. padded SCHC Packet). Fragmentation header may not be aligned on byte
