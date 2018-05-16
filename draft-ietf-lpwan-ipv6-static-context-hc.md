@@ -297,12 +297,12 @@ The SCHC Packet has the following format:
 {: #Fig-SCHCpckt title='SCHC Packet'}
 
 The Fragment Header size is variable and depends on the Fragmentation parameters. The Fragment payload may contain: 
-Compressed Header or Payload or both and its size depends on the L2 data unit, see {{Frag}}. The SCHC Fragment has the 
+part of the SCHC Packet or Payload or both and its size depends on the L2 data unit, see {{Frag}}. The SCHC Fragment has the 
 following format:
 
 ~~~~
 
-| Rule ID + DTAG + W + FCN [+ MIC ] |  Comp. Header | Payload |
+| Rule ID + DTAG + W + FCN [+ MIC ] |   Part of SCHC Packet   |
 +-----------------------------------+-------------------------+ 
 |        Fragment Header            |         Fragment        |
 +-----------------------------------+-------------------------+
