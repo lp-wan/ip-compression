@@ -344,7 +344,7 @@ address {
 
   <meta name="dct.creator" content="Minaburo, A., Toutain, L., and C. Gomez" />
   <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-lpwan-ipv6-static-context-hc-11" />
-  <meta name="dct.issued" scheme="ISO8601" content="2018-05-16" />
+  <meta name="dct.issued" scheme="ISO8601" content="2018-05-18" />
   <meta name="dct.abstract" content="This document defines the Static Context Header Compression (SCHC) framework, which provides header compression and fragmentation functionality. SCHC has been tailored for Low Power Wide Area Networks (LPWAN)." />
   <meta name="description" content="This document defines the Static Context Header Compression (SCHC) framework, which provides header compression and fragmentation functionality. SCHC has been tailored for Low Power Wide Area Networks (LPWAN)." />
 
@@ -368,7 +368,7 @@ address {
 <td class="right">L. Toutain</td>
 </tr>
 <tr>
-<td class="left">Expires: November 17, 2018</td>
+<td class="left">Expires: November 19, 2018</td>
 <td class="right">IMT-Atlantique</td>
 </tr>
 <tr>
@@ -381,7 +381,7 @@ address {
 </tr>
 <tr>
 <td class="left"></td>
-<td class="right">May 16, 2018</td>
+<td class="right">May 18, 2018</td>
 </tr>
 
     	
@@ -399,7 +399,7 @@ address {
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at https://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on November 17, 2018.</p>
+<p>This Internet-Draft will expire on November 19, 2018.</p>
 <h1 id="rfc.copyrightnotice"><a href="#rfc.copyrightnotice">Copyright Notice</a></h1>
 <p>Copyright (c) 2018 IETF Trust and the persons identified as the document authors.  All rights reserved.</p>
 <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (https://trustee.ietf.org/license-info) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.</p>
@@ -588,7 +588,7 @@ address {
 <li>Bitmap: a field of bits in an acknowledgment message that tells the sender which SCHC Fragments of a window were correctly received.</li>
 <li>C: Checked bit. Used in an acknowledgment (SCHC ACK) header to determine if the MIC locally computed by the receiver matches (1) the received MIC or not (0).</li>
 <li>CDA: Compression/Decompression Action. Describes the reciprocal pair of actions that are performed at the compressor to compress a header field and at the decompressor to recover the original header field value.</li>
-<li>Compress Residue. The bytes that need to be sent after applying the SCHC compression over each header field</li>
+<li>Compression Residue. The bits that need to be sent after applying the SCHC compression over each header field</li>
 <li>Context: A set of rules used to compress/decompress headers.</li>
 <li>Dev: Device. A node connected to the LPWAN. A Dev SHOULD implement SCHC.</li>
 <li>Dev-IID: Device Interface Identifier. Second part of the IPv6 address that identifies the device interface.</li>
@@ -666,11 +666,11 @@ SENDER                                                RECEIVER
 
 </pre>
 <p class="figure">Figure 3: SCHC operations taking place at the sender and the receiver</p>
-<p id="rfc.section.4.p.3">The SCHC Packet Compressed Header is formed by the Rule ID and the Compress Residue both have a variable size, and in some cases, the Compress Residue is not present depending on the Header Compression achievement, see <a href="#SCHComp" class="xref">Section 6</a> for more details.  The SCHC Packet has the following format:</p>
+<p id="rfc.section.4.p.3">The SCHC Packet is composed of the Compressed Header followed by the payload from the original packet (see <a href="#Fig-SCHCpckt" class="xref">Figure 4</a>).  The Compressed Header itself is composed of a Rule ID and a Compression Residue. The Compression Residue may be absent, see <a href="#SCHComp" class="xref">Section 6</a>. Both the Rule ID and the Compression Residue potentially have a variable size, and generally are not a mutiple of bytes in size.</p>
 <div id="rfc.figure.4"></div>
 <div id="Fig-SCHCpckt"></div>
 <pre>
-|  Rule ID   +  Compress  Residue |
+|  Rule ID +  Compression Residue |
 +---------------------------------+--------------------+ 
 |      Compressed Header          |      Payload       |
 +---------------------------------+--------------------+
@@ -798,11 +798,11 @@ SENDER                                                RECEIVER
 <li>Compression Rule selection: The goal is to identify which Rule(s) will be used to compress the packet&#8217;s headers. When <br> doing decompression, in the network side the SCHC C/D needs to find the correct Rule based on the L2 address and in this way, it can use the Dev-ID and the Rule-ID. In the Dev side, only the Rule ID is needed to identify the correct Rule since the Dev only holds Rules that apply to itself. The Rule will be selected by matching the Fields Descriptions to the packet header as described below. When the selection of a Rule is done, this Rule is used to compress the header.  The detailed steps for compression Rule selection are the following:  <ul>
 <li>The first step is to choose the Fields Descriptions by their direction, using the direction indicator (DI). A Field Description that does not correspond to the appropriate DI will be ignored, if all the fields of the packet do not have a Field Description with the correct DI the Rule is discarded and SCHC C/D proceeds to explore the next Rule.</li>
 <li>When the DI has matched, then the next step is to identify the fields according to Field Position (FP). If the Field Position does not correspond, the Rule is not used and the SCHC C/D proceeds to consider the next Rule.</li>
-<li>Once the DI and the FP correspond to the header information, each field&#8217;s value of the packet is then compared to the corresponding Target Value (TV) stored in the Rule for that specific field using the matching operator (MO).      <br><br> If all the fields in the packet&#8217;s header satisfy all the matching operators (MO) of a Rule (i.e. all MO results are True), the fields of the header are then compressed according to the Compression/Decompression Actions (CDAs) and a compressed header (with possibly a Compressed Residue) SHOULD be obtained. Otherwise, the next Rule is tested.</li>
+<li>Once the DI and the FP correspond to the header information, each field&#8217;s value of the packet is then compared to the corresponding Target Value (TV) stored in the Rule for that specific field using the matching operator (MO).      <br><br> If all the fields in the packet&#8217;s header satisfy all the matching operators (MO) of a Rule (i.e. all MO results are True), the fields of the header are then compressed according to the Compression/Decompression Actions (CDAs) and a compressed header (with possibly a Compression Residue) SHOULD be obtained. Otherwise, the next Rule is tested.</li>
 <li>If no eligible Rule is found, then the header MUST be sent without compression, depending on the L2 PDU size, this is one of the case that MAY require the use of the SCHC Fragmentation process.</li>
 </ul>
 </li>
-<li>Sending: If an eligible Rule is found, the Rule ID is sent to the other end followed by the Compression Residue (which could be empty) and directly followed by the payload. The product of the Compression Residue is sent in the order expressed in the Rule for all the fields.  The way the Rule ID is sent depends on the specific LPWAN layer two technology. For example, it can be either included in a Layer 2 header or sent in the first byte of the L2 payload. (Cf. <a href="#Fig-FormatPckt" class="xref">Figure 9</a>). This process will be specified in the LPWAN technology-specific document and is out of the scope of the present document. On LPWAN technologies that are byte- oriented, the compressed header concatenated with the original packet payload is padded to a multiple of 8 bits, if needed.  See <a href="#Padding" class="xref">Section 8</a> for details.</li>
+<li>Sending: If an eligible Rule is found, the Rule ID is sent to the other end followed by the Compression Residue (which could be empty) and directly followed by the payload. The Compression Residue is the concatenation of the Compression Residues for each field according to the CDAs for that rule.  The way the Rule ID is sent depends on the specific LPWAN layer two technology. For example, it can be either included in a Layer 2 header or sent in the first byte of the L2 payload. (Cf. <a href="#Fig-FormatPckt" class="xref">Figure 9</a>). This process will be specified in the LPWAN technology-specific document and is out of the scope of the present document. On LPWAN technologies that are byte- oriented, the compressed header concatenated with the original packet payload is padded to a multiple of 8 bits, if needed.  See <a href="#Padding" class="xref">Section 8</a> for details.</li>
 <li>Decompression: When doing decompression, in the network side the SCHC C/D needs to find the correct Rule based on the L2 address and in this way, it can use the Dev-ID and the Rule-ID. In the Dev side, only the Rule ID is needed to identify the correct Rule since the Dev only holds Rules that apply to itself.  <br><br> The receiver identifies the sender through its device-id (e.g. MAC address, if exists) and selects the appropriate Rule  <br> from the Rule ID. If a source identifier is present in the L2 technology, it is used to select the Rule ID. This Rule describes the compressed header format and associates the values to the header fields.  The receiver applies the CDA action to reconstruct the original header fields. The CDA application order can be different from the order given by the Rule. For instance, Compute-* SHOULD be applied at the end, after all the other CDAs.</li>
 </ul>
 <div id="rfc.figure.9"></div>
@@ -867,12 +867,12 @@ y=size of the transmitted bits
 <a href="#rfc.section.6.5.1">6.5.1.</a> <a href="#not-sent-cda" id="not-sent-cda">not-sent CDA</a>
 </h1>
 <p id="rfc.section.6.5.1.p.1">The not-sent function is generally used when the field value is specified in the Rule and therefore known by both the Compressor and the Decompressor. This action is generally used with the &#8220;equal&#8221; MO. If MO is &#8220;ignore&#8221;, there is a risk to have a decompressed field value different from the compressed field.</p>
-<p id="rfc.section.6.5.1.p.2">The compressor does not send any value in the Compressed Residue for a field on which not-sent compression is applied.</p>
+<p id="rfc.section.6.5.1.p.2">The compressor does not send any Compression Residue for a field on which not-sent compression is applied.</p>
 <p id="rfc.section.6.5.1.p.3">The decompressor restores the field value with the Target Value stored in the matched Rule identified by the received Rule ID.</p>
 <h1 id="rfc.section.6.5.2">
 <a href="#rfc.section.6.5.2">6.5.2.</a> <a href="#value-sent-cda" id="value-sent-cda">value-sent CDA</a>
 </h1>
-<p id="rfc.section.6.5.2.p.1">The value-sent action is generally used when the field value is not known by both Compressor and Decompressor.  The value is sent in the compressed message header. Both Compressor and Decompressor MUST know the size of the field, either implicitly (the size is known by both sides) or explicitly in the compression residue by indicating the length, as defined in <a href="#chap-CDA" class="xref">Section 6.5</a>. This function is generally used with the &#8220;ignore&#8221; MO.</p>
+<p id="rfc.section.6.5.2.p.1">The value-sent action is generally used when the field value is not known by both Compressor and Decompressor.  The value is sent in the compressed message header. Both Compressor and Decompressor MUST know the size of the field, either implicitly (the size is known by both sides) or by explicitly indicating the length in the Compression Residue, as defined in <a href="#chap-CDA" class="xref">Section 6.5</a>. This function is generally used with the &#8220;ignore&#8221; MO.</p>
 <h1 id="rfc.section.6.5.3">
 <a href="#rfc.section.6.5.3">6.5.3.</a> <a href="#mapping-sent-cda" id="mapping-sent-cda">mapping-sent CDA</a>
 </h1>
@@ -884,7 +884,7 @@ y=size of the transmitted bits
 </h1>
 <p id="rfc.section.6.5.4.p.1">The LSB(y) action is used together with the &#8220;MSB(x)&#8221; MO to avoid sending the higher part of the packet field if that part is already known by the receiving end. A length can be specified in the rule to indicate how many bits have to be sent. If the length is not specified, the number of bits sent is the original header field length minus the length specified in the MSB(x) MO.</p>
 <p id="rfc.section.6.5.4.p.2">The compressor sends the Least Significant Bits (e.g. LSB of the length field). The decompressor combines the value received with the Target Value depending on the field type.</p>
-<p id="rfc.section.6.5.4.p.3">If this action needs to be done on a variable length field, the size of the Compressed Residue in bytes MUST be sent as described in <a href="#chap-CDA" class="xref">Section 6.5</a>.</p>
+<p id="rfc.section.6.5.4.p.3">If this action needs to be done on a variable length field, the size of the Compression Residue in bytes MUST be sent as described in <a href="#chap-CDA" class="xref">Section 6.5</a>.</p>
 <h1 id="rfc.section.6.5.5">
 <a href="#rfc.section.6.5.5">6.5.5.</a> <a href="#deviid-appiid-cda" id="deviid-appiid-cda">DEViid, APPiid CDA</a>
 </h1>
@@ -1231,7 +1231,7 @@ y=size of the transmitted bits
 <a href="#rfc.section.8">8.</a> <a href="#Padding" id="Padding">Padding management</a>
 </h1>
 <p id="rfc.section.8.p.1">Default padding is defined for L2 frame with a variable length of bytes. Padding is done twice, after compression and in the all-1 fragmentation.</p>
-<p id="rfc.section.8.p.2">In compression, the rule and the compression residues are not aligned on a byte, but payload following the residue is always a multiple of 8 bits. In that case, padding bits can be added after the payload to reach the first byte boundary. Since the rule and the residue give the length of the SCHC header and payload is always a multiple of 8 bits, the receiver can without ambiguity remove the padding bits which never excide 7 bits.</p>
+<p id="rfc.section.8.p.2">In compression, the Compressed Header is generally not a multiple of bytes in size, but the payload following the Compressed Header is always a multiple of 8 bits (see <a href="#Fig-SCHCpckt" class="xref">Figure 4</a>). If needed, padding bits can be added after the payload to reach the next byte boundary. Since the Compressed Header (through the Rule ID and the Compression Residue) tells its length and the payload is always a multiple of 8 bits, the receiver can without ambiguity remove the padding bits, which never exceed 7 bits.</p>
 <p id="rfc.section.8.p.3">SCHC Fragmentation works on a byte aligned (i.e. padded SCHC Packet). Fragmentation header may not be aligned on byte boundary, but each fragment except the last one (All-1 fragment) must sent the maximum bits as possible. Only the last fragment need to introduce padding to reach the next boundary limit. Since the SCHC is known to be a multiple of 8 bits, the receiver can remove the extra bit to reach this limit.</p>
 <p id="rfc.section.8.p.4">Default padding mechanism do not need to send the padding length and can lead to a maximum of 14 bits of padding.</p>
 <p id="rfc.section.8.p.5">The padding is not mandatory and is optional to the technology-specific document to give a different solution. In this docuement there are some inputs on how to manage the padding.</p>
