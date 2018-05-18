@@ -168,13 +168,13 @@ This section defines the terminology and acronyms used in this document.
 * DI: Direction Indicator. This field tells which direction of packet travel (Up, Dw or Bi) a rule applies to. This allows
   for assymmetric processing.
 
-* DTag: Datagram Tag. This SCHC Fragmentation header field is set to the same value for all SCHC Fragments carrying the same
+* DTag: Datagram Tag. This SCHC F/R header field is set to the same value for all SCHC Fragments carrying the same
   IPv6 datagram.
 
 * Dw: Downlink direction for compression/decompression in both sides, from SCHC C/D in the network to SCHC C/D in the
   Dev.
 
-* FCN: Fragment Compressed Number. This SCHC Fragmentation header field carries an efficient representation of a larger-sized
+* FCN: Fragment Compressed Number. This SCHC F/R header field carries an efficient representation of a larger-sized
   fragment number.
 
 * Field Description. A line in the Rule Table.
@@ -193,7 +193,7 @@ This section defines the terminology and acronyms used in this document.
 
 * L2: Layer two. The immediate lower layer SCHC interfaces with. It is provided by an underlying LPWAN technology.
 
-* MIC: Message Integrity Check.  A SCHC Fragmentation header field computed over an IPv6 packet before fragmentation, used
+* MIC: Message Integrity Check.  A SCHC F/R header field computed over an IPv6 packet before fragmentation, used
 for error detection after IPv6 packet reassembly.
 
 * MO: Matching Operator. An operator used to match a value contained in a header field with a value contained in a Rule.
@@ -206,7 +206,7 @@ for error detection after IPv6 packet reassembly.
 * Rule entry: A column in the rule that describes a parameter of the header field.
 
 * Rule ID: An identifier for a rule, SCHC C/D in both sides share the same Rule ID for a specific packet. A set of Rule IDs
-  are used to support SCHC Fragmentation functionality.
+  are used to support SCHC F/R functionality.
   
 * SCHC ACK: A SCHC acknowledgement for fragmentation, this format used to report the success or unsuccess reception of a set 
   of SCHC Fragments. See {{Frag}} for more details. 
@@ -214,7 +214,10 @@ for error detection after IPv6 packet reassembly.
 * SCHC C/D: Static Context Header Compression Compressor/Decompressor. A mechanism used in both sides, at the Dev and at the
   network to achieve Compression/Decompression of headers. SCHC C/D uses SCHC rules to perform compression and decompression.
   
-* SCHC Fragment: A data unit that carries a subset of a SCHC Packet. SCHC Fragmentation is needed when the size of a SCHC
+* SCHC F/R: Static Context Header Compression Fragmentation/Reassembly. A protocol used in both sides, at the Dev and at the 
+  network to achieve Fragmentation/Reassembly of fragments. SCHC F/R has three reliability modes.
+  
+* SCHC Fragment: A data unit that carries a subset of a SCHC Packet. SCHC F/R is needed when the size of a SCHC
   packet exceeds the available payload size of the underlying L2 technology data unit. See {{Frag}}.
 
 * SCHC Packet: A packet (e.g. an IPv6 packet) whose header has been compressed as per the header compression mechanism
@@ -302,9 +305,9 @@ following format:
 
 ~~~~
 
-| Rule ID + DTAG + W + FCN [+ MIC ] |   Part of SCHC Packet   |
+| Rule ID + DTAG + W + FCN [+ MIC ] |   Partial  SCHC Packet  |
 +-----------------------------------+-------------------------+ 
-|        Fragment Header            |         Fragment        |
+|        Fragment Header            |   Fragment  Payload     |
 +-----------------------------------+-------------------------+
 
 ~~~~ 
@@ -326,7 +329,7 @@ Fragmentation and has the following format:
 # Rule ID
 
 Rule ID are identifiers used to select either the correct context to be used for Compression/Decompression functionalities or
-for SCHC Fragmentation or after trying to do SCHC C/D and SCHC Fragmentation the packet is sent as is. The size of the Rule
+for Fragmentation/Reassembly or after trying to do SCHC C/D and SCHC F/R the packet is sent as is. The size of the Rule
 ID is not specified in this document, as it is implementation-specific and can vary according to the LPWAN technology and the
 number of Rules, among others.
 
@@ -334,12 +337,12 @@ The Rule IDs identifiers are used:
 
 * In the SCHC C/D context to keep the Field Description of the header packet.
 
-* In SCHC Fragmentation to identify the specific modes and settings. In bidirectional SCHC Fragmentation at least two Rules   
+* In SCHC F/R to identify the specific modes and settings. In bidirectional SCHC F/R at least two Rules   
   ID are needed.
   
-* To identify the SCHC ACK in fragmentation 
+* To identify the SCHC ACK in SCHC F/R 
 
-* And at least one Rule ID MAY be reserved to the case where no SCHC C/D nor SCHC Fragmentation were possible.
+* And at least one Rule ID MAY be reserved to the case where no SCHC C/D nor SCHC F/R were possible.
 
 
 # Static Context Header Compression {#SCHComp}
@@ -370,18 +373,18 @@ or they can be pre-provisioned. The way the contexts are provisioned on both end
 {: #Fig-archi title='Architecture'}
 
 {{Fig-archi}} The figure represents the architecture for SCHC (Static Context Header Compression) Compression/Fragmentation
-where SCHC C/D (Compressor/Decompressor) and SCHC Fragmentation are performed. It is based on {{I-D.ietf-lpwan-overview}}
-terminology.
+where SCHC C/D (Compressor/Decompressor) and SCHC F/R (Fragmentation/Reassembly) are performed. It is based on {{I-D.ietf-
+lpwan-overview}} terminology.
 SCHC Compression/Fragmentation is located on both sides of the transmission in the Dev and in the Network side.
 In the Uplink direction, the Device application packets use IPv6 or IPv6/UDP protocols. Before sending these packets, the Dev
 compresses their headers using SCHC C/D and if the SCHC Packet resulting from the compression exceeds the maximum payload
-size of the underlying LPWAN technology, SCHC Fragmentation is performed, see {{Frag}}. The resulting SCHC Fragments are sent
+size of the underlying LPWAN technology, SCHC F/R is performed, see {{Frag}}. The resulting SCHC Fragments are sent
 as one or more L2 frames to an LPWAN Radio Gateway (RG) which forwards the frame(s) to a Network Gateway (NGW).
 
-The NGW sends the data to an SCHC Fragmentation and then to the SCHC C/D for decompression. The SCHC C/D in the Network side
+The NGW sends the data to a SCHC F/R and then to the SCHC C/D for decompression. The SCHC C/D in the Network side
 can be located in the Network Gateway (NGW) or somewhere else as long as a tunnel is established between the NGW and the SCHC
-Compression/Fragmentation. Note that, for some LPWAN technologies, it MAY be suitable to locate SCHC Fragmentation and
-reassembly functionality nearer the NGW, in order to better deal with time constraints of such technologies.
+Compression/Fragmentation. Note that, for some LPWAN technologies, it MAY be suitable to locate SCHC Fragmentation/Reassembly 
+functionality nearer the NGW, in order to better deal with time constraints of such technologies.
 The SCHC C/Ds on both sides MUST share the same set of Rules. After decompression, the packet can be sent over the Internet
 to one or several LPWAN Application Servers (App).
 
@@ -499,7 +502,7 @@ The compression/decompression process follows several steps:
     compressed header (with possibly a Compression Residue) SHOULD be obtained. Otherwise, the next Rule is tested.
 
   * If no eligible Rule is found, then the header MUST be sent without compression, depending on the L2 PDU size, this is one
-    of the case that MAY require the use of the SCHC Fragmentation process.
+    of the case that MAY require the use of the SCHC F/R process.
 
 * Sending: If an eligible Rule is found, the Rule ID is sent to the other end followed by the Compression Residue (which
   could be empty) and directly followed by the payload. The Compression Residue is the concatenation of the Compression Residues for each field according to the CDAs for that rule.
@@ -564,7 +567,7 @@ the original value.
 |not-sent            |elided       |use value stored in ctxt    |
 |value-sent          |send         |build from received value   |
 |mapping-sent        |send index   |value from index on a table |
-|LSB(y)              |send LSB     |TV, received value          |
+|LSB                 |send LSB     |TV, received value          |
 |compute-length      |elided       |compute length              |
 |compute-checksum    |elided       |compute UDP checksum        |
 |Deviid              |elided       |build IID from L2 Dev addr  |
@@ -621,9 +624,9 @@ On the decompressor side, the CDA uses the received index to restore the field v
 
 The number of bits sent is the minimal size for coding all the possible indices.
 
-### LSB(y) CDA
+### LSB CDA
 
-The LSB(y) action is used together with the "MSB(x)" MO to avoid sending the higher part of the packet field if that part is
+The LSB action is used together with the "MSB(x)" MO to avoid sending the higher part of the packet field if that part is
 already known by the receiving end. A length can be specified in the rule to indicate
 how many bits have to be sent. If the length is not specified, the number of bits sent is the
 original header field length minus the length specified in the MSB(x) MO.
@@ -660,33 +663,33 @@ length.
 
 ## Overview
 
-In LPWAN technologies, the L2 data unit size typically varies from tens to hundreds of bytes. The SCHC Fragmentation MAY be
-used either because after applying SCHC C/D or when SCHC C/D is not possible the entire SCHC Packet still exceeds the L2 data
-unit.
+In LPWAN technologies, the L2 data unit size typically varies from tens to hundreds of bytes. The SCHC Fragmentation 
+/Reassembly MAY be used either because after applying SCHC C/D or when SCHC C/D is not possible the entire SCHC Packet still 
+exceeds the L2 data unit.
 
-The SCHC Fragmentation functionality defined in this document has been designed under the assumption that data unit out-of-
+The SCHC F/R functionality defined in this document has been designed under the assumption that data unit out-of-
 sequence delivery will not happen between the entity performing fragmentation and the entity performing reassembly.  This
-assumption allows reducing the complexity and overhead of the SCHC Fragmentation mechanism.
+assumption allows reducing the complexity and overhead of the SCHC F/R mechanism.
 
-To adapt the SCHC Fragmentation to the capabilities of LPWAN technologies is required to enable optional SCHC Fragment
+To adapt the SCHC F/R to the capabilities of LPWAN technologies is required to enable optional SCHC Fragment
 retransmission and to allow a stepper delivery for the reliability of SCHC Fragments. This document does not make any
 decision with regard to which SCHC Fragment delivery reliability mode will be used over a specific LPWAN technology. These
 details will be defined in other technology-specific documents.
 
 ## Fragmentation Tools
 
-This subsection describes the different tools that are used to enable the SCHC Fragmentation functionality defined in this
-document, such as fields in the SCHC Fragmentation header frames (see the related formats in {{Fragfor}}), and the different
+This subsection describes the different tools that are used to enable the SCHC F/R functionality defined in this
+document, such as fields in the SCHC F/R header frames (see the related formats in {{Fragfor}}), and the different
 parameters supported in the reliability modes such as timers and parameters.  
 
 * Rule ID. The Rule ID is present in the SCHC Fragment header and in the SCHC ACK header format.  The Rule ID in a SCHC 
-  fragment header is used to identify that a SCHC Fragment is being carried, which SCHC Fragmentation reliability mode is 
-  used and which window size is used. The Rule ID  in the SCHC Fragmentation header also allows interleaving non-fragmented   
+  fragment header is used to identify that a SCHC Fragment is being carried, which SCHC F/R reliability mode is 
+  used and which window size is used. The Rule ID  in the SCHC F/R header also allows interleaving non-fragmented   
   packets and SCHC Fragments that carry other SCHC Packets. The Rule ID in an SCHC ACK identifies the message as an SCHC ACK.
 
 * Fragment Compressed Number (FCN).  The FCN is included in all SCHC Fragments. This field can be understood as a truncated,
   efficient representation of a larger-sized fragment number, and does not carry an absolute SCHC Fragment number. There are
-  two FCN reserved values that are used for controlling the SCHC Fragmentation process, as described next:
+  two FCN reserved values that are used for controlling the SCHC F/R process, as described next:
   
   * The FCN value with all the bits equal to 1 (All-1) denotes the last SCHC Fragment of a packet. The last window of a
   packet is called an All-1 window. 
@@ -1219,7 +1222,7 @@ with the encoded Bitmap is not sent at the end of each window but only when at l
 has been lost. Excepts for the last window where an SCHC ACK MUST be sent to finish the transmission.  
 
 In ACK-on-Error, the Retransmission Timer expiration will be considered as a positive acknowledgment. This timer is set after
-sending an All-0 or an All-1 fragment. When the All-1 fragment has been sent, then the on-going SCHC Fragmentation process is
+sending an All-0 or an All-1 fragment. When the All-1 fragment has been sent, then the on-going SCHC F/R process is
 finished and the sender waits for the last SCHC ACK.  If the Retransmission Timer expires while waiting for the SCHC ACK for 
 the last window, an All-1 empty MUST be sent to request the last SCHC ACK by the sender to complete the SCHC Fragmented 
 packet transmission. When it expires the sender continue sending SCHC Fragments of the next window.
@@ -1319,8 +1322,8 @@ a multiple of 8 bits (see {{Fig-SCHCpckt}}). If needed, padding bits can be adde
 Rule ID and the Compression Residue) tells its length and the payload is always a multiple of 8 bits, the receiver can without
 ambiguity remove the padding bits, which never exceed 7 bits.
 
-SCHC Fragmentation works on a byte aligned (i.e. padded SCHC Packet). Fragmentation header may not be aligned on byte
-boundary, but each fragment except the last one (All-1 fragment) must sent the maximum bits as possible. Only the last
+SCHC F/R works on a byte aligned (i.e. padded SCHC Packet). Fragmentation header may not be aligned on byte boundary, but 
+each fragment except the last one (All-1 fragment) must sent the maximum bits as possible. Only the last
 fragment need to introduce padding to reach the next boundary limit. Since the SCHC is known to be a multiple of 8 bits, the
 receiver can remove the extra bit to reach this limit.
 
@@ -1468,7 +1471,7 @@ In other cases, the length SHOULD be sent and the CDA is replaced by "value-sent
 
 IPv6 mandates a checksum in the protocol above IP. Nevertheless, if a more efficient
 mechanism such as L2 CRC or MIC is carried by or over the L2 (such as in the
-LPWAN SCHC Fragmentation process (see {{Frag}})), the UDP checksum transmission can be avoided.
+LPWAN SCHC F/R process (see {{Frag}})), the UDP checksum transmission can be avoided.
 In that case, the TV is not set, the MO is set to "ignore" and the CDA is set to
 "compute-checksum".
 
@@ -1485,8 +1488,8 @@ Header Compression does not add more security problem than what is already neede
 For instance, to avoid an attack, never re-construct a packet bigger than some configured size (with 1500 bytes as generic
 default).
 
-## Security considerations for SCHC Fragmentation
-This subsection describes potential attacks to LPWAN SCHC Fragmentation
+## Security considerations for SCHC Fragmentation/Reassembly
+This subsection describes potential attacks to LPWAN SCHC F/R
 and suggests possible countermeasures.
 
 A node can perform a buffer reservation attack by sending a first
@@ -1647,8 +1650,8 @@ Rule 0
  |IPv6 APPprefix  |64|1 |Bi|gamma/64 | equal  | not-sent   ||      |
  |IPv6 APPiid     |64|1 |Bi|::1000   | equal  | not-sent   ||      |
  +================+==+==+==+=========+========+============++======+
- |UDP DEVport     |16|1 |Bi|8720     | MSB(12)| LSB(4)     || [4]  |
- |UDP APPport     |16|1 |Bi|8720     | MSB(12)| LSB(4)     || [4]  |
+ |UDP DEVport     |16|1 |Bi|8720     | MSB(12)| LSB        || [4]  |
+ |UDP APPport     |16|1 |Bi|8720     | MSB(12)| LSB        || [4]  |
  |UDP Length      |16|1 |Bi|         | ignore | comp-length||      |
  |UDP checksum    |16|1 |Bi|         | ignore | comp-chk   ||      |
  +================+==+==+==+=========+========+============++======+
