@@ -157,7 +157,7 @@ This section defines the terminology and acronyms used in this document.
 * CDA: Compression/Decompression Action. Describes the reciprocal pair of actions that are performed at the compressor to
   compress a header field and at the decompressor to recover the original header field value.
 
-* Compress Residue. The bytes that need to be sent after applying the SCHC compression over each header field
+* Compression Residue. The bits that need to be sent after applying the SCHC compression over each header field
 
 * Context: A set of rules used to compress/decompress headers.
 
@@ -282,13 +282,13 @@ SENDER                                                RECEIVER
 ~~~~
 {: #Fig-Operations title='SCHC operations taking place at the sender and the receiver'}
 
-The SCHC Packet Compressed Header is formed by the Rule ID and the Compress Residue both have a variable size, and in some 
-cases, the Compress Residue is not present depending on the Header Compression achievement, see {{SCHComp}} for more details. 
-The SCHC Packet has the following format:
+
+The SCHC Packet is composed of the Compressed Header followed by the payload from the original packet (see {{Fig-SCHCpckt}}).
+The Compressed Header itself is composed of a Rule ID and a Compression Residue. The Compression Residue may be absent, see {{SCHComp}}. Both the Rule ID and the Compression Residue potentially have a variable size, and generally are not a mutiple of bytes in size.
   
 ~~~~
 
-|  Rule ID   +  Compress  Residue |
+|  Rule ID +  Compression Residue |
 +---------------------------------+--------------------+ 
 |      Compressed Header          |      Payload       |
 +---------------------------------+--------------------+
@@ -496,14 +496,13 @@ The compression/decompression process follows several steps:
 
     If all the fields in the packet's header satisfy all the matching operators (MO) of a Rule (i.e. all MO results are
     True), the fields of the header are then compressed according to the Compression/Decompression Actions (CDAs) and a
-    compressed header (with possibly a Compressed Residue) SHOULD be obtained. Otherwise, the next Rule is tested.
+    compressed header (with possibly a Compression Residue) SHOULD be obtained. Otherwise, the next Rule is tested.
 
   * If no eligible Rule is found, then the header MUST be sent without compression, depending on the L2 PDU size, this is one
     of the case that MAY require the use of the SCHC Fragmentation process.
 
 * Sending: If an eligible Rule is found, the Rule ID is sent to the other end followed by the Compression Residue (which
-  could be empty) and directly followed by the payload. The product of the Compression Residue is sent in the order expressed
-  in the Rule for all the fields.
+  could be empty) and directly followed by the payload. The Compression Residue is the concatenation of the Compression Residues for each field according to the CDAs for that rule.
   The way the Rule ID is sent depends on the specific LPWAN layer two technology. For example, it can be either included in a
   Layer 2 header or sent in the first byte of the L2 payload. (Cf. {{Fig-FormatPckt}}). This process will be specified in the
   LPWAN technology-specific document and is out of the scope of the present document. On LPWAN technologies that are byte-
@@ -599,7 +598,7 @@ therefore known by both the Compressor and the Decompressor. This action is gene
 "equal" MO. If MO is "ignore", there is a risk to have a decompressed field
 value different from the compressed field.
 
-The compressor does not send any value in the Compressed Residue for a field on which not-sent compression is applied.
+The compressor does not send any Compression Residue for a field on which not-sent compression is applied.
 
 The decompressor restores the field value with the Target Value stored in the matched Rule identified by the received Rule ID.
 
@@ -608,7 +607,7 @@ The decompressor restores the field value with the Target Value stored in the ma
 The value-sent action is generally used when the field value is not known by both Compressor and Decompressor.
 The value is sent in the compressed message header. Both Compressor and Decompressor MUST know the
 size of the field, either implicitly (the size is known by both sides)
-or explicitly in the compression residue by indicating the length, as defined in {{chap-CDA}}. This function is generally
+or by explicitly indicating the length in the Compression Residue, as defined in {{chap-CDA}}. This function is generally
 used with the "ignore" MO.
 
 ### mapping-sent CDA
@@ -632,7 +631,7 @@ original header field length minus the length specified in the MSB(x) MO.
 The compressor sends the Least Significant Bits (e.g. LSB of the length field). The
 decompressor combines the value received with the Target Value depending on the field type.
 
-If this action needs to be done on a variable length field, the size of the Compressed Residue in bytes MUST be sent as
+If this action needs to be done on a variable length field, the size of the Compression Residue in bytes MUST be sent as
 described in {{chap-CDA}}.
 
 
@@ -1315,10 +1314,10 @@ been received by the SCHC Fragment receiver, and it also assumes that it is unli
 Default padding is defined for L2 frame with a variable length of bytes. Padding is done twice, after compression and in the
 all-1 fragmentation.
 
-In compression, the rule and the compression residues are not aligned on a byte, but payload following the residue is always
-a multiple of 8 bits. In that case, padding bits can be added after the payload to reach the first byte boundary. Since the
-rule and the residue give the length of the SCHC header and payload is always a multiple of 8 bits, the receiver can without
-ambiguity remove the padding bits which never excide 7 bits.
+In compression, the Compressed Header is generally not a multiple of bytes in size, but the payload following the Compressed Header is always
+a multiple of 8 bits (see {{Fig-SCHCpckt}}). If needed, padding bits can be added after the payload to reach the next byte boundary. Since the Compressed Header (through the
+Rule ID and the Compression Residue) tells its length and the payload is always a multiple of 8 bits, the receiver can without
+ambiguity remove the padding bits, which never exceed 7 bits.
 
 SCHC Fragmentation works on a byte aligned (i.e. padded SCHC Packet). Fragmentation header may not be aligned on byte
 boundary, but each fragment except the last one (All-1 fragment) must sent the maximum bits as possible. Only the last
