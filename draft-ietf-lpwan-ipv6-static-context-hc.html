@@ -344,7 +344,7 @@ address {
 
   <meta name="dct.creator" content="Minaburo, A., Toutain, L., and C. Gomez" />
   <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-lpwan-ipv6-static-context-hc-12" />
-  <meta name="dct.issued" scheme="ISO8601" content="2018-05-18" />
+  <meta name="dct.issued" scheme="ISO8601" content="2018-05-22" />
   <meta name="dct.abstract" content="This document defines the Static Context Header Compression (SCHC) framework, which provides header compression and fragmentation functionality. SCHC has been tailored for Low Power Wide Area Networks (LPWAN)." />
   <meta name="description" content="This document defines the Static Context Header Compression (SCHC) framework, which provides header compression and fragmentation functionality. SCHC has been tailored for Low Power Wide Area Networks (LPWAN)." />
 
@@ -368,7 +368,7 @@ address {
 <td class="right">L. Toutain</td>
 </tr>
 <tr>
-<td class="left">Expires: November 19, 2018</td>
+<td class="left">Expires: November 23, 2018</td>
 <td class="right">IMT-Atlantique</td>
 </tr>
 <tr>
@@ -381,7 +381,7 @@ address {
 </tr>
 <tr>
 <td class="left"></td>
-<td class="right">May 18, 2018</td>
+<td class="right">May 22, 2018</td>
 </tr>
 
     	
@@ -399,7 +399,7 @@ address {
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at https://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on November 19, 2018.</p>
+<p>This Internet-Draft will expire on November 23, 2018.</p>
 <h1 id="rfc.copyrightnotice"><a href="#rfc.copyrightnotice">Copyright Notice</a></h1>
 <p>Copyright (c) 2018 IETF Trust and the persons identified as the document authors.  All rights reserved.</p>
 <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (https://trustee.ietf.org/license-info) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.</p>
@@ -773,7 +773,7 @@ SENDER                                                RECEIVER
 
 <ul>
 <li>Field ID (FID) is a unique value to define the header field.</li>
-<li>Field Length (FL) represents the length of the field in bits for fixed values or a type (variable, token length, &#8230;) for Field Description length unknown at the rule creation. The length of a header field is defined in the specific protocol standard.</li>
+<li>Field Length (FL) represents the length of the field. It can be either a fixed value (in bits) if the length is known when the rule is created or a type if the length is variable.  The length of a header field is defined in the specific protocol standard.  The type defines the process to compute length, its unit (bits, bytes,&#8230;) and the value to be sent before the compression residue.</li>
 <li>Field Position (FP): indicating if several instances of a field exist in the headers which one is targeted. The default position is 1.</li>
 <li>A direction indicator (DI) indicates the packet direction(s) this Field Description applies to. Three values are possible:  <ul>
 <li>UPLINK (Up): this Field Description is only applicable to packets sent by the Dev to the App,</li>
@@ -803,7 +803,7 @@ SENDER                                                RECEIVER
 <li>If no eligible Rule is found, then the header MUST be sent without compression, depending on the L2 PDU size, this is one of the case that MAY require the use of the SCHC F/R process.</li>
 </ul>
 </li>
-<li>Sending: If an eligible Rule is found, the Rule ID is sent to the other end followed by the Compression Residue (which could be empty) and directly followed by the payload. The Compression Residue is the concatenation of the Compression Residues for each field according to the CDAs for that rule.  The way the Rule ID is sent depends on the specific LPWAN layer two technology. For example, it can be either included in a Layer 2 header or sent in the first byte of the L2 payload. (Cf. <a href="#Fig-FormatPckt" class="xref">Figure 9</a>). This process will be specified in the LPWAN technology-specific document and is out of the scope of the present document. On LPWAN technologies that are byte- oriented, the compressed header concatenated with the original packet payload is padded to a multiple of 8 bits, if needed.  See <a href="#Padding" class="xref">Section 8</a> for details.</li>
+<li>Sending: If an eligible Rule is found, the Rule ID is sent to the other end followed by the Compression Residue (which could be empty) and directly followed by the payload. The Compression Residue is the concatenation of the Compression<br> Residues for each field according to the CDAs for that rule.  The way the Rule ID is sent depends on the specific LPWAN layer two technology. For example, it can be either included in a Layer 2 header or sent in the first byte of the L2 payload. (Cf. <a href="#Fig-FormatPckt" class="xref">Figure 9</a>). This process will be specified in the LPWAN technology-specific document and is out of the scope of the present document. On LPWAN technologies that are byte- oriented, the compressed header concatenated with the original packet payload is padded to a multiple of 8 bits, if needed.  See <a href="#Padding" class="xref">Section 8</a> for details.</li>
 <li>Decompression: When doing decompression, in the network side the SCHC C/D needs to find the correct Rule based on the L2 address and in this way, it can use the Dev-ID and the Rule-ID. In the Dev side, only the Rule ID is needed to identify the correct Rule since the Dev only holds Rules that apply to itself.  <br><br> The receiver identifies the sender through its device-id (e.g. MAC address, if exists) and selects the appropriate Rule  <br> from the Rule ID. If a source identifier is present in the L2 technology, it is used to select the Rule ID. This Rule describes the compressed header format and associates the values to the header fields.  The receiver applies the CDA action to reconstruct the original header fields. The CDA application order can be different from the order given by the Rule. For instance, Compute-* SHOULD be applied at the end, after all the other CDAs.</li>
 </ul>
 <div id="rfc.figure.9"></div>
@@ -826,7 +826,7 @@ SENDER                                                RECEIVER
 <ul>
 <li>equal: The match result is True if a field value in a packet and the value in the TV are equal.</li>
 <li>ignore: No check is done between a field value in a packet and a TV in the Rule. The result of the matching is always true.</li>
-<li>MSB(x): A match is obtained if the most significant x bits of the field value in the header packet are equal to the TV in the Rule. The x parameter of the MSB Matching Operator indicates how many bits are involved in the comparison.</li>
+<li>MSB(x): A match is obtained if the most significant x bits of the field value in the header packet are equal to the TV in the Rule.  The x parameter of the MSB Matching Operator indicates how many bits are involved in the comparison. If the FL is described as variable, the length must be a multiple of the unit. For example, x must be multiple of 8 if the unit of the variable length is in bytes.</li>
 <li>match-mapping: With match-mapping, the Target Value is a list of values. Each value of the list is identified by a short ID (or index). Compression is achieved by sending the index instead of the original header field value.  This operator matches if the header field value is equal to one of the values in the target list.</li>
 </ul>
 <h1 id="rfc.section.6.5">
@@ -855,7 +855,7 @@ y=size of the transmitted bits
 <p class="figure">Figure 10: Compression and Decompression Functions</p>
 <p><a href="#Fig-function" class="xref">Figure 10</a> summarizes the basic functions that can be used to compress and decompress a field. The first column lists the actions name. The second and third columns outline the reciprocal compression/decompression behavior for each action.</p>
 <p id="rfc.section.6.5.p.3">Compression is done in order that Fields Descriptions appear in the Rule. The result of each Compression/Decompression Action is appended to the working Compression Residue in that same order. The receiver knows the size of each compressed field which can be given by the rule or MAY be sent with the compressed header.</p>
-<p id="rfc.section.6.5.p.4">If the field is identified as being variable in the Field Description, then the size of the Compression Residue value in bytes MUST be sent first using the following coding:</p>
+<p id="rfc.section.6.5.p.4">If the field is identified as being variable in the Field Description, then the size of the Compression Residue value (using the unit defined in the FL) MUST be sent first using the following coding:</p>
 <p></p>
 
 <ul>
@@ -908,7 +908,7 @@ y=size of the transmitted bits
 <h1 id="rfc.section.7.1">
 <a href="#rfc.section.7.1">7.1.</a> <a href="#overview" id="overview">Overview</a>
 </h1>
-<p id="rfc.section.7.1.p.1">In LPWAN technologies, the L2 data unit size typically varies from tens to hundreds of bytes. The SCHC Fragmentation /Reassembly MAY be used either because after applying SCHC C/D or when SCHC C/D is not possible the entire SCHC Packet still exceeds the L2 data unit.</p>
+<p id="rfc.section.7.1.p.1">In LPWAN technologies, the L2 data unit size typically varies from tens to hundreds of bytes. The SCHC F/R (Fragmentation /Reassembly) MAY be used either because after applying SCHC C/D or when SCHC C/D is not possible the entire SCHC Packet still exceeds the L2 data unit.</p>
 <p id="rfc.section.7.1.p.2">The SCHC F/R functionality defined in this document has been designed under the assumption that data unit out-of- sequence delivery will not happen between the entity performing fragmentation and the entity performing reassembly.  This assumption allows reducing the complexity and overhead of the SCHC F/R mechanism.</p>
 <p id="rfc.section.7.1.p.3">To adapt the SCHC F/R to the capabilities of LPWAN technologies is required to enable optional SCHC Fragment retransmission and to allow a stepper delivery for the reliability of SCHC Fragments. This document does not make any decision with regard to which SCHC Fragment delivery reliability mode will be used over a specific LPWAN technology. These details will be defined in other technology-specific documents.</p>
 <h1 id="rfc.section.7.2">
