@@ -594,7 +594,7 @@ Compression is done in order that Fields Descriptions appear in the Rule. The re
 If the field is identified as being variable in the Field Description, then the size of the Compression Residue value 
 (using the unit defined in the FL) MUST be sent first using the following coding:
 
-* If the size is between 0 and 14 bytes, it is sent as a 4-bits integer.
+* If the size is between 0 and 14, it is sent as a 4-bits integer.
 
 * For values between 15 and 254, the first 4 bits sent are set to 1 and the size is sent using 8 bits integer.
 
