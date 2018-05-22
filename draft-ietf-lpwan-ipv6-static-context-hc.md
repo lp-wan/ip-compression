@@ -783,7 +783,7 @@ parameters supported in the reliability modes such as timers and parameters.
 
 ## Reliability modes
 
-This specification defines three reliability modes: No-ACK, ACK-Always and ACK-on-Error. ACK-Always and ACK-on-Error operate
+This specification defines three reliability modes: No-ACK, ACK-Always, and ACK-on-Error. ACK-Always and ACK-on-Error operate
 on windows of SCHC Fragments. A window of SCHC Fragments is a subset of the full set of SCHC Fragments needed to carry a
 packet or an SCHC Packet.
 
@@ -798,7 +798,7 @@ packet or an SCHC Packet.
   whole number of SCHC Fragments needed to carry a complete SCHC Packet. The SCHC ACK is used to inform the sender if a SCHC 
   fragment in the actual window has been lost or well received. Upon an SCHC ACK reception, the sender retransmits the lost 
   SCHC Fragments. When an SCHC ACK is lost and the sender has not received it before the expiration of the Retransmission 
-  Timer, the sender uses an SCHC ACK request by sending the All-0 empty SCHC Fragment when it is not the last windown and the 
+  Timer, the sender uses an SCHC ACK request by sending the All-0 empty SCHC Fragment when it is not the last window and the 
   ALL-1 empty Fragment when it is the last window. The maximum number of SCHC ACK requests is MAX_ACK_REQUESTS. If the 
   MAX_ACK_REQUEST is reached the transmission needs to be Aborted. See further details 
   in {{ACK-Always-subsection}}.
@@ -996,8 +996,8 @@ to 1 to indicate that the MIC check computed by the receiver matches the MIC pre
 The Bitmap is transmitted by a receiver as part of the SCHC ACK format. An SCHC ACK message MAY include padding at the end to 
 align its number of transmitted bits to a multiple of 8 bits.  
 
-Note that the SCHC ACK sent in response to an All-1 fragment includes the C bit. Therefore, the window size and thus the 
-encoded Bitmap size need to be determined taking into account the available space in the layer two frame payload, where there 
+Note that the SCHC ACK sent a response to an All-1 fragment including the C bit. Therefore, the window size and thus the 
+encoded Bitmap size need to be determined to take into account the available space in the layer two frame payload, where there 
 will be 1 bit less for an SCHC ACK sent in response to an All-1 fragment than in other SCHC ACKs. Note that the maximum 
 number of SCHC Fragments of the last window is one unit smaller than that of the previous windows.
 
@@ -1016,7 +1016,7 @@ In order to reduce the resulting frame size, the encoded Bitmap is shortened by 
 right-most contiguous bytes in the encoded Bitmap that have all their bits set to 1 MUST NOT be transmitted.  Because the
 SCHC Fragment sender knows the actual Bitmap size, it can reconstruct the original Bitmap with the trailing 1 bit optimized
 away.  In the example shown in {{Fig-transmittedbitmap}}, the last 2 bytes of the Bitmap shown in {{Fig-Localbitmap}}
-comprise bits that are all set to 1, therefore they are not sent.
+comprises bits that are all set to 1, therefore they are not sent.
 
 ~~~~   
             |-- T --|1|
