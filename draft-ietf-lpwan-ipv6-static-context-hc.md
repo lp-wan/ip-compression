@@ -441,9 +441,11 @@ The Context describes the header fields and its values with the following entrie
 
 * Field ID (FID) is a unique value to define the header field.
 
-* Field Length (FL) represents the length of the field in bits for fixed values or a type (variable, token length, ...) for 
-  Field Description length unknown at the rule creation. The length of a header field is defined in the specific protocol 
-  standard.
+* Field Length (FL) represents the length of the field. It can be either a fixed value (in bits) 
+  if the length is known when the rule is created or a type if the length is variable. 
+  The length of a header field is defined in the specific protocol standard. 
+  The type defines the process to compute length, its unit (bits, bytes,...) 
+  and the value to be sent before the compression residue.  
 
 * Field Position (FP): indicating if several instances of a field exist in the headers which one is targeted. The default
   position is 1.
@@ -505,7 +507,8 @@ The compression/decompression process follows several steps:
     of the case that MAY require the use of the SCHC F/R process.
 
 * Sending: If an eligible Rule is found, the Rule ID is sent to the other end followed by the Compression Residue (which
-  could be empty) and directly followed by the payload. The Compression Residue is the concatenation of the Compression Residues for each field according to the CDAs for that rule.
+  could be empty) and directly followed by the payload. The Compression Residue is the concatenation of the Compression  
+  Residues for each field according to the CDAs for that rule.
   The way the Rule ID is sent depends on the specific LPWAN layer two technology. For example, it can be either included in a
   Layer 2 header or sent in the first byte of the L2 payload. (Cf. {{Fig-FormatPckt}}). This process will be specified in the
   LPWAN technology-specific document and is out of the scope of the present document. On LPWAN technologies that are byte-
@@ -545,9 +548,13 @@ or any other data type. The result of the operation can either be True or False.
 * ignore: No check is done between a field value in a packet and a TV
   in the Rule. The result of the matching is always true.
 
-* MSB(x): A match is obtained if the most significant x bits
-  of the field value in the header packet are equal to the TV in the Rule. The x parameter of the MSB Matching Operator
-  indicates how many bits are involved in the comparison.
+* MSB(x): A match is obtained if the most significant x bits of the
+      field value in the header packet are equal to the TV in the Rule.
+      The x parameter of the MSB Matching Operator indicates how many
+      bits are involved in the comparison. If the FL is described as 
+      variable, the length must be a multiple of the unit. For example, 
+      x must be multiple of 8 if the unit of the variable length is in 
+      bytes.
 
 * match-mapping: With match-mapping, the Target Value is a list of values. Each value of the list is identified by a short ID (or index). Compression is achieved by sending the index instead of the original header field value.
   This operator matches if the header field value is equal to one of the values in the target list.
@@ -584,7 +591,8 @@ columns outline the reciprocal compression/decompression behavior for each actio
 
 Compression is done in order that Fields Descriptions appear in the Rule. The result of each Compression/Decompression Action is appended to the working Compression Residue in that same order. The receiver knows the size of each compressed field which can be given by the rule or MAY be sent with the compressed header.
 
-If the field is identified as being variable in the Field Description, then the size of the Compression Residue value in bytes MUST be sent first using the following coding:
+If the field is identified as being variable in the Field Description, then the size of the Compression Residue value 
+(using the unit defined in the FL) MUST be sent first using the following coding:
 
 * If the size is between 0 and 14 bytes, it is sent as a 4-bits integer.
 
@@ -663,8 +671,8 @@ length.
 
 ## Overview
 
-In LPWAN technologies, the L2 data unit size typically varies from tens to hundreds of bytes. The SCHC Fragmentation 
-/Reassembly MAY be used either because after applying SCHC C/D or when SCHC C/D is not possible the entire SCHC Packet still 
+In LPWAN technologies, the L2 data unit size typically varies from tens to hundreds of bytes. The SCHC F/R (Fragmentation 
+/Reassembly) MAY be used either because after applying SCHC C/D or when SCHC C/D is not possible the entire SCHC Packet still 
 exceeds the L2 data unit.
 
 The SCHC F/R functionality defined in this document has been designed under the assumption that data unit out-of-
