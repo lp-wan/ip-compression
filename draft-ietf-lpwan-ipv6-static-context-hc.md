@@ -507,7 +507,7 @@ The compression/decompression process follows several steps:
     of the case that MAY require the use of the SCHC F/R process.
 
 * Sending: If an eligible Rule is found, the Rule ID is sent to the other end followed by the Compression Residue (which
-  could be empty) and directly followed by the payload. The Compression Residue is the concatenation of the Compression  
+  could be empty) and directly followed by the payload. The Compression Residue is the concatenation of the Compression 
   Residues for each field according to the CDAs for that rule.
   The way the Rule ID is sent depends on the specific LPWAN layer two technology. For example, it can be either included in a
   Layer 2 header or sent in the first byte of the L2 payload. (Cf. {{Fig-FormatPckt}}). This process will be specified in the
