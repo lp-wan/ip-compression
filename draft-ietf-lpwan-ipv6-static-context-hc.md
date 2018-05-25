@@ -1036,17 +1036,12 @@ to 1 to indicate that the MIC check computed by the receiver matches the MIC pre
 {: #Fig-ACK-Format1 title='Format of an SCHC ACK for All-1 windows'}
 
 The Bitmap carries information on the reception of each fragment of the window as described in {{FragTools}}.
+
+See {{SCHCParams}} for a discussion on the size of the Bitmaps.
+
 In order to reduce the SCK ACK size, the Bitmap that is actually transmitted is shortened ("encoded") as explained in {{Bitmapopt}}.
 
 #### Bitmap Encoding {#Bitmapopt}
-
-<<<Dangling text, move to somewhere else or remove>>>
-Note that the SCHC ACK sent a response to an All-1 fragment including the C bit. Therefore, the window size and thus the 
-encoded Bitmap size need to be determined to take into account the available space in the layer two frame payload, where there 
-will be 1 bit less for an SCHC ACK sent in response to an All-1 fragment than in other SCHC ACKs. Note that the maximum 
-number of SCHC Fragments of the last window is one unit smaller than that of the previous windows.
-<<< end dangling text>>>
-
 The Bitmap that is transmitted is shortened by applying the following algorithm: the longest contiguous sequence of Bitmap bits that are
 all set to 1, starting from an L2 Word boundary and up to the end of the Bitmap, if one such sequence exists, MUST NOT be transmitted.
 Because the SCHC Fragment sender knows the actual Bitmap size, it can reconstruct the original Bitmap from the shortened bitmap.
@@ -2250,7 +2245,7 @@ Lcl_Bitmap==recv_Bitmap &| |   |   all missing frag sent
 {: #Fig-ACKonerrorRcv title='Receiver State Machine for the ACK-on-Error Mode'}
 
 
-# SCHC Parameters - Ticket #15
+# SCHC Parameters - Ticket #15 {#SCHCParams}
 
 This section gives the list of parameters that need to be defined in the technology-specific documents, technology developers 
 must evaluate that L2 has strong enough integrity checking to match SCHC's assumption: 
@@ -2286,6 +2281,18 @@ corresponding technology architecture.
 * In the ACK format to have a length for Rule-ID + T + W bit into a complete number of byte to do optimization more easily
 
 * The technology documents will describe if Rule ID is constrained by any alignment
+
+* When fragmenting in Ack-on-Error or Ack-Always mode, it is expected that the last window (called All-1 window) will not be
+  fully utilised, i.e. there won't be fragments with all FCN values from MAX_WIND_FCN downto 1 and finally All-1.
+  It is worth noting that this document does not mandate that other windows (called All-0 windows) are fully utilised either.
+  This document purposely does not specify that All-1 windows use Bitmaps with the same number of bits as All-0 windows do.
+  By default, Bitmaps for All-0 and All-1 windows are of the same size MAX_WIND_FCN + 1. But a technology-specific document
+  MAY revert that decision. The rationale for reverting the decision could be the following: Note that the SCHC ACK sent as a
+  response to an All-1 fragment includes a C bit that SCK ACK for other windows don't have. Therefore, the SCHC ACK for the
+  All-1 window is one bit bigger. An L2 technology with a severely constrained payload size might decide that this "bump" in
+  the SCH ACK for the last fragment is a bad resource usage. It could thus mandate that the All-1 window is not allowed to use
+  the FCN value 1 and that the All-1 SCHC ACK Bitmap size is reduced by 1 bit. This provides room for the C bit without creating
+  a bump in the SCHC ACK.
 
 
 And the following parameters need to be addressed in another document but not forcely in the technology-specific one:
