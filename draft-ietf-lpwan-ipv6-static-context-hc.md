@@ -720,15 +720,12 @@ parameters supported in the reliability modes such as timers and parameters.
   23, then subsequent FCNs are set sequentially and in decreasing order, and the FCN will wrap from 0 back to 23).
 
 * Datagram Tag (DTag). The DTag field, if present, is set to the same value for all SCHC Fragments carrying the same SCHC   
-  packet, and to different values for different SCHC Packets. Using this field, the sender can interleave fragments from
-  different SCHC Packets, while the receiver can still tell them apart.
+  packet. Using this field, the sender can interleave fragments fromdifferent SCHC Packets, while the receiver can still tell them apart.
   In the SCHC Fragment formats, the size of the DTag field is T bits, which MAY be set to a value greater than or equal to 0
   bits. For each new SCHC Packet processed by the sender, DTag MUST be sequentially increased, from 0 to 2^T – 1 wrapping
   back from 2^T - 1 to 0.
   In the SCHC ACK format, DTag carries the same value as the DTag field in the SCHC Fragments for which this SCHC ACK is 
   intended. 
-  When there is no Dtag, there can be only 1 SCHC Packet in transist. And only after all its fragments have been transmitted 
-  another SCHC Packet could be sent.
   The length of DTag, denoted T is not given in this document because is technolgy dependant, and will be defined in the 
   corresponding technology-documents. DTag is based on the number of simultaneous packets supported.  
 
@@ -872,7 +869,7 @@ total size of the fragment header is not byte aligned.
 
 ~~~~
 
- |---Fragmentation Header---|
+ |---Fragmentation Header--|
            |-- T --|-- N --|
  +-- ... --+- ... -+- ... -+--------...-------+
  | Rule ID |  DTag |  FCN  | Fragment payload |
@@ -1007,7 +1004,7 @@ will Abort the transmission.
 ~~~~                                                  
                    |----         Bitmap bits       ----|   
 | Rule ID | DTag |W|1|0|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|   
-|--- byte boundary ----| 1 byte  next  |  1 byte next  |   
+|next byte boundary -->|  next byte -->|  next byte -->|   
 
 ~~~~
 {: #Fig-Localbitmap title='A non-encoded Bitmap'}
@@ -1023,7 +1020,7 @@ comprises bits that are all set to 1, therefore they are not sent.
 +---- ... --+- ... -+-+-+-+
 |  Rule ID  |  DTag |W|1|0|
 +---- ... --+- ... -+-+-+-+
-|---- byte boundary -----|    
+|  next byte boundary --->|    
 
 ~~~~
 {: #Fig-transmittedbitmap title='Optimized Bitmap format'}
@@ -1037,13 +1034,13 @@ indicates that the second and the fifth SCHC Fragments have not been correctly r
 +---------+-------+-+-+-+-+-+-+-+-----+
 | Rule ID |  DTag |W|1|0|1|1|0|1|all-0| Bitmap(before tx)
 +---------+-------+-+-+-+-+-+-+-+-----+
-|<-- byte boundary ->|<---- 1 byte---->|
+|next byte boundary ->|  next  byte --->|
     (*)=(FCN values)
 
-+---------+------+-+-+-+-+-+-+-+-----+~~
-| Rule ID | DTag |W|1|0|1|1|0|1|all-0|Padding(opt.) encoded Bitmap
-+---------+------+-+-+-+-+-+-+-+-----+~~
-|<-- byte boundary ->|<---- 1 byte---->|
++---------+-------+-+-+-+-+-+-+-+-----+~~
+| Rule ID | DTag  |W|1|0|1|1|0|1|all-0|Padding(opt.) encoded Bitmap
++---------+-------+-+-+-+-+-+-+-+-----+~~
+|next byte boundary ->|  next  byte---->|
 
 ~~~~
 {: #Fig-Bitmap-Win title='Example of a Bitmap before transmission, and the transmitted one, in any window except the last one'}
@@ -1055,12 +1052,12 @@ MIC check has failed but there are no missing SCHC Fragments.
  |-Fragmentation Header-|6 5 4 3 2 1 7 (*)
             |-- T --|1|
  |  Rule ID |  DTag |W|0|1|1|1|1|1|1|1|padding|  Bitmap (before tx)
- |---- byte boundary -----|  1 byte next |  
+ |next byte boundary ---->| next byte -->|  
                        C
  +---- ... --+-... -+-+-+-+
  |  Rule ID  | DTag |W|0|1| encoded Bitmap
  +---- ... --+-... -+-+-+-+
- |---- byte boundary -----|
+ |next byte boundary ---->|
    (*) = (FCN values indicating the order)
 
 ~~~~
@@ -1078,7 +1075,7 @@ Abort.
 
 When a SCHC Fragment receiver needs to abort the on-going SCHC Fragmented packet transmission, it transmits the Receiver-
 Abort format {{Fig-ACKabort}}, creating an exception in the encoded Bitmap coding. Encoded Bitmap avoid sending the rigth
-most bits of the Bitmap set to 1. Abort is coded as an SCHC ACK message with a Bitmap set to 1 until the byte boundary, 
+most bits of the Bitmap set to 1. Abort is coded as an SCHC ACK message with a Bitmap set to 1 until the next byte boundary, 
 followed by an extra 0xFF byte. Such message never occurs in a regular acknowledgement and is view as an abort.
 
 None of these messages are not acknowledged nor retransmitted.
@@ -1099,7 +1096,7 @@ window. Some other cases for Abort are explained in the {{FragModes}} or {{FSM}}
 
 ~~~~
 
- |----- byte boundary ------|---- 1 byte ---|
+ | next byte boundary  ---->|---- 1 byte ---|
 
  +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+-+-+
  |  Rule ID  | DTag |W| 1..1|       FF      |  
@@ -1330,8 +1327,7 @@ a multiple of 8 bits (see {{Fig-SCHCpckt}}). If needed, padding bits can be adde
 Rule ID and the Compression Residue) tells its length and the payload is always a multiple of 8 bits, the receiver can without
 ambiguity remove the padding bits, which never exceed 7 bits.
 
-SCHC F/R works on a byte aligned (i.e. padded SCHC Packet). Fragmentation header may not be aligned on byte boundary, but 
-each fragment except the last one (All-1 fragment) must sent the maximum bits as possible. Only the last
+SCHC F/R works on a byte aligned (i.e. padded SCHC Packet). Fragmentation header may not be aligned on the next byte boundary, but each fragment except the last one (All-1 fragment) must sent the maximum bits as possible. Only the last
 fragment need to introduce padding to reach the next boundary limit. Since the SCHC is known to be a multiple of 8 bits, the
 receiver can remove the extra bit to reach this limit.
 
