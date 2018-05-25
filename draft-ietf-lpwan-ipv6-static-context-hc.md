@@ -1045,9 +1045,6 @@ Note that the SCHC ACK sent a response to an All-1 fragment including the C bit.
 encoded Bitmap size need to be determined to take into account the available space in the layer two frame payload, where there 
 will be 1 bit less for an SCHC ACK sent in response to an All-1 fragment than in other SCHC ACKs. Note that the maximum 
 number of SCHC Fragments of the last window is one unit smaller than that of the previous windows.
-
-When the receiver transmits an encoded Bitmap with a SCHC Fragment that has not been sent during the transmission, the sender
-will Abort the transmission.
 <<< end dangling text>>>
 
 The Bitmap that is transmitted is shortened by applying the following algorithm: the longest contiguous sequence of Bitmap bits that are
@@ -1278,9 +1275,12 @@ means that the sender has received a correct encoded Bitmap reporting that all S
 receiver then updates the value of the next expected window.
 
 When an All-1 fragment is received, it indicates that the last SCHC Fragment of the packet has been sent.  Since the last
-window is not always full, the MIC will be used to detect if all SCHC Fragments of the packet have been received.  A correct
+window is not always full, the MIC will be used by the receiver to detect if all SCHC Fragments of the packet have been received.  A correct
 MIC indicates the end of the transmission but the receiver MUST stay alive for an Inactivity Timer period to answer to any
 empty All-1 fragments the sender MAY send if SCHC ACKs sent by the receiver are lost. If the MIC is incorrect, some SCHC Fragments have been lost. The receiver sends the SCHC ACK regardless of successful SCHC Fragmented packet reception or not, the Inactitivity Timer is set. In case of an incorrect MIC, the receiver waits for SCHC Fragments belonging to the same window. After MAX_ACK_REQUESTS, the receiver will abort the on-going SCHC Fragmented packet transmission by transmitting a the Receiver-Abort format. The receiver also aborts upon Inactivity Timer expiration.
+
+If the sender receives a SCK ACK with a Bitmap containing a bit set for a SCHC Fragment that it has not sent during the
+transmission phase of this window, it MUST abort the whole fragmentation and transmission of this SCHC Packet.
 
 ### ACK-on-Error {#ACK-on-Error-subsection}
 The senders behavior for ACK-on-Error and ACK-Always are similar. The main difference is that in ACK-on-Error the SCHC ACK 
@@ -1296,7 +1296,7 @@ packet transmission. When it expires the sender continue sending SCHC Fragments 
 If the sender receives an SCHC ACK, it checks the window value. SCHC ACKs with an unexpected window number are discarded.  If 
 the window number on the received encoded Bitmap is correct, the sender verifies if the receiver has received all SCHC 
 fragments of the current window.  When at least one SCHC Fragment has been lost, the counter Attempts is increased by one and 
-the sender resends the missing SCHC Fragments again.  When Attempts reaches MAX_ACK_REQUESTS, the sender sends an Abort 
+the sender resends the missing SCHC Fragments again.  When Attempts reaches MAX_ACK_REQUESTS, the sender sends an Abort
 message and releases all resources for the on-going SCHC Fragmented packet transmission.  When the retransmission of the 
 missing SCHC Fragments is finished, the sender starts listening for an SCHC ACK (even if an All-0 or an All-1 has not been 
 sent during the retransmission) and initializes the Retransmission Timer. After sending an All-1 fragment, the sender listens 
@@ -1304,6 +1304,9 @@ for an SCHC ACK, initializes Attempts, and starts the Retransmission Timer. If t
 increased by one and an empty All-1 fragment is sent to request the SCHC ACK for the last window. If Attempts reaches 
 MAX_ACK_REQUESTS, the sender aborts the on-going SCHC Fragmented packet transmission by transmitting the Sender-Abort 
 fragment.
+
+If the sender receives a SCK ACK with a Bitmap containing a bit set for a SCHC Fragment that it has not sent during the
+transmission phase of this window, it MUST abort the whole fragmentation and transmission of this SCHC Packet.
 
 Unlike the sender, the receiver for ACK-on-Error has a larger amount of differences compared with ACK-Always.  First, an SCHC 
 ACK is not sent unless there is a lost SCHC Fragment or an unexpected behavior. With the exception of the last window, where 
