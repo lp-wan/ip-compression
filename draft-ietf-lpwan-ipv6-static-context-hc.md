@@ -923,7 +923,7 @@ used in ACK-Always mode.
 |----- Fragment Header -----|
           |-- T --|1|-- N --|
 +-- ... --+- ... -+-+- ... -+~~~~~~~~~~~~~~~~~~~~~
-| Rule ID | DTag  |W|  0..0 | padding (as needed)
+| Rule ID | DTag  |W|  0..0 | padding (as needed)      (no payload)
 +-- ... --+- ... -+-+- ... -+~~~~~~~~~~~~~~~~~~~~~
 
 ~~~~
@@ -994,7 +994,7 @@ Since an All-1 payload MUST be at least the size of an L2 Word, a receiver can d
 |---------- Fragment Header --------------|
           |-- T --|1|-- N --|
 +-- ... --+- ... -+-+- ... -+---- ... ----+~~~~~~~~~~~~~~~~~~~~~
-| Rule ID | DTag  |W|  1..1 |     MIC     | padding (as needed)
+| Rule ID | DTag  |W|  1..1 |     MIC     | padding (as needed)      (no payload)
 +-- ... --+- ... -+-+- ... -+---- ... ----+~~~~~~~~~~~~~~~~~~~~~
 
 ~~~~
@@ -1041,8 +1041,6 @@ In order to reduce the SCK ACK size, the Bitmap that is actually transmitted is 
 #### Bitmap Encoding {#Bitmapopt}
 
 <<<Dangling text, move to somewhere else or remove>>>
-The Bitmap is transmitted by a receiver as part of the SCHC ACK format.
-
 Note that the SCHC ACK sent a response to an All-1 fragment including the C bit. Therefore, the window size and thus the 
 encoded Bitmap size need to be determined to take into account the available space in the layer two frame payload, where there 
 will be 1 bit less for an SCHC ACK sent in response to an All-1 fragment than in other SCHC ACKs. Note that the maximum 
