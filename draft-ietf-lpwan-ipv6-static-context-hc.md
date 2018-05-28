@@ -2273,7 +2273,8 @@ corresponding technology architecture.
 
 * Define the MAX_ACK_REQUEST (number of attempts)
 
-* Use of padding or not and how and when to use it
+* Padding: size of the L2 Word (for most technologies, a byte; for some technologies, a bit). Value of the padding bits (1 or 0).
+  The value of the padding bits needs to be specified because the padding bits are included in the MIC calculation.
 
 * Take into account that the length of rule-id + N + T + W when possible is good to have a multiple of 8 bits to complete a 
   byte and avoid padding
