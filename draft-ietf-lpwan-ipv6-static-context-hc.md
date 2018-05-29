@@ -42,7 +42,7 @@ author:
   org: Orange Labs
   street:
   - 28 chemin du Vieux Chêne
-  - 38243 Meylan, France
+  - 38243 Meylan
   country: France
   email: dominique.barthel@orange.com  
 normative:
@@ -828,7 +828,7 @@ None of these messages are not acknowledged nor retransmitted.
 The sender uses the Sender-Abort when the MAX_ACK_REQUEST is reached. The receiver uses the Receiver-Abort when the Inactivity timer expires, or in the ACK-on-Error mode, SCHC ACK is lost and the sender transmits SCHC Fragments of a new window. Some other cases for Abort are explained in the {{FragModes}} or {{FSM}}.
 
 ~~~~
-|-- Fragmentation Header ---|--- 1 byte ----|
+|--- next byte boundary --->|<-- 1 byte --->|
 +--- ... ---+- ... -+-+-...-+-+-+-+-+-+-+-+-+
 |  Rule ID  | DTag  |W| FCN |       FF      | (no MIC & no payload)  
 +--- ... ---+- ... -+-+-...-+-+-+-+-+-+-+-+-+
@@ -839,7 +839,7 @@ The sender uses the Sender-Abort when the MAX_ACK_REQUEST is reached. The receiv
 
 ~~~~
 
- | next byte boundary  ---->|---- 1 byte ---|
+ | next byte boundary  ---->|<--- 1 byte -->|
 
  +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+-+-+
  |  Rule ID  | DTag |W| 1..1|       FF      |  
