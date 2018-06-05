@@ -16,7 +16,7 @@ author:
 - ins: A. Minaburo
   name: Ana Minaburo
   org: Acklio
-  street: 2bis rue de la Chataigneraie
+  street: 1137A avenue des Champs Blancs
   city: 35510 Cesson-Sevigne Cedex
   country: France
   email: ana@ackl.io
