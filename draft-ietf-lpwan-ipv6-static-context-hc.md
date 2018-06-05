@@ -1049,7 +1049,7 @@ In other cases, the length SHOULD be sent and the CDA is replaced by "value-sent
 
 IPv6 mandates a checksum in the protocol above IP. Nevertheless, if a more efficient mechanism such as L2 CRC or MIC is carried by or over the L2 (such as in the LPWAN SCHC F/R process (see {{Frag}})), the UDP checksum transmission can be avoided. In that case, the TV is not set, the MO is set to "ignore" and the CDA is set to "compute-checksum".
 
-In other cases, the checksum SHOULD be explicitly sent. The TV is not set, the MO is set to "ignore" and the CDF is set to "value-sent".
+In other cases, the checksum SHOULD be explicitly sent. The TV is not set, the MO is set to "ignore" and the CDA is set to "value-sent".
 
 # Security considerations
 
