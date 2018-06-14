@@ -299,8 +299,8 @@ address {
 <link href="#rfc.section.7.2" rel="Chapter" title="7.2 Fragmentation Tools">
 <link href="#rfc.section.7.3" rel="Chapter" title="7.3 Reliability modes">
 <link href="#rfc.section.7.4" rel="Chapter" title="7.4 Fragmentation Formats">
-<link href="#rfc.section.7.4.1" rel="Chapter" title="7.4.1 Fragment format">
-<link href="#rfc.section.7.4.2" rel="Chapter" title="7.4.2 All-1 and All-0 formats">
+<link href="#rfc.section.7.4.1" rel="Chapter" title="7.4.1 Fragments that are not the last one">
+<link href="#rfc.section.7.4.2" rel="Chapter" title="7.4.2 All-1 fragment">
 <link href="#rfc.section.7.4.3" rel="Chapter" title="7.4.3 SCHC ACK format">
 <link href="#rfc.section.7.4.4" rel="Chapter" title="7.4.4 Abort formats">
 <link href="#rfc.section.7.5" rel="Chapter" title="7.5 Baseline mechanism">
@@ -344,7 +344,7 @@ address {
 
   <meta name="dct.creator" content="Minaburo, A., Toutain, L., Gomez, C., and D. Barthel" />
   <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-lpwan-ipv6-static-context-hc-14" />
-  <meta name="dct.issued" scheme="ISO8601" content="2018-06-05" />
+  <meta name="dct.issued" scheme="ISO8601" content="2018-06-14" />
   <meta name="dct.abstract" content="This document defines the Static Context Header Compression (SCHC) framework, which provides header compression and fragmentation functionality. SCHC has been tailored for Low Power Wide Area Networks (LPWAN)." />
   <meta name="description" content="This document defines the Static Context Header Compression (SCHC) framework, which provides header compression and fragmentation functionality. SCHC has been tailored for Low Power Wide Area Networks (LPWAN)." />
 
@@ -368,7 +368,7 @@ address {
 <td class="right">L. Toutain</td>
 </tr>
 <tr>
-<td class="left">Expires: December 7, 2018</td>
+<td class="left">Expires: December 16, 2018</td>
 <td class="right">IMT-Atlantique</td>
 </tr>
 <tr>
@@ -389,7 +389,7 @@ address {
 </tr>
 <tr>
 <td class="left"></td>
-<td class="right">June 05, 2018</td>
+<td class="right">June 14, 2018</td>
 </tr>
 
     	
@@ -407,7 +407,7 @@ address {
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at https://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on December 7, 2018.</p>
+<p>This Internet-Draft will expire on December 16, 2018.</p>
 <h1 id="rfc.copyrightnotice"><a href="#rfc.copyrightnotice">Copyright Notice</a></h1>
 <p>Copyright (c) 2018 IETF Trust and the persons identified as the document authors.  All rights reserved.</p>
 <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (https://trustee.ietf.org/license-info) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.</p>
@@ -461,9 +461,9 @@ address {
 </li>
 <li>7.4.   <a href="#rfc.section.7.4">Fragmentation Formats</a>
 </li>
-<ul><li>7.4.1.   <a href="#rfc.section.7.4.1">Fragment format</a>
+<ul><li>7.4.1.   <a href="#rfc.section.7.4.1">Fragments that are not the last one</a>
 </li>
-<li>7.4.2.   <a href="#rfc.section.7.4.2">All-1 and All-0 formats</a>
+<li>7.4.2.   <a href="#rfc.section.7.4.2">All-1 fragment</a>
 </li>
 <li>7.4.3.   <a href="#rfc.section.7.4.3">SCHC ACK format</a>
 </li>
@@ -579,7 +579,7 @@ address {
 </pre>
 <p class="figure">Figure 1: LPWAN Architecture</p>
 <h1 id="rfc.section.3">
-<a href="#rfc.section.3">3.</a> <a href="#terminology" id="terminology">Terminology</a>
+<a href="#rfc.section.3">3.</a> <a href="#Term" id="Term">Terminology</a>
 </h1>
 <p id="rfc.section.3.p.1">This section defines the terminology and acronyms used in this document.</p>
 <p></p>
@@ -612,8 +612,10 @@ address {
 </li>
 <li>Inactivity Timer. A timer used after receiving a SCHC Fragment to detect when there is an error and there is no possibility to continue an on-going SCHC Fragmented packet transmission.</li>
 <li>L2: Layer two. The immediate lower layer SCHC interfaces with. It is provided by an underlying LPWAN technology.</li>
+<li>L2 Word: this is the minimum subdivision of paylaod data that the L2 will carry. In most L2 technologies, the L2 Word is an octet.  In bit-oriented radio technologies, the L2 Word might be a single bit.  The L2 Word size is assumed to be constant over time for each device.</li>
 <li>MIC: Message Integrity Check.  A SCHC F/R header field computed over an IPv6 packet before fragmentation, used for error detection after IPv6 packet reassembly.</li>
 <li>MO: Matching Operator. An operator used to match a value contained in a header field with a value contained in a Rule.</li>
+<li>Padding (P). Extra bits that may be appended by SCHC to a Data Unit that it passes to the underlying Layer 2 for transmission.  SCHC itself operates on bits, not bytes, and does not have any alignment prerequisite. See <a href="#Padding" class="xref">Section 8</a>.</li>
 <li>Retransmission Timer. A timer used by the SCHC Fragment sender during an on-going SCHC Fragmented packet transmission to detect possible link errors when waiting for a possible incoming SCHC ACK.</li>
 <li>Rule: A set of header field values.</li>
 <li>Rule entry: A column in the rule that describes a parameter of the header field.</li>
@@ -697,7 +699,7 @@ SENDER                                                RECEIVER
 
 </pre>
 <p class="figure">Figure 5: SCHC Fragment</p>
-<p id="rfc.section.4.p.5">The SCHC ACK is byte aligned and the ACK Header and the encoded Bitmap both have variable size. The SCHC ACK is used only in Fragmentation and has the following format:</p>
+<p id="rfc.section.4.p.5">The SCHC ACK Header and the encoded Bitmap both have variable size. The SCHC ACK is used only in Fragmentation and has the following format:</p>
 <div id="rfc.figure.6"></div>
 <div id="Fig-SCHCack"></div>
 <pre>
@@ -817,10 +819,10 @@ SENDER                                                RECEIVER
 <div id="rfc.figure.9"></div>
 <div id="Fig-FormatPckt"></div>
 <pre>
-+--- ... --+------- ... -------+------------------+~~~~~~~
-|  Rule ID |Compression Residue|  packet payload  |padding
-+--- ... --+------- ... -------+------------------+~~~~~~~
-                                                   (optional)
++--- ... --+------- ... -------+------------------+
+|  Rule ID |Compression Residue|  packet payload  |
++--- ... --+------- ... -------+------------------+
+
 |----- compressed header ------|
 
 </pre>
@@ -919,8 +921,9 @@ y=size of the transmitted bits
 <p id="rfc.section.7.1.p.1">In LPWAN technologies, the L2 data unit size typically varies from tens to hundreds of bytes. The SCHC F/R (Fragmentation /Reassembly) MAY be used either because after applying SCHC C/D or when SCHC C/D is not possible the entire SCHC Packet still exceeds the L2 data unit.</p>
 <p id="rfc.section.7.1.p.2">The SCHC F/R functionality defined in this document has been designed under the assumption that data unit out-of-sequence delivery will not happen between the entity performing fragmentation and the entity performing reassembly. This assumption allows reducing the complexity and overhead of the SCHC F/R mechanism.</p>
 <p id="rfc.section.7.1.p.3">To adapt the SCHC F/R to the capabilities of LPWAN technologies is required to enable optional SCHC Fragment retransmission and to allow a stepper delivery for the reliability of SCHC Fragments. This document does not make any decision with regard to which SCHC Fragment delivery reliability mode will be used over a specific LPWAN technology. These details will be defined in other technology-specific documents.</p>
+<p id="rfc.section.7.1.p.4">SCHC F/R uses the knowledge of the L2 Word size (see <a href="#Term" class="xref">Section 3</a>) to encode some messages. Therefore, SCHC MUST know the L2 Word size.  SCHC F/R generates SCHC Fragments and SCHC ACKs that are, for most of them, multiples of L2 Words.  The padding overhead is kept to the absolute minimum. See <a href="#Padding" class="xref">Section 8</a>.</p>
 <h1 id="rfc.section.7.2">
-<a href="#rfc.section.7.2">7.2.</a> <a href="#fragmentation-tools" id="fragmentation-tools">Fragmentation Tools</a>
+<a href="#rfc.section.7.2">7.2.</a> <a href="#FragTools" id="FragTools">Fragmentation Tools</a>
 </h1>
 <p id="rfc.section.7.2.p.1">This subsection describes the different tools that are used to enable the SCHC F/R functionality defined in this document, such as fields in the SCHC F/R header frames (see the related formats in <a href="#Fragfor" class="xref">Section 7.4</a>), and the different parameters supported in the reliability modes such as timers and parameters.</p>
 <p></p>
@@ -933,16 +936,15 @@ y=size of the transmitted bits
 </ul>
 <p> The rest of the FCN values are assigned in a sequentially decreasing order, which has the purpose to avoid possible ambiguity for the receiver that might arise under certain conditions. In the SCHC Fragments, this field is an unsigned integer, with a size of N bits. In the No-ACK mode, it is set to 1 bit (N=1), All-0 is used in all SCHC Fragments and All-1 for the last one.  For the other reliability modes, it is recommended to use a number of bits (N) equal to or greater than 3. Nevertheless, the appropriate value of N MUST be defined in the corresponding technology-specific profile documents. For windows that are not the last one from a SCHC Fragmented packet, the FCN for the last SCHC Fragment in such windows is an All-0. This indicates that the window is finished and communication proceeds according to the reliability mode in use. The FCN for the last SCHC Fragment in the last window is an All-1, indicating the last SCHC Fragment of the SCHC Packet. It is also important to note that, in the No-ACK mode or when N=1, the last SCHC Fragment of the packet will carry a FCN equal to 1, while all previous  SCHC Fragments will carry a FCN to 0. For further details see </p>
 <a href="#FragModes" class="xref">Section 7.5</a>. The highest FCN in the window, denoted MAX_WIND_FCN, MUST be a value equal to or smaller than 2^N-2. (Example for N=5, MAX_WIND_FCN MAY be set to 23, then subsequent FCNs are set sequentially and in decreasing order, and the FCN will wrap from 0 back to 23).</li>
-<li>Datagram Tag (DTag). The DTag field, if present, is set to the same value for all SCHC Fragments carrying the same SCHC packet. Using this field, the sender can interleave fragments fromdifferent SCHC Packets, while the receiver can still tell them apart.  In the SCHC Fragment formats, the size of the DTag field is T bits, which MAY be set to a value greater than or equal to 0 bits. For each new SCHC Packet processed by the sender, DTag MUST be sequentially increased, from 0 to 2^T &#8211; 1 wrapping back from 2^T - 1 to 0.  In the SCHC ACK format, DTag carries the same value as the DTag field in the SCHC Fragments for which this SCHC ACK is intended.  The length of DTag, denoted T is not given in this document because is technolgy dependant, and will be defined in the corresponding technology-documents. DTag is based on the number of simultaneous packets supported.</li>
+<li>Datagram Tag (DTag). The DTag field, if present, is set to the same value for all SCHC Fragments carrying the same SCHC <br> packet, and to different values for different SCHC Packets. Using this field, the sender can interleave fragments from different SCHC Packets, while the receiver can still tell them apart.  In the SCHC Fragment formats, the size of the DTag field is T bits, which MAY be set to a value greater than or equal to 0 bits. For each new SCHC Packet processed by the sender, DTag MUST be sequentially increased, from 0 to 2^T &#8211; 1 wrapping back from 2^T - 1 to 0.  In the SCHC ACK format, DTag carries the same value as the DTag field in the SCHC Fragments for which this SCHC ACK is intended.  When there is no Dtag, there can be only 1 SCHC Packet in transist. And only after all its fragments have been transmitted another SCHC Packet could be sent.  The length of DTag, denoted T is not given in this document because is technolgy dependant, and will be defined in the corresponding technology-documents. DTag is based on the number of simultaneous packets supported.</li>
 <li>W (window): W is a 1-bit field. This field carries the same value for all SCHC Fragments of a window, and it is complemented for the next window. The initial value for this field is 0. In the SCHC ACK format, this field also has a size of 1 bit. In all SCHC ACKs, the W bit carries the same value as the W bit carried by the SCHC Fragments whose reception is being positively or negatively acknowledged by the SCHC ACK.</li>
 <li>Message Integrity Check (MIC). This field is computed by the sender over the complete SCHC Packet and before SCHC fragmentation. The MIC allows the receiver to check errors in the reassembled packet, while it also enables compressing the UDP checksum by use of SCHC compression. The CRC32 as 0xEDB88320 (i.e. the reverse representation of the polynomial used e.g. in the Ethernet standard <a href="#RFC3385" class="xref">[RFC3385]</a>) is recommended as the default algorithm for computing the MIC. Nevertheless, other algorithms MAY be required and are defined in the technology-specific documents as well as the length in bits of the MIC used.</li>
 <li>C (MIC checked): C is a 1-bit field. This field is used in the SCHC ACK packets to report the outcome of the MIC check, i.e. whether the reassembled packet was correctly received or not. A value of 1 represents a positive MIC check at the receiver side (i.e. the MIC computed by the receiver matches the received MIC).</li>
 <li>Retransmission Timer. A SCHC Fragment sender uses it after the transmission of a window to detect a transmission error of the SCHC ACK corresponding to this window. Depending on the reliability mode, it will lead to a request an SCHC ACK retransmission (in ACK-Always mode) or it will trigger the transmission of the next window (in ACK-on-Error mode). The duration of this timer is not defined in this document and MUST be defined in the corresponding technology documents.</li>
-<li>Inactivity Timer. A SCHC Fragment receiver uses it to take action when there is a problem in the transmission of SCHC fragments. Such a problem could be detected by the receiver not getting a single SCHC Fragment during a given period of time or not getting a given number of packets in a given period of time. When this happens, an Abort message will be sent (see related text later in this section). Initially, and each time a SCHC Fragment is received, the timer is reinitialized. The duration of this timer is not defined in this document and MUST be defined in the specific technology document.</li>
+<li>Inactivity Timer. A SCHC Fragment receiver uses it to take action when there is a problem in the transmission of SCHC fragments. Such a problem could be detected by the receiver not getting a single SCHC Fragment during a given period of time or not getting a given number of packets in a given period of time. When this happens, an Abort message will be sent (see related text later in this section). Initially, and each time a SCHC Fragment is received, the timer is reinitialized.  The duration of this timer is not defined in this document and MUST be defined in the specific technology document.</li>
 <li>Attempts. This counter counts the requests for a missing SCHC ACK. When it reaches the value MAX_ACK_REQUESTS, the sender assume there are recurrent SCHC Fragment transmission errors and determines that an Abort is needed. The default value offered MAX_ACK_REQUESTS is not stated in this document, and it is expected to be defined in the specific technology document. The Attempts counter is defined per window. It is initialized each time a new window is used.</li>
-<li>Bitmap. The Bitmap is a sequence of bits carried in an SCHC ACK. Each bit in the Bitmap corresponds to a SCHC fragment of the current window, and provides feedback on whether the SCHC Fragment has been received or not. The right-most position on the Bitmap reports if the All-0 or All-1 fragment has been received or not. Feedback on the SCHC fragment with the highest FCN value is provided by the bit in the left-most position of the Bitmap. In the Bitmap, a bit set to 1 indicates that the SCHC Fragment of FCN corresponding to that bit position has been correctly sent and received. The text above describes the internal representation of the Bitmap. When inserted in the SCHC ACK for transmission from the receiver to the sender, the Bitmap MAY be truncated for energy/bandwidth optimisation, see more details in <a href="#Bitmapopt" class="xref">Section 7.4.3.1</a>.</li>
+<li>Bitmap. The Bitmap is a sequence of bits carried in an SCHC ACK. Each bit in the Bitmap corresponds to a SCHC fragment of the current window, and provides feedback on whether the SCHC Fragment has been received or not. The right-most position on the Bitmap reports if the All-0 or All-1 fragment has been received or not. Feedback on the SCHC fragment with the highest FCN value is provided by the bit in the left-most position of the Bitmap. In the Bitmap, a bit set to 1 indicates that the SCHC Fragment of FCN corresponding to that bit position has been correctly sent and received.  The text above describes the internal representation of the Bitmap. When inserted in the SCHC ACK for transmission from the receiver to the sender, the Bitmap MAY be truncated for energy/bandwidth optimisation, see more details in <a href="#Bitmapopt" class="xref">Section 7.4.3.1</a>.</li>
 <li>Abort. On expiration of the Inactivity timer, or when Attempts reached MAX_ACK_REQUESTS or upon an occurrence of some other error, the sender or the receiver MUST use the Abort. When the receiver needs to abort the on-going SCHC Fragmented packet transmission, it sends the Receiver-Abort format. When the sender needs to abort the transmission, it sends the Sender-Abort format. None of the Abort are acknowledged.</li>
-<li>Padding (P). If it is needed, the number of bits used for padding is not defined and depends on the size of the Rule ID, DTag and FCN fields, and on the L2 payload size (see <a href="#Padding" class="xref">Section 8</a>). Some SCHC ACKs are byte-aligned and do not need padding (see <a href="#Bitmapopt" class="xref">Section 7.4.3.1</a>).</li>
 </ul>
 <h1 id="rfc.section.7.3">
 <a href="#rfc.section.7.3">7.3.</a> <a href="#reliability-modes" id="reliability-modes">Reliability modes</a>
@@ -961,24 +963,24 @@ y=size of the transmitted bits
 <h1 id="rfc.section.7.4">
 <a href="#rfc.section.7.4">7.4.</a> <a href="#Fragfor" id="Fragfor">Fragmentation Formats</a>
 </h1>
-<p id="rfc.section.7.4.p.1">This section defines the SCHC Fragment format, the All-0 and All-1 formats, the SCHC ACK format and the Abort formats.</p>
-<h1 id="rfc.section.7.4.1">
-<a href="#rfc.section.7.4.1">7.4.1.</a> <a href="#fragment-format" id="fragment-format">Fragment format</a>
-</h1>
-<p id="rfc.section.7.4.1.p.1">A SCHC Fragment comprises a SCHC Fragment header, a SCHC Fragment payload and padding bits (if needed). A SCHC Fragment conforms to the general format shown in <a href="#Fig-FragFormat" class="xref">Figure 11</a>. The SCHC Fragment payload carries a subset of SCHC Packet. A SCHC Fragment is the payload of the L2 protocol data unit (PDU). Padding MAY be added in SCHC Fragments and in SCHC ACKs if necessary, therefore a padding field is optional (this is explicitly indicated in <a href="#Fig-FragFormat" class="xref">Figure 11</a> for the sake of illustration clarity.</p>
+<p id="rfc.section.7.4.p.1">This section defines the SCHC Fragment format, including the All-0 and All-1 formats and their &#8220;empty&#8221; variations, the SCHC ACK format and the Abort formats.</p>
+<p id="rfc.section.7.4.p.2">A SCHC Fragment conforms to the general format shown in <a href="#Fig-FragFormat" class="xref">Figure 11</a>.  It comprises a SCHC Fragment Header and a SCHC Fragment Payload.  In addition, the last SCHC Fragment carries as many padding bits as needed to fill up an L2 Word.  The SCHC Fragment Payload carries a subset of the SCHC Packet.  The SCHC Fragment is the data unit passed on to the L2 for transmission (L2 Protocol Data Unit, or L2PDU).</p>
 <div id="rfc.figure.11"></div>
 <div id="Fig-FragFormat"></div>
 <pre>
-+-----------------+-----------------------+~~~~~~~~~~~~~~~
-| Fragment Header | &#160; Fragment payload    | padding (opt.)
-+-----------------+-----------------------+~~~~~~~~~~~~~~~
++-----------------+-----------------------+~~~~~~~~~~~~~~~~~~~~~
+| Fragment Header | &#160; Fragment payload    | padding (as needed)
++-----------------+-----------------------+~~~~~~~~~~~~~~~~~~~~~
 </pre>
-<p class="figure">Figure 11: Fragment general format. Presence of a padding field is optional</p>
-<p id="rfc.section.7.4.1.p.2">In ACK-Always or ACK-on-Error, SCHC Fragments except the last one SHALL conform the detailed format defined in <a href="#Fig-NotLastWin" class="xref">Figure 12</a>. The total size of the fragment header is not byte aligned.</p>
+<p class="figure">Figure 11: SCHC Fragment general format. Presence of a padding field is optional</p>
+<h1 id="rfc.section.7.4.1">
+<a href="#rfc.section.7.4.1">7.4.1.</a> <a href="#fragments-that-are-not-the-last-one" id="fragments-that-are-not-the-last-one">Fragments that are not the last one</a>
+</h1>
+<p id="rfc.section.7.4.1.p.1">In ACK-Always or ACK-on-Error, SCHC Fragments except the last one SHALL conform the detailed format defined in <a href="#Fig-NotLastWin" class="xref">Figure 12</a>.</p>
 <div id="rfc.figure.12"></div>
 <div id="Fig-NotLastWin"></div>
 <pre>
- |---Fragmentation Header----|
+ |----- Fragment Header -----|
            |-- T --|1|-- N --|
  +-- ... --+- ... -+-+- ... -+--------...-------+
  | Rule ID | DTag  |W|  FCN  | Fragment payload |
@@ -986,11 +988,11 @@ y=size of the transmitted bits
 
 </pre>
 <p class="figure">Figure 12: Fragment Detailed Format for Fragments except the Last One, ACK-Always and ACK-on-Error</p>
-<p id="rfc.section.7.4.1.p.3">In the No-ACK mode, SCHC Fragments except the last one SHALL conform to the detailed format defined in <a href="#Fig-NotLast" class="xref">Figure 13</a>. The total size of the fragment header is not byte aligned.</p>
+<p id="rfc.section.7.4.1.p.2">In the No-ACK mode, SCHC Fragments except the last one SHALL conform to the detailed format defined in <a href="#Fig-NotLast" class="xref">Figure 13</a>.</p>
 <div id="rfc.figure.13"></div>
 <div id="Fig-NotLast"></div>
 <pre>
- |---Fragmentation Header--|
+ |---- Fragment Header ----|
            |-- T --|-- N --|
  +-- ... --+- ... -+- ... -+--------...-------+
  | Rule ID |  DTag |  FCN  | Fragment payload |
@@ -999,14 +1001,15 @@ y=size of the transmitted bits
 
 </pre>
 <p class="figure">Figure 13: Fragment Detailed Format for Fragments except the Last One, No-ACK mode</p>
-<p id="rfc.section.7.4.1.p.4">In all these cases, the total size of the fragment header is not byte aligned.</p>
-<h1 id="rfc.section.7.4.2">
-<a href="#rfc.section.7.4.2">7.4.2.</a> <a href="#all-1-and-all-0-formats" id="all-1-and-all-0-formats">All-1 and All-0 formats</a>
+<p id="rfc.section.7.4.1.p.3">The total size of the fragment header is not necessarily a multiple of the L2 Word size.  To build the fragment payload, SCHC F/R MUST take from the SCHC Packet a number of bits that makes the SCHC Fragment an exact multiple of L2 Words. As a consequence, no padding bit is used for these fragments.</p>
+<h1 id="rfc.section.7.4.1.1">
+<a href="#rfc.section.7.4.1.1">7.4.1.1.</a> <a href="#all-0-fragment" id="all-0-fragment">All-0 fragment</a>
 </h1>
-<p id="rfc.section.7.4.2.p.1">The All-0 format is used for sending the last SCHC Fragment of a window that is not the last window of the packet.</p>
+<p id="rfc.section.7.4.1.1.p.1">The All-0 format is used for sending the last SCHC Fragment of a window that is not the last window of the packet.</p>
 <div id="rfc.figure.14"></div>
 <div id="Fig-All0"></div>
 <pre>
+|----- Fragment Header -----|
           |-- T --|1|-- N --|
 +-- ... --+- ... -+-+- ... -+--- ... ---+
 | Rule ID | DTag  |W|  0..0 |  payload  |  
@@ -1014,51 +1017,73 @@ y=size of the transmitted bits
 
 </pre>
 <p class="figure">Figure 14: All-0 fragment detailed format</p>
-<p id="rfc.section.7.4.2.p.2">The All-0 empty fragment format is used by a sender to request the retransmission of an SCHC ACK by the receiver. It is only used in ACK-Always mode.</p>
+<p id="rfc.section.7.4.1.1.p.2">This is simply an instance of the format described in <a href="#Fig-NotLastWin" class="xref">Figure 12</a>.  An All-0 fragment payload MUST be at least the size of an L2 Word. The rationale is that the All-0 empty fragment (see <a href="#All0Empty" class="xref">Section 7.4.1.2</a>) needs to be distinguishable from the All-0 regular fragment, even in the presence of padding.</p>
+<h1 id="rfc.section.7.4.1.2">
+<a href="#rfc.section.7.4.1.2">7.4.1.2.</a> <a href="#All0Empty" id="All0Empty">All-0 empty fragment</a>
+</h1>
+<p id="rfc.section.7.4.1.2.p.1">The All-0 empty fragment is an exception to the All-0 fragment described above.  It is used by a sender to request the retransmission of a SCHC ACK by the receiver. It is only used in ACK-Always mode.</p>
 <div id="rfc.figure.15"></div>
 <div id="Fig-All0empty"></div>
 <pre>
-           |-- T --|1|-- N --|
- +-- ... --+- ... -+-+- ... -+
- | Rule ID | DTag  |W|  0..0 | (no payload)  
- +-- ... --+- ... -+-+- ... -+
+|----- Fragment Header -----|
+          |-- T --|1|-- N --|
++-- ... --+- ... -+-+- ... -+~~~~~~~~~~~~~~~~~~~~~
+| Rule ID | DTag  |W|  0..0 | padding (as needed)      (no payload)
++-- ... --+- ... -+-+- ... -+~~~~~~~~~~~~~~~~~~~~~
 
 </pre>
 <p class="figure">Figure 15: All-0 empty fragment detailed format</p>
-<p id="rfc.section.7.4.2.p.3">In the No-ACK mode, the last SCHC Fragment of an IPv6 datagram SHALL contain a SCHC Fragment header that conforms to the detaield format shown in <a href="#Fig-Last" class="xref">Figure 16</a>.</p>
+<p id="rfc.section.7.4.1.2.p.2">The size of the All-0 fragment header is generally not a multiple of the L2 Word size.  Therefore, an All-0 empty fragment generally needs padding bits. The padding bits are always less than an L2 Word.</p>
+<p id="rfc.section.7.4.1.2.p.3">Since an All-0 payload MUST be at least the size of an L2 Word, a receiver can distinguish an All-0 empty fragment from a regular All-0 fragment, even in the presence of padding.</p>
+<h1 id="rfc.section.7.4.2">
+<a href="#rfc.section.7.4.2">7.4.2.</a> <a href="#all-1-fragment" id="all-1-fragment">All-1 fragment</a>
+</h1>
+<p id="rfc.section.7.4.2.p.1">In the No-ACK mode, the last SCHC Fragment of an IPv6 datagram SHALL contain a SCHC Fragment header that conforms to the detailed format shown in <a href="#Fig-Last" class="xref">Figure 16</a>.</p>
 <div id="rfc.figure.16"></div>
 <div id="Fig-Last"></div>
 <pre>
+|---------- Fragment Header -------------|
              |-- T --|-N=1-| 
-+---- ... ---+- ... -+-----+---- ... ----+---...---+
-|   Rule ID  | DTag  |  1  |     MIC     | payload |
-+---- ... ---+- ... -+-----+---- ... ----+---...---+
++---- ... ---+- ... -+-----+---- ... ----+---...---+~~~~~~~~~~~~~~~~~~~~~
+|   Rule ID  | DTag  |  1  |     MIC     | payload | padding (as needed)
++---- ... ---+- ... -+-----+---- ... ----+---...---+~~~~~~~~~~~~~~~~~~~~~
 
 </pre>
 <p class="figure">Figure 16: All-1 Fragment Detailed Format for the Last Fragment, No-ACK mode</p>
-<p id="rfc.section.7.4.2.p.4">In any of the Window modes, the last fragment of an IPv6 datagram SHALL contain a SCHC Fragment header that conforms to the detailed format shown in <a href="#Fig-LastWinMode" class="xref">Figure 17</a>. The total size of the SCHC Fragment header in this format is not byte aligned.</p>
+<p id="rfc.section.7.4.2.p.2">In ACK-Always or ACK-on-Error mode, the last fragment of an IPv6 datagram SHALL contain a SCHC Fragment header that conforms to the detailed format shown in <a href="#Fig-LastWinMode" class="xref">Figure 17</a>.</p>
 <div id="rfc.figure.17"></div>
 <div id="Fig-LastWinMode"></div>
 <pre>
+|---------- Fragment Header --------------|
           |-- T --|1|-- N --|
-+-- ... --+- ... -+-+- ... -+---- ... ----+---...---+
-| Rule ID | DTag  |W| 11..1 |     MIC     | payload |
-+-- ... --+- ... -+-+- ... -+---- ... ----+---...---+
++-- ... --+- ... -+-+- ... -+---- ... ----+---...---+~~~~~~~~~~~~~~~~~~~~~
+| Rule ID | DTag  |W| 11..1 |     MIC     | payload | padding (as needed)
++-- ... --+- ... -+-+- ... -+---- ... ----+---...---+~~~~~~~~~~~~~~~~~~~~~
                       (FCN)
 </pre>
 <p class="figure">Figure 17: All-1 Fragment Detailed Format for the Last Fragment, ACK-Always or ACK-on-Error</p>
-<p id="rfc.section.7.4.2.p.5">In either ACK-Always or ACK-on-Error, in order to request a retransmission of the SCHC ACK for the All-1 window, the fragment sender uses the format shown in <a href="#Fig-All1retries" class="xref">Figure 18</a>. The total size of the SCHC Fragment header in not byte aligned.</p>
+<p id="rfc.section.7.4.2.p.3">The total size of the All-1 SCHC Fragment header is generally not a multiple of the L2 Word size.  The All-1 fragment being the last one of the SCHC Packet, SCHC F/R cannot freely choose the payload size to align the fragment to an L2 Word.  Therefore, padding bits are generally appended to the All-1 fragment to make it a multiple of L2 Words in size.</p>
+<p id="rfc.section.7.4.2.p.4">The MIC MUST be computed on the payload and the padding bits. The rationale is that the SCHC Reassembler needs to check the correctness of the reassembled SCHC packet but has no way of knowing where the payload ends.  Indeed, the latter requires decompressing the SCHC Packet.</p>
+<p id="rfc.section.7.4.2.p.5">An All-1 fragment payload MUST be at least the size of an L2 Word.  The rationale is that the All-1 empty fragment (see <a href="#All1Empty" class="xref">Section 7.4.2.1</a>) needs to be distinguishable from the All-1 fragment, even in the presence of padding.  This may entail saving an L2 Word from the previous fragment payload to make the payload of this All-1 fragment big enough.</p>
+<p id="rfc.section.7.4.2.p.6">The values for N, T and the length of MIC are not specified in this document, and SHOULD be determined in other documents (e.g. technology-specific profile documents).</p>
+<p id="rfc.section.7.4.2.p.7">The length of the MIC MUST be at least an L2 Word size. The rationale is to be able to distinguish a Sender-Abort (see <a href="#Aborts" class="xref">Section 7.4.4</a>) from an All-1 Fragment, even in the presence of padding.</p>
+<h1 id="rfc.section.7.4.2.1">
+<a href="#rfc.section.7.4.2.1">7.4.2.1.</a> <a href="#All1Empty" id="All1Empty">All-1 empty fragment</a>
+</h1>
+<p id="rfc.section.7.4.2.1.p.1">The All-1 empty fragment format is an All-1 fragment format without a payload (see <a href="#Fig-All1retries" class="xref">Figure 18</a>).  It is used by a fragment sender, in either ACK-Always or ACK-on-Error, to request a retransmission of the SCHC ACK for the All-1 window.</p>
+<p id="rfc.section.7.4.2.1.p.2">The size of the All-1 empty fragment header is generally not a multiple of the L2 Word size. Therefore, an All-1 empty fragment generally needs padding bits. The padding bits are always less than an L2 Word.</p>
+<p id="rfc.section.7.4.2.1.p.3">Since an All-1 payload MUST be at least the size of an L2 Word, a receiver can distinguish an All-1 empty fragment from a regular All-1 fragment, even in the presence of padding.</p>
 <div id="rfc.figure.18"></div>
 <div id="Fig-All1retries"></div>
 <pre>
+|---------- Fragment Header --------------|
           |-- T --|1|-- N --|
-+-- ... --+- ... -+-+- ... -+---- ... ----+
-| Rule ID | DTag  |W|  1..1 |     MIC     | (no payload)  
-+-- ... --+- ... -+-+- ... -+---- ... ----+
++-- ... --+- ... -+-+- ... -+---- ... ----+~~~~~~~~~~~~~~~~~~~~~
+| Rule ID | DTag  |W|  1..1 |     MIC     | padding (as needed)      (no payload)
++-- ... --+- ... -+-+- ... -+---- ... ----+~~~~~~~~~~~~~~~~~~~~~
 
 </pre>
 <p class="figure">Figure 18: All-1 for Retries format, also called All-1 empty</p>
-<p id="rfc.section.7.4.2.p.6">The values for Fragmentation Header, N, T and the length of MIC are not specified in this document, and SHOULD be determined in other documents (e.g. technology-specific profile documents).</p>
 <h1 id="rfc.section.7.4.3">
 <a href="#rfc.section.7.4.3">7.4.3.</a> <a href="#schc-ack-format" id="schc-ack-format">SCHC ACK format</a>
 </h1>
@@ -1089,30 +1114,33 @@ y=size of the transmitted bits
 
 </pre>
 <p class="figure">Figure 20: Format of an SCHC ACK for All-1 windows</p>
+<p id="rfc.section.7.4.3.p.3">The Bitmap carries information on the reception of each fragment of the window as described in <a href="#FragTools" class="xref">Section 7.2</a>.</p>
+<p id="rfc.section.7.4.3.p.4">See <a href="#SCHCParams" class="xref">Appendix D</a> for a discussion on the size of the Bitmaps.</p>
+<p id="rfc.section.7.4.3.p.5">In order to reduce the SCK ACK size, the Bitmap that is actually transmitted is shortened (&#8220;encoded&#8221;) as explained in <a href="#Bitmapopt" class="xref">Section 7.4.3.1</a>.</p>
 <h1 id="rfc.section.7.4.3.1">
 <a href="#rfc.section.7.4.3.1">7.4.3.1.</a> <a href="#Bitmapopt" id="Bitmapopt">Bitmap Encoding</a>
 </h1>
-<p id="rfc.section.7.4.3.1.p.1">The Bitmap is transmitted by a receiver as part of the SCHC ACK format. An SCHC ACK message MAY include padding at the end to align its number of transmitted bits to a multiple of 8 bits.</p>
-<p id="rfc.section.7.4.3.1.p.2">Note that the SCHC ACK sent a response to an All-1 fragment including the C bit. Therefore, the window size and thus the encoded Bitmap size need to be determined to take into account the available space in the layer two frame payload, where there will be 1 bit less for an SCHC ACK sent in response to an All-1 fragment than in other SCHC ACKs. Note that the maximum number of SCHC Fragments of the last window is one unit smaller than that of the previous windows.</p>
-<p id="rfc.section.7.4.3.1.p.3">When the receiver transmits an encoded Bitmap with a SCHC Fragment that has not been sent during the transmission, the sender will Abort the transmission.</p>
+<p id="rfc.section.7.4.3.1.p.1">The Bitmap that is transmitted is shortened by applying the following algorithm: the longest contiguous sequence of Bitmap bits that are all set to 1, starting from an L2 Word boundary and up to the end of the Bitmap, if one such sequence exists, MUST NOT be transmitted.  Because the SCHC Fragment sender knows the actual Bitmap size, it can reconstruct the original Bitmap from the shortened bitmap.</p>
+<p id="rfc.section.7.4.3.1.p.2">When shortening effectively takes place, the SCHC ACK is a multiple of L2 Words, and padding MUST NOT be appended.  When shortening does not happen, padding bits MUST be appended as needed to fill up the last L2 Word.</p>
+<p><a href="#Fig-Localbitmap" class="xref">Figure 21</a> shows an example where L2 Words are actually bytes and where the original Bitmap contains 17 bits, the last 15 of which are all set to 1.</p>
 <div id="rfc.figure.21"></div>
 <div id="Fig-Localbitmap"></div>
 <pre>
-                   |----         Bitmap bits       ----|   
-| Rule ID | DTag |W|1|0|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|   
-|next byte boundary --&gt;|  next byte --&gt;|  next byte --&gt;|   
+|--  SCHC ACK Header --|--------       Bitmap    --------|
+|  Rule ID  |  DTag  |W|1|0|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|
+     next L2 Word boundary -&gt;|  next L2 Word |  next L2 Word |
 
 </pre>
 <p class="figure">Figure 21: A non-encoded Bitmap</p>
-<p id="rfc.section.7.4.3.1.p.4">In order to reduce the resulting frame size, the encoded Bitmap is shortened by applying the following algorithm: all the right-most contiguous bytes in the encoded Bitmap that have all their bits set to 1 MUST NOT be transmitted.  Because the SCHC Fragment sender knows the actual Bitmap size, it can reconstruct the original Bitmap with the trailing 1 bit optimized away.  In the example shown in <a href="#Fig-transmittedbitmap" class="xref">Figure 22</a>, the last 2 bytes of the Bitmap shown in <a href="#Fig-Localbitmap" class="xref">Figure 21</a> comprises bits that are all set to 1, therefore they are not sent.</p>
+<p><a href="#Fig-transmittedbitmap" class="xref">Figure 22</a> shows that the last 14 bits are not sent.</p>
 <div id="rfc.figure.22"></div>
 <div id="Fig-transmittedbitmap"></div>
 <pre>
             |-- T --|1|
-+---- ... --+- ... -+-+-+-+
-|  Rule ID  |  DTag |W|1|0|
-+---- ... --+- ... -+-+-+-+
-|  next byte boundary ---&gt;|    
++---- ... --+- ... -+-+-+-+-+
+|  Rule ID  |  DTag |W|1|0|1|
++---- ... --+- ... -+-+-+-+-+
+    next L2 Word boundary -&gt;|
 
 </pre>
 <p class="figure">Figure 22: Optimized Bitmap format</p>
@@ -1120,66 +1148,70 @@ y=size of the transmitted bits
 <div id="rfc.figure.23"></div>
 <div id="Fig-Bitmap-Win"></div>
 <pre>
-                     6 5 4 3 2 1   0 (*)
-          |-- T --|1|  
-+---------+-------+-+-+-+-+-+-+-+-----+
-| Rule ID |  DTag |W|1|0|1|1|0|1|all-0| Bitmap(before tx)
-+---------+-------+-+-+-+-+-+-+-+-----+
-|next byte boundary -&gt;|  next  byte ---&gt;|
+                       6 5 4 3 2 1 0 (*)
+            |-- T --|1|
++-----------+-------+-+-+-+-+-+-+-+-+
+|  Rule ID  |  DTag |W|1|0|1|1|0|1|1|            Bitmap before tx
++-----------+-------+-+-+-+-+-+-+-+-+
+next L2 Word boundary -&gt;|&lt;-- L2 Word --&gt;|
     (*)=(FCN values)
 
-+---------+-------+-+-+-+-+-+-+-+-----+~~
-| Rule ID | DTag  |W|1|0|1|1|0|1|all-0|Padding(opt.) encoded Bitmap
-+---------+-------+-+-+-+-+-+-+-+-----+~~
-|next byte boundary -&gt;|  next  byte----&gt;|
++-----------+-------+-+-+-+-+-+-+-+-+~~~+
+|  Rule ID  |  DTag |W|1|0|1|1|0|1|1|Pad|        Encoded Bitmap
++-----------+-------+-+-+-+-+-+-+-+-+~~~+
+next L2 Word boundary -&gt;|&lt;-- L2 Word --&gt;|
+
 
 </pre>
-<p class="figure">Figure 23: Example of a Bitmap before transmission, and the transmitted one, in any window except the last one</p>
-<p><a href="#Fig-Bitmap-lastWin" class="xref">Figure 24</a> shows an example of an SCHC ACK with FCN ranging from 6 down to 0, where the Bitmap indicates that the MIC check has failed but there are no missing SCHC Fragments.</p>
+<p class="figure">Figure 23: Example of a Bitmap before transmission, and the transmitted one, for a window that is not the last one</p>
+<p><a href="#Fig-Bitmap-lastWin" class="xref">Figure 24</a> shows an example of an SCHC ACK with FCN ranging from 6 down to 0, where MIC check has failed but the Bitmap indicates that there is no missing SCHC Fragment.</p>
 <div id="rfc.figure.24"></div>
 <div id="Fig-Bitmap-lastWin"></div>
 <pre>
- |-Fragmentation Header-|6 5 4 3 2 1 7 (*)
+|- Fragmentation Header-|6 5 4 3 2 1 7 (*)
             |-- T --|1|
- |  Rule ID |  DTag |W|0|1|1|1|1|1|1|1|padding|  Bitmap (before tx)
- |next byte boundary ----&gt;| next byte --&gt;|  
+|  Rule ID  |  DTag |W|0|1|1|1|1|1|1|1|          Bitmap before tx
+  next L2 Word boundary -&gt;|&lt;-- L2 Word --&gt;|
                        C
- +---- ... --+-... -+-+-+-+
- |  Rule ID  | DTag |W|0|1| encoded Bitmap
- +---- ... --+-... -+-+-+-+
- |next byte boundary ----&gt;|
++---- ... --+- ... -+-+-+-+
+|  Rule ID  |  DTag |W|0|1|                      Encoded Bitmap
++---- ... --+- ... -+-+-+-+
+  next L2 Word boundary -&gt;|
    (*) = (FCN values indicating the order)
 
 </pre>
 <p class="figure">Figure 24: Example of the Bitmap in ACK-Always or ACK-on-Error for the last window, for N=3)</p>
 <h1 id="rfc.section.7.4.4">
-<a href="#rfc.section.7.4.4">7.4.4.</a> <a href="#abort-formats" id="abort-formats">Abort formats</a>
+<a href="#rfc.section.7.4.4">7.4.4.</a> <a href="#Aborts" id="Aborts">Abort formats</a>
 </h1>
-<p id="rfc.section.7.4.4.p.1">Abort are coded as exceptions to the previous coding, a specific format is defined for each direction. When a SCHC Fragment sender needs to abort the transmission, it sends the Sender-Abort format <a href="#Fig-All1Abort" class="xref">Figure 25</a>, that is an All-1 fragment with no MIC or payload. In regular cases All-1 fragment contains at least a MIC value. This absence of the MIC value indicates an Abort.</p>
-<p id="rfc.section.7.4.4.p.2">When a SCHC Fragment receiver needs to abort the on-going SCHC Fragmented packet transmission, it transmits the Receiver-Abort format <a href="#Fig-ACKabort" class="xref">Figure 26</a>, creating an exception in the encoded Bitmap coding. Encoded Bitmap avoid sending the rigth most bits of the Bitmap set to 1. Abort is coded as an SCHC ACK message with a Bitmap set to 1 until the next byte boundary, followed by an extra 0xFF byte. Such message never occurs in a regular acknowledgement and is view as an abort.</p>
-<p id="rfc.section.7.4.4.p.3">None of these messages are not acknowledged nor retransmitted.</p>
-<p id="rfc.section.7.4.4.p.4">The sender uses the Sender-Abort when the MAX_ACK_REQUEST is reached. The receiver uses the Receiver-Abort when the Inactivity timer expires, or in the ACK-on-Error mode, SCHC ACK is lost and the sender transmits SCHC Fragments of a new window. Some other cases for Abort are explained in the <a href="#FragModes" class="xref">Section 7.5</a> or <a href="#FSM" class="xref">Appendix C</a>.</p>
+<p id="rfc.section.7.4.4.p.1">When a SCHC Fragment sender needs to abort the on-going SCHC fragmented packet transmission, it sends a Sender-Abort.  The Sender-Abort format <a href="#Fig-All1Abort" class="xref">Figure 25</a> is a variation of the All-1 fragment, with neither a MIC nor a payload.  All-1 fragments contain at least a MIC. The absence of the MIC value indicates a Sender-Abort.</p>
 <div id="rfc.figure.25"></div>
 <div id="Fig-All1Abort"></div>
 <pre>
-|--- next byte boundary ---&gt;|&lt;-- 1 byte ---&gt;|
-+--- ... ---+- ... -+-+-...-+-+-+-+-+-+-+-+-+
-|  Rule ID  | DTag  |W| FCN |       FF      | (no MIC &amp; no payload)  
-+--- ... ---+- ... -+-+-...-+-+-+-+-+-+-+-+-+
+|--- Sender-Abort Header ---|
++--- ... ---+- ... -+-+-...-+~~~~~~~~~~~~~~~~~~~~~
+|  Rule ID  | DTag  |W| FCN | padding (as needed)
++--- ... ---+- ... -+-+-...-+~~~~~~~~~~~~~~~~~~~~~
 
 </pre>
-<p class="figure">Figure 25: Sender-Abort format. All FCN fields in this format are set to 1</p>
+<p class="figure">Figure 25: Sender-Abort format. All FCN field bits in this format are set to 1</p>
+<p id="rfc.section.7.4.4.p.2">The size of the Sender-Abort header is generally not a multiple of the L2 Word size.  Therefore, a Sender-Abort generally needs padding bits.</p>
+<p id="rfc.section.7.4.4.p.3">Since an All-1 fragment MIC MUST be at least the size of an L2 Word, a receiver can distinguish a Sender-Abort from an All-1 fragment, even in the presence of padding.</p>
+<p id="rfc.section.7.4.4.p.4">When a SCHC Fragment receiver needs to abort the on-going SCHC fragmented packet transmission, it transmits a Receiver- Abort. The Receiver-Abort format is a variation on the SCHC ACK format, creating an exception in the encoded Bitmap algorithm.  As shown in <a href="#Fig-ACKabort" class="xref">Figure 26</a>, a Receiver-Abort is coded as a SCHC ACK message with a shortened Bitmap set to 1 up to the first L2 Word boundary, followed by an extra L2 Word full of 1&#8217;s.  Such a message never occurs in a regular acknowledgement and is detected as a Receiver-Abort.  A Receiver-Abort is aligned to L2 Words by design. Therefore, padding MUST not be appended.</p>
 <div id="rfc.figure.26"></div>
 <div id="Fig-ACKabort"></div>
 <pre>
- | next byte boundary  ----&gt;|&lt;--- 1 byte --&gt;|
+|- Receiver-Abort Header -|
 
- +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+-+-+
- |  Rule ID  | DTag |W| 1..1|       FF      |  
- +---- ... --+-... -+-+-+-+-+-+-+-+-+-+-+-+-+
++---- ... ----+-- ... --+-+-+-+-+-+-+-+-+-+-+-+-+
+|   Rule ID   |   DTag  |W| 1..1|      1..1     |
++---- ... ----+-- ... --+-+-+-+-+-+-+-+-+-+-+-+-+
+        next L2 Word boundary -&gt;|&lt;-- L2 Word --&gt;|
 
 </pre>
 <p class="figure">Figure 26: Receiver-Abort format</p>
+<p id="rfc.section.7.4.4.p.5">Neither the Sender-Abort nor the Receiver-Abort messages are ever acknowledged or retransmitted.</p>
+<p id="rfc.section.7.4.4.p.6">The sender uses the Sender-Abort when the MAX_ACK_REQUEST is reached. The receiver uses the Receiver-Abort when the Inactivity timer expires or, in the ACK-on-Error mode, when the SCHC ACK is lost and the sender transmits SCHC Fragments of a new window. Some other cases for Abort are explained in the <a href="#FragModes" class="xref">Section 7.5</a> or <a href="#FSM" class="xref">Appendix C</a>.</p>
 <h1 id="rfc.section.7.5">
 <a href="#rfc.section.7.5">7.5.</a> <a href="#FragModes" id="FragModes">Baseline mechanism</a>
 </h1>
@@ -1213,16 +1245,18 @@ y=size of the transmitted bits
 <p id="rfc.section.7.5.2.p.6">When an All-0 fragment is received, it indicates that all the SCHC Fragments have been sent in the current window.  Since the sender is not obliged to always send a full window, some SCHC Fragment number not set in the receiver memory SHOULD not correspond to losses.  The receiver sends the corresponding SCHC ACK, the Inactivity Timer is set and the transmission of the next window by the sender can start.</p>
 <p id="rfc.section.7.5.2.p.7">If an All-0 fragment has been received and all SCHC Fragments of the current window have also been received, the receiver then expects a new Window and waits for the next SCHC Fragment.  Upon receipt of a SCHC Fragment, if the window value has not changed, the received SCHC Fragments are part of a retransmission. A receiver that has already received a SCHC Fragment SHOULD discard it, otherwise, it updates the encoded Bitmap.  If all the bits of the encoded Bitmap are set to one, the receiver MUST send an SCHC ACK without waiting for an All-0 fragment and the Inactivity Timer is initialized.</p>
 <p id="rfc.section.7.5.2.p.8">On the other hand, if the window value of the next received SCHC Fragment is set to the next expected window value, this means that the sender has received a correct encoded Bitmap reporting that all SCHC Fragments have been received.  The receiver then updates the value of the next expected window.</p>
-<p id="rfc.section.7.5.2.p.9">When an All-1 fragment is received, it indicates that the last SCHC Fragment of the packet has been sent.  Since the last window is not always full, the MIC will be used to detect if all SCHC Fragments of the packet have been received.  A correctMIC indicates the end of the transmission but the receiver MUST stay alive for an Inactivity Timer period to answer to any empty All-1 fragments the sender MAY send if SCHC ACKs sent by the receiver are lost. If the MIC is incorrect, some SCHC Fragments have been lost. The receiver sends the SCHC ACK regardless of successful SCHC Fragmented packet reception or not, the Inactitivity Timer is set. In case of an incorrect MIC, the receiver waits for SCHC Fragments belonging to the same window. After MAX_ACK_REQUESTS, the receiver will abort the on-going SCHC Fragmented packet transmission by transmitting the Receiver-Abort format. The receiver also aborts upon Inactivity Timer expiration.</p>
+<p id="rfc.section.7.5.2.p.9">When an All-1 fragment is received, it indicates that the last SCHC Fragment of the packet has been sent.  Since the last window is not always full, the MIC will be used by the receiver to detect if all SCHC Fragments of the packet have been received.  A correct MIC indicates the end of the transmission but the receiver MUST stay alive for an Inactivity Timer period to answer to any empty All-1 fragments the sender MAY send if SCHC ACKs sent by the receiver are lost. If the MIC is incorrect, some SCHC Fragments have been lost.  The receiver sends the SCHC ACK regardless of successful SCHC Fragmented packet reception or not, the Inactitivity Timer is set.  In case of an incorrect MIC, the receiver waits for SCHC Fragments belonging to the same window. After MAX_ACK_REQUESTS, the receiver will abort the on-going SCHC Fragmented packet transmission by transmitting a the Receiver-Abort format. The receiver also aborts upon Inactivity Timer expiration.</p>
+<p id="rfc.section.7.5.2.p.10">If the sender receives a SCK ACK with a Bitmap containing a bit set for a SCHC Fragment that it has not sent during the transmission phase of this window, it MUST abort the whole fragmentation and transmission of this SCHC Packet.</p>
 <h1 id="rfc.section.7.5.3">
 <a href="#rfc.section.7.5.3">7.5.3.</a> <a href="#ACK-on-Error-subsection" id="ACK-on-Error-subsection">ACK-on-Error</a>
 </h1>
 <p id="rfc.section.7.5.3.p.1">The senders behavior for ACK-on-Error and ACK-Always are similar. The main difference is that in ACK-on-Error the SCHC ACK with the encoded Bitmap is not sent at the end of each window but only when at least one SCHC Fragment of the current window has been lost. Excepts for the last window where an SCHC ACK MUST be sent to finish the transmission.</p>
 <p id="rfc.section.7.5.3.p.2">In ACK-on-Error, the Retransmission Timer expiration will be considered as a positive acknowledgment. This timer is set after sending an All-0 or an All-1 fragment. When the All-1 fragment has been sent, then the on-going SCHC F/R process is finished and the sender waits for the last SCHC ACK.  If the Retransmission Timer expires while waiting for the SCHC ACK for the last window, an All-1 empty MUST be sent to request the last SCHC ACK by the sender to complete the SCHC Fragmented packet transmission. When it expires the sender continue sending SCHC Fragments of the next window.</p>
-<p id="rfc.section.7.5.3.p.3">If the sender receives an SCHC ACK, it checks the window value. SCHC ACKs with an unexpected window number are discarded.  If the window number on the received encoded Bitmap is correct, the sender verifies if the receiver has received all SCHC fragments of the current window.  When at least one SCHC Fragment has been lost, the counter Attempts is increased by one and the sender resends the missing SCHC Fragments again.  When Attempts reaches MAX_ACK_REQUESTS, the sender sends an Abort message and releases all resources for the on-going SCHC Fragmented packet transmission.  When the retransmission of the missing SCHC Fragments is finished, the sender starts listening for an SCHC ACK (even if an All-0 or an All-1 has not been sent during the retransmission) and initializes the Retransmission Timer. After sending an All-1 fragment, the sender listens for an SCHC ACK, initializes Attempts, and starts the Retransmission Timer. If the Retransmission Timer expires, Attempts in increased by one and an empty All-1 fragment is sent to request the SCHC ACK for the last window. If Attempts reaches MAX_ACK_REQUESTS, the sender aborts the on-going SCHC Fragmented packet transmission by transmitting the Sender-Abort fragment.</p>
-<p id="rfc.section.7.5.3.p.4">Unlike the sender, the receiver for ACK-on-Error has a larger amount of differences compared with ACK-Always.  First, an SCHC ACK is not sent unless there is a lost SCHC Fragment or an unexpected behavior. With the exception of the last window, where an SCHC ACK is always sent regardless of SCHC Fragment losses or not.  The receiver starts by expecting SCHC Fragments from window 0 and maintains the information regarding which SCHC Fragments it receives.  After receiving an SCHC Fragment, the Inactivity Timer is set. If no further SCHC Fragment are received and the Inactivity Timer expires, the SCHC Fragment receiver aborts the on-going SCHC Fragmented packet transmission by transmitting the Receiver-Abort data unit.</p>
-<p id="rfc.section.7.5.3.p.5">Any SCHC Fragment not belonging to the current window is discarded. The actual SCHC Fragment number is computed based on the FCN value.  When an All-0 fragment is received and all SCHC Fragments have been received, the receiver updates the expected window value and expects a new window and waits for the next SCHC Fragment. If the window value of the next SCHC Fragment has not changed, the received SCHC Fragment is a retransmission. A receiver that has already received an SCHC Fragment discard it. If all SCHC Fragments of a window (that is not the last one) have been received, the receiver does not send an SCHC ACK. While the receiver waits for the next window and if the window value is set to the next value, and if an All-1 fragment with the next value window arrived the receiver knows that the last SCHC Fragment of the packet has been sent.  Since the last window is not always full, the MIC will be used to detect if all SCHC Fragments of the window have been received.  A correct MIC check indicates the end of the SCHC Fragmented packet transmission. An ACK is sent by the SCHC Fragment receiver. In case of an incorrect MIC, the receiver waits for SCHC Fragments belonging to the same window or the expiration of the Inactivity Timer. The latter will lead the receiver to abort the on-going SCHC fragmented packet transmission.</p>
-<p id="rfc.section.7.5.3.p.6">If after receiving an All-0 fragment the receiver missed some SCHC Fragments, the receiver uses an SCHC ACK with the encoded Bitmap to ask the retransmission of the missing fragments and expect to receive SCHC Fragments with the actual window. While waiting the retransmission an All-0 empty fragment is received, the receiver sends again the SCHC ACK with the encoded Bitmap, if the SCHC Fragments received belongs to another window or an All-1 fragment is received, the transmission is aborted by sending a Receiver-Abort fragment. Once it has received all the missing fragments it waits for the next window fragments.</p>
+<p id="rfc.section.7.5.3.p.3">If the sender receives an SCHC ACK, it checks the window value. SCHC ACKs with an unexpected window number are discarded.  If the window number on the received encoded Bitmap is correct, the sender verifies if the receiver has received all SCHC fragments of the current window.  When at least one SCHC Fragment has been lost, the counter Attempts is increased by one and the sender resends the missing SCHC Fragments again.  When Attempts reaches MAX_ACK_REQUESTS, the sender sends an Abort message and releases all resources for the on-going SCHC Fragmented packet transmission.  When the retransmission of the missing SCHC Fragments is finished, the sender starts listening for an SCHC ACK (even if an All-0 or an All-1 has not been sent during the retransmission) and initializes the Retransmission Timer. After sending an All-1 fragment, the sender listens for an SCHC ACK, initializes Attempts, and starts the Retransmission Timer. If the Retransmission Timer expires, Attempts is increased by one and an empty All-1 fragment is sent to request the SCHC ACK for the last window. If Attempts reaches MAX_ACK_REQUESTS, the sender aborts the on-going SCHC Fragmented packet transmission by transmitting the Sender-Abort fragment.</p>
+<p id="rfc.section.7.5.3.p.4">If the sender receives a SCK ACK with a Bitmap containing a bit set for a SCHC Fragment that it has not sent during the transmission phase of this window, it MUST abort the whole fragmentation and transmission of this SCHC Packet.</p>
+<p id="rfc.section.7.5.3.p.5">Unlike the sender, the receiver for ACK-on-Error has a larger amount of differences compared with ACK-Always.  First, an SCHC ACK is not sent unless there is a lost SCHC Fragment or an unexpected behavior. With the exception of the last window, where an SCHC ACK is always sent regardless of SCHC Fragment losses or not.  The receiver starts by expecting SCHC Fragments from window 0 and maintains the information regarding which SCHC Fragments it receives.  After receiving an SCHC Fragment, the Inactivity Timer is set. If no further SCHC Fragment are received and the Inactivity Timer expires, the SCHC Fragment receiver aborts the on-going SCHC Fragmented packet transmission by transmitting the Receiver-Abort data unit.</p>
+<p id="rfc.section.7.5.3.p.6">Any SCHC Fragment not belonging to the current window is discarded. The actual SCHC Fragment number is computed based on the FCN value.  When an All-0 fragment is received and all SCHC Fragments have been received, the receiver updates the expected window value and expects a new window and waits for the next SCHC Fragment.<br> If the window value of the next SCHC Fragment has not changed, the received SCHC Fragment is a retransmission. A receiver that has already received an SCHC Fragment discard it. If all SCHC Fragments of a window (that is not the last one) have been received, the receiver does not send an SCHC ACK. While the receiver waits for the next window and if the window value is set to the next value, and if an All-1 fragment with the next value window arrived the receiver knows that the last SCHC Fragment of the packet has been sent.  Since the last window is not always full, the MIC will be used to detect if all SCHC Fragments of the window have been received.  A correct MIC check indicates the end of the SCHC Fragmented packet transmission. An ACK is sent by the SCHC Fragment receiver. In case of an incorrect MIC, the receiver waits for SCHC Fragments belonging to the same window or the expiration of the Inactivity Timer. The latter will lead the receiver to abort the on-going SCHC fragmented packet transmission.</p>
+<p id="rfc.section.7.5.3.p.7">If after receiving an All-0 fragment the receiver missed some SCHC Fragments, the receiver uses an SCHC ACK with the encoded Bitmap to ask the retransmission of the missing fragments and expect to receive SCHC Fragments with the actual window. While waiting the retransmission an All-0 empty fragment is received, the receiver sends again the SCHC ACK with the encoded Bitmap, if the SCHC Fragments received belongs to another window or an All-1 fragment is received, the transmission is aborted by sending a Receiver-Abort fragment. Once it has received all the missing fragments it waits for the next window fragments.</p>
 <h1 id="rfc.section.7.6">
 <a href="#rfc.section.7.6">7.6.</a> <a href="#supporting-multiple-window-sizes" id="supporting-multiple-window-sizes">Supporting multiple window sizes</a>
 </h1>
@@ -1239,11 +1273,10 @@ y=size of the transmitted bits
 <h1 id="rfc.section.8">
 <a href="#rfc.section.8">8.</a> <a href="#Padding" id="Padding">Padding management</a>
 </h1>
-<p id="rfc.section.8.p.1">Default padding is defined for L2 frame with a variable length of bytes. Padding is done twice, after compression and in the all-1 fragmentation.</p>
-<p id="rfc.section.8.p.2">In compression, the Compressed Header is generally not a multiple of bytes in size, but the payload following the Compressed Header is always a multiple of 8 bits (see <a href="#Fig-SCHCpckt" class="xref">Figure 4</a>). If needed, padding bits can be added after the payload to reach the next byte boundary. Since the Compressed Header (through the Rule ID and the Compression Residue) tells its length and the payload is always a multiple of 8 bits, the receiver can without ambiguity remove the padding bits, which never exceed 7 bits.</p>
-<p id="rfc.section.8.p.3">SCHC F/R works on a byte aligned (i.e. padded SCHC Packet). Fragmentation header may not be aligned on the next byte boundary, but each fragment except the last one (All-1 fragment) must sent the maximum bits as possible. Only the last fragment need to introduce padding to reach the next boundary limit. Since the SCHC is known to be a multiple of 8 bits, the receiver can remove the extra bit to reach this limit.</p>
-<p id="rfc.section.8.p.4">Default padding mechanism do not need to send the padding length and can lead to a maximum of 14 bits of padding.</p>
-<p id="rfc.section.8.p.5">The padding is not mandatory and is optional to the technology-specific document to give a different solution. In this document there are some inputs on how to manage the padding.</p>
+<p id="rfc.section.8.p.1">SCHC C/D and SCHC F/R operate on bits, not bytes. SCHC itself does not have any alignment prerequisite.  If the Layer 2 below SCHC constrains the L2 Data Unit to align to some boundary, called L2 Words (for example, bytes), SCHC will meet that constraint and produce messages with the correct alignement.  This may entail adding extra bits (called padding bits).</p>
+<p id="rfc.section.8.p.2">When padding occurs, the number of appended bits is strictly less than the L2 Word size.</p>
+<p id="rfc.section.8.p.3">Padding happens at most once for each Packet going through the full SCHC chain, i.e. Compression and (optionnally) SCHC Fragmentation (see <a href="#Fig-IntroLayers" class="xref">Figure 2</a>).  If a SCHC Packet is sent unfragmented (see <a href="#Fig-Operations" class="xref">Figure 3</a>), it is padded as needed.  If a SCHC Packet is fragmented, only the last fragment is padded as needed.</p>
+<p id="rfc.section.8.p.4">Each technology-specific document MUST specify the size of the L2 Word.  The L2 Word might actually be a single bit, in which case at most zero bits of padding will be appended to any message, i.e. no padding will take place at all.</p>
 <h1 id="rfc.section.9">
 <a href="#rfc.section.9">9.</a> <a href="#schc-compression-for-ipv6-and-udp-headers" id="schc-compression-for-ipv6-and-udp-headers">SCHC Compression for IPv6 and UDP headers</a>
 </h1>
@@ -1992,7 +2025,7 @@ Lcl_Bitmap==recv_Bitmap &amp;| |   |   all missing frag sent
 </pre>
 <p class="figure">Figure 43: Receiver State Machine for the ACK-on-Error Mode</p>
 <h1 id="rfc.appendix.D">
-<a href="#rfc.appendix.D">Appendix D.</a> <a href="#schc-parameters-ticket-15" id="schc-parameters-ticket-15">SCHC Parameters - Ticket #15</a>
+<a href="#rfc.appendix.D">Appendix D.</a> <a href="#SCHCParams" id="SCHCParams">SCHC Parameters - Ticket #15</a>
 </h1>
 <p id="rfc.section.D.p.1">This section gives the list of parameters that need to be defined in the technology-specific documents, technology developers must evaluate that L2 has strong enough integrity checking to match SCHC&#8217;s assumption:</p>
 <p></p>
@@ -2009,10 +2042,11 @@ Lcl_Bitmap==recv_Bitmap &amp;| |   |   all missing frag sent
 <li>Retransmission Timer duration</li>
 <li>Inactivity Timer duration</li>
 <li>Define the MAX_ACK_REQUEST (number of attempts)</li>
-<li>Use of padding or not and how and when to use it</li>
+<li>Padding: size of the L2 Word (for most technologies, a byte; for some technologies, a bit). Value of the padding bits (1 or 0).  The value of the padding bits needs to be specified because the padding bits are included in the MIC calculation.</li>
 <li>Take into account that the length of rule-id + N + T + W when possible is good to have a multiple of 8 bits to complete a byte and avoid padding</li>
 <li>In the ACK format to have a length for Rule-ID + T + W bit into a complete number of byte to do optimization more easily</li>
 <li>The technology documents will describe if Rule ID is constrained by any alignment</li>
+<li>When fragmenting in Ack-on-Error or Ack-Always mode, it is expected that the last window (called All-1 window) will not be fully utilised, i.e. there won&#8217;t be fragments with all FCN values from MAX_WIND_FCN downto 1 and finally All-1.  It is worth noting that this document does not mandate that other windows (called All-0 windows) are fully utilised either.  This document purposely does not specify that All-1 windows use Bitmaps with the same number of bits as All-0 windows do.  By default, Bitmaps for All-0 and All-1 windows are of the same size MAX_WIND_FCN + 1. But a technology-specific document MAY revert that decision. The rationale for reverting the decision could be the following: Note that the SCHC ACK sent as a response to an All-1 fragment includes a C bit that SCK ACK for other windows don&#8217;t have. Therefore, the SCHC ACK for the All-1 window is one bit bigger. An L2 technology with a severely constrained payload size might decide that this &#8220;bump&#8221; in the SCH ACK for the last fragment is a bad resource usage. It could thus mandate that the All-1 window is not allowed to use the FCN value 1 and that the All-1 SCHC ACK Bitmap size is reduced by 1 bit. This provides room for the C bit without creating a bump in the SCHC ACK.</li>
 </ul>
 <p id="rfc.section.D.p.3">And the following parameters need to be addressed in another document but not forcely in the technology-specific one:</p>
 <p></p>
