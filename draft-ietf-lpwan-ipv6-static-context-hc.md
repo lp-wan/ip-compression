@@ -719,15 +719,15 @@ To build the fragment payload, SCHC F/R MUST take from the SCHC Packet a number 
 
 #### All-0 fragment
 
-The All-0 format is used for sending the last SCHC Fragment of a window that is not the last window of the packet.
+The All-0 format is used for sending the last SCHC Fragment of a window that is not the last window of the SCHC Packet.
 
 ~~~~
 
 |----- Fragment Header -----|
           |-- T --|1|-- N --|
-+-- ... --+- ... -+-+- ... -+--- ... ---+
-| Rule ID | DTag  |W|  0..0 |  payload  |  
-+-- ... --+- ... -+-+- ... -+--- ... ---+
++-- ... --+- ... -+-+- ... -+--------...-------+
+| Rule ID | DTag  |W|  0..0 | Fragment payload |
++-- ... --+- ... -+-+- ... -+--------...-------+
 
 ~~~~
 {: #Fig-All0 title='All-0 fragment detailed format'}
@@ -758,7 +758,7 @@ Since an All-0 payload MUST be at least the size of an L2 Word, a receiver can d
 
 ### All-1 fragment
 
-In the No-ACK mode, the last SCHC Fragment of an IPv6 datagram SHALL contain a SCHC Fragment header that conforms to
+In the No-ACK mode, the last SCHC Fragment of a SCHC Packet SHALL contain a SCHC Fragment header that conforms to
 the detailed format shown in {{Fig-Last}}.
 
 ~~~~
@@ -773,7 +773,7 @@ the detailed format shown in {{Fig-Last}}.
 {: #Fig-Last title='All-1 Fragment Detailed Format for the Last Fragment, No-ACK mode'}
 
 
-In ACK-Always or ACK-on-Error mode, the last fragment of an IPv6 datagram SHALL contain a SCHC Fragment header that conforms to
+In ACK-Always or ACK-on-Error mode, the last fragment of a SCHC Packet SHALL contain a SCHC Fragment header that conforms to
 the detailed format shown in {{Fig-LastWinMode}}.
 
 ~~~~
@@ -814,11 +814,11 @@ Since an All-1 payload MUST be at least the size of an L2 Word, a receiver can d
 
 ~~~~
 
-|---------- Fragment Header --------------|
+|---------- Fragment Header ----------|
           |-- T --|1|-- N --|
-+-- ... --+- ... -+-+- ... -+---- ... ----+~~~~~~~~~~~~~~~~~~~~~
-| Rule ID | DTag  |W|  1..1 |     MIC     | padding (as needed)      (no payload)
-+-- ... --+- ... -+-+- ... -+---- ... ----+~~~~~~~~~~~~~~~~~~~~~
++-- ... --+- ... -+-+- ... -+-- ... --+~~~~~~~~~~~~~~~~~~~
+| Rule ID | DTag  |W|  1..1 |   MIC   | padding as needed (no payload)
++-- ... --+- ... -+-+- ... -+-- ... --+~~~~~~~~~~~~~~~~~~~
 
 ~~~~
 {: #Fig-All1retries title='All-1 for Retries format, also called All-1 empty'}
@@ -864,8 +864,8 @@ See {{SCHCParams}} for a discussion on the size of the Bitmaps.
 In order to reduce the SCK ACK size, the Bitmap that is actually transmitted is shortened ("encoded") as explained in {{Bitmapopt}}.
 
 #### Bitmap Encoding {#Bitmapopt}
-The Bitmap that is transmitted is shortened by applying the following algorithm: the longest contiguous sequence of Bitmap bits that are
-all set to 1, starting from an L2 Word boundary and up to the end of the Bitmap, if one such sequence exists, MUST NOT be transmitted.
+The SCHC ACK that is transmitted is truncated by applying the following algorithm: the longest contiguous sequence of bits that are all part of the Bitmap and that are
+all set to 1, starting from an L2 Word boundary in the SCHC ACK and up to the end of the Bitmap, if one such sequence exists, MUST NOT be transmitted.
 Because the SCHC Fragment sender knows the actual Bitmap size, it can reconstruct the original Bitmap from the shortened bitmap.
 
 When shortening effectively takes place, the SCHC ACK is a multiple of L2 Words, and padding MUST NOT be appended.
@@ -930,7 +930,7 @@ indicates that there is no missing SCHC Fragment.
    (*) = (FCN values indicating the order)
 
 ~~~~
-{: #Fig-Bitmap-lastWin title='Example of the Bitmap in ACK-Always or ACK-on-Error for the last window, for N=3)'}
+{: #Fig-Bitmap-lastWin title='Example of the Bitmap in ACK-Always or ACK-on-Error for the last window'}
 
 
 ### Abort formats {#Aborts}
@@ -954,8 +954,8 @@ Therefore, a Sender-Abort generally needs padding bits.
 Since an All-1 fragment MIC MUST be at least the size of an L2 Word, a receiver can distinguish a Sender-Abort from an All-1 fragment, even in the presence of padding.
 
 
-When a SCHC Fragment receiver needs to abort the on-going SCHC fragmented packet transmission, it transmits a Receiver-
-Abort. The Receiver-Abort format is a variation on the SCHC ACK format, creating an exception in the encoded Bitmap algorithm.
+When a SCHC Fragment receiver needs to abort the on-going SCHC fragmented packet transmission, it transmits a Receiver-Abort.
+The Receiver-Abort format is a variation on the SCHC ACK format, creating an exception in the encoded Bitmap algorithm.
 As shown in {{Fig-ACKabort}}, a Receiver-Abort is coded as a SCHC ACK message with a shortened Bitmap set to 1 up to
 the first L2 Word boundary, followed by an extra L2 Word full of 1's.
 Such a message never occurs in a regular acknowledgement and is detected as a Receiver-Abort.
@@ -1042,7 +1042,7 @@ transmission phase of this window, it MUST abort the whole fragmentation and tra
 ### ACK-on-Error {#ACK-on-Error-subsection}
 The senders behavior for ACK-on-Error and ACK-Always are similar. The main difference is that in ACK-on-Error the SCHC ACK 
 with the encoded Bitmap is not sent at the end of each window but only when at least one SCHC Fragment of the current window 
-has been lost. Excepts for the last window where an SCHC ACK MUST be sent to finish the transmission.  
+has been lost. Except for the last window where a SCHC ACK MUST be sent to finish the transmission.
 
 In ACK-on-Error, the Retransmission Timer expiration will be considered as a positive acknowledgment. This timer is set after
 sending an All-0 or an All-1 fragment. When the All-1 fragment has been sent, then the on-going SCHC F/R process is
@@ -1924,9 +1924,9 @@ This section gives the list of parameters that need to be defined in the technol
   This document purposely does not specify that All-1 windows use Bitmaps with the same number of bits as All-0 windows do.
   By default, Bitmaps for All-0 and All-1 windows are of the same size MAX_WIND_FCN + 1. But a technology-specific document
   MAY revert that decision. The rationale for reverting the decision could be the following: Note that the SCHC ACK sent as a
-  response to an All-1 fragment includes a C bit that SCK ACK for other windows don't have. Therefore, the SCHC ACK for the
+  response to an All-1 fragment includes a C bit that SCHC ACK for other windows don't have. Therefore, the SCHC ACK for the
   All-1 window is one bit bigger. An L2 technology with a severely constrained payload size might decide that this "bump" in
-  the SCH ACK for the last fragment is a bad resource usage. It could thus mandate that the All-1 window is not allowed to use
+  the SCHC ACK for the last fragment is a bad resource usage. It could thus mandate that the All-1 window is not allowed to use
   the FCN value 1 and that the All-1 SCHC ACK Bitmap size is reduced by 1 bit. This provides room for the C bit without creating
   a bump in the SCHC ACK.
 
