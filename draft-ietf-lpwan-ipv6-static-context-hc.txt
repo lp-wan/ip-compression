@@ -439,9 +439,9 @@ Internet-Draft                 LPWAN SCHC                      June 2018
    o  Up: Uplink direction for compression/decompression in both sides,
       from the Dev SCHC C/D to the network SCHC C/D.
 
-   o  W: Window bit.  A SCHC Fragment header field used in Window mode
-      Section 7, which carries the same value for all SCHC Fragments of
-      a window.
+   o  W: Window bit.  A SCHC Fragment header field used in ACK-on-Error
+      or ACK-Always mode Section 7, which carries the same value for all
+      SCHC Fragments of a window.
 
 
 
@@ -450,8 +450,8 @@ Minaburo, et al.        Expires December 20, 2018               [Page 8]
 Internet-Draft                 LPWAN SCHC                      June 2018
 
 
-   o  Window: A subset of the SCHC Fragments needed to carry a packet
-      Section 7.
+   o  Window: A subset of the SCHC Fragments needed to carry a SCHC
+      Packet Section 7.
 
 4.  SCHC overview
 
@@ -1878,10 +1878,10 @@ Internet-Draft                 LPWAN SCHC                      June 2018
    the SCHC Packet.  For example, the receiver MAY place the fragment
    payload within a payload reassembly buffer at the location determined
    from the FCN, the arrival order of the SCHC Fragments, and the
-   fragment payload sizes.  In Window mode, the fragment receiver also
-   uses the W bit in the received SCHC Fragments.  Note that the size of
-   the original, unfragmented packet cannot be determined from
-   fragmentation headers.
+   fragment payload sizes.  In ACK-on-Error or ACK-Always, the fragment
+   receiver also uses the W bit in the received SCHC Fragments.  Note
+   that the size of the original, unfragmented packet cannot be
+   determined from fragmentation headers.
 
    Fragmentation functionality uses the FCN value to transmit the SCHC
    Fragments.  It has a length of N bits where the All-1 and All-0 FCN
@@ -1911,9 +1911,9 @@ Internet-Draft                 LPWAN SCHC                      June 2018
    the MIC received.  In No-ACK, if the integrity check indicates that
    the reassembled SCHC Packet does not match the original SCHC Packet
    (prior to fragmentation), the reassembled SCHC Packet MUST be
-   discarded.  In Window mode, a MIC check is also performed by the
-   fragment receiver after reception of each subsequent SCHC Fragment
-   retransmitted after the first MIC check.
+   discarded.  In ACK-on-Error or ACK-Always, a MIC check is also
+   performed by the fragment receiver after reception of each subsequent
+   SCHC Fragment retransmitted after the first MIC check.
 
    There are three reliability modes: No-ACK, ACK-Always and ACK-on-
    Error.  In ACK-Always and ACK-on-Error, a jumping window protocol
@@ -2583,17 +2583,17 @@ Internet-Draft                 LPWAN SCHC                      June 2018
    Implementers SHOULD make sure that the correct operation is not
    affected by such event.
 
-   In Window mode - ACK on error, a malicious node MAY force a SCHC
-   Fragment sender to resend a SCHC Fragment a number of times, with the
-   aim to increase consumption of the SCHC Fragment sender's resources.
-   To this end, the malicious node MAY repeatedly send a fake ACK to the
-   SCHC Fragment sender, with a Bitmap that reports that one or more
-   SCHC Fragments have been lost.  In order to mitigate this possible
-   attack, MAX_ACK_RETRIES MAY be set to a safe value which allows to
-   limit the maximum damage of the attack to an acceptable extent.
-   However, note that a high setting for MAX_ACK_RETRIES benefits SCHC
-   Fragment reliability modes, therefore the trade-off needs to be
-   carefully considered.
+   In ACK-on-Error, a malicious node MAY force a SCHC Fragment sender to
+   resend a SCHC Fragment a number of times, with the aim to increase
+   consumption of the SCHC Fragment sender's resources.  To this end,
+   the malicious node MAY repeatedly send a fake ACK to the SCHC
+   Fragment sender, with a Bitmap that reports that one or more SCHC
+   Fragments have been lost.  In order to mitigate this possible attack,
+   MAX_ACK_RETRIES MAY be set to a safe value which allows to limit the
+   maximum damage of the attack to an acceptable extent.  However, note
+   that a high setting for MAX_ACK_RETRIES benefits SCHC Fragment
+   reliability modes, therefore the trade-off needs to be carefully
+   considered.
 
 11.  Acknowledgements
 
@@ -3586,7 +3586,7 @@ Minaburo, et al.        Expires December 20, 2018              [Page 64]
 Internet-Draft                 LPWAN SCHC                      June 2018
 
 
-   o  When fragmenting in Ack-on-Error or Ack-Always mode, it is
+   o  When fragmenting in ACK-on-Error or ACK-Always mode, it is
       expected that the last window (called All-1 window) will not be
       fully utilised, i.e. there won't be fragments with all FCN values
       from MAX_WIND_FCN downto 1 and finally All-1.  It is worth noting
