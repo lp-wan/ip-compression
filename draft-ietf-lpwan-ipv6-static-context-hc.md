@@ -982,9 +982,7 @@ A Receiver-Abort is aligned to L2 Words, by design. Therefore, padding MUST not 
 
 Neither the Sender-Abort nor the Receiver-Abort messages are ever acknowledged or retransmitted.
 
-The sender uses the Sender-Abort when the MAX_ACK_REQUEST is reached. The receiver uses the Receiver-Abort when the
-Inactivity timer expires or, in the ACK-on-Error mode, when the SCHC ACK is lost and the sender transmits SCHC Fragments of a new
-window. Some other cases for Abort are explained in the {{FragModes}} or {{FSM}}.
+Use cases for the Sender-Abort and Receiver-Abort messages are explained in {{FragModes}} or {{FSM}}.
 
 
 ## Baseline mechanism {#FragModes}
