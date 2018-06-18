@@ -864,8 +864,8 @@ See {{SCHCParams}} for a discussion on the size of the Bitmaps.
 In order to reduce the SCK ACK size, the Bitmap that is actually transmitted is shortened ("encoded") as explained in {{Bitmapopt}}.
 
 #### Bitmap Encoding {#Bitmapopt}
-The SCHC ACK that is transmitted is truncated by applying the following algorithm: the longest contiguous sequence of bits that are all part of the Bitmap and that are
-all set to 1, starting from an L2 Word boundary in the SCHC ACK and up to the end of the Bitmap, if one such sequence exists, MUST NOT be transmitted.
+The SCHC ACK that is transmitted is truncated by applying the following algorithm: the longest contiguous sequence of bits that starts at an L2 Word boundary of the SCHC ACK,
+where the bits of that sequence are all set to 1, are all part of the Bitmap and finish exactly at the end of the Bitmap, if one such sequence exists, MUST NOT be transmitted.
 Because the SCHC Fragment sender knows the actual Bitmap size, it can reconstruct the original Bitmap from the shortened bitmap.
 
 When shortening effectively takes place, the SCHC ACK is a multiple of L2 Words, and padding MUST NOT be appended.
