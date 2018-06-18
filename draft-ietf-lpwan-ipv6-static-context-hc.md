@@ -857,6 +857,8 @@ to 1 to indicate that the MIC check computed by the receiver matches the MIC pre
 ~~~~
 {: #Fig-ACK-Format1 title='Format of an SCHC ACK for All-1 windows'}
 
+The Rule ID and Dtag values in the SCHC ACK messages MUST be identical to the ones used in the SCHC Fragments that are being acknowledged. This allows matching the SCHC ACK and the corresponding SCHC Fragments.
+
 The Bitmap carries information on the reception of each fragment of the window as described in {{FragTools}}.
 
 See {{SCHCParams}} for a discussion on the size of the Bitmaps.
@@ -959,7 +961,11 @@ The Receiver-Abort format is a variation on the SCHC ACK format, creating an exc
 As shown in {{Fig-ACKabort}}, a Receiver-Abort is coded as a SCHC ACK message with a shortened Bitmap set to 1 up to
 the first L2 Word boundary, followed by an extra L2 Word full of 1's.
 Such a message never occurs in a regular acknowledgement and is detected as a Receiver-Abort.
-A Receiver-Abort is aligned to L2 Words by design. Therefore, padding MUST not be appended.
+
+The Rule ID and Dtag values in the Receive-Abort message MUST be identical to the ones used in the fragments of the SCHC Packet the transmission of which is being aborted.
+
+
+A Receiver-Abort is aligned to L2 Words, by design. Therefore, padding MUST not be appended.
 
 ~~~~
 
