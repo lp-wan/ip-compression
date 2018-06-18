@@ -203,9 +203,9 @@ for error detection after IPv6 packet reassembly.
 
 * Up: Uplink direction for compression/decompression in both sides, from the Dev SCHC C/D to the network SCHC C/D.
 
-* W: Window bit. A SCHC Fragment header field used in Window mode {{Frag}}, which carries the same value for all SCHC Fragments of a window.
+* W: Window bit. A SCHC Fragment header field used in ACK-on-Error or ACK-Always mode {{Frag}}, which carries the same value for all SCHC Fragments of a window.
 
-* Window: A subset of the SCHC Fragments needed to carry a packet {{Frag}}.
+* Window: A subset of the SCHC Fragments needed to carry a SCHC Packet {{Frag}}.
 
 # SCHC overview
 
@@ -999,13 +999,13 @@ If after applying SCHC header compression (or when SCHC header compression is no
 
 Then, the fragment receiver MAY determine the SCHC Fragment reliability mode that is used for this SCHC Fragment based on the Rule ID in that fragment.
 
-After a SCHC Fragment reception, the receiver starts constructing the SCHC Packet. It uses the FCN and the arrival order of each SCHC Fragment to determine the location of the individual fragments within the SCHC Packet. For example, the receiver MAY place the fragment payload within a payload reassembly buffer at the location determined from the FCN, the arrival order of the SCHC Fragments, and the fragment payload sizes. In Window mode, the fragment receiver also uses the W bit in the received SCHC Fragments. Note that the size of the original, unfragmented packet cannot be determined from fragmentation headers.
+After a SCHC Fragment reception, the receiver starts constructing the SCHC Packet. It uses the FCN and the arrival order of each SCHC Fragment to determine the location of the individual fragments within the SCHC Packet. For example, the receiver MAY place the fragment payload within a payload reassembly buffer at the location determined from the FCN, the arrival order of the SCHC Fragments, and the fragment payload sizes. In ACK-on-Error or ACK-Always, the fragment receiver also uses the W bit in the received SCHC Fragments. Note that the size of the original, unfragmented packet cannot be determined from fragmentation headers.
 
 Fragmentation functionality uses the FCN value to transmit the SCHC Fragments. It has a length of N bits where the All-1 and All-0 FCN values are used to control the fragmentation transmission. The rest of the FCN numbers MUST be assigned sequentially in a decreasing order, the first FCN of a window is RECOMMENDED to be MAX_WIND_FCN, i.e. the highest possible FCN value depending on the FCN number of bits.
 
 In all modes, the last SCHC Fragment of a packet MUST contain a MIC which is used to check if there are errors or missing SCHC Fragments and MUST use the corresponding All-1 fragment format.  Note that a SCHC Fragment with an All-0 format is considered the last SCHC Fragment of the current window.
 
-If the receiver receives the last fragment of a SCHC Packet (All-1), it checks for the integrity of the reassembled SCHC Packet, based on the MIC received. In No-ACK, if the integrity check indicates that the reassembled SCHC Packet does not match the original SCHC Packet (prior to fragmentation), the reassembled SCHC Packet MUST be discarded. In Window mode, a MIC check is also performed by the fragment receiver after reception of each subsequent SCHC Fragment retransmitted after the first MIC check.
+If the receiver receives the last fragment of a SCHC Packet (All-1), it checks for the integrity of the reassembled SCHC Packet, based on the MIC received. In No-ACK, if the integrity check indicates that the reassembled SCHC Packet does not match the original SCHC Packet (prior to fragmentation), the reassembled SCHC Packet MUST be discarded. In ACK-on-Error or ACK-Always, a MIC check is also performed by the fragment receiver after reception of each subsequent SCHC Fragment retransmitted after the first MIC check.
 
 There are three reliability modes: No-ACK, ACK-Always and ACK-on-Error. In ACK-Always and ACK-on-Error, a jumping window protocol uses two windows alternatively, identified as 0 and 1.  A SCHC Fragment with all FCN bits set to 0 (i.e. an All-0 fragment) indicates that the window is over (i.e. the SCHC Fragment is the last one of the window) and allows to switch from one window to the next one.  The All-1 FCN in a SCHC Fragment indicates that it is the last fragment of the packet being transmitted and therefore there will not be another window for this packet.
 
@@ -1257,7 +1257,7 @@ In another type of attack, the malicious node is required to have overhearing ca
 
 Further attacks MAY involve sending overlapped fragments (i.e. comprising some overlapping parts of the original IPv6 datagram). Implementers SHOULD make sure that the correct operation is not affected by such event.
 
-In Window mode – ACK on error, a malicious node MAY force a SCHC Fragment sender to resend a SCHC Fragment a number of times, with the aim to increase consumption of the SCHC Fragment sender’s resources. To this end, the malicious node MAY repeatedly send a fake ACK to the SCHC Fragment sender, with a Bitmap that reports that one or more SCHC Fragments have been lost. In order to mitigate this possible attack, MAX_ACK_RETRIES MAY be set to a safe value which allows to limit the maximum damage of the attack to an acceptable extent. However, note that a high setting for MAX_ACK_RETRIES benefits SCHC Fragment reliability modes, therefore the trade-off needs to be carefully considered.
+In ACK-on-Error, a malicious node MAY force a SCHC Fragment sender to resend a SCHC Fragment a number of times, with the aim to increase consumption of the SCHC Fragment sender’s resources. To this end, the malicious node MAY repeatedly send a fake ACK to the SCHC Fragment sender, with a Bitmap that reports that one or more SCHC Fragments have been lost. In order to mitigate this possible attack, MAX_ACK_RETRIES MAY be set to a safe value which allows to limit the maximum damage of the attack to an acceptable extent. However, note that a high setting for MAX_ACK_RETRIES benefits SCHC Fragment reliability modes, therefore the trade-off needs to be carefully considered.
 
 # Acknowledgements
 
@@ -1922,7 +1922,7 @@ This section gives the list of parameters that need to be defined in the technol
 
 * The technology documents will describe if Rule ID is constrained by any alignment
 
-* When fragmenting in Ack-on-Error or Ack-Always mode, it is expected that the last window (called All-1 window) will not be
+* When fragmenting in ACK-on-Error or ACK-Always mode, it is expected that the last window (called All-1 window) will not be
   fully utilised, i.e. there won't be fragments with all FCN values from MAX_WIND_FCN downto 1 and finally All-1.
   It is worth noting that this document does not mandate that other windows (called All-0 windows) are fully utilised either.
   This document purposely does not specify that All-1 windows use Bitmaps with the same number of bits as All-0 windows do.
