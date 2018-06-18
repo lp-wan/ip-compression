@@ -1667,13 +1667,13 @@ Internet-Draft                 LPWAN SCHC                      June 2018
 
             Figure 20: Format of an SCHC ACK for All-1 windows
 
+   The Rule ID and Dtag values in the SCHC ACK messages MUST be
+   identical to the ones used in the SCHC Fragments that are being
+   acknowledged.  This allows matching the SCHC ACK and the
+   corresponding SCHC Fragments.
+
    The Bitmap carries information on the reception of each fragment of
    the window as described in Section 7.2.
-
-   See Appendix D for a discussion on the size of the Bitmaps.
-
-   In order to reduce the SCK ACK size, the Bitmap that is actually
-   transmitted is shortened ("encoded") as explained in Section 7.4.3.1.
 
 
 
@@ -1681,6 +1681,11 @@ Minaburo, et al.        Expires December 20, 2018              [Page 30]
 
 Internet-Draft                 LPWAN SCHC                      June 2018
 
+
+   See Appendix D for a discussion on the size of the Bitmaps.
+
+   In order to reduce the SCK ACK size, the Bitmap that is actually
+   transmitted is shortened ("encoded") as explained in Section 7.4.3.1.
 
 7.4.3.1.  Bitmap Encoding
 
@@ -1723,11 +1728,6 @@ Internet-Draft                 LPWAN SCHC                      June 2018
    Figure 23 shows an example of an SCHC ACK with FCN ranging from 6
    down to 0, where the Bitmap indicates that the second and the fifth
    SCHC Fragments have not been correctly received.
-
-
-
-
-
 
 
 
@@ -1818,9 +1818,14 @@ Internet-Draft                 LPWAN SCHC                      June 2018
    a Receiver-Abort is coded as a SCHC ACK message with a shortened
    Bitmap set to 1 up to the first L2 Word boundary, followed by an
    extra L2 Word full of 1's.  Such a message never occurs in a regular
-   acknowledgement and is detected as a Receiver-Abort.  A Receiver-
-   Abort is aligned to L2 Words by design.  Therefore, padding MUST not
-   be appended.
+   acknowledgement and is detected as a Receiver-Abort.
+
+   The Rule ID and Dtag values in the Receive-Abort message MUST be
+   identical to the ones used in the fragments of the SCHC Packet the
+   transmission of which is being aborted.
+
+   A Receiver-Abort is aligned to L2 Words, by design.  Therefore,
+   padding MUST not be appended.
 
    |- Receiver-Abort Header -|
 
@@ -1835,13 +1840,8 @@ Internet-Draft                 LPWAN SCHC                      June 2018
    Neither the Sender-Abort nor the Receiver-Abort messages are ever
    acknowledged or retransmitted.
 
-   The sender uses the Sender-Abort when the MAX_ACK_REQUEST is reached.
-   The receiver uses the Receiver-Abort when the Inactivity timer
-   expires or, in the ACK-on-Error mode, when the SCHC ACK is lost and
-   the sender transmits SCHC Fragments of a new window.  Some other
-   cases for Abort are explained in the Section 7.5 or Appendix C.
-
-
+   Use cases for the Sender-Abort and Receiver-Abort messages are
+   explained in Section 7.5 or Appendix C.
 
 
 

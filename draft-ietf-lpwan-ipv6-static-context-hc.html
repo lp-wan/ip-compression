@@ -1114,9 +1114,10 @@ y=size of the transmitted bits
 
 </pre>
 <p class="figure">Figure 20: Format of an SCHC ACK for All-1 windows</p>
-<p id="rfc.section.7.4.3.p.3">The Bitmap carries information on the reception of each fragment of the window as described in <a href="#FragTools" class="xref">Section 7.2</a>.</p>
-<p id="rfc.section.7.4.3.p.4">See <a href="#SCHCParams" class="xref">Appendix D</a> for a discussion on the size of the Bitmaps.</p>
-<p id="rfc.section.7.4.3.p.5">In order to reduce the SCK ACK size, the Bitmap that is actually transmitted is shortened (&#8220;encoded&#8221;) as explained in <a href="#Bitmapopt" class="xref">Section 7.4.3.1</a>.</p>
+<p id="rfc.section.7.4.3.p.3">The Rule ID and Dtag values in the SCHC ACK messages MUST be identical to the ones used in the SCHC Fragments that are being acknowledged. This allows matching the SCHC ACK and the corresponding SCHC Fragments.</p>
+<p id="rfc.section.7.4.3.p.4">The Bitmap carries information on the reception of each fragment of the window as described in <a href="#FragTools" class="xref">Section 7.2</a>.</p>
+<p id="rfc.section.7.4.3.p.5">See <a href="#SCHCParams" class="xref">Appendix D</a> for a discussion on the size of the Bitmaps.</p>
+<p id="rfc.section.7.4.3.p.6">In order to reduce the SCK ACK size, the Bitmap that is actually transmitted is shortened (&#8220;encoded&#8221;) as explained in <a href="#Bitmapopt" class="xref">Section 7.4.3.1</a>.</p>
 <h1 id="rfc.section.7.4.3.1">
 <a href="#rfc.section.7.4.3.1">7.4.3.1.</a> <a href="#Bitmapopt" id="Bitmapopt">Bitmap Encoding</a>
 </h1>
@@ -1197,7 +1198,9 @@ next L2 Word boundary -&gt;|&lt;-- L2 Word --&gt;|
 <p class="figure">Figure 25: Sender-Abort format. All FCN field bits in this format are set to 1</p>
 <p id="rfc.section.7.4.4.p.2">The size of the Sender-Abort header is generally not a multiple of the L2 Word size.  Therefore, a Sender-Abort generally needs padding bits.</p>
 <p id="rfc.section.7.4.4.p.3">Since an All-1 fragment MIC MUST be at least the size of an L2 Word, a receiver can distinguish a Sender-Abort from an All-1 fragment, even in the presence of padding.</p>
-<p id="rfc.section.7.4.4.p.4">When a SCHC Fragment receiver needs to abort the on-going SCHC fragmented packet transmission, it transmits a Receiver-Abort.  The Receiver-Abort format is a variation on the SCHC ACK format, creating an exception in the encoded Bitmap algorithm.  As shown in <a href="#Fig-ACKabort" class="xref">Figure 26</a>, a Receiver-Abort is coded as a SCHC ACK message with a shortened Bitmap set to 1 up to the first L2 Word boundary, followed by an extra L2 Word full of 1&#8217;s.  Such a message never occurs in a regular acknowledgement and is detected as a Receiver-Abort.  A Receiver-Abort is aligned to L2 Words by design. Therefore, padding MUST not be appended.</p>
+<p id="rfc.section.7.4.4.p.4">When a SCHC Fragment receiver needs to abort the on-going SCHC fragmented packet transmission, it transmits a Receiver-Abort.  The Receiver-Abort format is a variation on the SCHC ACK format, creating an exception in the encoded Bitmap algorithm.  As shown in <a href="#Fig-ACKabort" class="xref">Figure 26</a>, a Receiver-Abort is coded as a SCHC ACK message with a shortened Bitmap set to 1 up to the first L2 Word boundary, followed by an extra L2 Word full of 1&#8217;s.  Such a message never occurs in a regular acknowledgement and is detected as a Receiver-Abort.</p>
+<p id="rfc.section.7.4.4.p.5">The Rule ID and Dtag values in the Receive-Abort message MUST be identical to the ones used in the fragments of the SCHC Packet the transmission of which is being aborted.</p>
+<p id="rfc.section.7.4.4.p.6">A Receiver-Abort is aligned to L2 Words, by design. Therefore, padding MUST not be appended.</p>
 <div id="rfc.figure.26"></div>
 <div id="Fig-ACKabort"></div>
 <pre>
@@ -1210,8 +1213,8 @@ next L2 Word boundary -&gt;|&lt;-- L2 Word --&gt;|
 
 </pre>
 <p class="figure">Figure 26: Receiver-Abort format</p>
-<p id="rfc.section.7.4.4.p.5">Neither the Sender-Abort nor the Receiver-Abort messages are ever acknowledged or retransmitted.</p>
-<p id="rfc.section.7.4.4.p.6">The sender uses the Sender-Abort when the MAX_ACK_REQUEST is reached. The receiver uses the Receiver-Abort when the Inactivity timer expires or, in the ACK-on-Error mode, when the SCHC ACK is lost and the sender transmits SCHC Fragments of a new window. Some other cases for Abort are explained in the <a href="#FragModes" class="xref">Section 7.5</a> or <a href="#FSM" class="xref">Appendix C</a>.</p>
+<p id="rfc.section.7.4.4.p.7">Neither the Sender-Abort nor the Receiver-Abort messages are ever acknowledged or retransmitted.</p>
+<p id="rfc.section.7.4.4.p.8">Use cases for the Sender-Abort and Receiver-Abort messages are explained in <a href="#FragModes" class="xref">Section 7.5</a> or <a href="#FSM" class="xref">Appendix C</a>.</p>
 <h1 id="rfc.section.7.5">
 <a href="#rfc.section.7.5">7.5.</a> <a href="#FragModes" id="FragModes">Baseline mechanism</a>
 </h1>
