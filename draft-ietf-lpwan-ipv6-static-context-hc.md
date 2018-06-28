@@ -339,9 +339,9 @@ which is based on using context, i.e. a set of rules to compress or decompress h
 ~~~~
 {: #Fig-archi title='Architecture'}
 
-{{Fig-archi}} The figure represents the architecture for SCHC (Static Context Header Compression) Compression/Fragmentation
-where SCHC C/D (Compressor/Decompressor) and SCHC F/R (Fragmentation/Reassembly) are performed. It is based on {{I-D.ietf-
-lpwan-overview}} terminology.
+{{Fig-archi}} represents the architecture for SCHC (Static Context Header Compression) Compression/Fragmentation
+where SCHC C/D (Compressor/Decompressor) and SCHC F/R (Fragmentation/Reassembly) are performed.
+It is based on {{I-D.ietf-lpwan-overview}} terminology.
 SCHC Compression/Fragmentation is located on both sides of the transmission in the Dev and in the Network side. In the Uplink direction, the Device application packets use IPv6 or IPv6/UDP protocols. Before sending these packets, the Dev compresses their headers using SCHC C/D and if the SCHC Packet resulting from the compression exceeds the maximum payload size of the underlying LPWAN technology, SCHC F/R is performed, see {{Frag}}. The resulting SCHC Fragments are sent as one or more L2 frames to an LPWAN Radio Gateway (RG) which forwards the frame(s) to a Network Gateway (NGW).
 
 The NGW sends the data to a SCHC F/R and then to the SCHC C/D for decompression. The SCHC C/D in the Network side can be located in the Network Gateway (NGW) or somewhere else as long as a tunnel is established between the NGW and the SCHC
@@ -600,10 +600,10 @@ This subsection describes the different tools that are used to enable the SCHC F
   back from 2^T - 1 to 0.
   In the SCHC ACK format, DTag carries the same value as the DTag field in the SCHC Fragments for which this SCHC ACK is 
   intended. 
-  When there is no Dtag, there can be only 1 SCHC Packet in transist. And only after all its fragments have been transmitted 
-  another SCHC Packet could be sent.
-  The length of DTag, denoted T is not given in this document because is technolgy dependant, and will be defined in the 
-  corresponding technology-documents. DTag is based on the number of simultaneous packets supported.  
+  When there is no Dtag, there can be only one SCHC Packet in transit.
+  Only after all its fragments have been transmitted can another SCHC Packet be sent.
+  The length of DTag, denoted T, is not specified in this document because it is technolgy dependant, and will be defined in the
+  corresponding technology-specific documents. DTag is based on the number of simultaneous packets supported.
 
 * W (window): W is a 1-bit field. This field carries the same value for all SCHC Fragments of a window, and it is
   complemented for the next window. The initial value for this field is 0. In the SCHC ACK format, this field also has a size 
@@ -1337,7 +1337,7 @@ In ACK-on-Error, a malicious node MAY force a SCHC Fragment sender to resend a S
 
 # Acknowledgements
 
-Thanks to Dominique Barthel, Carsten Bormann, Philippe Clavier, Eduardo Ingles Sanchez, Arunprabhu Kandasamy, Rahul Jadhav,
+Thanks to Carsten Bormann, Philippe Clavier, Eduardo Ingles Sanchez, Arunprabhu Kandasamy, Rahul Jadhav,
 Sergio Lopez Bernal, Antony Markovski, Alexander Pelov, Pascal Thubert, Juan Carlos Zuniga, Diego Dujovne, Edgar Ramos, and
 Shoichi Sakane for useful design consideration and comments.
 
