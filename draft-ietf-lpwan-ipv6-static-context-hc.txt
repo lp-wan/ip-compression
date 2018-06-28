@@ -97,7 +97,7 @@ Table of Contents
        6.5.2.  value-sent CDA  . . . . . . . . . . . . . . . . . . .  19
        6.5.3.  mapping-sent CDA  . . . . . . . . . . . . . . . . . .  19
        6.5.4.  LSB CDA . . . . . . . . . . . . . . . . . . . . . . .  19
-       6.5.5.  DEViid, APPiid CDA  . . . . . . . . . . . . . . . . .  20
+       6.5.5.  DevIID, AppIID CDA  . . . . . . . . . . . . . . . . .  20
        6.5.6.  Compute-* . . . . . . . . . . . . . . . . . . . . . .  20
    7.  Fragmentation . . . . . . . . . . . . . . . . . . . . . . . .  20
      7.1.  Overview  . . . . . . . . . . . . . . . . . . . . . . . .  20
@@ -292,8 +292,8 @@ Internet-Draft                 LPWAN SCHC                      June 2018
    o  App: LPWAN Application.  An application sending/receiving IPv6
       packets to/from the Device.
 
-   o  APP-IID: Application Interface Identifier.  Second part of the
-      IPv6 address that identifies the application server interface.
+   o  AppIID: Application Interface Identifier.  Second part of the IPv6
+      address that identifies the application server interface.
 
    o  Bi: Bidirectional, a rule entry that applies to headers of packets
       travelling in either direction (Up and Dw, see this glossary).
@@ -320,7 +320,7 @@ Internet-Draft                 LPWAN SCHC                      June 2018
    o  Dev: Device.  A node connected to an LPWAN.  A Dev SHOULD
       implement SCHC.
 
-   o  Dev-IID: Device Interface Identifier.  Second part of the IPv6
+   o  DevIID: Device Interface Identifier.  Second part of the IPv6
       address that identifies the device interface.
 
    o  DI: Direction Indicator.  This field tells which direction of
@@ -619,7 +619,7 @@ Internet-Draft                 LPWAN SCHC                      June 2018
 
 
    bandwidth-consuming operation in other header compression mechanisms
-   such as RoHC [RFC5795].  Since the nature of packets are highly
+   such as RoHC [RFC5795].  Since the nature of packets is highly
    predictable in LPWAN networks, static contexts MAY be stored
    beforehand to omit transmitting some information over the air.  The
    contexts MUST be stored at both ends, and they can either be learned
@@ -634,11 +634,11 @@ Internet-Draft                 LPWAN SCHC                      June 2018
    |       UDP      |                                  |     UDP      |
    |      IPv6      |                                  |    IPv6      |
    |                |                                  |              |
-   |SCHC Comp / Frag|                                  |              |
+   |SCHC C/D and F/R|                                  |              |
    +--------+-------+                                  +-------+------+
             |   +--+     +----+     +-----------+              .
             +~~ |RG| === |NGW | === |   SCHC    |... Internet ..
-                +--+     +----+     |Comp / Frag|
+                +--+     +----+     |C/D and F/R|
                                     +-----------+
 
                           Figure 7: Architecture
@@ -687,13 +687,14 @@ Internet-Draft                 LPWAN SCHC                      June 2018
    ID identifies a rule that provides the closest match to the original
    packet values.  Hence, when a value is known by both ends, it is only
    necessary to send the corresponding Rule ID over the LPWAN network.
-   How Rules are generated is out of the scope of this document.  The
-   rule MAY be changed but it will be specified in another document.
+   How rules are generated is out of the scope of this document.  The
+   rules MAY be changed at run-time but the way to do this will be
+   specified in another document.
 
-   The context contains a list of rules (cf.  Figure 8).  Each Rule
-   contains itself a list of Fields Descriptions composed of a field
-   identifier (FID), a field length (FL), a field position (FP), a
-   direction indicator (DI), a target value (TV), a matching operator
+   The context contains a list of rules (cf.  Figure 8).  Each rule
+   itself contains a list of Field Descriptions composed of a Field
+   Identifier (FID), a Field Length (FL), a Field Position (FP), a
+   Direction Indicator (DI), a Target Value (TV), a Matching Operator
    (MO) and a Compression/Decompression Action (CDA).
 
      /-----------------------------------------------------------------\
@@ -717,11 +718,10 @@ Internet-Draft                 LPWAN SCHC                      June 2018
 
                 Figure 8: Compression/Decompression Context
 
-   The Rule does not describe how to delineate each field in the
+   The rule does not describe how to delineate each field in the
    original packet header.  This MUST be known from the compressor/
    decompressor.  The rule only describes the compression/decompression
-   behavior for each header field.  In the rule, the Fields Descriptions
-
+   behavior for each header field.  In the rule, the Field Descriptions
 
 
 
@@ -733,8 +733,9 @@ Internet-Draft                 LPWAN SCHC                      June 2018
    are listed in the order in which the fields appear in the packet
    header.
 
-   The Rule also describes the Compression Residue sent regarding the
-   order of the Fields Descriptions in the Rule.
+   The rule also describes what Compression Residue is sent.  The
+   Compression Residue is assembled by concatenating the residues for
+   each field, in the order the Field Descriptions appear in the Rule.
 
    The Context describes the header fields and its values with the
    following entries:
@@ -746,14 +747,14 @@ Internet-Draft                 LPWAN SCHC                      June 2018
       rule is created or a type if the length is variable.  The length
       of a header field is defined in the specific protocol standard.
       The type defines the process to compute length, its unit (bits,
-      bytes,...) and the value to be sent before the compression
-      residue.
+      bytes,...) and the value to be sent before the Compression
+      Residue.
 
-   o  Field Position (FP): indicating if several instances of a field
-      exist in the headers which one is targeted.  The default position
-      is 1.
+   o  Field Position (FP): if several instances of a field exist in the
+      headers, FP indicates which occurrence this Field Desccription
+      applies to.  The default value is 1 (first occurence).
 
-   o  A direction indicator (DI) indicates the packet direction(s) this
+   o  A Direction Indicator (DI) indicates the packet direction(s) this
       Field Description applies to.  Three values are possible:
 
       *  UPLINK (Up): this Field Description is only applicable to
@@ -780,7 +781,6 @@ Internet-Draft                 LPWAN SCHC                      June 2018
 
 
 
-
 Minaburo, et al.        Expires December 30, 2018              [Page 14]
 
 Internet-Draft                 LPWAN SCHC                      June 2018
@@ -788,10 +788,10 @@ Internet-Draft                 LPWAN SCHC                      June 2018
 
    o  Compression Decompression Action (CDA) describes the compression
       and decompression processes to be performed after the MO is
-      applied.  The CDA MAY require some parameters to be processed.
-      CDAs are used in both the compression and the decompression
-      functions.  The set of CDAs defined in this document can be found
-      in Section 6.5.
+      applied.  Some CDAs MAY require parameter values for their
+      operation.  CDAs are used in both the compression and the
+      decompression functions.  The set of CDAs defined in this document
+      can be found in Section 6.5.
 
 6.2.  Rule ID for SCHC C/D
 
@@ -809,9 +809,9 @@ Internet-Draft                 LPWAN SCHC                      June 2018
 
    o  Compression Rule selection: The goal is to identify which Rule(s)
       will be used to compress the packet's headers.  When doing
-      decompression, in the network side the SCHC C/D needs to find the
+      decompression, on the network side the SCHC C/D needs to find the
       correct Rule based on the L2 address and in this way, it can use
-      the Dev-ID and the Rule-ID.  In the Dev side, only the Rule ID is
+      the DevIID and the Rule ID.  On the Dev side, only the Rule ID is
       needed to identify the correct Rule since the Dev only holds Rules
       that apply to itself.  The Rule will be selected by matching the
       Fields Descriptions to the packet header as described below.  When
@@ -819,8 +819,8 @@ Internet-Draft                 LPWAN SCHC                      June 2018
       header.  The detailed steps for compression Rule selection are the
       following:
 
-      *  The first step is to choose the Fields Descriptions by their
-         direction, using the direction indicator (DI).  A Field
+      *  The first step is to choose the Field Descriptions by their
+         direction, using the Direction Indicator (DI).  A Field
          Description that does not correspond to the appropriate DI will
          be ignored, if all the fields of the packet do not have a Field
          Description with the correct DI the Rule is discarded and SCHC
@@ -832,7 +832,7 @@ Internet-Draft                 LPWAN SCHC                      June 2018
          proceeds to consider the next Rule.
 
       *  Once the DI and the FP correspond to the header information,
-         each field's value of the packet is then compared to the
+         each packet field's value is then compared to the corresponding
 
 
 
@@ -842,8 +842,8 @@ Minaburo, et al.        Expires December 30, 2018              [Page 15]
 Internet-Draft                 LPWAN SCHC                      June 2018
 
 
-         corresponding Target Value (TV) stored in the Rule for that
-         specific field using the matching operator (MO).
+         Target Value (TV) stored in the Rule for that specific field
+         using the matching operator (MO).
 
          If all the fields in the packet's header satisfy all the
          matching operators (MO) of a Rule (i.e. all MO results are
@@ -853,15 +853,15 @@ Internet-Draft                 LPWAN SCHC                      June 2018
          be obtained.  Otherwise, the next Rule is tested.
 
       *  If no eligible Rule is found, then the header MUST be sent
-         without compression, depending on the L2 PDU size, this is one
-         of the case that MAY require the use of the SCHC F/R process.
+         without compression.  This that MAY require the use of the SCHC
+         F/R process.
 
    o  Sending: If an eligible Rule is found, the Rule ID is sent to the
       other end followed by the Compression Residue (which could be
       empty) and directly followed by the payload.  The Compression
       Residue is the concatenation of the Compression Residues for each
       field according to the CDAs for that rule.  The way the Rule ID is
-      sent depends on the specific LPWAN layer two technology.  For
+      sent depends on the specific underlying LPWAN technology.  For
       example, it can be either included in a Layer 2 header or sent in
       the first byte of the L2 payload.  (Cf.  Figure 9).  This process
       will be specified in the LPWAN technology-specific document and is
@@ -870,9 +870,9 @@ Internet-Draft                 LPWAN SCHC                      June 2018
       the original packet payload is padded to a multiple of 8 bits, if
       needed.  See Section 8 for details.
 
-   o  Decompression: When doing decompression, in the network side the
+   o  Decompression: When doing decompression, on the network side the
       SCHC C/D needs to find the correct Rule based on the L2 address
-      and in this way, it can use the Dev-ID and the Rule-ID.  In the
+      and in this way, it can use the DevIID and the Rule ID.  On the
       Dev side, only the Rule ID is needed to identify the correct Rule
       since the Dev only holds Rules that apply to itself.
 
@@ -922,12 +922,11 @@ Internet-Draft                 LPWAN SCHC                      June 2018
       TV in the Rule.  The result of the matching is always true.
 
    o  MSB(x): A match is obtained if the most significant x bits of the
-      field value in the header packet are equal to the TV in the Rule.
-      The x parameter of the MSB Matching Operator indicates how many
-      bits are involved in the comparison.  If the FL is described as
-      variable, the length must be a multiple of the unit.  For example,
-      x must be multiple of 8 if the unit of the variable length is in
-      bytes.
+      packet header field value are equal to the TV in the Rule.  The x
+      parameter of the MSB Matching Operator indicates how many bits are
+      involved in the comparison.  If the FL is described as variable,
+      the length must be a multiple of the unit.  For example, x must be
+      multiple of 8 if the unit of the variable length is in bytes.
 
    o  match-mapping: With match-mapping, the Target Value is a list of
       values.  Each value of the list is identified by a short ID (or
@@ -949,6 +948,7 @@ Internet-Draft                 LPWAN SCHC                      June 2018
 
 
 
+
 Minaburo, et al.        Expires December 30, 2018              [Page 17]
 
 Internet-Draft                 LPWAN SCHC                      June 2018
@@ -958,18 +958,18 @@ Internet-Draft                 LPWAN SCHC                      June 2018
    |  Action            | Compression | Decompression              |
    |                    |             |                            |
    +--------------------+-------------+----------------------------+
-   |not-sent            |elided       |use value stored in ctxt    |
+   |not-sent            |elided       |use value stored in context |
    |value-sent          |send         |build from received value   |
    |mapping-sent        |send index   |value from index on a table |
    |LSB                 |send LSB     |TV, received value          |
    |compute-length      |elided       |compute length              |
    |compute-checksum    |elided       |compute UDP checksum        |
-   |Deviid              |elided       |build IID from L2 Dev addr  |
-   |Appiid              |elided       |build IID from L2 App addr  |
+   |DevIID              |elided       |build IID from L2 Dev addr  |
+   |AppIID              |elided       |build IID from L2 App addr  |
    \--------------------+-------------+----------------------------/
 
 
-            Figure 10: Compression and Decompression Functions
+             Figure 10: Compression and Decompression Actions
 
    Figure 10 summarizes the basic functions that can be used to compress
    and decompress a field.  The first column lists the actions name.
@@ -1016,7 +1016,7 @@ Internet-Draft                 LPWAN SCHC                      June 2018
    specified in the Rule and therefore known by both the Compressor and
    the Decompressor.  This action is generally used with the "equal" MO.
    If MO is "ignore", there is a risk to have a decompressed field value
-   different from the compressed field.
+   different from the original field that was compressed.
 
    The compressor does not send any Compression Residue for a field on
    which not-sent compression is applied.
@@ -1027,12 +1027,12 @@ Internet-Draft                 LPWAN SCHC                      June 2018
 6.5.2.  value-sent CDA
 
    The value-sent action is generally used when the field value is not
-   known by both Compressor and Decompressor.  The value is sent in the
-   compressed message header.  Both Compressor and Decompressor MUST
-   know the size of the field, either implicitly (the size is known by
-   both sides) or by explicitly indicating the length in the Compression
-   Residue, as defined in Section 6.5.  This function is generally used
-   with the "ignore" MO.
+   known by both the Compressor and the Decompressor.  The value is sent
+   as a residue in the compressed message header.  Both Compressor and
+   Decompressor MUST know the size of the field, either implicitly (the
+   size is known by both sides) or by explicitly indicating the length
+   in the Compression Residue, as defined in Section 6.5.  This function
+   is generally used with the "ignore" MO.
 
 6.5.3.  mapping-sent CDA
 
@@ -1052,11 +1052,11 @@ Internet-Draft                 LPWAN SCHC                      June 2018
 6.5.4.  LSB CDA
 
    The LSB action is used together with the "MSB(x)" MO to avoid sending
-   the higher part of the packet field if that part is already known by
-   the receiving end.  A length can be specified in the rule to indicate
-   how many bits have to be sent.  If the length is not specified, the
-   number of bits sent is the original header field length minus the
-   length specified in the MSB(x) MO.
+   the most significant part of the packet field if that part is already
+   known by the receiving end.  A length can be specified in the rule to
+   indicate how many bits have to be sent.  If the length is not
+   specified, the number of bits sent defaults to the original header
+   field length minus the length specified in the MSB(x) MO.
 
 
 
@@ -1074,19 +1074,19 @@ Internet-Draft                 LPWAN SCHC                      June 2018
    of the Compression Residue in bytes MUST be sent as described in
    Section 6.5.
 
-6.5.5.  DEViid, APPiid CDA
+6.5.5.  DevIID, AppIID CDA
 
    These functions are used to process respectively the Dev and the App
-   Interface Identifiers (Deviid and Appiid) of the IPv6 addresses.
-   Appiid CDA is less common since current LPWAN technologies frames
+   Interface Identifiers (DevIID and AppIID) of the IPv6 addresses.
+   AppIID CDA is less common since current LPWAN technologies frames
    contain a single address, which is the Dev's address.
 
    The IID value MAY be computed from the Device ID present in the Layer
    2 header, or from some other stable identifier.  The computation is
-   specific for each LPWAN technology and MAY depend on the Device ID
+   specific to each LPWAN technology and MAY depend on the Device ID
    size.
 
-   In the Downlink direction, these Deviid CDA is used to determine the
+   In the Downlink direction, this DevIID CDA is used to determine the
    L2 addresses used by the LPWAN.
 
 6.5.6.  Compute-*
@@ -1128,9 +1128,9 @@ Internet-Draft                 LPWAN SCHC                      June 2018
    This document also assumes that the L2 data unit size does not vary
    while a fragmented SCHC Packet is being transmitted.
 
-   To adapt the SCHC F/R to the capabilities of LPWAN technologies is
-   required to enable optional SCHC Fragment retransmission and to allow
-   a stepper delivery for the reliability of SCHC Fragments.  This
+   To adapt the SCHC F/R to the capabilities of LPWAN technologies, it
+   is required to enable optional SCHC Fragment retransmission and to
+   allow a stepper delivery for the reliability of SCHC Fragments.  This
    document does not make any decision with regard to which SCHC
    Fragment delivery reliability mode will be used over a specific LPWAN
    technology.  These details will be defined in other technology-
@@ -1147,8 +1147,7 @@ Internet-Draft                 LPWAN SCHC                      June 2018
    This subsection describes the different tools that are used to enable
    the SCHC F/R functionality defined in this document, such as fields
    in the SCHC F/R header frames (see the related formats in
-   Section 7.4), and the different parameters supported in the
-   reliability modes such as timers and parameters.
+   Section 7.4), windows and timers.
 
    o  Rule ID.  The Rule ID is present in the SCHC Fragment header and
       in the SCHC ACK header format.  The Rule ID in a SCHC fragment
@@ -1169,6 +1168,7 @@ Internet-Draft                 LPWAN SCHC                      June 2018
       *  The FCN value with all the bits equal to 1 (All-1) denotes the
          last SCHC Fragment of a packet.  The last window of a packet is
          called an All-1 window.
+
 
 
 
@@ -1290,7 +1290,7 @@ Minaburo, et al.        Expires December 30, 2018              [Page 23]
 Internet-Draft                 LPWAN SCHC                      June 2018
 
 
-      determines that an Abort is needed.  The default value offered
+      determines that an Abort is needed.  The default value
       MAX_ACK_REQUESTS is not stated in this document, and it is
       expected to be defined in the specific technology document.  The
       Attempts counter is defined per window.  It is initialized each
@@ -1307,9 +1307,8 @@ Internet-Draft                 LPWAN SCHC                      June 2018
       corresponding to that bit position has been correctly sent and
       received.  The text above describes the internal representation of
       the Bitmap.  When inserted in the SCHC ACK for transmission from
-      the receiver to the sender, the Bitmap MAY be truncated for
-      energy/bandwidth optimisation, see more details in
-      Section 7.4.3.1.
+      the receiver to the sender, the Bitmap is truncated for energy/
+      bandwidth optimisation, see more details in Section 7.4.3.1.
 
    o  Abort.  On expiration of the Inactivity timer, or when Attempts
       reached MAX_ACK_REQUESTS or upon an occurrence of some other
@@ -1334,10 +1333,11 @@ Internet-Draft                 LPWAN SCHC                      June 2018
       ACKs.  See further details in Section 7.5.1.
 
    o  ACK-Always.  The ACK-Always mode provides flow control using a
-      window scheme.  This mode is also able to handle long bursts of
+      windowing scheme.  This mode is also able to handle long bursts of
       lost SCHC Fragments since detection of such events can be done
       before the end of the SCHC Packet transmission as long as the
       window size is short enough.  However, such benefit comes at the
+      expense of SCHC ACK use.  In ACK-Always, the receiver sends a SCHC
 
 
 
@@ -1346,44 +1346,41 @@ Minaburo, et al.        Expires December 30, 2018              [Page 24]
 Internet-Draft                 LPWAN SCHC                      June 2018
 
 
-      expense of SCHC ACK use.  In ACK-Always the receiver sends a SCHC
-      ACK after a window of SCHC Fragments has been received, where a
-      window of SCHC Fragments is a subset of the whole number of SCHC
-      Fragments needed to carry a complete SCHC Packet.  The SCHC ACK is
-      used to inform the sender if a SCHC fragment in the actual window
-      has been lost or well received.  Upon a SCHC ACK reception, the
-      sender retransmits the lost SCHC Fragments.  When a SCHC ACK is
-      lost and the sender has not received it before the expiration of
-      the Retransmission Timer, the sender uses a SCHC ACK request by
-      sending the All-0 empty SCHC Fragment when it is not the last
-      window and the ALL-1 empty Fragment when it is the last window.
-      The maximum number of SCHC ACK requests is MAX_ACK_REQUESTS.  If
-      the MAX_ACK_REQUEST is reached the transmission needs to be
-      Aborted.  See further details in Section 7.5.2.
+      ACK after a window of SCHC Fragments has been received.  The SCHC
+      ACK is used to inform the sender which SCHC Fragments in the
+      current window have been well received.  Upon a SCHC ACK
+      reception, the sender retransmits the lost SCHC Fragments.  When a
+      SCHC ACK is lost and the sender has not received it by the
+      expiration of the Retransmission Timer, the sender uses a SCHC ACK
+      request by sending the All-0 empty SCHC Fragment when it is not
+      the last window and the ALL-1 empty Fragment when it is the last
+      window.  The maximum number of SCHC ACK requests is
+      MAX_ACK_REQUESTS.  If the MAX_ACK_REQUEST is reached the
+      transmission needs to be Aborted.  See further details in
+      Section 7.5.2.
 
    o  ACK-on-Error.  The ACK-on-Error mode is suitable for links
       offering relatively low L2 data unit loss probability.  In this
       mode, the SCHC Fragment receiver reduces the number of SCHC ACKs
       transmitted, which MAY be especially beneficial in asymmetric
-      scenarios.  Because the SCHC Fragments use the uplink of the
-      underlying LPWAN technology, which has higher capacity than
-      downlink.  The receiver transmits a SCHC ACK only after the
+      scenarios.  The receiver transmits a SCHC ACK only after the
       complete window transmission and if at least one SCHC Fragment of
       this window has been lost.  An exception to this behavior is in
       the last window, where the receiver MUST transmit a SCHC ACK,
       including the C bit set based on the MIC checked result, even if
       all the SCHC Fragments of the last window have been correctly
       received.  The SCHC ACK gives the state of all the SCHC Fragments
-      (received or lost).  Upon a SCHC ACK reception, the sender
-      retransmits the lost SCHC Fragments.  If a SCHC ACK is not
-      transmitted back by the receiver at the end of a window, the
-      sender assumes that all SCHC Fragments have been correctly
-      received.  When the SCHC ACK is lost, the sender assumes that all
-      SCHC Fragments covered by the lost SCHC ACK have been successfully
-      delivered, so the sender continues transmitting the next window of
-      SCHC Fragments.  If the next SCHC Fragments received belong to the
-      next window, the receiver will abort the on-going fragmented
-      packet transmission.  See further details in Section 7.5.3.
+      of the current window (received or lost).  Upon a SCHC ACK
+      reception, the sender retransmits the lost SCHC Fragments.  If a
+      SCHC ACK is not transmitted back by the receiver at the end of a
+      window, the sender assumes that all SCHC Fragments have been
+      correctly received.  When a SCHC ACK is lost, the sender assumes
+      that all SCHC Fragments covered by the lost SCHC ACK have been
+      successfully delivered, so the sender continues transmitting the
+      next window of SCHC Fragments.  If the next SCHC Fragments
+      received belong to the next window, the receiver will abort the
+      on-going fragmented packet transmission.  See further details in
+      Section 7.5.3.
 
    The same reliability mode MUST be used for all SCHC Fragments of a
    SCHC Packet.  The decision on which reliability mode will be used and
@@ -1394,6 +1391,9 @@ Internet-Draft                 LPWAN SCHC                      June 2018
    particular characteristic of the underlying L2 LPWAN technology, e.g.
    the No-ACK mode MAY be used on top of an L2 LPWAN technology with
    symmetric characteristics for uplink and downlink.  This document
+   does not make any decision as to which SCHC Fragment reliability
+   mode(s) are supported by a specific LPWAN technology.
+
 
 
 
@@ -1401,9 +1401,6 @@ Minaburo, et al.        Expires December 30, 2018              [Page 25]
 
 Internet-Draft                 LPWAN SCHC                      June 2018
 
-
-   does not make any decision as to which SCHC Fragment reliability
-   mode(s) are supported by a specific LPWAN technology.
 
    Examples of the different reliability modes described are provided in
    Appendix B.
@@ -1419,7 +1416,7 @@ Internet-Draft                 LPWAN SCHC                      June 2018
    addition, the last SCHC Fragment carries as many padding bits as
    needed to fill up an L2 Word.  The SCHC Fragment Payload carries a
    subset of the SCHC Packet.  The SCHC Fragment is the data unit passed
-   on to the L2 for transmission (L2 Protocol Data Unit, or L2PDU).
+   on to the L2 for transmission.
 
    +-----------------+-----------------------+~~~~~~~~~~~~~~~~~~~~~
    | Fragment Header |   Fragment payload    | padding (as needed)
@@ -1431,7 +1428,7 @@ Internet-Draft                 LPWAN SCHC                      June 2018
 7.4.1.  Fragments that are not the last one
 
    In ACK-Always or ACK-on-Error, SCHC Fragments except the last one
-   SHALL conform the detailed format defined in Figure 12.
+   SHALL conform to the detailed format defined in Figure 12.
 
     |----- Fragment Header -----|
               |-- T --|1|-- N --|
@@ -1445,6 +1442,9 @@ Internet-Draft                 LPWAN SCHC                      June 2018
 
    In the No-ACK mode, SCHC Fragments except the last one SHALL conform
    to the detailed format defined in Figure 13.
+
+
+
 
 
 
@@ -2471,9 +2471,9 @@ Internet-Draft                 LPWAN SCHC                      June 2018
    If the DEV or APP IID are based on an LPWAN address, then the IID can
    be reconstructed with information coming from the LPWAN header.  In
    that case, the TV is not set, the MO is set to "ignore" and the CDA
-   is set to "DEViid" or "APPiid".  Note that the LPWAN technology
+   is set to "DevIID" or "AppIID".  Note that the LPWAN technology
    generally carries a single identifier corresponding to the DEV.
-   Therefore Appiid cannot be used.
+   Therefore AppIID cannot be used.
 
    For privacy reasons or if the DEV address is changing over time, a
    static value that is not equal to the DEV address SHOULD be used.  In
@@ -2818,9 +2818,9 @@ Internet-Draft                 LPWAN SCHC                      June 2018
     |IPv6 Next Header|8 |1 |Bi|17       | equal  | not-sent   ||      |
     |IPv6 Hop Limit  |8 |1 |Bi|255      | ignore | not-sent   ||      |
     |IPv6 DEVprefix  |64|1 |Bi|FE80::/64| equal  | not-sent   ||      |
-    |IPv6 DEViid     |64|1 |Bi|         | ignore | DEViid     ||      |
+    |IPv6 DevIID     |64|1 |Bi|         | ignore | DevIID     ||      |
     |IPv6 APPprefix  |64|1 |Bi|FE80::/64| equal  | not-sent   ||      |
-    |IPv6 APPiid     |64|1 |Bi|::1      | equal  | not-sent   ||      |
+    |IPv6 AppIID     |64|1 |Bi|::1      | equal  | not-sent   ||      |
     +================+==+==+==+=========+========+============++======+
     |UDP DEVport     |16|1 |Bi|123      | equal  | not-sent   ||      |
     |UDP APPport     |16|1 |Bi|124      | equal  | not-sent   ||      |
@@ -2841,11 +2841,11 @@ Internet-Draft                 LPWAN SCHC                      June 2018
     |IPv6 Hop Limit  |8 |1 |Bi|255      | ignore | not-sent   ||      |
     |IPv6 DEVprefix  |64|1 |Bi|[alpha/64, match- |mapping-sent||  [1] |
     |                |  |  |  |fe80::/64] mapping|            ||      |
-    |IPv6 DEViid     |64|1 |Bi|         | ignore | DEViid     ||      |
+    |IPv6 DevIID     |64|1 |Bi|         | ignore | DevIID     ||      |
     |IPv6 APPprefix  |64|1 |Bi|[beta/64,| match- |mapping-sent||  [2] |
     |                |  |  |  |alpha/64,| mapping|            ||      |
     |                |  |  |  |fe80::64]|        |            ||      |
-    |IPv6 APPiid     |64|1 |Bi|::1000   | equal  | not-sent   ||      |
+    |IPv6 AppIID     |64|1 |Bi|::1000   | equal  | not-sent   ||      |
     +================+==+==+==+=========+========+============++======+
     |UDP DEVport     |16|1 |Bi|5683     | equal  | not-sent   ||      |
     |UDP APPport     |16|1 |Bi|5683     | equal  | not-sent   ||      |
@@ -2874,9 +2874,9 @@ Internet-Draft                 LPWAN SCHC                      June 2018
     |IPv6 Hop Limit  |8 |1 |Up|255      | ignore | not-sent   ||      |
     |IPv6 Hop Limit  |8 |1 |Dw|         | ignore | value-sent ||  [8] |
     |IPv6 DEVprefix  |64|1 |Bi|alpha/64 | equal  | not-sent   ||      |
-    |IPv6 DEViid     |64|1 |Bi|         | ignore | DEViid     ||      |
+    |IPv6 DevIID     |64|1 |Bi|         | ignore | DevIID     ||      |
     |IPv6 APPprefix  |64|1 |Bi|gamma/64 | equal  | not-sent   ||      |
-    |IPv6 APPiid     |64|1 |Bi|::1000   | equal  | not-sent   ||      |
+    |IPv6 AppIID     |64|1 |Bi|::1000   | equal  | not-sent   ||      |
     +================+==+==+==+=========+========+============++======+
     |UDP DEVport     |16|1 |Bi|8720     | MSB(12)| LSB        || [4]  |
     |UDP APPport     |16|1 |Bi|8720     | MSB(12)| LSB        || [4]  |
@@ -2889,7 +2889,7 @@ Internet-Draft                 LPWAN SCHC                      June 2018
                          Figure 29: Context rules
 
    All the fields described in the three rules depicted on Figure 29 are
-   present in the IPv6 and UDP headers.  The DEViid-DID value is found
+   present in the IPv6 and UDP headers.  The DevIID-DID value is found
    in the L2 header.
 
    The second and third rules use global addresses.  The way the Dev
@@ -3642,11 +3642,11 @@ Minaburo, et al.        Expires December 30, 2018              [Page 65]
 Internet-Draft                 LPWAN SCHC                      June 2018
 
 
-   o  Take into account that the length of rule-id + N + T + W when
+   o  Take into account that the length of Rule ID + N + T + W when
       possible is good to have a multiple of 8 bits to complete a byte
       and avoid padding
 
-   o  In the ACK format to have a length for Rule-ID + T + W bit into a
+   o  In the ACK format to have a length for Rule ID + T + W bit into a
       complete number of byte to do optimization more easily
 
    o  The technology documents will describe if Rule ID is constrained
