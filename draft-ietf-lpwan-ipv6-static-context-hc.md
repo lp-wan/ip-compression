@@ -303,18 +303,18 @@ Fragmentation and has the following format:
 
 # Rule ID
 
-Rule ID are identifiers used to select either the correct context to be used for Compression/Decompression functionalities or
-for Fragmentation/Reassembly or after trying to do SCHC C/D and SCHC F/R the packet is sent as is. The size of the Rule ID is not specified in this document, as it is implementation-specific and can vary according to the LPWAN technology and the number of Rules, among others.
+Rule IDs are identifiers used to select either the correct context to be used for Compression/Decompression functionalities or
+for Fragmentation/Reassembly or after trying to do SCHC C/D and SCHC F/R the packet is sent as is.
 
-The Rule IDs identifiers are used:
+The size of the Rule ID is not specified in this document, as it is implementation-specific and can vary according to the LPWAN technology and the number of Rules, among others.
 
-* In the SCHC C/D context to keep the Field Description of the header packet.
+The Rule IDs are used:
 
-* In SCHC F/R to identify the specific modes and settings. In bidirectional SCHC F/R at least two Rules ID are needed.
-  
-* To identify the SCHC ACK in SCHC F/R 
+* In the SCHC C/D context, to identify the Rule (i.e., the set of Field Descriptions) that is used to compress a packet header.
 
-* And at least one Rule ID MAY be reserved to the case where no SCHC C/D nor SCHC F/R were possible.
+* At least one Rule ID MAY be allocated to tag packets for which SCHC compression was not possible (no matching rule was found).
+
+* In SCHC F/R, to identify the specific modes and settings of SCHC Fragments, and to identify the SCK ACK. In bidirectional SCHC F/R, at least two Rule ID values are needed. 
 
 
 # Static Context Header Compression {#SCHComp}
