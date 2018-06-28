@@ -498,7 +498,7 @@ If the field is identified as being variable in the Field Description, then the 
 
 * For higher values of size, the first 12 bits are set to 1 and the next two bytes contain the size value as a 16 bits integer.
 
-* If a field does not exist in the packet but in the Rule and its FL is variable, the size zero MUST be used.
+If a field is not present in the packet but exists in the Rule and its FL is specified as being variable, size 0 MUST be sent to denote its absence.
 
 ### not-sent CDA
 
