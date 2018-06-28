@@ -1057,11 +1057,8 @@ The senders behavior for ACK-on-Error and ACK-Always are similar. The main diffe
 with the encoded Bitmap is not sent at the end of each window but only when at least one SCHC Fragment of the current window 
 has been lost. Except for the last window where a SCHC ACK MUST be sent to finish the transmission.
 
-In ACK-on-Error, the Retransmission Timer expiration will be considered as a positive acknowledgement. This timer is set after
-sending an All-0 or an All-1 fragment. When the All-1 fragment has been sent, the on-going SCHC F/R process is
-finished and the sender waits for the last SCHC ACK.  If the Retransmission Timer expires while waiting for the SCHC ACK for 
-the last window, an All-1 empty message MUST be sent to request the last SCHC ACK by the sender to complete the fragmented SCHC
-Packet transmission. When it expires, the sender continues sending SCHC Fragments of the next window.
+In ACK-on-Error, the Retransmission Timer expiration is considered as a positive acknowledgement for all windows but the last one.
+This timer is set after sending an All-0 or an All-1 fragment. For an All-0 fragment, on timer expiration, the sender resumes operation and sends the SCHC Fragments of the next window.
 
 If the sender receives a SCHC ACK, it checks the window value. SCHC ACKs with an unexpected window number are discarded. If
 the window number on the received encoded Bitmap is correct, the sender verifies if the receiver has received all SCHC 
@@ -1069,14 +1066,16 @@ fragments of the current window.  When at least one SCHC Fragment has been lost,
 the sender resends the missing SCHC Fragments again.  When Attempts reaches MAX_ACK_REQUESTS, the sender sends a Sender-Abort
 message and releases all resources for the on-going fragmented SCHC Packet transmission.  When the retransmission of the
 missing SCHC Fragments is finished, the sender starts listening for a SCHC ACK (even if an All-0 or an All-1 has not been
-sent during the retransmission) and initializes the Retransmission Timer. After sending an All-1 fragment, the sender listens 
+sent during the retransmission) and initializes the Retransmission Timer.
+
+After sending an All-1 fragment, the sender listens
 for a SCHC ACK, initializes Attempts, and starts the Retransmission Timer. If the Retransmission Timer expires, Attempts is
 increased by one and an empty All-1 fragment is sent to request the SCHC ACK for the last window. If Attempts reaches 
 MAX_ACK_REQUESTS, the sender aborts the on-going fragmented SCHC Packet transmission by transmitting the Sender-Abort
 fragment.
 
-If the sender receives a SCK ACK with a Bitmap containing a bit set for a SCHC Fragment that it has not sent during the
-transmission phase of this window, it MUST abort the whole fragmentation and transmission of this SCHC Packet.
+At the end of any window, if the sender receives a SCK ACK with a Bitmap containing a bit set for a SCHC Fragment that it has not sent during the
+transmission phase of that window, it MUST abort the whole fragmentation and transmission of this SCHC Packet.
 
 Unlike the sender, the receiver for ACK-on-Error has a larger amount of differences compared with ACK-Always.  First, a SCHC
 ACK is not sent unless there is a lost SCHC Fragment or an unexpected behavior. With the exception of the last window, where 
