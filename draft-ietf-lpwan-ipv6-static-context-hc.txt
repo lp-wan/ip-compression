@@ -25,19 +25,20 @@ Abstract
    Networks (LPWAN).
 
    SCHC compression is based on a common static context stored in both
-   LPWAN devices and in the network sides.  This document defines SCHC
-   header compression mechanism and its deployment for IPv6/UDP headers.
-   This document also specifies a fragmentation and reassembly mechanism
-   that is used to support the IPv6 MTU requirement over the LPWAN
-   technologies.  The Fragmentation is needed for IPv6 datagrams that,
-   after SCHC compression or when it has not been possible to apply such
-   compression, still exceed the layer two maximum payload size.
+   the LPWAN devices and the network side.  This document defines a
+   header compression mechanism and its application to compress IPv6/UDP
+   headers.  This document also specifies a fragmentation and reassembly
+   mechanism that is used to support the IPv6 MTU requirement over the
+   LPWAN technologies.  Fragmentation is needed for IPv6 datagrams that,
+   after SCHC compression or when such compression was not possible,
+   still exceed the layer two maximum payload size.
 
    The SCHC header compression mechanism is independent of the specific
-   LPWAN technology over which it will be used.  Note that this document
+   LPWAN technology over which it is used.  Note that this document
    defines generic functionalities and advisedly offers flexibility with
-   regard to parameters settings and mechanism choices, that are
-   expected to be made in other technology-specific documents.
+   regard to parameter settings and mechanism choices.  Such settings
+   and choices are expected to be made in other technology-specific
+   documents.
 
 Status of This Memo
 
@@ -48,7 +49,6 @@ Status of This Memo
    Task Force (IETF).  Note that other groups may also distribute
    working documents as Internet-Drafts.  The list of current Internet-
    Drafts is at https://datatracker.ietf.org/drafts/current/.
-
 
 
 
@@ -170,21 +170,21 @@ Minaburo, et al.        Expires December 30, 2018               [Page 3]
 Internet-Draft                 LPWAN SCHC                      June 2018
 
 
-   o  The topology is star-oriented which means that all packets follow
-      the same path.  For the necessity of this draft, the architecture
-      is simple and is described as Devices (Dev) exchanging information
-      with LPWAN Application Servers (App) through Network Gateways
-      (NGW).
+   o  The network topology is star-oriented, which means that all
+      packets follow the same path.  For the needs of this document, the
+      architecture can simply be described as Devices (Dev) exchanging
+      information with LPWAN Application Servers (App) through Network
+      Gateways (NGW).
 
-   o  The traffic flows can be known in advance since devices embed
-      built-in applications.  New applications cannot be easily
-      installed in LPWAN devices, as they would in computers or
-      smartphones.
+   o  Because devices embed built-in applications, the traffic flows to
+      be compressed are known in advance.  Indeed, new applications
+      cannot be easily installed in LPWAN devices, as they would in
+      computers or smartphones.
 
    The Static Context Header Compression (SCHC) is defined for this
-   environment.  SCHC uses a context, where header information is kept
-   in the header format order.  This context is static: the values of
-   the header fields do not change over time.  This avoids complex
+   environment.  SCHC uses a context, in which information about header
+   fieds is stored.  This context is static: the values of the header
+   fields do not change over time.  This avoids complex
    resynchronization mechanisms, that would be incompatible with LPWAN
    characteristics.  In most cases, a small context identifier is enough
    to represent the full IPv6/UDP headers.  The SCHC header compression
@@ -195,22 +195,22 @@ Internet-Draft                 LPWAN SCHC                      June 2018
    instance, devices are sleeping most of the time and MAY receive data
    during short periods of time after transmission to preserve battery.
    LPWAN technologies are also characterized, among others, by a very
-   reduced data unit and/or payload size [I-D.ietf-lpwan-overview].
-   However, some of these technologies do not provide fragmentation
-   functionality, therefore the only option for them to support the IPv6
-   MTU requirement of 1280 bytes [RFC2460] is to use a fragmentation
-   protocol at the adaptation layer, below IPv6.  In response to this
-   need, this document also defines a fragmentation/reassembly
-   mechanism, which supports the IPv6 MTU requirement over LPWAN
-   technologies.  Such functionality has been designed under the
-   assumption that data unit out-of-sequence delivery will not happen
-   between the entity performing fragmentation and the entity performing
-   reassembly.
+   reduced data unit and/or payload size (see
+   [I-D.ietf-lpwan-overview]).  However, some of these technologies do
+   not provide fragmentation functionality, therefore the only option
+   for them to support the IPv6 MTU requirement of 1280 bytes [RFC2460]
+   is to use a fragmentation protocol at the adaptation layer, below
+   IPv6.  In response to this need, this document also defines a
+   fragmentation/reassembly mechanism, which supports the IPv6 MTU
+   requirement over LPWAN technologies.  Such functionality has been
+   designed under the assumption that there is no out-of-sequence
+   delivery of data units between the entity performing fragmentation
+   and the entity performing reassembly.
 
    Note that this document defines generic functionality and
    purposefully offers flexibility with regard to parameter settings and
-   mechanism choices, that are expected to be made in other, technology-
-   specific documents.
+   mechanism choices.  Such settings and choices are expected to be made
+   in other, technology-specific documents.
 
 2.  LPWAN Architecture
 
@@ -265,15 +265,15 @@ Internet-Draft                 LPWAN SCHC                      June 2018
    o  Abort.  A SCHC Fragment format to signal the other end-point that
       the on-going fragment transmission is stopped and finished.
 
-   o  All-0.  The SCHC Fragment format for the last frame of a window
-      that is not the last one of a packet (see Window in this
+   o  All-0.  The SCHC Fragment format for the last fragment of a window
+      that is not the last one of a SCHC Packet (see window in this
       glossary).
 
-   o  All-1.  The SCHC Fragment format for the last frame of the packet.
+   o  All-1.  The SCHC Fragment format for the last fragment of the SCHC
+      Packet.
 
    o  All-0 empty.  An All-0 SCHC Fragment without payload.  It is used
       to request the SCHC ACK with the encoded Bitmap when the
-
 
 
 
@@ -296,10 +296,10 @@ Internet-Draft                 LPWAN SCHC                      June 2018
       IPv6 address that identifies the application server interface.
 
    o  Bi: Bidirectional, a rule entry that applies to headers of packets
-      travelling in both directions (Up and Dw).
+      travelling in either direction (Up and Dw, see this glossary).
 
-   o  Bitmap: a field of bits in an acknowledgement message that tells
-      the sender which SCHC Fragments of a window were correctl
+   o  Bitmap: a bit field in the SCHC ACK message that tells the sender
+      which SCHC Fragments in a window of fragments were correctly
       received.
 
    o  C: Checked bit.  Used in an acknowledgement (SCHC ACK) header to
@@ -311,12 +311,13 @@ Internet-Draft                 LPWAN SCHC                      June 2018
       header field and at the decompressor to recover the original
       header field value.
 
-   o  Compression Residue.  The bits that need to be sent after applying
-      the SCHC compression over each header field
+   o  Compression Residue.  The bits that need to be sent (beyond the
+      Ruole ID itself) after applying the SCHC compression over each
+      header field
 
    o  Context: A set of rules used to compress/decompress headers.
 
-   o  Dev: Device.  A node connected to the LPWAN.  A Dev SHOULD
+   o  Dev: Device.  A node connected to an LPWAN.  A Dev SHOULD
       implement SCHC.
 
    o  Dev-IID: Device Interface Identifier.  Second part of the IPv6
@@ -328,7 +329,6 @@ Internet-Draft                 LPWAN SCHC                      June 2018
 
    o  DTag: Datagram Tag. This SCHC F/R header field is set to the same
       value for all SCHC Fragments carrying the same SCHC Packet.
-
 
 
 
@@ -350,8 +350,9 @@ Internet-Draft                 LPWAN SCHC                      June 2018
    o  FID: Field Identifier.  This is an index to describe the header
       fields in a Rule.
 
-   o  FL: Field Length is the length of the field in bits for fixed
-      values or a type (variable, token length, ...) for length unknown
+   o  FL: Field Length is the length of the packet header field.  It is
+      expressed in bits for header of fixed lengths or as a type
+      (variable, token length, ...) for field lengths that are unknown
       at the rule creation.  The length of a header field is defined in
       the specific protocol standard.
 
@@ -375,17 +376,16 @@ Internet-Draft                 LPWAN SCHC                      June 2018
       each device.
 
    o  MIC: Message Integrity Check.  A SCHC F/R header field computed
-      over an IPv6 packet before fragmentation, used for error detection
-      after IPv6 packet reassembly.
+      over the fragmented SCHC Packet and potential fragment padding,
+      used for error detection after SCHC Packet reassembly.
 
    o  MO: Matching Operator.  An operator used to match a value
       contained in a header field with a value contained in a Rule.
 
-   o  Padding (P).  Extra bits that may be appended by SCHC to a Data
-      Unit that it passes to the underlying Layer 2 for transmission.
+   o  Padding (P).  Extra bits that may be appended by SCHC to a data
+      unit that it passes to the underlying Layer 2 for transmission.
       SCHC itself operates on bits, not bytes, and does not have any
       alignment prerequisite.  See Section 8.
-
 
 
 
@@ -408,7 +408,7 @@ Internet-Draft                 LPWAN SCHC                      June 2018
       the same Rule ID for a specific packet.  A set of Rule IDs are
       used to support SCHC F/R functionality.
 
-   o  SCHC ACK: A SCHC acknowledgement for fragmentation.  This format
+   o  SCHC ACK: A SCHC acknowledgement for fragmentation.  This message
       is used to report the successul or unsuccessful reception of a set
       of SCHC Fragments.  See Section 7 for more details.
 
@@ -455,7 +455,7 @@ Internet-Draft                 LPWAN SCHC                      June 2018
       SCHC Fragments of a window.
 
    o  Window: A subset of the SCHC Fragments needed to carry a SCHC
-      Packet Section 7.
+      Packet (see Section 7).
 
 4.  SCHC overview
 
@@ -506,31 +506,31 @@ Minaburo, et al.        Expires December 30, 2018               [Page 9]
 Internet-Draft                 LPWAN SCHC                      June 2018
 
 
-   A packet (e.g. an IPv6 packet)
-            |                                           ^
-            v                                           |
-   +------------------+                      +--------------------+
-   | SCHC Compression |                      | SCHC Decompression |
-   +------------------+                      +--------------------+
-            |                                           ^
-            |   If no fragmentation (*)                 |
-            +-------------- SCHC Packet  -------------->|
-            |                                           |
-            v                                           |
-   +--------------------+                       +-----------------+
-   | SCHC Fragmentation |                       | SCHC Reassembly |
-   +--------------------+                       +-----------------+
-         |     ^                                     |     ^
-         |     |                                     |     |
-         |     +-------------- SCHC ACK -------------+     |
-         |                                                 |
-         +-------------- SCHC Fragments -------------------+
+A packet (e.g. an IPv6 packet)
+         |                                           ^
+         v                                           |
++------------------+                      +--------------------+
+| SCHC Compression |                      | SCHC Decompression |
++------------------+                      +--------------------+
+         |                                           ^
+         |   If no fragmentation (*)                 |
+         +-------------- SCHC Packet  -------------->|
+         |                                           |
+         v                                           |
++--------------------+                       +-----------------+
+| SCHC Fragmentation |                       | SCHC Reassembly |
++--------------------+                       +-----------------+
+      |     ^                                     |     ^
+      |     |                                     |     |
+      |     +-------------- SCHC ACK -------------+     |
+      |                                                 |
+      +-------------- SCHC Fragments -------------------+
 
-           SENDER                                    RECEIVER
+        SENDER                                    RECEIVER
 
 
-   *: see Section 7 to define the use of Fragmentation and the
-            technology-specific documents for the L2 decision.
+*: the decision to use Fragmentation or not is left to each LPWAN technology
+   over which SCHC is applied. See LPWAN technology-specific documents.
 
 
    Figure 3: SCHC operations taking place at the sender and the receiver
@@ -584,10 +584,8 @@ Internet-Draft                 LPWAN SCHC                      June 2018
 
 5.  Rule ID
 
-   Rule IDs are identifiers used to select either the correct context to
-   be used for Compression/Decompression functionalities or for
-   Fragmentation/Reassembly or after trying to do SCHC C/D and SCHC F/R
-   the packet is sent as is.
+   Rule IDs are identifiers used to select the correct context either
+   for Compression/Decompression or for Fragmentation/Reassembly.
 
    The size of the Rule ID is not specified in this document, as it is
    implementation-specific and can vary according to the LPWAN
@@ -602,14 +600,16 @@ Internet-Draft                 LPWAN SCHC                      June 2018
       SCHC compression was not possible (no matching rule was found).
 
    o  In SCHC F/R, to identify the specific modes and settings of SCHC
-      Fragments, and to identify the SCK ACK.  In bidirectional SCHC F/
-      R, at least two Rule ID values are needed.
+      Fragments being transmitted, and to identify the SCK ACK,
+      including their modes and settings.  Note that for bidirectional
+      LPWANs, at least two Rule ID values are therefore needed for F/R.
 
 6.  Static Context Header Compression
 
    In order to perform header compression, this document defines a
    mechanism called Static Context Header Compression (SCHC), which is
    based on using context, i.e. a set of rules to compress or decompress
+   headers.  SCHC avoids context synchronization, which is the most
 
 
 
@@ -618,7 +618,6 @@ Minaburo, et al.        Expires December 30, 2018              [Page 11]
 Internet-Draft                 LPWAN SCHC                      June 2018
 
 
-   headers.  SCHC avoids context synchronization, which is the most
    bandwidth-consuming operation in other header compression mechanisms
    such as RoHC [RFC5795].  Since the nature of packets are highly
    predictable in LPWAN networks, static contexts MAY be stored
@@ -666,6 +665,7 @@ Internet-Draft                 LPWAN SCHC                      June 2018
    SCHC Fragmentation/Reassembly functionality nearer the NGW, in order
    to better deal with time constraints of such technologies.  The SCHC
    C/Ds on both sides MUST share the same set of Rules.  After
+
 
 
 
