@@ -119,6 +119,8 @@ LPWAN technologies have similar network architectures but different terminology.
 # Terminology {#Term}
 This section defines the terminology and acronyms used in this document.
 
+Note that the SCHC acronym is pronounced like "sheek" in English (or "chic" in French). Therefore, this document writes "a SCHC Packet" instead of "an SCHC Packet".
+
 * Abort. A SCHC Fragment format to signal the other end-point that the on-going fragment transmission is stopped and finished.
 
 * All-0. The SCHC Fragment format for the last frame of a window that is not the last one of a packet (see Window in this glossary).
