@@ -62,15 +62,17 @@ informative:
 
 This document defines the Static Context Header Compression (SCHC) framework, which provides both header compression and fragmentation functionalities. SCHC has been tailored for Low Power Wide Area Networks (LPWAN).
 
-SCHC compression is based on a common static context stored in both the LPWAN devices and the network side. This document defines a header compression mechanism and its application to compress IPv6/UDP headers. This document also specifies a fragmentation and reassembly mechanism that is used to support the IPv6 MTU requirement over the LPWAN technologies. Fragmentation is needed for IPv6 datagrams that, after SCHC compression or when such compression was not possible, still exceed the layer two maximum payload size.
+SCHC compression is based on a common static context stored in both the LPWAN devices and the network side. This document defines a header compression mechanism and its application to compress IPv6/UDP headers.
 
-The SCHC header compression mechanism is independent of the specific LPWAN technology over which it is used. Note that this document defines generic functionalities and advisedly offers flexibility with regard to parameter settings and mechanism choices. Such settings and choices are expected to be made in other technology-specific documents.
+This document also specifies a fragmentation and reassembly mechanism that is used to support the IPv6 MTU requirement over the LPWAN technologies. Fragmentation is needed for IPv6 datagrams that, after SCHC compression or when such compression was not possible, still exceed the layer two maximum payload size.
+
+The SCHC header compression and fragmentation mechanisms are independent of the specific LPWAN technology over which they are used. Note that this document defines generic functionalities and advisedly offers flexibility with regard to parameter settings and mechanism choices. Such settings and choices are expected to be made in other technology-specific documents.
 
 --- middle
 
 # Introduction {#Introduction}
 
-This document defines a header compression scheme and fragmentation functionality, both specially tailored for Low Power Wide Area Networks (LPWAN).
+This document defines the Static Context Header Compression (SCHC) framework, which provides both header compression and fragmentation functionalities. SCHC has been tailored for Low Power Wide Area Networks (LPWAN).
 
 Header compression is needed to efficiently bring Internet connectivity to the node within an LPWAN network. Some LPWAN networks properties can be exploited to get an efficient header compression:
 
@@ -133,7 +135,7 @@ Note that the SCHC acronym is pronounced like "sheek" in English (or "chic" in F
 
 * App: LPWAN Application. An application sending/receiving IPv6 packets to/from the Device.
 
-* AppIID: Application Interface Identifier. Second part of the IPv6 address that identifies the application server interface.
+* AppIID: Application Interface Identifier. The IID that identifies the application server interface.
 
 * Bi: Bidirectional, a rule entry that applies to headers of packets travelling in either direction (Up and Dw, see this glossary).
 
@@ -143,13 +145,13 @@ Note that the SCHC acronym is pronounced like "sheek" in English (or "chic" in F
 
 * CDA: Compression/Decompression Action. Describes the reciprocal pair of actions that are performed at the compressor to compress a header field and at the decompressor to recover the original header field value.
 
-* Compression Residue. The bits that need to be sent (beyond the Ruole ID itself) after applying the SCHC compression over each header field
+* Compression Residue. The bits that need to be sent (beyond the Rule ID itself) after applying the SCHC compression over each header field
 
 * Context: A set of rules used to compress/decompress headers.
 
 * Dev: Device. A node connected to an LPWAN. A Dev SHOULD implement SCHC.
 
-* DevIID: Device Interface Identifier. Second part of the IPv6 address that identifies the device interface.
+* DevIID: Device Interface Identifier. The IID that identifies the Dev interface.
 
 * DI: Direction Indicator. This field tells which direction of packet travel (Up, Dw or Bi) a rule applies to. This allows for assymmetric processing.
 
@@ -163,13 +165,13 @@ Note that the SCHC acronym is pronounced like "sheek" in English (or "chic" in F
 
 * FID: Field Identifier. This is an index to describe the header fields in a Rule.
 
-* FL: Field Length is the length of the packet header field. It is expressed in bits for header of fixed lengths or as a type (variable, token length, ...) for field lengths that are unknown at the rule creation. The length of a header field is defined in the specific protocol standard.
+* FL: Field Length is the length of the packet header field. It is expressed in bits for header fields of fixed lengths or as a type (e.g. variable, token length, ...) for field lengths that are unknown at the rule creation. The length of a header field is defined in the corresponding protocol specification.
 
 * FP: Field Position is a value that is used to identify the position where each instance of a field appears in the header.  
 
 * IID: Interface Identifier. See the IPv6 addressing architecture {{RFC7136}}
 
-* Inactivity Timer. A timer used after receiving a SCHC Fragment to detect when there is an error and there is no possibility to continue an on-going fragmented SCHC Packet transmission.
+* Inactivity Timer. A timer used after receiving a SCHC Fragment to detect when, due to a communication error, there is no possibility to continue an on-going fragmented SCHC Packet transmission.
 
 * L2: Layer two. The immediate lower layer SCHC interfaces with. It is provided by an underlying LPWAN technology.
 
@@ -194,7 +196,7 @@ for error detection after SCHC Packet reassembly.
 
 * Rule ID: An identifier for a rule, SCHC C/D in both sides share the same Rule ID for a specific packet. A set of Rule IDs are used to support SCHC F/R functionality.
   
-* SCHC ACK: A SCHC acknowledgement for fragmentation. This message is used to report the successul or unsuccessful reception of a set of SCHC Fragments. See {{Frag}} for more details.
+* SCHC ACK: A SCHC acknowledgement for fragmentation. This message is used to report on the success of reception of a set of SCHC Fragments. See {{Frag}} for more details.
 
 * SCHC C/D: Static Context Header Compression Compressor/Decompressor. A mechanism used in both sides, at the Dev and at the network to achieve Compression/Decompression of headers. SCHC C/D uses SCHC rules to perform compression and decompression.
   
@@ -316,7 +318,7 @@ The Rule IDs are used:
 
 * At least one Rule ID MAY be allocated to tagging packets for which SCHC compression was not possible (no matching rule was found).
 
-* In SCHC F/R, to identify the specific modes and settings of SCHC Fragments being transmitted, and to identify the SCK ACK, including their modes and settings. Note that for bidirectional LPWANs, at least two Rule ID values are therefore needed for F/R.
+* In SCHC F/R, to identify the specific modes and settings of SCHC Fragments being transmitted, and to identify the SCK ACKs, including their modes and settings. Note that in the case of bidirectional communication, at least two Rule ID values are therefore needed for F/R.
 
 
 # Static Context Header Compression {#SCHComp}
@@ -385,7 +387,7 @@ The context contains a list of rules (cf. {{Fig-ctxt}}). Each rule itself contai
 {: #Fig-ctxt title='Compression/Decompression Context'}
 
 
-The rule does not describe how to delineate each field in the original packet header. This MUST be known from the compressor/decompressor. The rule only describes the compression/decompression behavior for each header field. In the rule, the Field Descriptions are listed in the order in which the fields appear in the packet header.
+The rule does not describe how to parse a packet header to find each field. This MUST be known from the compressor/decompressor. The rule only describes the compression/decompression behavior for each header field. In the rule, the Field Descriptions are listed in the order in which the fields appear in the packet header.
 
 The rule also describes what Compression Residue is sent. The Compression Residue is assembled by concatenating the residues for each field, in the order the Field Descriptions appear in the Rule.
 
@@ -393,9 +395,9 @@ The Context describes the header fields and its values with the following entrie
 
 * Field ID (FID) is a unique value to define the header field.
 
-* Field Length (FL) represents the length of the field. It can be either a fixed value (in bits) if the length is known when the rule is created or a type if the length is variable. The length of a header field is defined in the specific protocol standard. The type defines the process to compute length, its unit (bits, bytes,...) and the value to be sent before the Compression Residue.
+* Field Length (FL) represents the length of the field. It can be either a fixed value (in bits) if the length is known when the rule is created or a type if the length is variable. The length of a header field is defined in the corresponding protocol specific. The type defines the process to compute length, its unit (bits, bytes,...) and the value to be sent before the Compression Residue.
 
-* Field Position (FP): if several instances of a field exist in the headers, FP indicates which occurrence this Field Desccription applies to. The default value is 1 (first occurence).
+* Field Position (FP): most often, a field only occurs once in a packet header. Some fields may occur multiple times in a header. FP indicates which occurrence  this Field Description applies to. The default value is 1 (first occurence).
 
 * A Direction Indicator (DI) indicates the packet direction(s) this Field Description applies to. Three values are possible:
 
@@ -426,15 +428,15 @@ The compression/decompression process follows several steps:
 
   * The first step is to choose the Field Descriptions by their direction, using the Direction Indicator (DI). A Field Description that does not correspond to the appropriate DI will be ignored, if all the fields of the packet do not have a Field Description with the correct DI the Rule is discarded and SCHC C/D proceeds to explore the next Rule.
 
-  * When the DI has matched, then the next step is to identify the fields according to Field Position (FP). If the Field Position does not correspond, the Rule is not used and the SCHC C/D proceeds to consider the next Rule.
+  * When the DI has matched, then the next step is to identify the fields according to Field Position (FP). If FP does not correspond, the Rule is not used and the SCHC C/D proceeds to consider the next Rule.
 
   * Once the DI and the FP correspond to the header information, each packet field's value is then compared to the corresponding Target Value (TV) stored in the Rule for that specific field using the matching operator (MO).
 
     If all the fields in the packet's header satisfy all the matching operators (MO) of a Rule (i.e. all MO results are True), the fields of the header are then compressed according to the Compression/Decompression Actions (CDAs) and a compressed header (with possibly a Compression Residue) SHOULD be obtained. Otherwise, the next Rule is tested.
 
-  * If no eligible Rule is found, then the header MUST be sent without compression. This that MAY require the use of the SCHC F/R process.
+  * If no eligible Rule is found, then the header MUST be sent without compression. This MAY require the use of the SCHC F/R process.
 
-* Sending: If an eligible Rule is found, the Rule ID is sent to the other end followed by the Compression Residue (which could be empty) and directly followed by the payload. The Compression Residue is the concatenation of the Compression Residues for each field according to the CDAs for that rule. The way the Rule ID is sent depends on the specific underlying LPWAN technology. For example, it can be either included in a Layer 2 header or sent in the first byte of the L2 payload. (Cf. {{Fig-FormatPckt}}). This process will be specified in the LPWAN technology-specific document and is out of the scope of the present document. On LPWAN technologies that are byte-oriented, the compressed header concatenated with the original packet payload is padded to a multiple of 8 bits, if needed. See {{Padding}} for details.
+* Sending: If an eligible Rule is found, the Rule ID is sent to the other end followed by the Compression Residue (which could be empty) and directly followed by the payload. The Compression Residue is the concatenation of the Compression Residues for each field according to the CDAs for that rule. The way the Rule ID is sent depends on the specific underlying LPWAN technology. For example, it can be either included in an L2 header or sent in the first byte of the L2 payload. (Cf. {{Fig-FormatPckt}}). This process will be specified in the LPWAN technology-specific document and is out of the scope of the present document. On LPWAN technologies that are byte-oriented, the compressed header concatenated with the original packet payload is padded to a multiple of 8 bits, if needed. See {{Padding}} for details.
 
 * Decompression: When doing decompression, on the network side the SCHC C/D needs to find the correct Rule based on the L2 address and in this way, it can use the DevIID and the Rule ID. On the Dev side, only the Rule ID is needed to identify the correct Rule since the Dev only holds Rules that apply to itself.
 
@@ -460,7 +462,7 @@ Matching Operators (MOs) are functions used by both SCHC C/D endpoints involved 
 
 * ignore: No check is done between a field value in a packet and a TV in the Rule. The result of the matching is always true.
 
-* MSB(x): A match is obtained if the most significant x bits of the packet header field value are equal to the TV in the Rule. The x parameter of the MSB Matching Operator indicates how many bits are involved in the comparison. If the FL is described as variable, the length must be a multiple of the unit. For example, x must be multiple of 8 if the unit of the variable length is in bytes.
+* MSB(x): A match is obtained if the most significant x bits of the packet header field value are equal to the TV in the Rule. The x parameter of the MSB MO indicates how many bits are involved in the comparison. If the FL is described as variable, the length must be a multiple of the unit. For example, x must be multiple of 8 if the unit of the variable length is in bytes.
 
 * match-mapping: With match-mapping, the Target Value is a list of values. Each value of the list is identified by a short ID (or index). Compression is achieved by sending the index instead of the original header field value. This operator matches if the header field value is equal to one of the values in the target list.
 
@@ -524,9 +526,10 @@ The number of bits sent is the minimal size for coding all the possible indices.
 
 ### LSB CDA
 
-The LSB action is used together with the "MSB(x)" MO to avoid sending the most significant part of the packet field if that part is already known by the receiving end. A length can be specified in the rule to indicate how many bits have to be sent. If the length is not specified, the number of bits sent defaults to the original header field length minus the length specified in the MSB(x) MO.
+The LSB action is used together with the "MSB(x)" MO to avoid sending the most significant part of the packet field if that part is already known by the receiving end.
+The number of bits sent is the original header field length minus the length specified in the MSB(x) MO.
 
-The compressor sends the Least Significant Bits (e.g. LSB of the length field). The decompressor combines the value received with the Target Value depending on the field type.
+The compressor sends the Least Significant Bits (e.g. LSB of the length field). The decompressor concatenates the x most significant bits of Target Value and the received residue.
 
 If this action needs to be done on a variable length field, the size of the Compression Residue in bytes MUST be sent as described in {{chap-CDA}}.
 
@@ -535,13 +538,13 @@ If this action needs to be done on a variable length field, the size of the Comp
 
 These functions are used to process respectively the Dev and the App Interface Identifiers (DevIID and AppIID) of the IPv6 addresses. AppIID CDA is less common since current LPWAN technologies frames contain a single address, which is the Dev's address.
 
-The IID value MAY be computed from the Device ID present in the Layer 2 header, or from some other stable identifier. The computation is specific to each LPWAN technology and MAY depend on the Device ID size.
+The IID value MAY be computed from the Device ID present in the L2 header, or from some other stable identifier. The computation is specific to each LPWAN technology and MAY depend on the Device ID size.
 
-In the Downlink direction, this DevIID CDA is used to determine the L2 addresses used by the LPWAN.
+In the downlink direction (Dw), at the compressor, this DevIID CDA may be used to generate the L2 addresses on the LPWAN, based on the packet destination address.
 
 ### Compute-\*
 
-Some fields are elided during compression and reconstructed during decompression. This is the case for length and Checksum, so:
+Some fields are elided during compression and reconstructed during decompression. This is the case for length and checksum, so:
 
 * compute-length: computes the length assigned to this field. This CDA MAY be used to compute IPv6 length or UDP length.
 
@@ -560,7 +563,7 @@ The SCHC F/R functionality defined in this document has been designed under the 
 
 This document also assumes that the L2 data unit size does not vary while a fragmented SCHC Packet is being transmitted.
 
-To adapt the SCHC F/R to the capabilities of LPWAN technologies, it is required to enable optional SCHC Fragment retransmission and to allow a stepper delivery for the reliability of SCHC Fragments. This document does not make any decision with regard to which SCHC Fragment delivery reliability mode will be used over a specific LPWAN technology. These details will be defined in other technology-specific documents.
+To adapt the SCHC F/R to the capabilities of LPWAN technologies, it is required to enable optional SCHC Fragment retransmission and to allow for a range of reliability options for sending the SCHC Fragments. This document does not make any decision with regard to which SCHC Fragment delivery reliability mode will be used over a specific LPWAN technology. These details will be defined in other technology-specific documents.
 
 SCHC F/R uses the knowledge of the L2 Word size (see {{Term}}) to encode some messages. Therefore, SCHC MUST know the L2 Word size.
 SCHC F/R generates SCHC Fragments and SCHC ACKs that are, for most of them, multiples of L2 Words.
@@ -581,7 +584,7 @@ This subsection describes the different tools that are used to enable the SCHC F
 
   The rest of the FCN values are assigned in a sequentially decreasing order, which has the purpose to avoid possible
   ambiguity for the receiver that might arise under certain conditions. In the SCHC Fragments, this field is an unsigned
-  integer, with a size of N bits. In the No-ACK mode, it is set to 1 bit (N=1), All-0 is used in all SCHC Fragments and
+  integer, with a size of N bits. In the No-ACK mode, the size is set to 1 bit (N=1), All-0 is used in all SCHC Fragments and
   All-1 for the last one.
   For the other reliability modes, it is recommended to use a number of bits (N) equal to or greater than 3. Nevertheless,
   the appropriate value of N MUST be defined in the corresponding technology-specific profile documents. For windows that are
@@ -625,17 +628,17 @@ This subsection describes the different tools that are used to enable the SCHC F
 * Retransmission Timer. A SCHC Fragment sender uses it after the transmission of a window to detect a transmission error of
   the SCHC ACK corresponding to this window. Depending on the reliability mode, it will lead to a request a SCHC ACK
   retransmission (in ACK-Always mode) or it will trigger the transmission of the next window (in ACK-on-Error mode). The
-  duration of this timer is not defined in this document and MUST be defined in the corresponding technology documents.
+  duration of this timer is not defined in this document and MUST be defined in the corresponding technology-specific documents.
 
 * Inactivity Timer. A SCHC Fragment receiver uses it to take action when there is a problem in the transmission of SCHC
   fragments. Such a problem could be detected by the receiver not getting a single SCHC Fragment during a given period of
-  time or not getting a given number of packets in a given period of time. When this happens, an Abort message will be sent
+  time. When this happens, an Abort message will be sent
   (see related text later in this section). Initially, and each time a SCHC Fragment is received, the timer is reinitialized.
-  The duration of this timer is not defined in this document and MUST be defined in the specific technology document.
+  The duration of this timer is not defined in this document and MUST be defined in the corresponding technology-specific document.
 
 * Attempts. This counter counts the requests for a missing SCHC ACK. When it reaches the value MAX_ACK_REQUESTS,
   the sender assumes there are recurrent SCHC Fragment transmission errors and determines that an Abort is needed. The default
-  value MAX_ACK_REQUESTS is not stated in this document, and it is expected to be defined in the specific technology
+  value MAX_ACK_REQUESTS is not stated in this document, and it is expected to be defined in the corresponding technology-specific
   document. The Attempts counter is defined per window. It is initialized each time a new window is used.
 
 * Bitmap. The Bitmap is a sequence of bits carried in a SCHC ACK. Each bit in the Bitmap corresponds to a SCHC
@@ -644,12 +647,12 @@ This subsection describes the different tools that are used to enable the SCHC F
   fragment with the highest FCN value is provided by the bit in the left-most position of the Bitmap. In the Bitmap, a bit
   set to 1 indicates that the SCHC Fragment of FCN corresponding to that bit position has been correctly sent and received.
   The text above describes the internal representation of the Bitmap. When inserted in the SCHC ACK for transmission from the
-  receiver to the sender, the Bitmap is truncated for energy/bandwidth optimisation, see more details in {{Bitmapopt}}.
+  receiver to the sender, the Bitmap is shortened for energy/bandwidth optimisation, see more details in {{Bitmapopt}}.
 
-* Abort. On expiration of the Inactivity timer, or when Attempts reached MAX_ACK_REQUESTS or upon an occurrence of some other
-  error, the sender or the receiver MUST use the Abort. When the receiver needs to abort the on-going fragmented SCHC
+* Abort. On expiration of the Inactivity timer, or when Attempts reaches MAX_ACK_REQUESTS or upon occurrence of some other
+  error, the sender or the receiver may use the Abort. When the receiver needs to abort the on-going fragmented SCHC
   Packet transmission, it sends the Receiver-Abort format. When the sender needs to abort the transmission, it sends the
-  Sender-Abort format. None of the Abort are acknowledged.
+  Sender-Abort format. None of the Aborts are acknowledged.
 
 
 ## Reliability modes
@@ -658,14 +661,14 @@ This specification defines three reliability modes: No-ACK, ACK-Always, and ACK-
 
 * No-ACK. No-ACK is the simplest SCHC Fragment reliability mode. The receiver does not generate overhead in the form of acknowledgements (ACKs).  However, this mode does not enhance reliability beyond that offered by the underlying LPWAN technology. In the No-ACK mode, the receiver MUST NOT issue SCHC ACKs. See further details in {{No-ACK-subsection}}.
 
-* ACK-Always. The ACK-Always mode provides flow control using a windowing scheme. This mode is also able to handle long bursts of lost SCHC Fragments since detection of such events can be done before the end of the SCHC Packet transmission as long as the window size is short enough. However, such benefit comes at the expense of SCHC ACK use. In ACK-Always, the receiver sends a SCHC ACK after a window of SCHC Fragments has been received. The SCHC ACK is used to inform the sender which SCHC Fragments in the current window have been well received. Upon a SCHC ACK reception, the sender retransmits the lost SCHC Fragments. When a SCHC ACK is lost and the sender has not received it by the expiration of the Retransmission Timer, the sender uses a SCHC ACK request by sending the All-0 empty SCHC Fragment when it is not the last window and the ALL-1 empty Fragment when it is the last window. The maximum number of SCHC ACK requests is MAX_ACK_REQUESTS. If the MAX_ACK_REQUEST is reached the transmission needs to be Aborted. See further details in {{ACK-Always-subsection}}.
+* ACK-Always. The ACK-Always mode provides flow control using a windowing scheme. This mode is also able to handle long bursts of lost SCHC Fragments since detection of such events can be done before the end of the SCHC Packet transmission as long as the window size is short enough. However, such benefit comes at the expense of SCHC ACK use. In ACK-Always, the receiver sends a SCHC ACK after a window of SCHC Fragments has been received. The SCHC ACK is used to inform the sender which SCHC Fragments in the current window have been well received. Upon a SCHC ACK reception, the sender retransmits the lost SCHC Fragments. When a SCHC ACK is lost and the sender has not received it by the expiration of the Retransmission Timer, the sender uses a SCHC ACK request by sending the All-0 empty SCHC Fragment when it is not the last window and the All-1 empty Fragment when it is the last window. The maximum number of SCHC ACK requests is MAX_ACK_REQUESTS. If MAX_ACK_REQUESTS is reached, the transmission needs to be aborted. See further details in {{ACK-Always-subsection}}.
 
 * ACK-on-Error. The ACK-on-Error mode is suitable for links offering relatively low L2 data unit loss probability. In this mode, the SCHC Fragment receiver reduces the number of SCHC ACKs transmitted, which MAY be especially beneficial in asymmetric scenarios. The receiver transmits a SCHC ACK only after the complete window transmission and if at least one SCHC Fragment of this window has been lost. An exception to this behavior is in the last window, where the receiver MUST transmit a SCHC ACK, including the C bit set based on the MIC checked result, even if all the SCHC Fragments of the last window have been correctly received.
-  The SCHC ACK gives the state of all the SCHC Fragments of the current window (received or lost). Upon a SCHC ACK reception, the sender retransmits the lost SCHC Fragments. If a SCHC ACK is not transmitted back by the receiver at the end of a window, the sender assumes that all SCHC Fragments have been correctly received. When a SCHC ACK is lost, the sender assumes that all SCHC Fragments covered by the lost SCHC ACK have been successfully delivered, so the sender continues transmitting the next window of SCHC Fragments. If the next SCHC Fragments received belong to the next window, the receiver will abort the on-going fragmented packet transmission. See further details in {{ACK-on-Error-subsection}}.
+  The SCHC ACK gives the state of all the SCHC Fragments of the current window (received or lost). Upon a SCHC ACK reception, the sender retransmits any lost SCHC Fragments based on the SCHC ACK. If a SCHC ACK is not transmitted back by the receiver at the end of a window, the sender assumes that all SCHC Fragments have been correctly received. When a SCHC ACK is lost, the sender assumes that all SCHC Fragments covered by the lost SCHC ACK have been successfully delivered, so the sender continues transmitting the next window of SCHC Fragments. If the next SCHC Fragments received belong to the next window and it is still expecting fragments from the previous window, the receiver will abort the on-going fragmented packet transmission. See further details in {{ACK-on-Error-subsection}}.
 
 The same reliability mode MUST be used for all SCHC Fragments of a SCHC Packet. The decision on which reliability mode will be used and whether the same reliability mode applies to all SCHC Packets is an implementation problem and is out of the scope of this document.
 
-Note that the reliability mode choice is not necessarily tied to a particular characteristic of the underlying L2 LPWAN technology, e.g. the No-ACK mode MAY be used on top of an L2 LPWAN technology with symmetric characteristics for uplink and downlink. This document does not make any decision as to which SCHC Fragment reliability mode(s) are supported by a specific LPWAN technology.
+Note that the reliability mode choice is not necessarily tied to a particular characteristic of the underlying L2 LPWAN technology, e.g. the No-ACK mode MAY be used on top of an L2 LPWAN technology with symmetric characteristics for uplink and downlink. This document does not make any decision as to which SCHC Fragment reliability modes are relevant for a specific LPWAN technology.
 
 Examples of the different reliability modes described are provided in Appendix B.
 
@@ -1320,7 +1323,7 @@ In other cases, the checksum SHOULD be explicitly sent. The TV is not set, the M
 
 # Security considerations
 
-## Security considerations for header compression
+## Security considerations for SCHC Compression/Decompression
 A malicious header compression could cause the reconstruction of a wrong packet that does not match with the original one. Such a corruption MAY be detected with end-to-end authentication and integrity mechanisms. Header Compression does not add more security problem than what is already needed in a transmission. For instance, to avoid an attack, never re-construct a packet bigger than some configured size (with 1500 bytes as generic default).
 
 ## Security considerations for SCHC Fragmentation/Reassembly
