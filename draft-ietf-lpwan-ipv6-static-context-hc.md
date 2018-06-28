@@ -1776,19 +1776,20 @@ not expected wnd |    |    Bitmap     |            +=======+
     discard frag      +==+=+===+=+==+=+| ~~~~~~~~~~~~~~~~~ |
                          | |   | ^  ^  |reSend(empty)All-* |   
                          | |   | |  |  |Set Retrans_Timer  |
-MIC_bit==1 &             | |   | |  +--+Attemp++           |
-Recv_window==window &    | |   | +-------------------------+   
-Lcl_Bitmap==recv_Bitmap &| |   |   all missing frag sent
+                         | |   | |  +--+Attemp++           |
+MIC_bit==1 &             | |   | +-------------------------+
+Recv_window==window &    | |   |   all missing frags sent
              no more frag| |   |   ~~~~~~~~~~~~~~~~~~~~~~
  ~~~~~~~~~~~~~~~~~~~~~~~~| |   |   Set Retrans_Timer                
        Stop Retrans_Timer| |   |    
  +=============+         | |   |
- |     END     +<--------+ |   | Attemp > MAX_ACK_REQUESTS
- +=============+           |   | ~~~~~~~~~~~~~~~~~~
-              All-1 Window |   v Send Abort
-              ~~~~~~~~~~~~ | +=+===========+
-             MIC_bit ==0 & +>|    ERROR    |
-    Lcl_Bitmap==recv_Bitmap  +=============+
+ |     END     +<--------+ |   |
+ +=============+           |   | Attemp > MAX_ACK_REQUESTS
+            All-1 Window & |   | ~~~~~~~~~~~~~~~~~~
+             MIC_bit ==0 & |   v Send Abort
+   Lcl_Bitmap==recv_Bitmap | +=+===========+
+              ~~~~~~~~~~~~ +>|    ERROR    |
+                Send Abort   +=============+
 
 
 ~~~~
