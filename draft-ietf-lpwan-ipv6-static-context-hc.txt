@@ -258,6 +258,10 @@ Internet-Draft                 LPWAN SCHC                      June 2018
    This section defines the terminology and acronyms used in this
    document.
 
+   Note that the SCHC acronym is pronounced like "sheek" in English (or
+   "chic" in French).  Therefore, this document writes "a SCHC Packet"
+   instead of "an SCHC Packet".
+
    o  Abort.  A SCHC Fragment format to signal the other end-point that
       the on-going fragment transmission is stopped and finished.
 
@@ -269,10 +273,6 @@ Internet-Draft                 LPWAN SCHC                      June 2018
 
    o  All-0 empty.  An All-0 SCHC Fragment without payload.  It is used
       to request the SCHC ACK with the encoded Bitmap when the
-      Retransmission Timer expires, in a window that is not the last one
-      of a packet.
-
-
 
 
 
@@ -281,6 +281,9 @@ Minaburo, et al.        Expires December 30, 2018               [Page 5]
 
 Internet-Draft                 LPWAN SCHC                      June 2018
 
+
+      Retransmission Timer expires, in a window that is not the last one
+      of a packet.
 
    o  All-1 empty.  An All-1 SCHC Fragment without payload.  It is used
       to request the SCHC ACK with the encoded Bitmap when the
@@ -326,9 +329,6 @@ Internet-Draft                 LPWAN SCHC                      June 2018
    o  DTag: Datagram Tag. This SCHC F/R header field is set to the same
       value for all SCHC Fragments carrying the same SCHC Packet.
 
-   o  Dw: Downlink direction for compression/decompression in both
-      sides, from SCHC C/D in the network to SCHC C/D in the Dev.
-
 
 
 
@@ -337,6 +337,9 @@ Minaburo, et al.        Expires December 30, 2018               [Page 6]
 
 Internet-Draft                 LPWAN SCHC                      June 2018
 
+
+   o  Dw: Downlink direction for compression/decompression in both
+      sides, from SCHC C/D in the network to SCHC C/D in the Dev.
 
    o  FCN: Fragment Compressed Number.  This SCHC F/R header field
       carries an efficient representation of a larger-sized fragment
@@ -383,9 +386,6 @@ Internet-Draft                 LPWAN SCHC                      June 2018
       SCHC itself operates on bits, not bytes, and does not have any
       alignment prerequisite.  See Section 8.
 
-   o  Retransmission Timer.  A timer used by the SCHC Fragment sender
-      during an on-going fragmented SCHC Packet transmission to detect
-
 
 
 
@@ -394,6 +394,8 @@ Minaburo, et al.        Expires December 30, 2018               [Page 7]
 Internet-Draft                 LPWAN SCHC                      June 2018
 
 
+   o  Retransmission Timer.  A timer used by the SCHC Fragment sender
+      during an on-going fragmented SCHC Packet transmission to detect
       possible link errors when waiting for a possible incoming SCHC
       ACK.
 
@@ -439,9 +441,7 @@ Internet-Draft                 LPWAN SCHC                      June 2018
    o  Up: Uplink direction for compression/decompression in both sides,
       from the Dev SCHC C/D to the network SCHC C/D.
 
-   o  W: Window bit.  A SCHC Fragment header field used in ACK-on-Error
-      or ACK-Always mode Section 7, which carries the same value for all
-      SCHC Fragments of a window.
+
 
 
 
@@ -449,6 +449,10 @@ Minaburo, et al.        Expires December 30, 2018               [Page 8]
 
 Internet-Draft                 LPWAN SCHC                      June 2018
 
+
+   o  W: Window bit.  A SCHC Fragment header field used in ACK-on-Error
+      or ACK-Always mode Section 7, which carries the same value for all
+      SCHC Fragments of a window.
 
    o  Window: A subset of the SCHC Fragments needed to carry a SCHC
       Packet Section 7.
@@ -483,10 +487,6 @@ Internet-Draft                 LPWAN SCHC                      June 2018
    the SCHC Fragments are then transmitted over the LPWAN.  The
    reciprocal operations take place at the receiver.  This process is
    illustrated in Figure 3.
-
-
-
-
 
 
 
@@ -3336,24 +3336,24 @@ Internet-Draft                 LPWAN SCHC                      June 2018
        discard frag      +==+=+===+=+==+=+| ~~~~~~~~~~~~~~~~~ |
                             | |   | ^  ^  |reSend(empty)All-* |
                             | |   | |  |  |Set Retrans_Timer  |
-   MIC_bit==1 &             | |   | |  +--+Attemp++           |
-   Recv_window==window &    | |   | +-------------------------+
-   Lcl_Bitmap==recv_Bitmap &| |   |   all missing frag sent
+                            | |   | |  +--+Attemp++           |
+   MIC_bit==1 &             | |   | +-------------------------+
+   Recv_window==window &    | |   |   all missing frags sent
                 no more frag| |   |   ~~~~~~~~~~~~~~~~~~~~~~
     ~~~~~~~~~~~~~~~~~~~~~~~~| |   |   Set Retrans_Timer
           Stop Retrans_Timer| |   |
     +=============+         | |   |
-    |     END     +<--------+ |   | Attemp > MAX_ACK_REQUESTS
-    +=============+           |   | ~~~~~~~~~~~~~~~~~~
-                 All-1 Window |   v Send Abort
-                 ~~~~~~~~~~~~ | +=+===========+
-                MIC_bit ==0 & +>|    ERROR    |
-       Lcl_Bitmap==recv_Bitmap  +=============+
+    |     END     +<--------+ |   |
+    +=============+           |   | Attemp > MAX_ACK_REQUESTS
+               All-1 Window & |   | ~~~~~~~~~~~~~~~~~~
+                MIC_bit ==0 & |   v Send Abort
+      Lcl_Bitmap==recv_Bitmap | +=+===========+
+                 ~~~~~~~~~~~~ +>|    ERROR    |
+                   Send Abort   +=============+
 
 
 
           Figure 41: Sender State Machine for the ACK-Always Mode
-
 
 
 

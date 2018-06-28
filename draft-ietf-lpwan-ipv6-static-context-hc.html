@@ -582,6 +582,7 @@ address {
 <a href="#rfc.section.3">3.</a> <a href="#Term" id="Term">Terminology</a>
 </h1>
 <p id="rfc.section.3.p.1">This section defines the terminology and acronyms used in this document.</p>
+<p id="rfc.section.3.p.2">Note that the SCHC acronym is pronounced like &#8220;sheek&#8221; in English (or &#8220;chic&#8221; in French). Therefore, this document writes &#8220;a SCHC Packet&#8221; instead of &#8220;an SCHC Packet&#8221;.</p>
 <p></p>
 
 <ul>
@@ -1900,19 +1901,20 @@ not expected wnd |    |    Bitmap     |            +=======+
     discard frag      +==+=+===+=+==+=+| ~~~~~~~~~~~~~~~~~ |
                          | |   | ^  ^  |reSend(empty)All-* |   
                          | |   | |  |  |Set Retrans_Timer  |
-MIC_bit==1 &amp;             | |   | |  +--+Attemp++           |
-Recv_window==window &amp;    | |   | +-------------------------+   
-Lcl_Bitmap==recv_Bitmap &amp;| |   |   all missing frag sent
+                         | |   | |  +--+Attemp++           |
+MIC_bit==1 &amp;             | |   | +-------------------------+
+Recv_window==window &amp;    | |   |   all missing frags sent
              no more frag| |   |   ~~~~~~~~~~~~~~~~~~~~~~
  ~~~~~~~~~~~~~~~~~~~~~~~~| |&#160;  | &#160; Set Retrans_Timer &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160;
        Stop Retrans_Timer| |   |    
  +=============+         | |   |
- |     END     +&lt;--------+ |   | Attemp &gt; MAX_ACK_REQUESTS
- +=============+           |   | ~~~~~~~~~~~~~~~~~~
-              All-1 Window |   v Send Abort
- &#160; &#160; &#160; &#160; &#160; &#160;  ~~~~~~~~~~~~ | +=+===========+
-             MIC_bit ==0 &amp; +&gt;|    ERROR    |
-    Lcl_Bitmap==recv_Bitmap  +=============+
+ |     END     +&lt;--------+ |   |
+ +=============+           |   | Attemp &gt; MAX_ACK_REQUESTS
+            All-1 Window &amp; |   | ~~~~~~~~~~~~~~~~~~
+             MIC_bit ==0 &amp; |   v Send Abort
+   Lcl_Bitmap==recv_Bitmap | +=+===========+
+ &#160; &#160; &#160; &#160; &#160; &#160;  ~~~~~~~~~~~~ +&gt;|    ERROR    |
+                Send Abort   +=============+
 
 
 </pre>
