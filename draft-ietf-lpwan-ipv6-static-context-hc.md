@@ -312,7 +312,7 @@ The Rule IDs are used:
 
 * In the SCHC C/D context, to identify the Rule (i.e., the set of Field Descriptions) that is used to compress a packet header.
 
-* At least one Rule ID MAY be allocated to tag packets for which SCHC compression was not possible (no matching rule was found).
+* At least one Rule ID MAY be allocated to tagging packets for which SCHC compression was not possible (no matching rule was found).
 
 * In SCHC F/R, to identify the specific modes and settings of SCHC Fragments, and to identify the SCK ACK. In bidirectional SCHC F/R, at least two Rule ID values are needed. 
 
