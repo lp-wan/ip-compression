@@ -92,7 +92,9 @@ and mechanism choices. Such settings and choices are expected to be made in othe
 
 # LPWAN Architecture {#LPWAN-Archi}
 
-LPWAN technologies have similar network architectures but different terminology. We can identify different types of entities in a typical LPWAN network, see {{Fig-LPWANarchi}}:
+LPWAN technologies have similar network architectures but different terminologies.
+Using the terminology defined in {{I-D.ietf-lpwan-overview}},
+we can identify different types of entities in a typical LPWAN network, see {{Fig-LPWANarchi}}:
 
    o  Devices (Dev) are the end-devices or hosts (e.g. sensors, actuators, etc.). There can be a very high density of devices per radio gateway.
 
@@ -279,7 +281,9 @@ The Compressed Header itself is composed of a Rule ID and a Compression Residue.
 ~~~~ 
 {: #Fig-SCHCpckt title='SCHC Packet'}
 
-The Fragment Header size is variable and depends on the Fragmentation parameters. The Fragment payload may contain: part of the SCHC Packet or Payload or both and its size depends on the L2 data unit, see {{Frag}}. The SCHC Fragment has the 
+The Fragment Header size is variable and depends on the Fragmentation parameters.
+The Fragment payload contains a part of the SCHC Packet Compressed Header, a part of the SCHC Packet Payload or both.
+Its size depends on the L2 data unit, see {{Frag}}. The SCHC Fragment has the
 following format:
 
 ~~~~
@@ -292,8 +296,8 @@ following format:
 ~~~~ 
 {: #Fig-SCHCfragment title='SCHC Fragment'}
 
-The SCHC ACK Header and the encoded Bitmap both have variable size. The SCHC ACK is used only in
-Fragmentation and has the following format: 
+The SCHC ACK is only used for Fragmentation.
+It has the following format:
 
 ~~~~
 
@@ -304,6 +308,41 @@ Fragmentation and has the following format:
 
 ~~~~ 
 {: #Fig-SCHCack title='SCHC ACK'}
+
+The SCHC ACK Header and the encoded Bitmap both have variable size.
+
+
+{{Fig-archi}} below maps the functional elements of {{Fig-Operations}} onto the LPWAN architecture elements of {{Fig-LPWANarchi}}.
+
+
+~~~~
+     Dev                                                 App
++----------------+                                  +--------------+
+| APP1 APP2 APP3 |                                  |APP1 APP2 APP3|
+|                |                                  |              |
+|       UDP      |                                  |     UDP      |
+|      IPv6      |                                  |    IPv6      |   
+|                |                                  |              |  
+|SCHC C/D and F/R|                                  |              |
++--------+-------+                                  +-------+------+
+         |   +--+     +----+     +-----------+              .
+         +~~ |RG| === |NGW | === |   SCHC    |... Internet ..
+             +--+     +----+     |F/R and C/D|
+                                 +-----------+
+~~~~
+{: #Fig-archi title='Architecture'}
+
+
+SCHC C/D and SCHC F/R are located on both sides of the LPWAN transmission, i.e. on the Dev side and on the Network side.
+
+Let's describe the operation in the Uplink direction. The Device application packets use IPv6 or IPv6/UDP protocols. Before sending these packets, the Dev compresses their headers using SCHC C/D and, if the SCHC Packet resulting from the compression exceeds the maximum payload size of the underlying LPWAN technology, SCHC F/R is performed (see {{Frag}}). The resulting SCHC Fragments are sent as one or more L2 frames to an LPWAN Radio Gateway (RG) which forwards them to a Network Gateway (NGW).
+The NGW sends the data to a SCHC F/R and then to the SCHC C/D for decompression. The SCHC F/R and C/D on the Network side can be located in the NGW or somewhere else as long as a tunnel is established between them and the NGW. Note that, for some LPWAN technologies, it MAY be suitable to locate the SCHC F/R
+functionality nearer the NGW, in order to better deal with time constraints of such technologies.
+The SCHC C/D and F/R on both sides MUST share the same set of Rules. After decompression, the packet can be sent over the Internet
+to one or several LPWAN Application Servers (App).
+
+The SCHC C/D and F/R process is symmetrical, therefore the description of the Downlink direction trivially derives from the one above.
+
 
 # Rule ID
 
@@ -324,37 +363,7 @@ The Rule IDs are used:
 # Static Context Header Compression {#SCHComp}
 
 In order to perform header compression, this document defines a mechanism called Static Context Header Compression (SCHC),
-which is based on using context, i.e. a set of rules to compress or decompress headers. SCHC avoids context synchronization, which is the most bandwidth-consuming operation in other header compression mechanisms such as RoHC {{RFC5795}}. Since the nature of packets is highly predictable in LPWAN networks, static contexts MAY be stored beforehand to omit transmitting some information over the air. The contexts MUST be stored at both ends, and they can either be learned by a provisioning protocol, by out of band means, or they can be pre-provisioned. The way the contexts are provisioned on both ends is out of the scope of this document.
-
-~~~~
-     Dev                                                 App
-+----------------+                                  +--------------+
-| APP1 APP2 APP3 |                                  |APP1 APP2 APP3|
-|                |                                  |              |
-|       UDP      |                                  |     UDP      |
-|      IPv6      |                                  |    IPv6      |   
-|                |                                  |              |  
-|SCHC C/D and F/R|                                  |              |
-+--------+-------+                                  +-------+------+
-         |   +--+     +----+     +-----------+              .
-         +~~ |RG| === |NGW | === |   SCHC    |... Internet ..
-             +--+     +----+     |C/D and F/R|
-                                 +-----------+
-~~~~
-{: #Fig-archi title='Architecture'}
-
-{{Fig-archi}} represents the architecture for SCHC (Static Context Header Compression) Compression/Fragmentation
-where SCHC C/D (Compressor/Decompressor) and SCHC F/R (Fragmentation/Reassembly) are performed.
-It is based on {{I-D.ietf-lpwan-overview}} terminology.
-SCHC Compression/Fragmentation is located on both sides of the transmission in the Dev and in the Network side. In the Uplink direction, the Device application packets use IPv6 or IPv6/UDP protocols. Before sending these packets, the Dev compresses their headers using SCHC C/D and if the SCHC Packet resulting from the compression exceeds the maximum payload size of the underlying LPWAN technology, SCHC F/R is performed, see {{Frag}}. The resulting SCHC Fragments are sent as one or more L2 frames to an LPWAN Radio Gateway (RG) which forwards the frame(s) to a Network Gateway (NGW).
-
-The NGW sends the data to a SCHC F/R and then to the SCHC C/D for decompression. The SCHC C/D in the Network side can be located in the Network Gateway (NGW) or somewhere else as long as a tunnel is established between the NGW and the SCHC
-Compression/Fragmentation. Note that, for some LPWAN technologies, it MAY be suitable to locate SCHC Fragmentation/Reassembly 
-functionality nearer the NGW, in order to better deal with time constraints of such technologies.
-The SCHC C/Ds on both sides MUST share the same set of Rules. After decompression, the packet can be sent over the Internet
-to one or several LPWAN Application Servers (App).
-
-The SCHC Compression/Fragmentation process is symmetrical, therefore the same description applies to the reverse direction.
+which is based on using context, i.e. a set of rules to compress or decompress headers. SCHC avoids context synchronization, which is the most bandwidth-consuming operation in other header compression mechanisms such as RoHC {{RFC5795}}. Since the nature of packets is highly predictable in LPWAN networks, static contexts MAY be stored beforehand to omit transmitting some information over the air. The contexts MUST be stored at both ends, and they can be learned by a provisioning protocol or by out of band means, or they can be pre-provisioned. The way the contexts are provisioned on both ends is out of the scope of this document.
 
 ## SCHC C/D Rules
 
