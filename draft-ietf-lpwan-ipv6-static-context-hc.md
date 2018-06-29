@@ -93,7 +93,7 @@ and mechanism choices. Such settings and choices are expected to be made in othe
 # Requirements Notation
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
-SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+"SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in BCP 14
 {{RFC2119}}{{RFC8174}} when, and only when, they appear in all capitals, 
 as shown here.
