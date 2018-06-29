@@ -194,7 +194,7 @@ for error detection after SCHC Packet reassembly.
 
 * Rule: A set of header field values.
 
-* Rule entry: A column in the Rule that describes a parameter of the header field.
+* Rule entry: A column in a Rule that describes a parameter of the header field.
 
 * Rule ID: An identifier for a Rule. SCHC C/D on both sides share the same Rule ID for a given packet. A set of Rule IDs are used to support SCHC F/R functionality.
   
@@ -208,7 +208,7 @@ for error detection after SCHC Packet reassembly.
 
 * SCHC Packet: A packet (e.g. an IPv6 packet) whose header has been compressed as per the header compression mechanism defined in this document. If the header compression process is unable to actually compress the packet header, the packet with the uncompressed header is still called a SCHC Packet (in this case, a Rule ID is used to indicate that the packet header has not been compressed). See {{SCHComp}} for more details.
 
-* TV: Target value. A value contained in the Rule that will be matched with the value of a header field.
+* TV: Target value. A value contained in a Rule that will be matched with the value of a header field.
 
 * Up: Uplink direction for compression/decompression in both sides, from the Dev SCHC C/D to the network SCHC C/D.
 
@@ -349,7 +349,7 @@ The SCHC C/D and F/R process is symmetrical, therefore the description of the Do
 Rule IDs are identifiers used to select the correct context either for Compression/Decompression or
 for Fragmentation/Reassembly.
 
-The size of the Rule ID is not specified in this document, as it is implementation-specific and can vary according to the LPWAN technology and the number of Rules, among others.
+The size of the Rule IDs is not specified in this document, as it is implementation-specific and can vary according to the LPWAN technology and the number of Rules, among others.
 
 The Rule IDs are used:
 
@@ -396,9 +396,9 @@ The context contains a list of Rules (cf. {{Fig-ctxt}}). Each Rule itself contai
 {: #Fig-ctxt title='Compression/Decompression Context'}
 
 
-The Rule does not describe how to parse a packet header to find each field. This MUST be known from the compressor/decompressor. The Rule only describes the compression/decompression behavior for each header field. In the Rule, the Field Descriptions are listed in the order in which the fields appear in the packet header.
+A Rule does not describe how to parse a packet header to find each field. This MUST be known from the compressor/decompressor. Rules only describe the compression/decompression behavior for each header field. In a Rule, the Field Descriptions are listed in the order in which the fields appear in the packet header.
 
-The Rule also describes what Compression Residue is sent. The Compression Residue is assembled by concatenating the residues for each field, in the order the Field Descriptions appear in the Rule.
+A Rule also describes what Compression Residue is sent. The Compression Residue is assembled by concatenating the residues for each field, in the order the Field Descriptions appear in the Rule.
 
 The Context describes the header fields and its values with the following entries:
 
@@ -435,7 +435,7 @@ The compression/decompression process follows several steps:
 
 * Compression Rule selection: The goal is to identify which Rule(s) will be used to compress the packet's headers. When doing decompression, on the network side the SCHC C/D needs to find the correct Rule based on the L2 address and in this way, it can use the DevIID and the Rule ID. On the Dev side, only the Rule ID is needed to identify the correct Rule since the Dev only holds Rules that apply to itself. The Rule will be selected by matching the Fields Descriptions to the packet header as described below. When the selection of a Rule is done, this Rule is used to compress the header. The detailed steps for compression Rule selection are the following:
 
-  * The first step is to choose the Field Descriptions by their direction, using the Direction Indicator (DI). A Field Description that does not correspond to the appropriate DI will be ignored, if all the fields of the packet do not have a Field Description with the correct DI the Rule is discarded and SCHC C/D proceeds to explore the next Rule.
+  * The first step is to choose the Field Descriptions by their direction, using the Direction Indicator (DI). A Field Description that does not correspond to the appropriate DI will be ignored. If all the fields of the packet do not have a Field Description with the correct DI, the Rule is discarded and SCHC C/D proceeds to explore the next Rule.
 
   * When the DI has matched, then the next step is to identify the fields according to Field Position (FP). If FP does not correspond, the Rule is not used and the SCHC C/D proceeds to consider the next Rule.
 
@@ -500,7 +500,7 @@ The Compression Decompression Action (CDA) describes the actions taken during th
 
 {{Fig-function}} summarizes the basic functions that can be used to compress and decompress a field. The first column lists the actions name. The second and third columns outline the reciprocal compression/decompression behavior for each action.
 
-Compression is done in order that Fields Descriptions appear in the Rule. The result of each Compression/Decompression Action is appended to the working Compression Residue in that same order. The receiver knows the size of each compressed field which can be given by the Rule or MAY be sent with the compressed header.
+Compression is done in order that Fields Descriptions appear in a Rule. The result of each Compression/Decompression Action is appended to the working Compression Residue in that same order. The receiver knows the size of each compressed field which can be given by the Rule or MAY be sent with the compressed header.
 
 If the field is identified as being variable in the Field Description, then the size of the Compression Residue value (using the unit defined in the FL) MUST be sent first using the following coding:
 
@@ -514,7 +514,7 @@ If a field is not present in the packet but exists in the Rule and its FL is spe
 
 ### not-sent CDA
 
-The not-sent function is generally used when the field value is specified in the Rule and therefore known by both the Compressor and the Decompressor. This action is generally used with the "equal" MO. If MO is "ignore", there is a risk to have a decompressed field value different from the original field that was compressed.
+The not-sent function is generally used when the field value is specified in a Rule and therefore known by both the Compressor and the Decompressor. This action is generally used with the "equal" MO. If MO is "ignore", there is a risk to have a decompressed field value different from the original field that was compressed.
 
 The compressor does not send any Compression Residue for a field on which not-sent compression is applied.
 
@@ -582,7 +582,7 @@ The padding overhead is kept to the absolute minimum. See {{Padding}}.
 
 This subsection describes the different tools that are used to enable the SCHC F/R functionality defined in this document, such as fields in the SCHC F/R header frames (see the related formats in {{Fragfor}}), windows and timers.
 
-* Rule ID. The Rule ID is present in the SCHC Fragment header and in the SCHC ACK header format.  The Rule ID in a SCHC fragment header is used to identify that a SCHC Fragment is being carried, which SCHC F/R reliability mode is used and which window size is used. The Rule ID in the SCHC F/R header also allows interleaving non-fragmented packets and SCHC Fragments that carry other SCHC Packets. The Rule ID in a SCHC ACK identifies the message as a SCHC ACK.
+* Rule ID. The Rule ID is present in the SCHC Fragment header and in the SCHC ACK header formats.  The Rule ID in a SCHC Fragment header is used to identify that a SCHC Fragment is being carried, which SCHC F/R reliability mode is used and which window size is used. The Rule ID in the SCHC Fragment header also allows interleaving non-fragmented SCHC Packets and SCHC Fragments that carry other SCHC Packets. The Rule ID in a SCHC ACK identifies the message as a SCHC ACK.
 
 * Fragment Compressed Number (FCN).  The FCN is included in all SCHC Fragments. This field can be understood as a truncated, efficient representation of a larger-sized fragment number, and does not carry an absolute SCHC Fragment number. There are two FCN reserved values that are used for controlling the SCHC F/R process, as described next:
   
@@ -1990,7 +1990,7 @@ This section gives the list of parameters that need to be defined in the technol
 
 * Rule ID numbering system, number of Rules
 
-* Size of the Rule ID
+* Size of the Rule IDs
 
 * The way the Rule ID is sent (L2 or L3) and how (describe)
 
