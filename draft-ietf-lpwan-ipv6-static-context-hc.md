@@ -269,8 +269,9 @@ A packet (e.g. an IPv6 packet)
         SENDER                                    RECEIVER
 
 
-*: the decision to use Fragmentation or not is left to each LPWAN technology
-   over which SCHC is applied. See LPWAN technology-specific documents.
+*: the decision to use Fragmentation or not is left to each LPWAN 
+   technology over which SCHC is applied. See LPWAN 
+   technology-specific documents.
 
 ~~~~
 {: #Fig-Operations title='SCHC operations taking place at the sender and the receiver'}
