@@ -49,7 +49,6 @@ normative:
   RFC2119:
   RFC7217:
   RFC8174:
-  RFC8200:
 informative:  
   RFC3385:
   RFC4944:
