@@ -124,7 +124,7 @@ Internet-Draft                 LPWAN SCHC                      June 2018
        8.5.1.  No-ACK  . . . . . . . . . . . . . . . . . . . . . . .  36
        8.5.2.  ACK-Always  . . . . . . . . . . . . . . . . . . . . .  36
        8.5.3.  ACK-on-Error  . . . . . . . . . . . . . . . . . . . .  39
-     8.6.  Supporting multiple window sizes  . . . . . . . . . . . .  41
+     8.6.  Supporting multiple window sizes  . . . . . . . . . . . .  40
      8.7.  Downlink SCHC Fragment transmission . . . . . . . . . . .  41
    9.  Padding management  . . . . . . . . . . . . . . . . . . . . .  42
    10. SCHC Compression for IPv6 and UDP headers . . . . . . . . . .  43
@@ -2096,9 +2096,9 @@ Internet-Draft                 LPWAN SCHC                      June 2018
    SCHC Fragment, if the window value has not changed, the received SCHC
    Fragments are part of a retransmission.  A receiver that has already
    received a SCHC Fragment SHOULD discard it, otherwise, it updates the
-   encoded Bitmap.  If all the bits of the encoded Bitmap are set to
-   one, the receiver MUST send a SCHC ACK without waiting for an All-0
-   fragment and the Inactivity Timer is initialized.
+   Bitmap.  If all the bits of the Bitmap are set to one, the receiver
+   MUST send a SCHC ACK without waiting for an All-0 fragment and the
+   Inactivity Timer is initialized.
 
    On the other hand, if the window value of the next received SCHC
    Fragment is set to the next expected window value, this means that
@@ -2152,17 +2152,16 @@ Internet-Draft                 LPWAN SCHC                      June 2018
 
    If the sender receives a SCHC ACK, it checks the window value.  SCHC
    ACKs with an unexpected window number are discarded.  If the window
-   number on the received encoded Bitmap is correct, the sender verifies
-   if the receiver has received all SCHC fragments of the current
-   window.  When at least one SCHC Fragment has been lost, the counter
-   Attempts is increased by one and the sender resends the missing SCHC
-   Fragments again.  When Attempts reaches MAX_ACK_REQUESTS, the sender
-   sends a Sender-Abort message and releases all resources for the on-
-   going fragmented SCHC Packet transmission.  When the retransmission
-   of the missing SCHC Fragments is finished, the sender starts
-   listening for a SCHC ACK (even if an All-0 or an All-1 has not been
-   sent during the retransmission) and initializes the Retransmission
-   Timer.
+   number in the received SCHC ACK is correct, the sender verifies if
+   the receiver has received all SCHC fragments of the current window.
+   When at least one SCHC Fragment has been lost, the counter Attempts
+   is increased by one and the sender resends the missing SCHC Fragments
+   again.  When Attempts reaches MAX_ACK_REQUESTS, the sender sends a
+   Sender-Abort message and releases all resources for the on-going
+   fragmented SCHC Packet transmission.  When the retransmission of the
+   missing SCHC Fragments is finished, the sender starts listening for a
+   SCHC ACK (even if an All-0 or an All-1 has not been sent during the
+   retransmission) and initializes the Retransmission Timer.
 
    After sending an All-1 fragment, the sender listens for a SCHC ACK,
    initializes Attempts, and starts the Retransmission Timer.  If the
@@ -2177,7 +2176,8 @@ Internet-Draft                 LPWAN SCHC                      June 2018
    during the transmission phase of that window, it MUST abort the whole
    fragmentation and transmission of this SCHC Packet.
 
-
+   Unlike the sender, the receiver for ACK-on-Error has a larger amount
+   of differences compared with ACK-Always.  First, a SCHC ACK is not
 
 
 
@@ -2186,8 +2186,6 @@ Minaburo, et al.        Expires December 31, 2018              [Page 39]
 Internet-Draft                 LPWAN SCHC                      June 2018
 
 
-   Unlike the sender, the receiver for ACK-on-Error has a larger amount
-   of differences compared with ACK-Always.  First, a SCHC ACK is not
    sent unless there is a lost SCHC Fragment or an unexpected behavior.
    With the exception of the last window, where a SCHC ACK is always
    sent regardless of SCHC Fragment losses or not.  The receiver starts
@@ -2231,9 +2229,11 @@ Internet-Draft                 LPWAN SCHC                      June 2018
    fragment.  Once it has received all the missing fragments it waits
    for the next window fragments.
 
+8.6.  Supporting multiple window sizes
 
-
-
+   For ACK-Always or ACK-on-Error, implementers MAY opt to support a
+   single window size or multiple window sizes.  The latter, when
+   feasible, may provide performance optimizations.  For example, a
 
 
 
@@ -2242,11 +2242,6 @@ Minaburo, et al.        Expires December 31, 2018              [Page 40]
 Internet-Draft                 LPWAN SCHC                      June 2018
 
 
-8.6.  Supporting multiple window sizes
-
-   For ACK-Always or ACK-on-Error, implementers MAY opt to support a
-   single window size or multiple window sizes.  The latter, when
-   feasible, may provide performance optimizations.  For example, a
    large window size SHOULD be used for packets that need to be carried
    by a large number of SCHC Fragments.  However, when the number of
    SCHC Fragments required to carry a packet is low, a smaller window
@@ -2290,6 +2285,11 @@ Internet-Draft                 LPWAN SCHC                      June 2018
    The default initial value for the Inactivity timer, as well as the
    maximum number of retries for a specific SCHC ACK, denoted
    MAX_ACK_RETRIES, are not defined in this document, and need to be
+   defined in other documents (e.g. technology-specific profiles).  The
+   initial value of the Inactivity timer is expected to be greater than
+   that of the Retransmission timer, in order to make sure that a
+   (buffered) SCHC Fragment to be retransmitted can find an opportunity
+   for that transmission.
 
 
 
@@ -2297,12 +2297,6 @@ Minaburo, et al.        Expires December 31, 2018              [Page 41]
 
 Internet-Draft                 LPWAN SCHC                      June 2018
 
-
-   defined in other documents (e.g. technology-specific profiles).  The
-   initial value of the Inactivity timer is expected to be greater than
-   that of the Retransmission timer, in order to make sure that a
-   (buffered) SCHC Fragment to be retransmitted can find an opportunity
-   for that transmission.
 
    When the SCHC Fragment sender transmits the All-1 fragment, it starts
    its Retransmission Timer with a large timeout value (e.g. several
@@ -2337,6 +2331,12 @@ Internet-Draft                 LPWAN SCHC                      June 2018
    Figure 2).  If a SCHC Packet is sent unfragmented (see Figure 27), it
    is padded as needed.  If a SCHC Packet is fragmented, only the last
    fragment is padded as needed.
+
+
+
+
+
+
 
 
 
