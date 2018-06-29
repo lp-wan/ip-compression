@@ -1058,7 +1058,7 @@ On the other hand, at the beginning, the receiver side expects to receive window
 When an All-0 fragment is received, it indicates that all the SCHC Fragments have been sent in the current window.  Since the sender is not obliged to always send a full window, some SCHC Fragment number not set in the receiver memory may not correspond to losses.  The receiver sends the corresponding SCHC ACK, the Inactivity Timer is set and the transmission of the 
 next window by the sender can start.
 
-If an All-0 fragment has been received and all SCHC Fragments of the current window have also been received, the receiver then expects a new Window and waits for the next SCHC Fragment.  Upon receipt of a SCHC Fragment, if the window value has not changed, the received SCHC Fragments are part of a retransmission. A receiver that has already received a SCHC Fragment SHOULD discard it, otherwise, it updates the encoded Bitmap.  If all the bits of the encoded Bitmap are set to one, the receiver MUST send a SCHC ACK without waiting for an All-0 fragment and the Inactivity Timer is initialized.
+If an All-0 fragment has been received and all SCHC Fragments of the current window have also been received, the receiver then expects a new Window and waits for the next SCHC Fragment.  Upon receipt of a SCHC Fragment, if the window value has not changed, the received SCHC Fragments are part of a retransmission. A receiver that has already received a SCHC Fragment SHOULD discard it, otherwise, it updates the Bitmap.  If all the bits of the Bitmap are set to one, the receiver MUST send a SCHC ACK without waiting for an All-0 fragment and the Inactivity Timer is initialized.
 
 On the other hand, if the window value of the next received SCHC Fragment is set to the next expected window value, this means that the sender has received a correct encoded Bitmap reporting that all SCHC Fragments have been received.  The receiver then updates the value of the next expected window.
 
@@ -1082,7 +1082,7 @@ In ACK-on-Error, the Retransmission Timer expiration is considered as a positive
 This timer is set after sending an All-0 or an All-1 fragment. For an All-0 fragment, on timer expiration, the sender resumes operation and sends the SCHC Fragments of the next window.
 
 If the sender receives a SCHC ACK, it checks the window value. SCHC ACKs with an unexpected window number are discarded. If
-the window number on the received encoded Bitmap is correct, the sender verifies if the receiver has received all SCHC 
+the window number in the received SCHC ACK is correct, the sender verifies if the receiver has received all SCHC
 fragments of the current window.  When at least one SCHC Fragment has been lost, the counter Attempts is increased by one and 
 the sender resends the missing SCHC Fragments again.  When Attempts reaches MAX_ACK_REQUESTS, the sender sends a Sender-Abort
 message and releases all resources for the on-going fragmented SCHC Packet transmission.  When the retransmission of the
