@@ -1,8 +1,8 @@
 ---
 stand_alone: true
 ipr: trust200902
-docname: draft-ietf-lpwan-ipv6-static-context-hc-14
-cat: info
+docname: draft-ietf-lpwan-ipv6-static-context-hc-15
+cat: std
 pi:
   symrefs: 'yes'
   sortrefs: 'yes'
@@ -46,16 +46,17 @@ author:
   country: France
   email: dominique.barthel@orange.com  
 normative:
-  RFC4944:
-  RFC2460:
-  RFC3385:
-  RFC7136:
-  RFC5795:
+  RFC2119:
   RFC7217:
+  RFC8174:
   RFC8200:
-  RFC6936:
 informative:  
+  RFC3385:
+  RFC4944:
+  RFC5795:
   RFC6282:
+  RFC6936:
+  RFC7136:
   RFC8376:
 
 --- abstract
@@ -89,6 +90,13 @@ In response to this need, this document also defines a fragmentation/reassembly 
 Note that this document defines generic functionality and purposefully offers flexibility with regard to parameter settings
 and mechanism choices. Such settings and choices are expected to be made in other, technology-specific documents.
 
+# Requirements Notation
+
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+"OPTIONAL" in this document are to be interpreted as described in BCP 14
+{{RFC2119}}{{RFC8174}} when, and only when, they appear in all capitals, 
+as shown here.
 
 # LPWAN Architecture {#LPWAN-Archi}
 
@@ -1329,6 +1337,10 @@ the transport layer and take special care when manipulating that data.
 
 
 In other cases, the checksum SHOULD be explicitly sent. The TV is not set, the MO is set to "ignore" and the CDA is set to "value-sent".
+
+# IANA Considerations
+
+This document has no request to IANA.
 
 # Security considerations
 
