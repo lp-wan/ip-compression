@@ -55,8 +55,8 @@ normative:
   RFC8200:
   RFC6936:
 informative:  
-  I-D.ietf-lpwan-overview:
   RFC6282:
+  RFC8376:
 
 --- abstract
 
@@ -83,7 +83,7 @@ Header compression is needed to efficiently bring Internet connectivity to the n
 The Static Context Header Compression (SCHC) is defined for this environment. SCHC uses a context, in which information about header fieds is stored. This context is static: the values of the header fields do not change over time. This avoids complex resynchronization mechanisms, that would be incompatible with LPWAN characteristics. In most cases, a small context identifier is enough to represent the full IPv6/UDP headers. The SCHC header compression mechanism is independent of the specific LPWAN technology over which it is used.
 
 LPWAN technologies impose some strict limitations on traffic. For instance, devices are sleeping most of the time and MAY receive data during short periods of time after transmission to preserve battery. LPWAN technologies are also characterized,
-among others, by a very reduced data unit and/or payload size (see {{I-D.ietf-lpwan-overview}}).  However, some of these technologies do not provide fragmentation functionality, therefore the only option for them to support the IPv6 MTU requirement of 1280 bytes {{RFC2460}} is to use a fragmentation protocol at the adaptation layer, below IPv6.
+among others, by a very reduced data unit and/or payload size (see {{RFC8376}}).  However, some of these technologies do not provide fragmentation functionality, therefore the only option for them to support the IPv6 MTU requirement of 1280 bytes {{RFC2460}} is to use a fragmentation protocol at the adaptation layer, below IPv6.
 In response to this need, this document also defines a fragmentation/reassembly mechanism, which supports the IPv6 MTU requirement over LPWAN technologies. Such functionality has been designed under the assumption that there is no out-of-sequence delivery of data units between the entity performing fragmentation and the entity performing reassembly.
 
 Note that this document defines generic functionality and purposefully offers flexibility with regard to parameter settings
@@ -93,7 +93,7 @@ and mechanism choices. Such settings and choices are expected to be made in othe
 # LPWAN Architecture {#LPWAN-Archi}
 
 LPWAN technologies have similar network architectures but different terminologies.
-Using the terminology defined in {{I-D.ietf-lpwan-overview}},
+Using the terminology defined in {{RFC8376}},
 we can identify different types of entities in a typical LPWAN network, see {{Fig-LPWANarchi}}:
 
    o  Devices (Dev) are the end-devices or hosts (e.g. sensors, actuators, etc.). There can be a very high density of devices per radio gateway.
@@ -147,7 +147,7 @@ Note that the SCHC acronym is pronounced like "sheek" in English (or "chic" in F
 
 * CDA: Compression/Decompression Action. Describes the reciprocal pair of actions that are performed at the compressor to compress a header field and at the decompressor to recover the original header field value.
 
-* Compression Residue. The bits that need to be sent (beyond the Rule ID itself) after applying the SCHC compression over each header field
+* Compression Residue. The bits that need to be sent (beyond the Rule ID itself) after applying the SCHC compression over each header field.
 
 * Context: A set of Rules used to compress/decompress headers.
 
