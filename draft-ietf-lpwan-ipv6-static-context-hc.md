@@ -638,6 +638,11 @@ This subsection describes the different tools that are used to enable the SCHC F
   enables compressing the UDP checksum by use of SCHC compression. The CRC32 as 0xEDB88320 (i.e. the reverse representation
   of the polynomial used e.g. in the Ethernet standard {{RFC3385}}) is recommended as the default algorithm for computing the
   MIC. Nevertheless, other MIC lengths or other algorithms MAY be required by the technology-specific documents.
+  Note that the concatenation of the complete SCHC Packet and the last fragment potential padding bits does not
+  generally constitute an integer number of bytes.
+  For implementers to be able to used byte-oriented CRC libraries, it is RECOMMENDED that the concatenation of the
+  complete SCHC Packet and the last fragment potential padding bits be zero-extended to the next byte boundary and
+  that the MIC be computed on that byte array.
 
 * C (MIC checked): C is a 1-bit field. This field is used in the SCHC ACK packets to report the outcome of the MIC check, 
   i.e. whether the reassembled packet was correctly received or not. A value of 1 represents a positive MIC check at the 
@@ -2012,7 +2017,7 @@ This section lists the parameters that need to be defined in the LPWAN technolog
 
     * support for interleaved packet transmission, to what extent
 
-    * size and algorithm of MIC, if different from the default CRC32
+    * size of MIC and algorithm for its computation, if different from the default CRC32. Byte fill-up with zeroes or other mechanism, to be specified.
 
     * Retransmission Timer duration
 
