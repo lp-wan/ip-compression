@@ -1307,7 +1307,14 @@ Internet-Draft                 LPWAN SCHC                      July 2018
       polynomial used e.g. in the Ethernet standard [RFC3385]) is
       recommended as the default algorithm for computing the MIC.
       Nevertheless, other MIC lengths or other algorithms MAY be
-      required by the technology-specific documents.
+      required by the technology-specific documents.  Note that the
+      concatenation of the complete SCHC Packet and the last fragment
+      potential padding bits does not generally constitute an integer
+      number of bytes.  For implementers to be able to used byte-
+      oriented CRC libraries, it is RECOMMENDED that the concatenation
+      of the complete SCHC Packet and the last fragment potential
+      padding bits be zero-extended to the next byte boundary and that
+      the MIC be computed on that byte array.
 
    o  C (MIC checked): C is a 1-bit field.  This field is used in the
       SCHC ACK packets to report the outcome of the MIC check, i.e.
@@ -1331,13 +1338,6 @@ Internet-Draft                 LPWAN SCHC                      July 2018
       happens, an Abort message will be sent (see related text later in
       this section).  Initially, and each time a SCHC Fragment is
       received, the timer is reinitialized.  The duration of this timer
-      is not defined in this document and MUST be defined in the
-      corresponding technology-specific document.
-
-   o  Attempts.  This counter counts the requests for a missing SCHC
-      ACK.  When it reaches the value MAX_ACK_REQUESTS, the sender
-      assumes there are recurrent SCHC Fragment transmission errors and
-      determines that an Abort is needed.  The default value
 
 
 
@@ -1346,6 +1346,13 @@ Minaburo, et al.        Expires January 20, 2019               [Page 24]
 Internet-Draft                 LPWAN SCHC                      July 2018
 
 
+      is not defined in this document and MUST be defined in the
+      corresponding technology-specific document.
+
+   o  Attempts.  This counter counts the requests for a missing SCHC
+      ACK.  When it reaches the value MAX_ACK_REQUESTS, the sender
+      assumes there are recurrent SCHC Fragment transmission errors and
+      determines that an Abort is needed.  The default value
       MAX_ACK_REQUESTS is not stated in this document, and it is
       expected to be defined in the corresponding technology-specific
       document.  The Attempts counter is defined per window.  It is
@@ -1387,13 +1394,6 @@ Internet-Draft                 LPWAN SCHC                      July 2018
       technology.  In the No-ACK mode, the receiver MUST NOT issue SCHC
       ACKs.  See further details in Section 8.5.1.
 
-   o  ACK-Always.  The ACK-Always mode provides flow control using a
-      windowing scheme.  This mode is also able to handle long bursts of
-      lost SCHC Fragments since detection of such events can be done
-      before the end of the SCHC Packet transmission as long as the
-      window size is short enough.  However, such benefit comes at the
-      expense of SCHC ACK use.  In ACK-Always, the receiver sends a SCHC
-      ACK after a window of SCHC Fragments has been received.  The SCHC
 
 
 
@@ -1402,6 +1402,13 @@ Minaburo, et al.        Expires January 20, 2019               [Page 25]
 Internet-Draft                 LPWAN SCHC                      July 2018
 
 
+   o  ACK-Always.  The ACK-Always mode provides flow control using a
+      windowing scheme.  This mode is also able to handle long bursts of
+      lost SCHC Fragments since detection of such events can be done
+      before the end of the SCHC Packet transmission as long as the
+      window size is short enough.  However, such benefit comes at the
+      expense of SCHC ACK use.  In ACK-Always, the receiver sends a SCHC
+      ACK after a window of SCHC Fragments has been received.  The SCHC
       ACK is used to inform the sender which SCHC Fragments in the
       current window have been well received.  Upon a SCHC ACK
       reception, the sender retransmits the lost SCHC Fragments.  When a
@@ -1443,13 +1450,6 @@ Internet-Draft                 LPWAN SCHC                      July 2018
    whether the same reliability mode applies to all SCHC Packets is an
    implementation problem and is out of the scope of this document.
 
-   Note that the reliability mode choice is not necessarily tied to a
-   particular characteristic of the underlying L2 LPWAN technology, e.g.
-   the No-ACK mode MAY be used on top of an L2 LPWAN technology with
-   symmetric characteristics for uplink and downlink.  This document
-   does not make any decision as to which SCHC Fragment reliability
-   modes are relevant for a specific LPWAN technology.
-
 
 
 
@@ -1457,6 +1457,13 @@ Minaburo, et al.        Expires January 20, 2019               [Page 26]
 
 Internet-Draft                 LPWAN SCHC                      July 2018
 
+
+   Note that the reliability mode choice is not necessarily tied to a
+   particular characteristic of the underlying L2 LPWAN technology, e.g.
+   the No-ACK mode MAY be used on top of an L2 LPWAN technology with
+   symmetric characteristics for uplink and downlink.  This document
+   does not make any decision as to which SCHC Fragment reliability
+   modes are relevant for a specific LPWAN technology.
 
    Examples of the different reliability modes described are provided in
    Appendix B.
@@ -1498,13 +1505,6 @@ Internet-Draft                 LPWAN SCHC                      July 2018
 
    In the No-ACK mode, SCHC Fragments except the last one SHALL conform
    to the detailed format defined in Figure 13.
-
-
-
-
-
-
-
 
 
 
@@ -3730,7 +3730,9 @@ Appendix D.  SCHC Parameters
 
       *  support for interleaved packet transmission, to what extent
 
-      *  size and algorithm of MIC, if different from the default CRC32
+      *  size of MIC and algorithm for its computation, if different
+         from the default CRC32.  Byte fill-up with zeroes or other
+         mechanism, to be specified.
 
       *  Retransmission Timer duration
 
@@ -3743,9 +3745,7 @@ Appendix D.  SCHC Parameters
       padding bits of the last fragment are included in the MIC
       conputation.
 
-   o  Note on the "C-bit bump": When fragmenting in ACK-on-Error or ACK-
-      Always mode, it is expected that the last window (called All-1
-      window) will not be fully utilised, i.e. there won't be fragments
+
 
 
 
@@ -3754,6 +3754,9 @@ Minaburo, et al.        Expires January 20, 2019               [Page 67]
 Internet-Draft                 LPWAN SCHC                      July 2018
 
 
+   o  Note on the "C-bit bump": When fragmenting in ACK-on-Error or ACK-
+      Always mode, it is expected that the last window (called All-1
+      window) will not be fully utilised, i.e. there won't be fragments
       with all FCN values from MAX_WIND_FCN downto 1 and finally All-1.
       It is worth noting that this document does not mandate that other
       windows (called All-0 windows) are fully utilised either.  This
@@ -3798,9 +3801,6 @@ Appendix E.  Note
    (Ministerio de Educacion, Cultura y Deporte) through the Jose
    Castillejo grant CAS15/00336, and by the ERDF and the Spanish
    Government through project TEC2016-79988-P.  Part of his contribution
-   to this work has been carried out during his stay as a visiting
-   scholar at the Computer Laboratory of the University of Cambridge.
-
 
 
 
@@ -3809,6 +3809,9 @@ Minaburo, et al.        Expires January 20, 2019               [Page 68]
 
 Internet-Draft                 LPWAN SCHC                      July 2018
 
+
+   to this work has been carried out during his stay as a visiting
+   scholar at the Computer Laboratory of the University of Cambridge.
 
 Authors' Addresses
 
@@ -3847,9 +3850,6 @@ Authors' Addresses
    France
 
    Email: dominique.barthel@orange.com
-
-
-
 
 
 
