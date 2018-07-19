@@ -151,7 +151,7 @@ Note that the SCHC acronym is pronounced like "sheek" in English (or "chic" in F
 
 * Bitmap: a bit field in the SCHC ACK message that tells the sender which SCHC Fragments in a window of fragments were correctly received.
 
-* C: Checked bit. Used in an acknowledgement (SCHC ACK) header to determine if the MIC locally computed by the receiver matches (1) the received MIC or not (0).
+* C: Checked bit. Used in a SCHC ACK header to determine if the MIC locally computed by the receiver matches the received MIC or not. C == 1 signals a match, C == 0 a mismatch.
 
 * CDA: Compression/Decompression Action. Describes the reciprocal pair of actions that are performed at the compressor to compress a header field and at the decompressor to recover the original header field value.
 
