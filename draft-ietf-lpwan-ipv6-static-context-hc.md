@@ -1988,67 +1988,68 @@ Recv_window==window &    | |   |   all missing frags sent
 {: #Fig-ACKonerrorRcv title='Receiver State Machine for the ACK-on-Error Mode'}
 
 
-# SCHC Parameters - Ticket #15 {#SCHCParams}
+# SCHC Parameters {#SCHCParams}
 
-This section gives the list of parameters that need to be defined in the technology-specific documents.
+This section lists the parameters that need to be defined in the LPWAN technology-specific documents.
 
-* Define the most common uses case and how SCHC may be deployed.
+* Most common uses cases, deployment scenarios
 
-* LPWAN Architecture. Explain the SCHC entities (Compression and Fragmentation), how/where they are represented in the corresponding technology architecture. If applicable, explain the various potential channel conditions for the technology and the corresponding recommended use of C/D and F/R.
+* Mapping of the SCHC architectural elements onto the LPWAN architecture
 
-* L2 fragmentation decision
+* Assessment of LPWAN integrity checking
 
-* Technology developers must evaluate that L2 has strong enough integrity checking to match SCHC's assumption.
+* Various potential channel conditions for the technology and the corresponding recommended use of SCHC C/D and F/R
 
-* Rule ID numbering system, number of Rules
+* Rule ID numbering scheme, fixed-sized or variable-sized Rule IDs, number of Rules, the way the Rule ID is transmitted
 
-* Size of the Rule IDs
+* Padding: size of the L2 Word (for most LPWAN technologies, this would be a byte; for some technologies, a bit)
 
-* The way the Rule ID is sent (L2 or L3) and how (describe)
+* Decision to use SCHC fragmentation mechanism or not. If yes:
 
-* Fragmentation delivery reliability mode used in which cases (e.g. based on link channel condition)
+    * reliability mode(s) used, in which cases (e.g. based on link channel condition)
 
-* Define the number of bits for FCN (N) and DTag (T)
+    * number of bits for FCN (N) and DTag (T)
 
-* in particular, is interleaved packet transmission supported and to what extent
+    * support for interleaved packet transmission, to what extent
 
-* The MIC algorithm to be used and the size, if different from the default CRC32
+    * size and algorithm of MIC, if different from the default CRC32
 
-* Retransmission Timer duration
+    * Retransmission Timer duration
 
-* Inactivity Timer duration
+    * Inactivity Timer duration
 
-* Define MAX_ACK_REQUEST (number of attempts)
+    * MAX_ACK_REQUEST value
 
-* Padding: size of the L2 Word (for most technologies, a byte; for some technologies, a bit). Value of the padding bits (1 or 0).
-  The value of the padding bits needs to be specified because the padding bits are included in the MIC calculation.
+* if L2 Word is wider than a bit and SCHC fragmentation is used, value of the padding bits (0 or 1). This is needed
+because the padding bits of the last fragment are included in the MIC conputation.
 
-* Take into account that the length of Rule ID + N + T + W when possible is good to have a multiple of 8 bits to complete a byte and avoid padding
-
-* In the ACK format to have a length for Rule ID + T + W bit into a complete number of byte to do optimization more easily
-
-* The technology documents will describe if Rule ID is constrained by any alignment
-
-* When fragmenting in ACK-on-Error or ACK-Always mode, it is expected that the last window (called All-1 window) will not be
+* Note on the "C-bit bump": When fragmenting in ACK-on-Error or ACK-Always mode, it is expected that the last window (called All-1 window) will not be
   fully utilised, i.e. there won't be fragments with all FCN values from MAX_WIND_FCN downto 1 and finally All-1.
   It is worth noting that this document does not mandate that other windows (called All-0 windows) are fully utilised either.
   This document purposely does not specify that All-1 windows use Bitmaps with the same number of bits as All-0 windows do.
   By default, Bitmaps for All-0 and All-1 windows are of the same size MAX_WIND_FCN + 1. But a technology-specific document
   MAY revert that decision. The rationale for reverting the decision could be the following: Note that the SCHC ACK sent as a
   response to an All-1 fragment includes a C bit that SCHC ACK for other windows don't have. Therefore, the SCHC ACK for the
-  All-1 window is one bit bigger. An L2 technology with a severely constrained payload size might decide that this "bump" in
+  All-1 window is one bit bigger. An LPWAN technology with a severely constrained payload size might decide that this "bump" in
   the SCHC ACK for the last fragment is a bad resource usage. It could thus mandate that the All-1 window is not allowed to use
   the FCN value 1 and that the All-1 SCHC ACK Bitmap size is reduced by 1 bit. This provides room for the C bit without creating
   a bump in the SCHC ACK.
 
 
-In some LPWAN technologies, as part of energy-saving techniques, downlink transmission is only possible immediately after an uplink transmission. In order to avoid potentially high delay in the downlink transmission of a fragmented SCHC Packet, the SCHC Fragment receiver may perform an uplink transmission as soon as possible after reception of a SCHC Fragment that is not the last one. Such uplink transmission may be triggered by the L2 (e.g. an L2 ACK sent in response to a SCHC Fragment encapsulated in a L2 PDU that requires an L2 ACK) or it may be triggered from an upper layer.
+* Note on soliciting downlink transmissions: In some LPWAN technologies, as part of energy-saving techniques,
+downlink transmission is only possible immediately after an uplink transmission.
+In order to avoid potentially high delay in the downlink transmission of a fragmented SCHC Packet,
+the SCHC Fragment receiver may want to perform an uplink transmission as soon as possible after reception of a SCHC
+Fragment that is not the last one.
+Such uplink transmission may be triggered by the L2 (e.g. an L2 ACK sent in response to a SCHC Fragment encapsulated
+in a L2 PDU that requires an L2 ACK) or it may be triggered from an upper layer.
 
-And the following parameters need to be addressed in another document but not forcely in the technology-specific one:
+* the following parameters need to be addressed in documents other than this one but not forcely in
+the LPWAN technology-specific documents:
 
-* The way the contexts are provisioning
+    * The way the contexts are provisioned
 
-* The way the Rules as generated
+    * The way the Rules as generated
 
 
 # Note
