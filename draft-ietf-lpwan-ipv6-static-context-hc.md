@@ -189,7 +189,7 @@ Note that the SCHC acronym is pronounced like "sheek" in English (or "chic" in F
   In bit-oriented radio technologies, the L2 Word might be a single bit.
   The L2 Word size is assumed to be constant over time for each device.
 
-* MIC: Message Integrity Check.  A SCHC F/R header field computed over the fragmented SCHC Packet and potential fragment padding, used
+* MIC: Message Integrity Check.  A SCHC F/R header field computed over the fragmented SCHC Packet and potential last fragment padding, used
 for error detection after SCHC Packet reassembly.
 
 * MO: Matching Operator. An operator used to match a value contained in a header field with a value contained in a Rule.
@@ -632,12 +632,12 @@ This subsection describes the different tools that are used to enable the SCHC F
   of 1 bit. In all SCHC ACKs, the W bit carries the same value as the W bit carried by the SCHC Fragments whose reception is 
   being positively or negatively acknowledged by the SCHC ACK.
 
-* Message Integrity Check (MIC). This field is computed by the sender over the complete SCHC Packet and before SCHC 
-  fragmentation. The MIC allows the receiver to check errors in the reassembled packet, while it also
+* Message Integrity Check (MIC). This field is computed by the sender over the complete SCHC Packet and the
+  last fragment potential padding bits.
+  The MIC allows the receiver to check errors in the reassembled packet, while it also
   enables compressing the UDP checksum by use of SCHC compression. The CRC32 as 0xEDB88320 (i.e. the reverse representation
   of the polynomial used e.g. in the Ethernet standard {{RFC3385}}) is recommended as the default algorithm for computing the
-  MIC. Nevertheless, other algorithms MAY be required and are defined in the technology-specific documents as well as the 
-  length in bits of the MIC used.
+  MIC. Nevertheless, other MIC lengths or other algorithms MAY be required by the technology-specific documents.
 
 * C (MIC checked): C is a 1-bit field. This field is used in the SCHC ACK packets to report the outcome of the MIC check, 
   i.e. whether the reassembled packet was correctly received or not. A value of 1 represents a positive MIC check at the 
