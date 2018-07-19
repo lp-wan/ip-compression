@@ -1207,7 +1207,7 @@ and CDA to "not-sent".
 If the DiffServ field does not vary and is known by both sides, the Field Descriptor in the Rule SHOULD contain a TV with
 this well-known value, an "equal" MO and a "not-sent" CDA.
 
-Otherwise, two possibilities can be considered depending on the variability of the value:
+Otherwise (e.g. ECN bits are to be transmitted), two possibilities can be considered depending on the variability of the value:
 
 * One possibility is to not compress the field and send the original value. In the Rule, TV is not set to any particular value, MO is set to "ignore" and CDA is set to "value-sent".
 
