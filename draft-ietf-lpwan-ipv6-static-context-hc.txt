@@ -324,9 +324,9 @@ Internet-Draft                 LPWAN SCHC                      July 2018
       which SCHC Fragments in a window of fragments were correctly
       received.
 
-   o  C: Checked bit.  Used in an acknowledgement (SCHC ACK) header to
-      determine if the MIC locally computed by the receiver matches (1)
-      the received MIC or not (0).
+   o  C: Checked bit.  Used in a SCHC ACK header to determine if the MIC
+      locally computed by the receiver matches the received MIC or not.
+      C == 1 signals a match, C == 0 a mismatch.
 
    o  CDA: Compression/Decompression Action.  Describes the reciprocal
       pair of actions that are performed at the compressor to compress a
@@ -409,8 +409,8 @@ Internet-Draft                 LPWAN SCHC                      July 2018
       each device.
 
    o  MIC: Message Integrity Check.  A SCHC F/R header field computed
-      over the fragmented SCHC Packet and potential fragment padding,
-      used for error detection after SCHC Packet reassembly.
+      over the fragmented SCHC Packet and potential last fragment
+      padding, used for error detection after SCHC Packet reassembly.
 
    o  MO: Matching Operator.  An operator used to match a value
       contained in a header field with a value contained in a Rule.
@@ -1299,15 +1299,15 @@ Internet-Draft                 LPWAN SCHC                      July 2018
       acknowledged by the SCHC ACK.
 
    o  Message Integrity Check (MIC).  This field is computed by the
-      sender over the complete SCHC Packet and before SCHC
-      fragmentation.  The MIC allows the receiver to check errors in the
-      reassembled packet, while it also enables compressing the UDP
-      checksum by use of SCHC compression.  The CRC32 as 0xEDB88320
-      (i.e. the reverse representation of the polynomial used e.g. in
-      the Ethernet standard [RFC3385]) is recommended as the default
-      algorithm for computing the MIC.  Nevertheless, other algorithms
-      MAY be required and are defined in the technology-specific
-      documents as well as the length in bits of the MIC used.
+      sender over the complete SCHC Packet and the last fragment
+      potential padding bits.  The MIC allows the receiver to check
+      errors in the reassembled packet, while it also enables
+      compressing the UDP checksum by use of SCHC compression.  The
+      CRC32 as 0xEDB88320 (i.e. the reverse representation of the
+      polynomial used e.g. in the Ethernet standard [RFC3385]) is
+      recommended as the default algorithm for computing the MIC.
+      Nevertheless, other MIC lengths or other algorithms MAY be
+      required by the technology-specific documents.
 
    o  C (MIC checked): C is a 1-bit field.  This field is used in the
       SCHC ACK packets to report the outcome of the MIC check, i.e.
