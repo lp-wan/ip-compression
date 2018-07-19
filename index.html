@@ -341,12 +341,12 @@ address {
 <link href="#rfc.authors" rel="Chapter">
 
 
-  <meta name="generator" content="xml2rfc version 2.9.9 - https://tools.ietf.org/tools/xml2rfc" />
+  <meta name="generator" content="xml2rfc version 2.10.0 - https://tools.ietf.org/tools/xml2rfc" />
   <link rel="schema.dct" href="http://purl.org/dc/terms/" />
 
   <meta name="dct.creator" content="Minaburo, A., Toutain, L., Gomez, C., and D. Barthel" />
   <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-lpwan-ipv6-static-context-hc-16" />
-  <meta name="dct.issued" scheme="ISO8601" content="2018-06-29" />
+  <meta name="dct.issued" scheme="ISO8601" content="2018-07-19" />
   <meta name="dct.abstract" content="This document defines the Static Context Header Compression (SCHC) framework, which provides both header compression and fragmentation functionalities. SCHC has been tailored for Low Power Wide Area Networks (LPWAN)." />
   <meta name="description" content="This document defines the Static Context Header Compression (SCHC) framework, which provides both header compression and fragmentation functionalities. SCHC has been tailored for Low Power Wide Area Networks (LPWAN)." />
 
@@ -370,7 +370,7 @@ address {
 <td class="right">L. Toutain</td>
 </tr>
 <tr>
-<td class="left">Expires: December 31, 2018</td>
+<td class="left">Expires: January 20, 2019</td>
 <td class="right">IMT-Atlantique</td>
 </tr>
 <tr>
@@ -391,7 +391,7 @@ address {
 </tr>
 <tr>
 <td class="left"></td>
-<td class="right">June 29, 2018</td>
+<td class="right">July 19, 2018</td>
 </tr>
 
     	
@@ -410,7 +410,7 @@ address {
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at https://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on December 31, 2018.</p>
+<p>This Internet-Draft will expire on January 20, 2019.</p>
 <h1 id="rfc.copyrightnotice"><a href="#rfc.copyrightnotice">Copyright Notice</a></h1>
 <p>Copyright (c) 2018 IETF Trust and the persons identified as the document authors.  All rights reserved.</p>
 <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (https://trustee.ietf.org/license-info) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.</p>
@@ -623,7 +623,7 @@ address {
 <li>IID: Interface Identifier. See the IPv6 addressing architecture <a href="#RFC7136" class="xref">[RFC7136]</a>
 </li>
 <li>Inactivity Timer. A timer used after receiving a SCHC Fragment to detect when, due to a communication error, there is no possibility to continue an on-going fragmented SCHC Packet transmission.</li>
-<li>L2: Layer two. The immediate lower layer SCHC interfaces with. It is provided by an underlying LPWAN technology.</li>
+<li>L2: Layer two. The immediate lower layer SCHC interfaces with. It is provided by an underlying LPWAN technology. It does not necessarily correspond to the OSI model definition of Layer 2.</li>
 <li>L2 Word: this is the minimum subdivision of payload data that the L2 will carry. In most L2 technologies, the L2 Word is an octet.  In bit-oriented radio technologies, the L2 Word might be a single bit.  The L2 Word size is assumed to be constant over time for each device.</li>
 <li>MIC: Message Integrity Check.  A SCHC F/R header field computed over the fragmented SCHC Packet and potential fragment padding, used for error detection after SCHC Packet reassembly.</li>
 <li>MO: Matching Operator. An operator used to match a value contained in a header field with a value contained in a Rule.</li>
@@ -635,7 +635,7 @@ address {
 <li>SCHC ACK: A SCHC acknowledgement for fragmentation. This message is used to report on the success of reception of a set of SCHC Fragments. See <a href="#Frag" class="xref">Section 8</a> for more details.</li>
 <li>SCHC C/D: Static Context Header Compression Compressor/Decompressor. A mechanism used on both sides, at the Dev and at the network, to achieve Compression/Decompression of headers. SCHC C/D uses Rules to perform compression and decompression.</li>
 <li>SCHC F/R: Static Context Header Compression Fragmentation/Reassembly. A protocol used on both sides, at the Dev and at the network, to achieve Fragmentation/Reassembly of SCHC Packets. SCHC F/R has three reliability modes.</li>
-<li>SCHC Fragment: A data unit that carries a subset of a SCHC Packet. SCHC F/R is needed when the size of a SCHC packet exceeds the available payload size of the underlying L2 technology data unit. See <a href="#Frag" class="xref">Section 8</a>.</li>
+<li>SCHC Fragment: A data unit that carries a subset of a SCHC Packet. SCHC F/R is needed when the size of a SCHC packet exceeds the L2 MTU. See <a href="#Frag" class="xref">Section 8</a>.</li>
 <li>SCHC Packet: A packet (e.g. an IPv6 packet) whose header has been compressed as per the header compression mechanism defined in this document. If the header compression process is unable to actually compress the packet header, the packet with the uncompressed header is still called a SCHC Packet (in this case, a Rule ID is used to indicate that the packet header has not been compressed). See <a href="#SCHComp" class="xref">Section 7</a> for more details.</li>
 <li>TV: Target value. A value contained in a Rule that will be matched with the value of a header field.</li>
 <li>Up: Uplink direction for compression/decompression in both sides, from the Dev SCHC C/D to the network SCHC C/D.</li>
@@ -705,7 +705,7 @@ A packet (e.g. an IPv6 packet)
 
 </pre>
 <p class="figure">Figure 4: SCHC Packet</p>
-<p id="rfc.section.5.p.4">The Fragment Header size is variable and depends on the Fragmentation parameters.  The Fragment payload contains a part of the SCHC Packet Compressed Header, a part of the SCHC Packet Payload or both.  Its size depends on the L2 data unit, see <a href="#Frag" class="xref">Section 8</a>. The SCHC Fragment has the following format:</p>
+<p id="rfc.section.5.p.4">The Fragment Header size is variable and depends on the Fragmentation parameters.  The Fragment payload contains a part of the SCHC Packet Compressed Header, a part of the SCHC Packet Payload or both.  Its size depends on the L2 MTU, see <a href="#Frag" class="xref">Section 8</a>. The SCHC Fragment has the following format:</p>
 <div id="rfc.figure.5"></div>
 <div id="Fig-SCHCfragment"></div>
 <pre>
@@ -748,7 +748,7 @@ A packet (e.g. an IPv6 packet)
 </pre>
 <p class="figure">Figure 7: Architecture</p>
 <p id="rfc.section.5.p.8">SCHC C/D and SCHC F/R are located on both sides of the LPWAN transmission, i.e. on the Dev side and on the Network side.</p>
-<p id="rfc.section.5.p.9">Let&#8217;s describe the operation in the Uplink direction. The Device application packets use IPv6 or IPv6/UDP protocols. Before sending these packets, the Dev compresses their headers using SCHC C/D and, if the SCHC Packet resulting from the compression exceeds the maximum payload size of the underlying LPWAN technology, SCHC F/R is performed (see <a href="#Frag" class="xref">Section 8</a>). The resulting SCHC Fragments are sent as one or more L2 frames to an LPWAN Radio Gateway (RG) which forwards them to a Network Gateway (NGW).  The NGW sends the data to a SCHC F/R and then to the SCHC C/D for decompression. The SCHC F/R and C/D on the Network side can be located in the NGW or somewhere else as long as a tunnel is established between them and the NGW. Note that, for some LPWAN technologies, it MAY be suitable to locate the SCHC F/R functionality nearer the NGW, in order to better deal with time constraints of such technologies.  The SCHC C/D and F/R on both sides MUST share the same set of Rules. After decompression, the packet can be sent over the Internet to one or several LPWAN Application Servers (App).</p>
+<p id="rfc.section.5.p.9">Let&#8217;s describe the operation in the Uplink direction. The Device application packets use IPv6 or IPv6/UDP protocols. Before sending these packets, the Dev compresses their headers using SCHC C/D and, if the SCHC Packet resulting from the compression exceeds the maximum payload size of the underlying LPWAN technology, SCHC F/R is performed (see <a href="#Frag" class="xref">Section 8</a>). The resulting SCHC Fragments are sent to an LPWAN Radio Gateway (RG) which forwards them to a Network Gateway (NGW).  The NGW sends the data to a SCHC F/R and then to the SCHC C/D for decompression. The SCHC F/R and C/D on the Network side can be located in the NGW or somewhere else as long as a tunnel is established between them and the NGW. Note that, for some LPWAN technologies, it MAY be suitable to locate the SCHC F/R functionality nearer the NGW, in order to better deal with time constraints of such technologies.  The SCHC C/D and F/R on both sides MUST share the same set of Rules. After decompression, the packet can be sent over the Internet to one or several LPWAN Application Servers (App).</p>
 <p id="rfc.section.5.p.10">The SCHC C/D and F/R process is symmetrical, therefore the description of the Downlink direction trivially derives from the one above.</p>
 <h1 id="rfc.section.6">
 <a href="#rfc.section.6">6.</a> <a href="#rule-id" id="rule-id">Rule ID</a>
@@ -917,7 +917,7 @@ A packet (e.g. an IPv6 packet)
 <h1 id="rfc.section.7.5.5">
 <a href="#rfc.section.7.5.5">7.5.5.</a> <a href="#deviid-appiid-cda" id="deviid-appiid-cda">DevIID, AppIID CDA</a>
 </h1>
-<p id="rfc.section.7.5.5.p.1">These functions are used to process respectively the Dev and the App Interface Identifiers (DevIID and AppIID) of the IPv6 addresses. AppIID CDA is less common since current LPWAN technologies frames contain a single address, which is the Dev&#8217;s address.</p>
+<p id="rfc.section.7.5.5.p.1">These functions are used to process respectively the Dev and the App Interface Identifiers (DevIID and AppIID) of the IPv6 addresses. AppIID CDA is less common since most current LPWAN technologies frames contain a single L2 address, which is the Dev&#8217;s address.</p>
 <p id="rfc.section.7.5.5.p.2">The IID value MAY be computed from the Device ID present in the L2 header, or from some other stable identifier. The computation is specific to each LPWAN technology and MAY depend on the Device ID size.</p>
 <p id="rfc.section.7.5.5.p.3">In the downlink direction (Dw), at the compressor, this DevIID CDA may be used to generate the L2 addresses on the LPWAN, based on the packet destination address.</p>
 <h1 id="rfc.section.7.5.6">
@@ -936,15 +936,15 @@ A packet (e.g. an IPv6 packet)
 <h1 id="rfc.section.8.1">
 <a href="#rfc.section.8.1">8.1.</a> <a href="#overview" id="overview">Overview</a>
 </h1>
-<p id="rfc.section.8.1.p.1">In LPWAN technologies, the L2 data unit size typically varies from tens to hundreds of bytes. The SCHC F/R (Fragmentation /Reassembly) MAY be used either because after applying SCHC C/D or when SCHC C/D is not possible the entire SCHC Packet still exceeds the L2 data unit.</p>
+<p id="rfc.section.8.1.p.1">In LPWAN technologies, the L2 MTU typically ranges from tens to hundreds of bytes. The SCHC F/R (Fragmentation /Reassembly) MAY be used either because after applying SCHC C/D or when SCHC C/D is not possible the entire SCHC Packet size still exceeds the L2 MTU.</p>
 <p id="rfc.section.8.1.p.2">The SCHC F/R functionality defined in this document has been designed under the assumption that data unit out-of-sequence delivery will not happen between the entity performing fragmentation and the entity performing reassembly. This assumption allows reducing the complexity and overhead of the SCHC F/R mechanism.</p>
-<p id="rfc.section.8.1.p.3">This document also assumes that the L2 data unit size does not vary while a fragmented SCHC Packet is being transmitted.</p>
+<p id="rfc.section.8.1.p.3">This document also assumes that the L2 MTU value does not change while a fragmented SCHC Packet is being transmitted.</p>
 <p id="rfc.section.8.1.p.4">To adapt the SCHC F/R to the capabilities of LPWAN technologies, it is required to enable optional SCHC Fragment retransmission and to allow for a range of reliability options for sending the SCHC Fragments. This document does not make any decision with regard to which SCHC Fragment delivery reliability mode will be used over a specific LPWAN technology. These details will be defined in other technology-specific documents.</p>
 <p id="rfc.section.8.1.p.5">SCHC F/R uses the knowledge of the L2 Word size (see <a href="#Term" class="xref">Section 4</a>) to encode some messages. Therefore, SCHC MUST know the L2 Word size.  SCHC F/R generates SCHC Fragments and SCHC ACKs that are, for most of them, multiples of L2 Words.  The padding overhead is kept to the absolute minimum. See <a href="#Padding" class="xref">Section 9</a>.</p>
 <h1 id="rfc.section.8.2">
 <a href="#rfc.section.8.2">8.2.</a> <a href="#FragTools" id="FragTools">Fragmentation Tools</a>
 </h1>
-<p id="rfc.section.8.2.p.1">This subsection describes the different tools that are used to enable the SCHC F/R functionality defined in this document, such as fields in the SCHC F/R header frames (see the related formats in <a href="#Fragfor" class="xref">Section 8.4</a>), windows and timers.</p>
+<p id="rfc.section.8.2.p.1">This subsection describes the different tools that are used to enable the SCHC F/R functionality defined in this document, such as fields in the SCHC F/R header (see the related formats in <a href="#Fragfor" class="xref">Section 8.4</a>), windows and timers.</p>
 <p></p>
 
 <ul>
@@ -974,7 +974,7 @@ A packet (e.g. an IPv6 packet)
 <ul>
 <li>No-ACK. No-ACK is the simplest SCHC Fragment reliability mode. The receiver does not generate overhead in the form of acknowledgements (ACKs).  However, this mode does not enhance reliability beyond that offered by the underlying LPWAN technology. In the No-ACK mode, the receiver MUST NOT issue SCHC ACKs. See further details in <a href="#No-ACK-subsection" class="xref">Section 8.5.1</a>.</li>
 <li>ACK-Always. The ACK-Always mode provides flow control using a windowing scheme. This mode is also able to handle long bursts of lost SCHC Fragments since detection of such events can be done before the end of the SCHC Packet transmission as long as the window size is short enough. However, such benefit comes at the expense of SCHC ACK use. In ACK-Always, the receiver sends a SCHC ACK after a window of SCHC Fragments has been received. The SCHC ACK is used to inform the sender which SCHC Fragments in the current window have been well received. Upon a SCHC ACK reception, the sender retransmits the lost SCHC Fragments. When a SCHC ACK is lost and the sender has not received it by the expiration of the Retransmission Timer, the sender uses a SCHC ACK request by sending the All-0 empty SCHC Fragment when it is not the last window and the All-1 empty Fragment when it is the last window. The maximum number of SCHC ACK requests is MAX_ACK_REQUESTS. If MAX_ACK_REQUESTS is reached, the transmission needs to be aborted. See further details in <a href="#ACK-Always-subsection" class="xref">Section 8.5.2</a>.</li>
-<li>ACK-on-Error. The ACK-on-Error mode is suitable for links offering relatively low L2 data unit loss probability. In this mode, the SCHC Fragment receiver reduces the number of SCHC ACKs transmitted, which MAY be especially beneficial in asymmetric scenarios. The receiver transmits a SCHC ACK only after the complete window transmission and if at least one SCHC Fragment of this window has been lost. An exception to this behavior is in the last window, where the receiver MUST transmit a SCHC ACK, including the C bit set based on the MIC checked result, even if all the SCHC Fragments of the last window have been correctly received.  The SCHC ACK gives the state of all the SCHC Fragments of the current window (received or lost). Upon a SCHC ACK reception, the sender retransmits any lost SCHC Fragments based on the SCHC ACK. If a SCHC ACK is not transmitted back by the receiver at the end of a window, the sender assumes that all SCHC Fragments have been correctly received. When a SCHC ACK is lost, the sender assumes that all SCHC Fragments covered by the lost SCHC ACK have been successfully delivered, so the sender continues transmitting the next window of SCHC Fragments. If the next SCHC Fragments received belong to the next window and it is still expecting fragments from the previous window, the receiver will abort the on-going fragmented packet transmission. See further details in <a href="#ACK-on-Error-subsection" class="xref">Section 8.5.3</a>.</li>
+<li>ACK-on-Error. The ACK-on-Error mode is suitable for links offering relatively low packet loss probability. In this mode, the SCHC Fragment receiver reduces the number of SCHC ACKs transmitted, which MAY be especially beneficial in asymmetric scenarios. The receiver transmits a SCHC ACK only after the complete window transmission and if at least one SCHC Fragment of this window has been lost. An exception to this behavior is in the last window, where the receiver MUST transmit a SCHC ACK, including the C bit set based on the MIC checked result, even if all the SCHC Fragments of the last window have been correctly received.  The SCHC ACK gives the state of all the SCHC Fragments of the current window (received or lost). Upon a SCHC ACK reception, the sender retransmits any lost SCHC Fragments based on the SCHC ACK. If a SCHC ACK is not transmitted back by the receiver at the end of a window, the sender assumes that all SCHC Fragments have been correctly received. When a SCHC ACK is lost, the sender assumes that all SCHC Fragments covered by the lost SCHC ACK have been successfully delivered, so the sender continues transmitting the next window of SCHC Fragments. If the next SCHC Fragments received belong to the next window and it is still expecting fragments from the previous window, the receiver will abort the on-going fragmented packet transmission. See further details in <a href="#ACK-on-Error-subsection" class="xref">Section 8.5.3</a>.</li>
 </ul>
 <p id="rfc.section.8.3.p.3">The same reliability mode MUST be used for all SCHC Fragments of a SCHC Packet. The decision on which reliability mode will be used and whether the same reliability mode applies to all SCHC Packets is an implementation problem and is out of the scope of this document.</p>
 <p id="rfc.section.8.3.p.4">Note that the reliability mode choice is not necessarily tied to a particular characteristic of the underlying L2 LPWAN technology, e.g. the No-ACK mode MAY be used on top of an L2 LPWAN technology with symmetric characteristics for uplink and downlink. This document does not make any decision as to which SCHC Fragment reliability modes are relevant for a specific LPWAN technology.</p>
@@ -1237,7 +1237,7 @@ next L2 Word boundary -&gt;|&lt;-- L2 Word --&gt;|
 <h1 id="rfc.section.8.5">
 <a href="#rfc.section.8.5">8.5.</a> <a href="#FragModes" id="FragModes">Baseline mechanism</a>
 </h1>
-<p id="rfc.section.8.5.p.1">If after applying SCHC header compression (or when SCHC header compression is not possible) the SCHC Packet does not fit within the payload of a single L2 data unit, the SCHC Packet SHALL be broken into SCHC Fragments and the fragments SHALL be sent to the fragment receiver. The fragment receiver needs to identify all the SCHC Fragments that belong to a given SCHC Packet. To this end, the receiver SHALL use:</p>
+<p id="rfc.section.8.5.p.1">If after applying SCHC header compression (or when SCHC header compression is not possible) the SCHC Packet size is larger than the L2 MTU, the SCHC Packet SHALL be broken into SCHC Fragments and the fragments SHALL be sent to the fragment receiver. The fragment receiver needs to identify all the SCHC Fragments that belong to a given SCHC Packet. To this end, the receiver SHALL use:</p>
 <p></p>
 
 <ul>
@@ -1289,15 +1289,14 @@ next L2 Word boundary -&gt;|&lt;-- L2 Word --&gt;|
 <h1 id="rfc.section.8.7">
 <a href="#rfc.section.8.7">8.7.</a> <a href="#downlink-schc-fragment-transmission" id="downlink-schc-fragment-transmission">Downlink SCHC Fragment transmission</a>
 </h1>
-<p id="rfc.section.8.7.p.1">In some LPWAN technologies, as part of energy-saving techniques, downlink transmission is only possible immediately after an uplink transmission. In order to avoid potentially high delay in the downlink transmission of a fragmented SCHC Packet, the SCHC Fragment receiver MAY perform an uplink transmission as soon as possible after reception of a SCHC Fragment that is not the last one. Such uplink transmission MAY be triggered by the L2 (e.g. an L2 ACK sent in response to a SCHC Fragment encapsulated in a L2 frame that requires an L2 ACK) or it MAY be triggered from an upper layer.</p>
-<p id="rfc.section.8.7.p.2">For downlink transmission of a fragmented SCHC Packet in ACK-Always mode, the SCHC Fragment receiver MAY support timer-based SCHC ACK retransmission. In this mechanism, the SCHC Fragment receiver initializes and starts a timer (the Inactivity Timer is used) after the transmission of a SCHC ACK, except when the SCHC ACK is sent in response to the last SCHC Fragment of a packet (All-1 fragment). In the latter case, the SCHC Fragment receiver does not start a timer after transmission of the SCHC ACK.</p>
-<p id="rfc.section.8.7.p.3">If, after transmission of a SCHC ACK that is not an All-1 fragment, and before expiration of the corresponding Inactivity timer, the SCHC Fragment receiver receives a SCHC Fragment that belongs to the current window (e.g. a missing SCHC Fragment from the current window) or to the next window, the Inactivity timer for the SCHC ACK is stopped. However, if the Inactivity timer expires, the SCHC ACK is resent and the Inactivity timer is reinitialized and restarted.</p>
-<p id="rfc.section.8.7.p.4">The default initial value for the Inactivity timer, as well as the maximum number of retries for a specific SCHC ACK, denoted MAX_ACK_RETRIES, are not defined in this document, and need to be defined in other documents (e.g. technology-specific profiles). The initial value of the Inactivity timer is expected to be greater than that of the Retransmission timer, in order to make sure that a (buffered) SCHC Fragment to be retransmitted can find an opportunity for that transmission.</p>
-<p id="rfc.section.8.7.p.5">When the SCHC Fragment sender transmits the All-1 fragment, it starts its Retransmission Timer with a large timeout value (e.g. several times that of the initial Inactivity timer). If a SCHC ACK is received before expiration of this timer, the SCHC Fragment sender retransmits any lost SCHC Fragments reported by the SCHC ACK, or if the SCHC ACK confirms successful reception of all SCHC Fragments of the last window, the transmission of the fragmented SCHC Packet is considered complete. If the timer expires, and no SCHC ACK has been received since the start of the timer, the SCHC Fragment sender assumes that the All-1 fragment has been successfully received (and possibly, the last SCHC ACK has been lost: this mechanism assumes that the retransmission timer for the All-1 fragment is long enough to allow several SCHC ACK retries if the All-1 fragment has not;been received by the SCHC Fragment receiver, and it also assumes that it is unlikely that several ACKs become all lost).</p>
+<p id="rfc.section.8.7.p.1">For downlink transmission of a fragmented SCHC Packet in ACK-Always mode, the SCHC Fragment receiver MAY support timer-based SCHC ACK retransmission. In this mechanism, the SCHC Fragment receiver initializes and starts a timer (the Inactivity Timer is used) after the transmission of a SCHC ACK, except when the SCHC ACK is sent in response to the last SCHC Fragment of a packet (All-1 fragment). In the latter case, the SCHC Fragment receiver does not start a timer after transmission of the SCHC ACK.</p>
+<p id="rfc.section.8.7.p.2">If, after transmission of a SCHC ACK that is not an All-1 fragment, and before expiration of the corresponding Inactivity timer, the SCHC Fragment receiver receives a SCHC Fragment that belongs to the current window (e.g. a missing SCHC Fragment from the current window) or to the next window, the Inactivity timer for the SCHC ACK is stopped. However, if the Inactivity timer expires, the SCHC ACK is resent and the Inactivity timer is reinitialized and restarted.</p>
+<p id="rfc.section.8.7.p.3">The default initial value for the Inactivity timer, as well as the maximum number of retries for a specific SCHC ACK, denoted MAX_ACK_RETRIES, are not defined in this document, and need to be defined in other documents (e.g. technology-specific profiles). The initial value of the Inactivity timer is expected to be greater than that of the Retransmission timer, in order to make sure that a (buffered) SCHC Fragment to be retransmitted can find an opportunity for that transmission.</p>
+<p id="rfc.section.8.7.p.4">When the SCHC Fragment sender transmits the All-1 fragment, it starts its Retransmission Timer with a large timeout value (e.g. several times that of the initial Inactivity timer). If a SCHC ACK is received before expiration of this timer, the SCHC Fragment sender retransmits any lost SCHC Fragments reported by the SCHC ACK, or if the SCHC ACK confirms successful reception of all SCHC Fragments of the last window, the transmission of the fragmented SCHC Packet is considered complete. If the timer expires, and no SCHC ACK has been received since the start of the timer, the SCHC Fragment sender assumes that the All-1 fragment has been successfully received (and possibly, the last SCHC ACK has been lost: this mechanism assumes that the retransmission timer for the All-1 fragment is long enough to allow several SCHC ACK retries if the All-1 fragment has not;been received by the SCHC Fragment receiver, and it also assumes that it is unlikely that several ACKs become all lost).</p>
 <h1 id="rfc.section.9">
 <a href="#rfc.section.9">9.</a> <a href="#Padding" id="Padding">Padding management</a>
 </h1>
-<p id="rfc.section.9.p.1">SCHC C/D and SCHC F/R operate on bits, not bytes. SCHC itself does not have any alignment prerequisite.  If the Layer 2 below SCHC constrains the L2 Data Unit to align to some boundary, called L2 Words (for example, bytes), SCHC will meet that constraint and produce messages with the correct alignement.  This may entail adding extra bits (called padding bits).</p>
+<p id="rfc.section.9.p.1">SCHC C/D and SCHC F/R operate on bits, not bytes. SCHC itself does not have any alignment prerequisite.  If the L2 below SCHC constrains the payload to align to some boundary, called L2 Words (for example, bytes), SCHC will meet that constraint and produce messages with the correct alignement.  This may entail adding extra bits (called padding bits).</p>
 <p id="rfc.section.9.p.2">When padding occurs, the number of appended bits is strictly less than the L2 Word size.</p>
 <p id="rfc.section.9.p.3">Padding happens at most once for each Packet going through the full SCHC chain, i.e. Compression and (optionally) SCHC Fragmentation (see <a href="#Fig-IntroLayers" class="xref">Figure 2</a>).  If a SCHC Packet is sent unfragmented (see <a href="#Fig-Operations-Pad" class="xref">Figure 27</a>), it is padded as needed.  If a SCHC Packet is fragmented, only the last fragment is padded as needed.</p>
 <div id="rfc.figure.27"></div>
@@ -1383,7 +1382,7 @@ A packet (e.g. an IPv6 packet)
 <h1 id="rfc.section.10.7">
 <a href="#rfc.section.10.7">10.7.</a> <a href="#ipv6-addresses-fields" id="ipv6-addresses-fields">IPv6 addresses fields</a>
 </h1>
-<p id="rfc.section.10.7.p.1">As in 6LoWPAN <a href="#RFC4944" class="xref">[RFC4944]</a>, IPv6 addresses are split into two 64-bit long fields; one for the prefix and one for the Interface Identifier (IID). These fields SHOULD be compressed. To allow for a single Rule being used for both directions, these values are identified by their role (DEV or APP) and not by their position in the frame (source or destination).</p>
+<p id="rfc.section.10.7.p.1">As in 6LoWPAN <a href="#RFC4944" class="xref">[RFC4944]</a>, IPv6 addresses are split into two 64-bit long fields; one for the prefix and one for the Interface Identifier (IID). These fields SHOULD be compressed. To allow for a single Rule being used for both directions, these values are identified by their role (DEV or APP) and not by their position in the header (source or destination).</p>
 <h1 id="rfc.section.10.7.1">
 <a href="#rfc.section.10.7.1">10.7.1.</a> <a href="#ipv6-source-and-destination-prefixes" id="ipv6-source-and-destination-prefixes">IPv6 source and destination prefixes</a>
 </h1>
@@ -1405,7 +1404,7 @@ A packet (e.g. an IPv6 packet)
 <h1 id="rfc.section.10.9">
 <a href="#rfc.section.10.9">10.9.</a> <a href="#udp-source-and-destination-port" id="udp-source-and-destination-port">UDP source and destination port</a>
 </h1>
-<p id="rfc.section.10.9.p.1">To allow for a single Rule being used for both directions, the UDP port values are identified by their role (DEV or APP) and not by their position in the frame (source or destination). The SCHC C/D MUST be aware of the traffic direction (Uplink, Downlink) to select the appropriate field. The following Rules apply for DEV and APP port numbers.</p>
+<p id="rfc.section.10.9.p.1">To allow for a single Rule being used for both directions, the UDP port values are identified by their role (DEV or APP) and not by their position in the header (source or destination). The SCHC C/D MUST be aware of the traffic direction (Uplink, Downlink) to select the appropriate field. The following Rules apply for DEV and APP port numbers.</p>
 <p id="rfc.section.10.9.p.2">If both ends know the port number, it can be elided. The TV contains the port number, the MO is set to &#8220;equal&#8221; and the CDA is set to &#8220;not-sent&#8221;.</p>
 <p id="rfc.section.10.9.p.3">If the port variation is on few bits, the TV contains the stable part of the port number, the MO is set to &#8220;MSB&#8221; and the CDA is set to &#8220;LSB&#8221;.</p>
 <p id="rfc.section.10.9.p.4">If some well-known values are used,  the TV can contain the list of these values, the MO is set to &#8220;match-mapping&#8221; and the CDA is set to &#8220;mapping-sent&#8221;.</p>
@@ -1758,7 +1757,7 @@ Rule 0
              |&lt;-----ACK, W=0-------|C=1 no Bitmap
            (End)
 </pre>
-<p class="figure">Figure 35: Transmission in ACK-Always mode of an IPv6 packet carried by 11 fragments, with MAX_WIND_FCN=6, three lost framents and only one retry needed for each lost fragment.</p>
+<p class="figure">Figure 35: Transmission in ACK-Always mode of an IPv6 packet carried by 11 fragments, with MAX_WIND_FCN=6, three lost fragments and only one retry needed for each lost fragment.</p>
 <p><a href="#Fig-Example-Rel-Window-ACK-Loss-Last-B" class="xref">Figure 36</a> illustrates the transmission in ACK-Always mode of an IPv6 packet that needs 6 fragments, with MAX_WIND_FCN=6, three lost fragments, and the second ACK lost.</p>
 <div id="rfc.figure.36"></div>
 <div id="Fig-Example-Rel-Window-ACK-Loss-Last-B"></div>
@@ -2136,7 +2135,8 @@ Recv_window==window &amp;    | |   |   all missing frags sent
 <li>The technology documents will describe if Rule ID is constrained by any alignment</li>
 <li>When fragmenting in ACK-on-Error or ACK-Always mode, it is expected that the last window (called All-1 window) will not be fully utilised, i.e. there won&#8217;t be fragments with all FCN values from MAX_WIND_FCN downto 1 and finally All-1.  It is worth noting that this document does not mandate that other windows (called All-0 windows) are fully utilised either.  This document purposely does not specify that All-1 windows use Bitmaps with the same number of bits as All-0 windows do.  By default, Bitmaps for All-0 and All-1 windows are of the same size MAX_WIND_FCN + 1. But a technology-specific document MAY revert that decision. The rationale for reverting the decision could be the following: Note that the SCHC ACK sent as a response to an All-1 fragment includes a C bit that SCHC ACK for other windows don&#8217;t have. Therefore, the SCHC ACK for the All-1 window is one bit bigger. An L2 technology with a severely constrained payload size might decide that this &#8220;bump&#8221; in the SCHC ACK for the last fragment is a bad resource usage. It could thus mandate that the All-1 window is not allowed to use the FCN value 1 and that the All-1 SCHC ACK Bitmap size is reduced by 1 bit. This provides room for the C bit without creating a bump in the SCHC ACK.</li>
 </ul>
-<p id="rfc.section.D.p.3">And the following parameters need to be addressed in another document but not forcely in the technology-specific one:</p>
+<p id="rfc.section.D.p.3">In some LPWAN technologies, as part of energy-saving techniques, downlink transmission is only possible immediately after an uplink transmission. In order to avoid potentially high delay in the downlink transmission of a fragmented SCHC Packet, the SCHC Fragment receiver may perform an uplink transmission as soon as possible after reception of a SCHC Fragment that is not the last one. Such uplink transmission may be triggered by the L2 (e.g. an L2 ACK sent in response to a SCHC Fragment encapsulated in a L2 PDU that requires an L2 ACK) or it may be triggered from an upper layer.</p>
+<p id="rfc.section.D.p.4">And the following parameters need to be addressed in another document but not forcely in the technology-specific one:</p>
 <p></p>
 
 <ul>
