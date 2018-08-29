@@ -1161,7 +1161,7 @@ This may entail adding extra bits (called padding bits).
 
 When padding occurs, the number of appended bits is strictly less than the L2 Word size.
 
-Padding happens at most once for each Packet going through the full SCHC chain, i.e. Compression and (optionally) SCHC Fragmentation (see {{Fig-IntroLayers}}).
+Padding happens at most once for each Packet during SCHC Compression and optional SCHC Fragmentation (see {{Fig-IntroLayers}}).
 If a SCHC Packet is sent unfragmented (see {{Fig-Operations-Pad}}), it is padded as needed.
 If a SCHC Packet is fragmented, only the last fragment is padded as needed.
 
