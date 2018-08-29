@@ -474,11 +474,11 @@ The compression/decompression process follows several steps:
 
 ## Matching operators {#chap-MO}
 
-Matching Operators (MOs) are functions used by both SCHC C/D endpoints involved in the header compression/decompression. They are not typed and can be indifferently applied to integer, string or any other data type. The result of the operation can either be True or False. MOs are defined as follows:
+Matching Operators (MOs) are functions used by both SCHC C/D endpoints involved in the header compression/decompression. They are not typed and can be applied to integer, string or any other data type. The result of the operation can either be True or False. MOs are defined as follows:
 
-* equal: The match result is True if a field value in a packet and the value in the TV are equal.
+* equal: The match result is True if the field value in the packet matches the TV.
 
-* ignore: No check is done between a field value in a packet and a TV in the Rule. The result of the matching is always true.
+* ignore: No check is done between the field value in the packet and the TV in the Rule. The result of the matching is always true.
 
 * MSB(x): A match is obtained if the most significant x bits of the packet header field value are equal to the TV in the Rule. The x parameter of the MSB MO indicates how many bits are involved in the comparison. If the FL is described as variable, the length must be a multiple of the unit. For example, x must be multiple of 8 if the unit of the variable length is in bytes.
 
@@ -507,23 +507,25 @@ The Compression Decompression Action (CDA) describes the actions taken during th
 ~~~~
 {: #Fig-function title='Compression and Decompression Actions'}
 
-{{Fig-function}} summarizes the basic functions that can be used to compress and decompress a field. The first column lists the actions name. The second and third columns outline the reciprocal compression/decompression behavior for each action.
+{{Fig-function}} summarizes the basic actions that can be used to compress and decompress a field. The first column shows the action's name. The second and third columns show the reciprocal compression/decompression behavior for each action.
 
-Compression is done in order that Fields Descriptions appear in a Rule. The result of each Compression/Decompression Action is appended to the working Compression Residue in that same order. The receiver knows the size of each compressed field which can be given by the Rule or MAY be sent with the compressed header.
+Compression is done in the order that the Field Descriptions appear in a Rule. The result of each Compression/Decompression Action is appended to the accumulated Compression Residue in that same order. The receiver knows the size of each compressed field, which can be given by the Rule or MAY be sent with the compressed header.
 
-If the field is identified as being variable in the Field Description, then the size of the Compression Residue value (using the unit defined in the FL) MUST be sent first using the following coding:
+### processing variable-length fields {#var-length-field}
 
-* If the size is between 0 and 14, it is sent as a 4-bits integer.
+If the field is identified in the Field Description as being of variable size, then the size of the Compression Residue value (using the unit defined in the FL) MUST first be sent as follows:
 
-* For values between 15 and 254, the first 4 bits sent are set to 1 and the size is sent using 8 bits integer.
+* If the size is between 0 and 14, it is sent as a 4-bits unsigned integer.
 
-* For higher values of size, the first 12 bits are set to 1 and the next two bytes contain the size value as a 16 bits integer.
+* For values between 15 and 254, 0b1111 is transmitted and then the size is sent as an 8 bits unsigned integer.
+
+* For larger values of the size, 0xffff is transmitted and then the next two bytes contain the size value as a 16 bits unsigned integer.
 
 If a field is not present in the packet but exists in the Rule and its FL is specified as being variable, size 0 MUST be sent to denote its absence.
 
 ### not-sent CDA
 
-The not-sent function is generally used when the field value is specified in a Rule and therefore known by both the Compressor and the Decompressor. This action is generally used with the "equal" MO. If MO is "ignore", there is a risk to have a decompressed field value different from the original field that was compressed.
+The not-sent action is generally used when the field value is specified in a Rule and therefore known by both the Compressor and the Decompressor. This action SHOULD be used with the "equal" MO. If MO is "ignore", there is a risk to have a decompressed field value different from the original field that was compressed.
 
 The compressor does not send any Compression Residue for a field on which not-sent compression is applied.
 
@@ -531,11 +533,11 @@ The decompressor restores the field value with the Target Value stored in the ma
 
 ### value-sent CDA
 
-The value-sent action is generally used when the field value is not known by both the Compressor and the Decompressor. The value is sent as a residue in the compressed message header. Both Compressor and Decompressor MUST know the size of the field, either implicitly (the size is known by both sides) or by explicitly indicating the length in the Compression Residue, as defined in {{chap-CDA}}. This function is generally used with the "ignore" MO.
+The value-sent action is generally used when the field value is not known by both the Compressor and the Decompressor. The value is sent as a residue in the compressed message header. Both Compressor and Decompressor MUST know the size of the field, either implicitly (the size is known by both sides) or by explicitly indicating the length in the Compression Residue, as defined in {{var-length-field}}. This action is generally used with the "ignore" MO.
 
 ### mapping-sent CDA
 
-The mapping-sent is used to send a smaller index (the index into the Target Value list of values) instead of the original value. This function is used together with the "match-mapping" MO.
+The mapping-sent action is used to send an index (the index into the Target Value list of values) instead of the original value. This action is used together with the "match-mapping" MO.
 
 On the compressor side, the match-mapping Matching Operator searches the TV for a match with the header field value and the mapping-sent CDA appends the corresponding index to the Compression Residue to be sent.
 On the decompressor side, the CDA uses the received index to restore the field value by looking up the list in the TV.
@@ -549,20 +551,20 @@ The number of bits sent is the original header field length minus the length spe
 
 The compressor sends the Least Significant Bits (e.g. LSB of the length field). The decompressor concatenates the x most significant bits of Target Value and the received residue.
 
-If this action needs to be done on a variable length field, the size of the Compression Residue in bytes MUST be sent as described in {{chap-CDA}}.
+If this action needs to be done on a variable length field, the size of the Compression Residue in bytes MUST be sent as described in {{var-length-field}}.
 
 
 ### DevIID, AppIID CDA
 
-These functions are used to process respectively the Dev and the App Interface Identifiers (DevIID and AppIID) of the IPv6 addresses. AppIID CDA is less common since most current LPWAN technologies frames contain a single L2 address, which is the Dev's address.
+These actions are used to process respectively the Dev and the App Interface Identifiers (DevIID and AppIID) of the IPv6 addresses. AppIID CDA is less common since most current LPWAN technologies frames contain a single L2 address, which is the Dev's address.
 
 The IID value MAY be computed from the Device ID present in the L2 header, or from some other stable identifier. The computation is specific to each LPWAN technology and MAY depend on the Device ID size.
 
-In the downlink direction (Dw), at the compressor, this DevIID CDA may be used to generate the L2 addresses on the LPWAN, based on the packet destination address.
+In the downlink direction (Dw), at the compressor, the DevIID CDA may be used to generate the L2 addresses on the LPWAN, based on the packet's Destination Address.
 
 ### Compute-\*
 
-Some fields are elided during compression and reconstructed during decompression. This is the case for length and checksum, so:
+Some fields may be elided during compression and reconstructed during decompression. This is the case for length and checksum, so:
 
 * compute-length: computes the length assigned to this field. This CDA MAY be used to compute IPv6 length or UDP length.
 
