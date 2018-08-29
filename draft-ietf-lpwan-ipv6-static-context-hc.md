@@ -1386,9 +1386,22 @@ In ACK-on-Error, a malicious node MAY force a SCHC Fragment sender to resend a S
 
 # Acknowledgements
 
-Thanks to Carsten Bormann, Philippe Clavier, Eduardo Ingles Sanchez, Arunprabhu Kandasamy, Rahul Jadhav,
-Sergio Lopez Bernal, Antony Markovski, Alexander Pelov, Pascal Thubert, Juan Carlos Zuniga, Diego Dujovne, Edgar Ramos, and
-Shoichi Sakane for useful design consideration and comments.
+Thanks to
+Carsten Bormann,
+Philippe Clavier,
+Diego Dujovne,
+Eduardo Ingles Sanchez,
+Arunprabhu Kandasamy,
+Rahul Jadhav,
+Sergio Lopez Bernal,
+Antony Markovski,
+Alexander Pelov,
+Charles Perkins,
+Edgar Ramos,
+Shoichi Sakane,
+Pascal Thubert
+and Juan Carlos Zuniga
+for useful design consideration and comments.
 
 --- back
 
