@@ -245,7 +245,8 @@ SCHC can be characterized as an adaptation layer between IPv6 and the underlying
 ~~~~
 {: #Fig-IntroLayers title='Protocol stack comprising IPv6, SCHC and an LPWAN technology'}
 
-As per this document, when a packet (e.g. an IPv6 packet) needs to be transmitted, header compression is first applied to the packet. The resulting packet after header compression (whose header may or may not actually be smaller than that of the original packet) is called a SCHC Packet. If the SCHC Packet size exceeds the layer 2 (L2) MTU, fragmentation is then applied to the SCHC Packet. The SCHC Packet or the SCHC Fragments are then transmitted over the LPWAN. The reciprocal operations take place at the receiver. This process is illustrated in {{Fig-Operations}}.
+As per this document, when a packet (e.g. an IPv6 packet) needs to be transmitted, header compression is first applied to the packet. The resulting packet after header compression (whose header may or may not actually be smaller than that of the original packet) is called a SCHC Packet.
+If the SCHC Packet neds to be fragmented by the optional SCHC Fragmentation, fragmentation is then applied to the SCHC Packet. The SCHC Packet or the SCHC Fragments are then transmitted over the LPWAN. The reciprocal operations take place at the receiver. This process is illustrated in {{Fig-Operations}}.
 
 ~~~~
 A packet (e.g. an IPv6 packet) 
@@ -278,6 +279,7 @@ A packet (e.g. an IPv6 packet)
 ~~~~
 {: #Fig-Operations title='SCHC operations at the SENDER and the RECEIVER'}
 
+## SCHC Packet format
 
 The SCHC Packet is composed of the Compressed Header followed by the payload from the original packet (see {{Fig-SCHCpckt}}).
 The Compressed Header itself is composed of a Rule ID and a Compression Residue. The Compression Residue may be absent, see {{SCHComp}}. Both the Rule ID and the Compression Residue potentially have a variable size, and generally are not a mutiple of bytes in size.
@@ -292,9 +294,9 @@ The Compressed Header itself is composed of a Rule ID and a Compression Residue.
 ~~~~ 
 {: #Fig-SCHCpckt title='SCHC Packet'}
 
-The Fragment Header size is variable and depends on the Fragmentation parameters.
-The Fragment payload contains a part of the SCHC Packet Compressed Header, a part of the SCHC Packet Payload or both.
-Its size depends on the L2 MTU (see {{Frag}}). The SCHC Fragment has the
+## SCHC Fragmentation message formats
+
+The SCHC Fragment has the
 following format:
 
 ~~~~
@@ -307,8 +309,13 @@ following format:
 ~~~~ 
 {: #Fig-SCHCfragment title='SCHC Fragment'}
 
-The SCHC ACK is only used for Fragmentation.
-It has the following format:
+The Fragment Header size is variable and depends on the Fragmentation parameters.
+The Fragment payload contains a part of the SCHC Packet Compressed Header, a part of the SCHC Packet Payload or both.
+Its size depends on the L2 MTU (see {{Frag}}).
+
+
+The SCHC ACK
+has the following format:
 
 ~~~~
 
@@ -322,6 +329,9 @@ It has the following format:
 
 The SCHC ACK Header and the encoded Bitmap both have variable size.
 
+SCHC Fragmentation messages are further described in {{Frag}}.
+
+## Functional mapping
 
 {{Fig-archi}} below maps the functional elements of {{Fig-Operations}} onto the LPWAN architecture elements of {{Fig-LPWANarchi}}.
 
@@ -346,11 +356,17 @@ The SCHC ACK Header and the encoded Bitmap both have variable size.
 
 SCHC C/D and SCHC F/R are located on both sides of the LPWAN transmission, i.e. on the Dev side and on the Network side.
 
-The operation in the Uplink direction is as follows. The Device application uses IPv6 or IPv6/UDP protocols. Before sending the packets, the Dev compresses their headers using SCHC C/D and, if the SCHC Packet resulting from the compression exceeds the maximum payload size of the underlying LPWAN technology, SCHC F/R is performed (see {{Frag}}). The resulting SCHC Fragments are sent to an LPWAN Radio Gateway (RG) which forwards them to a Network Gateway (NGW).
-The NGW sends the data to a SCHC F/R and then to the SCHC C/D for decompression. The SCHC F/R and C/D on the Network side can be located in the NGW, or somewhere else as long as a tunnel is established between them and the NGW. Note that, for some LPWAN technologies, it MAY be suitable to locate the SCHC F/R
-functionality nearer the NGW, in order to better deal with time constraints of such technologies.
-The SCHC C/D and F/R on both sides MUST share the same set of Rules. After decompression, the packet can be sent over the Internet
+The operation in the Uplink direction is as follows. The Device application uses IPv6 or IPv6/UDP protocols. Before sending the packets, the Dev compresses their headers using SCHC C/D and,
+if the SCHC Packet resulting from the compression needs to be fragmented by SCHC, SCHC F/R is performed (see {{Frag}}).
+The resulting SCHC Fragments are sent to an LPWAN Radio Gateway (RG) which forwards them to a Network Gateway (NGW).
+The NGW sends the data to a SCHC F/R for re-assembly (if needed) and then to the SCHC C/D for decompression.
+After decompression, the packet can be sent over the Internet
 to one or several LPWAN Application Servers (App).
+
+The SCHC F/R and C/D on the Network side can be located in the NGW, or somewhere else as long as a tunnel is established between them and the NGW. Note that, for some LPWAN technologies, it MAY be suitable to locate the SCHC F/R
+functionality nearer the NGW, in order to better deal with time constraints of such technologies.
+
+The SCHC C/D and F/R on both sides MUST share the same set of Rules.
 
 The SCHC C/D and F/R process is symmetrical, therefore the description of the Downlink direction is symmetrical to the one above.
 
