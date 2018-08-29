@@ -283,19 +283,20 @@ address {
 <link href="#rfc.section.4" rel="Chapter" title="4 Terminology">
 <link href="#rfc.section.5" rel="Chapter" title="5 SCHC overview">
 <link href="#rfc.section.6" rel="Chapter" title="6 Rule ID">
-<link href="#rfc.section.7" rel="Chapter" title="7 Static Context Header Compression">
+<link href="#rfc.section.7" rel="Chapter" title="7 Compression/Decompression">
 <link href="#rfc.section.7.1" rel="Chapter" title="7.1 SCHC C/D Rules">
 <link href="#rfc.section.7.2" rel="Chapter" title="7.2 Rule ID for SCHC C/D">
 <link href="#rfc.section.7.3" rel="Chapter" title="7.3 Packet processing">
 <link href="#rfc.section.7.4" rel="Chapter" title="7.4 Matching operators">
 <link href="#rfc.section.7.5" rel="Chapter" title="7.5 Compression Decompression Actions (CDA)">
-<link href="#rfc.section.7.5.1" rel="Chapter" title="7.5.1 not-sent CDA">
-<link href="#rfc.section.7.5.2" rel="Chapter" title="7.5.2 value-sent CDA">
-<link href="#rfc.section.7.5.3" rel="Chapter" title="7.5.3 mapping-sent CDA">
-<link href="#rfc.section.7.5.4" rel="Chapter" title="7.5.4 LSB CDA">
-<link href="#rfc.section.7.5.5" rel="Chapter" title="7.5.5 DevIID, AppIID CDA">
-<link href="#rfc.section.7.5.6" rel="Chapter" title="7.5.6 Compute-*">
-<link href="#rfc.section.8" rel="Chapter" title="8 Fragmentation">
+<link href="#rfc.section.7.5.1" rel="Chapter" title="7.5.1 processing variable-length fields">
+<link href="#rfc.section.7.5.2" rel="Chapter" title="7.5.2 not-sent CDA">
+<link href="#rfc.section.7.5.3" rel="Chapter" title="7.5.3 value-sent CDA">
+<link href="#rfc.section.7.5.4" rel="Chapter" title="7.5.4 mapping-sent CDA">
+<link href="#rfc.section.7.5.5" rel="Chapter" title="7.5.5 LSB CDA">
+<link href="#rfc.section.7.5.6" rel="Chapter" title="7.5.6 DevIID, AppIID CDA">
+<link href="#rfc.section.7.5.7" rel="Chapter" title="7.5.7 Compute-*">
+<link href="#rfc.section.8" rel="Chapter" title="8 Fragmentation/Reassembly">
 <link href="#rfc.section.8.1" rel="Chapter" title="8.1 Overview">
 <link href="#rfc.section.8.2" rel="Chapter" title="8.2 Fragmentation Tools">
 <link href="#rfc.section.8.3" rel="Chapter" title="8.3 Reliability modes">
@@ -346,9 +347,9 @@ address {
 
   <meta name="dct.creator" content="Minaburo, A., Toutain, L., Gomez, C., and D. Barthel" />
   <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-lpwan-ipv6-static-context-hc-16" />
-  <meta name="dct.issued" scheme="ISO8601" content="2018-07-19" />
-  <meta name="dct.abstract" content="This document defines the Static Context Header Compression (SCHC) framework, which provides both header compression and fragmentation functionalities. SCHC has been tailored for Low Power Wide Area Networks (LPWAN)." />
-  <meta name="description" content="This document defines the Static Context Header Compression (SCHC) framework, which provides both header compression and fragmentation functionalities. SCHC has been tailored for Low Power Wide Area Networks (LPWAN)." />
+  <meta name="dct.issued" scheme="ISO8601" content="2018-08-29" />
+  <meta name="dct.abstract" content="This document defines the Static Context Header Compression (SCHC) framework, which provides both header compression and fragmentation functionalities. SCHC has been designed for Low Power Wide Area Networks (LPWAN)." />
+  <meta name="description" content="This document defines the Static Context Header Compression (SCHC) framework, which provides both header compression and fragmentation functionalities. SCHC has been designed for Low Power Wide Area Networks (LPWAN)." />
 
 </head>
 
@@ -370,7 +371,7 @@ address {
 <td class="right">L. Toutain</td>
 </tr>
 <tr>
-<td class="left">Expires: January 20, 2019</td>
+<td class="left">Expires: March 2, 2019</td>
 <td class="right">IMT-Atlantique</td>
 </tr>
 <tr>
@@ -391,7 +392,7 @@ address {
 </tr>
 <tr>
 <td class="left"></td>
-<td class="right">July 19, 2018</td>
+<td class="right">August 29, 2018</td>
 </tr>
 
     	
@@ -402,15 +403,15 @@ address {
   <span class="filename">draft-ietf-lpwan-ipv6-static-context-hc-16</span></p>
   
   <h1 id="rfc.abstract"><a href="#rfc.abstract">Abstract</a></h1>
-<p>This document defines the Static Context Header Compression (SCHC) framework, which provides both header compression and fragmentation functionalities. SCHC has been tailored for Low Power Wide Area Networks (LPWAN).</p>
-<p>SCHC compression is based on a common static context stored in both the LPWAN devices and the network side. This document defines a header compression mechanism and its application to compress IPv6/UDP headers.</p>
-<p>This document also specifies a fragmentation and reassembly mechanism that is used to support the IPv6 MTU requirement over the LPWAN technologies. Fragmentation is needed for IPv6 datagrams that, after SCHC compression or when such compression was not possible, still exceed the layer two maximum payload size.</p>
-<p>The SCHC header compression and fragmentation mechanisms are independent of the specific LPWAN technology over which they are used. Note that this document defines generic functionalities and advisedly offers flexibility with regard to parameter settings and mechanism choices. Such settings and choices are expected to be made in other technology-specific documents.</p>
+<p>This document defines the Static Context Header Compression (SCHC) framework, which provides both header compression and fragmentation functionalities. SCHC has been designed for Low Power Wide Area Networks (LPWAN).</p>
+<p>SCHC compression is based on a common static context stored in both the LPWAN device and the network side. This document defines a header compression mechanism and its application to compress IPv6/UDP headers.</p>
+<p>This document also specifies a fragmentation and reassembly mechanism that is used to support the IPv6 MTU requirement over the LPWAN technologies. Fragmentation is needed for IPv6 datagrams that, after SCHC compression or when such compression was not possible, still exceed the layer-2 maximum payload size.</p>
+<p>The SCHC header compression and fragmentation mechanisms are independent of the specific LPWAN technology over which they are used. This document defines generic functionalities and offers flexibility with regard to parameter settings and mechanism choices. Technology-specific settings and choices are expected to be made in other documents.</p>
 <h1 id="rfc.status"><a href="#rfc.status">Status of This Memo</a></h1>
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at https://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on January 20, 2019.</p>
+<p>This Internet-Draft will expire on March 2, 2019.</p>
 <h1 id="rfc.copyrightnotice"><a href="#rfc.copyrightnotice">Copyright Notice</a></h1>
 <p>Copyright (c) 2018 IETF Trust and the persons identified as the document authors.  All rights reserved.</p>
 <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (https://trustee.ietf.org/license-info) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.</p>
@@ -432,7 +433,7 @@ address {
 </li>
 <li>6.   <a href="#rfc.section.6">Rule ID</a>
 </li>
-<li>7.   <a href="#rfc.section.7">Static Context Header Compression</a>
+<li>7.   <a href="#rfc.section.7">Compression/Decompression</a>
 </li>
 <ul><li>7.1.   <a href="#rfc.section.7.1">SCHC C/D Rules</a>
 </li>
@@ -444,19 +445,21 @@ address {
 </li>
 <li>7.5.   <a href="#rfc.section.7.5">Compression Decompression Actions (CDA)</a>
 </li>
-<ul><li>7.5.1.   <a href="#rfc.section.7.5.1">not-sent CDA</a>
+<ul><li>7.5.1.   <a href="#rfc.section.7.5.1">processing variable-length fields</a>
 </li>
-<li>7.5.2.   <a href="#rfc.section.7.5.2">value-sent CDA</a>
+<li>7.5.2.   <a href="#rfc.section.7.5.2">not-sent CDA</a>
 </li>
-<li>7.5.3.   <a href="#rfc.section.7.5.3">mapping-sent CDA</a>
+<li>7.5.3.   <a href="#rfc.section.7.5.3">value-sent CDA</a>
 </li>
-<li>7.5.4.   <a href="#rfc.section.7.5.4">LSB CDA</a>
+<li>7.5.4.   <a href="#rfc.section.7.5.4">mapping-sent CDA</a>
 </li>
-<li>7.5.5.   <a href="#rfc.section.7.5.5">DevIID, AppIID CDA</a>
+<li>7.5.5.   <a href="#rfc.section.7.5.5">LSB CDA</a>
 </li>
-<li>7.5.6.   <a href="#rfc.section.7.5.6">Compute-*</a>
+<li>7.5.6.   <a href="#rfc.section.7.5.6">DevIID, AppIID CDA</a>
 </li>
-</ul></ul><li>8.   <a href="#rfc.section.8">Fragmentation</a>
+<li>7.5.7.   <a href="#rfc.section.7.5.7">Compute-*</a>
+</li>
+</ul></ul><li>8.   <a href="#rfc.section.8">Fragmentation/Reassembly</a>
 </li>
 <ul><li>8.1.   <a href="#rfc.section.8.1">Overview</a>
 </li>
@@ -551,17 +554,17 @@ address {
   <h1 id="rfc.section.1">
 <a href="#rfc.section.1">1.</a> <a href="#Introduction" id="Introduction">Introduction</a>
 </h1>
-<p id="rfc.section.1.p.1">This document defines the Static Context Header Compression (SCHC) framework, which provides both header compression and fragmentation functionalities. SCHC has been tailored for Low Power Wide Area Networks (LPWAN).</p>
-<p id="rfc.section.1.p.2">Header compression is needed to efficiently bring Internet connectivity to the node within an LPWAN network. Some LPWAN networks properties can be exploited to get an efficient header compression:</p>
+<p id="rfc.section.1.p.1">This document defines the Static Context Header Compression (SCHC) framework, which provides both header compression and fragmentation functionalities. SCHC has been designed for Low Power Wide Area Networks (LPWAN).</p>
+<p id="rfc.section.1.p.2">Header compression is needed for efficient Internet connectivity to the node within an LPWAN network. Some LPWAN networks properties can be exploited to get an efficient header compression:</p>
 <p></p>
 
 <ul>
-<li>The network topology is star-oriented, which means that all packets follow the same path. For the needs of this document, the architecture can simply be described as Devices (Dev) exchanging information with LPWAN Application Servers (App) through Network Gateways (NGW).</li>
+<li>The network topology is star-oriented, which means that all packets between the same source-destination pair follow the same path. For the needs of this document, the architecture can simply be described as Devices (Dev) exchanging information with LPWAN Application Servers (App) through a Network Gateway (NGW).</li>
 <li>Because devices embed built-in applications, the traffic flows to be compressed are known in advance. Indeed, new applications cannot be easily installed in LPWAN devices, as they would in computers or smartphones.</li>
 </ul>
-<p id="rfc.section.1.p.4">The Static Context Header Compression (SCHC) is defined for this environment. SCHC uses a context, in which information about header fieds is stored. This context is static: the values of the header fields do not change over time. This avoids complex resynchronization mechanisms, that would be incompatible with LPWAN characteristics. In most cases, a small context identifier is enough to represent the full IPv6/UDP headers. The SCHC header compression mechanism is independent of the specific LPWAN technology over which it is used.</p>
-<p id="rfc.section.1.p.5">LPWAN technologies impose some strict limitations on traffic. For instance, devices are sleeping most of the time and MAY receive data during short periods of time after transmission to preserve battery. LPWAN technologies are also characterized, among others, by a very reduced data unit and/or payload size (see <a href="#RFC8376" class="xref">[RFC8376]</a>).  However, some of these technologies do not provide fragmentation functionality, therefore the only option for them to support the IPv6 MTU requirement of 1280 bytes <a href="#RFC8200" class="xref">[RFC8200]</a> is to use a fragmentation protocol at the adaptation layer, below IPv6.  In response to this need, this document also defines a fragmentation/reassembly mechanism, which supports the IPv6 MTU requirement over LPWAN technologies. Such functionality has been designed under the assumption that there is no out-of-sequence delivery of data units between the entity performing fragmentation and the entity performing reassembly.</p>
-<p id="rfc.section.1.p.6">Note that this document defines generic functionality and purposefully offers flexibility with regard to parameter settings and mechanism choices. Such settings and choices are expected to be made in other, technology-specific documents.</p>
+<p id="rfc.section.1.p.4">The Static Context Header Compression (SCHC) is defined for this environment. SCHC uses a context in which information about header fieds is stored. This context is static: the values of the header fields do not change over time. This avoids complex resynchronization mechanisms, that would be incompatible with LPWAN characteristics. In most cases, a small context identifier is enough to represent the full IPv6/UDP headers. The SCHC header compression mechanism is independent of the specific LPWAN technology over which it is used.</p>
+<p id="rfc.section.1.p.5">LPWAN technologies impose some strict limitations on traffic. For instance, devices are sleeping most of the time and may receive data during short periods of time after transmission to preserve battery. LPWAN technologies are also characterized by a greatly reduced data unit and/or payload size (see <a href="#RFC8376" class="xref">[RFC8376]</a>).  However, some LPWAN technologies do not provide fragmentation functionality; to support the IPv6 MTU requirement of 1280 bytes <a href="#RFC8200" class="xref">[RFC8200]</a>, they require a fragmentation protocol at the adaptation layer below IPv6.  Accordingly, this document defines a fragmentation/reassembly mechanism for LPWAN technologies to supports the IPv6 MTU. The mechanism has been designed under the assumption that there is no out-of-sequence delivery of data units between the entity performing fragmentation and the entity performing reassembly.</p>
+<p id="rfc.section.1.p.6">This document defines generic functionality and offers flexibility with regard to parameter settings and mechanism choices. Technology-specific settings and choices are expected to be made in other documents.</p>
 <h1 id="rfc.section.2">
 <a href="#rfc.section.2">2.</a> <a href="#requirements-notation" id="requirements-notation">Requirements Notation</a>
 </h1>
@@ -622,7 +625,7 @@ address {
 <li>FP: Field Position is a value that is used to identify the position where each instance of a field appears in the header.</li>
 <li>IID: Interface Identifier. See the IPv6 addressing architecture <a href="#RFC7136" class="xref">[RFC7136]</a>
 </li>
-<li>Inactivity Timer. A timer used after receiving a SCHC Fragment to detect when, due to a communication error, there is no possibility to continue an on-going fragmented SCHC Packet transmission.</li>
+<li>Inactivity Timer. A timer used after receiving a SCHC Fragment to detect when, due to a communication error, an on-going fragmented SCHC Packet transmission cannot be continued.</li>
 <li>L2: Layer two. The immediate lower layer SCHC interfaces with. It is provided by an underlying LPWAN technology. It does not necessarily correspond to the OSI model definition of Layer 2.</li>
 <li>L2 Word: this is the minimum subdivision of payload data that the L2 will carry. In most L2 technologies, the L2 Word is an octet.  In bit-oriented radio technologies, the L2 Word might be a single bit.  The L2 Word size is assumed to be constant over time for each device.</li>
 <li>MIC: Message Integrity Check.  A SCHC F/R header field computed over the fragmented SCHC Packet and potential last fragment padding, used for error detection after SCHC Packet reassembly.</li>
@@ -639,13 +642,13 @@ address {
 <li>SCHC Packet: A packet (e.g. an IPv6 packet) whose header has been compressed as per the header compression mechanism defined in this document. If the header compression process is unable to actually compress the packet header, the packet with the uncompressed header is still called a SCHC Packet (in this case, a Rule ID is used to indicate that the packet header has not been compressed). See <a href="#SCHComp" class="xref">Section 7</a> for more details.</li>
 <li>TV: Target value. A value contained in a Rule that will be matched with the value of a header field.</li>
 <li>Up: Uplink direction for compression/decompression in both sides, from the Dev SCHC C/D to the network SCHC C/D.</li>
-<li>W: Window bit. A SCHC Fragment header field used in ACK-on-Error or ACK-Always mode <a href="#Frag" class="xref">Section 8</a>, which carries the same value for all SCHC Fragments of a window.</li>
+<li>W: Window bit. A SCHC Fragment header field used in ACK-on-Error or ACK-Always mode (see <a href="#Frag" class="xref">Section 8</a>), which carries the same value for all SCHC Fragments of a window.</li>
 <li>Window: A subset of the SCHC Fragments needed to carry a SCHC Packet (see <a href="#Frag" class="xref">Section 8</a>).</li>
 </ul>
 <h1 id="rfc.section.5">
 <a href="#rfc.section.5">5.</a> <a href="#schc-overview" id="schc-overview">SCHC overview</a>
 </h1>
-<p id="rfc.section.5.p.1">SCHC can be abstracted as an adaptation layer between IPv6 and the underlying LPWAN technology. SCHC comprises two sublayers (i.e. the Compression sublayer and the Fragmentation sublayer), as shown in <a href="#Fig-IntroLayers" class="xref">Figure 2</a>.</p>
+<p id="rfc.section.5.p.1">SCHC can be characterized as an adaptation layer between IPv6 and the underlying LPWAN technology. SCHC comprises two sublayers (i.e. the Compression sublayer and the Fragmentation sublayer), as shown in <a href="#Fig-IntroLayers" class="xref">Figure 2</a>.</p>
 <div id="rfc.figure.2"></div>
 <div id="Fig-IntroLayers"></div>
 <pre>
@@ -693,7 +696,7 @@ A packet (e.g. an IPv6 packet)
    technology-specific documents.
 
 </pre>
-<p class="figure">Figure 3: SCHC operations taking place at the sender and the receiver</p>
+<p class="figure">Figure 3: SCHC operations at the SENDER and the RECEIVER</p>
 <p id="rfc.section.5.p.3">The SCHC Packet is composed of the Compressed Header followed by the payload from the original packet (see <a href="#Fig-SCHCpckt" class="xref">Figure 4</a>).  The Compressed Header itself is composed of a Rule ID and a Compression Residue. The Compression Residue may be absent, see <a href="#SCHComp" class="xref">Section 7</a>. Both the Rule ID and the Compression Residue potentially have a variable size, and generally are not a mutiple of bytes in size.</p>
 <div id="rfc.figure.4"></div>
 <div id="Fig-SCHCpckt"></div>
@@ -705,7 +708,7 @@ A packet (e.g. an IPv6 packet)
 
 </pre>
 <p class="figure">Figure 4: SCHC Packet</p>
-<p id="rfc.section.5.p.4">The Fragment Header size is variable and depends on the Fragmentation parameters.  The Fragment payload contains a part of the SCHC Packet Compressed Header, a part of the SCHC Packet Payload or both.  Its size depends on the L2 MTU, see <a href="#Frag" class="xref">Section 8</a>. The SCHC Fragment has the following format:</p>
+<p id="rfc.section.5.p.4">The Fragment Header size is variable and depends on the Fragmentation parameters.  The Fragment payload contains a part of the SCHC Packet Compressed Header, a part of the SCHC Packet Payload or both.  Its size depends on the L2 MTU (see <a href="#Frag" class="xref">Section 8</a>). The SCHC Fragment has the following format:</p>
 <div id="rfc.figure.5"></div>
 <div id="Fig-SCHCfragment"></div>
 <pre>
@@ -748,8 +751,8 @@ A packet (e.g. an IPv6 packet)
 </pre>
 <p class="figure">Figure 7: Architecture</p>
 <p id="rfc.section.5.p.8">SCHC C/D and SCHC F/R are located on both sides of the LPWAN transmission, i.e. on the Dev side and on the Network side.</p>
-<p id="rfc.section.5.p.9">Let&#8217;s describe the operation in the Uplink direction. The Device application packets use IPv6 or IPv6/UDP protocols. Before sending these packets, the Dev compresses their headers using SCHC C/D and, if the SCHC Packet resulting from the compression exceeds the maximum payload size of the underlying LPWAN technology, SCHC F/R is performed (see <a href="#Frag" class="xref">Section 8</a>). The resulting SCHC Fragments are sent to an LPWAN Radio Gateway (RG) which forwards them to a Network Gateway (NGW).  The NGW sends the data to a SCHC F/R and then to the SCHC C/D for decompression. The SCHC F/R and C/D on the Network side can be located in the NGW or somewhere else as long as a tunnel is established between them and the NGW. Note that, for some LPWAN technologies, it MAY be suitable to locate the SCHC F/R functionality nearer the NGW, in order to better deal with time constraints of such technologies.  The SCHC C/D and F/R on both sides MUST share the same set of Rules. After decompression, the packet can be sent over the Internet to one or several LPWAN Application Servers (App).</p>
-<p id="rfc.section.5.p.10">The SCHC C/D and F/R process is symmetrical, therefore the description of the Downlink direction trivially derives from the one above.</p>
+<p id="rfc.section.5.p.9">The operation in the Uplink direction is as follows. The Device application uses IPv6 or IPv6/UDP protocols. Before sending the packets, the Dev compresses their headers using SCHC C/D and, if the SCHC Packet resulting from the compression exceeds the maximum payload size of the underlying LPWAN technology, SCHC F/R is performed (see <a href="#Frag" class="xref">Section 8</a>). The resulting SCHC Fragments are sent to an LPWAN Radio Gateway (RG) which forwards them to a Network Gateway (NGW).  The NGW sends the data to a SCHC F/R and then to the SCHC C/D for decompression. The SCHC F/R and C/D on the Network side can be located in the NGW, or somewhere else as long as a tunnel is established between them and the NGW. Note that, for some LPWAN technologies, it MAY be suitable to locate the SCHC F/R functionality nearer the NGW, in order to better deal with time constraints of such technologies.  The SCHC C/D and F/R on both sides MUST share the same set of Rules. After decompression, the packet can be sent over the Internet to one or several LPWAN Application Servers (App).</p>
+<p id="rfc.section.5.p.10">The SCHC C/D and F/R process is symmetrical, therefore the description of the Downlink direction is symmetrical to the one above.</p>
 <h1 id="rfc.section.6">
 <a href="#rfc.section.6">6.</a> <a href="#rule-id" id="rule-id">Rule ID</a>
 </h1>
@@ -761,17 +764,17 @@ A packet (e.g. an IPv6 packet)
 <ul>
 <li>In the SCHC C/D context, to identify the Rule (i.e., the set of Field Descriptions) that is used to compress a packet header.</li>
 <li>At least one Rule ID MAY be allocated to tagging packets for which SCHC compression was not possible (no matching Rule was found).</li>
-<li>In SCHC F/R, to identify the specific modes and settings of SCHC Fragments being transmitted, and to identify the SCK ACKs, including their modes and settings. Note that in the case of bidirectional communication, at least two Rule ID values are therefore needed for F/R.</li>
+<li>In SCHC F/R, to identify the specific modes and settings of SCHC Fragments being transmitted, and to identify the SCK ACKs, including their modes and settings. Note that when F/R is used for both communication directions, at least two Rule ID values are therefore needed for F/R.</li>
 </ul>
 <h1 id="rfc.section.7">
-<a href="#rfc.section.7">7.</a> <a href="#SCHComp" id="SCHComp">Static Context Header Compression</a>
+<a href="#rfc.section.7">7.</a> <a href="#SCHComp" id="SCHComp">Compression/Decompression</a>
 </h1>
-<p id="rfc.section.7.p.1">In order to perform header compression, this document defines a mechanism called Static Context Header Compression (SCHC), which is based on using context, i.e. a set of Rules to compress or decompress headers. SCHC avoids context synchronization, which is the most bandwidth-consuming operation in other header compression mechanisms such as RoHC <a href="#RFC5795" class="xref">[RFC5795]</a>. Since the nature of packets is highly predictable in LPWAN networks, static contexts MAY be stored beforehand to omit transmitting some information over the air. The contexts MUST be stored at both ends, and they can be learned by a provisioning protocol or by out of band means, or they can be pre-provisioned. The way the contexts are provisioned on both ends is out of the scope of this document.</p>
+<p id="rfc.section.7.p.1">Compression with SCHC is based on using context, i.e. a set of Rules to compress or decompress headers. SCHC avoids context synchronization, which consumes considerable bandwidth in other header compression mechanisms such as RoHC <a href="#RFC5795" class="xref">[RFC5795]</a>. Since the content of packets is highly predictable in LPWAN networks, static contexts MAY be stored beforehand to omit transmitting some information over the air. The contexts MUST be stored at both ends, and they can be learned by a provisioning protocol or by out of band means, or they can be pre-provisioned. The way the contexts are provisioned is out of the scope of this document.</p>
 <h1 id="rfc.section.7.1">
 <a href="#rfc.section.7.1">7.1.</a> <a href="#schc-cd-rules" id="schc-cd-rules">SCHC C/D Rules</a>
 </h1>
-<p id="rfc.section.7.1.p.1">The main idea of the SCHC compression scheme is to transmit the Rule ID to the other end instead of sending known field values. This Rule ID identifies a Rule that provides the closest match to the original packet values. Hence, when a value is known by both ends, it is only necessary to send the corresponding Rule ID over the LPWAN network.  How Rules are generated is out of the scope of this document. The Rules MAY be changed at run-time but the way to do this will be specified in another document.</p>
-<p id="rfc.section.7.1.p.2">The context contains a list of Rules (cf. <a href="#Fig-ctxt" class="xref">Figure 8</a>). Each Rule itself contains a list of Field Descriptions composed of a Field Identifier (FID), a Field Length (FL), a Field Position (FP), a Direction Indicator (DI), a Target Value (TV), a Matching Operator (MO) and a Compression/Decompression Action (CDA).</p>
+<p id="rfc.section.7.1.p.1">The main idea of the SCHC compression scheme is to transmit the Rule ID to the other end instead of sending known field values. This Rule ID identifies a Rule that provides the closest match to the original packet values. Hence, when a value is known by both ends, it is only necessary to send the corresponding Rule ID over the LPWAN network.  The manner by which Rules are generated is out of the scope of this document. The Rules MAY be changed at run-time but the mechanism is out of scope of this document.</p>
+<p id="rfc.section.7.1.p.2">The context contains a list of Rules (see <a href="#Fig-ctxt" class="xref">Figure 8</a>). Each Rule itself contains a list of Field Descriptions composed of a Field Identifier (FID), a Field Length (FL), a Field Position (FP), a Direction Indicator (DI), a Target Value (TV), a Matching Operator (MO) and a Compression/Decompression Action (CDA).</p>
 <div id="rfc.figure.8"></div>
 <div id="Fig-ctxt"></div>
 <pre>
@@ -794,7 +797,7 @@ A packet (e.g. an IPv6 packet)
 \-----------------------------------------------------------------/
 
 </pre>
-<p class="figure">Figure 8: Compression/Decompression Context</p>
+<p class="figure">Figure 8: A Compression/Decompression Context</p>
 <p id="rfc.section.7.1.p.3">A Rule does not describe how to parse a packet header to find each field. This MUST be known from the compressor/decompressor. Rules only describe the compression/decompression behavior for each header field. In a Rule, the Field Descriptions are listed in the order in which the fields appear in the packet header.</p>
 <p id="rfc.section.7.1.p.4">A Rule also describes what Compression Residue is sent. The Compression Residue is assembled by concatenating the residues for each field, in the order the Field Descriptions appear in the Rule.</p>
 <p id="rfc.section.7.1.p.5">The Context describes the header fields and its values with the following entries:</p>
@@ -810,14 +813,14 @@ A packet (e.g. an IPv6 packet)
 <li>BIDIRECTIONAL (Bi): this Field Description is applicable to packets travelling both Up and Dw.</li>
 </ul>
 </li>
-<li>Target Value (TV) is the value used to make the match with the packet header field. The Target Value can be of any type (integer, strings, etc.). For instance, it can be a single value or a more complex structure (array, list, etc.), such as a JSON or a CBOR structure.</li>
+<li>Target Value (TV) is the value used to match against the packet header field. The Target Value can be of any type (integer, strings, etc.). It can be a single value or a more complex structure (array, list, etc.), such as a JSON or a CBOR structure.</li>
 <li>Matching Operator (MO) is the operator used to match the Field Value and the Target Value. The Matching Operator may require some parameters. MO is only used during the compression phase. The set of MOs defined in this document can be found in <a href="#chap-MO" class="xref">Section 7.4</a>.</li>
 <li>Compression Decompression Action (CDA) describes the compression and decompression processes to be performed after the MO is applied. Some CDAs MAY require parameter values for their operation. CDAs are used in both the compression and the decompression functions. The set of CDAs defined in this document can be found in <a href="#chap-CDA" class="xref">Section 7.5</a>.</li>
 </ul>
 <h1 id="rfc.section.7.2">
 <a href="#rfc.section.7.2">7.2.</a> <a href="#IDComp" id="IDComp">Rule ID for SCHC C/D</a>
 </h1>
-<p id="rfc.section.7.2.p.1">Rule IDs are sent by the compression function in one side and are received for the decompression function in the other side.  In SCHC C/D, the Rule IDs are specific to a Dev. Hence, multiple Dev instances MAY use the same Rule ID to define different header compression contexts. To identify the correct Rule ID, the SCHC C/D needs to correlate the Rule ID with the Dev identifier to find the appropriate Rule to be applied.</p>
+<p id="rfc.section.7.2.p.1">Rule IDs are sent by the compression function in one side and are received for the decompression function in the other side.  In SCHC C/D, the Rule IDs are specific to a Dev. Hence, multiple Dev instances MAY use the same Rule ID to define different header compression contexts. To identify the correct Rule ID, the SCHC C/D needs to associate the Rule ID with the Dev identifier to find the appropriate Rule to be applied.</p>
 <h1 id="rfc.section.7.3">
 <a href="#rfc.section.7.3">7.3.</a> <a href="#packet-processing" id="packet-processing">Packet processing</a>
 </h1>
@@ -825,15 +828,15 @@ A packet (e.g. an IPv6 packet)
 <p></p>
 
 <ul>
-<li>Compression Rule selection: The goal is to identify which Rule(s) will be used to compress the packet&#8217;s headers. When doing decompression, on the network side the SCHC C/D needs to find the correct Rule based on the L2 address and in this way, it can use the DevIID and the Rule ID. On the Dev side, only the Rule ID is needed to identify the correct Rule since the Dev only holds Rules that apply to itself. The Rule will be selected by matching the Fields Descriptions to the packet header as described below. When the selection of a Rule is done, this Rule is used to compress the header. The detailed steps for compression Rule selection are the following:  <ul>
-<li>The first step is to choose the Field Descriptions by their direction, using the Direction Indicator (DI). A Field Description that does not correspond to the appropriate DI will be ignored. If all the fields of the packet do not have a Field Description with the correct DI, the Rule is discarded and SCHC C/D proceeds to explore the next Rule.</li>
+<li>Compression Rule selection: The goal is to identify which Rule(s) will be used to compress the packet&#8217;s headers. When performing decompression, on the network side the SCHC C/D needs to find the correct Rule based on the L2 address; in this way, it can use the DevIID and the Rule ID. On the Dev side, only the Rule ID is needed to identify the correct Rule since the Dev typically only holds Rules that apply to itself. The Rule will be selected by matching the Fields Descriptions to the packet header as described below. When the selection of a Rule is done, this Rule is used to compress the header. The detailed steps for compression Rule selection are the following:  <ul>
+<li>The first step is to choose the Field Descriptions by their direction, using the Direction Indicator (DI). A Field Description that does not correspond to the appropriate DI will be ignored. If all the fields of the packet do not have a Field Description with the correct DI, the Rule is discarded and SCHC C/D proceeds to consider the next Rule.</li>
 <li>When the DI has matched, then the next step is to identify the fields according to Field Position (FP). If FP does not correspond, the Rule is not used and the SCHC C/D proceeds to consider the next Rule.</li>
 <li>Once the DI and the FP correspond to the header information, each packet field&#8217;s value is then compared to the corresponding Target Value (TV) stored in the Rule for that specific field using the matching operator (MO).      <br><br> If all the fields in the packet&#8217;s header satisfy all the matching operators (MO) of a Rule (i.e. all MO results are True), the fields of the header are then compressed according to the Compression/Decompression Actions (CDAs) and a compressed header (with possibly a Compression Residue) SHOULD be obtained. Otherwise, the next Rule is tested.</li>
-<li>If no eligible Rule is found, then the header MUST be sent without compression. This MAY require the use of the SCHC F/R process.</li>
+<li>If no eligible Rule is found, then the header MUST be sent without compression (but may require the use of the SCHC F/R process).</li>
 </ul>
 </li>
-<li>Sending: If an eligible Rule is found, the Rule ID is sent to the other end followed by the Compression Residue (which could be empty) and directly followed by the payload. The Compression Residue is the concatenation of the Compression Residues for each field according to the CDAs for that Rule. The way the Rule ID is sent depends on the specific underlying LPWAN technology. For example, it can be either included in an L2 header or sent in the first byte of the L2 payload. (Cf. <a href="#Fig-FormatPckt" class="xref">Figure 9</a>). This process will be specified in the LPWAN technology-specific document and is out of the scope of the present document. On LPWAN technologies that are byte-oriented, the compressed header concatenated with the original packet payload is padded to a multiple of 8 bits, if needed. See <a href="#Padding" class="xref">Section 9</a> for details.</li>
-<li>Decompression: When doing decompression, on the network side the SCHC C/D needs to find the correct Rule based on the L2 address and in this way, it can use the DevIID and the Rule ID. On the Dev side, only the Rule ID is needed to identify the correct Rule since the Dev only holds Rules that apply to itself.  <br><br> The receiver identifies the sender through its device-id (e.g. MAC address, if exists) and selects the appropriate Rule from the Rule ID. If a source identifier is present in the L2 technology, it is used to select the Rule ID. This Rule describes the compressed header format and associates the values to the header fields.  The receiver applies the CDA action to reconstruct the original header fields. The CDA application order can be different from the order given by the Rule. For instance, Compute-* SHOULD be applied at the end, after all the other CDAs.</li>
+<li>Sending: If an eligible Rule is found, the Rule ID is sent to the other end followed by the Compression Residue (which could be empty) and directly followed by the payload. The Compression Residue is the concatenation of the Compression Residues for each field according to the CDAs for that Rule. The way the Rule ID is sent depends on the specific underlying LPWAN technology. For example, it can be either included in an L2 header or sent in the first byte of the L2 payload. (see <a href="#Fig-FormatPckt" class="xref">Figure 9</a>). This process will be specified in the LPWAN technology-specific document and is out of the scope of the present document. On LPWAN technologies that are byte-oriented, the compressed header concatenated with the original packet payload is padded to a multiple of 8 bits, if needed. See <a href="#Padding" class="xref">Section 9</a> for details.</li>
+<li>Decompression: When doing decompression, on the network side the SCHC C/D needs to find the correct Rule based on the L2 address and in this way, it can use the DevIID and the Rule ID. On the Dev side, only the Rule ID is needed to identify the correct Rule since the Dev only holds Rules that apply to itself.  <br><br> The receiver identifies the sender through its device-id or source identifier (e.g. MAC address, if it exists) and selects the Rule using the Rule ID. This Rule describes the compressed header format and associates the values to the header fields.  The receiver applies the CDA action to reconstruct the original header fields. The CDA application order can be different from the order given by the Rule. For instance, Compute-* SHOULD be applied at the end, after all the other CDAs.</li>
 </ul>
 <div id="rfc.figure.9"></div>
 <div id="Fig-FormatPckt"></div>
@@ -849,12 +852,12 @@ A packet (e.g. an IPv6 packet)
 <h1 id="rfc.section.7.4">
 <a href="#rfc.section.7.4">7.4.</a> <a href="#chap-MO" id="chap-MO">Matching operators</a>
 </h1>
-<p id="rfc.section.7.4.p.1">Matching Operators (MOs) are functions used by both SCHC C/D endpoints involved in the header compression/decompression. They are not typed and can be indifferently applied to integer, string or any other data type. The result of the operation can either be True or False. MOs are defined as follows:</p>
+<p id="rfc.section.7.4.p.1">Matching Operators (MOs) are functions used by both SCHC C/D endpoints involved in the header compression/decompression. They are not typed and can be applied to integer, string or any other data type. The result of the operation can either be True or False. MOs are defined as follows:</p>
 <p></p>
 
 <ul>
-<li>equal: The match result is True if a field value in a packet and the value in the TV are equal.</li>
-<li>ignore: No check is done between a field value in a packet and a TV in the Rule. The result of the matching is always true.</li>
+<li>equal: The match result is True if the field value in the packet matches the TV.</li>
+<li>ignore: No check is done between the field value in the packet and the TV in the Rule. The result of the matching is always true.</li>
 <li>MSB(x): A match is obtained if the most significant x bits of the packet header field value are equal to the TV in the Rule. The x parameter of the MSB MO indicates how many bits are involved in the comparison. If the FL is described as variable, the length must be a multiple of the unit. For example, x must be multiple of 8 if the unit of the variable length is in bytes.</li>
 <li>match-mapping: With match-mapping, the Target Value is a list of values. Each value of the list is identified by a short ID (or index). Compression is achieved by sending the index instead of the original header field value. This operator matches if the header field value is equal to one of the values in the target list.</li>
 </ul>
@@ -881,49 +884,52 @@ A packet (e.g. an IPv6 packet)
 
 </pre>
 <p class="figure">Figure 10: Compression and Decompression Actions</p>
-<p><a href="#Fig-function" class="xref">Figure 10</a> summarizes the basic functions that can be used to compress and decompress a field. The first column lists the actions name. The second and third columns outline the reciprocal compression/decompression behavior for each action.</p>
-<p id="rfc.section.7.5.p.3">Compression is done in order that Fields Descriptions appear in a Rule. The result of each Compression/Decompression Action is appended to the working Compression Residue in that same order. The receiver knows the size of each compressed field which can be given by the Rule or MAY be sent with the compressed header.</p>
-<p id="rfc.section.7.5.p.4">If the field is identified as being variable in the Field Description, then the size of the Compression Residue value (using the unit defined in the FL) MUST be sent first using the following coding:</p>
+<p><a href="#Fig-function" class="xref">Figure 10</a> summarizes the basic actions that can be used to compress and decompress a field. The first column shows the action&#8217;s name. The second and third columns show the reciprocal compression/decompression behavior for each action.</p>
+<p id="rfc.section.7.5.p.3">Compression is done in the order that the Field Descriptions appear in a Rule. The result of each Compression/Decompression Action is appended to the accumulated Compression Residue in that same order. The receiver knows the size of each compressed field, which can be given by the Rule or MAY be sent with the compressed header.</p>
+<h1 id="rfc.section.7.5.1">
+<a href="#rfc.section.7.5.1">7.5.1.</a> <a href="#var-length-field" id="var-length-field">processing variable-length fields</a>
+</h1>
+<p id="rfc.section.7.5.1.p.1">If the field is identified in the Field Description as being of variable size, then the size of the Compression Residue value (using the unit defined in the FL) MUST first be sent as follows:</p>
 <p></p>
 
 <ul>
-<li>If the size is between 0 and 14, it is sent as a 4-bits integer.</li>
-<li>For values between 15 and 254, the first 4 bits sent are set to 1 and the size is sent using 8 bits integer.</li>
-<li>For higher values of size, the first 12 bits are set to 1 and the next two bytes contain the size value as a 16 bits integer.</li>
+<li>If the size is between 0 and 14, it is sent as a 4-bits unsigned integer.</li>
+<li>For values between 15 and 254, 0b1111 is transmitted and then the size is sent as an 8 bits unsigned integer.</li>
+<li>For larger values of the size, 0xffff is transmitted and then the next two bytes contain the size value as a 16 bits unsigned integer.</li>
 </ul>
-<p id="rfc.section.7.5.p.6">If a field is not present in the packet but exists in the Rule and its FL is specified as being variable, size 0 MUST be sent to denote its absence.</p>
-<h1 id="rfc.section.7.5.1">
-<a href="#rfc.section.7.5.1">7.5.1.</a> <a href="#not-sent-cda" id="not-sent-cda">not-sent CDA</a>
-</h1>
-<p id="rfc.section.7.5.1.p.1">The not-sent function is generally used when the field value is specified in a Rule and therefore known by both the Compressor and the Decompressor. This action is generally used with the &#8220;equal&#8221; MO. If MO is &#8220;ignore&#8221;, there is a risk to have a decompressed field value different from the original field that was compressed.</p>
-<p id="rfc.section.7.5.1.p.2">The compressor does not send any Compression Residue for a field on which not-sent compression is applied.</p>
-<p id="rfc.section.7.5.1.p.3">The decompressor restores the field value with the Target Value stored in the matched Rule identified by the received Rule ID.</p>
+<p id="rfc.section.7.5.1.p.3">If a field is not present in the packet but exists in the Rule and its FL is specified as being variable, size 0 MUST be sent to denote its absence.</p>
 <h1 id="rfc.section.7.5.2">
-<a href="#rfc.section.7.5.2">7.5.2.</a> <a href="#value-sent-cda" id="value-sent-cda">value-sent CDA</a>
+<a href="#rfc.section.7.5.2">7.5.2.</a> <a href="#not-sent-cda" id="not-sent-cda">not-sent CDA</a>
 </h1>
-<p id="rfc.section.7.5.2.p.1">The value-sent action is generally used when the field value is not known by both the Compressor and the Decompressor. The value is sent as a residue in the compressed message header. Both Compressor and Decompressor MUST know the size of the field, either implicitly (the size is known by both sides) or by explicitly indicating the length in the Compression Residue, as defined in <a href="#chap-CDA" class="xref">Section 7.5</a>. This function is generally used with the &#8220;ignore&#8221; MO.</p>
+<p id="rfc.section.7.5.2.p.1">The not-sent action is generally used when the field value is specified in a Rule and therefore known by both the Compressor and the Decompressor. This action SHOULD be used with the &#8220;equal&#8221; MO. If MO is &#8220;ignore&#8221;, there is a risk to have a decompressed field value different from the original field that was compressed.</p>
+<p id="rfc.section.7.5.2.p.2">The compressor does not send any Compression Residue for a field on which not-sent compression is applied.</p>
+<p id="rfc.section.7.5.2.p.3">The decompressor restores the field value with the Target Value stored in the matched Rule identified by the received Rule ID.</p>
 <h1 id="rfc.section.7.5.3">
-<a href="#rfc.section.7.5.3">7.5.3.</a> <a href="#mapping-sent-cda" id="mapping-sent-cda">mapping-sent CDA</a>
+<a href="#rfc.section.7.5.3">7.5.3.</a> <a href="#value-sent-cda" id="value-sent-cda">value-sent CDA</a>
 </h1>
-<p id="rfc.section.7.5.3.p.1">The mapping-sent is used to send a smaller index (the index into the Target Value list of values) instead of the original value. This function is used together with the &#8220;match-mapping&#8221; MO.</p>
-<p id="rfc.section.7.5.3.p.2">On the compressor side, the match-mapping Matching Operator searches the TV for a match with the header field value and the mapping-sent CDA appends the corresponding index to the Compression Residue to be sent.  On the decompressor side, the CDA uses the received index to restore the field value by looking up the list in the TV.</p>
-<p id="rfc.section.7.5.3.p.3">The number of bits sent is the minimal size for coding all the possible indices.</p>
+<p id="rfc.section.7.5.3.p.1">The value-sent action is generally used when the field value is not known by both the Compressor and the Decompressor. The value is sent as a residue in the compressed message header. Both Compressor and Decompressor MUST know the size of the field, either implicitly (the size is known by both sides) or by explicitly indicating the length in the Compression Residue, as defined in <a href="#var-length-field" class="xref">Section 7.5.1</a>. This action is generally used with the &#8220;ignore&#8221; MO.</p>
 <h1 id="rfc.section.7.5.4">
-<a href="#rfc.section.7.5.4">7.5.4.</a> <a href="#lsb-cda" id="lsb-cda">LSB CDA</a>
+<a href="#rfc.section.7.5.4">7.5.4.</a> <a href="#mapping-sent-cda" id="mapping-sent-cda">mapping-sent CDA</a>
 </h1>
-<p id="rfc.section.7.5.4.p.1">The LSB action is used together with the &#8220;MSB(x)&#8221; MO to avoid sending the most significant part of the packet field if that part is already known by the receiving end.  The number of bits sent is the original header field length minus the length specified in the MSB(x) MO.</p>
-<p id="rfc.section.7.5.4.p.2">The compressor sends the Least Significant Bits (e.g. LSB of the length field). The decompressor concatenates the x most significant bits of Target Value and the received residue.</p>
-<p id="rfc.section.7.5.4.p.3">If this action needs to be done on a variable length field, the size of the Compression Residue in bytes MUST be sent as described in <a href="#chap-CDA" class="xref">Section 7.5</a>.</p>
+<p id="rfc.section.7.5.4.p.1">The mapping-sent action is used to send an index (the index into the Target Value list of values) instead of the original value. This action is used together with the &#8220;match-mapping&#8221; MO.</p>
+<p id="rfc.section.7.5.4.p.2">On the compressor side, the match-mapping Matching Operator searches the TV for a match with the header field value and the mapping-sent CDA appends the corresponding index to the Compression Residue to be sent.  On the decompressor side, the CDA uses the received index to restore the field value by looking up the list in the TV.</p>
+<p id="rfc.section.7.5.4.p.3">The number of bits sent is the minimal size for coding all the possible indices.</p>
 <h1 id="rfc.section.7.5.5">
-<a href="#rfc.section.7.5.5">7.5.5.</a> <a href="#deviid-appiid-cda" id="deviid-appiid-cda">DevIID, AppIID CDA</a>
+<a href="#rfc.section.7.5.5">7.5.5.</a> <a href="#lsb-cda" id="lsb-cda">LSB CDA</a>
 </h1>
-<p id="rfc.section.7.5.5.p.1">These functions are used to process respectively the Dev and the App Interface Identifiers (DevIID and AppIID) of the IPv6 addresses. AppIID CDA is less common since most current LPWAN technologies frames contain a single L2 address, which is the Dev&#8217;s address.</p>
-<p id="rfc.section.7.5.5.p.2">The IID value MAY be computed from the Device ID present in the L2 header, or from some other stable identifier. The computation is specific to each LPWAN technology and MAY depend on the Device ID size.</p>
-<p id="rfc.section.7.5.5.p.3">In the downlink direction (Dw), at the compressor, this DevIID CDA may be used to generate the L2 addresses on the LPWAN, based on the packet destination address.</p>
+<p id="rfc.section.7.5.5.p.1">The LSB action is used together with the &#8220;MSB(x)&#8221; MO to avoid sending the most significant part of the packet field if that part is already known by the receiving end.  The number of bits sent is the original header field length minus the length specified in the MSB(x) MO.</p>
+<p id="rfc.section.7.5.5.p.2">The compressor sends the Least Significant Bits (e.g. LSB of the length field). The decompressor concatenates the x most significant bits of Target Value and the received residue.</p>
+<p id="rfc.section.7.5.5.p.3">If this action needs to be done on a variable length field, the size of the Compression Residue in bytes MUST be sent as described in <a href="#var-length-field" class="xref">Section 7.5.1</a>.</p>
 <h1 id="rfc.section.7.5.6">
-<a href="#rfc.section.7.5.6">7.5.6.</a> <a href="#compute-" id="compute-">Compute-*</a>
+<a href="#rfc.section.7.5.6">7.5.6.</a> <a href="#deviid-appiid-cda" id="deviid-appiid-cda">DevIID, AppIID CDA</a>
 </h1>
-<p id="rfc.section.7.5.6.p.1">Some fields are elided during compression and reconstructed during decompression. This is the case for length and checksum, so:</p>
+<p id="rfc.section.7.5.6.p.1">These actions are used to process respectively the Dev and the App Interface Identifiers (DevIID and AppIID) of the IPv6 addresses. AppIID CDA is less common since most current LPWAN technologies frames contain a single L2 address, which is the Dev&#8217;s address.</p>
+<p id="rfc.section.7.5.6.p.2">The IID value MAY be computed from the Device ID present in the L2 header, or from some other stable identifier. The computation is specific to each LPWAN technology and MAY depend on the Device ID size.</p>
+<p id="rfc.section.7.5.6.p.3">In the downlink direction (Dw), at the compressor, the DevIID CDA may be used to generate the L2 addresses on the LPWAN, based on the packet&#8217;s Destination Address.</p>
+<h1 id="rfc.section.7.5.7">
+<a href="#rfc.section.7.5.7">7.5.7.</a> <a href="#compute-" id="compute-">Compute-*</a>
+</h1>
+<p id="rfc.section.7.5.7.p.1">Some fields may be elided during compression and reconstructed during decompression. This is the case for length and checksum, so:</p>
 <p></p>
 
 <ul>
@@ -931,7 +937,7 @@ A packet (e.g. an IPv6 packet)
 <li>compute-checksum: computes a checksum from the information already received by the SCHC C/D. This field MAY be used to compute UDP checksum.</li>
 </ul>
 <h1 id="rfc.section.8">
-<a href="#rfc.section.8">8.</a> <a href="#Frag" id="Frag">Fragmentation</a>
+<a href="#rfc.section.8">8.</a> <a href="#Frag" id="Frag">Fragmentation/Reassembly</a>
 </h1>
 <h1 id="rfc.section.8.1">
 <a href="#rfc.section.8.1">8.1.</a> <a href="#overview" id="overview">Overview</a>
