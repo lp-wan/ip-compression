@@ -969,11 +969,18 @@ A packet (e.g. an IPv6 packet)
 <h1 id="rfc.section.8.1">
 <a href="#rfc.section.8.1">8.1.</a> <a href="#overview" id="overview">Overview</a>
 </h1>
-<p id="rfc.section.8.1.p.1">In LPWAN technologies, the L2 MTU typically ranges from tens to hundreds of bytes. The SCHC F/R (Fragmentation /Reassembly) MAY be used either because after applying SCHC C/D or when SCHC C/D is not possible the entire SCHC Packet size still exceeds the L2 MTU.</p>
-<p id="rfc.section.8.1.p.2">The SCHC F/R functionality defined in this document has been designed under the assumption that data unit out-of-sequence delivery will not happen between the entity performing fragmentation and the entity performing reassembly. This assumption allows reducing the complexity and overhead of the SCHC F/R mechanism.</p>
-<p id="rfc.section.8.1.p.3">This document also assumes that the L2 MTU value does not change while a fragmented SCHC Packet is being transmitted.</p>
-<p id="rfc.section.8.1.p.4">To adapt the SCHC F/R to the capabilities of LPWAN technologies, it is required to enable optional SCHC Fragment retransmission and to allow for a range of reliability options for sending the SCHC Fragments. This document does not make any decision with regard to which SCHC Fragment delivery reliability mode will be used over a specific LPWAN technology. These details will be defined in other technology-specific documents.</p>
-<p id="rfc.section.8.1.p.5">SCHC F/R uses the knowledge of the L2 Word size (see <a href="#Term" class="xref">Section 4</a>) to encode some messages. Therefore, SCHC MUST know the L2 Word size.  SCHC F/R generates SCHC Fragments and SCHC ACKs that are, for most of them, multiples of L2 Words.  The padding overhead is kept to the absolute minimum. See <a href="#Padding" class="xref">Section 9</a>.</p>
+<p id="rfc.section.8.1.p.1">In LPWAN technologies, the L2 MTU typically ranges from tens to hundreds of bytes.  Some of these technologies do not have an internal fragmentation/reassembly mechanism.</p>
+<p id="rfc.section.8.1.p.2">The SCHC Fragmentation/Reassembly (SCHC F/R) functionality is offered as an option for such LPWAN technologies to cope with the IPv6 MTU requirement of 1280 bytes <a href="#RFC8200" class="xref">[RFC8200]</a>.  It is optional to implement. If it is not needed, its description can be safely ignored.</p>
+<p id="rfc.section.8.1.p.3">It has been designed under the following assumptions</p>
+<p></p>
+
+<ul>
+<li>Data unit out-of-sequence delivery does not occur between the entity performing fragmentation and the entity performing reassembly</li>
+<li>The L2 MTU value does not change while a fragmented SCHC Packet is being transmitted.</li>
+</ul>
+<p id="rfc.section.8.1.p.5">These assumptions allows reducing the complexity and overhead of the SCHC F/R mechanism.</p>
+<p id="rfc.section.8.1.p.6">This specification includes several SCHC F/R modes, which allow for a range of reliability options such as optional SCHC Fragment retransmission.  More modes may be defined in the future.  This document does not make any decision with regard to which mode will be used over a specific LPWAN technology. These details will be defined in other technology-specific documents.</p>
+<p id="rfc.section.8.1.p.7">SCHC F/R uses the knowledge of the L2 Word size (see <a href="#Term" class="xref">Section 4</a>) to encode some messages. Therefore, SCHC MUST know the L2 Word size.  SCHC F/R usually generates SCHC Fragments and SCHC ACKs that are multiples of L2 Words.  The padding overhead is kept to the absolute minimum (see <a href="#Padding" class="xref">Section 9</a>).</p>
 <h1 id="rfc.section.8.2">
 <a href="#rfc.section.8.2">8.2.</a> <a href="#FragTools" id="FragTools">Fragmentation Tools</a>
 </h1>

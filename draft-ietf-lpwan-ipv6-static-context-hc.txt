@@ -1127,32 +1127,38 @@ Internet-Draft                 LPWAN SCHC                    August 2018
 8.1.  Overview
 
    In LPWAN technologies, the L2 MTU typically ranges from tens to
-   hundreds of bytes.  The SCHC F/R (Fragmentation /Reassembly) MAY be
-   used either because after applying SCHC C/D or when SCHC C/D is not
-   possible the entire SCHC Packet size still exceeds the L2 MTU.
+   hundreds of bytes.  Some of these technologies do not have an
+   internal fragmentation/reassembly mechanism.
 
-   The SCHC F/R functionality defined in this document has been designed
-   under the assumption that data unit out-of-sequence delivery will not
-   happen between the entity performing fragmentation and the entity
-   performing reassembly.  This assumption allows reducing the
-   complexity and overhead of the SCHC F/R mechanism.
+   The SCHC Fragmentation/Reassembly (SCHC F/R) functionality is offered
+   as an option for such LPWAN technologies to cope with the IPv6 MTU
+   requirement of 1280 bytes [RFC8200].  It is optional to implement.
+   If it is not needed, its description can be safely ignored.
 
-   This document also assumes that the L2 MTU value does not change
-   while a fragmented SCHC Packet is being transmitted.
+   It has been designed under the following assumptions
 
-   To adapt the SCHC F/R to the capabilities of LPWAN technologies, it
-   is required to enable optional SCHC Fragment retransmission and to
-   allow for a range of reliability options for sending the SCHC
-   Fragments.  This document does not make any decision with regard to
-   which SCHC Fragment delivery reliability mode will be used over a
-   specific LPWAN technology.  These details will be defined in other
-   technology-specific documents.
+   o  Data unit out-of-sequence delivery does not occur between the
+      entity performing fragmentation and the entity performing
+      reassembly
+
+   o  The L2 MTU value does not change while a fragmented SCHC Packet is
+      being transmitted.
+
+   These assumptions allows reducing the complexity and overhead of the
+   SCHC F/R mechanism.
+
+   This specification includes several SCHC F/R modes, which allow for a
+   range of reliability options such as optional SCHC Fragment
+   retransmission.  More modes may be defined in the future.  This
+   document does not make any decision with regard to which mode will be
+   used over a specific LPWAN technology.  These details will be defined
+   in other technology-specific documents.
 
    SCHC F/R uses the knowledge of the L2 Word size (see Section 4) to
    encode some messages.  Therefore, SCHC MUST know the L2 Word size.
-   SCHC F/R generates SCHC Fragments and SCHC ACKs that are, for most of
-   them, multiples of L2 Words.  The padding overhead is kept to the
-   absolute minimum.  See Section 9.
+   SCHC F/R usually generates SCHC Fragments and SCHC ACKs that are
+   multiples of L2 Words.  The padding overhead is kept to the absolute
+   minimum (see Section 9).
 
 8.2.  Fragmentation Tools
 
@@ -1164,12 +1170,6 @@ Internet-Draft                 LPWAN SCHC                    August 2018
    o  Rule ID.  The Rule ID is present in the SCHC Fragment header and
       in the SCHC ACK header formats.  The Rule ID in a SCHC Fragment
       header is used to identify that a SCHC Fragment is being carried,
-      which SCHC F/R reliability mode is used and which window size is
-      used.  The Rule ID in the SCHC Fragment header also allows
-      interleaving non-fragmented SCHC Packets and SCHC Fragments that
-      carry other SCHC Packets.  The Rule ID in a SCHC ACK identifies
-      the message as a SCHC ACK.
-
 
 
 
@@ -1177,6 +1177,12 @@ Minaburo, et al.          Expires March 2, 2019                [Page 21]
 
 Internet-Draft                 LPWAN SCHC                    August 2018
 
+
+      which SCHC F/R reliability mode is used and which window size is
+      used.  The Rule ID in the SCHC Fragment header also allows
+      interleaving non-fragmented SCHC Packets and SCHC Fragments that
+      carry other SCHC Packets.  The Rule ID in a SCHC ACK identifies
+      the message as a SCHC ACK.
 
    o  Fragment Compressed Number (FCN).  The FCN is included in all SCHC
       Fragments.  This field can be understood as a truncated, efficient
@@ -1220,12 +1226,6 @@ Internet-Draft                 LPWAN SCHC                    August 2018
 
    o  Datagram Tag (DTag).  The DTag field, if present, is set to the
       same value for all SCHC Fragments carrying the same SCHC
-      packet, and to different values for different SCHC Packets.  Using
-      this field, the sender can interleave fragments from different
-      SCHC Packets, while the receiver can still tell them apart.  In
-      the SCHC Fragment formats, the size of the DTag field is T bits,
-      which MAY be set to a value greater than or equal to 0 bits.  For
-      each new SCHC Packet processed by the sender, DTag MUST be
 
 
 
@@ -1234,6 +1234,12 @@ Minaburo, et al.          Expires March 2, 2019                [Page 22]
 Internet-Draft                 LPWAN SCHC                    August 2018
 
 
+      packet, and to different values for different SCHC Packets.  Using
+      this field, the sender can interleave fragments from different
+      SCHC Packets, while the receiver can still tell them apart.  In
+      the SCHC Fragment formats, the size of the DTag field is T bits,
+      which MAY be set to a value greater than or equal to 0 bits.  For
+      each new SCHC Packet processed by the sender, DTag MUST be
       sequentially increased, from 0 to 2^T - 1 wrapping back from 2^T -
       1 to 0.  In the SCHC ACK format, DTag carries the same value as
       the DTag field in the SCHC Fragments for which this SCHC ACK is
@@ -1277,12 +1283,6 @@ Internet-Draft                 LPWAN SCHC                    August 2018
       value of 1 represents a positive MIC check at the receiver side
       (i.e. the MIC computed by the receiver matches the received MIC).
 
-   o  Retransmission Timer.  A SCHC Fragment sender uses it after the
-      transmission of a window to detect a transmission error of the
-      SCHC ACK corresponding to this window.  Depending on the
-      reliability mode, it will lead to a request a SCHC ACK
-      retransmission (in ACK-Always mode) or it will trigger the
-
 
 
 Minaburo, et al.          Expires March 2, 2019                [Page 23]
@@ -1290,6 +1290,11 @@ Minaburo, et al.          Expires March 2, 2019                [Page 23]
 Internet-Draft                 LPWAN SCHC                    August 2018
 
 
+   o  Retransmission Timer.  A SCHC Fragment sender uses it after the
+      transmission of a window to detect a transmission error of the
+      SCHC ACK corresponding to this window.  Depending on the
+      reliability mode, it will lead to a request a SCHC ACK
+      retransmission (in ACK-Always mode) or it will trigger the
       transmission of the next window (in ACK-on-Error mode).  The
       duration of this timer is not defined in this document and MUST be
       defined in the corresponding technology-specific documents.
@@ -1332,11 +1337,6 @@ Internet-Draft                 LPWAN SCHC                    August 2018
       the sender or the receiver may use the Abort.  When the receiver
       needs to abort the on-going fragmented SCHC Packet transmission,
       it sends the Receiver-Abort format.  When the sender needs to
-      abort the transmission, it sends the Sender-Abort format.  None of
-      the Aborts are acknowledged.
-
-
-
 
 
 
@@ -1345,6 +1345,9 @@ Minaburo, et al.          Expires March 2, 2019                [Page 24]
 
 Internet-Draft                 LPWAN SCHC                    August 2018
 
+
+      abort the transmission, it sends the Sender-Abort format.  None of
+      the Aborts are acknowledged.
 
 8.3.  Reliability modes
 
@@ -1391,9 +1394,6 @@ Internet-Draft                 LPWAN SCHC                    August 2018
       all the SCHC Fragments of the last window have been correctly
       received.  The SCHC ACK gives the state of all the SCHC Fragments
       of the current window (received or lost).  Upon a SCHC ACK
-      reception, the sender retransmits any lost SCHC Fragments based on
-      the SCHC ACK.  If a SCHC ACK is not transmitted back by the
-      receiver at the end of a window, the sender assumes that all SCHC
 
 
 
@@ -1402,6 +1402,9 @@ Minaburo, et al.          Expires March 2, 2019                [Page 25]
 Internet-Draft                 LPWAN SCHC                    August 2018
 
 
+      reception, the sender retransmits any lost SCHC Fragments based on
+      the SCHC ACK.  If a SCHC ACK is not transmitted back by the
+      receiver at the end of a window, the sender assumes that all SCHC
       Fragments have been correctly received.  When a SCHC ACK is lost,
       the sender assumes that all SCHC Fragments covered by the lost
       SCHC ACK have been successfully delivered, so the sender continues
@@ -1445,9 +1448,6 @@ Internet-Draft                 LPWAN SCHC                    August 2018
 
    Figure 11: SCHC Fragment general format.  Presence of a padding field
                                 is optional
-
-
-
 
 
 
