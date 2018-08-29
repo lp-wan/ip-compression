@@ -81,11 +81,11 @@ Header compression is needed for efficient Internet connectivity to the node wit
 
 * Because devices embed built-in applications, the traffic flows to be compressed are known in advance. Indeed, new applications cannot be easily installed in LPWAN devices, as they would in computers or smartphones.
 
-The Static Context Header Compression (SCHC) is defined for this environment. SCHC uses a context in which information about header fieds is stored. This context is static: the values of the header fields do not change over time. This avoids complex resynchronization mechanisms, that would be incompatible with LPWAN characteristics. In most cases, a small context identifier is enough to represent the full IPv6/UDP headers. The SCHC header compression mechanism is independent of the specific LPWAN technology over which it is used.
+SCHC compression uses a context in which information about header fieds is stored. This context is static: the values of the header fields do not change over time. This avoids complex resynchronization mechanisms, that would be incompatible with LPWAN characteristics. In most cases, a small context identifier is enough to represent the full IPv6/UDP headers. The SCHC header compression mechanism is independent of the specific LPWAN technology over which it is used.
 
 LPWAN technologies impose some strict limitations on traffic. For instance, devices are sleeping most of the time and may receive data during short periods of time after transmission to preserve battery. LPWAN technologies are also characterized
 by a greatly reduced data unit and/or payload size (see {{RFC8376}}).  However, some LPWAN technologies do not provide fragmentation functionality; to support the IPv6 MTU requirement of 1280 bytes {{RFC8200}}, they require a fragmentation protocol at the adaptation layer below IPv6.
-Accordingly, this document defines a fragmentation/reassembly mechanism for LPWAN technologies to supports the IPv6 MTU. The mechanism has been designed under the assumption that there is no out-of-sequence delivery of data units between the entity performing fragmentation and the entity performing reassembly.
+Accordingly, this document defines an fragmentation/reassembly mechanism for LPWAN technologies to supports the IPv6 MTU. Its implementation is optional. If not interested, the reader can safely skip its description.
 
 This document defines generic functionality and offers flexibility with regard to parameter settings
 and mechanism choices. Technology-specific settings and choices are expected to be made in other documents.
@@ -133,25 +133,11 @@ This section defines the terminology and acronyms used in this document.
 
 Note that the SCHC acronym is pronounced like "sheek" in English (or "chic" in French). Therefore, this document writes "a SCHC Packet" instead of "an SCHC Packet".
 
-* Abort. A SCHC Fragment format to signal the other end-point that the on-going fragment transmission is stopped and finished.
-
-* All-0. The SCHC Fragment format for the last fragment of a window that is not the last one of a SCHC Packet (see window in this glossary).
-
-* All-1. The SCHC Fragment format for the last fragment of the SCHC Packet.
-
-* All-0 empty. An All-0 SCHC Fragment without payload. It is used to request the SCHC ACK with the encoded Bitmap when the Retransmission Timer expires, in a window that is not the last one of a packet.
-
-* All-1 empty. An All-1 SCHC Fragment without payload. It is used to request the SCHC ACK with the encoded Bitmap when the Retransmission Timer expires in the last window of a packet.
-
 * App: LPWAN Application. An application sending/receiving IPv6 packets to/from the Device.
 
 * AppIID: Application Interface Identifier. The IID that identifies the application server interface.
 
 * Bi: Bidirectional. Characterises a Rule Entry that applies to headers of packets travelling in either direction (Up and Dw, see this glossary).
-
-* Bitmap: a bit field in the SCHC ACK message that tells the sender which SCHC Fragments in a window of fragments were correctly received.
-
-* C: Checked bit. Used in a SCHC ACK header to determine if the MIC locally computed by the receiver matches the received MIC or not. C == 1 signals a match, C == 0 a mismatch.
 
 * CDA: Compression/Decompression Action. Describes the reciprocal pair of actions that are performed at the compressor to compress a header field and at the decompressor to recover the original header field value.
 
@@ -165,11 +151,7 @@ Note that the SCHC acronym is pronounced like "sheek" in English (or "chic" in F
 
 * DI: Direction Indicator. This field tells which direction of packet travel (Up, Dw or Bi) a Rule applies to. This allows for assymmetric processing.
 
-* DTag: Datagram Tag. This SCHC F/R header field is set to the same value for all SCHC Fragments carrying the same SCHC Packet.
-
 * Dw: Downlink direction for compression/decompression in both sides, from SCHC C/D in the network to SCHC C/D in the Dev.
-
-* FCN: Fragment Compressed Number. This SCHC F/R header field carries an efficient representation of a larger-sized fragment number.
 
 * Field Description. A line in the Rule table.
 
@@ -181,24 +163,16 @@ Note that the SCHC acronym is pronounced like "sheek" in English (or "chic" in F
 
 * IID: Interface Identifier. See the IPv6 addressing architecture {{RFC7136}}
 
-* Inactivity Timer. A timer used after receiving a SCHC Fragment to detect when, due to a communication error, an on-going fragmented SCHC Packet transmission cannot be continued.
-
 * L2: Layer two. The immediate lower layer SCHC interfaces with. It is provided by an underlying LPWAN technology. It does not necessarily correspond to the OSI model definition of Layer 2.
 
 * L2 Word: this is the minimum subdivision of payload data that the L2 will carry. In most L2 technologies, the L2 Word is an octet.
   In bit-oriented radio technologies, the L2 Word might be a single bit.
   The L2 Word size is assumed to be constant over time for each device.
 
-* MIC: Message Integrity Check.  A SCHC F/R header field computed over the fragmented SCHC Packet and potential last fragment padding, used
-for error detection after SCHC Packet reassembly.
-
 * MO: Matching Operator. An operator used to match a value contained in a header field with a value contained in a Rule.
 
 * Padding (P). Extra bits that may be appended by SCHC to a data unit that it passes to the underlying Layer 2 for transmission.
   SCHC itself operates on bits, not bytes, and does not have any alignment prerequisite. See {{Padding}}.
-
-* Retransmission Timer. A timer used by the SCHC Fragment sender during an on-going fragmented SCHC Packet transmission to
-  detect possible link errors when waiting for a possible incoming SCHC ACK.
 
 * Rule: A set of header field values.
 
@@ -206,19 +180,47 @@ for error detection after SCHC Packet reassembly.
 
 * Rule ID: An identifier for a Rule. SCHC C/D on both sides share the same Rule ID for a given packet. A set of Rule IDs are used to support SCHC F/R functionality.
   
-* SCHC ACK: A SCHC acknowledgement for fragmentation. This message is used to report on the success of reception of a set of SCHC Fragments. See {{Frag}} for more details.
-
 * SCHC C/D: Static Context Header Compression Compressor/Decompressor. A mechanism used on both sides, at the Dev and at the network, to achieve Compression/Decompression of headers. SCHC C/D uses Rules to perform compression and decompression.
   
-* SCHC F/R: Static Context Header Compression Fragmentation/Reassembly. A protocol used on both sides, at the Dev and at the network, to achieve Fragmentation/Reassembly of SCHC Packets. SCHC F/R has three reliability modes.
-  
-* SCHC Fragment: A data unit that carries a subset of a SCHC Packet. SCHC F/R is needed when the size of a SCHC packet exceeds the L2 MTU. See {{Frag}}.
-
 * SCHC Packet: A packet (e.g. an IPv6 packet) whose header has been compressed as per the header compression mechanism defined in this document. If the header compression process is unable to actually compress the packet header, the packet with the uncompressed header is still called a SCHC Packet (in this case, a Rule ID is used to indicate that the packet header has not been compressed). See {{SCHComp}} for more details.
 
 * TV: Target value. A value contained in a Rule that will be matched with the value of a header field.
 
 * Up: Uplink direction for compression/decompression in both sides, from the Dev SCHC C/D to the network SCHC C/D.
+
+Here is the additional terminology for the optional SCHC Fragmentation / Reassembly mechanism
+
+* Abort. A SCHC Fragment format to signal the other end-point that the on-going fragment transmission is stopped and finished.
+
+* All-0. The SCHC Fragment format for the last fragment of a window that is not the last one of a SCHC Packet (see window in this glossary).
+
+* All-1. The SCHC Fragment format for the last fragment of the SCHC Packet.
+
+* All-0 empty. An All-0 SCHC Fragment without payload. It is used to request the SCHC ACK with the encoded Bitmap when the Retransmission Timer expires, in a window that is not the last one of a packet.
+
+* All-1 empty. An All-1 SCHC Fragment without payload. It is used to request the SCHC ACK with the encoded Bitmap when the Retransmission Timer expires in the last window of a packet.
+
+* Bitmap: a bit field in the SCHC ACK message that tells the sender which SCHC Fragments in a window of fragments were correctly received.
+
+* C: Checked bit. Used in a SCHC ACK header to determine if the MIC locally computed by the receiver matches the received MIC or not. C == 1 signals a match, C == 0 a mismatch.
+
+* DTag: Datagram Tag. This SCHC F/R header field is set to the same value for all SCHC Fragments carrying the same SCHC Packet.
+
+* FCN: Fragment Compressed Number. This SCHC F/R header field carries an efficient representation of a larger-sized fragment number.
+
+* Inactivity Timer. A timer used after receiving a SCHC Fragment to detect when, due to a communication error, an on-going fragmented SCHC Packet transmission cannot be continued.
+
+* MIC: Message Integrity Check.  A SCHC F/R header field computed over the fragmented SCHC Packet and potential last fragment padding, used
+for error detection after SCHC Packet reassembly.
+
+* Retransmission Timer. A timer used by the SCHC Fragment sender during an on-going fragmented SCHC Packet transmission to
+  detect possible link errors when waiting for a possible incoming SCHC ACK.
+
+* SCHC ACK: A SCHC acknowledgement for fragmentation. This message is used to report on the success of reception of a set of SCHC Fragments. See {{Frag}} for more details.
+
+* SCHC F/R: Static Context Header Compression Fragmentation/Reassembly. A protocol used on both sides, at the Dev and at the network, to achieve Fragmentation/Reassembly of SCHC Packets.
+
+* SCHC Fragment: A data unit that carries a subset of a SCHC Packet.
 
 * W: Window bit. A SCHC Fragment header field used in ACK-on-Error or ACK-Always mode (see {{Frag}}), which carries the same value for all SCHC Fragments of a window.
 
