@@ -605,7 +605,7 @@ It has been designed under the following assumptions
 
 * The L2 MTU value does not change while a fragmented SCHC Packet is being transmitted.
 
-These assumptions allows reducing the complexity and overhead of the SCHC F/R mechanism.
+These assumptions allow reducing the complexity and overhead of the SCHC F/R mechanism.
 
 This specification includes several SCHC F/R modes, which allow for a range of reliability options such as optional SCHC Fragment retransmission.
 More modes may be defined in the future.
@@ -617,54 +617,89 @@ The padding overhead is kept to the absolute minimum (see {{Padding}}).
 
 ## Fragmentation Tools {#FragTools}
 
-This subsection describes the different tools that are used to enable the SCHC F/R functionality defined in this document, such as fields in the SCHC F/R header (see the related formats in {{Fragfor}}), windows and timers.
+This subsection describes the different tools that are used to enable the SCHC F/R functionality defined in this document,
+such as SCHC F/R messages, windows, timers and header fields.
 
-* Rule ID. The Rule ID is present in the SCHC Fragment header and in the SCHC ACK header formats.  The Rule ID in a SCHC Fragment header is used to identify that a SCHC Fragment is being carried, which SCHC F/R reliability mode is used and which window size is used. The Rule ID in the SCHC Fragment header also allows interleaving non-fragmented SCHC Packets and SCHC Fragments that carry other SCHC Packets. The Rule ID in a SCHC ACK identifies the message as a SCHC ACK.
+The tools are described here in a generic manner. Their application to each SCHC F/R mode is found in {{FragModes}}.
 
-* Fragment Compressed Number (FCN).  The FCN is included in all SCHC Fragments. This field can be understood as a truncated, efficient representation of a larger-sized fragment number, and does not carry an absolute SCHC Fragment number. There are two FCN reserved values that are used for controlling the SCHC F/R process, as described next:
+The messages that can be used by SCHC F/R are the following
+
+* SCHC Fragment: A data unit that carries a subset of a SCHC Packet from the sender to the receiver.
+
+* SCHC ACK: An acknowledgement for fragmentation. This message is used by the receiver to report to the sender on the success of reception of a set of SCHC Fragments.
+
+* SCHC ACK REQ: A request for a SCHC ACK. It can be used when the sender expects a SCHC ACK from the receiver and doesn't receive one.
+
+* SCHC Sender-Abort: A message by the sender telling the receiver that is has aborted the transmission of a fragmented SCHC Packet and that the receiver should release all state associated to that transmission.
+
+
+* SCHC Receiver-Abort: A message by the receiver to tell the sender to abort the transmission of a fragmented SCHC Packet.
+
+
+Some SCHC F/R modes can logically group SCHC Fragments in aggregates called windows.
+When windowing is used, a SCHC ACK reports on the reception of the SCHC Fragments belonging to a window.
+When windowing is not used, a SCHC ACK reports on the reception of all the SCHC Fragments composing a fragmented SCHC Packet.
+
+
+Some SCHC F/R modes can use the following timers and counters
+
+* Inactivity Timer: this timer can be used to unlock a SCHC Fragment receiver that is not receiving a SCHC F/R message while it is expecting one.
+
+* Retransmission Timer: this timer can be used by a SCHC Fragment sender to set a timeout on expecting a SCHC ACK.
+
+* Attempts: this counter counts the requests for a missing SCHC ACK. MAX_ACK_REQUESTS is the threshold at which the SCHC Fragment sender changes behavior.
+
+
+The SCHC F/R messages use the following fields (see the related formats in {{Fragfor}})
+
+* Rule ID: this is used to identify
+
+  * that a SCHC F/R message is being carried, as opposed to an unfragmented SCHC Packet,
+
+  * which SCHC F/R mode is used and
+
+  * if applicable, which window size is used.
+
+  Therefore, the Rule ID allows SCHC F/R interleaving non-fragmented SCHC Packets and SCHC Fragments that carry other SCHC Packets, or interleaving SCHC Fragments that use different SCHC F/R modes.
+
+
+* Fragment Compressed Number (FCN). The FCN is present in the SCHC Fragments header. This field conveys information about the progress in the sequence of SCHC Fragments.
+  For exemple, it can contain a truncated, efficient representation of a larger-sized fragment number.
+  The exact use of the FCN field is left to each SCHC F/R mode.
+  However, two values are reserved. They help control the SCHC F/R process:
+
+  * The FCN value with all the bits equal to 1 (All-1) signals the very last SCHC Fragment of a SCHC Packet.
+  By extension, if windowing is used, the last window of a packet is called the All-1 window.
+
+  * If windowing is used, the FCN value with all the bits equal to 0 (All-0) signals the last SCHC Fragment of a window that is not the last one of
+  the packet. By extension, such a window is called an All-0 window.
+
+  The size of the FCN field is called N.
+  Since All-1 is reserved, the maximum value of FCN (unsigned integer) is theoretically (2^N)-2.
+  However, each SCHC F/R mode is free to specify that the maximum value, called MAX_WIND_FCN, is lower (2^N)-2.
+  The rationale is that MAX_WIND_FCN controls the width of the Bitmap in the SCHC ACK message.
   
-  * The FCN value with all the bits equal to 1 (All-1) denotes the last SCHC Fragment of a packet. The last window of a packet is called an All-1 window. 
-  
-  * The FCN value with all the bits equal to 0 (All-0) denotes the last SCHC Fragment of a window that is not the last one of
-  the packet. Such a window is called an All-0 window.
-
-  The rest of the FCN values are assigned in a sequentially decreasing order, which has the purpose to avoid possible
-  ambiguity for the receiver that might arise under certain conditions. In the SCHC Fragments, this field is an unsigned
-  integer, with a size of N bits. In the No-ACK mode, the size is set to 1 bit (N=1), All-0 is used in all SCHC Fragments and
-  All-1 for the last one.
-  For the other reliability modes, it is recommended to use a number of bits (N) equal to or greater than 3. Nevertheless,
-  the appropriate value of N MUST be defined in the corresponding technology-specific profile documents. For windows that are
-  not the last one of a fragmented SCHC Packet, the FCN for the last SCHC Fragment in such windows is an All-0. This
-  indicates that the window is finished and communication proceeds according to the reliability mode in use. The FCN for the
-  last SCHC Fragment in the last window is an All-1, indicating the last SCHC Fragment of the SCHC Packet. It is also
-  important to note that, in the No-ACK mode or when N=1, the last SCHC Fragment of the packet will carry a FCN equal to 1,
-  while all previous  SCHC Fragments will carry a FCN to 0. For further details see {{FragModes}}. The highest FCN in the
-  window, denoted MAX_WIND_FCN, MUST be a value equal to or smaller than 2^N-2. (Example for N=5, MAX_WIND_FCN MAY be set to
-  23, then subsequent FCNs are set sequentially and in decreasing order, and the FCN will wrap from 0 back to 23).
-
-* Datagram Tag (DTag). The DTag field, if present, is set to the same value for all SCHC Fragments carrying the same SCHC   
+* Datagram Tag (DTag). The DTag field, if present, is set to the same value for all SCHC Fragments carrying the same SCHC
   packet, and to different values for different SCHC Packets. Using this field, the sender can interleave fragments from
   different SCHC Packets, while the receiver can still tell them apart.
-  In the SCHC Fragment formats, the size of the DTag field is T bits, which MAY be set to a value greater than or equal to 0
+  The size of the DTag field is T bits, which MAY be set to a value greater than or equal to 0
   bits. For each new SCHC Packet processed by the sender, DTag MUST be sequentially increased, from 0 to 2^T – 1 wrapping
   back from 2^T - 1 to 0.
   In the SCHC ACK format, DTag carries the same value as the DTag field in the SCHC Fragments for which this SCHC ACK is 
   intended. 
-  When there is no Dtag, there can be only one SCHC Packet in transit.
-  Only after all its fragments have been transmitted can another SCHC Packet be sent.
-  The length of DTag, denoted T, is not specified in this document because it is technology dependant. It will be defined in the
-  corresponding technology-specific documents, based on the number of simultaneous packets that are to be supported.
+  When there is no Dtag, there can be only one fragmented SCHC Packet in transit.
+  Only after all its fragments have been transmitted can another fragmented SCHC Packet be sent.
 
-* W (window): W is a 1-bit field. This field carries the same value for all SCHC Fragments of a window, and it is
-  complemented for the next window. The initial value for this field is 0. In the SCHC ACK format, this field also has a size 
-  of 1 bit. In all SCHC ACKs, the W bit carries the same value as the W bit carried by the SCHC Fragments whose reception is 
-  being positively or negatively acknowledged by the SCHC ACK.
+* W (window): W is a 1-bit field. It is only present if windowing is used.
+  This field carries the same value for all SCHC F/R messages pertaining to the same window, and it is
+  complemented for the next window. The initial value for this field is 0.
 
-* Message Integrity Check (MIC). This field is computed by the sender over the complete SCHC Packet and the
-  last fragment potential padding bits.
-  The MIC allows the receiver to check errors in the reassembled packet, while it also
+* Message Integrity Check (MIC). This field is optional. If present, it only appears in the All-1 SCHC Fragment.
+  It is computed by the sender over the complete SCHC Packet and the last fragment potential padding bits.
+  The MIC allows the receiver to check for errors in the reassembled packet.
+  It also
   enables compressing the UDP checksum by use of SCHC compression. The CRC32 as 0xEDB88320 (i.e. the reverse representation
-  of the polynomial used e.g. in the Ethernet standard {{RFC3385}}) is recommended as the default algorithm for computing the
+  of the polynomial used e.g. in the Ethernet standard {{RFC3385}}) is RECOMMENDED as the default algorithm for computing the
   MIC. Nevertheless, other MIC lengths or other algorithms MAY be required by the technology-specific documents.
   Note that the concatenation of the complete SCHC Packet and the last fragment potential padding bits does not
   generally constitute an integer number of bytes.
@@ -672,38 +707,18 @@ This subsection describes the different tools that are used to enable the SCHC F
   complete SCHC Packet and the last fragment potential padding bits be zero-extended to the next byte boundary and
   that the MIC be computed on that byte array.
 
-* C (MIC checked): C is a 1-bit field. This field is used in the SCHC ACK packets to report the outcome of the MIC check, 
-  i.e. whether the reassembled packet was correctly received or not. A value of 1 represents a positive MIC check at the 
-  receiver side (i.e. the MIC computed by the receiver matches the received MIC).
+* C (MIC checked): C is a 1-bit field. It is optional, and goes together with the use of the MIC field.
+  This field is used in the SCHC ACK packets to report the outcome of the MIC check,
+  i.e. whether the fragmented SCHC Packet was correctly reassembled or not. A value of 1 tells that
+  the MIC computed by the receiver matches the MIC that was transmitted. A value of 0 represents a mismatch.
 
-* Retransmission Timer. A SCHC Fragment sender uses it after the transmission of a window to detect a transmission error of
-  the SCHC ACK corresponding to this window. Depending on the reliability mode, it will lead to a request a SCHC ACK
-  retransmission (in ACK-Always mode) or it will trigger the transmission of the next window (in ACK-on-Error mode). The
-  duration of this timer is not defined in this document and MUST be defined in the corresponding technology-specific documents.
-
-* Inactivity Timer. A SCHC Fragment receiver uses it to take action when there is a problem in the transmission of SCHC
-  fragments. Such a problem could be detected by the receiver not getting a single SCHC Fragment during a given period of
-  time. When this happens, an Abort message will be sent
-  (see related text later in this section). Initially, and each time a SCHC Fragment is received, the timer is reinitialized.
-  The duration of this timer is not defined in this document and MUST be defined in the corresponding technology-specific document.
-
-* Attempts. This counter counts the requests for a missing SCHC ACK. When it reaches the value MAX_ACK_REQUESTS,
-  the sender assumes there are recurrent SCHC Fragment transmission errors and determines that an Abort is needed. The default
-  value MAX_ACK_REQUESTS is not stated in this document, and it is expected to be defined in the corresponding technology-specific
-  document. The Attempts counter is defined per window. It is initialized each time a new window is used.
-
-* Bitmap. The Bitmap is a sequence of bits carried in a SCHC ACK. Each bit in the Bitmap corresponds to a SCHC
-  fragment of the current window, and provides feedback on whether the SCHC Fragment has been received or not. The right-most
-  position on the Bitmap reports if the All-0 or All-1 fragment has been received or not. Feedback on the SCHC
-  fragment with the highest FCN value is provided by the bit in the left-most position of the Bitmap. In the Bitmap, a bit
+* Bitmap. The Bitmap is a bit field maintained by the receiver during the reassembly of a fragmented SCHC Packet.
+  The Bitmap may also be carried in a SCHC ACK, either in extenso or in a shortened form (see {{Bitmapopt}}).
+  Each bit in the internal representation of the Bitmap corresponds to a SCHC
+  Fragment of the current window, and provides feedback on whether the SCHC Fragment has been received or not. The right-most
+  position on the Bitmap reports if the All-0 or All-1 fragment has been correctly received or not. Feedback on the SCHC
+  fragment with the FCN == MAX_WIND_FCN value is provided by the bit in the left-most position of the Bitmap. In the Bitmap, a bit
   set to 1 indicates that the SCHC Fragment of FCN corresponding to that bit position has been correctly sent and received.
-  The text above describes the internal representation of the Bitmap. When inserted in the SCHC ACK for transmission from the
-  receiver to the sender, the Bitmap is shortened for energy/bandwidth optimisation, see more details in {{Bitmapopt}}.
-
-* Abort. On expiration of the Inactivity timer, or when Attempts reaches MAX_ACK_REQUESTS or upon occurrence of some other
-  error, the sender or the receiver may use the Abort. When the receiver needs to abort the on-going fragmented SCHC
-  Packet transmission, it sends the Receiver-Abort format. When the sender needs to abort the transmission, it sends the
-  Sender-Abort format. None of the Aborts are acknowledged.
 
 
 ## Reliability modes
