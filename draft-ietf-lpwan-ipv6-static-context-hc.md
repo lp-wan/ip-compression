@@ -625,11 +625,17 @@ The SCHC F/R messages use the following fields (see the related formats in {{Fra
 
   * that a SCHC F/R message is being carried, as opposed to an unfragmented SCHC Packet,
 
-  * which SCHC F/R mode is used and
+  * which SCHC F/R mode is used
 
-  * if applicable, which window size is used.
+  * and among this mode
 
-  Therefore, the Rule ID allows SCHC F/R interleaving non-fragmented SCHC Packets and SCHC Fragments that carry other SCHC Packets, or interleaving SCHC Fragments that use different SCHC F/R modes.
+     * if windowing is used, what the window size is
+
+     * what optional fields are present
+
+     * and what the field sizes are.
+
+  Therefore, the Rule ID allows SCHC F/R interleaving non-fragmented SCHC Packets and SCHC Fragments that carry other SCHC Packets, or interleaving SCHC Fragments that use different SCHC F/R modes or different parameters.
 
 
 * Fragment Compressed Number (FCN). The FCN is present in the SCHC Fragments header. This field conveys information about the progress in the sequence of SCHC Fragments.
@@ -643,36 +649,49 @@ The SCHC F/R messages use the following fields (see the related formats in {{Fra
   * If windowing is used, the FCN value with all the bits equal to 0 (All-0) signals the last SCHC Fragment of a window that is not the last one of
   the SCHC packet. By extension, such a window is called an All-0 window.
 
-  The size of the FCN field is called N.
+  The size of the FCN field is called N. It is defined for each F/R mode and Rule Id.
   Since All-1 is special, the maximum value of FCN (as an unsigned integer) theoretically is (2^N)-2.
   However, each SCHC F/R mode or each LPWAN technology-specific document is free to specify a maximum value, called MAX_WIND_FCN, lower than (2^N)-2.
-  The rationale is that MAX_WIND_FCN controls the width of the Bitmap in the SCHC ACK message, which may be critical to some LPWAN technologies.
+  The rationale is that MAX_WIND_FCN finely controls the width of the Bitmap in the SCHC ACK message, which may be critical to some LPWAN technologies.
   
-* Datagram Tag (DTag). The DTag field, if present, is set to the same value for all SCHC Fragments carrying the same SCHC
+* Datagram Tag (DTag). The DTag field is optional.
+
+  When there is no DTag, there can be only one fragmented SCHC Packet in transit:
+  only after all its fragments have been transmitted can another fragmented SCHC Packet be sent.
+
+  If present, DTag MUST be set to the same value for all SCHC Fragments carrying the same SCHC
   packet, and to different values for different SCHC Packets. Using this field, the sender can interleave fragments from
   different SCHC Packets, while the receiver can still tell them apart.
-  The size of the DTag field is T bits, which MAY be set to a value greater than or equal to 0
-  bits. For each new SCHC Packet processed by the sender, DTag MUST be sequentially increased, from 0 to (2^T) – 1 wrapping
-  back from (2^T) - 1 to 0.
-  In the SCHC ACK message, DTag carries the same value as the DTag field in the SCHC Fragments for which this SCHC ACK is
-  intended. 
-  When there is no Dtag, there can be only one fragmented SCHC Packet in transit.
-  Only after all its fragments have been transmitted can another fragmented SCHC Packet be sent.
 
-* W (window): W is a field of M bits. It is only present if windowing is used.
+  If a SCHC ACK message is sent, it MUST carry the same DTag value as the SCHC Fragments for which this SCHC ACK is
+  intended. 
+
+  The presence and size of the DTag field is defined by each SCHC F/R mode for each Rule ID value.
+  For each new SCHC Packet processed by the sender under the same F/R mode and same RuleID, DTag MUST be sequentially
+  increased, from 0 to (2^T) – 1 wrapping back from (2^T) - 1 to 0, where T is the size of DTag in bits.
+
+
+* W (window): The W field is optional. It is only present if windowing is used.
+
   This field carries the same value for all SCHC F/R messages pertaining to the same window, and it is
-  incremented for the next window. The value of W is initialised to 0 for each new fragmented SCHC Packet.
+  incremented for the next window. The value of W is initialised to 0 for each new SCHC Packet fragmented under the same F/R mode and Rule Id.
+
+  The presence of W and its size (called M, in bits) is defined for each F/R mode and Rule Id.
 
 * Message Integrity Check (MIC).
-  This field is optional. If present, it only appears in the All-1 SCHC Fragment.
+  This field is optional. If present, it only appears in the All-1 SCHC Fragments and in the All-1 ACK REQ.
   If present, its size MUST be at least an L2 Word.
-  It is computed by the sender over the complete SCHC Packet and the last fragment potential padding bits.
-  The MIC allows the receiver to check for errors in the reassembled packet.
-  It also
-  enables compressing the UDP checksum by use of SCHC compression. The CRC32 as 0xEDB88320 (i.e. the reverse representation
+  If the MIC is present, the sender MUST compute it over the complete SCHC Packet and the potential padding bits of the last SCHC Fragment.
+
+  The MIC allows the receiver to check for errors in the reassembled SCHC Packet.
+  It supports
+  UDP checksum elision by SCHC C/D (see {{UDPchecksum}}).
+
+  The CRC32 polynomial 0xEDB88320 (i.e. the reverse representation
   of the polynomial used e.g. in the Ethernet standard {{RFC3385}}) is RECOMMENDED as the default algorithm for computing the
   MIC. Nevertheless, other MIC lengths or other algorithms MAY be required by the technology-specific documents.
-  Note that the concatenation of the complete SCHC Packet and the last fragment potential padding bits does not
+
+  Note that the concatenation of the complete SCHC Packet and the potential padding bits of the last SCHC Fragment does not
   generally constitute an integer number of bytes.
   For implementers to be able to used byte-oriented CRC libraries, it is RECOMMENDED that the concatenation of the
   complete SCHC Packet and the last fragment potential padding bits be zero-extended to the next byte boundary and
@@ -683,13 +702,13 @@ The SCHC F/R messages use the following fields (see the related formats in {{Fra
   i.e. whether the fragmented SCHC Packet was correctly reassembled or not. A value of 1 tells that
   the MIC computed by the receiver matches the MIC that was transmitted. A value of 0 represents a mismatch.
 
-* Bitmap. The Bitmap is a bit field maintained by the receiver during the reassembly of a fragmented SCHC Packet.
+* Bitmap. The Bitmap is used together with windowing. It is a bit field maintained by the receiver during the reassembly of a fragmented SCHC Packet.
   The Bitmap may also be carried in a SCHC ACK, either in extenso or in a shortened form (see {{Bitmapopt}}).
   Each bit in the internal representation of the Bitmap corresponds to a SCHC
   Fragment of the current window, and provides feedback on whether the SCHC Fragment has been received or not. The right-most
   position on the Bitmap reports if the All-0 or All-1 fragment has been correctly received or not. Feedback on the SCHC
   Fragment with the FCN == MAX_WIND_FCN value is provided by the bit in the left-most position of the Bitmap. In the Bitmap, a bit
-  set to 1 indicates that the SCHC Fragment of FCN corresponding to that bit position has been correctly sent and received.
+  set to 1 indicates that the SCHC Fragment of FCN corresponding to that bit position has been correctly received.
 
 
 ## SCHC F/R Message Formats {#Fragfor}
@@ -783,7 +802,7 @@ The format of a SCHC ACK that acknowledges a window of SCHC Fragments that is no
 ~~~~
 {: #Fig-All0-ACK-Format title='ACK format for All-0 windows'}
 
-The Rule ID and Dtag values in the SCHC ACK message MUST be identical to the ones used in the SCHC Fragments that are being acknowledged. This allows matching the SCHC ACK and the corresponding SCHC Fragments.
+The Rule ID and DTag values in the SCHC ACK message MUST be identical to the ones used in the SCHC Fragments that are being acknowledged. This allows matching the SCHC ACK and the corresponding SCHC Fragments.
 
 #### All-1 SCHC ACK
 
@@ -809,7 +828,7 @@ to indicate if the MIC computed by the receiver matches the MIC transmitted in t
 If there is a match, the C bit is set to 1.
 If the MICs don't match, the C bit is set to 0 and the Bitmap for the All-1 window follows.
 
-The Rule ID and Dtag values in the SCHC ACK messages MUST be identical to the ones used in the SCHC Fragments that are being acknowledged. This allows matching the SCHC ACK and the corresponding SCHC Fragments.
+The Rule ID and DTag values in the SCHC ACK messages MUST be identical to the ones used in the SCHC Fragments that are being acknowledged. This allows matching the SCHC ACK and the corresponding SCHC Fragments.
 
 The Bitmap carries information on the reception of each fragment of the window as described in {{FragTools}}.
 
@@ -958,7 +977,7 @@ The W field is optional. Its presence is specified by each SCHC F/R mode.
 +-- ... --+- ... -+---+- ... -+~~~~~~~~~~~~~~~~~~~~~
 | Rule ID | DTag  | W | 11..1 | padding (as needed)
 +-- ... --+- ... -+---+- ... -+~~~~~~~~~~~~~~~~~~~~~
-                        (FCN)
+
 ~~~~
 {: #Fig-All1Abort title='SCHC Sender-Abort format'}
 
@@ -971,7 +990,7 @@ Therefore, a SCHC Sender-Abort generally needs padding bits.
 Padding bits are strictly less than a L2 Word size. The MIC is at least the size of an L2 Word.
 Therefore, by looking at the message length, a receiver can distinguish a SCHC Sender-Abort from an SCHC All-1 ACK REQ (see {{All1Empty}}), even in the presence of padding.
 
-The Rule ID and Dtag values in the SCHC Sender-Abort message MUST be identical to the ones used in the fragments of the SCHC Packet the transmission of which is being aborted.
+The Rule ID and DTag values in the SCHC Sender-Abort message MUST be identical to the ones used in the fragments of the SCHC Packet the transmission of which is being aborted.
 
 The SCHC Sender-Abort MUST NOT be acknowledged and MUST NOT be retransmitted.
 
@@ -1000,7 +1019,7 @@ the first L2 Word boundary, followed by an extra L2 Word full of 1's.
 Such a bit pattern never occurs in a regular SCHC ACK. This is how the SCHC Receiver-Abort message is recognized.
 
 
-The Rule ID and Dtag values in the SCHC Receiver-Abort message MUST be identical to the ones used in the fragments of the SCHC Packet the transmission of which is being aborted.
+The Rule ID and DTag values in the SCHC Receiver-Abort message MUST be identical to the ones used in the fragments of the SCHC Packet the transmission of which is being aborted.
 
 
 A SCHC Receiver-Abort is aligned to L2 Words, by design. Therefore, padding MUST NOT be appended.
@@ -1189,7 +1208,7 @@ If the payload is small, the TV can be set to 0x0000, the MO set to "MSB" and th
 
 In other cases, the length SHOULD be sent and the CDA is replaced by "value-sent".
 
-## UDP Checksum field
+## UDP Checksum field {#UDPchecksum}
 
 The UDP checksum operation is mandatory with IPv6 [RFC8200] for most
 packets but recognizes that there are exceptions to that default
