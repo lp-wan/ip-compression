@@ -659,9 +659,9 @@ The SCHC F/R messages use the following fields (see the related formats in {{Fra
   When there is no Dtag, there can be only one fragmented SCHC Packet in transit.
   Only after all its fragments have been transmitted can another fragmented SCHC Packet be sent.
 
-* W (window): W is a 1-bit field. It is only present if windowing is used.
+* W (window): W is a field of M bits. It is only present if windowing is used.
   This field carries the same value for all SCHC F/R messages pertaining to the same window, and it is
-  complemented for the next window. The value of W is initialised to 0 for each new fragmented SCHC Packet.
+  incremented for the next window. The value of W is initialised to 0 for each new fragmented SCHC Packet.
 
 * Message Integrity Check (MIC).
   This field is optional. If present, it only appears in the All-1 SCHC Fragment.
@@ -719,11 +719,11 @@ The W field is optional. Its presence is specified by each SCHC F/R mode.
 
 ~~~~
 
- |----- Fragment Header -----|
-           |-- T --|1|-- N --|
- +-- ... --+- ... -+-+- ... -+--------...-------+
- | Rule ID | DTag  |W|  FCN  | Fragment Payload |
- +-- ... --+- ... -+-+- ... -+--------...-------+
+ |------ Fragment Header ------|
+           |-- T --|-M-|-- N --|
+ +-- ... --+- ... -+---+- ... -+--------...-------+
+ | Rule ID | DTag  | W |  FCN  | Fragment Payload |
+ +-- ... --+- ... -+---+- ... -+--------...-------+
 
 ~~~~
 {: #Fig-NotLastWin title='Detailed Header Format for Fragments except the Last One'}
@@ -744,12 +744,12 @@ The W field is optional. Its presence is specified by each SCHC F/R mode.
 
 ~~~~
 
-|---------- Fragment Header --------|
-          |-- T --|1|-- N --|
-+-- ... --+- ... -+-+- ... -+- ... -+------...-----+~~~~~~~~~~~~~~~~~~~~~
-| Rule ID | DTag  |W| 11..1 |  MIC  | Frag Payload | padding (as needed)
-+-- ... --+- ... -+-+- ... -+- ... -+------...-----+~~~~~~~~~~~~~~~~~~~~~
-                      (FCN)
+|----------- Fragment Header ---------|
+          |-- T --|-M-|-- N --|
++-- ... --+- ... -+---+- ... -+- ... -+------...-----+~~~~~~~~~~~~~~~~~~~~~
+| Rule ID | DTag  | W | 11..1 |  MIC  | Frag Payload | padding (as needed)
++-- ... --+- ... -+---+- ... -+- ... -+------...-----+~~~~~~~~~~~~~~~~~~~~~
+                        (FCN)
 ~~~~
 {: #Fig-LastWinMode title='Detailed Header Format for the last SCHC Fragment of a SCHC Packet'}
 The total size of the All-1 SCHC Fragment header is generally not a multiple of the L2 Word size.
@@ -775,10 +775,10 @@ The format of a SCHC ACK that acknowledges a window of SCHC Fragments that is no
 
 ~~~~
 
-            |-- T --|1|
-+---- ... --+- ... -+-+---- ... -----+
-|  Rule ID  |  DTag |W|encoded Bitmap| (no payload)
-+---- ... --+- ... -+-+---- ... -----+
+            |-- T --|-M-|
++---- ... --+- ... -+---+---- ... -----+
+|  Rule ID  |  DTag | W |encoded Bitmap| (no payload)
++---- ... --+- ... -+---+---- ... -----+
 
 ~~~~
 {: #Fig-All0-ACK-Format title='ACK format for All-0 windows'}
@@ -787,22 +787,22 @@ The Rule ID and Dtag values in the SCHC ACK message MUST be identical to the one
 
 #### All-1 SCHC ACK
 
-The format of a SCHC ACK that follows the transmission of the last SCHC Fragments of a SCHC Packet (All-1 window) is shown in {{Fig-All1-ACK-Format}}.
+The format of a SCHC ACK that follows the transmission of the last SCHC Fragments of a SCHC Packet is shown in {{Fig-All1-ACK-Format}}.
 The W field is optional. Its presence is specified by each SCHC F/R mode.
 
 ~~~~
 
-            |-- T --|1|1|
-+---- ... --+- ... -+-+-+
-|  Rule ID  |  DTag |W|1| (MIC correct)
-+---- ... --+- ... -+-+-+
+            |-- T --|-M-|1|
++---- ... --+- ... -+---+-+
+|  Rule ID  |  DTag | W |1| (MIC correct)
++---- ... --+- ... -+---+-+
 
-+---- ... --+- ... -+-+-+----- ... -----+
-|  Rule ID  |  DTag |W|0|encoded Bitmap |(MIC Incorrect)
-+---- ... --+- ... -+-+-+----- ... -----+
-                       C
++---- ... --+- ... -+---+-+----- ... -----+
+|  Rule ID  |  DTag | W |0|encoded Bitmap |(MIC Incorrect)
++---- ... --+- ... -+---+-+----- ... -----+
+                         C
 ~~~~
-{: #Fig-All1-ACK-Format title='Format of a SCHC ACK for All-1 windows'}
+{: #Fig-All1-ACK-Format title='Format of a SCHC ACK at the end of a SCHC Packet transmission'}
 
 The All-1 SCHC ACK header contains a C bit (i.e. MIC checked)
 to indicate if the MIC computed by the receiver matches the MIC transmitted in the All-1 SCHC Fragment.
@@ -839,11 +839,11 @@ When shortening does not happen, padding bits MUST be appended as needed to fill
 {{Fig-transmittedbitmap}} shows that the last 14 bits are not sent.
 
 ~~~~   
-            |-- T --|1|
-+---- ... --+- ... -+-+-+-+-+
-|  Rule ID  |  DTag |W|1|0|1|
-+---- ... --+- ... -+-+-+-+-+
-    next L2 Word boundary ->|
+            |-- T --|-M-|
++---- ... --+- ... -+---+-+-+-+
+|  Rule ID  |  DTag | W |1|0|1|
++---- ... --+- ... -+---+-+-+-+
+      next L2 Word boundary ->|
 
 ~~~~
 {: #Fig-transmittedbitmap title='Optimized Bitmap format'}
@@ -851,18 +851,18 @@ When shortening does not happen, padding bits MUST be appended as needed to fill
 {{Fig-Bitmap-Win}} shows an example of a SCHC ACK with FCN ranging from 6 down to 0, where the Bitmap indicates that the second and the fifth SCHC Fragments have not been correctly received.
 
 ~~~~                                                  
-                       6 5 4 3 2 1 0 (*)
-            |-- T --|1|
-+-----------+-------+-+-+-+-+-+-+-+-+
-|  Rule ID  |  DTag |W|1|0|1|1|0|1|1|            Bitmap before tx
-+-----------+-------+-+-+-+-+-+-+-+-+
-next L2 Word boundary ->|<-- L2 Word -->|
+                         6 5 4 3 2 1 0 (*)
+            |-- T --|-M-|
++-----------+-------+---+-+-+-+-+-+-+-+
+|  Rule ID  |  DTag | W |1|0|1|1|0|1|1|            Bitmap before tx
++-----------+-------+---+-+-+-+-+-+-+-+
+  next L2 Word boundary ->|<-- L2 Word -->|
     (*)=(FCN values)
 
-+-----------+-------+-+-+-+-+-+-+-+-+~~~+
-|  Rule ID  |  DTag |W|1|0|1|1|0|1|1|Pad|        Encoded Bitmap
-+-----------+-------+-+-+-+-+-+-+-+-+~~~+
-next L2 Word boundary ->|<-- L2 Word -->|
++-----------+-------+---+-+-+-+-+-+-+-+~~~+
+|  Rule ID  |  DTag | W |1|0|1|1|0|1|1|Pad|        Encoded Bitmap
++-----------+-------+---+-+-+-+-+-+-+-+~~~+
+  next L2 Word boundary ->|<-- L2 Word -->|
 
 
 ~~~~
@@ -872,15 +872,15 @@ next L2 Word boundary ->|<-- L2 Word -->|
 indicates that there is no missing SCHC Fragment.
 
 ~~~~                                                  
-|- Fragmentation Header-|6 5 4 3 2 1 7 (*)
-            |-- T --|1|
-|  Rule ID  |  DTag |W|0|1|1|1|1|1|1|1|          Bitmap before tx
-  next L2 Word boundary ->|<-- L2 Word -->|
-                       C
-+---- ... --+- ... -+-+-+-+
-|  Rule ID  |  DTag |W|0|1|                      Encoded Bitmap
-+---- ... --+- ... -+-+-+-+
-  next L2 Word boundary ->|
+|- Fragmentation Header  -|6 5 4 3 2 1 7 (*)
+            |-- T --|-M-|
+|  Rule ID  |  DTag | W |0|1|1|1|1|1|1|1|          Bitmap before tx
+    next L2 Word boundary ->|<-- L2 Word -->|
+                         C
++---- ... --+- ... -+---+-+-+
+|  Rule ID  |  DTag | W |0|1|                      Encoded Bitmap
++---- ... --+- ... -+---+-+-+
+    next L2 Word boundary ->|
    (*) = (FCN values indicating the order)
 
 ~~~~
@@ -892,18 +892,18 @@ indicates that there is no missing SCHC Fragment.
 #### SCHC All-0 ACK REQ {#All0Empty}
 
 The SCHC All-0 ACK REQ is only used in SCHC F/R that use a windowing mechanism.
-Its purpose is for a a sender to request the retransmission of a SCHC ACK by the receiver, at the end of window which is not the last one of a SCHC Packet.
+Its purpose is for a a sender to request the retransmission of a SCHC ACK by the receiver, at the end of a window which is not the last one of a SCHC Packet.
 The SCHC All-0 ACK REQ format is described in {{Fig-All0empty}}.
 The W field is optional. Its presence is specified by each SCHC F/R mode.
 
 
 ~~~~
 
-|------ ACK REQ Header -----|
-          |-- T --|1|-- N --|
-+-- ... --+- ... -+-+- ... -+~~~~~~~~~~~~~~~~~~~~~
-| Rule ID | DTag  |W|  0..0 | padding (as needed)      (no payload)
-+-- ... --+- ... -+-+- ... -+~~~~~~~~~~~~~~~~~~~~~
+|------ ACK REQ Header -------|
+          |-- T --|-M-|-- N --|
++-- ... --+- ... -+---+- ... -+~~~~~~~~~~~~~~~~~~~~~
+| Rule ID | DTag  | W |  0..0 | padding (as needed)      (no payload)
++-- ... --+- ... -+---+- ... -+~~~~~~~~~~~~~~~~~~~~~
 
 ~~~~
 {: #Fig-All0empty title='All-0 empty fragment detailed format'}
@@ -924,11 +924,11 @@ The W field is optional. Its presence is specified by each SCHC F/R mode.
 
 ~~~~
 
-|---------- ACK REQ Header ---------|
-          |-- T --|1|-- N --|
-+-- ... --+- ... -+-+- ... -+- ... -+~~~~~~~~~~~~~~~~~~~
-| Rule ID | DTag  |W|  1..1 |  MIC  | padding as needed (no payload)
-+-- ... --+- ... -+-+- ... -+- ... -+~~~~~~~~~~~~~~~~~~~
+|---------- ACK REQ Header -----------|
+          |-- T --|-M-|-- N --|
++-- ... --+- ... -+---+- ... -+- ... -+~~~~~~~~~~~~~~~~~~~
+| Rule ID | DTag  | W |  1..1 |  MIC  | padding as needed (no payload)
++-- ... --+- ... -+---+- ... -+- ... -+~~~~~~~~~~~~~~~~~~~
 
 ~~~~
 {: #Fig-All1retries title='All-1 for Retries format, also called All-1 empty'}
@@ -953,12 +953,12 @@ The W field is optional. Its presence is specified by each SCHC F/R mode.
 
 ~~~~
 
-|------ Fragment Header ----|
-          |-- T --|1|-- N --|
-+-- ... --+- ... -+-+- ... -+~~~~~~~~~~~~~~~~~~~~~
-| Rule ID | DTag  |W| 11..1 | padding (as needed)
-+-- ... --+- ... -+-+- ... -+~~~~~~~~~~~~~~~~~~~~~
-                      (FCN)
+|------ Fragment Header ------|
+          |-- T --|-M-|-- N --|
++-- ... --+- ... -+---+- ... -+~~~~~~~~~~~~~~~~~~~~~
+| Rule ID | DTag  | W | 11..1 | padding (as needed)
++-- ... --+- ... -+---+- ... -+~~~~~~~~~~~~~~~~~~~~~
+                        (FCN)
 ~~~~
 {: #Fig-All1Abort title='SCHC Sender-Abort format'}
 
@@ -984,12 +984,12 @@ The W field is optional. Its presence is specified by each SCHC F/R mode.
 
 ~~~~
 
-|- Receiver-Abort Header -|
+|-- Receiver-Abort Header --|
 
-+---- ... ----+-- ... --+-+-+-+-+-+-+-+-+-+-+-+-+
-|   Rule ID   |   DTag  |W| 1..1|      1..1     |
-+---- ... ----+-- ... --+-+-+-+-+-+-+-+-+-+-+-+-+
-        next L2 Word boundary ->|<-- L2 Word -->|
++---- ... ----+-- ... --+---+-+-+-+-+-+-+-+-+-+-+-+
+|   Rule ID   |   DTag  | W | 1..1|      1..1     |
++---- ... ----+-- ... --+---+-+-+-+-+-+-+-+-+-+-+-+
+          next L2 Word boundary ->|<-- L2 Word -->|
 
 ~~~~
 {: #Fig-ACKabort title='SCHC Receiver-Abort format'}
@@ -1915,7 +1915,7 @@ This section lists the parameters that need to be defined in the LPWAN technolog
 
     * reliability mode(s) used, in which cases (e.g. based on link channel condition)
 
-    * number of bits for FCN (N) and DTag (T)
+    * number of bits for FCN (N), for W (M) and for DTag (T)
 
     * support for interleaved packet transmission, to what extent
 
