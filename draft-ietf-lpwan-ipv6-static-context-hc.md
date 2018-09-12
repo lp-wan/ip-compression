@@ -702,7 +702,9 @@ The SCHC F/R messages use the following fields (see the related formats in {{Fra
   i.e. whether the fragmented SCHC Packet was correctly reassembled or not. A value of 1 tells that
   the MIC computed by the receiver matches the MIC that was transmitted. A value of 0 represents a mismatch.
 
-* Bitmap. The Bitmap is used together with windowing. It is a bit field maintained by the receiver during the reassembly of a fragmented SCHC Packet.
+* Bitmap. The Bitmap is used together with windowing.
+  It is a bit field maintained by the sender during the fragmentation
+  and by the receiver during the reassembly of a fragmented SCHC Packet.
   The Bitmap may also be carried in a SCHC ACK, either in extenso or in a shortened form (see {{Bitmapopt}}).
   Each bit in the internal representation of the Bitmap corresponds to a SCHC
   Fragment of the current window, and provides feedback on whether the SCHC Fragment has been received or not. The right-most
@@ -1031,8 +1033,50 @@ The SCHC Sender-Abort MUST NOT be acknowledged and MUST NOT be retransmitted.
 ## SCHC F/R modes {#FragModes}
 
 
-### No-ACK {#No-ACK-subsection}
+### No-ACK mode {#No-ACK-subsection}
 
+In No-ACK mode, there is no feedback communication from the fragment receiver to the fragment sender.
+The sender just transmits all the SCHC Fragments blindly.
+
+SCHC ACK or SCHC ACK REQ MUST NOT be sent, and MUST be ignored if received.
+SCHC Sender-Abort MAY be sent. SCHC Receiver-Abort MUST NOT be sent.
+
+Windowing is not used. Therefore, the W field MUST NOT be present.
+The Retransmission Timer is not used.
+One Inactivity Timer MUST be instanciated for each pair of Rule Id and optional DTag values.
+The Inactivity Timer expiration value is based on the characteristics of the underlying LPWAN technology
+and MUST be defined in other documents (e.g. technology-specific profile documents).
+
+The presence and size of the MIC and DTag fields MUST be defined by each LPWAN technology-specific document.
+The size of the FCN field is RECOMMENDED to be 1 bit but MAY be defined by each LPWAN technology-specific document.
+
+#### Sender behaviour
+
+The sender transmits all the SCHC Fragments of a SCHC Packet, in sequential order.
+The All-1 FCN value MUST be used for the last SCHC Fragment, and MUST NOT be used for the preceeding SCHC Fragments.
+If it receives a SCHC Receiver-Abort with the corresponding Rule Id and optional DTag,
+the sender MAY abort the on-going transmission and MAY release all its state associated to this fragmented SCHC Packet.
+
+{{Fig-NoACKModeSnd}} shows an example of a corresponding state machine.
+
+#### Receiver behaviour
+
+While FCN is not All-1, the receiver concatenates the payloads of the SCHC Fragments that bear the same Rule Id and optional DTag, in the order they are received.
+When an All-1 SCHC Fragment is received with the same Rule Id and optional DTag, the receiver appends the All-1 SCHC Fragment Payload and the padding bits to the buffer and reassembly concludes.
+
+Each time a SCHC Fragment is received with the same Rule Id and optional DTag, the Inactivity timer MUST be reset.
+
+When the Inactivity timer expires, the reassembly operation concludes.
+
+If reassembly concludes because of Inactivity Timer expiration,
+the SCHC Packet being reassembled MUST be dropped and resources associated with this Rule Id and optional DTag MUST be released.
+
+If reassembly concludes because of receiving an All-1 SCHC Fragment and if integrity checking (either through the MIC or through some other L2 means) fails,
+the reassembled SCHC Packet MUST be dropped and resources associated with this Rule Id and optional DTag MUST be released.
+
+On reception of a SCHC Sender-Abort, the receiver MAY release all resource related to the reassembly of the SCHC Fragments with the same Rule Id and optional DTag.
+
+{{Fig-NoACKModeRcv}} shows an example of a corresponding state machine.
 
 ### ACK-Always {#ACK-Always-subsection}
 
