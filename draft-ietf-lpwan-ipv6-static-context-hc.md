@@ -348,7 +348,7 @@ The Rule IDs are used:
 
 * At least one Rule ID MAY be allocated to tagging packets for which SCHC compression was not possible (no matching Rule was found).
 
-* In SCHC F/R, to identify the specific modes and settings of SCHC Fragments being transmitted, and to identify the SCK ACKs, including their modes and settings. Note that when F/R is used for both communication directions, at least two Rule ID values are therefore needed for F/R.
+* In SCHC F/R, to identify the specific modes and settings of SCHC Fragments being transmitted, and to identify the SCHC ACKs, including their modes and settings. Note that when F/R is used for both communication directions, at least two Rule ID values are therefore needed for F/R.
 
 
 # Compression/Decompression {#SCHComp}
@@ -605,7 +605,7 @@ The messages that can be used by SCHC F/R are the following
 ### Windows, Timers, Counters
 
 Some SCHC F/R modes may handle SCHC Fragments as collections, called windows.
-When windowing is used, information on the correct reception of the SCHC Fragments belonging to a window is grouped together and may be sent back as a SCK ACK.
+When windowing is used, information on the correct reception of the SCHC Fragments belonging to a window is grouped together and may be sent back as a SCHC ACK.
 Whatever the windowing choice, a SCHC ACK may report on the reception of all the SCHC Fragments composing a fragmented SCHC Packet.
 
 
@@ -649,7 +649,7 @@ The SCHC F/R messages use the following fields (see the related formats in {{Fra
   * If windowing is used, the FCN value with all the bits equal to 0 (All-0) signals the last SCHC Fragment of a window that is not the last one of
   the SCHC packet. By extension, such a window is called an All-0 window.
 
-  The size of the FCN field is called N. It is defined for each F/R mode and Rule Id.
+  The size of the FCN field is called N. It is defined for each F/R mode and Rule ID.
   Since All-1 is special, the maximum value of FCN (as an unsigned integer) theoretically is (2^N)-2.
   However, each SCHC F/R mode or each LPWAN technology-specific document is free to specify a maximum value, called MAX_WIND_FCN, lower than (2^N)-2.
   The rationale is that MAX_WIND_FCN finely controls the width of the Bitmap in the SCHC ACK message, which may be critical to some LPWAN technologies.
@@ -674,9 +674,9 @@ The SCHC F/R messages use the following fields (see the related formats in {{Fra
 * W (window): The W field is optional. It is only present if windowing is used.
 
   This field carries the same value for all SCHC F/R messages pertaining to the same window, and it is
-  incremented for the next window. The value of W is initialised to 0 for each new SCHC Packet fragmented under the same F/R mode and Rule Id.
+  incremented for the next window. The value of W is initialised to 0 for each new SCHC Packet fragmented under the same F/R mode and Rule ID.
 
-  The presence of W and its size (called M, in bits) is defined for each F/R mode and Rule Id.
+  The presence of W and its size (called M, in bits) is defined for each F/R mode and Rule ID.
 
 * Message Integrity Check (MIC).
   This field is optional. If present, it only appears in the All-1 SCHC Fragments and in the All-1 ACK REQ.
@@ -836,7 +836,7 @@ The Bitmap carries information on the reception of each fragment of the window a
 
 See {{SCHCParams}} for a discussion on the size of the Bitmaps.
 
-In order to reduce the SCK ACK size, the Bitmap that is actually transmitted is shortened ("encoded") as explained in {{Bitmapopt}}.
+In order to reduce the SCHC ACK size, the Bitmap that is actually transmitted is shortened ("encoded") as explained in {{Bitmapopt}}.
 
 #### Bitmap Encoding {#Bitmapopt}
 The SCHC ACK that is transmitted is truncated by applying the following algorithm: the longest contiguous sequence of bits that starts at an L2 Word boundary of the SCHC ACK,
@@ -1043,7 +1043,7 @@ SCHC Sender-Abort MAY be sent. SCHC Receiver-Abort MUST NOT be sent.
 
 Windowing is not used. Therefore, the W field MUST NOT be present.
 The Retransmission Timer is not used.
-One Inactivity Timer MUST be instanciated for each pair of Rule Id and optional DTag values.
+At the receiver, one Inactivity Timer MUST be instantiated for each pair of Rule ID and optional DTag values.
 The Inactivity Timer expiration value is based on the characteristics of the underlying LPWAN technology
 and MUST be defined in other documents (e.g. technology-specific profile documents).
 
@@ -1053,28 +1053,30 @@ The size of the FCN field is RECOMMENDED to be 1 bit but MAY be defined by each 
 #### Sender behaviour
 
 The sender transmits all the SCHC Fragments of a SCHC Packet, in sequential order.
+It MUST use the same Rule ID and optional DTag pair for all these fragments.
 The All-1 FCN value MUST be used for the last SCHC Fragment, and MUST NOT be used for the preceeding SCHC Fragments.
-If it receives a SCHC Receiver-Abort with the corresponding Rule Id and optional DTag,
+If it receives a SCHC Receiver-Abort with the corresponding Rule ID and optional DTag,
 the sender MAY abort the on-going transmission and MAY release all its state associated to this fragmented SCHC Packet.
 
 {{Fig-NoACKModeSnd}} shows an example of a corresponding state machine.
 
 #### Receiver behaviour
 
-While FCN is not All-1, the receiver concatenates the payloads of the SCHC Fragments that bear the same Rule Id and optional DTag, in the order they are received.
-When an All-1 SCHC Fragment is received with the same Rule Id and optional DTag, the receiver appends the All-1 SCHC Fragment Payload and the padding bits to the buffer and reassembly concludes.
+While FCN is not All-1, the receiver assembles the payloads of the SCHC Fragments that bear the same Rule ID and optional DTag.
+When an All-1 SCHC Fragment is received with the same Rule ID and optional DTag, the receiver appends the All-1 SCHC Fragment Payload and the padding bits to the
+previously received SCHC Fragment payloads for this SCHC Packet. The reassembly operation concludes.
 
-Each time a SCHC Fragment is received with the same Rule Id and optional DTag, the Inactivity timer MUST be reset.
+Each time a SCHC Fragment is received with the same Rule ID and optional DTag, the Inactivity timer MUST be reset.
 
 When the Inactivity timer expires, the reassembly operation concludes.
 
 If reassembly concludes because of Inactivity Timer expiration,
-the SCHC Packet being reassembled MUST be dropped and resources associated with this Rule Id and optional DTag MUST be released.
+the SCHC Packet being reassembled MUST be dropped and resources associated with this Rule ID and optional DTag MUST be released.
 
 If reassembly concludes because of receiving an All-1 SCHC Fragment and if integrity checking (either through the MIC or through some other L2 means) fails,
-the reassembled SCHC Packet MUST be dropped and resources associated with this Rule Id and optional DTag MUST be released.
+the reassembled SCHC Packet MUST be dropped and resources associated with this Rule ID and optional DTag MUST be released.
 
-On reception of a SCHC Sender-Abort, the receiver MAY release all resource related to the reassembly of the SCHC Fragments with the same Rule Id and optional DTag.
+On reception of a SCHC Sender-Abort, the receiver MAY release all resource related to the reassembly of the SCHC Fragments with the same Rule ID and optional DTag.
 
 {{Fig-NoACKModeRcv}} shows an example of a corresponding state machine.
 
@@ -1991,7 +1993,7 @@ This section lists the parameters that need to be defined in the LPWAN technolog
     * MAX_ACK_REQUEST value
 
 * if L2 Word is wider than a bit and SCHC fragmentation is used, value of the padding bits (0 or 1). This is needed
-because the padding bits of the last fragment are included in the MIC conputation.
+because the padding bits of the last fragment are included in the MIC computation.
 
 * Note on the "C-bit bump": When fragmenting in ACK-on-Error or ACK-Always mode, it is expected that the last window (called All-1 window) will not be
   fully utilised, i.e. there won't be fragments with all FCN values from MAX_WIND_FCN downto 1 and finally All-1.
