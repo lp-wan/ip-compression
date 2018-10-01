@@ -347,12 +347,12 @@ address {
 <link href="#rfc.authors" rel="Chapter">
 
 
-  <meta name="generator" content="xml2rfc version 2.10.1 - https://tools.ietf.org/tools/xml2rfc" />
+  <meta name="generator" content="xml2rfc version 2.10.3 - https://tools.ietf.org/tools/xml2rfc" />
   <link rel="schema.dct" href="http://purl.org/dc/terms/" />
 
   <meta name="dct.creator" content="Minaburo, A., Toutain, L., Gomez, C., and D. Barthel" />
   <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-lpwan-ipv6-static-context-hc-16" />
-  <meta name="dct.issued" scheme="ISO8601" content="2018-09-18" />
+  <meta name="dct.issued" scheme="ISO8601" content="2018-10-01" />
   <meta name="dct.abstract" content="This document defines the Static Context Header Compression (SCHC) framework, which provides both header compression and fragmentation functionalities. SCHC has been designed for Low Power Wide Area Networks (LPWAN)." />
   <meta name="description" content="This document defines the Static Context Header Compression (SCHC) framework, which provides both header compression and fragmentation functionalities. SCHC has been designed for Low Power Wide Area Networks (LPWAN)." />
 
@@ -376,7 +376,7 @@ address {
 <td class="right">L. Toutain</td>
 </tr>
 <tr>
-<td class="left">Expires: March 22, 2019</td>
+<td class="left">Expires: April 4, 2019</td>
 <td class="right">IMT-Atlantique</td>
 </tr>
 <tr>
@@ -397,7 +397,7 @@ address {
 </tr>
 <tr>
 <td class="left"></td>
-<td class="right">September 18, 2018</td>
+<td class="right">October 01, 2018</td>
 </tr>
 
     	
@@ -416,7 +416,7 @@ address {
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at https://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on March 22, 2019.</p>
+<p>This Internet-Draft will expire on April 4, 2019.</p>
 <h1 id="rfc.copyrightnotice"><a href="#rfc.copyrightnotice">Copyright Notice</a></h1>
 <p>Copyright (c) 2018 IETF Trust and the persons identified as the document authors.  All rights reserved.</p>
 <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (https://trustee.ietf.org/license-info) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.</p>
@@ -1915,23 +1915,23 @@ Rule 0
               |       |       ~~~~~~~~~~~~~~~~~~~~~~
               +======++  +--+ send Window + frag(FCN)
                  W=0 |   |  | FCN-
-  Clear local Bitmap |   |  v set local Bitmap
+  Clear lcl_bm       |   |  v set lcl_bm
        FCN=max value |  ++==+========+
                      +&gt; |            |
 +---------------------&gt; |    SEND    |
 |                       +==+===+=====+
 |      FCN==0 &amp; more frags |   | last frag
 |    ~~~~~~~~~~~~~~~~~~~~~ |   | ~~~~~~~~~~~~~~~
-|         set local-Bitmap |   | set local-Bitmap
+|               set lcl_bm |   | set lcl_bm
 |   send wnd + frag(all-0) |   | send wnd+frag(all-1)+MIC
 |       set Retrans_Timer  |   | set Retrans_Timer
 |                          |   |
 |Recv_wnd == wnd &amp;         |   |  
-|Lcl_Bitmap==recv_Bitmap&amp;  |   |  +----------------------+
-|more frag                 |   |  |lcl-Bitmap!=rcv-Bitmap|
-|~~~~~~~~~~~~~~~~~~~~~~    |   |  | ~~~~~~~~~            |
-|Stop Retrans_Timer        |   |  | Attemp++             v
-|clear local_Bitmap        v   v  |                +=====+=+
+|lcl_bm==recv_bm &amp;         |   |  +-----------------------+
+|more frag                 |   |  | lcl_bm!=rcv-bm        |
+|~~~~~~~~~~~~~~~~~~~~~~    |   |  | ~~~~~~~~~             |
+|Stop Retrans_Timer        |   |  | Attempt++             v
+|clear lcl_bm              v   v  |                +=====+=+
 |window=next_window   +====+===+==+===+            |Resend |
 +---------------------+               |            |Missing|
                  +----+     Wait      |            |Frag   |
@@ -1940,7 +1940,7 @@ not expected wnd |    |    Bitmap     |            +=======+
     discard frag      +==+=+===+=+==+=+| ~~~~~~~~~~~~~~~~~ |
                          | |   | ^  ^  |reSend(empty)All-* |   
                          | |   | |  |  |Set Retrans_Timer  |
-                         | |   | |  +--+Attemp++           |
+                         | |   | |  +--+Attempt++          |
 MIC_bit==1 &amp;             | |   | +-------------------------+
 Recv_window==window &amp;    | |   |   all missing frags sent
              no more frag| |   |   ~~~~~~~~~~~~~~~~~~~~~~
@@ -1948,10 +1948,10 @@ Recv_window==window &amp;    | |   |   all missing frags sent
        Stop Retrans_Timer| |   |    
  +=============+         | |   |
  |     END     +&lt;--------+ |   |
- +=============+           |   | Attemp &gt; MAX_ACK_REQUESTS
+ +=============+           |   | Attempt &gt; MAX_ACK_REQUESTS
             All-1 Window &amp; |   | ~~~~~~~~~~~~~~~~~~
              MIC_bit ==0 &amp; |   v Send Abort
-   Lcl_Bitmap==recv_Bitmap | +=+===========+
+          lcl_bm==recv_bm  | +=+===========+
  &#160; &#160; &#160; &#160; &#160; &#160;  ~~~~~~~~~~~~ +&gt;|    ERROR    |
                 Send Abort   +=============+
 
@@ -1963,60 +1963,60 @@ Recv_window==window &amp;    | |   |   all missing frags sent
 <pre>
  Not All- &amp; w=expected +---+   +---+w = Not expected
  ~~~~~~~~~~~~~~~~~~~~~ |   |   |   |~~~~~~~~~~~~~~~~
- Set local_Bitmap(FCN) |   v   v   |discard
+ Set lcl_bm(FCN)       |   v   v   |discard
                       ++===+===+===+=+      
 +---------------------+ &#160; &#160; Rcv &#160; &#160;  +---&gt;* ABORT
 |  +------------------+ &#160; Window &#160; &#160; |
 |  | &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160;  +=====+==+=====+  
 |  | &#160; &#160; &#160; All-0 &amp; w=expect | &#160;^ w =next &amp; not-All
 |  |     ~~~~~~~~~~~~~~~~~~ |  |~~~~~~~~~~~~~~~~~~~~~
-|  |     set lcl_Bitmap(FCN)|  |expected = next window
-|  |      send local_Bitmap |  |Clear local_Bitmap
+|  |    set lcl_bm(FCN)     |  |expected = next window
+|  |      send lcl_bm       |  |Clear lcl_bm
 |  |                        |  |    
-|  | w=expct &amp; not-All      |  |    
+|  | w=expected &amp; not-All   |  |
 |  | ~~~~~~~~~~~~~~~~~~     |  |
-|  | set lcl_Bitmap(FCN)+-+ |  | +--+ w=next &amp; All-0
-|  | if lcl_Bitmap full | | |  | |  | ~~~~~~~~~~~~~~~
-|  | send lcl_Bitmap    | | |  | |  | expct = nxt wnd
-|  |                    v | v  | |  | Clear lcl_Bitmap
-|  |  w=expct &amp; All-1 +=+=+=+==+=++ | set lcl_Bitmap(FCN)     
-|  |  ~~~~~~~~~~~  +-&gt;+    Wait   +&lt;+ send lcl_Bitmap       
+|  |     set lcl_bm(FCN)+-+ |  | +--+ w=next &amp; All-0
+|  |     if lcl_bm full | | |  | |  | ~~~~~~~~~~~~~~~
+|  |     send lcl_bm    | | |  | |  | expected = nxt wnd
+|  |                    v | v  | |  | Clear lcl_bm
+|  |w=expected&amp; All-1 +=+=+=+==+=++ | set lcl_bm(FCN)
+|  |  ~~~~~~~~~~~  +-&gt;+    Wait   +&lt;+ send lcl_bm
 |  |    discard    +--|    Next   |   
 |  | All-0  +---------+  Window   +---&gt;* ABORT  
 |  | ~~~~~  +--------&gt;+========+=++        
 |  | snd lcl_bm  All-1 &amp; w=next| |  All-1 &amp; w=nxt
 |  |                &amp; MIC wrong| |  &amp; MIC right      
 |  |          ~~~~~~~~~~~~~~~~~| | ~~~~~~~~~~~~~~~~~~
-|  |      set local_Bitmap(FCN)| |set lcl_Bitmap(FCN)       
-|  |          send local_Bitmap| |send local_Bitmap
+|  |            set lcl_bm(FCN)| |set lcl_bm(FCN)
+|  |                send lcl_bm| |send lcl_bm
 |  |                           | +----------------------+
-|  |All-1 &amp; w=expct            |                        |
-|  |&amp; MIC wrong                v   +---+ w=expctd &amp;     |
+|  |All-1 &amp; w=expected         |                        |
+|  |&amp; MIC wrong                v   +---+ w=expected &amp;   |
 |  |~~~~~~~~~~~~~~~~~~~~  +====+=====+ | MIC wrong      |
-|  |set local_Bitmap(FCN) |          +&lt;+ ~~~~~~~~~~~~~~ |
-|  |send local_Bitmap     | Wait End | set lcl_btmp(FCN)|
+|  |set lcl_bm(FCN)       |          +&lt;+ ~~~~~~~~~~~~~~ |
+|  |send lcl_bm           | Wait End |   set lcl_bm(FCN)|
 |  +---------------------&gt;+          +---&gt;* ABORT       |
 |                         +===+====+=+-+ All-1&amp;MIC wrong|
 |                             |    ^   | ~~~~~~~~~~~~~~~|
-|      w=expected &amp; MIC right |    +---+ send lcl_btmp  |                
+|      w=expected &amp; MIC right |    +---+   send lcl_bm  |
 |      ~~~~~~~~~~~~~~~~~~~~~~ |                         |
-|       set local_Bitmap(FCN) | +-+ Not All-1           |
-|        send local_Bitmap    | | | ~~~~~~~~~           |
+|       set lcl_bm(FCN)       | +-+ Not All-1           |
+|        send lcl_bm          | | | ~~~~~~~~~           |
 |                             | | |  discard            |
-|All-1 &amp; w=expctd &amp; MIC right | | |                     |
+|All-1&amp;w=expected &amp; MIC right | | |                     |
 |~~~~~~~~~~~~~~~~~~~~~~~~~~~~ v | v +----+All-1         |
-|set local_Bitmap(FCN)      +=+=+=+=+==+ |~~~~~~~~~     |
-|send local_Bitmap          |          +&lt;+Send lcl_btmp |
+|set lcl_bm(FCN)            +=+=+=+=+==+ |~~~~~~~~~     |
+|send lcl_bm                |          +&lt;+Send lcl_bm   |
 +--------------------------&gt;+    END   |                |
                             +==========+&lt;---------------+
 
        ---&gt;* ABORT
  &#160; &#160; &#160; &#160; &#160; &#160;~~~~~~~
             Inactivity_Timer = expires
-        When DWN_Link
+        When DWL
           IF Inactivity_Timer expires
              Send DWL Request
-             Attemp++
+             Attempt++
  &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160;
 </pre>
 <p class="figure">Figure 39: Receiver State Machine for the ACK-Always Mode</p>
