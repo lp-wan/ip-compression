@@ -1038,7 +1038,7 @@ The SCHC Sender-Abort MUST NOT be acknowledged and MUST NOT be retransmitted.
 In No-ACK mode, there is no feedback communication from the fragment receiver to the fragment sender.
 The sender just transmits all the SCHC Fragments blindly.
 
-SCHC ACK or SCHC ACK REQ MUST NOT be sent, and MUST be ignored if received.
+SCHC ACK or SCHC ACK REQ MUST NOT be sent.
 SCHC Sender-Abort MAY be sent. SCHC Receiver-Abort MUST NOT be sent.
 
 Windowing is not used. Therefore, the W field MUST NOT be present.
@@ -1055,8 +1055,6 @@ The size of the FCN field is RECOMMENDED to be 1 bit but MAY be defined by each 
 The sender transmits all the SCHC Fragments of a SCHC Packet, in sequential order.
 It MUST use the same Rule ID and optional DTag pair for all these fragments.
 The All-1 FCN value MUST be used for the last SCHC Fragment, and MUST NOT be used for the preceeding SCHC Fragments.
-If it receives a SCHC Receiver-Abort with the corresponding Rule ID and optional DTag,
-the sender MAY abort the on-going transmission and MAY release all its state associated to this fragmented SCHC Packet.
 
 {{Fig-NoACKModeSnd}} shows an example of a corresponding state machine.
 
