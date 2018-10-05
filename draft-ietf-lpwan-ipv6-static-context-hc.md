@@ -818,18 +818,18 @@ The W field is optional. Its presence is specified by each SCHC F/R mode.
 
             |-- T --|-M-|1|
 +---- ... --+- ... -+---+-+
-|  Rule ID  |  DTag | W |1| (MIC correct)
+|  Rule ID  |  DTag | W |1| (integrity check success)
 +---- ... --+- ... -+---+-+
 
 +---- ... --+- ... -+---+-+----- ... -----+
-|  Rule ID  |  DTag | W |0|encoded Bitmap |(MIC Incorrect)
+|  Rule ID  |  DTag | W |0|encoded Bitmap |(integrity check failure)
 +---- ... --+- ... -+---+-+----- ... -----+
                          C
 ~~~~
 {: #Fig-All1-ACK-Format title='Format of a SCHC ACK at the end of a SCHC Packet transmission'}
 
-The All-1 SCHC ACK header contains a C bit (see {{HeaderFields}}).q
-If the C bit is set to 0 (integrity check failure) and if windowing is used, the Bitmap for the All-1 window follows.
+The All-1 SCHC ACK header contains a C bit (see {{HeaderFields}}).
+If the C bit is set to 0 (integrity check failure) and if windowing is used, the Bitmap for the All-1 window MUST follow.
 
 The Rule ID and DTag values in the SCHC ACK messages MUST be identical to the ones used in the SCHC Fragments that are being acknowledged. This allows matching the SCHC ACK and the corresponding SCHC Fragments.
 
@@ -2039,106 +2039,137 @@ Recv_window==window &    | |   |   all missing frags sent
 
 
 ~~~~
-                   +=======+  
-                   |       |  
-                   | INIT  |  
-                   |       |        FCN!=0 & more frags
-                   +======++  +--+  ~~~~~~~~~~~~~~~~~~~~~~
-                      W=0 |   |  |  send Window + frag(FCN)
-       ~~~~~~~~~~~~~~~~~~ |   |  |  FCN-
-       Clear local Bitmap |   |  v  set local Bitmap
-            FCN=max value |  ++=============+
-                          +> |              |
-                             |     SEND     |
- +-------------------------> |              |
- |                           ++=====+=======+
- |         FCN==0 & more frags|     |last frag
- |     ~~~~~~~~~~~~~~~~~~~~~~~|     |~~~~~~~~~~~~~~~~~
- |            set local-Bitmap|     |set local-Bitmap
- |      send wnd + frag(all-0)|     |send wnd+frag(all-1)+MIC
- |           set Retrans_Timer|     |set Retrans_Timer
- |                            |     |
- |Retrans_Timer expires &     |     |   lcl-Bitmap!=rcv-Bitmap
- |more fragments              |     |   ~~~~~~~~~~~~~~~~~~~~~~
- |~~~~~~~~~~~~~~~~~~~~        |     |   Attemp++        
- |stop Retrans_Timer          |     |  +-----------------+
- |clear local-Bitmap          v     v  |                 v
- |window = next window  +=====+=====+==+==+         +====+====+
- +----------------------+                 +         | Resend  |
- +--------------------->+    Wait Bitmap  |         | Missing |
- |                  +-- +                 |         | Frag    |
- | not expected wnd |   ++=+===+===+===+==+         +======+==+
- | ~~~~~~~~~~~~~~~~ |    ^ |   |   |   ^                   |
- |    discard frag  +----+ |   |   |   +-------------------+
- |                         |   |   |     all missing frag sent
- |Retrans_Timer expires &  |   |   |     ~~~~~~~~~~~~~~~~~~~~~
- |       No more Frag      |   |   |     Set Retrans_Timer
- | ~~~~~~~~~~~~~~~~~~~~~~~ |   |   |   
- |  Stop Retrans_Timer     |   |   |  
- |  Send ALL-1-empty       |   |   |
- +-------------------------+   |   |
-                               |   |
-      Local_Bitmap==Recv_Bitmap|   |
-      ~~~~~~~~~~~~~~~~~~~~~~~~~|   |Attemp > MAX_ACK_REQUESTS
- +=========+Stop Retrans_Timer |   |~~~~~~~~~~~~~~~~~~~~~~~
- |   END   +<------------------+   v  Send Abort
- +=========+                     +=+=========+
-                                 |   ERROR   |
-                                 +===========+                                      
+                      +=======+
+                      |       |
+                      | INIT  |
+                      |       |       FCN!=0 & more frags
+                      +======++       ~~~~~~~~~~~~~~~~~~~~~~
+         Frag RuleID trigger |   +--+ Send cur_W + frag(FCN);
+         ~~~~~~~~~~~~~~~~~~~ |   |  | FCN--;
+      cur_W=0; FCN=max_value;|   |  | set [cur_W, cur_Bmp]
+        clear [cur_W, Bmp_n];|   |  v
+              clear rcv_Bmp  |  ++==+==========+         **BACK_TO_SEND
+                             +->+              |     cur_W==rcv_W &
+          **BACK_TO_SEND        |     SEND     |     [cur_W,Bmp_n]==rcv_Bmp
+    +-------------------------->+              |     & more frags
+    |  +----------------------->+              |     ~~~~~~~~~~~~
+    |  |                        ++===+=========+     cur_W++;
+    |  |      FCN==0 & more frags|   |last frag      clear [cur_W, Bmp_n]
+    |  |  ~~~~~~~~~~~~~~~~~~~~~~~|   |~~~~~~~~~
+    |  |        set cur_Bmp;     |   |set [cur_W, Bmp_n];
+    |  |send cur_W + frag(All-0);|   |send cur_W + frag(All-1)+MIC;
+    |  |        set Retrans_Timer|   |set Retrans_Timer
+    |  |                         |   | +-----------------------------------+
+    |  |Retrans_Timer expires &  |   | |cur_W==rcv_W&[cur_W,Bmp_n]!=rcv_Bmp|
+    |  |more Frags               |   | |  ~~~~~~~~~~~~~~~~~~~              |
+    |  |~~~~~~~~~~~~~~~~~~~~     |   | |  Attempts++; W=cur_W              |
+    |  |stop Retrans_Timer;      |   | | +--------+             rcv_W==Wn &|
+    |  |[cur_W,Bmp_n]==cur_Bmp;  v   v | |        v     [Wn,Bmp_n]!=rcv_Bmp|
+    |  |cur_W++            +=====+===+=+=+==+   +=+=========+   ~~~~~~~~~~~|
+    |  +-------------------+                |   | Resend    |   Attempts++;|
+    +----------------------+   Wait x ACK   |   | Missing   |         W=Wn |
+    +--------------------->+                |   | Frags(W)  +<-------------+
+    |         rcv_W==Wn &+-+                |   +======+====+
+    | [Wn,Bmp_n]!=rcv_Bmp| ++=+===+===+==+==+          |
+    |      ~~~~~~~~~~~~~~|  ^ |   |   |  ^             |
+    |        send (cur_W,+--+ |   |   |  +-------------+
+    |        ALL-0-empty)     |   |   |     all missing frag sent(W)
+    |                         |   |   |     ~~~~~~~~~~~~~~~~~
+    |  Retrans_Timer expires &|   |   |     set Retrans_Timer
+    |            No more Frags|   |   |
+    |           ~~~~~~~~~~~~~~|   |   |
+    |      stop Retrans_Timer;|   |   |
+    |(re)send frag(All-1)+MIC |   |   |
+    +-------------------------+   |   |
+                     cur_W==rcv_W&|   |
+           [cur_W,Bmp_n]==rcv_Bmp&|   | Attempts > MAX_ACK_REQUESTS
+      No more Frags & MIC flag==OK|   | ~~~~~~~~~~
+                ~~~~~~~~~~~~~~~~~~|   | send Abort
+     +=========+stop Retrans_Timer|   |  +===========+
+     |   END   +<-----------------+   +->+   ERROR   |
+     +=========+                         +===========+
 ~~~~
 {: #Fig-ACKonerrorSnd title='Sender State Machine for the ACK-on-Error Mode'}
 
 
 
 ~~~~
-   Not All- & w=expected +---+   +---+w = Not expected
-   ~~~~~~~~~~~~~~~~~~~~~ |   |   |   |~~~~~~~~~~~~~~~~
-   Set local_Bitmap(FCN) |   v   v   |discard
-                        ++===+===+===+=+
-+-----------------------+              +--+ All-0 & full
-|            ABORT *<---+  Rcv Window  |  | ~~~~~~~~~~~~
-|  +--------------------+              +<-+ w =next
-|  |     All-0 empty +->+=+=+===+======+ clear lcl_Bitmap
-|  |     ~~~~~~~~~~~ |    | |   ^
-|  |     send bitmap +----+ |   |w=expct & not-All & full
-|  |                        |   |~~~~~~~~~~~~~~~~~~~~~~~~
-|  |                        |   |set lcl_Bitmap; w =nxt
-|  |                        |   |     
-|  |      All-0 & w=expect  |   |     w=next   
-|  |      & no_full Bitmap  |   |    ~~~~~~~~  +========+
-|  |      ~~~~~~~~~~~~~~~~~ |   |    Send abort| Error/ |
-|  |      send local_Bitmap |   |  +---------->+ Abort  |
-|  |                        |   |  | +-------->+========+
-|  |                        v   |  | |   all-1       ^
-|  |    All-0 empty    +====+===+==+=+=+ ~~~~~~~     |        
-|  |  ~~~~~~~~~~~~~ +--+    Wait       | Send abort  |
-|  |  send lcl_btmp +->| Missing Fragm.|             |
-|  |                   +==============++             |
-|  |                                  +--------------+
-|  |                                   Uplink Only &
-|  |                             Inactivity_Timer = expires
-|  |                             ~~~~~~~~~~~~~~~~~~~~~~~~~~
-|  |                              Send Abort
-|  |All-1 & w=expect & MIC wrong     
-|  |~~~~~~~~~~~~~~~~~~~~~~~~~~~~      +-+  All-1       
-|  |set local_Bitmap(FCN)             | v  ~~~~~~~~~~  
-|  |send local_Bitmap     +===========+==+ snd lcl_btmp
-|  +--------------------->+   Wait End   +-+           
-|                         +=====+=+====+=+ | w=expct &  
-|       w=expected & MIC right  | |    ^   | MIC wrong
-|       ~~~~~~~~~~~~~~~~~~~~~~  | |    +---+ ~~~~~~~~~
-|  set & send local_Bitmap(FCN) | | set lcl_Bitmap(FCN)
-|                               | |                    
-|All-1 & w=expected & MIC right | +-->* ABORT          
-|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ v                      
-|set & send local_Bitmap(FCN) +=+==========+           
-+---------------------------->+     END    |
-                              +============+   
-            --->* ABORT
-                 Only Uplink
-                 Inactivity_Timer = expires 
-                 ~~~~~~~~~~~~~~~~~~~~~~~~~~
-                 Send Abort                                                    
+                 +=======+        New frag RuleID received
+                 |       |        ~~~~~~~~~~~~~
+                 | INIT  +-------+cur_W=0;clear([cur_W,Bmp_n]);
+                 +=======+       |sync=0
+                                 |
+    Not All* & rcv_W==cur_W+---+ | +---+
+      ~~~~~~~~~~~~~~~~~~~~ |   | | |  (E)
+      set[cur_W,Bmp_n(FCN)]|   v v v   |
+                          ++===+=+=+===+=+
+   +----------------------+              +--+ All-0&Full[cur_W,Bmp_n]
+   |           ABORT *<---+  Rcv Window  |  | ~~~~~~~~~~
+   |  +-------------------+              +<-+ cur_W++;set Inact_timer;
+   |  |                +->+=+=+=+=+=+====+    clear [cur_W,Bmp_n]
+   |  | All-0 empty(Wn)|    | | | ^ ^
+   |  | ~~~~~~~~~~~~~~ +----+ | | | |rcv_W==cur_W & sync==0;
+   |  | sendACK([Wn,Bmp_n])   | | | |& Full([cur_W,Bmp_n])
+   |  |                       | | | |& All* || last_miss_frag
+   |  |                       | | | |~~~~~~~~~~~~~~~~~~~~~~
+   |  |    All* & rcv_W==cur_W|(C)| |sendACK([cur_W,Bmp_n]);
+   |  |              & sync==0| | | |cur_W++; clear([cur_W,Bmp_n])
+   |  |&no_full([cur_W,Bmp_n])| |(E)|
+   |  |      ~~~~~~~~~~~~~~~~ | | | |              +========+
+   |  | sendACK([cur_W,Bmp_n])| | | |              | Error/ |
+   |  |                       | | | |   +----+     | Abort  |
+   |  |                       v v | |   |    |     +===+====+
+   |  |                   +===+=+=+=+===+=+ (D)        ^
+   |  |                +--+    Wait x     |  |         |
+   |  | All-0 empty(Wn)+->| Missing Frags |<-+         |
+   |  | ~~~~~~~~~~~~~~    +=============+=+            |
+   |  | sendACK([Wn,Bmp_n])             +--------------+
+   |  |                                       *ABORT
+   v  v
+  (A)(B)
+                                    (D) All* || last_miss_frag
+    (C) All* & sync>0                   & rcv_W!=cur_W & sync>0
+        ~~~~~~~~~~~~                    & Full([rcv_W,Bmp_n])
+        Wn=oldest[not full(W)];         ~~~~~~~~~~~~~~~~~~~~
+        sendACK([Wn,Bmp_n])             Wn=oldest[not full(W)];
+                                        sendACK([Wn,Bmp_n]);sync--
+
+                              ABORT-->* Uplink Only &
+                                        Inact_Timer expires
+    (E) Not All* & rcv_W!=cur_W         || Attempts > MAX_ACK_REQUESTS
+        ~~~~~~~~~~~~~~~~~~~~            ~~~~~~~~~~~~~~~~~~~~~
+        sync++; cur_W=rcv_W;            send Abort
+        set[cur_W,Bmp_n(FCN)]
+
+~~~~
+~~~~
+  (A)(B)
+   |  |
+   |  | All-1 & rcv_W==cur_W & MIC!=OK        All-0 empty(Wn)
+   |  | ~~~~~~~~~~~~~~~~~~~~~~~~~~~~     +-+  ~~~~~~~~~~
+   |  | sendACK([cur_W,Bmp_n],MIC=0)     | v  sendACK([Wn,Bmp_n])
+   |  |                      +===========+=++
+   |  +--------------------->+   Wait End   +-+
+   |                         +=====+=+====+=+ | All-1
+   |     rcv_W==cur_W & MIC==OK    | |    ^   | & rcv_W==cur_W
+   |     ~~~~~~~~~~~~~~~~~~~~~~    | |    +---+ & MIC!=OK
+   |  sendACK([cur_W,Bmp_n],MIC=1) | |          ~~~~~~~~~~~~~~~~~~~
+   |                               | | sendACK([cur_W,Bmp_n],MIC=0);
+   |                               | |          Attempts++
+   |All-1 & Full([cur_W,Bmp_n])    | |
+   |& MIC==OK & sync==0            | +-->* ABORT
+   |~~~~~~~~~~~~~~~~~~~            v
+   |sendACK([cur_W,Bmp_n],MIC=1) +=+=========+
+   +---------------------------->+    END    |
+                                 +===========+
+
+
+         ABORT -->* Uplink Only &
+                    Inact_Timer = expires
+                    || Attempts > MAX_ACK_REQUESTS
+                    ~~~~~~~~~~~~~~~~~~~~~
+                    send Abort
+
 ~~~~
 {: #Fig-ACKonerrorRcv title='Receiver State Machine for the ACK-on-Error Mode'}
 
