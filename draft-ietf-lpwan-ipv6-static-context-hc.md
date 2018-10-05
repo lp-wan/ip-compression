@@ -828,7 +828,7 @@ The W field is optional. Its presence is specified by each SCHC F/R mode.
 ~~~~
 {: #Fig-All1-ACK-Format title='Format of a SCHC ACK at the end of a SCHC Packet transmission'}
 
-The All-1 SCHC ACK header contains a C bit (see {{HeaderFields}}).
+The All-1 SCHC ACK header contains a C bit (see {{HeaderFields}}).q
 If the C bit is set to 0 (integrity check failure) and if windowing is used, the Bitmap for the All-1 window follows.
 
 The Rule ID and DTag values in the SCHC ACK messages MUST be identical to the ones used in the SCHC Fragments that are being acknowledged. This allows matching the SCHC ACK and the corresponding SCHC Fragments.
@@ -1123,15 +1123,34 @@ The SCHC Fragment that bears the FCN value of All-0 or All-1 MUST be sent last i
 Then, the fragment sender MUST initialize an Attempts counter to 0 for that Rule ID and DTag value pair and it MUST enter a **second state**
 where it MUST start a Retransmission Timer for that Rule ID and DTag value pair
 and where it MUST expect to receive a SCHC ACK.
-On Retransmission Timer expiration, if Attempts is strictly less that MAX_ACK_REQUESTS, the fragment sender MUST send a SCHC ACK REQ and MUST increment the Attempts counter.
-If the current window is not the last one (All-0), the SCHC ACK REQ that is sent MUST be the SCHC All-0 ACK REQ described in {{All0ACKREQ}}.
-If the current window is the last one (All-1), the SCHC ACK REQ that is sent MUST be the SCHC All-1 ACK REQ described in {{All1ACKREQ}}.
-If the Retransmission Timer expires while Attempts is greater or equal to MAX_ACK_REQUESTS, the fragment sender MUST send a SCHC Sender-Abort, it MUST release all resource associated with this SCHC Packet and it MUST exit with an error condition.
-On receiving a SCHC ACK, if the SCHC ACK indicates that some fragments are missing at the receiver, the sender MUST increment Attempts, it MUST stop the Retransmission Timer and MUST enter a **third state**.
-If the current window is not the last one (All-0) and the SCHC ACK indicates that all fragments were received correctly, the sender MUST stop the Retransmission Timer, it MUST increment W, it MUST advance to the next fragmentation window and it MUST return to the **first state**.
-If the current window is the last one (All-1) and the SCHC ACK indicates that more fragments were received than the sender actually sent, then the fragment sender MUST send a SCHC Sender-Abort, it MUST release all resource associated with this SCHC Packet and it MUST exit with an error condition.
-If the current window is the last one (All-1) and the SCHC ACK indicates that all fragments were received correctly yet integrity checking does not match, the fragment sender MUST send a SCHC Sender-Abort, it MUST release all resource associated with this SCHC Packet and it MUST exit with an error condition.
-If the current window is the last one (All-1) and the SCHC ACK indicates that all fragments were received correctly and integrity checking does match, the sender exits succesfully.
+
+  - On Retransmission Timer expiration, if Attempts is strictly less that MAX_ACK_REQUESTS, the fragment sender MUST send a SCHC ACK REQ and MUST increment the Attempts counter.
+    * If the current window is not the last one (All-0), the SCHC ACK REQ that is sent MUST be the SCHC All-0 ACK REQ described in {{All0ACKREQ}}.
+    * If the current window is the last one (All-1), the SCHC ACK REQ that is sent MUST be the SCHC All-1 ACK REQ described in {{All1ACKREQ}}.
+  - If the Retransmission Timer expires while Attempts is greater or equal to MAX_ACK_REQUESTS,
+  the fragment sender MUST send a SCHC Sender-Abort,
+  it MUST release all resource associated with this SCHC Packet
+  and it MUST exit with an error condition.
+  - On receiving a SCHC ACK,
+    * if the SCHC ACK indicates that some fragments are missing at the receiver,
+    the sender MUST increment Attempts,
+    it MUST stop the Retransmission Timer
+    and MUST enter a **third state**.
+    * If the current window is not the last one (All-0) and the SCHC ACK indicates that all fragments were received correctly,
+    the sender MUST stop the Retransmission Timer,
+    it MUST increment W,
+    it MUST advance to the next fragmentation window
+    and it MUST return to the **first state**.
+    * If the current window is the last one (All-1) and the SCHC ACK indicates that more fragments were received than the sender actually sent,
+    the fragment sender MUST send a SCHC Sender-Abort,
+    it MUST release all resource associated with this SCHC Packet
+    and it MUST exit with an error condition.
+    * If the current window is the last one (All-1) and the SCHC ACK indicates that all fragments were received correctly yet integrity checking does not match,
+    the fragment sender MUST send a SCHC Sender-Abort,
+    it MUST release all resource associated with this SCHC Packet
+    and it MUST exit with an error condition.
+    * If the current window is the last one (All-1) and the SCHC ACK indicates that all fragments were received correctly and integrity checking does match,
+    the sender exits succesfully.
 
 In the **third state**, the fragment sender MUST transmit all the SCHC Fragments that have been reported missing, then it MUST return to the **second state**.
 
