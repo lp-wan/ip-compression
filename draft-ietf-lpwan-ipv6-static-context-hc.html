@@ -347,12 +347,12 @@ address {
 <link href="#rfc.authors" rel="Chapter">
 
 
-  <meta name="generator" content="xml2rfc version 2.10.3 - https://tools.ietf.org/tools/xml2rfc" />
+  <meta name="generator" content="xml2rfc version 2.11.0 - https://tools.ietf.org/tools/xml2rfc" />
   <link rel="schema.dct" href="http://purl.org/dc/terms/" />
 
   <meta name="dct.creator" content="Minaburo, A., Toutain, L., Gomez, C., and D. Barthel" />
   <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-lpwan-ipv6-static-context-hc-16" />
-  <meta name="dct.issued" scheme="ISO8601" content="2018-10-05" />
+  <meta name="dct.issued" scheme="ISO8601" content="2018-10-09" />
   <meta name="dct.abstract" content="This document defines the Static Context Header Compression (SCHC) framework, which provides both header compression and fragmentation functionalities. SCHC has been designed for Low Power Wide Area Networks (LPWAN)." />
   <meta name="description" content="This document defines the Static Context Header Compression (SCHC) framework, which provides both header compression and fragmentation functionalities. SCHC has been designed for Low Power Wide Area Networks (LPWAN)." />
 
@@ -376,7 +376,7 @@ address {
 <td class="right">L. Toutain</td>
 </tr>
 <tr>
-<td class="left">Expires: April 8, 2019</td>
+<td class="left">Expires: April 12, 2019</td>
 <td class="right">IMT-Atlantique</td>
 </tr>
 <tr>
@@ -397,7 +397,7 @@ address {
 </tr>
 <tr>
 <td class="left"></td>
-<td class="right">October 05, 2018</td>
+<td class="right">October 09, 2018</td>
 </tr>
 
     	
@@ -416,7 +416,7 @@ address {
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at https://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on April 8, 2019.</p>
+<p>This Internet-Draft will expire on April 12, 2019.</p>
 <h1 id="rfc.copyrightnotice"><a href="#rfc.copyrightnotice">Copyright Notice</a></h1>
 <p>Copyright (c) 2018 IETF Trust and the persons identified as the document authors.  All rights reserved.</p>
 <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (https://trustee.ietf.org/license-info) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.</p>
@@ -635,6 +635,7 @@ address {
 <li>L2 Word: this is the minimum subdivision of payload data that the L2 will carry. In most L2 technologies, the L2 Word is an octet.  In bit-oriented radio technologies, the L2 Word might be a single bit.  The L2 Word size is assumed to be constant over time for each device.</li>
 <li>MO: Matching Operator. An operator used to match a value contained in a header field with a value contained in a Rule.</li>
 <li>Padding (P). Extra bits that may be appended by SCHC to a data unit that it passes to the underlying Layer 2 for transmission.  SCHC itself operates on bits, not bytes, and does not have any alignment prerequisite. See <a href="#Padding" class="xref">Section 9</a>.</li>
+<li>Profile: SCHC offers variations in the way it is operated, with a number of parameters listed in <a href="#SCHCParams" class="xref">Appendix D</a>.  A profile indicates a particular setting of all these parameters.  Both ends of a SCHC session must be provisioned with the same profile information and with the same set of rules before the session starts, so that there is no ambiguity in how they expect to communicate.</li>
 <li>Rule: A set of header field values.</li>
 <li>Rule entry: A column in a Rule that describes a parameter of the header field.</li>
 <li>Rule ID: An identifier for a Rule. SCHC C/D on both sides share the same Rule ID for a given packet. A set of Rule IDs are used to support SCHC F/R functionality.</li>
@@ -964,7 +965,7 @@ A packet (e.g. an IPv6 packet)
 <li>The L2 MTU value does not change while a fragmented SCHC Packet is being transmitted.</li>
 </ul>
 <p id="rfc.section.8.1.p.5">These assumptions allow reducing the complexity and overhead of the SCHC F/R mechanism.</p>
-<p id="rfc.section.8.1.p.6">This specification includes several SCHC F/R modes, which allow for a range of reliability options such as optional SCHC Fragment retransmission.  More modes may be defined in the future.  The same SCHC F/R mode MUST be used for all SCHC Fragments of a fragmented SCHC Packet.  This document does not make any decision with regard to which mode(s) will be used over a specific LPWAN technology. This will be defined in other technology-specific documents.</p>
+<p id="rfc.section.8.1.p.6">This specification includes several SCHC F/R modes, which allow for a range of reliability options such as optional SCHC Fragment retransmission.  More modes may be defined in the future.  The same SCHC F/R mode MUST be used for all SCHC Fragments of the same fragmented SCHC Packet.  This document does not make any decision with regard to which mode(s) will be used over a specific LPWAN technology. This will be defined in other LPWAN technology-specific documents.</p>
 <p id="rfc.section.8.1.p.7">SCHC F/R uses the knowledge of the L2 Word size (see <a href="#Term" class="xref">Section 4</a>) to encode some messages. Therefore, SCHC MUST know the L2 Word size.  SCHC F/R usually generates SCHC Fragments and SCHC ACKs that are multiples of L2 Words.  The padding overhead is kept to the absolute minimum (see <a href="#Padding" class="xref">Section 9</a>).</p>
 <h1 id="rfc.section.8.2">
 <a href="#rfc.section.8.2">8.2.</a> <a href="#FragTools" id="FragTools">SCHC F/R Tools</a>
@@ -987,7 +988,7 @@ A packet (e.g. an IPv6 packet)
 <h1 id="rfc.section.8.2.2">
 <a href="#rfc.section.8.2.2">8.2.2.</a> <a href="#MiscTools" id="MiscTools">Windows, Timers, Counters, Intergrity Checking</a>
 </h1>
-<p id="rfc.section.8.2.2.p.1">Some SCHC F/R modes may handle SCHC Fragments as collections, called windows.  When windowing is used, information on the correct reception of the SCHC Fragments belonging to a window is grouped together and may be sent back as a SCHC ACK.  Whatever the windowing choice, a SCHC ACK may report on the reception of all the SCHC Fragments composing a fragmented SCHC Packet.</p>
+<p id="rfc.section.8.2.2.p.1">When fragmented, a SCHC Packet is broken down into pieces (called tile?).  Each SCHC Fragment carries (at least) one piece (tile) in its Payload.  Some SCHC F/R modes may handle consecutive SCHC Fragments as sets, called windows.  When windowing is used, the windows MUST be numbered from 0 upward when enumerating the tiles from the start of the SCHC Packet to its end.  When windowing is used, information on the correct reception of the SCHC Fragments belonging to the same window MUST be grouped together and MAY be sent back as a SCHC ACK.  The window size is the maximum number of SCHC Fragments that may be grouped together in a window.</p>
 <p id="rfc.section.8.2.2.p.2">Some SCHC F/R modes can use the following timers and counters</p>
 <p></p>
 
@@ -996,7 +997,7 @@ A packet (e.g. an IPv6 packet)
 <li>Retransmission Timer: this timer can be used by a SCHC Fragment sender to set a timeout on expecting a SCHC ACK.</li>
 <li>Attempts: this counter counts the requests for a missing SCHC ACK. MAX_ACK_REQUESTS is the threshold at which the SCHC Fragment sender stops sending requests.</li>
 </ul>
-<p id="rfc.section.8.2.2.p.4">The reassembled SCHC Packet is checked for integrity at the receive end.  One way of doing integrity checking is by computing a MIC at the sender side and transmitting it to the receiver for comparison with the locally computed MIC.  Some LPWAN technologies under SCHC may provide other means of ensuring that all fragments composing a SCHC Packet were correctly received and reassembled.</p>
+<p id="rfc.section.8.2.2.p.4">The reassembled SCHC Packet is checked for integrity at the receive end.  One way of doing integrity checking is by computing a MIC at the sender side and transmitting it to the receiver for comparison with the locally computed MIC.  Some LPWAN technologies under SCHC may provide other means of ensuring that all fragments composing a SCHC Packet were correctly received and reassembled.  The LPWAN technology-specific documents MUST define how integrity checking is done.</p>
 <h1 id="rfc.section.8.2.3">
 <a href="#rfc.section.8.2.3">8.2.3.</a> <a href="#HeaderFields" id="HeaderFields">Header Fields</a>
 </h1>
@@ -1023,10 +1024,10 @@ A packet (e.g. an IPv6 packet)
 <p> The size of the FCN field is called N. It is defined for each F/R mode and Rule ID.  Since All-1 is special, the maximum value of FCN (as an unsigned integer) theoretically is (2^N)-2.  However, each SCHC F/R mode or each LPWAN technology-specific document is free to specify a maximum value, called MAX_WIND_FCN, lower than (2^N)-2.  The rationale is that MAX_WIND_FCN finely controls the width of the Bitmap in the SCHC ACK message, which may be critical to some LPWAN technologies.</p>
 </li>
 <li>Datagram Tag (DTag). The DTag field is optional.  <br><br> When there is no DTag, there can be only one fragmented SCHC Packet in transit: only after all its fragments have been transmitted can another fragmented SCHC Packet be sent.  <br><br> If present, DTag MUST be set to the same value for all SCHC Fragments carrying the same SCHC packet, and to different values for different SCHC Packets. Using this field, the sender can interleave fragments from different SCHC Packets, while the receiver can still tell them apart.  <br><br> If a SCHC ACK message is sent, it MUST carry the same DTag value as the SCHC Fragments for which this SCHC ACK is intended.  <br><br> The presence and size of the DTag field is defined by each SCHC F/R mode for each Rule ID value.  For each new SCHC Packet processed by the sender under the same F/R mode and same RuleID, DTag MUST be sequentially increased, from 0 to (2^T) &#8211; 1 wrapping back from (2^T) - 1 to 0, where T is the size of DTag in bits.</li>
-<li>W (window): The W field is optional. It is only present if windowing is used.  <br><br> This field carries the same value for all SCHC F/R messages pertaining to the same window, and it is incremented for the next window. The value of W is initialised to 0 for each new SCHC Packet fragmented under the same F/R mode and Rule ID.  <br><br> The presence of W and its size (called M, in bits) is defined for each F/R mode and Rule ID.</li>
+<li>W: The W field is optional. It is only present if windowing is used.  <br><br> This field carries information related to the window number a SCHC F/R message relates to.  It MUST carry the same value for all SCHC F/R messages pertaining to the same window.  The value of W MUST be initialised to 0 for each new fragmented SCHC Packet.  <br><br> The presence of W and its size (called M, in bits) is defined for each F/R mode and Rule ID.  <br><br> Depending on the mode and profile, W may carry the full window number, or just the least significant bit or any other partial representation of the window number.</li>
 <li>Message Integrity Check (MIC).  This field is optional. If present, it only appears in the All-1 SCHC Fragments and in the All-1 ACK REQ.  If present, its size MUST be at least an L2 Word.  If the MIC is present, the sender MUST compute it over the complete SCHC Packet and the potential padding bits of the last SCHC Fragment.  <br><br> Sending a MIC is one way of allowing the receiver to do integrity checking on the reassembled SCHC Packet (see <a href="#MiscTools" class="xref">Section 8.2.2</a>).  The MIC supports UDP checksum elision by SCHC C/D (see <a href="#UDPchecksum" class="xref">Section 10.11</a>).  <br><br> The CRC32 polynomial 0xEDB88320 (i.e. the reverse representation of the polynomial used e.g. in the Ethernet standard <a href="#RFC3385" class="xref">[RFC3385]</a>) is RECOMMENDED as the default algorithm for computing the MIC. Nevertheless, other MIC lengths or other algorithms MAY be required by the technology-specific documents.  <br><br> Note that the concatenation of the complete SCHC Packet and the potential padding bits of the last SCHC Fragment does not generally constitute an integer number of bytes.  For implementers to be able to used byte-oriented CRC libraries, it is RECOMMENDED that the concatenation of the complete SCHC Packet and the last fragment potential padding bits be zero-extended to the next byte boundary and that the MIC be computed on that byte array.</li>
 <li>C (integrity Check): C is a 1-bit field.  This field is used in the SCHC ACK messages to report the outcome of the reassembled SCHC Packet integrity check (see <a href="#MiscTools" class="xref">Section 8.2.2</a>).  A value of 1 tells that the integrity check succeeded. A value of 0 represents a failure.</li>
-<li>Bitmap. The Bitmap is used together with windowing.  It is a bit field maintained by the sender during the fragmentation and by the receiver during the reassembly of a fragmented SCHC Packet.  The Bitmap may also be carried in a SCHC ACK, either in extenso or in a shortened form (see <a href="#Bitmapopt" class="xref">Section 8.3.2.3</a>).  Each bit in the internal representation of the Bitmap corresponds to a SCHC Fragment of the current window, and provides feedback on whether the SCHC Fragment has been received or not. The right-most position on the Bitmap reports if the All-0 or All-1 fragment has been correctly received or not. Feedback on the SCHC Fragment with the FCN == MAX_WIND_FCN value is provided by the bit in the left-most position of the Bitmap. In the Bitmap, a bit set to 1 indicates that the SCHC Fragment of FCN corresponding to that bit position has been correctly received.</li>
+<li>Bitmap. The Bitmap is used together with windowing.  It is a bit field that may be maintained by the sender during the fragmentation and by the receiver during the reassembly of a fragmented SCHC Packet.  The Bitmap may also be carried in a SCHC ACK, either in extenso or in a shortened form (see <a href="#Bitmapopt" class="xref">Section 8.3.2.3</a>).  Each bit in the internal representation of the Bitmap corresponds to a SCHC Fragment (tile) of a window, and provides feedback on whether the SCHC Fragment has been received or not. The right-most position on the Bitmap tells if the All-0 or All-1 fragment has been correctly received or not. Feedback on the SCHC Fragment with the FCN == MAX_WIND_FCN value is provided by the bit in the left-most position of the Bitmap. In the Bitmap, a bit set to 1 indicates that the SCHC Fragment of FCN corresponding to that bit position has been correctly received.</li>
 </ul>
 <h1 id="rfc.section.8.3">
 <a href="#rfc.section.8.3">8.3.</a> <a href="#Fragfor" id="Fragfor">SCHC F/R Message Formats</a>
@@ -1035,7 +1036,7 @@ A packet (e.g. an IPv6 packet)
 <h1 id="rfc.section.8.3.1">
 <a href="#rfc.section.8.3.1">8.3.1.</a> <a href="#schc-fragment-format" id="schc-fragment-format">SCHC Fragment format</a>
 </h1>
-<p id="rfc.section.8.3.1.p.1">A SCHC Fragment conforms to the general format shown in <a href="#Fig-FragFormat" class="xref">Figure 11</a>.  It comprises a SCHC Fragment Header and a SCHC Fragment Payload.  The SCHC Fragment Payload carries a subset of the SCHC Packet.  In addition, the last SCHC Fragment of a SCHC Packet carries just enough padding bits as needed to fill up an L2 Word.  The SCHC Fragment is the data unit passed on to the L2 for transmission.</p>
+<p id="rfc.section.8.3.1.p.1">A SCHC Fragment conforms to the general format shown in <a href="#Fig-FragFormat" class="xref">Figure 11</a>.  It comprises a SCHC Fragment Header and a SCHC Fragment Payload.  The SCHC Fragment Payload carries a subset of the SCHC Packet (tile).  In addition, the last SCHC Fragment of a SCHC Packet carries just enough padding bits as needed to fill up an L2 Word.  The SCHC Fragment is the data unit passed on to the L2 for transmission.</p>
 <div id="rfc.figure.11"></div>
 <div id="Fig-FragFormat"></div>
 <pre>
@@ -1410,6 +1411,86 @@ A packet (e.g. an IPv6 packet)
 <p><a href="#Fig-ACKAlwaysRcv" class="xref">Figure 39</a> shows an example of a corresponding state machine.</p>
 <h1 id="rfc.section.8.4.3">
 <a href="#rfc.section.8.4.3">8.4.3.</a> <a href="#ACK-on-Error-subsection" id="ACK-on-Error-subsection">ACK-on-Error</a>
+</h1>
+<p id="rfc.section.8.4.3.p.1">In ACK-on-Error mode, windowing is used.  The SCHC Packet MUST be fragmented into pieces of equal size, except for the last piece.  The last piece MUST NOT be larger than the other ones.  The pieces MUST be contigous.  The pieces are hereafeter called tiles.  Successive tiles are grouped in windows.  The window numbers MUST increase from 0 upward, from the start of the SCHC Packet to its end.  All windows, except the last one, MUST contain MAX_WIND_FCN+1 tiles.  Tiles are numbered within each window.  The tile numbers decrement from MAX_WIND_FN downward, looking from the start of the SCHC Packet toward its end.  Each tile of a SCHC Packet is therefore uniquely identified by a window number and a tile number within this window.</p>
+<p id="rfc.section.8.4.3.p.2">A SCHC Fragment message carries one or more tiles.  A SCHC ACK reports on the reception of a window of tiles.</p>
+<p id="rfc.section.8.4.3.p.3">The W field is wide enough that it unambiguously represents an absolute window number.  Acknowledgements are fed by the fragment receiver back to the fragment sender for the windows that have tiles missing at the receiver.  No acknowledgement is fed back for windows that have been fully received by the fragment receiver.</p>
+<p id="rfc.section.8.4.3.p.4">The fragment sender retransmits SCHC Fragments for tiles that are reported missing.  It can advance to the next window even before it has ascertained that all SCHC Fragments belonging to previous windows have been correctly received, and can still later retransmit SCHC Fragments belonging to previous windows.  Therefore, the sender and the receiver may operate in a fully decoupled fashion.  The fragmented SCHC Packet transmission concludes</p>
+<p></p>
+
+<ul>
+<li>when integrity checking shows that the fragmented SCHC Packet has been correctly re-assembled at the receive end, and this information has been conveyed back to the sender,</li>
+<li>or when too many retransmission attempts were made.</li>
+</ul>
+<p id="rfc.section.8.4.3.p.6">Each LPWAN technology-specific document MUST specify which Rule ID value(s) is (are) allocated to this ACK-on-Error mode.  For brevity, the rest of <a href="#ACK-on-Error-subsection" class="xref">Section 8.4.3</a> only refers to Rule ID values that are allocated to this mode.</p>
+<p id="rfc.section.8.4.3.p.7">The W field MUST be present in SCHC F/R messages.</p>
+<p id="rfc.section.8.4.3.p.8">Each LPWAN technology-specific document, for each Rule ID value, MUST define</p>
+<p></p>
+
+<ul>
+<li>the tile size (no alignement to the L2 Word is mandated)</li>
+<li>the value of M (size of the W field),</li>
+<li>the value of N (size of the FCN field),</li>
+<li>the value of MAX_WIND_FCN, which MUST be strictly less than (2^N)-1</li>
+<li>the presence or absence of the MIC field in the SCHC F/R messages, as well as its size if it is present,</li>
+<li>the presence or absence of the DTag field in the SCHC F/R messages, as well as its size if it is present,</li>
+<li>the value of MAX_ACK_REQUESTS,</li>
+<li>the expiration time of the Retransmission Timer</li>
+<li>the expiration time of the Inactivity Timer</li>
+</ul>
+<p id="rfc.section.8.4.3.p.10">The sender, for each active pair of Rule ID and optional DTag values, MUST instantiate</p>
+<p></p>
+
+<ul>
+<li>one Attempts counter</li>
+<li>one Retransmission Timer</li>
+</ul>
+<p id="rfc.section.8.4.3.p.12">The receiver, for each pair of Rule ID and optional DTag values, MUST instantiate</p>
+<p></p>
+
+<ul><li>one Inactivity Timer</li></ul>
+<h1 id="rfc.section.8.4.3.1">
+<a href="#rfc.section.8.4.3.1">8.4.3.1.</a> <a href="#sender-behaviour-2" id="sender-behaviour-2">Sender behaviour</a>
+</h1>
+<p id="rfc.section.8.4.3.1.p.1">At the beginning of the fragmentation of a new SCHC Packet, the fragment sender MUST select a Rule ID and DTag value pair for this SCHC Packet.  A Rule MUST NOT be selected if the SCHC Packet cannot be fragmented in (2&#710;M) * (MAX_WIND_FCN+1) tiles or less.</p>
+<p id="rfc.section.8.4.3.1.p.2">The fragment sender MUST initialize the Attempts counter to 0 for that Rule ID and DTag value pair.</p>
+<p id="rfc.section.8.4.3.1.p.3">A SCHC Fragment message carries in its payload one or more tiles.  If more than one tile is carried in one SCHC Fragment, the tiles MUST be consecutive and MUST be ordered from the start of the SCHC Packet toward its end.</p>
+<p id="rfc.section.8.4.3.1.p.4">In a SCHC Fragment message, the sender MUST fill the W and FCN fields with the window number and tile number of the first tile sent in that SCHC Fragment.</p>
+<p id="rfc.section.8.4.3.1.p.5">If a SCHC Fragment message carries only the last tile of the fragmented SCHC Packet, it MUST be of the All-1 type specified in <a href="#LastFrag" class="xref">Section 8.3.1.2</a>.  Otherwise, it MUST be of the regular type specified in <a href="#NotLastFrag" class="xref">Section 8.3.1.1</a>.</p>
+<p id="rfc.section.8.4.3.1.p.6">The fragment sender MUST send SCHC Fragments such that, all together, they contain all the tiles of the fragmented SCHC Packet.</p>
+<p id="rfc.section.8.4.3.1.p.7">The fragment sender MUST send at least one All-1 SCHC Fragment or at least one All-1 ACK REQ.</p>
+<p id="rfc.section.8.4.3.1.p.8">At all times, after having sent an All-1 SCHC Fragment or an All-1 ACK REQ, the fragment sender MUST listen for SCHC ACK messages.  Profiles defined in each LPWAN technology-specific document MAY specify other times at which the fragment sender MUST listen for SCHC ACK messages.</p>
+<p id="rfc.section.8.4.3.1.p.9">Each time a fragment sender sends an All-1 SCHC Fragment or an All-1 ACK REQ,</p>
+<p></p>
+
+<ul>
+<li>it MUST increment the Attempts counter</li>
+<li>it MUST reset the Retransmission Timer</li>
+</ul>
+<p id="rfc.section.8.4.3.1.p.11">On Retransmission Timer expiration</p>
+<p></p>
+
+<ul>
+<li>if Attempts is strictly less that MAX_ACK_REQUESTS, the fragment sender MUST send a SCHC All-1 ACK REQ and MUST increment the Attempts counter</li>
+<li>otherwise the fragment sender MUST send a SCHC Sender-Abort, it MUST release all resource associated with this SCHC Packet and it MUST exit with an error condition.</li>
+</ul>
+<p id="rfc.section.8.4.3.1.p.13">On receiving a SCHC ACK,</p>
+<p></p>
+
+<ul>
+<li>if the W field in the SCHC ACK corresponds to the number of the last window,  <ul>
+<li>if the C bit is set, the sender MUST release all resource associated with this SCHC Packet and MUST exit successfully</li>
+<li>otherwise, the fragment sender      <br><br> o MUST send SCHC Fragment messages containing the tiles that are reported missing in the SCHC ACK.  o the last one of these SCHC Fragment messages MUST be an All-1 SCHC Fragment, or a SCHC All-1 ACK REQ MUST be sent after the last SCHC Fragment message</li>
+</ul>
+</li>
+<li>otherwise, the fragment sender  <ul>
+<li>MUST send SCHC Fragment messages containing the tiles that are reported missing in the SCK ACK</li>
+<li>then it MAY send a SCHC All-1 ACK REQ</li>
+</ul>
+</li>
+</ul>
+<h1 id="rfc.section.8.4.3.2">
+<a href="#rfc.section.8.4.3.2">8.4.3.2.</a> <a href="#receiver-behaviour-2" id="receiver-behaviour-2">Receiver behaviour</a>
 </h1>
 <h1 id="rfc.section.8.5">
 <a href="#rfc.section.8.5">8.5.</a> <a href="#supporting-multiple-window-sizes" id="supporting-multiple-window-sizes">Supporting multiple window sizes</a>
