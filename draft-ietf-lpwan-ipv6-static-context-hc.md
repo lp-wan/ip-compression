@@ -263,42 +263,6 @@ The Compressed Header itself is composed of a Rule ID and a Compression Residue.
 ~~~~ 
 {: #Fig-SCHCpckt title='SCHC Packet'}
 
-## SCHC Fragmentation message formats
-
-The SCHC Fragment has the
-following format:
-
-~~~~
-
-| Rule ID + DTAG + W + FCN [+ MIC ] |   Partial  SCHC Packet  |
-+-----------------------------------+-------------------------+ 
-|        Fragment Header            |   Fragment  Payload     |
-+-----------------------------------+-------------------------+
-
-~~~~ 
-{: #Fig-SCHCfragment title='SCHC Fragment'}
-
-The Fragment Header size is variable and depends on the Fragmentation parameters.
-The Fragment payload contains a part of the SCHC Packet Compressed Header, a part of the SCHC Packet Payload or both.
-Its size depends on the L2 MTU (see {{Frag}}).
-
-
-The SCHC ACK
-has the following format:
-
-~~~~
-
-|Rule ID + DTag + W|             
-+------------------+-------- ... ---------+
-|    ACK Header    |    encoded Bitmap    |
-+------------------+-------- ... ---------+
-
-~~~~ 
-{: #Fig-SCHCack title='SCHC ACK'}
-
-The SCHC ACK Header and the encoded Bitmap both have variable size.
-
-SCHC Fragmentation messages are further described in {{Frag}}.
 
 ## Functional mapping
 
@@ -600,13 +564,13 @@ The messages that can be used by SCHC F/R are the following
 
 * SCHC ACK: An acknowledgement for fragmentation. This message is used by the receiver to report to the sender on the success of reception of a set of SCHC Fragments.
 
-* SCHC ACK REQ: A request for a SCHC ACK. It can be used when the sender expects a SCHC ACK from the receiver but doesn't receive one.
+* SCHC ACK REQ: A request for a SCHC ACK. It can be used by the sender to explicitely request a SCHC ACK from the receiver.
 
 * SCHC Sender-Abort: A message by the sender telling the receiver that it has aborted the transmission of a fragmented SCHC Packet.
 
 * SCHC Receiver-Abort: A message by the receiver to tell the sender to abort the transmission of a fragmented SCHC Packet.
 
-### Windows, Timers, Counters, Intergrity Checking {#MiscTools}
+### Windows, Timers, Counters, Integrity Checking {#MiscTools}
 
 When fragmented, a SCHC Packet is broken down into pieces (called tile?).
 Each SCHC Fragment carries (at least) one piece (tile) in its Payload.
@@ -621,7 +585,7 @@ Some SCHC F/R modes can use the following timers and counters
 
 * Retransmission Timer: this timer can be used by a SCHC Fragment sender to set a timeout on expecting a SCHC ACK.
 
-* Attempts: this counter counts the requests for a missing SCHC ACK. MAX_ACK_REQUESTS is the threshold at which the SCHC Fragment sender stops sending requests.
+* Attempts: this counter counts the requests for a missing SCHC ACK. MAX_ACK_REQUESTS is the threshold at which the SCHC Fragment sender stops sending repeated requests.
 
 
 The reassembled SCHC Packet is checked for integrity at the receive end.
@@ -651,25 +615,25 @@ The SCHC F/R messages use the following fields (see the related formats in {{Fra
 
 
 * Fragment Compressed Number (FCN). The FCN is present in the SCHC Fragments header. This field conveys information about the progress in the sequence of SCHC Fragments.
-  For exemple, it can contain a truncated, efficient representation of a larger-sized fragment number.
+  For example, it can contain a truncated, efficient representation of a larger-sized fragment number.
   The exact use of the FCN field is left to each SCHC F/R mode.
-  However, two values are special. They help control the SCHC F/R process:
+  However, two values are reserved for special purpose. They help control the SCHC F/R process:
 
-  * The FCN value with all the bits equal to 1 (All-1) signals the very last SCHC Fragment of a SCHC Packet.
+  * The FCN value with all the bits equal to 1 (called All-1) signals the very last SCHC Fragment of a SCHC Packet.
   By extension, if windowing is used, the last window of a packet is called the All-1 window.
 
-  * If windowing is used, the FCN value with all the bits equal to 0 (All-0) signals the last SCHC Fragment of a window that is not the last one of
+  * If windowing is used, the FCN value with all the bits equal to 0 (called All-0) signals the last SCHC Fragment of a window that is not the last one of
   the SCHC packet. By extension, such a window is called an All-0 window.
 
-  The size of the FCN field is called N. It is defined for each F/R mode and Rule ID.
-  Since All-1 is special, the maximum value of FCN (as an unsigned integer) theoretically is (2^N)-2.
-  However, each SCHC F/R mode or each LPWAN technology-specific document is free to specify a maximum value, called MAX_WIND_FCN, lower than (2^N)-2.
-  The rationale is that MAX_WIND_FCN finely controls the width of the Bitmap in the SCHC ACK message, which may be critical to some LPWAN technologies.
+  N is the size of the FCN field, in bits. It is defined for each SCHC F/R mode, Profile and Rule ID.
+  Since All-1 is special, the highest value of FCN (as an unsigned integer) theoretically is (2^N)-2.
+  However, each SCHC F/R mode or Profile is free to specify a maximum value, called MAX_WIND_FCN, lower than (2^N)-2.
+  The rationale is that MAX_WIND_FCN finely controls the size of the Bitmap in the SCHC ACK message, which may be critical to some LPWAN technologies.
   
 * Datagram Tag (DTag). The DTag field is optional.
 
-  When there is no DTag, there can be only one fragmented SCHC Packet in transit:
-  only after all its fragments have been transmitted can another fragmented SCHC Packet be sent.
+  When there is no DTag, there can be only one fragmented SCHC Packet in transit.
+  In other words, only after all its fragments have been transmitted can another fragmented SCHC Packet be sent.
 
   If present, DTag MUST be set to the same value for all SCHC Fragments carrying the same SCHC
   packet, and to different values for different SCHC Packets. Using this field, the sender can interleave fragments from
@@ -707,7 +671,7 @@ The SCHC F/R messages use the following fields (see the related formats in {{Fra
 
   Note that the concatenation of the complete SCHC Packet and the potential padding bits of the last SCHC Fragment does not
   generally constitute an integer number of bytes.
-  For implementers to be able to used byte-oriented CRC libraries, it is RECOMMENDED that the concatenation of the
+  For implementers to be able to use byte-oriented CRC libraries, it is RECOMMENDED that the concatenation of the
   complete SCHC Packet and the last fragment potential padding bits be zero-extended to the next byte boundary and
   that the MIC be computed on that byte array.
 
@@ -720,7 +684,7 @@ The SCHC F/R messages use the following fields (see the related formats in {{Fra
   and by the receiver during the reassembly of a fragmented SCHC Packet.
   The Bitmap may also be carried in a SCHC ACK, either in extenso or in a shortened form (see {{Bitmapopt}}).
   Each bit in the internal representation of the Bitmap corresponds to a SCHC
-  Fragment (tile) of a window, and provides feedback on whether the SCHC Fragment has been received or not. The right-most
+  Fragment (tile) of a window, and it provides feedback on whether the SCHC Fragment has been received or not. The right-most
   position on the Bitmap tells if the All-0 or All-1 fragment has been correctly received or not. Feedback on the SCHC
   Fragment with the FCN == MAX_WIND_FCN value is provided by the bit in the left-most position of the Bitmap. In the Bitmap, a bit
   set to 1 indicates that the SCHC Fragment of FCN corresponding to that bit position has been correctly received.
@@ -745,7 +709,7 @@ The SCHC Fragment is the data unit passed on to the L2 for transmission.
 ~~~~
 {: #Fig-FragFormat title='SCHC Fragment general format. Presence of a padding field is optional'}
 
-#### Fragments that are not the last one {#NotLastFrag}
+#### Regular SCHC Fragments {#NotLastFrag}
 
 All SCHC Fragments except the last one of a SCHC Packet MUST conform to the detailed format defined in {{Fig-NotLastFrag}}.
 The W field is optional. Its presence is specified by each SCHC F/R mode.
@@ -767,14 +731,14 @@ The total size of the Fragment Header is not necessarily a multiple of the L2 Wo
 To build the Fragment Payload, SCHC F/R MUST take from the SCHC Packet a number of bits that makes the SCHC Fragment an exact multiple of L2 Words. As a consequence, no padding bit is used for these fragments.
 
 
-The Fragment Payload of a SCHC Fragment with FCN == All-0 (called an All-0 SCHC Fragment) MUST be at least the size of an L2 Word.
-The rationale is that, even in the presence of padding, an All-0 SCHC Fragment needs to be distinguishable from the SCHC ACK REQ message, which has the same header (see {{All0ACKREQ}}).
+The Fragment Payload of a SCHC Fragment with FCN == 0 (called an All-0 SCHC Fragment) MUST be at least the size of an L2 Word.
+The rationale is that, even in the presence of padding, an All-0 SCHC Fragment needs to be distinguishable from the SCHC ACK REQ message, which has the same header but has no payload (see {{All0ACKREQ}}).
 
 #### All-1 SCHC Fragment {#LastFrag}
 
-The Fragment Header of the last SCHC Fragment of a SCHC Packet MUST conform to
+The Fragment Header of the very last SCHC Fragment of a SCHC Packet MUST conform to
 the detailed format shown in {{Fig-LastFrag}}.
-The W field is optional. Its presence is specified by each SCHC F/R mode.
+The W field is optional.
 The MIC field is optional.
 
 ~~~~
@@ -791,29 +755,28 @@ The total size of the All-1 SCHC Fragment header is generally not a multiple of 
 The All-1 SCHC Fragment being the last one of the SCHC Packet, SCHC F/R cannot freely choose the payload size to align the fragment to an L2 Word.
 Therefore, padding bits are generally appended to the All-1 SCHC Fragment to make it a multiple of L2 Words in size.
 
-The MIC MUST be computed on the payload and the padding bits. The rationale is that the SCHC Reassembler needs to check the correctness of
-the reassembled SCHC packet but it has no way of knowing where the payload ends.
+When present, the MIC MUST be computed on the payload and the padding bits. The rationale is that the SCHC Reassembler needs to check the correctness of
+the reassembled SCHC Packet but it has no way of knowing where the payload ends.
 Indeed, the latter requires decompressing the SCHC Packet, which is out of the scope of the reassembler.
 
 An All-1 SCHC Fragment payload MUST be at least the size of an L2 Word.
 The rationale is that, even in the presence of padding, the SCHC All-1 ACK REQ (see {{All1ACKREQ}}) needs to be distinguishable from the All-1 SCHC Fragment.
 This may entail saving an L2 Word from the payload of the previous SCHC Fragment to make the payload of this All-1 SCHC Fragment big enough.
 
-The values for N, T and the length of MIC are not specified in this document, and SHOULD be determined in other documents (e.g. technology-specific profile documents).
 
 ### SCHC ACK format
 
 #### All-0 SCHC ACK {#All0ACK}
 
 This message only appears in SCHC F/R modes that use windowing.
-The format of a SCHC ACK that acknowledges a window of SCHC Fragments that is not the last one of a SCHC Packet (All-0 window) is shown in {{Fig-All0-ACK-Format}}.
+The format of a SCHC ACK that acknowledges a window of SCHC Fragments that is not the last one of a SCHC Packet (All-0 window) MUST obey the format shown in {{Fig-All0-ACK-Format}}.
 
 ~~~~
 
             |-- T --|-M-|
-+---- ... --+- ... -+---+---- ... -----+
-|  Rule ID  |  DTag | W |encoded Bitmap| (no payload)
-+---- ... --+- ... -+---+---- ... -----+
++---- ... --+- ... -+---+----- ... ------+
+|  Rule ID  |  DTag | W |truncated Bitmap| (no payload)
++---- ... --+- ... -+---+----- ... ------+
 
 ~~~~
 {: #Fig-All0-ACK-Format title='ACK format for All-0 windows'}
@@ -822,7 +785,7 @@ The Rule ID and DTag values in the SCHC ACK message MUST be identical to the one
 
 #### All-1 SCHC ACK {#All1ACK}
 
-The format of a SCHC ACK that follows the transmission of the last SCHC Fragments of a SCHC Packet is shown in {{Fig-All1-ACK-Format}}.
+The format of a SCHC ACK that follows the transmission of the last SCHC Fragment of a SCHC Packet MUST obey the format shown in {{Fig-All1-ACK-Format}}.
 The W field is optional. Its presence is specified by each SCHC F/R mode.
 
 ~~~~
@@ -832,9 +795,9 @@ The W field is optional. Its presence is specified by each SCHC F/R mode.
 |  Rule ID  |  DTag | W |1| (integrity check success)
 +---- ... --+- ... -+---+-+
 
-+---- ... --+- ... -+---+-+----- ... -----+
-|  Rule ID  |  DTag | W |0|encoded Bitmap |(integrity check failure)
-+---- ... --+- ... -+---+-+----- ... -----+
++---- ... --+- ... -+---+-+------ ... ------+
+|  Rule ID  |  DTag | W |0|truncated Bitmap |(integrity check failure)
++---- ... --+- ... -+---+-+------ ... ------+
                          C
 ~~~~
 {: #Fig-All1-ACK-Format title='Format of a SCHC ACK at the end of a SCHC Packet transmission'}
@@ -848,15 +811,23 @@ If present, the Bitmap carries information on the reception of each fragment of 
 
 See {{SCHCParams}} for a discussion on the size of the Bitmaps.
 
-In order to reduce the SCHC ACK size, the Bitmap that is actually transmitted is shortened ("encoded") as explained in {{Bitmapopt}}.
+In order to reduce the SCHC ACK size, the Bitmap that is actually transmitted is shortened ("truncated") as explained in {{Bitmapopt}}.
 
-#### Bitmap Encoding {#Bitmapopt}
-The SCHC ACK that is transmitted is truncated by applying the following algorithm: the longest contiguous sequence of bits that starts at an L2 Word boundary of the SCHC ACK,
-where the bits of that sequence are all set to 1, are all part of the Bitmap and finish exactly at the end of the Bitmap, if one such sequence exists, MUST NOT be transmitted.
-Because the SCHC Fragment sender knows the actual Bitmap size, it can reconstruct the original Bitmap from the shortened bitmap.
+#### Bitmap Truncation {#Bitmapopt}
+The Bitmap is truncated by applying the following algorithm (see {{Fig-Localbitmap}} for a follow-along example):
 
-When shortening effectively takes place, the SCHC ACK is a multiple of L2 Words, and padding MUST NOT be appended.
-When shortening does not happen, padding bits MUST be appended as needed to fill up the last L2 Word.
+- Build a temporary All-1 SCHC ACK message that contains the Header and the original Bitmap.
+- Positioning scissors at the end of the Bitmap, after its last bit.
+- While the bit left to the scissors is 1 and belongs to the Bitmap, keep moving left, then stop. When this is done,
+- while the scissors are not on an L2 Word boundary of the SCHC ACK message and are strictly inside the Bitmap, keep moving right, then stop.
+- At this point, cut and drop off any bits to the right of the scissors
+
+When one or more bits have effectively been dropped off as a result of the above algorithm, the resulting All-1 SCHC ACK message is a multiple of L2 Words, and padding MUST NOT be appended.
+Otherwise, padding bits MUST be appended as needed to fill up the last L2 Word.
+
+The result of this algorithm is the All-1 SCHC ACK message that MUST be sent.
+
+Because the SCHC Fragment sender knows the size of the original Bitmap, it can reconstruct the original Bitmap from the Truncated Bitmap received in the All-1 SCH ACK message.
 
 {{Fig-Localbitmap}} shows an example where L2 Words are actually bytes and where the original Bitmap contains 17 bits, the last 15 of which are all set to 1.
 
@@ -867,7 +838,7 @@ When shortening does not happen, padding bits MUST be appended as needed to fill
      next L2 Word boundary ->|  next L2 Word |  next L2 Word |
 
 ~~~~
-{: #Fig-Localbitmap title='A non-encoded Bitmap'}
+{: #Fig-Localbitmap title='Bitmap before truncation'}
 
 {{Fig-transmittedbitmap}} shows that the last 14 bits are not sent.
 
@@ -879,7 +850,7 @@ When shortening does not happen, padding bits MUST be appended as needed to fill
       next L2 Word boundary ->|
 
 ~~~~
-{: #Fig-transmittedbitmap title='Optimized Bitmap format'}
+{: #Fig-transmittedbitmap title='Truncated Bitmap'}
 
 {{Fig-Bitmap-Win}} shows an example of a SCHC ACK with FCN ranging from 6 down to 0, where the Bitmap indicates that the second and the fifth SCHC Fragments have not been correctly received.
 
@@ -887,13 +858,13 @@ When shortening does not happen, padding bits MUST be appended as needed to fill
                          6 5 4 3 2 1 0 (*)
             |-- T --|-M-|
 +-----------+-------+---+-+-+-+-+-+-+-+
-|  Rule ID  |  DTag | W |1|0|1|1|0|1|1|            Bitmap before tx
+|  Rule ID  |  DTag | W |1|0|1|1|0|1|1|        SCHC ACK with Original Bitmap
 +-----------+-------+---+-+-+-+-+-+-+-+
   next L2 Word boundary ->|<-- L2 Word -->|
     (*)=(FCN values)
 
 +-----------+-------+---+-+-+-+-+-+-+-+~~~+
-|  Rule ID  |  DTag | W |1|0|1|1|0|1|1|Pad|        Encoded Bitmap
+|  Rule ID  |  DTag | W |1|0|1|1|0|1|1|Pad|    transmitted SCHC ACK
 +-----------+-------+---+-+-+-+-+-+-+-+~~~+
   next L2 Word boundary ->|<-- L2 Word -->|
 
@@ -907,17 +878,17 @@ indicates that there is no missing SCHC Fragment.
 ~~~~                                                  
 |- Fragmentation Header  -|6 5 4 3 2 1 7 (*)
             |-- T --|-M-|
-|  Rule ID  |  DTag | W |0|1|1|1|1|1|1|1|          Bitmap before tx
+|  Rule ID  |  DTag | W |0|1|1|1|1|1|1|1|      SCHC ACK with Original Bitmap
     next L2 Word boundary ->|<-- L2 Word -->|
                          C
 +---- ... --+- ... -+---+-+-+
-|  Rule ID  |  DTag | W |0|1|                      Encoded Bitmap
+|  Rule ID  |  DTag | W |0|1|                  transmitted SCHC ACK
 +---- ... --+- ... -+---+-+-+
     next L2 Word boundary ->|
    (*) = (FCN values indicating the order)
 
 ~~~~
-{: #Fig-Bitmap-lastWin title='Example of the Bitmap in ACK-Always or ACK-on-Error for the last window'}
+{: #Fig-Bitmap-lastWin title='Example of the Bitmap for the last window'}
 
 
 ### SCHC ACK REQ format
@@ -925,7 +896,7 @@ indicates that there is no missing SCHC Fragment.
 #### SCHC All-0 ACK REQ {#All0ACKREQ}
 
 The SCHC All-0 ACK REQ is only used in SCHC F/R that use a windowing mechanism.
-Its purpose is for a a sender to request the retransmission of a SCHC ACK by the receiver, at the end of a window which is not the last one of a SCHC Packet.
+Its purpose is for a sender to request the retransmission of a SCHC ACK by the receiver, at the end of a window which is not the last one of a SCHC Packet.
 The SCHC All-0 ACK REQ format is described in {{Fig-All0ACKREQ}}.
 The W field is optional. Its presence is specified by each SCHC F/R mode.
 
@@ -941,8 +912,8 @@ The W field is optional. Its presence is specified by each SCHC F/R mode.
 ~~~~
 {: #Fig-All0ACKREQ title='All-0 empty fragment detailed format'}
 
-Notice that the SCHC All-0 ACK REQ has the same header as an All-0 SCHC Fragment but doesn't have a a payload.
-The message length allows distinguishing between a SCHC All-0 ACK REQ and a All-0 SCHC Fragment.
+Note that the SCHC All-0 ACK REQ has the same header as an All-0 SCHC Fragment but it doesn't have a payload.
+The message length allows distinguishing between a SCHC All-0 ACK REQ and an All-0 SCHC Fragment.
 
 The size of the SCHC All-0 ACK REQ header is generally not a multiple of the L2 Word size.
 Therefore, a SCHC All-0 ACK REQ generally needs padding bits. The padding bits are always less than an L2 Word.
@@ -967,8 +938,8 @@ The MIC field is optional.
 ~~~~
 {: #Fig-All1ACKREQ title='All-1 for Retries format, also called All-1 empty'}
 
-Notice that the SCHC All-1 ACK REQ has the same header as an All-1 SCHC Fragment but doesn't have a a payload.
-The message length allows distinguishing between a SCHC All-1 ACK REQ and a All-1 SCHC Fragment.
+Note that the SCHC All-1 ACK REQ has the same header as an All-1 SCHC Fragment but doesn't have a payload.
+The message length allows distinguishing between a SCHC All-1 ACK REQ and an All-1 SCHC Fragment.
 
 The size of the SCHC All-1 ACK REQ header is generally not a multiple of the L2 Word size. Therefore, a SCHC All-1 ACK REQ generally needs padding bits. The padding bits are always less than an L2 Word.
 
@@ -996,7 +967,7 @@ The W field is optional. Its presence is specified by each SCHC F/R mode.
 ~~~~
 {: #Fig-All1Abort title='SCHC Sender-Abort format'}
 
-Notice that the SCHC Sender-Abort has the same header as an All-1 SCHC Fragment, but that it does not include a MIC nor a payload.
+Note that the SCHC Sender-Abort has the same header as an All-1 SCHC Fragment, but that it does not include a MIC nor a payload.
 The message length allows distinguishing between a SCHC Sender-Abort and a SCHC Fragment.
 
 The size of the SCHC Sender-Abort header is generally not a multiple of the L2 Word size.
@@ -1028,8 +999,8 @@ The W field is optional. Its presence is specified by each SCHC F/R mode.
 ~~~~
 {: #Fig-ACKabort title='SCHC Receiver-Abort format'}
 
-Notice that the SCHC Receiver-Abort has the same header as a SCHC ACK message.
-THe bits that follow the SCHC Receiver-Abort header look like a shortened Bitmap set to 1 up to
+Note that the SCHC Receiver-Abort has the same header as a SCHC ACK message.
+The bits that follow the SCHC Receiver-Abort header look like a truncated Bitmap set to 1 up to
 the first L2 Word boundary, followed by an extra L2 Word full of 1's.
 Such a bit pattern never occurs in a regular SCHC ACK. This is how the SCHC Receiver-Abort message is recognized.
 
@@ -1062,14 +1033,14 @@ The Inactivity Timer expiration value is based on the characteristics of the und
 and MUST be defined in other documents (e.g. technology-specific profile documents).
 
 The presence and size of the MIC and DTag fields MUST be defined by each LPWAN technology-specific document.
-The size of the FCN field is RECOMMENDED to be 1 bit but MAY be defined by each LPWAN technology-specific document.
+The size of the FCN field is RECOMMENDED to be 1 bit but it MAY be defined by each LPWAN technology-specific document.
 
 #### Sender behaviour
 
 The sender transmits all the SCHC Fragments of a SCHC Packet, in sequential order.
 It MUST use the same Rule ID and optional DTag pair for all these fragments.
 The All-1 FCN value MUST be used for the last SCHC Fragment, which MUST use the format described in {{LastFrag}}.
-The All-1 FCN MUST NOT be used for the preceeding SCHC Fragments, which MUST use the format described in {{NotLastFrag}}.
+The All-1 FCN MUST NOT be used for the preceding SCHC Fragments, which MUST use the format described in {{NotLastFrag}}.
 
 {{Fig-NoACKModeSnd}} shows an example of a corresponding state machine.
 
@@ -1122,14 +1093,14 @@ The value of MAX_ACK_REQUESTS MUST be defined by each LPWAN technology-specific 
 At the beginning of the fragmentation of a new SCHC Packet, the fragment sender MUST select a Rule ID and DTag value pair for this SCHC Packet and it MUST initialize the W bit to 0.
 The SCHC Packet is fragmented into pieces that will be carried by SCHC Fragment messages, which are grouped in windows.
 The SCHC Fragment that comes first in a window, in fragmentation order, MUST have an FCN value of MAX_WIND_FCN.
-Within a window, each successive SCHC Fragment MUST bear an FCN field decremented by 1 (unsigned integer) compared to the fragment preceeding it in fragmentation order, except for the last SCHC Fragment of the SCHC Packet.
-Except for the last window, a window MUST be composed of exactly one SCHC Fragment with each possible value of FCN between MAX_WIND_FCN and 0.
+Within a window, each successive SCHC Fragment MUST bear an FCN field decremented by 1 (unsigned integer) compared to the fragment preceding it in fragmentation order, except for the last SCHC Fragment of the SCHC Packet.
+Except for the last window, a window MUST be composed of exactly one SCHC Fragment bearing each possible value of FCN between MAX_WIND_FCN and 0.
 In the last window, the last SCHC Fragment in fragmentation order MUST have the FCN value of All-1 and MUST use the format described in {{LastFrag}}.
 The other SCHC Fragments MUST use the format described in {{NotLastFrag}}.
 
 The fragment sender MUST start by processing the window that is first in fragmentation order.
 With this window, it MUST enter a **first state** in which it MUST transmit all the SCHC Fragments composing the window.
-The SCHC Fragment that bears the FCN value of All-0 or All-1 MUST be sent last in that serie.
+The SCHC Fragment that bears the FCN value of All-0 or All-1 MUST be sent last in that series.
 
 Then, the fragment sender MUST initialize an Attempts counter to 0 for that Rule ID and DTag value pair and it MUST enter a **second state**
 where it MUST start a Retransmission Timer for that Rule ID and DTag value pair
@@ -1161,13 +1132,13 @@ and where it MUST expect to receive a SCHC ACK.
     it MUST release all resource associated with this SCHC Packet
     and it MUST exit with an error condition.
     * If the current window is the last one (All-1) and the SCHC ACK indicates that all fragments were received correctly and integrity checking does match,
-    the sender exits succesfully.
+    the sender exits successfully.
 
 In the **third state**, the fragment sender MUST transmit all the SCHC Fragments that have been reported missing, then it MUST return to the **second state**.
 
-At any time in the **second state**, the sender MUST silently discard and ignore any SCK ACK bearing a W value different from its own W value.
+At any time in the **second state**, the sender MUST silently discard and ignore any SCHC ACK bearing a W value different from its own W value.
 
-At any time in **any state**, on receiving a SCHC Receiver-Abort with the correct Rule ID and DTag value pair, the fragment sender MUST release all resource associated with this SCHC Packet and it MUST exit with an error condition.
+At any time, on receiving a SCHC Receiver-Abort with the correct Rule ID and DTag value pair, the fragment sender MUST release all resource associated with this SCHC Packet and it MUST exit with an error condition.
 
 {{Fig-ACKAlwaysSnd}} shows an example of a corresponding state machine.
 
@@ -1177,7 +1148,7 @@ A delay between each SCHC Fragment transmission can be added to respect local re
 #### Receiver behaviour
 
 On receiving a SCHC Fragment with a Rule ID and DTag pair not being processed at that time,
-the receiver MUST start a process to assemble a SCHC Packet with that Rule ID and DTag value pair.
+the receiver MUST start a process to assemble a new SCHC Packet with that Rule ID and DTag value pair.
 That process MUST only examine received SCHC F/R messages with that Rule ID and DTag value pair
 and MUST only transmit SCHC F/R messages with that Rule ID and DTag value pair.
 It MUST intialise its current window number to be the first one, it MUST initialise its current W bit to 0
@@ -1264,12 +1235,12 @@ In the **fourth state**
   - On receiving an All-1 SCHC Fragment or an SCHC All-1 ACK REQ, the receiver MUST send an All-1 SCHC ACK.
   - On expiration of the Inactivity Timer, the receive process for that SCHC Packet MUST exit
 
-At any time in **any state**, when Attempts reaches MAC_ACK_REQUESTS,
+At any time, when Attempts reaches MAC_ACK_REQUESTS,
 the receiver MUST send a SCHC Receiver-Abort,
 it MUST release all resource associated with this SCHC Packet
 and it MUST exit the receive process for that SCHC Packet.
 
-At any time in **any state**, on receiving a SCHC Sender-Abort,
+At any time, on receiving a SCHC Sender-Abort,
 the fragment sender MUST release all resource associated with this SCHC Packet
 and it MUST exit the receive process for that SCHC Packet.
 
@@ -1280,33 +1251,34 @@ and it MUST exit the receive process for that SCHC Packet.
 ### ACK-on-Error {#ACK-on-Error-subsection}
 
 In ACK-on-Error mode, windowing is used.
-The SCHC Packet MUST be fragmented into pieces of equal size, except for the last piece.
-The last piece MUST NOT be larger than the other ones.
-The pieces MUST be contigous.
-The pieces are hereafeter called tiles.
+The SCHC Packet is fragmented into pieces, hereafter called tiles.
+All tiles MUST be of equal size, except for the last one,
+which MUST be of the same size or smaller than the preceding ones.
+The tiles MUST be contiguous.
 Successive tiles are grouped in windows.
 The window numbers MUST increase from 0 upward, from the start of the SCHC Packet to its end.
 All windows, except the last one, MUST contain MAX_WIND_FCN+1 tiles.
 Tiles are numbered within each window.
-The tile numbers decrement from MAX_WIND_FN downward, looking from the start of the SCHC Packet toward its end.
+The tile numbers decrement from MAX_WIND_FCN downward, looking from the start of the SCHC Packet toward its end.
 Each tile of a SCHC Packet is therefore uniquely identified by a window number and a tile number within this window.
 
 A SCHC Fragment message carries one or more tiles.
 A SCHC ACK reports on the reception of a window of tiles.
 
 The W field is wide enough that it unambiguously represents an absolute window number.
-Acknowledgements are fed by the fragment receiver back to the fragment sender for the windows that have tiles missing at the receiver.
-No acknowledgement is fed back for windows that have been fully received by the fragment receiver.
+SCHC ACKs are fed by the fragment receiver back to the fragment sender for the windows that have tiles missing at the receiver.
+No SCHC ACK is fed back for windows that have been fully received by the fragment receiver.
 
 The fragment sender retransmits SCHC Fragments for tiles that are reported missing.
 It can advance to the next window even before it has ascertained that all SCHC Fragments belonging to previous windows have been correctly received,
 and can still later retransmit SCHC Fragments belonging to previous windows.
 Therefore, the sender and the receiver may operate in a fully decoupled fashion.
-The fragmented SCHC Packet transmission concludes
+The fragmented SCHC Packet transmission concludes when
 
-- when integrity checking shows that the fragmented SCHC Packet has been correctly re-assembled at the receive end,
+- integrity checking shows that the fragmented SCHC Packet has been correctly reassembled at the receive end,
   and this information has been conveyed back to the sender,
-- or when too many retransmission attempts were made.
+- or too many retransmission attempts were made,
+- or the receiver determines that the transmission of this fragmented SCHC Packet has been inactive for too long.
 
 Each LPWAN technology-specific document MUST specify which Rule ID value(s) is (are) allocated to this ACK-on-Error mode.
 For brevity, the rest of {{ACK-on-Error-subsection}} only refers to Rule ID values that are allocated to this mode.
@@ -1315,7 +1287,7 @@ The W field MUST be present in SCHC F/R messages.
 
 Each LPWAN technology-specific document, for each Rule ID value, MUST define
 
-- the tile size (no alignement to the L2 Word is mandated)
+- the tile size (a tile does not need to be multiple of an L2 Word, but it MUST be at least the size of an L2 Word)
 - the value of M (size of the W field),
 - the value of N (size of the FCN field),
 - the value of MAX_WIND_FCN, which MUST be strictly less than (2^N)-1
@@ -1335,7 +1307,7 @@ The receiver, for each pair of Rule ID and optional DTag values, MUST instantiat
 - one Inactivity Timer
 
 
-#### Sender behaviour
+#### Sender behaviour {#ACK-on-Error-sender}
 
 At the beginning of the fragmentation of a new SCHC Packet, the fragment sender MUST select a Rule ID and DTag value pair for this SCHC Packet.
 A Rule MUST NOT be selected if the SCHC Packet cannot be fragmented in (2ˆM) * (MAX_WIND_FCN+1) tiles or less.
@@ -1364,7 +1336,7 @@ Each time a fragment sender sends an All-1 SCHC Fragment or an All-1 ACK REQ,
 
 On Retransmission Timer expiration
 
-- if Attempts is strictly less that MAX_ACK_REQUESTS, the fragment sender MUST send a SCHC All-1 ACK REQ and MUST increment the Attempts counter
+- if Attempts is strictly less than MAX_ACK_REQUESTS, the fragment sender MUST send a SCHC All-1 ACK REQ and MUST increment the Attempts counter
 - otherwise the fragment sender MUST send a SCHC Sender-Abort,
   it MUST release all resource associated with this SCHC Packet
   and it MUST exit with an error condition.
@@ -1374,16 +1346,18 @@ On receiving a SCHC ACK,
 - if the W field in the SCHC ACK corresponds to the number of the last window,
 
   * if the C bit is set, the sender MUST release all resource associated with this SCHC Packet and MUST exit successfully
-  * otherwise, the fragment sender
+  * otherwise,
 
-    o MUST send SCHC Fragment messages containing the tiles that are reported missing in the SCHC ACK.
-    o the last one of these SCHC Fragment messages MUST be an All-1 SCHC Fragment, or a SCHC All-1 ACK REQ MUST be sent after the last SCHC Fragment message
+    - the fragment sender MUST send SCHC Fragment messages containing all the tiles that are reported missing in the SCHC ACK.
+    - the last one of these SCHC Fragment messages MUST be an All-1 SCHC Fragment, or a SCHC All-1 ACK REQ MUST be sent after the last SCHC Fragment message
 
 - otherwise, the fragment sender
 
-  * MUST send SCHC Fragment messages containing the tiles that are reported missing in the SCK ACK
+  * MUST send SCHC Fragment messages containing the tiles that are reported missing in the SCHC ACK
   * then it MAY send a SCHC All-1 ACK REQ
 
+
+See {{Fig-ACKonerrorSnd}} for an example of a Finite State Machine implementing the sender behaviour.
 
 #### Receiver behaviour
 
@@ -1981,7 +1955,7 @@ with MAX_WIND_FCN=6, with three lost fragments, and one retransmitted fragment l
         |-----W=0, FCN=1 ----->|
         |-----W=0, FCN=0 ----->|
         |                      |lcl-Bitmap:110111111111101111111111
-        |<------ACK, W=0-------|encoded Bitmap:1101111111111011
+        |<------ACK, W=0-------|truncated Bitmap:1101111111111011
         |-----W=0, FCN=21----->|
         |-----W=0, FCN=10----->|
         |<------ACK, W=0-------|no Bitmap
@@ -2212,6 +2186,7 @@ Recv_window==window &    | |   |   all missing frags sent
 ~~~~
 {: #Fig-ACKonerrorSnd title='Sender State Machine for the ACK-on-Error Mode'}
 
+This is an example only. The specification in {{ACK-on-Error-sender}} is open to very different sequencing of operations.
 
 
 ~~~~
