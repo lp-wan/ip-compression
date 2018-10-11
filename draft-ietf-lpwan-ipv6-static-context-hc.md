@@ -1261,17 +1261,32 @@ All windows, except the last one, MUST contain MAX_WIND_FCN+1 tiles.
 Tiles are numbered within each window.
 The tile numbers decrement from MAX_WIND_FCN downward, looking from the start of the SCHC Packet toward its end.
 Each tile of a SCHC Packet is therefore uniquely identified by a window number and a tile number within this window.
+See {{Fig-TilesExample}} for an example.
 
-A SCHC Fragment message carries one or more tiles.
-A SCHC ACK reports on the reception of a window of tiles.
+~~~~
+
+         +----------------------------------------------...-------------------+
+         |                            SCHC Packet                             |
+         +----------------------------------------------...-------------------+
+
+Tile #   | 4 | 3 | 2 | 1 | 0 | 4 | 3 | 2 | 1 | 0 | 4 |      | 2 | 1 | 0 | 4 |3|
+Window # |-------- 0 --------|-------- 1 --------|- 2 - ... - 27 -------|- 28-|
+
+
+SCHC Fragment msg    |-----------|
+~~~~
+{: #Fig-TilesExample title='a SCHC Packet fragmented in tiles, Ack-on-Error mode'}
+
+A SCHC Fragment message carries one or more tiles, which may span multiple windows.
+A SCHC ACK reports on the reception of exactly one window of tiles.
 
 The W field is wide enough that it unambiguously represents an absolute window number.
 SCHC ACKs are fed by the fragment receiver back to the fragment sender for the windows that have tiles missing at the receiver.
 No SCHC ACK is fed back for windows that have been fully received by the fragment receiver.
 
 The fragment sender retransmits SCHC Fragments for tiles that are reported missing.
-It can advance to the next window even before it has ascertained that all SCHC Fragments belonging to previous windows have been correctly received,
-and can still later retransmit SCHC Fragments belonging to previous windows.
+It can advance to next windows even before it has ascertained that all tiles belonging to previous windows have been correctly received,
+and can still later retransmit SCHC Fragments with tiles belonging to previous windows.
 Therefore, the sender and the receiver may operate in a fully decoupled fashion.
 The fragmented SCHC Packet transmission concludes when
 
@@ -1310,7 +1325,7 @@ The receiver, for each pair of Rule ID and optional DTag values, MUST instantiat
 #### Sender behaviour {#ACK-on-Error-sender}
 
 At the beginning of the fragmentation of a new SCHC Packet, the fragment sender MUST select a Rule ID and DTag value pair for this SCHC Packet.
-A Rule MUST NOT be selected if the SCHC Packet cannot be fragmented in (2ˆM) * (MAX_WIND_FCN+1) tiles or less.
+A Rule MUST NOT be selected if the values of N and MAX_WIND_FCN for that Rule are such that the SCHC Packet cannot be fragmented in (2ˆM) * (MAX_WIND_FCN+1) tiles or less.
 
 The fragment sender MUST initialize the Attempts counter to 0 for that Rule ID and DTag value pair.
 
@@ -1320,14 +1335,17 @@ If more than one tile is carried in one SCHC Fragment, the tiles MUST be consecu
 In a SCHC Fragment message, the sender MUST fill the W and FCN fields with the window number and tile number of the first tile sent in that SCHC Fragment.
 
 If a SCHC Fragment message carries only the last tile of the fragmented SCHC Packet, it MUST be of the All-1 type specified in {{LastFrag}}.
-Otherwise, it MUST be of the regular type specified in {{NotLastFrag}}.
+Otherwise,
+
+- it MUST be of the regular type specified in {{NotLastFrag}}
+- padding bits MUST be appended to the tiles as needed to fit the Payload size constraint of regular SCHC Fragments
 
 The fragment sender MUST send SCHC Fragments such that, all together, they contain all the tiles of the fragmented SCHC Packet.
 
 The fragment sender MUST send at least one All-1 SCHC Fragment or at least one All-1 ACK REQ.
 
-At all times, after having sent an All-1 SCHC Fragment or an All-1 ACK REQ, the fragment sender MUST listen for SCHC ACK messages.
-Profiles defined in each LPWAN technology-specific document MAY specify other times at which the fragment sender MUST listen for SCHC ACK messages.
+The fragment sender MUST listen for SCHC ACK messages after having sent an All-1 SCHC Fragment or an All-1 ACK REQ.
+Profiles MAY specify other times at which the fragment sender MUST listen for SCHC ACK messages.
 
 Each time a fragment sender sends an All-1 SCHC Fragment or an All-1 ACK REQ,
 
@@ -1337,19 +1355,18 @@ Each time a fragment sender sends an All-1 SCHC Fragment or an All-1 ACK REQ,
 On Retransmission Timer expiration
 
 - if Attempts is strictly less than MAX_ACK_REQUESTS, the fragment sender MUST send a SCHC All-1 ACK REQ and MUST increment the Attempts counter
-- otherwise the fragment sender MUST send a SCHC Sender-Abort,
-  it MUST release all resource associated with this SCHC Packet
-  and it MUST exit with an error condition.
+- otherwise the fragment sender MUST send a SCHC Sender-Abort and
+  it MUST release all resource associated with this SCHC Packet.
 
 On receiving a SCHC ACK,
 
-- if the W field in the SCHC ACK corresponds to the number of the last window,
+- if the W field in the SCHC ACK corresponds to the number of the last window of the SCHC Packet,
 
   * if the C bit is set, the sender MUST release all resource associated with this SCHC Packet and MUST exit successfully
   * otherwise,
 
     - the fragment sender MUST send SCHC Fragment messages containing all the tiles that are reported missing in the SCHC ACK.
-    - the last one of these SCHC Fragment messages MUST be an All-1 SCHC Fragment, or a SCHC All-1 ACK REQ MUST be sent after the last SCHC Fragment message
+    - the last message in this sequence of SCHC Fragment messages MUST be an All-1 SCHC Fragment, or a SCHC All-1 ACK REQ MUST be sent after the sequence
 
 - otherwise, the fragment sender
 
