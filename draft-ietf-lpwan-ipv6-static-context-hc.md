@@ -1824,6 +1824,62 @@ In the following examples, N (i.e. the size if the FCN field) is 3 bits. Therefo
 ~~~~
 {: #Fig-Example-Rel-Window-NACK-Loss title='Transmission in ACK-on-Error mode of an IPv6 packet carried by 11 fragments, with MAX_WIND_FCN=6 and three lost fragments.'}
 
+
+{{Figure-Example-ACK-on-Error-VarMTU}} shows an example of a transmission in ACK-on-Error mode of a SCHC Packet broken into
+73 tiles, with N=5, MAX_WIND_FCN=27, M=2 and 3 lost SCHC Fragments.
+
+~~~~
+      Sender               Receiver
+        |-----W=0, FCN=27----->| 4 tiles sent
+        |-----W=0, FCN=23----->| 4 tiles sent
+        |-----W=0, FCN=19----->| 4 tiles sent
+        |-----W=0, FCN=15--X-->| 4 tiles sent (not received)
+        |-----W=0, FCN=11----->| 4 tiles sent
+        |-----W=0, FCN=7 ----->| 4 tiles sent
+        |-----W=0, FCN=3 ----->| 4 tiles sent
+        |-----W=1, FCN=27----->| 4 tiles sent
+        |-----W=1, FCN=23----->| 4 tiles sent
+        |-----W=1, FCN=19----->| 4 tiles sent
+        |-----W=1, FCN=15----->| 4 tiles sent
+        |-----W=1, FCN=11----->| 4 tiles sent
+        |-----W=1, FCN=7 ----->| 4 tiles sent
+        |-----W=1, FCN=3 --X-->| 4 tiles sent (not received)
+        |-----W=2, FCN=27----->| 4 tiles sent
+        |-----W=2, FCN=23----->| 4 tiles sent
+    ^   |-----W=2, FCN=19----->| 1 tile sent
+    |   |-----W=2, FCN=18----->| 1 tile sent
+    |   |-----W=2, FCN=17----->| 1 tile sent
+        |-----W=2, FCN=16----->| 1 tile sent
+    s   |-----W=2, FCN=15----->| 1 tile sent
+    m   |-----W=2, FCN=14----->| 1 tile sent
+    a   |-----W=2, FCN=13--X-->| 1 tile sent (not received)
+    l   |-----W=2, FCN=12----->| 1 tile sent
+    l   |---W=2, FCN=31 + MIC->| Integrity check: failure
+    e   |<------ACK, W=0-------| Bitmap:1111111111110000111111111111
+    r   |-----W=0, FCN=15----->| 1 tile sent
+        |-----W=0, FCN=14----->| 1 tile sent
+    L   |-----W=0, FCN=13----->| 1 tile sent
+    2   |-----W=0, FCN=12----->| 1 tile sent
+        |<------ACK, W=1-------| Bitmap:1111111111111111111111110000
+    M   |-----W=1, FCN=3 ----->| 1 tile sent
+    T   |-----W=1, FCN=2 ----->| 1 tile sent
+    U   |-----W=1, FCN=1 ----->| 1 tile sent
+        |-----W=1, FCN=0 ----->| 1 tile sent
+    |   |<------ACK, W=2-------| Bitmap:1111111111111101100000000000
+    |   |-----W=2, FCN=13----->| Integrity check: success
+    V   |<-----ACK, W=2, C=1 --| C=1
+      (End)
+
+~~~~
+{: #Figure-Example-ACK-on-Error-VarMTU title='ACK-on-Error mode with variable MTU.'}
+
+In this example, the L2 MTU becomes reduced just before sending the "W=2, FCN=19" fragment, leaving space for only 1 tile in each forthcoming SCHC Fragment.
+Before retransmissions, the 73 tiles are carried by a total of 25 SCHC Fragments, the last 9 being of smaller size.
+
+Note 1: Bitmaps are shown prior to truncation for transmission
+Note 2: other behaviors (e.g. regarding when ACKs are sent by the Receiver) are also allowed in ACK-on-Error.
+
+
 {{Fig-Example-Rel-Window-ACK-NoLoss}} illustrates the transmission in ACK-Always mode of an IPv6 packet that needs 11 fragments, with MAX_WIND_FCN=6 and no loss.
 
 ~~~~
