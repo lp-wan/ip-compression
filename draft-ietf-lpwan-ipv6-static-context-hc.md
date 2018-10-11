@@ -81,13 +81,13 @@ Header compression is needed for efficient Internet connectivity to the node wit
 
 * Because devices embed built-in applications, the traffic flows to be compressed are known in advance. Indeed, new applications cannot be easily installed in LPWAN devices, as they would in computers or smartphones.
 
-SCHC compression uses a context in which information about header fieds is stored. This context is static: the values of the header fields do not change over time. This avoids complex resynchronization mechanisms, that would be incompatible with LPWAN characteristics. In most cases, a small context identifier is enough to represent the full IPv6/UDP headers. The SCHC header compression mechanism is independent of the specific LPWAN technology over which it is used.
+SCHC compression uses a context in which information about header fields is stored. This context is static: the values of the header fields do not change over time. This avoids complex resynchronization mechanisms, that would be incompatible with LPWAN characteristics. In most cases, a small context identifier is enough to represent the full IPv6/UDP headers. The SCHC header compression mechanism is independent of the specific LPWAN technology over which it is used.
 
 LPWAN technologies impose some strict limitations on traffic. For instance, devices are sleeping most of the time and may receive data during short periods of time after transmission to preserve battery. LPWAN technologies are also characterized
 by a greatly reduced data unit and/or payload size (see {{RFC8376}}).  However, some LPWAN technologies do not provide fragmentation functionality; to support the IPv6 MTU requirement of 1280 bytes {{RFC8200}}, they require a fragmentation protocol at the adaptation layer below IPv6.
 Accordingly, this document defines an fragmentation/reassembly mechanism for LPWAN technologies to supports the IPv6 MTU. Its implementation is optional. If not interested, the reader can safely skip its description.
 
-This document defines generic functionality and offers flexibility with regard to parameter settings
+This document defines generic functionality and offers flexibility with regard to parameters settings
 and mechanism choices. Technology-specific settings and choices are expected to be made in other documents.
 
 # Requirements Notation
@@ -215,7 +215,7 @@ SCHC can be characterized as an adaptation layer between IPv6 and the underlying
 {: #Fig-IntroLayers title='Protocol stack comprising IPv6, SCHC and an LPWAN technology'}
 
 As per this document, when a packet (e.g. an IPv6 packet) needs to be transmitted, header compression is first applied to the packet. The resulting packet after header compression (whose header may or may not actually be smaller than that of the original packet) is called a SCHC Packet.
-If the SCHC Packet neds to be fragmented by the optional SCHC Fragmentation, fragmentation is then applied to the SCHC Packet. The SCHC Packet or the SCHC Fragments are then transmitted over the LPWAN. The reciprocal operations take place at the receiver. This process is illustrated in {{Fig-Operations}}.
+If the SCHC Packet needs to be fragmented by the optional SCHC Fragmentation, fragmentation is then applied to the SCHC Packet. The SCHC Packet or the SCHC Fragments are then transmitted over the LPWAN. The reciprocal operations take place at the receiver. This process is illustrated in {{Fig-Operations}}.
 
 ~~~~
 A packet (e.g. an IPv6 packet) 
@@ -251,7 +251,7 @@ A packet (e.g. an IPv6 packet)
 ## SCHC Packet format
 
 The SCHC Packet is composed of the Compressed Header followed by the payload from the original packet (see {{Fig-SCHCpckt}}).
-The Compressed Header itself is composed of a Rule ID and a Compression Residue. The Compression Residue may be absent, see {{SCHComp}}. Both the Rule ID and the Compression Residue potentially have a variable size, and generally are not a mutiple of bytes in size.
+The Compressed Header itself is composed of a Rule ID and a Compression Residue. The Compression Residue may be empty, see {{SCHComp}}. Both the Rule ID and the Compression Residue potentially have a variable size, and generally are not a mutiple of bytes in size.
   
 ~~~~
 
@@ -358,7 +358,7 @@ The context contains a list of Rules (see {{Fig-ctxt}}). Each Rule itself contai
 
 A Rule does not describe how to parse a packet header to find each field. This MUST be known from the compressor/decompressor. Rules only describe the compression/decompression behavior for each header field. In a Rule, the Field Descriptions are listed in the order in which the fields appear in the packet header.
 
-A Rule also describes what Compression Residue is sent. The Compression Residue is assembled by concatenating the residues for each field, in the order the Field Descriptions appear in the Rule.
+A Rule also describes what is sent in the Compression Residue. The Compression Residue is assembled by concatenating the residues for each field, in the order the Field Descriptions appear in the Rule.
 
 The Context describes the header fields and its values with the following entries:
 
