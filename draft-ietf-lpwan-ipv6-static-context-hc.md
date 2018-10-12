@@ -67,7 +67,7 @@ SCHC compression is based on a common static context stored in both the LPWAN de
 
 This document also specifies a fragmentation and reassembly mechanism that is used to support the IPv6 MTU requirement over the LPWAN technologies. Fragmentation is needed for IPv6 datagrams that, after SCHC compression or when such compression was not possible, still exceed the layer-2 maximum payload size.
 
-The SCHC header compression and fragmentation mechanisms are independent of the specific LPWAN technology over which they are used. This document defines generic functionalities and offers flexibility with regard to parameter settings and mechanism choices. Technology-specific settings and choices are expected to be made in other documents.
+The SCHC header compression and fragmentation mechanisms are independent of the specific LPWAN technology over which they are used. This document defines generic functionalities and offers flexibility with regard to parameter settings and mechanism choices. Technology-specific settings and choices are expected to be grouped into Profiles specified in other documents.
 
 --- middle
 
@@ -88,7 +88,7 @@ by a greatly reduced data unit and/or payload size (see {{RFC8376}}).  However, 
 Accordingly, this document defines an fragmentation/reassembly mechanism for LPWAN technologies to supports the IPv6 MTU. Its implementation is optional. If not interested, the reader can safely skip its description.
 
 This document defines generic functionality and offers flexibility with regard to parameters settings
-and mechanism choices. Technology-specific settings and choices are expected to be made in other documents.
+and mechanism choices. Technology-specific settings and choices are expected to be grouped into Profiles specified in other documents.
 
 # Requirements Notation
 
@@ -175,8 +175,8 @@ Note that the SCHC acronym is pronounced like "sheek" in English (or "chic" in F
   SCHC itself operates on bits, not bytes, and does not have any alignment prerequisite. See {{Padding}}.
 
 * Profile: SCHC offers variations in the way it is operated, with a number of parameters listed in {{SCHCParams}}.
-  A profile indicates a particular setting of all these parameters.
-  Both ends of a SCHC session must be provisioned with the same profile information and with the same set of rules before the session starts,
+  A Profile indicates a particular setting of all these parameters.
+  Both ends of a SCHC session must be provisioned with the same profile information and with the same set of Rules before the session starts,
   so that there is no ambiguity in how they expect to communicate.
 
 * Rule: A set of header field values.
@@ -241,9 +241,7 @@ A packet (e.g. an IPv6 packet)
         SENDER                                    RECEIVER
 
 
-*: the decision to use Fragmentation or not is left to each LPWAN 
-   technology over which SCHC is applied. See LPWAN 
-   technology-specific documents.
+*: the decision to use Fragmentation or not is left to each Profile.
 
 ~~~~
 {: #Fig-Operations title='SCHC operations at the SENDER and the RECEIVER'}
@@ -309,7 +307,7 @@ The SCHC C/D and F/R process is symmetrical, therefore the description of the Do
 Rule IDs are identifiers used to select the correct context either for Compression/Decompression or
 for Fragmentation/Reassembly.
 
-The size of the Rule IDs is not specified in this document, as it is implementation-specific and can vary according to the LPWAN technology and the number of Rules, among others.
+The size of the Rule IDs is not specified in this document, as it is implementation-specific and can vary according to the LPWAN technology and the number of Rules, among others. It is defined in Profiles.
 
 The Rule IDs are used:
 
@@ -405,7 +403,7 @@ The compression/decompression process follows several steps:
 
   * If no eligible Rule is found, then the header MUST be sent without compression (but may require the use of the SCHC F/R process).
 
-* Sending: If an eligible Rule is found, the Rule ID is sent to the other end followed by the Compression Residue (which could be empty) and directly followed by the payload. The Compression Residue is the concatenation of the Compression Residues for each field according to the CDAs for that Rule. The way the Rule ID is sent depends on the specific underlying LPWAN technology. For example, it can be either included in an L2 header or sent in the first byte of the L2 payload. (see {{Fig-FormatPckt}}). This process will be specified in the LPWAN technology-specific document and is out of the scope of the present document. On LPWAN technologies that are byte-oriented, the compressed header concatenated with the original packet payload is padded to a multiple of 8 bits, if needed. See {{Padding}} for details.
+* Sending: If an eligible Rule is found, the Rule ID is sent to the other end followed by the Compression Residue (which could be empty) and directly followed by the payload. The Compression Residue is the concatenation of the Compression Residues for each field according to the CDAs for that Rule. The way the Rule ID is sent depends on the Profile. For example, it can be either included in an L2 header or sent in the first byte of the L2 payload. (see {{Fig-FormatPckt}}). This process will be specified in the Profile and is out of the scope of the present document. On LPWAN technologies that are byte-oriented, the compressed header concatenated with the original packet payload is padded to a multiple of 8 bits, if needed. See {{Padding}} for details.
 
 * Decompression: When doing decompression, on the network side the SCHC C/D needs to find the correct Rule based on the L2 address and in this way, it can use the DevIID and the Rule ID. On the Dev side, only the Rule ID is needed to identify the correct Rule since the Dev only holds Rules that apply to itself.
 
@@ -509,7 +507,7 @@ If this action needs to be done on a variable length field, the size of the Comp
 
 These actions are used to process respectively the Dev and the App Interface Identifiers (DevIID and AppIID) of the IPv6 addresses. AppIID CDA is less common since most current LPWAN technologies frames contain a single L2 address, which is the Dev's address.
 
-The IID value MAY be computed from the Device ID present in the L2 header, or from some other stable identifier. The computation is specific to each LPWAN technology and MAY depend on the Device ID size.
+The IID value MAY be computed from the Device ID present in the L2 header, or from some other stable identifier. The computation is specific to each Profile and MAY depend on the Device ID size.
 
 In the downlink direction (Dw), at the compressor, the DevIID CDA may be used to generate the L2 addresses on the LPWAN, based on the packet's Destination Address.
 
@@ -543,7 +541,7 @@ These assumptions allow reducing the complexity and overhead of the SCHC F/R mec
 This specification includes several SCHC F/R modes, which allow for a range of reliability options such as optional SCHC Fragment retransmission.
 More modes may be defined in the future.
 The same SCHC F/R mode MUST be used for all SCHC Fragments of the same fragmented SCHC Packet.
-This document does not make any decision with regard to which mode(s) will be used over a specific LPWAN technology. This will be defined in other LPWAN technology-specific documents.
+This document does not make any decision with regard to which mode(s) will be used over a specific LPWAN technology. This will be defined in Profiles.
 
 SCHC F/R uses the knowledge of the L2 Word size (see {{Term}}) to encode some messages. Therefore, SCHC MUST know the L2 Word size.
 SCHC F/R usually generates SCHC Fragments and SCHC ACKs that are multiples of L2 Words.
@@ -591,7 +589,7 @@ Some SCHC F/R modes can use the following timers and counters
 The reassembled SCHC Packet is checked for integrity at the receive end.
 One way of doing integrity checking is by computing a MIC at the sender side and transmitting it to the receiver for comparison with the locally computed MIC.
 Some LPWAN technologies under SCHC may provide other means of ensuring that all fragments composing a SCHC Packet were correctly received and reassembled.
-The LPWAN technology-specific documents MUST define how integrity checking is done.
+The Profile MUST define how integrity checking is done.
 
 ### Header Fields {#HeaderFields}
 
@@ -655,7 +653,7 @@ The SCHC F/R messages use the following fields (see the related formats in {{Fra
 
   The presence of W and its size (called M, in bits) is defined for each F/R mode and Rule ID.
 
-  Depending on the mode and profile, W may carry the full window number, or just the least significant bit or any other partial representation of the window number.
+  Depending on the mode and Profile, W may carry the full window number, or just the least significant bit or any other partial representation of the window number.
 
 * Message Integrity Check (MIC).
   This field is optional. If present, it only appears in the All-1 SCHC Fragments and in the All-1 ACK REQ.
@@ -667,7 +665,7 @@ The SCHC F/R messages use the following fields (see the related formats in {{Fra
 
   The CRC32 polynomial 0xEDB88320 (i.e. the reverse representation
   of the polynomial used e.g. in the Ethernet standard {{RFC3385}}) is RECOMMENDED as the default algorithm for computing the
-  MIC. Nevertheless, other MIC lengths or other algorithms MAY be required by the technology-specific documents.
+  MIC. Nevertheless, other MIC lengths or other algorithms MAY be required by the Profile.
 
   Note that the concatenation of the complete SCHC Packet and the potential padding bits of the last SCHC Fragment does not
   generally constitute an integer number of bytes.
@@ -1030,10 +1028,10 @@ The Retransmission Timer is not used.
 The Attempts counter is not used.
 At the receiver, one Inactivity Timer MUST be instantiated for each pair of Rule ID and optional DTag values.
 The Inactivity Timer expiration value is based on the characteristics of the underlying LPWAN technology
-and MUST be defined in other documents (e.g. technology-specific profile documents).
+and MUST be defined in a Profile.
 
-The presence and size of the MIC and DTag fields MUST be defined by each LPWAN technology-specific document.
-The size of the FCN field is RECOMMENDED to be 1 bit but it MAY be defined by each LPWAN technology-specific document.
+The presence and size of the MIC and DTag fields MUST be defined by each Profile.
+The size of the FCN field is RECOMMENDED to be 1 bit but it MAY be defined by each Profile.
 
 #### Sender behaviour
 
@@ -1080,13 +1078,13 @@ At the sender, one Attempts counter MUST be instantiated for each pair of Rule I
 At the sender, one Retransmission Timer MUST be instantiated for each pair of Rule ID and optional DTag values.
 At the receiver, one Inactivity Timer MUST be instantiated for each pair of Rule ID and optional DTag values.
 The expiration values of the Retransmission Timer and of the Inactivity Timer are based on the characteristics of the underlying LPWAN technology
-and MUST be defined in other documents (e.g. technology-specific profile documents).
+and MUST be defined in a Profile.
 
-The presence and size of the MIC and DTag fields MUST be defined by each LPWAN technology-specific document.
+The presence and size of the MIC and DTag fields MUST be defined by each Profile.
 
-The value of N (size of the FCN field) and the value of MAX_WIND_FCN MUST be defined by each LPWAN technology-specific document.
+The value of N (size of the FCN field) and the value of MAX_WIND_FCN MUST be defined by each Profile.
 
-The value of MAX_ACK_REQUESTS MUST be defined by each LPWAN technology-specific document.
+The value of MAX_ACK_REQUESTS MUST be defined by each Profile.
 
 #### Sender behaviour
 
@@ -1295,12 +1293,12 @@ The fragmented SCHC Packet transmission concludes when
 - or too many retransmission attempts were made,
 - or the receiver determines that the transmission of this fragmented SCHC Packet has been inactive for too long.
 
-Each LPWAN technology-specific document MUST specify which Rule ID value(s) is (are) allocated to this ACK-on-Error mode.
+Each Profile MUST specify which Rule ID value(s) is (are) allocated to this ACK-on-Error mode.
 For brevity, the rest of {{ACK-on-Error-subsection}} only refers to Rule ID values that are allocated to this mode.
 
 The W field MUST be present in SCHC F/R messages.
 
-Each LPWAN technology-specific document, for each Rule ID value, MUST define
+Each Profile, for each Rule ID value, MUST define
 
 - the tile size (a tile does not need to be multiple of an L2 Word, but it MUST be at least the size of an L2 Word)
 - the value of M (size of the W field),
@@ -1394,7 +1392,7 @@ For downlink transmission of a fragmented SCHC Packet in ACK-Always mode, the SC
 
 If, after transmission of a SCHC ACK that is not an All-1 fragment, and before expiration of the corresponding Inactivity timer, the SCHC Fragment receiver receives a SCHC Fragment that belongs to the current window (e.g. a missing SCHC Fragment from the current window) or to the next window, the Inactivity timer for the SCHC ACK is stopped. However, if the Inactivity timer expires, the SCHC ACK is resent and the Inactivity timer is reinitialized and restarted.
 
-The default initial value for the Inactivity timer, as well as the maximum number of retries for a specific SCHC ACK, denoted MAX_ACK_RETRIES, are not defined in this document, and need to be defined in other documents (e.g. technology-specific profiles). The initial value of the Inactivity timer is expected to be greater than that of the Retransmission timer, in order to make sure that a (buffered) SCHC Fragment to be retransmitted can find an opportunity for that transmission.
+The default initial value for the Inactivity timer, as well as the maximum number of retries for a specific SCHC ACK, denoted MAX_ACK_RETRIES, are not defined in this document, and need to be defined in a Profile. The initial value of the Inactivity timer is expected to be greater than that of the Retransmission timer, in order to make sure that a (buffered) SCHC Fragment to be retransmitted can find an opportunity for that transmission.
 
 When the SCHC Fragment sender transmits the All-1 fragment, it starts its Retransmission Timer with a large timeout value (e.g. several times that of the initial Inactivity timer). If a SCHC ACK is received before expiration of this timer, the SCHC Fragment sender retransmits any lost SCHC Fragments reported by the SCHC ACK, or if the SCHC ACK confirms successful reception of all SCHC Fragments of the last window, the transmission of the fragmented SCHC Packet is considered complete. If the timer expires, and no SCHC ACK has been received since the start of the timer, the SCHC Fragment sender assumes that the All-1 fragment has been successfully received (and possibly, the last SCHC ACK has been lost: this mechanism assumes that the retransmission timer for the All-1 fragment is long enough to allow several SCHC ACK retries if the All-1 fragment has not;been received by the SCHC Fragment receiver, and it also assumes that it is unlikely that several ACKs become all lost).
 
@@ -1443,7 +1441,7 @@ A packet (e.g. an IPv6 packet)
 {: #Fig-Operations-Pad title='SCHC operations, including padding as needed'}
 
 
-Each technology-specific document MUST specify the size of the L2 Word.
+Each Profile MUST specify the size of the L2 Word.
 The L2 Word might actually be a single bit, in which case at most zero bits of padding will be appended to any message, i.e. no padding will take place at all.
 
 
@@ -1582,7 +1580,7 @@ checksum; in that case, if the compressor is collocated with the
 fragmentation point and the decompressor is collocated with the
 packet reassembly point, then compressor MAY elide the UDP checksum.
 Whether and when the UDP Checksum is elided is to be specified in the
-technology-specific documents.
+Profile.
 
 Since the compression happens before the fragmentation, implementors
 should understand the risks when dealing with unprotected data below
@@ -2345,7 +2343,7 @@ This is an example only. The specification in {{ACK-on-Error-sender}} is open to
 
 # SCHC Parameters {#SCHCParams}
 
-This section lists the parameters that need to be defined in the LPWAN technology-specific documents.
+This section lists the information that need to be provided in the LPWAN technology-specific documents.
 
 * Most common uses cases, deployment scenarios
 
@@ -2354,6 +2352,8 @@ This section lists the parameters that need to be defined in the LPWAN technolog
 * Assessment of LPWAN integrity checking
 
 * Various potential channel conditions for the technology and the corresponding recommended use of SCHC C/D and F/R
+
+This section lists the parameters that need to be defined in theProfile.
 
 * Rule ID numbering scheme, fixed-sized or variable-sized Rule IDs, number of Rules, the way the Rule ID is transmitted
 
@@ -2382,7 +2382,7 @@ because the padding bits of the last fragment are included in the MIC computatio
   fully utilised, i.e. there won't be fragments with all FCN values from MAX_WIND_FCN downto 1 and finally All-1.
   It is worth noting that this document does not mandate that other windows (called All-0 windows) are fully utilised either.
   This document purposely does not specify that All-1 windows use Bitmaps with the same number of bits as All-0 windows do.
-  By default, Bitmaps for All-0 and All-1 windows are of the same size MAX_WIND_FCN + 1. But a technology-specific document
+  By default, Bitmaps for All-0 and All-1 windows are of the same size MAX_WIND_FCN + 1. But a Profile
   MAY revert that decision. The rationale for reverting the decision could be the following: Note that the SCHC ACK sent as a
   response to an All-1 fragment includes a C bit that SCHC ACK for other windows don't have. Therefore, the SCHC ACK for the
   All-1 window is one bit bigger. An LPWAN technology with a severely constrained payload size might decide that this "bump" in
