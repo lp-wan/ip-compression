@@ -550,7 +550,7 @@ The padding overhead is kept to the absolute minimum (see {{Padding}}).
 ## SCHC F/R Tools {#FragTools}
 
 This subsection describes the different tools that are used to enable the SCHC F/R functionality defined in this document.
-These tools include the SCHC F/R messages, windows, timers and header fields.
+These tools include the SCHC F/R messages, tiles, windows, counters, timers and header fields.
 
 The tools are described here in a generic manner. Their application to each SCHC F/R mode is found in {{FragModes}}.
 
@@ -558,7 +558,7 @@ The tools are described here in a generic manner. Their application to each SCHC
 
 The messages that can be used by SCHC F/R are the following
 
-* SCHC Fragment: A data unit that carries a subset of a SCHC Packet from the sender to the receiver.
+* SCHC Fragment: A data unit that carries a piece of a SCHC Packet from the sender to the receiver.
 
 * SCHC ACK: An acknowledgement for fragmentation. This message is used by the receiver to report to the sender on the success of reception of a set of SCHC Fragments.
 
@@ -568,14 +568,40 @@ The messages that can be used by SCHC F/R are the following
 
 * SCHC Receiver-Abort: A message by the receiver to tell the sender to abort the transmission of a fragmented SCHC Packet.
 
-### Windows, Timers, Counters, Integrity Checking {#MiscTools}
+### Tiles, Windows, Timers, Counters, Integrity Checking {#MiscTools}
 
-When fragmented, a SCHC Packet is broken down into pieces (called tile?).
-Each SCHC Fragment carries (at least) one piece (tile) in its Payload.
-Some SCHC F/R modes may handle consecutive SCHC Fragments as sets, called windows.
-When windowing is used, the windows MUST be numbered from 0 upward when enumerating the tiles from the start of the SCHC Packet to its end.
-When windowing is used, information on the correct reception of the SCHC Fragments belonging to the same window MUST be grouped together and MAY be sent back as a SCHC ACK.
-The window size is the maximum number of SCHC Fragments that may be grouped together in a window.
+The SCHC Packet is fragmented into pieces, hereafter called tiles.
+The tiles MUST be contiguous.
+
+Each SCHC Fragment message carries at least one tile in its Payload.
+
+Some SCHC F/R modes may handle successive tiles in groups, called windows.
+If windows are used
+
+- all the windows of a SCHC Packet, except the last one, MUST contain the same number of tiles.
+  This number is MAX_WIND_FCN + 1.
+- the windows are numbered.
+- their numbers MUST increase from 0 upward, from the start of the SCHC Packet to its end.
+- the last window MUST contain MAX_WIND_FCN + 1 tiles or less.
+- tiles are numbered within each window.
+- the tile numbers MUST decrement from MAX_WIND_FCN downward, looking from the start of the SCHC Packet toward its end.
+- each tile of a SCHC Packet is therefore uniquely identified by a window number and a tile number within this window.
+
+See {{Fig-TilesExample}} for an example.
+
+~~~~
+
+         +----------------------------------------------...---------------------+
+         |                            SCHC Packet                               |
+         +----------------------------------------------...---------------------+
+
+Tile #   | 4 | 3 | 2 | 1 | 0 | 4 | 3 | 2 | 1 | 0 | 4 |      | 2 | 1 | 0 | 4 | 3 |
+Window # |-------- 0 --------|-------- 1 --------|- 2 - ... - 27 -------|-- 28 -|
+
+~~~~
+{: #Fig-TilesExample title='a SCHC Packet fragmented in tiles grouped in 28 windows, with 5 tiles per window'}
+
+When windows are used, information on the correct reception of the tiles belonging to the same window MUST be grouped together and MAY be sent back as a SCHC ACK.
 
 Some SCHC F/R modes can use the following timers and counters
 
@@ -603,7 +629,7 @@ The SCHC F/R messages use the following fields (see the related formats in {{Fra
 
   * and among this mode
 
-     * if windowing is used, what the window size is
+     * if windows are used, how many tiles the windows contain
 
      * what optional fields are present
 
@@ -612,20 +638,23 @@ The SCHC F/R messages use the following fields (see the related formats in {{Fra
   Therefore, the Rule ID allows SCHC F/R interleaving non-fragmented SCHC Packets and SCHC Fragments that carry other SCHC Packets, or interleaving SCHC Fragments that use different SCHC F/R modes or different parameters.
 
 
-* Fragment Compressed Number (FCN). The FCN is present in the SCHC Fragments header. This field conveys information about the progress in the sequence of SCHC Fragments.
-  For example, it can contain a truncated, efficient representation of a larger-sized fragment number.
+* Fragment Compressed Number (FCN). The FCN is present in the SCHC Fragments header.
+  This field conveys information about the progress in the sequence of tiles.
+  For example, it can contain a truncated, efficient representation of a larger-sized tile number.
   The exact use of the FCN field is left to each SCHC F/R mode.
   However, two values are reserved for special purpose. They help control the SCHC F/R process:
 
-  * The FCN value with all the bits equal to 1 (called All-1) signals the very last SCHC Fragment of a SCHC Packet.
-  By extension, if windowing is used, the last window of a packet is called the All-1 window.
+  * The FCN value with all the bits equal to 1 (called All-1) signals the very last tile of a SCHC Packet.
+  By extension, if windows are used, the last window of a packet is called the All-1 window.
 
-  * If windowing is used, the FCN value with all the bits equal to 0 (called All-0) signals the last SCHC Fragment of a window that is not the last one of
-  the SCHC packet. By extension, such a window is called an All-0 window.
+  * If windows are used, the FCN value with all the bits equal to 0 (called All-0) signals
+  the last tile of a window that is not the last one of the SCHC packet.
+  By extension, such a window is called an All-0 window.
 
   N is the size of the FCN field, in bits. It is defined for each SCHC F/R mode, Profile and Rule ID.
-  Since All-1 is special, the highest value of FCN (as an unsigned integer) theoretically is (2^N)-2.
-  However, each SCHC F/R mode or Profile is free to specify a maximum value, called MAX_WIND_FCN, lower than (2^N)-2.
+  Since All-1 is special, the highest value of FCN (an unsigned integer), called MAX_WIND_FCN,
+  theoretically is (2^N)-2.
+  However, each SCHC F/R mode or Profile is free to specify for MAX_WIND_FCN a value lower than (2^N)-2.
   The rationale is that MAX_WIND_FCN finely controls the size of the Bitmap in the SCHC ACK message, which may be critical to some LPWAN technologies.
   
 * Datagram Tag (DTag). The DTag field is optional.
@@ -634,22 +663,21 @@ The SCHC F/R messages use the following fields (see the related formats in {{Fra
   In other words, only after all its fragments have been transmitted can another fragmented SCHC Packet be sent.
 
   If present, DTag MUST be set to the same value for all SCHC Fragments carrying the same SCHC
-  packet, and to different values for different SCHC Packets. Using this field, the sender can interleave fragments from
+  Packet, and to different values for different SCHC Packets.
+  Using this field, the sender can interleave fragments from
   different SCHC Packets, while the receiver can still tell them apart.
 
-  If a SCHC ACK message is sent, it MUST carry the same DTag value as the SCHC Fragments for which this SCHC ACK is
-  intended. 
+  If a SCHC ACK message is sent, it MUST carry the same DTag value as the SCHC Fragments for the same SCHC Packet.
 
   The presence and size of the DTag field is defined by each SCHC F/R mode for each Rule ID value.
   For each new SCHC Packet processed by the sender under the same F/R mode and same RuleID, DTag MUST be sequentially
   increased, from 0 to (2^T) – 1 wrapping back from (2^T) - 1 to 0, where T is the size of DTag in bits.
 
 
-* W: The W field is optional. It is only present if windowing is used.
+* W: The W field is optional. It is only present if windows are used.
 
-  This field carries information related to the window number a SCHC F/R message relates to.
+  This field carries information pertaining to the window number a SCHC F/R message relates to.
   It MUST carry the same value for all SCHC F/R messages pertaining to the same window.
-  The value of W MUST be initialised to 0 for each new fragmented SCHC Packet.
 
   The presence of W and its size (called M, in bits) is defined for each F/R mode and Rule ID.
 
@@ -677,15 +705,18 @@ The SCHC F/R messages use the following fields (see the related formats in {{Fra
   This field is used in the SCHC ACK messages to report the outcome of the reassembled SCHC Packet integrity check (see {{MiscTools}}).
   A value of 1 tells that the integrity check succeeded. A value of 0 represents a failure.
 
-* Bitmap. The Bitmap is used together with windowing.
+* Bitmap. The Bitmap is used together with windows.
   It is a bit field that may be maintained by the sender during the fragmentation
   and by the receiver during the reassembly of a fragmented SCHC Packet.
-  The Bitmap may also be carried in a SCHC ACK, either in extenso or in a shortened form (see {{Bitmapopt}}).
-  Each bit in the internal representation of the Bitmap corresponds to a SCHC
-  Fragment (tile) of a window, and it provides feedback on whether the SCHC Fragment has been received or not. The right-most
-  position on the Bitmap tells if the All-0 or All-1 fragment has been correctly received or not. Feedback on the SCHC
-  Fragment with the FCN == MAX_WIND_FCN value is provided by the bit in the left-most position of the Bitmap. In the Bitmap, a bit
-  set to 1 indicates that the SCHC Fragment of FCN corresponding to that bit position has been correctly received.
+
+  Each window has a Bitmap.
+  Each bit in the internal representation of the window Bitmap corresponds to a tile in the window,
+  and it provides feedback on whether the tile has been received or not.
+
+  The bit at the right-most position tells if the All-0 or All-1 tile has been correctly received.
+  The bit an the left-most position tells if the tile with the FCN equal to MAX_WIND_FCN has been correctly received.
+  A bit set to 1 in the Bitmap indicates that a tile with the FCN value corresponding to that bit position has been correctly received.
+  A bit set to 0 in the Bitmap indicates that a tile with that FCN has not been received.
 
 
 ## SCHC F/R Message Formats {#Fragfor}
@@ -696,7 +727,7 @@ This section defines the SCHC Fragment format, the SCHC ACK format, the SCHC ACK
 
 A SCHC Fragment conforms to the general format shown in {{Fig-FragFormat}}.
 It comprises a SCHC Fragment Header and a SCHC Fragment Payload.
-The SCHC Fragment Payload carries a subset of the SCHC Packet (tile).
+The SCHC Fragment Payload carries one or several tile(s).
 In addition, the last SCHC Fragment of a SCHC Packet carries just enough padding bits as needed to fill up an L2 Word.
 The SCHC Fragment is the data unit passed on to the L2 for transmission.
 
@@ -717,17 +748,20 @@ The W field is optional. Its presence is specified by each SCHC F/R mode.
 
  |------ Fragment Header ------|
            |-- T --|-M-|-- N --|
- +-- ... --+- ... -+---+- ... -+--------...-------+
- | Rule ID | DTag  | W |  FCN  | Fragment Payload |
- +-- ... --+- ... -+---+- ... -+--------...-------+
+ +-- ... --+- ... -+---+- ... -+--------...-------+~~~~~~~~~~~~~~~~~~~~~
+ | Rule ID | DTag  | W |  FCN  | Fragment Payload | padding (as needed)
+ +-- ... --+- ... -+---+- ... -+--------...-------+~~~~~~~~~~~~~~~~~~~~~
 
 ~~~~
 {: #Fig-NotLastFrag title='Detailed Header Format for Fragments except the Last One'}
 
 
 The total size of the Fragment Header is not necessarily a multiple of the L2 Word size.
-To build the Fragment Payload, SCHC F/R MUST take from the SCHC Packet a number of bits that makes the SCHC Fragment an exact multiple of L2 Words. As a consequence, no padding bit is used for these fragments.
 
+If the size of the tiles carried in the SCHC Fragment Payload does not nicely complement the SCHC Header size
+in a way that would make the SCHC Fragment a multiple of the L2 Word, then padding bits MUST be added.
+
+The padding bits that are added MUST be less that the L2 Word size.
 
 The Fragment Payload of a SCHC Fragment with FCN == 0 (called an All-0 SCHC Fragment) MUST be at least the size of an L2 Word.
 The rationale is that, even in the presence of padding, an All-0 SCHC Fragment needs to be distinguishable from the SCHC ACK REQ message, which has the same header but has no payload (see {{ACKREQ}}).
@@ -766,7 +800,7 @@ This may entail saving an L2 Word from the payload of the previous SCHC Fragment
 
 #### All-0 SCHC ACK {#All0ACK}
 
-This message only appears in SCHC F/R modes that use windowing.
+This message only appears in SCHC F/R modes that use windows.
 The format of a SCHC ACK that acknowledges a window of SCHC Fragments that is not the last one of a SCHC Packet (All-0 window) MUST obey the format shown in {{Fig-All0-ACK-Format}}.
 
 ~~~~
@@ -801,7 +835,7 @@ The W field is optional. Its presence is specified by each SCHC F/R mode.
 {: #Fig-All1-ACK-Format title='Format of a SCHC ACK at the end of a SCHC Packet transmission'}
 
 The All-1 SCHC ACK header contains a C bit (see {{HeaderFields}}).
-If the C bit is set to 0 (integrity check failure) and if windowing is used, the Bitmap for the All-1 window MUST follow.
+If the C bit is set to 0 (integrity check failure) and if windows are used, the Bitmap for the All-1 window MUST follow.
 
 The Rule ID and DTag values in the SCHC ACK messages MUST be identical to the ones used in the SCHC Fragments that are being acknowledged. This allows matching the SCHC ACK and the corresponding SCHC Fragments.
 
@@ -1007,6 +1041,8 @@ The size of the FCN field is RECOMMENDED to be 1 bit but it MAY be defined by ea
 
 #### Sender behaviour
 
+To build the Fragment Payload, SCHC F/R MUST take from the SCHC Packet a number of bits that makes the SCHC Fragment an exact multiple of L2 Words.
+As a consequence, no padding bit is used for these fragments.
 The sender transmits all the SCHC Fragments of a SCHC Packet, in sequential order.
 It MUST use the same Rule ID and optional DTag pair for all these fragments.
 The All-1 FCN value MUST be used for the last SCHC Fragment, which MUST use the format described in {{LastFrag}}.
@@ -1036,7 +1072,7 @@ On reception of a SCHC Sender-Abort, the receiver MAY release all resource relat
 
 ### ACK-Always {#ACK-Always-subsection}
 
-In ACK-Always mode, windowing is used.
+In ACK-Always mode, windows are used.
 An acknowledgement, positive or negative, is fed by the fragment receiver back to the fragment sender at the end of the transmission of each window of SCHC Fragments.
 
 In a nutshell, the fragment sender iterates retransmitting the SCHC Fragments that are reported missing until the fragment receiver reports that all the SCHC Fragments belonging to the window have been correctly received, or until too many attempts were made.
@@ -1218,18 +1254,14 @@ and it MUST exit the receive process for that SCHC Packet.
 
 ### ACK-on-Error {#ACK-on-Error-subsection}
 
-In ACK-on-Error mode, windowing is used.
-The SCHC Packet is fragmented into pieces, hereafter called tiles.
+In ACK-on-Error mode, windows are used.
 All tiles MUST be of equal size, except for the last one,
 which MUST be of the same size or smaller than the preceding ones.
-The tiles MUST be contiguous.
-Successive tiles are grouped in windows.
-The window numbers MUST increase from 0 upward, from the start of the SCHC Packet to its end.
-All windows, except the last one, MUST contain MAX_WIND_FCN+1 tiles.
-Tiles are numbered within each window.
-The tile numbers decrement from MAX_WIND_FCN downward, looking from the start of the SCHC Packet toward its end.
-Each tile of a SCHC Packet is therefore uniquely identified by a window number and a tile number within this window.
-See {{Fig-TilesExample}} for an example.
+
+A SCHC Fragment message carries one or more tiles, which may span multiple windows.
+A SCHC ACK reports on the reception of exactly one window of tiles.
+
+See {{Fig-TilesACKonError}} for an example.
 
 ~~~~
 
@@ -1243,13 +1275,10 @@ Window # |-------- 0 --------|-------- 1 --------|- 2 - ... - 27 -------|- 28-|
 
 SCHC Fragment msg    |-----------|
 ~~~~
-{: #Fig-TilesExample title='a SCHC Packet fragmented in tiles, Ack-on-Error mode'}
-
-A SCHC Fragment message carries one or more tiles, which may span multiple windows.
-A SCHC ACK reports on the reception of exactly one window of tiles.
+{: #Fig-TilesACKonError title='a SCHC Packet fragmented in tiles, Ack-on-Error mode'}
 
 The W field is wide enough that it unambiguously represents an absolute window number.
-SCHC ACKs are fed by the fragment receiver back to the fragment sender for the windows that have tiles missing at the receiver.
+The fragment receiver feeds SCHC ACKs back to the fragment sender about windows that it misses tiles of.
 No SCHC ACK is fed back for windows that have been fully received by the fragment receiver.
 
 The fragment sender retransmits SCHC Fragments for tiles that are reported missing.
