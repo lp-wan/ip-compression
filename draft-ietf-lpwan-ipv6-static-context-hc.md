@@ -1354,9 +1354,68 @@ On receiving a SCHC ACK,
 
 See {{Fig-ACKonerrorSnd}} for an example of a Finite State Machine implementing the sender behaviour.
 
-#### Receiver behaviour
+#### Receiver behaviour {#ACK-on-Error-receiver}
 
+On receiving a SCHC Fragment with a Rule ID and DTag pair not being processed at that time,
+the receiver MUST start a process to assemble a new SCHC Packet with that Rule ID and DTag value pair.
+That process MUST only examine received SCHC F/R messages with that Rule ID and DTag value pair
+and MUST only transmit SCHC F/R messages with that Rule ID and DTag value pair.
 
+(TODO: DTag filtering to avoid allocating a reassembly process for late-coming SCHC Fragments after an abort condition)
+
+The receiver MUST start an Inactivity Timer. It MUST initialise an Attempts counter to 0.
+
+On reception of any SCHC F/R message, the receiver MUST reset the Inactivity Timer.
+
+On reception of a SCHC Fragment message,
+the receiver MUST assemble the received tiles based on the W and FCN fields of the SCHC Fragment.
+
+- if the FCN is All-1, the full SCHC Fragment payload MUST be assembled.
+  This is because the size of the last tile is not known by the receiver,
+  therefore padding bits are indistinguishable from the tile data bits, at this stage.
+  They will be removed by the SCHC C/D sublayer.
+  If the size of the SCHC Fragment Payload exceeds or equals
+  the size of one regular tile plus the size of an L2 Word, this SHOULD raise an error flag.
+- otherwise, padding bits MUST be discarded. This is possible because
+
+  * the size of the tiles is known a priori,
+  * it is larger than an L2 Word
+  * padding bits are always less than an L2 Word
+
+On reception of a SCHC ACK REQ or of an All-1 SCHC Fragment, the receiver
+MUST return a SCHC ACK for the lowest-numbered window that has tiles missing at the receiver.
+If the receiver knows of no window that has tiles missing,
+it MUST return a SCHC ACK for the highest-numbered window it currently has tiles for.
+
+A Profile MAY specify other times and circumstances at which
+a receiver MUST send a SCHC ACK
+and which window(s) the SCHC ACK MUST report about.
+
+On sending a SCHC ACK, the receiver MUST increase the Attempts counter.
+
+From reception of an All-1 SCHC Fragment onward,
+a receiver MUST check the integrity of the reassembled SCHC Packet at least every time
+it prepares for sending a SCHC ACK for the last window.
+
+On reception of a SCHC Sender-Abort,
+the receiver MUST release all resource associated with this SCHC Packet.
+
+On expiration of the Inactivity Timer,
+the receiver MUST send a SCHC Receiver-Abort
+and it MUST release all resource associated with this SCHC Packet.
+
+On the Attempts counter exceeding MAX_ACK_REQUESTS,
+the receiver MUST send a SCHC Receiver-Abort
+and it MUST release all resource associated with this SCHC Packet.
+
+Reassembly of the SCHC Packet concludes when
+
+- a Sender-Abort has been received
+- or the Inactivity Timer has expired
+- or the Attempts counter has exceed MAX_ACK_REQUESTS
+- or when at least on All-1 SCHC Fragment has been received and integrity checking of the reassembled SCHC Packet is successful.
+
+See {{Fig-ACKonerrorRcv}} for one possible example of a Finite State Machine implementing a receiver behaviour.
 
 ## Supporting multiple window sizes
 
