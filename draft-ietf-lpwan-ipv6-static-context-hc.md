@@ -1029,10 +1029,10 @@ The sender just transmits all the SCHC Fragments blindly.
 SCHC ACK or SCHC ACK REQ MUST NOT be sent.
 SCHC Sender-Abort MAY be sent. SCHC Receiver-Abort MUST NOT be sent.
 
-Windowing is not used. Therefore, the W field MUST NOT be present.
+Windows are not used. Therefore, the W field MUST NOT be present.
 The Retransmission Timer is not used.
 The Attempts counter is not used.
-At the receiver, one Inactivity Timer MUST be instantiated for each pair of Rule ID and optional DTag values.
+At the receiver, one Inactivity Timer MUST be maintained for each pair of Rule ID and optional DTag values.
 The Inactivity Timer expiration value is based on the characteristics of the underlying LPWAN technology
 and MUST be defined in a Profile.
 
@@ -1041,32 +1041,44 @@ The size of the FCN field is RECOMMENDED to be 1 bit but it MAY be defined by ea
 
 #### Sender behaviour
 
-To build the Fragment Payload, SCHC F/R MUST take from the SCHC Packet a number of bits that makes the SCHC Fragment an exact multiple of L2 Words.
-As a consequence, no padding bit is used for these fragments.
-The sender transmits all the SCHC Fragments of a SCHC Packet, in sequential order.
-It MUST use the same Rule ID and optional DTag pair for all these fragments.
-The All-1 FCN value MUST be used for the last SCHC Fragment, which MUST use the format described in {{LastFrag}}.
-The All-1 FCN MUST NOT be used for the preceding SCHC Fragments, which MUST use the format described in {{NotLastFrag}}.
+The sender MUST use the same Rule ID and optional DTag pair for all the SCHC Fragments for a given SCHC Packet.
+
+Each SCHC Fragment MUST contain exactly one tile in its payload.
+The sender MUST transmit the SCHC Fragments messages in the order that the tiles appear in the SCHC Packet.
+Except for the last tile of a SCHC Packet, each tile MUST be of a size
+that complements the SCHC Fragment Header so
+that the SCHC Fragment is a multiple of L2 Words without the need for padding bits.
+Except for the last one, the SCHC Fragments MUST use the regular SCHC Fragment format specified in {{NotLastFrag}}.
+The last SCHC Fragment MUST use the All-1 format specified in {{LastFrag}}.
+
+The sender MAY transmit a SCHC Sender-Abort.
 
 {{Fig-NoACKModeSnd}} shows an example of a corresponding state machine.
 
 #### Receiver behaviour
 
-While FCN is not All-1, the receiver assembles the payloads of the SCHC Fragments that bear the same Rule ID and optional DTag.
-When an All-1 SCHC Fragment is received with the same Rule ID and optional DTag, the receiver appends the All-1 SCHC Fragment Payload and the padding bits to the
-previously received SCHC Fragment payloads for this SCHC Packet. The reassembly operation concludes.
+On receiving regular SCHC Fragments with the same Rule ID and optional DTag,
 
-Each time a SCHC Fragment is received with the same Rule ID and optional DTag, the Inactivity timer MUST be reset.
+- the receiver MUST reset the Inactivity Timer,
+- the receiver assembles the payloads of the SCHC Fragments
 
-When the Inactivity timer expires, the reassembly operation concludes.
+On receiving an All-1 SCHC Fragment with the same Rule ID and optional DTag,
 
-If reassembly concludes because of Inactivity Timer expiration,
-the SCHC Packet being reassembled MUST be dropped and resources associated with this Rule ID and optional DTag MUST be released.
+- the receiver MUST appends the All-1 SCHC Fragment Payload and the padding bits to the
+previously received SCHC Fragment payloads for this SCHC Packet
+- if an integrity checking is specified in the Profile,
+  * the receiver MUST perform the integrity check
+  * if integrity checking fails,
+    the receiver MUST drop the reassembled SCHC Packet
+    and it MUST release all resources associated with this Rule ID and optional DTag.
+- the reassembly operation concludes.
 
-If reassembly concludes because of receiving an All-1 SCHC Fragment and if integrity checking (either through the MIC or through some other L2 means) fails,
-the reassembled SCHC Packet MUST be dropped and resources associated with this Rule ID and optional DTag MUST be released.
+On expiration of the Inactivity Timer,
+the receiver MUST drop the SCHC Packet being reassembled
+and it MUST release all resources associated with this Rule ID and optional DTag.
 
-On reception of a SCHC Sender-Abort, the receiver MAY release all resource related to the reassembly of the SCHC Fragments with the same Rule ID and optional DTag.
+On receiving a SCHC Sender-Abort,
+the receiver MAY release all resources associated with this Rule ID and optional DTag.
 
 {{Fig-NoACKModeRcv}} shows an example of a corresponding state machine.
 
