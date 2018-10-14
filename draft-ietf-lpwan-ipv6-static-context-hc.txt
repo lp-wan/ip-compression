@@ -5,12 +5,12 @@
 lpwan Working Group                                          A. Minaburo
 Internet-Draft                                                    Acklio
 Intended status: Standards Track                              L. Toutain
-Expires: April 16, 2019                                   IMT-Atlantique
+Expires: April 17, 2019                                   IMT-Atlantique
                                                                 C. Gomez
                                     Universitat Politecnica de Catalunya
                                                               D. Barthel
                                                              Orange Labs
-                                                        October 13, 2018
+                                                        October 14, 2018
 
 
   LPWAN Static Context Header Compression (SCHC) and fragmentation for
@@ -53,7 +53,7 @@ Status of This Memo
 
 
 
-Minaburo, et al.         Expires April 16, 2019                 [Page 1]
+Minaburo, et al.         Expires April 17, 2019                 [Page 1]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
@@ -66,7 +66,7 @@ Internet-Draft                 LPWAN SCHC                   October 2018
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on April 16, 2019.
+   This Internet-Draft will expire on April 17, 2019.
 
 Copyright Notice
 
@@ -109,7 +109,7 @@ Table of Contents
 
 
 
-Minaburo, et al.         Expires April 16, 2019                 [Page 2]
+Minaburo, et al.         Expires April 17, 2019                 [Page 2]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
@@ -128,44 +128,44 @@ Internet-Draft                 LPWAN SCHC                   October 2018
      8.4.  SCHC F/R modes  . . . . . . . . . . . . . . . . . . . . .  32
        8.4.1.  No-ACK mode . . . . . . . . . . . . . . . . . . . . .  32
        8.4.2.  ACK-Always  . . . . . . . . . . . . . . . . . . . . .  33
-       8.4.3.  ACK-on-Error  . . . . . . . . . . . . . . . . . . . .  39
+       8.4.3.  ACK-on-Error  . . . . . . . . . . . . . . . . . . . .  40
      8.5.  Supporting multiple window sizes  . . . . . . . . . . . .  45
-     8.6.  Downlink SCHC Fragment transmission . . . . . . . . . . .  45
+     8.6.  Downlink SCHC Fragment transmission . . . . . . . . . . .  46
    9.  Padding management  . . . . . . . . . . . . . . . . . . . . .  46
-   10. SCHC Compression for IPv6 and UDP headers . . . . . . . . . .  47
-     10.1.  IPv6 version field . . . . . . . . . . . . . . . . . . .  47
-     10.2.  IPv6 Traffic class field . . . . . . . . . . . . . . . .  47
+   10. SCHC Compression for IPv6 and UDP headers . . . . . . . . . .  48
+     10.1.  IPv6 version field . . . . . . . . . . . . . . . . . . .  48
+     10.2.  IPv6 Traffic class field . . . . . . . . . . . . . . . .  48
      10.3.  Flow label field . . . . . . . . . . . . . . . . . . . .  48
-     10.4.  Payload Length field . . . . . . . . . . . . . . . . . .  48
-     10.5.  Next Header field  . . . . . . . . . . . . . . . . . . .  48
+     10.4.  Payload Length field . . . . . . . . . . . . . . . . . .  49
+     10.5.  Next Header field  . . . . . . . . . . . . . . . . . . .  49
      10.6.  Hop Limit field  . . . . . . . . . . . . . . . . . . . .  49
      10.7.  IPv6 addresses fields  . . . . . . . . . . . . . . . . .  49
-       10.7.1.  IPv6 source and destination prefixes . . . . . . . .  49
+       10.7.1.  IPv6 source and destination prefixes . . . . . . . .  50
        10.7.2.  IPv6 source and destination IID  . . . . . . . . . .  50
-     10.8.  IPv6 extensions  . . . . . . . . . . . . . . . . . . . .  50
-     10.9.  UDP source and destination port  . . . . . . . . . . . .  50
+     10.8.  IPv6 extensions  . . . . . . . . . . . . . . . . . . . .  51
+     10.9.  UDP source and destination port  . . . . . . . . . . . .  51
      10.10. UDP length field . . . . . . . . . . . . . . . . . . . .  51
      10.11. UDP Checksum field . . . . . . . . . . . . . . . . . . .  51
    11. IANA Considerations . . . . . . . . . . . . . . . . . . . . .  52
    12. Security considerations . . . . . . . . . . . . . . . . . . .  52
      12.1.  Security considerations for SCHC
-            Compression/Decompression  . . . . . . . . . . . . . . .  52
+            Compression/Decompression  . . . . . . . . . . . . . . .  53
      12.2.  Security considerations for SCHC
-            Fragmentation/Reassembly . . . . . . . . . . . . . . . .  52
-   13. Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .  53
+            Fragmentation/Reassembly . . . . . . . . . . . . . . . .  53
+   13. Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .  54
    14. References  . . . . . . . . . . . . . . . . . . . . . . . . .  54
      14.1.  Normative References . . . . . . . . . . . . . . . . . .  54
      14.2.  Informative References . . . . . . . . . . . . . . . . .  54
    Appendix A.  SCHC Compression Examples  . . . . . . . . . . . . .  55
    Appendix B.  Fragmentation Examples . . . . . . . . . . . . . . .  58
-   Appendix C.  Fragmentation State Machines . . . . . . . . . . . .  65
-   Appendix D.  SCHC Parameters  . . . . . . . . . . . . . . . . . .  72
-   Appendix E.  Note . . . . . . . . . . . . . . . . . . . . . . . .  74
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  74
+   Appendix C.  Fragmentation State Machines . . . . . . . . . . . .  66
+   Appendix D.  SCHC Parameters  . . . . . . . . . . . . . . . . . .  73
+   Appendix E.  Note . . . . . . . . . . . . . . . . . . . . . . . .  75
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  75
 
 
 
-Minaburo, et al.         Expires April 16, 2019                 [Page 3]
+Minaburo, et al.         Expires April 17, 2019                 [Page 3]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
@@ -221,7 +221,7 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
 
 
-Minaburo, et al.         Expires April 16, 2019                 [Page 4]
+Minaburo, et al.         Expires April 17, 2019                 [Page 4]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
@@ -277,7 +277,7 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
 
 
-Minaburo, et al.         Expires April 16, 2019                 [Page 5]
+Minaburo, et al.         Expires April 17, 2019                 [Page 5]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
@@ -333,7 +333,7 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
 
 
-Minaburo, et al.         Expires April 16, 2019                 [Page 6]
+Minaburo, et al.         Expires April 17, 2019                 [Page 6]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
@@ -389,7 +389,7 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
 
 
-Minaburo, et al.         Expires April 16, 2019                 [Page 7]
+Minaburo, et al.         Expires April 17, 2019                 [Page 7]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
@@ -445,7 +445,7 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
 
 
-Minaburo, et al.         Expires April 16, 2019                 [Page 8]
+Minaburo, et al.         Expires April 17, 2019                 [Page 8]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
@@ -501,7 +501,7 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
 
 
-Minaburo, et al.         Expires April 16, 2019                 [Page 9]
+Minaburo, et al.         Expires April 17, 2019                 [Page 9]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
@@ -557,7 +557,7 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
 
 
-Minaburo, et al.         Expires April 16, 2019                [Page 10]
+Minaburo, et al.         Expires April 17, 2019                [Page 10]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
@@ -613,7 +613,7 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
 
 
-Minaburo, et al.         Expires April 16, 2019                [Page 11]
+Minaburo, et al.         Expires April 17, 2019                [Page 11]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
@@ -669,7 +669,7 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
 
 
-Minaburo, et al.         Expires April 16, 2019                [Page 12]
+Minaburo, et al.         Expires April 17, 2019                [Page 12]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
@@ -725,7 +725,7 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
 
 
-Minaburo, et al.         Expires April 16, 2019                [Page 13]
+Minaburo, et al.         Expires April 17, 2019                [Page 13]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
@@ -781,7 +781,7 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
 
 
-Minaburo, et al.         Expires April 16, 2019                [Page 14]
+Minaburo, et al.         Expires April 17, 2019                [Page 14]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
@@ -837,7 +837,7 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
 
 
-Minaburo, et al.         Expires April 16, 2019                [Page 15]
+Minaburo, et al.         Expires April 17, 2019                [Page 15]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
@@ -893,7 +893,7 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
 
 
-Minaburo, et al.         Expires April 16, 2019                [Page 16]
+Minaburo, et al.         Expires April 17, 2019                [Page 16]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
@@ -949,7 +949,7 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
 
 
-Minaburo, et al.         Expires April 16, 2019                [Page 17]
+Minaburo, et al.         Expires April 17, 2019                [Page 17]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
@@ -1005,7 +1005,7 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
 
 
-Minaburo, et al.         Expires April 16, 2019                [Page 18]
+Minaburo, et al.         Expires April 17, 2019                [Page 18]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
@@ -1061,7 +1061,7 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
 
 
-Minaburo, et al.         Expires April 16, 2019                [Page 19]
+Minaburo, et al.         Expires April 17, 2019                [Page 19]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
@@ -1117,7 +1117,7 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
 
 
-Minaburo, et al.         Expires April 16, 2019                [Page 20]
+Minaburo, et al.         Expires April 17, 2019                [Page 20]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
@@ -1173,7 +1173,7 @@ Window # |-------- 0 --------|-------- 1 --------|- 2 - ... - 27 -------|-- 28 -
 
 
 
-Minaburo, et al.         Expires April 16, 2019                [Page 21]
+Minaburo, et al.         Expires April 17, 2019                [Page 21]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
@@ -1229,7 +1229,7 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
 
 
-Minaburo, et al.         Expires April 16, 2019                [Page 22]
+Minaburo, et al.         Expires April 17, 2019                [Page 22]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
@@ -1285,7 +1285,7 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
 
 
-Minaburo, et al.         Expires April 16, 2019                [Page 23]
+Minaburo, et al.         Expires April 17, 2019                [Page 23]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
@@ -1341,7 +1341,7 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
 
 
-Minaburo, et al.         Expires April 16, 2019                [Page 24]
+Minaburo, et al.         Expires April 17, 2019                [Page 24]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
@@ -1397,7 +1397,7 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
 
 
-Minaburo, et al.         Expires April 16, 2019                [Page 25]
+Minaburo, et al.         Expires April 17, 2019                [Page 25]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
@@ -1453,7 +1453,7 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
 
 
-Minaburo, et al.         Expires April 16, 2019                [Page 26]
+Minaburo, et al.         Expires April 17, 2019                [Page 26]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
@@ -1509,7 +1509,7 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
 
 
-Minaburo, et al.         Expires April 16, 2019                [Page 27]
+Minaburo, et al.         Expires April 17, 2019                [Page 27]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
@@ -1565,7 +1565,7 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
 
 
-Minaburo, et al.         Expires April 16, 2019                [Page 28]
+Minaburo, et al.         Expires April 17, 2019                [Page 28]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
@@ -1621,7 +1621,7 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
 
 
-Minaburo, et al.         Expires April 16, 2019                [Page 29]
+Minaburo, et al.         Expires April 17, 2019                [Page 29]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
@@ -1677,7 +1677,7 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
 
 
-Minaburo, et al.         Expires April 16, 2019                [Page 30]
+Minaburo, et al.         Expires April 17, 2019                [Page 30]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
@@ -1733,7 +1733,7 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
 
 
-Minaburo, et al.         Expires April 16, 2019                [Page 31]
+Minaburo, et al.         Expires April 17, 2019                [Page 31]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
@@ -1749,9 +1749,9 @@ Internet-Draft                 LPWAN SCHC                   October 2018
    SCHC ACK or SCHC ACK REQ MUST NOT be sent.  SCHC Sender-Abort MAY be
    sent.  SCHC Receiver-Abort MUST NOT be sent.
 
-   Windowing is not used.  Therefore, the W field MUST NOT be present.
+   Windows are not used.  Therefore, the W field MUST NOT be present.
    The Retransmission Timer is not used.  The Attempts counter is not
-   used.  At the receiver, one Inactivity Timer MUST be instantiated for
+   used.  At the receiver, one Inactivity Timer MUST be maintained for
    each pair of Rule ID and optional DTag values.  The Inactivity Timer
    expiration value is based on the characteristics of the underlying
    LPWAN technology and MUST be defined in a Profile.
@@ -1762,54 +1762,63 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
 8.4.1.1.  Sender behaviour
 
-   To build the Fragment Payload, SCHC F/R MUST take from the SCHC
-   Packet a number of bits that makes the SCHC Fragment an exact
-   multiple of L2 Words.  As a consequence, no padding bit is used for
-   these fragments.  The sender transmits all the SCHC Fragments of a
-   SCHC Packet, in sequential order.  It MUST use the same Rule ID and
-   optional DTag pair for all these fragments.  The All-1 FCN value MUST
-   be used for the last SCHC Fragment, which MUST use the format
-   described in Section 8.3.1.2.  The All-1 FCN MUST NOT be used for the
-   preceding SCHC Fragments, which MUST use the format described in
-   Section 8.3.1.1.
+   The sender MUST use the same Rule ID and optional DTag pair for all
+   the SCHC Fragments for a given SCHC Packet.
+
+   Each SCHC Fragment MUST contain exactly one tile in its payload.  The
+   sender MUST transmit the SCHC Fragments messages in the order that
+   the tiles appear in the SCHC Packet.  Except for the last tile of a
+   SCHC Packet, each tile MUST be of a size that complements the SCHC
+   Fragment Header so that the SCHC Fragment is a multiple of L2 Words
+   without the need for padding bits.  Except for the last one, the SCHC
+   Fragments MUST use the regular SCHC Fragment format specified in
+   Section 8.3.1.1.  The last SCHC Fragment MUST use the All-1 format
+   specified in Section 8.3.1.2.
+
+   The sender MAY transmit a SCHC Sender-Abort.
 
    Figure 36 shows an example of a corresponding state machine.
 
 8.4.1.2.  Receiver behaviour
 
-   While FCN is not All-1, the receiver assembles the payloads of the
-   SCHC Fragments that bear the same Rule ID and optional DTag.  When an
-   All-1 SCHC Fragment is received with the same Rule ID and optional
-   DTag, the receiver appends the All-1 SCHC Fragment Payload and the
-   padding bits to the previously received SCHC Fragment payloads for
-   this SCHC Packet.  The reassembly operation concludes.
+   On receiving regular SCHC Fragments with the same Rule ID and
+   optional DTag,
 
-   Each time a SCHC Fragment is received with the same Rule ID and
-   optional DTag, the Inactivity timer MUST be reset.
+   o  the receiver MUST reset the Inactivity Timer,
 
 
 
-Minaburo, et al.         Expires April 16, 2019                [Page 32]
+
+Minaburo, et al.         Expires April 17, 2019                [Page 32]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
 
-   When the Inactivity timer expires, the reassembly operation
-   concludes.
+   o  the receiver assembles the payloads of the SCHC Fragments
 
-   If reassembly concludes because of Inactivity Timer expiration, the
-   SCHC Packet being reassembled MUST be dropped and resources
-   associated with this Rule ID and optional DTag MUST be released.
+   On receiving an All-1 SCHC Fragment with the same Rule ID and
+   optional DTag,
 
-   If reassembly concludes because of receiving an All-1 SCHC Fragment
-   and if integrity checking (either through the MIC or through some
-   other L2 means) fails, the reassembled SCHC Packet MUST be dropped
-   and resources associated with this Rule ID and optional DTag MUST be
-   released.
+   o  the receiver MUST appends the All-1 SCHC Fragment Payload and the
+      padding bits to the previously received SCHC Fragment payloads for
+      this SCHC Packet
 
-   On reception of a SCHC Sender-Abort, the receiver MAY release all
-   resource related to the reassembly of the SCHC Fragments with the
-   same Rule ID and optional DTag.
+   o  if an integrity checking is specified in the Profile,
+
+      *  the receiver MUST perform the integrity check
+
+      *  if integrity checking fails, the receiver MUST drop the
+         reassembled SCHC Packet and it MUST release all resources
+         associated with this Rule ID and optional DTag.
+
+   o  the reassembly operation concludes.
+
+   On expiration of the Inactivity Timer, the receiver MUST drop the
+   SCHC Packet being reassembled and it MUST release all resources
+   associated with this Rule ID and optional DTag.
+
+   On receiving a SCHC Sender-Abort, the receiver MAY release all
+   resources associated with this Rule ID and optional DTag.
 
    Figure 37 shows an example of a corresponding state machine.
 
@@ -1832,6 +1841,15 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
    The W field MUST be present and its size MUST be 1 bit.
 
+
+
+
+
+Minaburo, et al.         Expires April 17, 2019                [Page 33]
+
+Internet-Draft                 LPWAN SCHC                   October 2018
+
+
    At the sender, one W bit and one FCN counter MUST be instantiated for
    each pair of Rule ID and optional DTag values.  At the receiver, one
    W bit, one FCN counter and one Bitmap MUST be instantiated for each
@@ -1842,14 +1860,6 @@ Internet-Draft                 LPWAN SCHC                   October 2018
    At the receiver, one Inactivity Timer MUST be instantiated for each
    pair of Rule ID and optional DTag values.  The expiration values of
    the Retransmission Timer and of the Inactivity Timer are based on the
-
-
-
-Minaburo, et al.         Expires April 16, 2019                [Page 33]
-
-Internet-Draft                 LPWAN SCHC                   October 2018
-
-
    characteristics of the underlying LPWAN technology and MUST be
    defined in a Profile.
 
@@ -1888,6 +1898,14 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
    Then, the fragment sender MUST initialize an Attempts counter to 0
    for that Rule ID and DTag value pair and it MUST enter a *second
+
+
+
+Minaburo, et al.         Expires April 17, 2019                [Page 34]
+
+Internet-Draft                 LPWAN SCHC                   October 2018
+
+
    state* where it MUST start a Retransmission Timer for that Rule ID
    and DTag value pair and where it MUST expect to receive a SCHC ACK.
 
@@ -1897,15 +1915,6 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
    o  If the Retransmission Timer expires while Attempts is greater or
       equal to MAX_ACK_REQUESTS, the fragment sender MUST send a SCHC
-
-
-
-
-Minaburo, et al.         Expires April 16, 2019                [Page 34]
-
-Internet-Draft                 LPWAN SCHC                   October 2018
-
-
       Sender-Abort, it MUST release all resource associated with this
       SCHC Packet and it MUST exit with an error condition.
 
@@ -1946,21 +1955,19 @@ Internet-Draft                 LPWAN SCHC                   October 2018
    and ignore any SCHC ACK bearing a W value different from its own W
    value.
 
+
+
+Minaburo, et al.         Expires April 17, 2019                [Page 35]
+
+Internet-Draft                 LPWAN SCHC                   October 2018
+
+
    At any time, on receiving a SCHC Receiver-Abort with the correct Rule
    ID and DTag value pair, the fragment sender MUST release all resource
    associated with this SCHC Packet and it MUST exit with an error
    condition.
 
    Figure 38 shows an example of a corresponding state machine.
-
-
-
-
-
-Minaburo, et al.         Expires April 16, 2019                [Page 35]
-
-Internet-Draft                 LPWAN SCHC                   October 2018
-
 
    A delay between each SCHC Fragment transmission can be added to
    respect local regulations or other constraints imposed by the
@@ -2003,6 +2010,14 @@ Internet-Draft                 LPWAN SCHC                   October 2018
       this SCHC Packet and it MUST exit the receive process for that
       SCHC Packet.
 
+
+
+
+Minaburo, et al.         Expires April 17, 2019                [Page 36]
+
+Internet-Draft                 LPWAN SCHC                   October 2018
+
+
    o  On receiving an All-0 SCHC Fragment, the receiver MUST send a SCHC
       All-0 ACK (specified in Section 8.3.2.1).  Reminder: the SCHC
       All-0 ACK reports on the SCHC Fragments that have been correctly
@@ -2010,14 +2025,6 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
       *  If the Bitmap indicates that all the SCHC Fragments of the
          current window have been correctly received, the receiver MUST
-
-
-
-Minaburo, et al.         Expires April 16, 2019                [Page 36]
-
-Internet-Draft                 LPWAN SCHC                   October 2018
-
-
          increment its current window number, it MUST flip its current W
          bit and it MUST re-enter the *first state*.
 
@@ -2058,6 +2065,15 @@ Internet-Draft                 LPWAN SCHC                   October 2018
    o  On reception of a SCHC Fragment with a W bit equal to that of the
       receiving process,
 
+
+
+
+
+Minaburo, et al.         Expires April 17, 2019                [Page 37]
+
+Internet-Draft                 LPWAN SCHC                   October 2018
+
+
       *  If the Bitmap indicates that the SCHC Fragment had already been
          received, the receiver MUST silently ignore it and discard it.
 
@@ -2066,13 +2082,6 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
    o  On the Bitmap becoming fully populated with 1's, the receiver MUST
       send an All-0 SCHC ACK and MUST reset the Inactivity Timer
-
-
-
-Minaburo, et al.         Expires April 16, 2019                [Page 37]
-
-Internet-Draft                 LPWAN SCHC                   October 2018
-
 
    o  On expiration of the Inactivity Timer, the receiver MUST send a
       SCHC Receiver-Abort, it MUST release all resource associated with
@@ -2111,6 +2120,16 @@ Internet-Draft                 LPWAN SCHC                   October 2018
       *  If the Bitmap indicates that the SCHC Fragment had already been
          received, the receiver MUST silently ignore it and discard it.
 
+
+
+
+
+
+Minaburo, et al.         Expires April 17, 2019                [Page 38]
+
+Internet-Draft                 LPWAN SCHC                   October 2018
+
+
       *  Otherwise it MUST update the Bitmap and assemble the payload of
          the SCHC Fragment received.  It MUST compute the integrity
          check.
@@ -2122,13 +2141,6 @@ Internet-Draft                 LPWAN SCHC                   October 2018
       SCHC Receiver-Abort, it MUST release all resource associated with
       this SCHC Packet and it MUST exit the receive process for that
       SCHC Packet.
-
-
-
-Minaburo, et al.         Expires April 16, 2019                [Page 38]
-
-Internet-Draft                 LPWAN SCHC                   October 2018
-
 
    o  On reception of a SCHC Fragment with a W bit different from that
       of the receiving process, the receiver MUST silently ignore and
@@ -2166,6 +2178,14 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
    Figure 39 shows an example of a corresponding state machine.
 
+
+
+
+Minaburo, et al.         Expires April 17, 2019                [Page 39]
+
+Internet-Draft                 LPWAN SCHC                   October 2018
+
+
 8.4.3.  ACK-on-Error
 
    In ACK-on-Error mode, windows are used.  All tiles MUST be of equal
@@ -2177,14 +2197,6 @@ Internet-Draft                 LPWAN SCHC                   October 2018
    window of tiles.
 
    See Figure 22 for an example.
-
-
-
-
-Minaburo, et al.         Expires April 16, 2019                [Page 39]
-
-Internet-Draft                 LPWAN SCHC                   October 2018
-
 
          +----------------------------------------------...-------------------+
          |                            SCHC Packet                             |
@@ -2221,6 +2233,15 @@ SCHC Fragment msg    |-----------|
    o  or the receiver determines that the transmission of this
       fragmented SCHC Packet has been inactive for too long.
 
+
+
+
+
+Minaburo, et al.         Expires April 17, 2019                [Page 40]
+
+Internet-Draft                 LPWAN SCHC                   October 2018
+
+
    Each Profile MUST specify which Rule ID value(s) is (are) allocated
    to this ACK-on-Error mode.  For brevity, the rest of Section 8.4.3
    only refers to Rule ID values that are allocated to this mode.
@@ -2233,14 +2254,6 @@ SCHC Fragment msg    |-----------|
       but it MUST be at least the size of an L2 Word)
 
    o  the value of M (size of the W field),
-
-
-
-
-Minaburo, et al.         Expires April 16, 2019                [Page 40]
-
-Internet-Draft                 LPWAN SCHC                   October 2018
-
 
    o  the value of N (size of the FCN field),
 
@@ -2276,6 +2289,15 @@ Internet-Draft                 LPWAN SCHC                   October 2018
    At the beginning of the fragmentation of a new SCHC Packet, the
    fragment sender MUST select a Rule ID and DTag value pair for this
    SCHC Packet.  A Rule MUST NOT be selected if the values of N and
+
+
+
+
+Minaburo, et al.         Expires April 17, 2019                [Page 41]
+
+Internet-Draft                 LPWAN SCHC                   October 2018
+
+
    MAX_WIND_FCN for that Rule are such that the SCHC Packet cannot be
    fragmented in (2&#710;M) * (MAX_WIND_FCN+1) tiles or less.
 
@@ -2290,13 +2312,6 @@ Internet-Draft                 LPWAN SCHC                   October 2018
    In a SCHC Fragment message, the sender MUST fill the W and FCN fields
    with the window number and tile number of the first tile sent in that
    SCHC Fragment.
-
-
-
-Minaburo, et al.         Expires April 16, 2019                [Page 41]
-
-Internet-Draft                 LPWAN SCHC                   October 2018
-
 
    If a SCHC Fragment message carries only the last tile of the
    fragmented SCHC Packet, it MUST be of the All-1 type specified in
@@ -2331,6 +2346,14 @@ Internet-Draft                 LPWAN SCHC                   October 2018
    Each time a fragment sender sends an All-1 SCHC Fragment or a SCHC
    ACK REQ,
 
+
+
+
+Minaburo, et al.         Expires April 17, 2019                [Page 42]
+
+Internet-Draft                 LPWAN SCHC                   October 2018
+
+
    o  it MUST increment the Attempts counter
 
    o  it MUST reset the Retransmission Timer
@@ -2345,14 +2368,6 @@ Internet-Draft                 LPWAN SCHC                   October 2018
       MUST release all resource associated with this SCHC Packet.
 
    On receiving a SCHC ACK,
-
-
-
-
-Minaburo, et al.         Expires April 16, 2019                [Page 42]
-
-Internet-Draft                 LPWAN SCHC                   October 2018
-
 
    o  if the W field in the SCHC ACK corresponds to the last window of
       the SCHC Packet,
@@ -2387,6 +2402,14 @@ Internet-Draft                 LPWAN SCHC                   October 2018
    On receiving a SCHC Fragment with a Rule ID and DTag pair not being
    processed at that time, the receiver MUST start a process to assemble
    a new SCHC Packet with that Rule ID and DTag value pair.  That
+
+
+
+Minaburo, et al.         Expires April 17, 2019                [Page 43]
+
+Internet-Draft                 LPWAN SCHC                   October 2018
+
+
    process MUST only examine received SCHC F/R messages with that Rule
    ID and DTag value pair and MUST only transmit SCHC F/R messages with
    that Rule ID and DTag value pair.
@@ -2399,16 +2422,6 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
    On reception of any SCHC F/R message, the receiver MUST reset the
    Inactivity Timer.
-
-
-
-
-
-
-Minaburo, et al.         Expires April 16, 2019                [Page 43]
-
-Internet-Draft                 LPWAN SCHC                   October 2018
-
 
    On reception of a SCHC Fragment message, the receiver MUST assemble
    the received tiles based on the W and FCN fields of the SCHC
@@ -2444,6 +2457,15 @@ Internet-Draft                 LPWAN SCHC                   October 2018
    On sending a SCHC ACK, the receiver MUST increase the Attempts
    counter.
 
+
+
+
+
+Minaburo, et al.         Expires April 17, 2019                [Page 44]
+
+Internet-Draft                 LPWAN SCHC                   October 2018
+
+
    From reception of an All-1 SCHC Fragment onward, a receiver MUST
    check the integrity of the reassembled SCHC Packet at least every
    time it prepares for sending a SCHC ACK for the last window.
@@ -2458,13 +2480,6 @@ Internet-Draft                 LPWAN SCHC                   October 2018
    On the Attempts counter exceeding MAX_ACK_REQUESTS, the receiver MUST
    send a SCHC Receiver-Abort and it MUST release all resource
    associated with this SCHC Packet.
-
-
-
-Minaburo, et al.         Expires April 16, 2019                [Page 44]
-
-Internet-Draft                 LPWAN SCHC                   October 2018
-
 
    Reassembly of the SCHC Packet concludes when
 
@@ -2496,6 +2511,17 @@ Internet-Draft                 LPWAN SCHC                   October 2018
    Note that the same window size MUST be used for the transmission of
    all SCHC Fragments that belong to the same SCHC Packet.
 
+
+
+
+
+
+
+Minaburo, et al.         Expires April 17, 2019                [Page 45]
+
+Internet-Draft                 LPWAN SCHC                   October 2018
+
+
 8.6.  Downlink SCHC Fragment transmission
 
    For downlink transmission of a fragmented SCHC Packet in ACK-Always
@@ -2514,13 +2540,6 @@ Internet-Draft                 LPWAN SCHC                   October 2018
    or to the next window, the Inactivity timer for the SCHC ACK is
    stopped.  However, if the Inactivity timer expires, the SCHC ACK is
    resent and the Inactivity timer is reinitialized and restarted.
-
-
-
-Minaburo, et al.         Expires April 16, 2019                [Page 45]
-
-Internet-Draft                 LPWAN SCHC                   October 2018
-
 
    The default initial value for the Inactivity timer, as well as the
    maximum number of retries for a specific SCHC ACK, denoted
@@ -2551,6 +2570,14 @@ Internet-Draft                 LPWAN SCHC                   October 2018
    SCHC C/D and SCHC F/R operate on bits, not bytes.  SCHC itself does
    not have any alignment prerequisite.  If the L2 below SCHC constrains
    the payload to align to some boundary, called L2 Words (for example,
+
+
+
+Minaburo, et al.         Expires April 17, 2019                [Page 46]
+
+Internet-Draft                 LPWAN SCHC                   October 2018
+
+
    bytes), SCHC will meet that constraint and produce messages with the
    correct alignement.  This may entail adding extra bits (called
    padding bits).
@@ -2562,21 +2589,6 @@ Internet-Draft                 LPWAN SCHC                   October 2018
    and optional SCHC Fragmentation (see Figure 2).  If a SCHC Packet is
    sent unfragmented (see Figure 23), it is padded as needed.  If a SCHC
    Packet is fragmented, only the last fragment is padded as needed.
-
-
-
-
-
-
-
-
-
-
-
-Minaburo, et al.         Expires April 16, 2019                [Page 46]
-
-Internet-Draft                 LPWAN SCHC                   October 2018
-
 
    A packet (e.g. an IPv6 packet)
             |                                           ^ (padding bits
@@ -2610,6 +2622,18 @@ Internet-Draft                 LPWAN SCHC                   October 2018
    will be appended to any message, i.e. no padding will take place at
    all.
 
+
+
+
+
+
+
+
+Minaburo, et al.         Expires April 17, 2019                [Page 47]
+
+Internet-Draft                 LPWAN SCHC                   October 2018
+
+
 10.  SCHC Compression for IPv6 and UDP headers
 
    This section lists the different IPv6 and UDP header fields and how
@@ -2625,14 +2649,6 @@ Internet-Draft                 LPWAN SCHC                   October 2018
    If the DiffServ field does not vary and is known by both sides, the
    Field Descriptor in the Rule SHOULD contain a TV with this well-known
    value, an "equal" MO and a "not-sent" CDA.
-
-
-
-
-Minaburo, et al.         Expires April 16, 2019                [Page 47]
-
-Internet-Draft                 LPWAN SCHC                   October 2018
-
 
    Otherwise (e.g.  ECN bits are to be transmitted), two possibilities
    can be considered depending on the variability of the value:
@@ -2663,6 +2679,17 @@ Internet-Draft                 LPWAN SCHC                   October 2018
       value with the stable known upper part, MO is set to MSB(x) and
       CDA to LSB(y).
 
+
+
+
+
+
+
+Minaburo, et al.         Expires April 17, 2019                [Page 48]
+
+Internet-Draft                 LPWAN SCHC                   October 2018
+
+
 10.4.  Payload Length field
 
    This field can be elided for the transmission on the LPWAN network.
@@ -2681,14 +2708,6 @@ Internet-Draft                 LPWAN SCHC                   October 2018
    the Field Descriptor in the Rule SHOULD contain a TV with this Next
    Header value, the MO SHOULD be "equal" and the CDA SHOULD be "not-
    sent".
-
-
-
-
-Minaburo, et al.         Expires April 16, 2019                [Page 48]
-
-Internet-Draft                 LPWAN SCHC                   October 2018
-
 
    Otherwise, TV is not set in the Field Descriptor, MO is set to
    "ignore" and CDA is set to "value-sent".  Alternatively, a matching-
@@ -2719,6 +2738,14 @@ Internet-Draft                 LPWAN SCHC                   October 2018
    their role (DEV or APP) and not by their position in the header
    (source or destination).
 
+
+
+
+Minaburo, et al.         Expires April 17, 2019                [Page 49]
+
+Internet-Draft                 LPWAN SCHC                   October 2018
+
+
 10.7.1.  IPv6 source and destination prefixes
 
    Both ends MUST be synchronized with the appropriate prefixes.  For a
@@ -2735,16 +2762,6 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
    Otherwise, the TV contains the prefix, the MO is set to "equal" and
    the CDA is set to "value-sent".
-
-
-
-
-
-
-Minaburo, et al.         Expires April 16, 2019                [Page 49]
-
-Internet-Draft                 LPWAN SCHC                   October 2018
-
 
 10.7.2.  IPv6 source and destination IID
 
@@ -2773,6 +2790,18 @@ Internet-Draft                 LPWAN SCHC                   October 2018
    the TV is not set, the MO is set to "ignore" and the CDA is set to
    "value-sent".
 
+
+
+
+
+
+
+
+Minaburo, et al.         Expires April 17, 2019                [Page 50]
+
+Internet-Draft                 LPWAN SCHC                   October 2018
+
+
 10.8.  IPv6 extensions
 
    No Rule is currently defined that processes IPv6 extensions.  If such
@@ -2791,16 +2820,6 @@ Internet-Draft                 LPWAN SCHC                   October 2018
    If both ends know the port number, it can be elided.  The TV contains
    the port number, the MO is set to "equal" and the CDA is set to "not-
    sent".
-
-
-
-
-
-
-Minaburo, et al.         Expires April 16, 2019                [Page 50]
-
-Internet-Draft                 LPWAN SCHC                   October 2018
-
 
    If the port variation is on few bits, the TV contains the stable part
    of the port number, the MO is set to "MSB" and the CDA is set to
@@ -2831,6 +2850,14 @@ Internet-Draft                 LPWAN SCHC                   October 2018
    packets but recognizes that there are exceptions to that default
    behavior.
 
+
+
+
+Minaburo, et al.         Expires April 17, 2019                [Page 51]
+
+Internet-Draft                 LPWAN SCHC                   October 2018
+
+
    For instance, protocols that use UDP as a tunnel encapsulation may
    enable zero-checksum mode for a specific port (or set of ports) for
    sending and/or receiving.  [RFC8200] also stipulates that any node
@@ -2850,14 +2877,6 @@ Internet-Draft                 LPWAN SCHC                   October 2018
    In a similar fashion, this specification allows a SCHC compressor to
    elide the UDP checks when another layer guarantees an identical or
    better integrity protection for the UDP payload and the pseudo-
-
-
-
-Minaburo, et al.         Expires April 16, 2019                [Page 51]
-
-Internet-Draft                 LPWAN SCHC                   October 2018
-
-
    header.  In this case, the TV is not set, the MO is set to "ignore"
    and the CDA is set to "compute-checksum".
 
@@ -2884,6 +2903,17 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
 12.  Security considerations
 
+
+
+
+
+
+
+Minaburo, et al.         Expires April 17, 2019                [Page 52]
+
+Internet-Draft                 LPWAN SCHC                   October 2018
+
+
 12.1.  Security considerations for SCHC Compression/Decompression
 
    A malicious header compression could cause the reconstruction of a
@@ -2906,14 +2936,6 @@ Internet-Draft                 LPWAN SCHC                   October 2018
    reassembly timeout.  Once that timeout expires, the attacker can
    repeat the same procedure, and iterate, thus creating a denial of
    service attack.  The (low) cost to mount this attack is linear with
-
-
-
-Minaburo, et al.         Expires April 16, 2019                [Page 52]
-
-Internet-Draft                 LPWAN SCHC                   October 2018
-
-
    the number of buffers at the target node.  However, the cost for an
    attacker can be increased if individual SCHC Fragments of multiple
    packets can be stored in the reassembly buffer.  To further increase
@@ -2939,6 +2961,15 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
    Further attacks MAY involve sending overlapped fragments (i.e.
    comprising some overlapping parts of the original IPv6 datagram).
+
+
+
+
+Minaburo, et al.         Expires April 17, 2019                [Page 53]
+
+Internet-Draft                 LPWAN SCHC                   October 2018
+
+
    Implementers SHOULD make sure that the correct operation is not
    affected by such event.
 
@@ -2962,14 +2993,6 @@ Internet-Draft                 LPWAN SCHC                   October 2018
    Ramos, Shoichi Sakane, Pascal Thubert and Juan Carlos Zuniga for
    useful design consideration and comments.
 
-
-
-
-Minaburo, et al.         Expires April 16, 2019                [Page 53]
-
-Internet-Draft                 LPWAN SCHC                   October 2018
-
-
 14.  References
 
 14.1.  Normative References
@@ -2990,6 +3013,18 @@ Internet-Draft                 LPWAN SCHC                   October 2018
               May 2017, <https://www.rfc-editor.org/info/rfc8174>.
 
 14.2.  Informative References
+
+
+
+
+
+
+
+
+Minaburo, et al.         Expires April 17, 2019                [Page 54]
+
+Internet-Draft                 LPWAN SCHC                   October 2018
+
 
    [RFC3385]  Sheinwald, D., Satran, J., Thaler, P., and V. Cavanna,
               "Internet Protocol Small Computer System Interface (iSCSI)
@@ -3017,15 +3052,6 @@ Internet-Draft                 LPWAN SCHC                   October 2018
               RFC 6936, DOI 10.17487/RFC6936, April 2013,
               <https://www.rfc-editor.org/info/rfc6936>.
 
-
-
-
-
-Minaburo, et al.         Expires April 16, 2019                [Page 54]
-
-Internet-Draft                 LPWAN SCHC                   October 2018
-
-
    [RFC7136]  Carpenter, B. and S. Jiang, "Significance of IPv6
               Interface Identifiers", RFC 7136, DOI 10.17487/RFC7136,
               February 2014, <https://www.rfc-editor.org/info/rfc7136>.
@@ -3048,6 +3074,14 @@ Appendix A.  SCHC Compression Examples
    will be a LPWAN Dev that embeds some applications running over CoAP.
    In this example, three flows are considered.  The first flow is for
    the device management based on CoAP using Link Local IPv6 addresses
+
+
+
+Minaburo, et al.         Expires April 17, 2019                [Page 55]
+
+Internet-Draft                 LPWAN SCHC                   October 2018
+
+
    and UDP ports 123 and 124 for Dev and App, respectively.  The second
    flow will be a CoAP server for measurements done by the Device (using
    ports 5683) and Global IPv6 Address prefixes alpha::IID/64 to
@@ -3057,30 +3091,6 @@ Appendix A.  SCHC Compression Examples
    Figure 24 presents the protocol stack for this Device.  IPv6 and UDP
    are represented with dotted lines since these protocols are
    compressed on the radio link.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Minaburo, et al.         Expires April 16, 2019                [Page 55]
-
-Internet-Draft                 LPWAN SCHC                   October 2018
-
 
     Management   Data
    +----------+---------+---------+
@@ -3120,6 +3130,14 @@ Internet-Draft                 LPWAN SCHC                   October 2018
     |IPv6 APPprefix  |64|1 |Bi|FE80::/64| equal  | not-sent   ||      |
     |IPv6 AppIID     |64|1 |Bi|::1      | equal  | not-sent   ||      |
     +================+==+==+==+=========+========+============++======+
+
+
+
+Minaburo, et al.         Expires April 17, 2019                [Page 56]
+
+Internet-Draft                 LPWAN SCHC                   October 2018
+
+
     |UDP DEVport     |16|1 |Bi|123      | equal  | not-sent   ||      |
     |UDP APPport     |16|1 |Bi|124      | equal  | not-sent   ||      |
     |UDP Length      |16|1 |Bi|         | ignore | comp-length||      |
@@ -3130,14 +3148,6 @@ Internet-Draft                 LPWAN SCHC                   October 2018
     +----------------+--+--+--+---------+--------+------------++------+
     | Field          |FL|FP|DI| Value   | Match  | Action     || Sent |
     |                |  |  |  |         | Opera. | Action     ||[bits]|
-
-
-
-Minaburo, et al.         Expires April 16, 2019                [Page 56]
-
-Internet-Draft                 LPWAN SCHC                   October 2018
-
-
     +----------------+--+--+--+---------+--------+------------++------+
     |IPv6 version    |4 |1 |Bi|6        | equal  | not-sent   ||      |
     |IPv6 DiffServ   |8 |1 |Bi|0        | equal  | not-sent   ||      |
@@ -3176,6 +3186,14 @@ Internet-Draft                 LPWAN SCHC                   October 2018
     |IPv6 APPprefix  |64|1 |Bi|gamma/64 | equal  | not-sent   ||      |
     |IPv6 AppIID     |64|1 |Bi|::1000   | equal  | not-sent   ||      |
     +================+==+==+==+=========+========+============++======+
+
+
+
+Minaburo, et al.         Expires April 17, 2019                [Page 57]
+
+Internet-Draft                 LPWAN SCHC                   October 2018
+
+
     |UDP DEVport     |16|1 |Bi|8720     | MSB(12)| LSB        || [4]  |
     |UDP APPport     |16|1 |Bi|8720     | MSB(12)| LSB        || [4]  |
     |UDP Length      |16|1 |Bi|         | ignore | comp-length||      |
@@ -3185,14 +3203,6 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
 
                          Figure 25: Context Rules
-
-
-
-
-Minaburo, et al.         Expires April 16, 2019                [Page 57]
-
-Internet-Draft                 LPWAN SCHC                   October 2018
-
 
    All the fields described in the three Rules depicted on Figure 25 are
    present in the IPv6 and UDP headers.  The DevIID-DID value is found
@@ -3231,24 +3241,18 @@ Appendix B.  Fragmentation Examples
    In the following examples, N (i.e. the size if the FCN field) is 3
    bits.  Therefore, the All-1 FCN value is 7.
 
-   Figure 27 illustrates the transmission in ACK-on-Error of an IPv6
-   packet that needs 11 fragments, with MAX_WIND_FCN=6 and no fragment
-   loss.
 
 
 
 
-
-
-
-
-
-
-
-Minaburo, et al.         Expires April 16, 2019                [Page 58]
+Minaburo, et al.         Expires April 17, 2019                [Page 58]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
+
+   Figure 27 illustrates the transmission in ACK-on-Error of an IPv6
+   packet that needs 11 fragments, with MAX_WIND_FCN=6 and no fragment
+   loss.
 
            Sender               Receiver
              |-----W=0, FCN=6----->|
@@ -3272,6 +3276,35 @@ Internet-Draft                 LPWAN SCHC                   October 2018
    Figure 28 illustrates the transmission in ACK-on-Error mode of an
    IPv6 packet that needs 11 fragments, with MAX_WIND_FCN=6 and three
    lost fragments.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Minaburo, et al.         Expires April 17, 2019                [Page 59]
+
+Internet-Draft                 LPWAN SCHC                   October 2018
+
 
             Sender             Receiver
              |-----W=0, FCN=6----->|
@@ -3298,17 +3331,36 @@ Internet-Draft                 LPWAN SCHC                   October 2018
         carried by 11 fragments, with MAX_WIND_FCN=6 and three lost
                                 fragments.
 
-
-
-
-Minaburo, et al.         Expires April 16, 2019                [Page 59]
-
-Internet-Draft                 LPWAN SCHC                   October 2018
-
-
    Figure 29 shows an example of a transmission in ACK-on-Error mode of
    a SCHC Packet broken into 73 tiles, with N=5, MAX_WIND_FCN=27, M=2
    and 3 lost SCHC Fragments.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Minaburo, et al.         Expires April 17, 2019                [Page 60]
+
+Internet-Draft                 LPWAN SCHC                   October 2018
+
 
          Sender               Receiver
            |-----W=0, FCN=27----->| 4 tiles sent
@@ -3354,17 +3406,18 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
               Figure 29: ACK-on-Error mode with variable MTU.
 
+   In this example, the L2 MTU becomes reduced just before sending the
+   "W=2, FCN=19" fragment, leaving space for only 1 tile in each
+   forthcoming SCHC Fragment.  Before retransmissions, the 73 tiles are
 
 
 
-Minaburo, et al.         Expires April 16, 2019                [Page 60]
+
+Minaburo, et al.         Expires April 17, 2019                [Page 61]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
 
-   In this example, the L2 MTU becomes reduced just before sending the
-   "W=2, FCN=19" fragment, leaving space for only 1 tile in each
-   forthcoming SCHC Fragment.  Before retransmissions, the 73 tiles are
    carried by a total of 25 SCHC Fragments, the last 9 being of smaller
    size.
 
@@ -3413,7 +3466,10 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
 
 
-Minaburo, et al.         Expires April 16, 2019                [Page 61]
+
+
+
+Minaburo, et al.         Expires April 17, 2019                [Page 62]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
@@ -3469,7 +3525,7 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
 
 
-Minaburo, et al.         Expires April 16, 2019                [Page 62]
+Minaburo, et al.         Expires April 17, 2019                [Page 63]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
@@ -3525,7 +3581,7 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
 
 
-Minaburo, et al.         Expires April 16, 2019                [Page 63]
+Minaburo, et al.         Expires April 17, 2019                [Page 64]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
@@ -3581,7 +3637,7 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
 
 
-Minaburo, et al.         Expires April 16, 2019                [Page 64]
+Minaburo, et al.         Expires April 17, 2019                [Page 65]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
@@ -3637,7 +3693,7 @@ Appendix C.  Fragmentation State Machines
 
 
 
-Minaburo, et al.         Expires April 16, 2019                [Page 65]
+Minaburo, et al.         Expires April 17, 2019                [Page 66]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
@@ -3693,7 +3749,7 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
 
 
-Minaburo, et al.         Expires April 16, 2019                [Page 66]
+Minaburo, et al.         Expires April 17, 2019                [Page 67]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
@@ -3749,7 +3805,7 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
 
 
-Minaburo, et al.         Expires April 16, 2019                [Page 67]
+Minaburo, et al.         Expires April 17, 2019                [Page 68]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
@@ -3805,7 +3861,7 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
 
 
-Minaburo, et al.         Expires April 16, 2019                [Page 68]
+Minaburo, et al.         Expires April 17, 2019                [Page 69]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
@@ -3861,7 +3917,7 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
 
 
-Minaburo, et al.         Expires April 16, 2019                [Page 69]
+Minaburo, et al.         Expires April 17, 2019                [Page 70]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
@@ -3917,7 +3973,7 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
 
 
-Minaburo, et al.         Expires April 16, 2019                [Page 70]
+Minaburo, et al.         Expires April 17, 2019                [Page 71]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
@@ -3973,7 +4029,7 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
 
 
-Minaburo, et al.         Expires April 16, 2019                [Page 71]
+Minaburo, et al.         Expires April 17, 2019                [Page 72]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
@@ -4029,7 +4085,7 @@ Appendix D.  SCHC Parameters
 
 
 
-Minaburo, et al.         Expires April 16, 2019                [Page 72]
+Minaburo, et al.         Expires April 17, 2019                [Page 73]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
@@ -4085,7 +4141,7 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
 
 
-Minaburo, et al.         Expires April 16, 2019                [Page 73]
+Minaburo, et al.         Expires April 17, 2019                [Page 74]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
@@ -4141,7 +4197,7 @@ Authors' Addresses
 
 
 
-Minaburo, et al.         Expires April 16, 2019                [Page 74]
+Minaburo, et al.         Expires April 17, 2019                [Page 75]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
@@ -4197,4 +4253,4 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
 
 
-Minaburo, et al.         Expires April 16, 2019                [Page 75]
+Minaburo, et al.         Expires April 17, 2019                [Page 76]
