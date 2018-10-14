@@ -1112,8 +1112,8 @@ Internet-Draft                 LPWAN SCHC                   October 2018
    Some SCHC F/R modes may handle successive tiles in groups, called
    windows.  If windows are used
 
-
-
+   o  all the windows of a SCHC Packet, except the last one, MUST
+      contain the same number of tiles.  This number is WINDOW_SIZE.
 
 
 
@@ -1122,20 +1122,16 @@ Minaburo, et al.         Expires April 17, 2019                [Page 20]
 Internet-Draft                 LPWAN SCHC                   October 2018
 
 
-   o  all the windows of a SCHC Packet, except the last one, MUST
-      contain the same number of tiles.  This number is MAX_WIND_FCN +
-      1.
-
    o  the windows are numbered.
 
    o  their numbers MUST increase from 0 upward, from the start of the
       SCHC Packet to its end.
 
-   o  the last window MUST contain MAX_WIND_FCN + 1 tiles or less.
+   o  the last window MUST contain WINDOW_SIZE tiles or less.
 
    o  tiles are numbered within each window.
 
-   o  the tile numbers MUST decrement from MAX_WIND_FCN downward,
+   o  the tile numbers MUST decrement from WINDOW_SIZE - 1 downward,
       looking from the start of the SCHC Packet toward its end.
 
    o  each tile of a SCHC Packet is therefore uniquely identified by a
@@ -1152,7 +1148,7 @@ Window # |-------- 0 --------|-------- 1 --------|- 2 - ... - 27 -------|-- 28 -
 
 
     Figure 9: a SCHC Packet fragmented in tiles grouped in 28 windows,
-                          with 5 tiles per window
+                           with WINDOW_SIZE = 5
 
    When windows are used
 
@@ -1168,8 +1164,12 @@ Window # |-------- 0 --------|-------- 1 --------|- 2 - ... - 27 -------|-- 28 -
 8.2.2.2.  Bitmap
 
    Each bit in the Bitmap for a window corresponds to a tile in the
-   window.  A Bitmap has therefore MAX_WIND_FCN+1 bits.  The bit at the
-   left-most position corresponds to the tile numbered MAX_WIND_FCN.
+   window.  A Bitmap has therefore WINDOW_SIZE bits.  The bit at the
+   left-most position corresponds to the tile numbered WINDOW_SIZE - 1.
+   The bit at the right-most position corresponds to the tile numbered
+   0.
+
+   At the receiver
 
 
 
@@ -1178,17 +1178,13 @@ Minaburo, et al.         Expires April 17, 2019                [Page 21]
 Internet-Draft                 LPWAN SCHC                   October 2018
 
 
-   The bit at the right-most position corresponds to the tile numbered
-   0.
+   o  a bit set to 1 in the Bitmap indicates that a tile with the number
+      corresponding to that bit position has been correctly received for
+      that window.
 
-   At the receiver
-
-   o  a bit set to 1 in the Bitmap indicates that a tile with the FCN
-      value corresponding to that bit position has been correctly
-      received.
-
-   o  a bit set to 0 in the Bitmap indicates that a tile with that FCN
-      has not been received.
+   o  a bit set to 0 in the Bitmap indicates that no tile with the
+      number corresponding to that bit position has been correctly
+      received for that window.
 
 8.2.2.3.  Misc tools
 
@@ -1225,7 +1221,11 @@ Internet-Draft                 LPWAN SCHC                   October 2018
    checking on the reassembled SCHC Packet.  The MIC supports UDP
    checksum elision by SCHC C/D (see Section 10.11).
 
-
+   The CRC32 polynomial 0xEDB88320 (i.e. the reverse representation of
+   the polynomial used e.g. in the Ethernet standard [RFC3385]) is
+   RECOMMENDED as the default algorithm for computing the MIC.
+   Nevertheless, other MIC lengths or other algorithms MAY be required
+   by the Profile.
 
 
 
@@ -1233,12 +1233,6 @@ Minaburo, et al.         Expires April 17, 2019                [Page 22]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
-
-   The CRC32 polynomial 0xEDB88320 (i.e. the reverse representation of
-   the polynomial used e.g. in the Ethernet standard [RFC3385]) is
-   RECOMMENDED as the default algorithm for computing the MIC.
-   Nevertheless, other MIC lengths or other algorithms MAY be required
-   by the Profile.
 
    Note that the concatenation of the complete SCHC Packet and the
    potential padding bits of the last SCHC Fragment does not generally
@@ -1275,11 +1269,17 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
    o  Fragment Compressed Number (FCN).  The FCN is present in the SCHC
       Fragments header.  This field conveys information about the
-      progress in the sequence of tiles.  For example, it can contain a
-      truncated, efficient representation of a larger-sized tile number.
-      The exact use of the FCN field is left to each SCHC F/R mode.
-      However, two values are reserved for special purpose.  They help
-      control the SCHC F/R process:
+      progress in the sequence of tiles being transmitted by the SCHC
+      Fragment.  For example, it can contain a truncated, efficient
+      representation of a larger-sized tile number.  The exact use of
+      the FCN field is left to each SCHC F/R mode.  However, two values
+      are reserved for special purposes.  They help control the SCHC F/R
+      process:
+
+      *  The FCN value with all the bits equal to 1 (called All-1)
+         signals the very last tile of a SCHC Packet.  By extension, if
+         windows are used, the last window of a packet is called the
+         All-1 window.
 
 
 
@@ -1289,11 +1289,6 @@ Minaburo, et al.         Expires April 17, 2019                [Page 23]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
-
-      *  The FCN value with all the bits equal to 1 (called All-1)
-         signals the very last tile of a SCHC Packet.  By extension, if
-         windows are used, the last window of a packet is called the
-         All-1 window.
 
       *  If windows are used, the FCN value with all the bits equal to 0
          (called All-0) signals the last tile of a window that is not
@@ -1337,7 +1332,12 @@ Internet-Draft                 LPWAN SCHC                   October 2018
       SCHC F/R message relates to.  It MUST carry the same value for all
       SCHC F/R messages pertaining to the same window.
 
+      The presence of W and its size (called M, in bits) is defined for
+      each F/R mode and Rule ID.
 
+      Depending on the mode and Profile, W may carry the full window
+      number, or just the least significant bit or any other partial
+      representation of the window number.
 
 
 
@@ -1345,13 +1345,6 @@ Minaburo, et al.         Expires April 17, 2019                [Page 24]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
-
-      The presence of W and its size (called M, in bits) is defined for
-      each F/R mode and Rule ID.
-
-      Depending on the mode and Profile, W may carry the full window
-      number, or just the least significant bit or any other partial
-      representation of the window number.
 
    o  Message Integrity Check (MIC).  This field is optional.  If
       present, it only appears in the All-1 SCHC Fragments.  If present,
@@ -1392,6 +1385,13 @@ Internet-Draft                 LPWAN SCHC                   October 2018
    Figure 10: SCHC Fragment general format.  Presence of a padding field
                                 is optional
 
+8.3.1.1.  Regular SCHC Fragment
+
+   The Regular SCHC Fragment format is shown in Figure 11.  Regular SCHC
+   Fragments are generally used to carry tiles that are not the last one
+   of a SCHC Packet.  The W field is optional.  Its presence is
+   specified by each SCHC F/R mode.
+
 
 
 
@@ -1401,13 +1401,6 @@ Minaburo, et al.         Expires April 17, 2019                [Page 25]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
-
-8.3.1.1.  Regular SCHC Fragment
-
-   The Regular SCHC Fragment format is shown in Figure 11.  Regular SCHC
-   Fragments are generally used to carry tiles that are not the last one
-   of a SCHC Packet.  The W field is optional.  Its presence is
-   specified by each SCHC F/R mode.
 
  |------ Fragment Header ------|
            |-- T --|-M-|-- N --|
@@ -1449,6 +1442,13 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
           Figure 12: Detailed format for the All-1 SCHC Fragment
 
+   The total size of the All-1 SCHC Fragment header is generally not a
+   multiple of the L2 Word size.
+
+   If the size of the tiles carried in the SCHC Fragment Payload does
+   not nicely complement the SCHC Header size in a way that would make
+   the SCHC Fragment a multiple of the L2 Word, then padding bits MUST
+   be added.
 
 
 
@@ -1457,14 +1457,6 @@ Minaburo, et al.         Expires April 17, 2019                [Page 26]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
-
-   The total size of the All-1 SCHC Fragment header is generally not a
-   multiple of the L2 Word size.
-
-   If the size of the tiles carried in the SCHC Fragment Payload does
-   not nicely complement the SCHC Header size in a way that would make
-   the SCHC Fragment a multiple of the L2 Word, then padding bits MUST
-   be added.
 
    The padding bits that are added MUST be less that the L2 Word size.
 
@@ -1504,6 +1496,14 @@ Internet-Draft                 LPWAN SCHC                   October 2018
    transmitted is shortened ("truncated") as explained in
    Section 8.3.2.1.
 
+   The Rule ID and DTag values in the SCHC ACK messages MUST be
+   identical to the ones used in the SCHC Fragments that carry the tiles
+   for this SCHC Packet.
+
+   See Appendix D for a discussion on the size of the Bitmaps.
+
+
+
 
 
 
@@ -1513,12 +1513,6 @@ Minaburo, et al.         Expires April 17, 2019                [Page 27]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
-
-   The Rule ID and DTag values in the SCHC ACK messages MUST be
-   identical to the ones used in the SCHC Fragments that carry the tiles
-   for this SCHC Packet.
-
-   See Appendix D for a discussion on the size of the Bitmaps.
 
 8.3.2.1.  Bitmap Truncation
 
@@ -1557,8 +1551,14 @@ Internet-Draft                 LPWAN SCHC                   October 2018
    where the original Bitmap contains 17 bits, the last 15 of which are
    all set to 1.
 
+   |--  SCHC ACK Header ----|--------       Bitmap    --------|
+   |  Rule ID  |  DTag  |W|0|1|0|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|
+                           C
+          next L2 Word boundary ->|  next L2 Word |  next L2 Word |
 
+    Figure 14: Tentative SCHC ACK message with Bitmap before truncation
 
+   Figure 15 shows that the last 14 bits are not sent.
 
 
 
@@ -1569,15 +1569,6 @@ Minaburo, et al.         Expires April 17, 2019                [Page 28]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
-
-   |--  SCHC ACK Header ----|--------       Bitmap    --------|
-   |  Rule ID  |  DTag  |W|0|1|0|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|
-                           C
-          next L2 Word boundary ->|  next L2 Word |  next L2 Word |
-
-    Figure 14: Tentative SCHC ACK message with Bitmap before truncation
-
-   Figure 15 shows that the last 14 bits are not sent.
 
                |-- T --|-M-|1|
    +---- ... --+- ... -+---+-+-+-+-+
@@ -1614,6 +1605,15 @@ Internet-Draft                 LPWAN SCHC                   October 2018
    Figure 17 shows an example of a SCHC ACK with FCN ranging from 6 down
    to 0, where integrity check has not been performed or has failed and
    the Bitmap indicates that there is no missing tile in that window.
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1886,7 +1886,8 @@ Internet-Draft                 LPWAN SCHC                   October 2018
    each Profile.
 
    The value of N (size of the FCN field) and the value of MAX_WIND_FCN
-   MUST be defined by each Profile.
+   MUST be defined by each Profile.  WINDOW_SIZE MUST be equal to
+   MAX_WIND_FCN + 1.
 
    The value of MAX_ACK_REQUESTS MUST be defined by each Profile.
 
@@ -1897,7 +1898,6 @@ Internet-Draft                 LPWAN SCHC                   October 2018
    SCHC Packet and it MUST initialize the W bit to 0.  The SCHC Packet
    is fragmented into pieces that will be carried by SCHC Fragment
    messages, which are grouped in windows.  The SCHC Fragment that comes
-   first in a window, in fragmentation order, MUST have an FCN value of
 
 
 
@@ -1906,6 +1906,7 @@ Minaburo, et al.         Expires April 17, 2019                [Page 34]
 Internet-Draft                 LPWAN SCHC                   October 2018
 
 
+   first in a window, in fragmentation order, MUST have an FCN value of
    MAX_WIND_FCN.  Within a window, each successive SCHC Fragment MUST
    bear an FCN field decremented by 1 (unsigned integer) compared to the
    fragment preceding it in fragmentation order, except for the last
@@ -1952,8 +1953,7 @@ Internet-Draft                 LPWAN SCHC                   October 2018
       *  If the current window is the last one (All-1) and the SCHC ACK
          indicates that more fragments were received than the sender
          actually sent, the fragment sender MUST send a SCHC Sender-
-         Abort, it MUST release all resource associated with this SCHC
-         Packet and it MUST exit with an error condition.
+
 
 
 
@@ -1961,6 +1961,9 @@ Minaburo, et al.         Expires April 17, 2019                [Page 35]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
+
+         Abort, it MUST release all resource associated with this SCHC
+         Packet and it MUST exit with an error condition.
 
       *  If the current window is the last one (All-1) and the SCHC ACK
          indicates that all fragments were received correctly yet
@@ -2007,9 +2010,6 @@ Internet-Draft                 LPWAN SCHC                   October 2018
    Note: the purpose in the *first state* is to receive the initial
    transmission of the SCHC Fragments of the current window.
 
-   On entering the *first state*, the receiver MUST start an Inactivity
-   Timer and it MUST initialise an empty Bitmap for the current window.
-
 
 
 
@@ -2017,6 +2017,9 @@ Minaburo, et al.         Expires April 17, 2019                [Page 36]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
+
+   On entering the *first state*, the receiver MUST start an Inactivity
+   Timer and it MUST initialise an empty Bitmap for the current window.
 
    In the *first state*:
 
@@ -2061,9 +2064,6 @@ Internet-Draft                 LPWAN SCHC                   October 2018
          been correctly reassembled, the receiver MUST enter the *fourth
          state*.
 
-      *  If the integrity check indicates that the full SCHC Packet has
-         not been correctly reassembled, the receiver MUST enter a
-         *third state*.
 
 
 
@@ -2073,6 +2073,10 @@ Minaburo, et al.         Expires April 17, 2019                [Page 37]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
+
+      *  If the integrity check indicates that the full SCHC Packet has
+         not been correctly reassembled, the receiver MUST enter a
+         *third state*.
 
    Note: the purpose in the *second state* is to receive the
    retransmitted SCHC Fragments of the current window before advancing
@@ -2118,10 +2122,6 @@ Internet-Draft                 LPWAN SCHC                   October 2018
       *  Otherwise, the receiver MUST silently ignore and discard the
          SCHC Fragment just received.
 
-   Note: the purpose in the *third state* is to receive the
-   retransmitted SCHC Fragments of the last window.
-
-
 
 
 
@@ -2129,6 +2129,9 @@ Minaburo, et al.         Expires April 17, 2019                [Page 38]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
+
+   Note: the purpose in the *third state* is to receive the
+   retransmitted SCHC Fragments of the last window.
 
    On entering the *third state*, the receiver MUST reset the Inactivity
    Timer.
@@ -2173,9 +2176,6 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
    In the *fourth state*
 
-   o  Any received SCHC F/R message with a W bit different from the
-      current W bit of the receiver process MUST be silently ignored and
-      discarded.
 
 
 
@@ -2185,6 +2185,10 @@ Minaburo, et al.         Expires April 17, 2019                [Page 39]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
+
+   o  Any received SCHC F/R message with a W bit different from the
+      current W bit of the receiver process MUST be silently ignored and
+      discarded.
 
    o  Any received SCHC F/R message different from an All-1 SCHC
       Fragment or a SCHC ACK REQ MUST be silently ignored and discarded.
@@ -2210,7 +2214,8 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
    In ACK-on-Error mode, windows are used.  All tiles MUST be of equal
    size, except for the last one, which MUST be of the same size or
-   smaller than the preceding ones.
+   smaller than the preceding ones.  WINDOW_SIZE MUST be equal to
+   MAX_WIND_FCN + 1.
 
    A SCHC Fragment message carries one or more tiles, which may span
    multiple windows.  A SCHC ACK reports on the reception of exactly one
@@ -2230,11 +2235,6 @@ SCHC Fragment msg    |-----------|
 
       Figure 21: a SCHC Packet fragmented in tiles, Ack-on-Error mode
 
-   The W field is wide enough that it unambiguously represents an
-   absolute window number.  The fragment receiver feeds SCHC ACKs back
-   to the fragment sender about windows that it misses tiles of.  No
-
-
 
 
 Minaburo, et al.         Expires April 17, 2019                [Page 40]
@@ -2242,6 +2242,9 @@ Minaburo, et al.         Expires April 17, 2019                [Page 40]
 Internet-Draft                 LPWAN SCHC                   October 2018
 
 
+   The W field is wide enough that it unambiguously represents an
+   absolute window number.  The fragment receiver feeds SCHC ACKs back
+   to the fragment sender about windows that it misses tiles of.  No
    SCHC ACK is fed back for windows that have been fully received by the
    fragment receiver.
 
@@ -2288,15 +2291,14 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
    o  the value of MAX_ACK_REQUESTS,
 
-   o  the expiration time of the Retransmission Timer
-
-
 
 
 Minaburo, et al.         Expires April 17, 2019                [Page 41]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
+
+   o  the expiration time of the Retransmission Timer
 
    o  the expiration time of the Inactivity Timer
 
@@ -2316,7 +2318,7 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
    At the beginning of the fragmentation of a new SCHC Packet, the
    fragment sender MUST select a Rule ID and DTag value pair for this
-   SCHC Packet.  A Rule MUST NOT be selected if the values of N and
+   SCHC Packet.  A Rule MUST NOT be selected if the values of M and
    MAX_WIND_FCN for that Rule are such that the SCHC Packet cannot be
    fragmented in (2&#710;M) * (MAX_WIND_FCN+1) tiles or less.
 
@@ -2328,23 +2330,21 @@ Internet-Draft                 LPWAN SCHC                   October 2018
    consecutive and MUST be ordered from the start of the SCHC Packet
    toward its end.
 
-   In a SCHC Fragment message, the sender MUST fill the W and FCN fields
-   with the window number and tile number of the first tile sent in that
-   SCHC Fragment.
+   In a SCHC Fragment message, the sender MUST fill the W field with the
+   window number of the first tile sent in that SCHC Fragment.
 
    If a SCHC Fragment message carries only the last tile of the
-   fragmented SCHC Packet, it MUST be of the All-1 type specified in
-   Section 8.3.1.2.  Otherwise,
+   fragmented SCHC Packet,
+
+   o  it MUST be of the All-1 type specified in Section 8.3.1.2.
+
+   o  if MIC is used, the MIC that is sent MUST be computed on the SCHC
+      Packet and on the padding bits that are appended to the Payload of
+      the last SCHC Fragment
+
+   Otherwise,
 
    o  it MUST be of the regular type specified in Section 8.3.1.1
-
-   o  padding bits MUST be appended to the tiles as needed to fit the
-      Payload size constraint of regular SCHC Fragments
-
-   The fragment sender MUST send SCHC Fragments such that, all together,
-   they contain all the tiles of the fragmented SCHC Packet.
-
-   The fragment sender MUST send
 
 
 
@@ -2353,6 +2353,17 @@ Minaburo, et al.         Expires April 17, 2019                [Page 42]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
+
+   o  the FCN field MUST contain the tile number of the first tile sent
+      in that SCHC Fragment.
+
+   o  padding bits MUST be appended to the tiles as needed to fit the
+      Payload size constraint of regular SCHC Fragments
+
+   The fragment sender MUST send SCHC Fragments such that, all together,
+   they contain all the tiles of the fragmented SCHC Packet.
+
+   The fragment sender MUST send
 
    o  at least one All-1 SCHC Fragment
 
@@ -2391,6 +2402,14 @@ Internet-Draft                 LPWAN SCHC                   October 2018
    o  if the W field in the SCHC ACK corresponds to the last window of
       the SCHC Packet,
 
+
+
+
+Minaburo, et al.         Expires April 17, 2019                [Page 43]
+
+Internet-Draft                 LPWAN SCHC                   October 2018
+
+
       *  if the C bit is set, the sender MUST release all resource
          associated with this SCHC Packet and MUST exit successfully
 
@@ -2402,14 +2421,6 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
          +  if the last message in this sequence of SCHC Fragment
             messages is not an All-1 SCHC Fragment, then a SCHC ACK REQ
-
-
-
-Minaburo, et al.         Expires April 17, 2019                [Page 43]
-
-Internet-Draft                 LPWAN SCHC                   October 2018
-
-
             with the W field corresponding to the last window MUST be
             sent after the sequence
 
@@ -2446,6 +2457,15 @@ Internet-Draft                 LPWAN SCHC                   October 2018
    the received tiles based on the W and FCN fields of the SCHC
    Fragment.
 
+
+
+
+
+Minaburo, et al.         Expires April 17, 2019                [Page 44]
+
+Internet-Draft                 LPWAN SCHC                   October 2018
+
+
    o  if the FCN is All-1, the full SCHC Fragment payload MUST be
       assembled.  This is because the size of the last tile is not known
       by the receiver, therefore padding bits are indistinguishable from
@@ -2458,13 +2478,6 @@ Internet-Draft                 LPWAN SCHC                   October 2018
       because
 
       *  the size of the tiles is known a priori,
-
-
-
-Minaburo, et al.         Expires April 17, 2019                [Page 44]
-
-Internet-Draft                 LPWAN SCHC                   October 2018
-
 
       *  it is larger than an L2 Word
 
@@ -2502,6 +2515,13 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
    o  a Sender-Abort has been received
 
+
+
+Minaburo, et al.         Expires April 17, 2019                [Page 45]
+
+Internet-Draft                 LPWAN SCHC                   October 2018
+
+
    o  or the Inactivity Timer has expired
 
    o  or the Attempts counter has exceed MAX_ACK_REQUESTS
@@ -2509,18 +2529,12 @@ Internet-Draft                 LPWAN SCHC                   October 2018
    o  or when at least on All-1 SCHC Fragment has been received and
       integrity checking of the reassembled SCHC Packet is successful.
 
+   If MIC is used for integrity checking, the MIC computed at the
+   receiver MUST be computed over the reassembled SCHC Packet and over
+   the padding bits that were received in the All-1 SCHC Fragment.
+
    See Figure 40 for one possible example of a Finite State Machine
    implementing a receiver behaviour.
-
-
-
-
-
-
-Minaburo, et al.         Expires April 17, 2019                [Page 45]
-
-Internet-Draft                 LPWAN SCHC                   October 2018
-
 
 8.5.  Supporting multiple window sizes
 
@@ -2557,6 +2571,13 @@ Internet-Draft                 LPWAN SCHC                   October 2018
    stopped.  However, if the Inactivity timer expires, the SCHC ACK is
    resent and the Inactivity timer is reinitialized and restarted.
 
+
+
+Minaburo, et al.         Expires April 17, 2019                [Page 46]
+
+Internet-Draft                 LPWAN SCHC                   October 2018
+
+
    The default initial value for the Inactivity timer, as well as the
    maximum number of retries for a specific SCHC ACK, denoted
    MAX_ACK_RETRIES, are not defined in this document, and need to be
@@ -2570,14 +2591,6 @@ Internet-Draft                 LPWAN SCHC                   October 2018
    times that of the initial Inactivity timer).  If a SCHC ACK is
    received before expiration of this timer, the SCHC Fragment sender
    retransmits any lost SCHC Fragments reported by the SCHC ACK, or if
-
-
-
-Minaburo, et al.         Expires April 17, 2019                [Page 46]
-
-Internet-Draft                 LPWAN SCHC                   October 2018
-
-
    the SCHC ACK confirms successful reception of all SCHC Fragments of
    the last window, the transmission of the fragmented SCHC Packet is
    considered complete.  If the timer expires, and no SCHC ACK has been
@@ -2605,19 +2618,6 @@ Internet-Draft                 LPWAN SCHC                   October 2018
    and optional SCHC Fragmentation (see Figure 2).  If a SCHC Packet is
    sent unfragmented (see Figure 22), it is padded as needed.  If a SCHC
    Packet is fragmented, only the last fragment is padded as needed.
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

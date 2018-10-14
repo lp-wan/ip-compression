@@ -967,12 +967,12 @@ A packet (e.g. an IPv6 packet)
 <p></p>
 
 <ul>
-<li>all the windows of a SCHC Packet, except the last one, MUST contain the same number of tiles.  This number is MAX_WIND_FCN + 1.</li>
+<li>all the windows of a SCHC Packet, except the last one, MUST contain the same number of tiles.  This number is WINDOW_SIZE.</li>
 <li>the windows are numbered.</li>
 <li>their numbers MUST increase from 0 upward, from the start of the SCHC Packet to its end.</li>
-<li>the last window MUST contain MAX_WIND_FCN + 1 tiles or less.</li>
+<li>the last window MUST contain WINDOW_SIZE tiles or less.</li>
 <li>tiles are numbered within each window.</li>
-<li>the tile numbers MUST decrement from MAX_WIND_FCN downward, looking from the start of the SCHC Packet toward its end.</li>
+<li>the tile numbers MUST decrement from WINDOW_SIZE - 1 downward, looking from the start of the SCHC Packet toward its end.</li>
 <li>each tile of a SCHC Packet is therefore uniquely identified by a window number and a tile number within this window.</li>
 </ul>
 <p id="rfc.section.8.2.2.1.p.3">See <a href="#Fig-TilesExample" class="xref">Figure 9</a> for an example.</p>
@@ -987,7 +987,7 @@ Tile #   | 4 | 3 | 2 | 1 | 0 | 4 | 3 | 2 | 1 | 0 | 4 |      | 2 | 1 | 0 | 4 | 3 
 Window # |-------- 0 --------|-------- 1 --------|- 2 - ... - 27 -------|-- 28 -|
 
 </pre>
-<p class="figure">Figure 9: a SCHC Packet fragmented in tiles grouped in 28 windows, with 5 tiles per window</p>
+<p class="figure">Figure 9: a SCHC Packet fragmented in tiles grouped in 28 windows, with WINDOW_SIZE = 5</p>
 <p id="rfc.section.8.2.2.1.p.4">When windows are used</p>
 <p></p>
 
@@ -1000,13 +1000,13 @@ Window # |-------- 0 --------|-------- 1 --------|- 2 - ... - 27 -------|-- 28 -
 <h1 id="rfc.section.8.2.2.2">
 <a href="#rfc.section.8.2.2.2">8.2.2.2.</a> <a href="#Bitmap" id="Bitmap">Bitmap</a>
 </h1>
-<p id="rfc.section.8.2.2.2.p.1">Each bit in the Bitmap for a window corresponds to a tile in the window.  A Bitmap has therefore MAX_WIND_FCN+1 bits.  The bit at the left-most position corresponds to the tile numbered MAX_WIND_FCN.  The bit at the right-most position corresponds to the tile numbered 0.</p>
+<p id="rfc.section.8.2.2.2.p.1">Each bit in the Bitmap for a window corresponds to a tile in the window.  A Bitmap has therefore WINDOW_SIZE bits.  The bit at the left-most position corresponds to the tile numbered WINDOW_SIZE - 1.  The bit at the right-most position corresponds to the tile numbered 0.</p>
 <p id="rfc.section.8.2.2.2.p.2">At the receiver</p>
 <p></p>
 
 <ul>
-<li>a bit set to 1 in the Bitmap indicates that a tile with the FCN value corresponding to that bit position has been correctly received.</li>
-<li>a bit set to 0 in the Bitmap indicates that a tile with that FCN has not been received.</li>
+<li>a bit set to 1 in the Bitmap indicates that a tile with the number corresponding to that bit position has been correctly received for that window.</li>
+<li>a bit set to 0 in the Bitmap indicates that no tile with the number corresponding to that bit position has been correctly received for that window.</li>
 </ul>
 <h1 id="rfc.section.8.2.2.3">
 <a href="#rfc.section.8.2.2.3">8.2.2.3.</a> <a href="#MiscTools" id="MiscTools">Misc tools</a>
@@ -1047,7 +1047,7 @@ Window # |-------- 0 --------|-------- 1 --------|- 2 - ... - 27 -------|-- 28 -
 </ul>
 <p> Therefore, the Rule ID allows SCHC F/R interleaving non-fragmented SCHC Packets and SCHC Fragments that carry other SCHC Packets, or interleaving SCHC Fragments that use different SCHC F/R modes or different parameters.</p>
 </li>
-<li>Fragment Compressed Number (FCN). The FCN is present in the SCHC Fragments header.  This field conveys information about the progress in the sequence of tiles.  For example, it can contain a truncated, efficient representation of a larger-sized tile number.  The exact use of the FCN field is left to each SCHC F/R mode.  However, two values are reserved for special purpose. They help control the SCHC F/R process:  <ul>
+<li>Fragment Compressed Number (FCN). The FCN is present in the SCHC Fragments header.  This field conveys information about the progress in the sequence of tiles being transmitted by the SCHC Fragment.  For example, it can contain a truncated, efficient representation of a larger-sized tile number.  The exact use of the FCN field is left to each SCHC F/R mode.  However, two values are reserved for special purposes. They help control the SCHC F/R process:  <ul>
 <li>The FCN value with all the bits equal to 1 (called All-1) signals the very last tile of a SCHC Packet.  By extension, if windows are used, the last window of a packet is called the All-1 window.</li>
 <li>If windows are used, the FCN value with all the bits equal to 0 (called All-0) signals the last tile of a window that is not the last one of the SCHC packet.  By extension, such a window is called an All-0 window.</li>
 </ul>
@@ -1322,7 +1322,7 @@ Window # |-------- 0 --------|-------- 1 --------|- 2 - ... - 27 -------|-- 28 -
 <p id="rfc.section.8.4.2.p.3">The W field MUST be present and its size MUST be 1 bit.</p>
 <p id="rfc.section.8.4.2.p.4">At the sender, one W bit and one FCN counter MUST be instantiated for each pair of Rule ID and optional DTag values.  At the receiver, one W bit, one FCN counter and one Bitmap MUST be instantiated for each pair of Rule ID and optional DTag values.  At the sender, one Attempts counter MUST be instantiated for each pair of Rule ID and optional DTag values.  At the sender, one Retransmission Timer MUST be instantiated for each pair of Rule ID and optional DTag values.  At the receiver, one Inactivity Timer MUST be instantiated for each pair of Rule ID and optional DTag values.  The expiration values of the Retransmission Timer and of the Inactivity Timer are based on the characteristics of the underlying LPWAN technology and MUST be defined in a Profile.</p>
 <p id="rfc.section.8.4.2.p.5">The presence and size of the MIC and DTag fields MUST be defined by each Profile.</p>
-<p id="rfc.section.8.4.2.p.6">The value of N (size of the FCN field) and the value of MAX_WIND_FCN MUST be defined by each Profile.</p>
+<p id="rfc.section.8.4.2.p.6">The value of N (size of the FCN field) and the value of MAX_WIND_FCN MUST be defined by each Profile.  WINDOW_SIZE MUST be equal to MAX_WIND_FCN + 1.</p>
 <p id="rfc.section.8.4.2.p.7">The value of MAX_ACK_REQUESTS MUST be defined by each Profile.</p>
 <h1 id="rfc.section.8.4.2.1">
 <a href="#rfc.section.8.4.2.1">8.4.2.1.</a> <a href="#sender-behaviour-1" id="sender-behaviour-1">Sender behaviour</a>
@@ -1429,7 +1429,7 @@ Window # |-------- 0 --------|-------- 1 --------|- 2 - ... - 27 -------|-- 28 -
 <h1 id="rfc.section.8.4.3">
 <a href="#rfc.section.8.4.3">8.4.3.</a> <a href="#ACK-on-Error-subsection" id="ACK-on-Error-subsection">ACK-on-Error</a>
 </h1>
-<p id="rfc.section.8.4.3.p.1">In ACK-on-Error mode, windows are used.  All tiles MUST be of equal size, except for the last one, which MUST be of the same size or smaller than the preceding ones.</p>
+<p id="rfc.section.8.4.3.p.1">In ACK-on-Error mode, windows are used.  All tiles MUST be of equal size, except for the last one, which MUST be of the same size or smaller than the preceding ones.  WINDOW_SIZE MUST be equal to MAX_WIND_FCN + 1.</p>
 <p id="rfc.section.8.4.3.p.2">A SCHC Fragment message carries one or more tiles, which may span multiple windows.  A SCHC ACK reports on the reception of exactly one window of tiles.</p>
 <p id="rfc.section.8.4.3.p.3">See <a href="#Fig-TilesACKonError" class="xref">Figure 21</a> for an example.</p>
 <div id="rfc.figure.21"></div>
@@ -1485,49 +1485,57 @@ SCHC Fragment msg    |-----------|
 <h1 id="rfc.section.8.4.3.1">
 <a href="#rfc.section.8.4.3.1">8.4.3.1.</a> <a href="#ACK-on-Error-sender" id="ACK-on-Error-sender">Sender behaviour</a>
 </h1>
-<p id="rfc.section.8.4.3.1.p.1">At the beginning of the fragmentation of a new SCHC Packet, the fragment sender MUST select a Rule ID and DTag value pair for this SCHC Packet.  A Rule MUST NOT be selected if the values of N and MAX_WIND_FCN for that Rule are such that the SCHC Packet cannot be fragmented in (2&#710;M) * (MAX_WIND_FCN+1) tiles or less.</p>
+<p id="rfc.section.8.4.3.1.p.1">At the beginning of the fragmentation of a new SCHC Packet, the fragment sender MUST select a Rule ID and DTag value pair for this SCHC Packet.  A Rule MUST NOT be selected if the values of M and MAX_WIND_FCN for that Rule are such that the SCHC Packet cannot be fragmented in (2&#710;M) * (MAX_WIND_FCN+1) tiles or less.</p>
 <p id="rfc.section.8.4.3.1.p.2">The fragment sender MUST initialize the Attempts counter to 0 for that Rule ID and DTag value pair.</p>
 <p id="rfc.section.8.4.3.1.p.3">A SCHC Fragment message carries in its payload one or more tiles.  If more than one tile is carried in one SCHC Fragment, the tiles MUST be consecutive and MUST be ordered from the start of the SCHC Packet toward its end.</p>
-<p id="rfc.section.8.4.3.1.p.4">In a SCHC Fragment message, the sender MUST fill the W and FCN fields with the window number and tile number of the first tile sent in that SCHC Fragment.</p>
-<p id="rfc.section.8.4.3.1.p.5">If a SCHC Fragment message carries only the last tile of the fragmented SCHC Packet, it MUST be of the All-1 type specified in <a href="#LastFrag" class="xref">Section 8.3.1.2</a>.  Otherwise,</p>
+<p id="rfc.section.8.4.3.1.p.4">In a SCHC Fragment message, the sender MUST fill the W field with the window number of the first tile sent in that SCHC Fragment.</p>
+<p id="rfc.section.8.4.3.1.p.5">If a SCHC Fragment message carries only the last tile of the fragmented SCHC Packet,</p>
+<p></p>
+
+<ul>
+<li>it MUST be of the All-1 type specified in <a href="#LastFrag" class="xref">Section 8.3.1.2</a>.</li>
+<li>if MIC is used, the MIC that is sent MUST be computed on the SCHC Packet and on the padding bits that are appended to the Payload of the last SCHC Fragment</li>
+</ul>
+<p id="rfc.section.8.4.3.1.p.7">Otherwise,</p>
 <p></p>
 
 <ul>
 <li>it MUST be of the regular type specified in <a href="#NotLastFrag" class="xref">Section 8.3.1.1</a>
 </li>
+<li>the FCN field MUST contain the tile number of the first tile sent in that SCHC Fragment.</li>
 <li>padding bits MUST be appended to the tiles as needed to fit the Payload size constraint of regular SCHC Fragments</li>
 </ul>
-<p id="rfc.section.8.4.3.1.p.7">The fragment sender MUST send SCHC Fragments such that, all together, they contain all the tiles of the fragmented SCHC Packet.</p>
-<p id="rfc.section.8.4.3.1.p.8">The fragment sender MUST send</p>
+<p id="rfc.section.8.4.3.1.p.9">The fragment sender MUST send SCHC Fragments such that, all together, they contain all the tiles of the fragmented SCHC Packet.</p>
+<p id="rfc.section.8.4.3.1.p.10">The fragment sender MUST send</p>
 <p></p>
 
 <ul>
 <li>at least one All-1 SCHC Fragment</li>
 <li>or at least one SCHC ACK REQ with the W field corresponding to the last window.</li>
 </ul>
-<p id="rfc.section.8.4.3.1.p.10">The fragment sender MUST listen for SCHC ACK messages after having sent</p>
+<p id="rfc.section.8.4.3.1.p.12">The fragment sender MUST listen for SCHC ACK messages after having sent</p>
 <p></p>
 
 <ul>
 <li>an All-1 SCHC Fragment</li>
 <li>or a SCHC ACK REQ with the W field corresponding to the last window.</li>
 </ul>
-<p id="rfc.section.8.4.3.1.p.12">Profiles MAY specify other times at which the fragment sender MUST listen for SCHC ACK messages.</p>
-<p id="rfc.section.8.4.3.1.p.13">Each time a fragment sender sends an All-1 SCHC Fragment or a SCHC ACK REQ,</p>
+<p id="rfc.section.8.4.3.1.p.14">Profiles MAY specify other times at which the fragment sender MUST listen for SCHC ACK messages.</p>
+<p id="rfc.section.8.4.3.1.p.15">Each time a fragment sender sends an All-1 SCHC Fragment or a SCHC ACK REQ,</p>
 <p></p>
 
 <ul>
 <li>it MUST increment the Attempts counter</li>
 <li>it MUST reset the Retransmission Timer</li>
 </ul>
-<p id="rfc.section.8.4.3.1.p.15">On Retransmission Timer expiration</p>
+<p id="rfc.section.8.4.3.1.p.17">On Retransmission Timer expiration</p>
 <p></p>
 
 <ul>
 <li>if Attempts is strictly less than MAX_ACK_REQUESTS, the fragment sender MUST send a SCHC ACK REQ with the W field corresponding to the last window and it MUST increment the Attempts counter</li>
 <li>otherwise the fragment sender MUST send a SCHC Sender-Abort and it MUST release all resource associated with this SCHC Packet.</li>
 </ul>
-<p id="rfc.section.8.4.3.1.p.17">On receiving a SCHC ACK,</p>
+<p id="rfc.section.8.4.3.1.p.19">On receiving a SCHC ACK,</p>
 <p></p>
 
 <ul>
@@ -1546,7 +1554,7 @@ SCHC Fragment msg    |-----------|
 </ul>
 </li>
 </ul>
-<p id="rfc.section.8.4.3.1.p.19">See <a href="#Fig-ACKonerrorSnd" class="xref">Figure 39</a> for an example of a Finite State Machine implementing the sender behaviour.</p>
+<p id="rfc.section.8.4.3.1.p.21">See <a href="#Fig-ACKonerrorSnd" class="xref">Figure 39</a> for an example of a Finite State Machine implementing the sender behaviour.</p>
 <h1 id="rfc.section.8.4.3.2">
 <a href="#rfc.section.8.4.3.2">8.4.3.2.</a> <a href="#ACK-on-Error-receiver" id="ACK-on-Error-receiver">Receiver behaviour</a>
 </h1>
@@ -1582,7 +1590,8 @@ SCHC Fragment msg    |-----------|
 <li>or the Attempts counter has exceed MAX_ACK_REQUESTS</li>
 <li>or when at least on All-1 SCHC Fragment has been received and integrity checking of the reassembled SCHC Packet is successful.</li>
 </ul>
-<p id="rfc.section.8.4.3.2.p.16">See <a href="#Fig-ACKonerrorRcv" class="xref">Figure 40</a> for one possible example of a Finite State Machine implementing a receiver behaviour.</p>
+<p id="rfc.section.8.4.3.2.p.16">If MIC is used for integrity checking, the MIC computed at the receiver MUST be computed over the reassembled SCHC Packet and over the padding bits that were received in the All-1 SCHC Fragment.</p>
+<p id="rfc.section.8.4.3.2.p.17">See <a href="#Fig-ACKonerrorRcv" class="xref">Figure 40</a> for one possible example of a Finite State Machine implementing a receiver behaviour.</p>
 <h1 id="rfc.section.8.5">
 <a href="#rfc.section.8.5">8.5.</a> <a href="#supporting-multiple-window-sizes" id="supporting-multiple-window-sizes">Supporting multiple window sizes</a>
 </h1>
