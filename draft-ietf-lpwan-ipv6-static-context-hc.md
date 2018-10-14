@@ -583,12 +583,12 @@ Some SCHC F/R modes may handle successive tiles in groups, called windows.
 If windows are used
 
 - all the windows of a SCHC Packet, except the last one, MUST contain the same number of tiles.
-  This number is MAX_WIND_FCN + 1.
+  This number is WINDOW_SIZE.
 - the windows are numbered.
 - their numbers MUST increase from 0 upward, from the start of the SCHC Packet to its end.
-- the last window MUST contain MAX_WIND_FCN + 1 tiles or less.
+- the last window MUST contain WINDOW_SIZE tiles or less.
 - tiles are numbered within each window.
-- the tile numbers MUST decrement from MAX_WIND_FCN downward, looking from the start of the SCHC Packet toward its end.
+- the tile numbers MUST decrement from WINDOW_SIZE - 1 downward, looking from the start of the SCHC Packet toward its end.
 - each tile of a SCHC Packet is therefore uniquely identified by a window number and a tile number within this window.
 
 See {{Fig-TilesExample}} for an example.
@@ -603,7 +603,7 @@ Tile #   | 4 | 3 | 2 | 1 | 0 | 4 | 3 | 2 | 1 | 0 | 4 |      | 2 | 1 | 0 | 4 | 3 
 Window # |-------- 0 --------|-------- 1 --------|- 2 - ... - 27 -------|-- 28 -|
 
 ~~~~
-{: #Fig-TilesExample title='a SCHC Packet fragmented in tiles grouped in 28 windows, with 5 tiles per window'}
+{: #Fig-TilesExample title='a SCHC Packet fragmented in tiles grouped in 28 windows, with WINDOW_SIZE = 5'}
 
 When windows are used
 
@@ -615,14 +615,14 @@ When windows are used
 #### Bitmap {#Bitmap}
 
 Each bit in the Bitmap for a window corresponds to a tile in the window.
-A Bitmap has therefore MAX_WIND_FCN+1 bits.
-The bit at the left-most position corresponds to the tile numbered MAX_WIND_FCN.
+A Bitmap has therefore WINDOW_SIZE bits.
+The bit at the left-most position corresponds to the tile numbered WINDOW_SIZE - 1.
 The bit at the right-most position corresponds to the tile numbered 0.
 
 At the receiver
 
-- a bit set to 1 in the Bitmap indicates that a tile with the FCN value corresponding to that bit position has been correctly received.
-- a bit set to 0 in the Bitmap indicates that a tile with that FCN has not been received.
+- a bit set to 1 in the Bitmap indicates that a tile with the number corresponding to that bit position has been correctly received for that window.
+- a bit set to 0 in the Bitmap indicates that no tile with the number corresponding to that bit position has been correctly received for that window.
 
 #### Misc tools {#MiscTools}
 
@@ -680,10 +680,10 @@ The SCHC F/R messages use the following fields (see the related formats in {{Fra
 
 
 * Fragment Compressed Number (FCN). The FCN is present in the SCHC Fragments header.
-  This field conveys information about the progress in the sequence of tiles.
+  This field conveys information about the progress in the sequence of tiles being transmitted by the SCHC Fragment.
   For example, it can contain a truncated, efficient representation of a larger-sized tile number.
   The exact use of the FCN field is left to each SCHC F/R mode.
-  However, two values are reserved for special purpose. They help control the SCHC F/R process:
+  However, two values are reserved for special purposes. They help control the SCHC F/R process:
 
   * The FCN value with all the bits equal to 1 (called All-1) signals the very last tile of a SCHC Packet.
   By extension, if windows are used, the last window of a packet is called the All-1 window.
@@ -1109,6 +1109,7 @@ and MUST be defined in a Profile.
 The presence and size of the MIC and DTag fields MUST be defined by each Profile.
 
 The value of N (size of the FCN field) and the value of MAX_WIND_FCN MUST be defined by each Profile.
+WINDOW_SIZE MUST be equal to MAX_WIND_FCN + 1.
 
 The value of MAX_ACK_REQUESTS MUST be defined by each Profile.
 
@@ -1275,6 +1276,7 @@ and it MUST exit the receive process for that SCHC Packet.
 In ACK-on-Error mode, windows are used.
 All tiles MUST be of equal size, except for the last one,
 which MUST be of the same size or smaller than the preceding ones.
+WINDOW_SIZE MUST be equal to MAX_WIND_FCN + 1.
 
 A SCHC Fragment message carries one or more tiles, which may span multiple windows.
 A SCHC ACK reports on the reception of exactly one window of tiles.
@@ -1340,19 +1342,24 @@ The receiver, for each pair of Rule ID and optional DTag values, MUST instantiat
 #### Sender behaviour {#ACK-on-Error-sender}
 
 At the beginning of the fragmentation of a new SCHC Packet, the fragment sender MUST select a Rule ID and DTag value pair for this SCHC Packet.
-A Rule MUST NOT be selected if the values of N and MAX_WIND_FCN for that Rule are such that the SCHC Packet cannot be fragmented in (2ˆM) * (MAX_WIND_FCN+1) tiles or less.
+A Rule MUST NOT be selected if the values of M and MAX_WIND_FCN for that Rule are such that the SCHC Packet cannot be fragmented in (2ˆM) * (MAX_WIND_FCN+1) tiles or less.
 
 The fragment sender MUST initialize the Attempts counter to 0 for that Rule ID and DTag value pair.
 
 A SCHC Fragment message carries in its payload one or more tiles.
 If more than one tile is carried in one SCHC Fragment, the tiles MUST be consecutive and MUST be ordered from the start of the SCHC Packet toward its end.
 
-In a SCHC Fragment message, the sender MUST fill the W and FCN fields with the window number and tile number of the first tile sent in that SCHC Fragment.
+In a SCHC Fragment message, the sender MUST fill the W field with the window number of the first tile sent in that SCHC Fragment.
 
-If a SCHC Fragment message carries only the last tile of the fragmented SCHC Packet, it MUST be of the All-1 type specified in {{LastFrag}}.
+If a SCHC Fragment message carries only the last tile of the fragmented SCHC Packet,
+
+- it MUST be of the All-1 type specified in {{LastFrag}}.
+- if MIC is used, the MIC that is sent MUST be computed on the SCHC Packet and on the padding bits that are appended to the Payload of the last SCHC Fragment
+
 Otherwise,
 
 - it MUST be of the regular type specified in {{NotLastFrag}}
+- the FCN field MUST contain the tile number of the first tile sent in that SCHC Fragment.
 - padding bits MUST be appended to the tiles as needed to fit the Payload size constraint of regular SCHC Fragments
 
 The fragment sender MUST send SCHC Fragments such that, all together, they contain all the tiles of the fragmented SCHC Packet.
@@ -1461,6 +1468,10 @@ Reassembly of the SCHC Packet concludes when
 - or the Inactivity Timer has expired
 - or the Attempts counter has exceed MAX_ACK_REQUESTS
 - or when at least on All-1 SCHC Fragment has been received and integrity checking of the reassembled SCHC Packet is successful.
+
+If MIC is used for integrity checking,
+the MIC computed at the receiver MUST be computed over the reassembled SCHC Packet
+and over the padding bits that were received in the All-1 SCHC Fragment.
 
 See {{Fig-ACKonerrorRcv}} for one possible example of a Finite State Machine implementing a receiver behaviour.
 
