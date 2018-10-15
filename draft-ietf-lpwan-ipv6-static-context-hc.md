@@ -726,7 +726,6 @@ The SCHC F/R messages use the following fields (see the related formats in {{Fra
 
 * Message Integrity Check (MIC).
   This field is optional. If present, it only appears in the All-1 SCHC Fragments.
-  If present, its size MUST be at least an L2 Word.
   See {{IntegrityChecking}} for details on the computation of the MIC.
 
 * C (integrity Check): C is a 1-bit field.
@@ -812,9 +811,12 @@ in a way that would make the SCHC Fragment a multiple of the L2 Word, then paddi
 
 The padding bits that are added MUST be less that the L2 Word size.
 
-An All-1 SCHC Fragment Payload MUST be at least the size of an L2 Word.
+The optional MIC concatenated with the All-1 SCHC Fragment Payload MUST be at least the size of an L2 Word.
 The rationale is that, even in the presence of padding, the All-1 SCHC Fragment needs to be distinguishable from the SCHC Sender-Abort (see {{SenderAbort}}).
-This may entail saving an L2 Word from the payload of the previous SCHC Fragment to make the payload of this All-1 SCHC Fragment big enough.
+If the MIC is absent, or if it is present but its size is less than an L2 Word,
+this requirement places a constraint on the size of the Payload.
+Meeting this constraint may entail saving an L2 Word from the payload of the previous SCHC Fragment
+to make the payload of this All-1 SCHC Fragment big enough.
 
 
 ### SCHC ACK format {#ACK}
@@ -825,6 +827,7 @@ The Truncated Bitmap field is optional. It can only be present in SCHC F/R modes
 
 ~~~~
 
+|---- SCHC ACK Header ----|
             |-- T --|-M-|1|
 +---- ... --+- ... -+---+-+
 |  Rule ID  |  DTag | W |1| (integrity check success)
@@ -837,7 +840,7 @@ The Truncated Bitmap field is optional. It can only be present in SCHC F/R modes
 ~~~~
 {: #Fig-ACK-Format title='Format of a SCHC ACK message'}
 
-The SCHC ACK header contains a C bit (see {{HeaderFields}}).
+The SCHC ACK Header contains a C bit (see {{HeaderFields}}).
 If the C bit is set to 0 (integrity check not performed or failed) and if windows are used, the Bitmap for the window referred to by the W field MUST follow.
 See {{Bitmap}} for a description of the Bitmap.
 
@@ -985,26 +988,27 @@ a receiver can, by looking at the message length, distinguish a SCHC Sender-Abor
 
 The Rule ID and DTag values in the SCHC Sender-Abort message MUST be identical to the ones used in the fragments of the SCHC Packet the transmission of which is being aborted.
 
-The SCHC Sender-Abort MUST NOT be acknowledged and MUST NOT be retransmitted.
+The SCHC Sender-Abort MUST NOT be acknowledged.
 
 
 #### SCHC Receiver-Abort
 
 When a SCHC Fragment receiver needs to abort an on-going fragmented SCHC Packet transmission, it transmits a SCHC Receiver-Abort.
-Its format is described in {{Fig-ACKabort}}.
+Its format is described in {{Fig-ReceiverAbort}}.
 The W field is optional. Its presence is specified by each SCHC F/R mode.
 
 ~~~~
 
-|-- Receiver-Abort Header --|
+|--- Receiver-Abort Header ---|
 
-+---- ... ----+-- ... --+---+-+-+-+-+-+-+-+-+-+-+-+
-|   Rule ID   |   DTag  | W | 1..1|      1..1     |
-+---- ... ----+-- ... --+---+-+-+-+-+-+-+-+-+-+-+-+
-          next L2 Word boundary ->|<-- L2 Word -->|
++---- ... ----+-- ... --+---+-+-+-+-+-+-+-+-+-+-+-+-+
+|   Rule ID   |   DTag  | W |1| 1..1|      1..1     |
++---- ... ----+-- ... --+---+-+-+-+-+-+-+-+-+-+-+-+-+
+                             C
+            next L2 Word boundary ->|<-- L2 Word -->|
 
 ~~~~
-{: #Fig-ACKabort title='SCHC Receiver-Abort format'}
+{: #Fig-ReceiverAbort title='SCHC Receiver-Abort format'}
 
 Note that the SCHC Receiver-Abort has the same header as a SCHC ACK message.
 The bits that follow the SCHC Receiver-Abort header look like a truncated Bitmap set to 1 up to
@@ -1018,7 +1022,7 @@ The Rule ID and DTag values in the SCHC Receiver-Abort message MUST be identical
 A SCHC Receiver-Abort is aligned to L2 Words, by design. Therefore, padding MUST NOT be appended.
 
 
-The SCHC Sender-Abort MUST NOT be acknowledged and MUST NOT be retransmitted.
+The SCHC Sender-Abort MUST NOT be acknowledged.
 
 
 ## SCHC F/R modes {#FragModes}
