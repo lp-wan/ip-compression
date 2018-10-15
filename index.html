@@ -352,7 +352,7 @@ address {
 
   <meta name="dct.creator" content="Minaburo, A., Toutain, L., Gomez, C., and D. Barthel" />
   <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-lpwan-ipv6-static-context-hc-16" />
-  <meta name="dct.issued" scheme="ISO8601" content="2018-10-14" />
+  <meta name="dct.issued" scheme="ISO8601" content="2018-10-15" />
   <meta name="dct.abstract" content="This document defines the Static Context Header Compression (SCHC) framework, which provides both header compression and fragmentation functionalities. SCHC has been designed for Low Power Wide Area Networks (LPWAN)." />
   <meta name="description" content="This document defines the Static Context Header Compression (SCHC) framework, which provides both header compression and fragmentation functionalities. SCHC has been designed for Low Power Wide Area Networks (LPWAN)." />
 
@@ -376,7 +376,7 @@ address {
 <td class="right">L. Toutain</td>
 </tr>
 <tr>
-<td class="left">Expires: April 17, 2019</td>
+<td class="left">Expires: April 18, 2019</td>
 <td class="right">IMT-Atlantique</td>
 </tr>
 <tr>
@@ -397,7 +397,7 @@ address {
 </tr>
 <tr>
 <td class="left"></td>
-<td class="right">October 14, 2018</td>
+<td class="right">October 15, 2018</td>
 </tr>
 
     	
@@ -416,7 +416,7 @@ address {
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at https://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on April 17, 2019.</p>
+<p>This Internet-Draft will expire on April 18, 2019.</p>
 <h1 id="rfc.copyrightnotice"><a href="#rfc.copyrightnotice">Copyright Notice</a></h1>
 <p>Copyright (c) 2018 IETF Trust and the persons identified as the document authors.  All rights reserved.</p>
 <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (https://trustee.ietf.org/license-info) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.</p>
@@ -1055,7 +1055,7 @@ Window # |-------- 0 --------|-------- 1 --------|- 2 - ... - 27 -------|-- 28 -
 </li>
 <li>Datagram Tag (DTag). The DTag field is optional.  <br><br> When there is no DTag, there can be only one fragmented SCHC Packet in transit.  In other words, only after all its fragments have been transmitted can another fragmented SCHC Packet be sent.  <br><br> If present, DTag MUST be set to the same value for all SCHC Fragments carrying the same SCHC Packet, and to different values for different SCHC Packets.  Using this field, the sender can interleave fragments from different SCHC Packets, while the receiver can still tell them apart.  <br><br> If a SCHC ACK message is sent, it MUST carry the same DTag value as the SCHC Fragments for the same SCHC Packet.  <br><br> The presence and size of the DTag field is defined by each SCHC F/R mode for each Rule ID value.  For each new SCHC Packet processed by the sender under the same F/R mode and same RuleID, DTag MUST be sequentially increased, from 0 to (2^T) &#8211; 1 wrapping back from (2^T) - 1 to 0, where T is the size of DTag in bits.</li>
 <li>W: The W field is optional. It is only present if windows are used.  <br><br> This field carries information pertaining to the window number a SCHC F/R message relates to.  It MUST carry the same value for all SCHC F/R messages pertaining to the same window.  <br><br> The presence of W and its size (called M, in bits) is defined for each F/R mode and Rule ID.  <br><br> Depending on the mode and Profile, W may carry the full window number, or just the least significant bit or any other partial representation of the window number.</li>
-<li>Message Integrity Check (MIC).  This field is optional. If present, it only appears in the All-1 SCHC Fragments.  If present, its size MUST be at least an L2 Word.  See <a href="#IntegrityChecking" class="xref">Section 8.2.3</a> for details on the computation of the MIC.</li>
+<li>Message Integrity Check (MIC).  This field is optional. If present, it only appears in the All-1 SCHC Fragments.  See <a href="#IntegrityChecking" class="xref">Section 8.2.3</a> for details on the computation of the MIC.</li>
 <li>C (integrity Check): C is a 1-bit field.  This field is used in the SCHC ACK message to report on the reassembled SCHC Packet integrity check (see <a href="#IntegrityChecking" class="xref">Section 8.2.3</a>).  A value of 1 tells that the integrity check was performed and is successful.  A value of 0 tells that the integrity check was not performed, or that is was a failure.</li>
 <li>Bitmap. The Bitmap is used together with windows.  It is a bit field that may be maintained by the sender during the fragmentation and by the receiver during the reassembly of a fragmented SCHC Packet.  A truncated version MAY be send in a SCHC ACK message.</li>
 </ul>
@@ -1112,7 +1112,7 @@ Window # |-------- 0 --------|-------- 1 --------|- 2 - ... - 27 -------|-- 28 -
 <p id="rfc.section.8.3.1.2.p.2">The total size of the All-1 SCHC Fragment header is generally not a multiple of the L2 Word size.</p>
 <p id="rfc.section.8.3.1.2.p.3">If the size of the tiles carried in the SCHC Fragment Payload does not nicely complement the SCHC Header size in a way that would make the SCHC Fragment a multiple of the L2 Word, then padding bits MUST be added.</p>
 <p id="rfc.section.8.3.1.2.p.4">The padding bits that are added MUST be less that the L2 Word size.</p>
-<p id="rfc.section.8.3.1.2.p.5">An All-1 SCHC Fragment Payload MUST be at least the size of an L2 Word.  The rationale is that, even in the presence of padding, the All-1 SCHC Fragment needs to be distinguishable from the SCHC Sender-Abort (see <a href="#SenderAbort" class="xref">Section 8.3.4.1</a>).  This may entail saving an L2 Word from the payload of the previous SCHC Fragment to make the payload of this All-1 SCHC Fragment big enough.</p>
+<p id="rfc.section.8.3.1.2.p.5">The optional MIC concatenated with the All-1 SCHC Fragment Payload MUST be at least the size of an L2 Word.  The rationale is that, even in the presence of padding, the All-1 SCHC Fragment needs to be distinguishable from the SCHC Sender-Abort (see <a href="#SenderAbort" class="xref">Section 8.3.4.1</a>).  If the MIC is absent, or if it is present but its size is less than an L2 Word, this requirement places a constraint on the size of the Payload.  Meeting this constraint may entail saving an L2 Word from the payload of the previous SCHC Fragment to make the payload of this All-1 SCHC Fragment big enough.</p>
 <h1 id="rfc.section.8.3.2">
 <a href="#rfc.section.8.3.2">8.3.2.</a> <a href="#ACK" id="ACK">SCHC ACK format</a>
 </h1>
@@ -1120,6 +1120,7 @@ Window # |-------- 0 --------|-------- 1 --------|- 2 - ... - 27 -------|-- 28 -
 <div id="rfc.figure.13"></div>
 <div id="Fig-ACK-Format"></div>
 <pre>
+|---- SCHC ACK Header ----|
             |-- T --|-M-|1|
 +---- ... --+- ... -+---+-+
 |  Rule ID  |  DTag | W |1| (integrity check success)
@@ -1131,7 +1132,7 @@ Window # |-------- 0 --------|-------- 1 --------|- 2 - ... - 27 -------|-- 28 -
                          C
 </pre>
 <p class="figure">Figure 13: Format of a SCHC ACK message</p>
-<p id="rfc.section.8.3.2.p.2">The SCHC ACK header contains a C bit (see <a href="#HeaderFields" class="xref">Section 8.2.4</a>).  If the C bit is set to 0 (integrity check not performed or failed) and if windows are used, the Bitmap for the window referred to by the W field MUST follow.  See <a href="#Bitmap" class="xref">Section 8.2.2.2</a> for a description of the Bitmap.</p>
+<p id="rfc.section.8.3.2.p.2">The SCHC ACK Header contains a C bit (see <a href="#HeaderFields" class="xref">Section 8.2.4</a>).  If the C bit is set to 0 (integrity check not performed or failed) and if windows are used, the Bitmap for the window referred to by the W field MUST follow.  See <a href="#Bitmap" class="xref">Section 8.2.2.2</a> for a description of the Bitmap.</p>
 <p id="rfc.section.8.3.2.p.3">In order to reduce the SCHC ACK size, the Bitmap that is actually transmitted is shortened (&#8220;truncated&#8221;) as explained in <a href="#Bitmapopt" class="xref">Section 8.3.2.1</a>.</p>
 <p id="rfc.section.8.3.2.p.4">The Rule ID and DTag values in the SCHC ACK messages MUST be identical to the ones used in the SCHC Fragments that carry the tiles for this SCHC Packet.</p>
 <p id="rfc.section.8.3.2.p.5">See <a href="#SCHCParams" class="xref">Appendix D</a> for a discussion on the size of the Bitmaps.</p>
@@ -1250,27 +1251,28 @@ Window # |-------- 0 --------|-------- 1 --------|- 2 - ... - 27 -------|-- 28 -
 <p id="rfc.section.8.3.4.1.p.2">The size of the SCHC Sender-Abort header is generally not a multiple of the L2 Word size.  Therefore, a SCHC Sender-Abort generally needs padding bits.</p>
 <p id="rfc.section.8.3.4.1.p.3">Note that the SCHC Sender-Abort has the same header as an All-1 SCHC Fragment, but that it does not include a MIC nor a payload.  Padding bits are strictly less than a L2 Word size.  Since the total size of the MIC and the payload of an All-1 SCHC Fragment is at least the size of an L2 Word, a receiver can, by looking at the message length, distinguish a SCHC Sender-Abort from an All-1 SCHC Fragment (see <a href="#LastFrag" class="xref">Section 8.3.1.2</a>), even in the presence of padding.</p>
 <p id="rfc.section.8.3.4.1.p.4">The Rule ID and DTag values in the SCHC Sender-Abort message MUST be identical to the ones used in the fragments of the SCHC Packet the transmission of which is being aborted.</p>
-<p id="rfc.section.8.3.4.1.p.5">The SCHC Sender-Abort MUST NOT be acknowledged and MUST NOT be retransmitted.</p>
+<p id="rfc.section.8.3.4.1.p.5">The SCHC Sender-Abort MUST NOT be acknowledged.</p>
 <h1 id="rfc.section.8.3.4.2">
 <a href="#rfc.section.8.3.4.2">8.3.4.2.</a> <a href="#schc-receiver-abort" id="schc-receiver-abort">SCHC Receiver-Abort</a>
 </h1>
-<p id="rfc.section.8.3.4.2.p.1">When a SCHC Fragment receiver needs to abort an on-going fragmented SCHC Packet transmission, it transmits a SCHC Receiver-Abort.  Its format is described in <a href="#Fig-ACKabort" class="xref">Figure 20</a>.  The W field is optional. Its presence is specified by each SCHC F/R mode.</p>
+<p id="rfc.section.8.3.4.2.p.1">When a SCHC Fragment receiver needs to abort an on-going fragmented SCHC Packet transmission, it transmits a SCHC Receiver-Abort.  Its format is described in <a href="#Fig-ReceiverAbort" class="xref">Figure 20</a>.  The W field is optional. Its presence is specified by each SCHC F/R mode.</p>
 <div id="rfc.figure.20"></div>
-<div id="Fig-ACKabort"></div>
+<div id="Fig-ReceiverAbort"></div>
 <pre>
-|-- Receiver-Abort Header --|
+|--- Receiver-Abort Header ---|
 
-+---- ... ----+-- ... --+---+-+-+-+-+-+-+-+-+-+-+-+
-|   Rule ID   |   DTag  | W | 1..1|      1..1     |
-+---- ... ----+-- ... --+---+-+-+-+-+-+-+-+-+-+-+-+
-          next L2 Word boundary -&gt;|&lt;-- L2 Word --&gt;|
++---- ... ----+-- ... --+---+-+-+-+-+-+-+-+-+-+-+-+-+
+|   Rule ID   |   DTag  | W |1| 1..1|      1..1     |
++---- ... ----+-- ... --+---+-+-+-+-+-+-+-+-+-+-+-+-+
+                             C
+            next L2 Word boundary -&gt;|&lt;-- L2 Word --&gt;|
 
 </pre>
 <p class="figure">Figure 20: SCHC Receiver-Abort format</p>
 <p id="rfc.section.8.3.4.2.p.2">Note that the SCHC Receiver-Abort has the same header as a SCHC ACK message.  The bits that follow the SCHC Receiver-Abort header look like a truncated Bitmap set to 1 up to the first L2 Word boundary, followed by an extra L2 Word full of 1&#8217;s.  Such a bit pattern never occurs in a regular SCHC ACK. This is how the SCHC Receiver-Abort message is recognized.</p>
 <p id="rfc.section.8.3.4.2.p.3">The Rule ID and DTag values in the SCHC Receiver-Abort message MUST be identical to the ones used in the fragments of the SCHC Packet the transmission of which is being aborted.</p>
 <p id="rfc.section.8.3.4.2.p.4">A SCHC Receiver-Abort is aligned to L2 Words, by design. Therefore, padding MUST NOT be appended.</p>
-<p id="rfc.section.8.3.4.2.p.5">The SCHC Sender-Abort MUST NOT be acknowledged and MUST NOT be retransmitted.</p>
+<p id="rfc.section.8.3.4.2.p.5">The SCHC Sender-Abort MUST NOT be acknowledged.</p>
 <h1 id="rfc.section.8.4">
 <a href="#rfc.section.8.4">8.4.</a> <a href="#FragModes" id="FragModes">SCHC F/R modes</a>
 </h1>
