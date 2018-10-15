@@ -530,14 +530,6 @@ Some of these technologies do not have an internal fragmentation/reassembly mech
 The SCHC Fragmentation/Reassembly (SCHC F/R) functionality is offered as an option for such LPWAN technologies to cope with the IPv6 MTU requirement of 1280 bytes {{RFC8200}}.
 It is optional to implement. If it is not needed, its description can be safely ignored.
 
-It has been designed under the following assumptions
-
-* Data unit out-of-sequence delivery does not occur between the entity performing fragmentation and the entity performing reassembly
-
-* The L2 MTU value does not change while a fragmented SCHC Packet is being transmitted.
-
-These assumptions allow reducing the complexity and overhead of the SCHC F/R mechanism.
-
 This specification includes several SCHC F/R modes, which allow for a range of reliability options such as optional SCHC Fragment retransmission.
 More modes may be defined in the future.
 The same SCHC F/R mode MUST be used for all SCHC Fragments of the same fragmented SCHC Packet.
@@ -575,11 +567,24 @@ The messages that can be used by SCHC F/R are the following
 The SCHC Packet is fragmented into pieces, hereafter called tiles.
 The tiles MUST be contiguous.
 
+See {{Fig-TilesExample}} for an example.
+
+~~~~
+
+                                      SCHC Packet
+         +----+--+-----+---+----+-+---+---+-----+------+...-----+----+---+------+
+Tiles    |    |  |     |   |    | |   |   |     |      |        |    |   |      |
+         +----+--+-----+---+----+-+---+---+-----+------+...-----+----+---+------+
+
+~~~~
+{: #Fig-TilesExample title='a SCHC Packet fragmented in tiles'}
+
 Each SCHC Fragment message carries at least one tile in its Payload.
 
 #### Windows {#Windows}
 
 Some SCHC F/R modes may handle successive tiles in groups, called windows.
+
 If windows are used
 
 - all the windows of a SCHC Packet, except the last one, MUST contain the same number of tiles.
@@ -591,7 +596,7 @@ If windows are used
 - the tile numbers MUST decrement from WINDOW_SIZE - 1 downward, looking from the start of the SCHC Packet toward its end.
 - each tile of a SCHC Packet is therefore uniquely identified by a window number and a tile number within this window.
 
-See {{Fig-TilesExample}} for an example.
+See {{Fig-WindowsExample}} for an example.
 
 ~~~~
 
@@ -603,7 +608,7 @@ Tile #   | 4 | 3 | 2 | 1 | 0 | 4 | 3 | 2 | 1 | 0 | 4 |      | 2 | 1 | 0 | 4 | 3 
 Window # |-------- 0 --------|-------- 1 --------|- 2 - ... - 27 -------|-- 28 -|
 
 ~~~~
-{: #Fig-TilesExample title='a SCHC Packet fragmented in tiles grouped in 28 windows, with WINDOW_SIZE = 5'}
+{: #Fig-WindowsExample title='a SCHC Packet fragmented in tiles grouped in 28 windows, with WINDOW_SIZE = 5'}
 
 When windows are used
 
@@ -1033,6 +1038,9 @@ The SCHC Sender-Abort MUST NOT be acknowledged.
 In No-ACK mode, there is no feedback communication from the fragment receiver to the fragment sender.
 The sender just transmits all the SCHC Fragments blindly.
 
+This mode has been designed under the assumption that data unit out-of-sequence delivery does not occur between the entity performing fragmentation and the entity performing reassembly.
+This mode supports LPWAN technologies that have variable MTU.
+
 SCHC ACK or SCHC ACK REQ MUST NOT be sent.
 SCHC Sender-Abort MAY be sent. SCHC Receiver-Abort MUST NOT be sent.
 
@@ -1096,6 +1104,12 @@ the receiver MAY release all resources associated with this Rule ID and optional
 
 In ACK-Always mode, windows are used.
 An acknowledgement, positive or negative, is fed by the fragment receiver back to the fragment sender at the end of the transmission of each window of SCHC Fragments.
+
+This mode has been designed under the following assumptions
+
+* Data unit out-of-sequence delivery does not occur between the entity performing fragmentation and the entity performing reassembly
+
+* The L2 MTU value does not change while a fragmented SCHC Packet is being transmitted.
 
 In a nutshell, the fragment sender iterates retransmitting the SCHC Fragments that are reported missing until the fragment receiver reports that all the SCHC Fragments belonging to the window have been correctly received, or until too many attempts were made.
 The fragment sender only advances to the next window of SCHC Fragments when it has ascertained that all the SCHC Fragments belonging to the current window have been fully and correctly received (lock-step behaviour between the sender and the receiver, at the window granularity).
@@ -1276,6 +1290,8 @@ and it MUST exit the receive process for that SCHC Packet.
 
 
 ### ACK-on-Error {#ACK-on-Error-subsection}
+
+The ACK-on-Error mode supports LPWAN technologies that have variable MTU and out-of-order delivery.
 
 In ACK-on-Error mode, windows are used.
 All tiles MUST be of equal size, except for the last one,
