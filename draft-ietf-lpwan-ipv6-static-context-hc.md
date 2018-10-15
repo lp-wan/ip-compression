@@ -648,14 +648,11 @@ Some SCHC F/R modes can use the following timers and counters
 
 The reassembled SCHC Packet is checked for integrity at the receive end.
 One way of doing integrity checking is by computing a MIC at the sender side and transmitting it to the receiver for comparison with the locally computed MIC.
-Some LPWAN technologies under SCHC may provide other means of ensuring that all fragments composing a SCHC Packet were correctly received and reassembled.
-The Profile MUST define how integrity checking is done.
+Some leyers under SCHC may provide other means of ensuring that all fragments composing a SCHC Packet were correctly received and reassembled.
+Profiles MUST define how integrity checking is done.
 
-If a Profile specify that MIC is used, the SCHC F/R mode specifies on what fields of the SCHC Fragments the MIC is computed.
+If a Profile specifies that MIC is used, the SCHC F/R mode specifies on what fields of the SCHC Fragments the MIC is computed.
 
-If the MIC is present, the sender MUST compute it over the complete SCHC Packet and the potential padding bits of the last SCHC Fragment.
-
-Sending a MIC is one way of allowing the receiver to do integrity checking on the reassembled SCHC Packet.
 The MIC supports UDP checksum elision by SCHC C/D (see {{UDPchecksum}}).
 
 The CRC32 polynomial 0xEDB88320 (i.e. the reverse representation
@@ -667,6 +664,7 @@ generally constitute an integer number of bytes.
 For implementers to be able to use byte-oriented CRC libraries, it is RECOMMENDED that the concatenation of the
 complete SCHC Packet and the last fragment potential padding bits be zero-extended to the next byte boundary and
 that the MIC be computed on that byte array.
+A Profile MAY specify another behaviour.
 
 ### Header Fields {#HeaderFields}
 
@@ -1335,7 +1333,7 @@ SCHC Fragment msg    |-----------|
 
 The W field is wide enough that it unambiguously represents an absolute window number.
 The fragment receiver feeds SCHC ACKs back to the fragment sender about windows that it misses tiles of.
-No SCHC ACK is fed back for windows that have been fully received by the fragment receiver.
+No SCHC ACK is fed back by the fragment receiver for windows that it knows have been fully received.
 
 The fragment sender retransmits SCHC Fragments for tiles that are reported missing.
 It can advance to next windows even before it has ascertained that all tiles belonging to previous windows have been correctly received,
@@ -1349,9 +1347,9 @@ The fragmented SCHC Packet transmission concludes when
 - or the receiver determines that the transmission of this fragmented SCHC Packet has been inactive for too long.
 
 Each Profile MUST specify which Rule ID value(s) is (are) allocated to this ACK-on-Error mode.
-For brevity, the rest of {{ACK-on-Error-subsection}} only refers to Rule ID values that are allocated to this mode.
+For brevity, the rest of {{ACK-on-Error-subsection}} only refers to SCHC F/R messages with Rule ID values that are allocated to this mode.
 
-The W field MUST be present in SCHC F/R messages.
+The W field MUST be present in the SCHC F/R messages.
 
 Each Profile, for each Rule ID value, MUST define
 
@@ -1365,12 +1363,12 @@ Each Profile, for each Rule ID value, MUST define
 - the expiration time of the Retransmission Timer
 - the expiration time of the Inactivity Timer
 
-The sender, for each active pair of Rule ID and optional DTag values, MUST instantiate
+The sender, for each active pair of Rule ID and optional DTag values, MUST maintain
 
 - one Attempts counter
 - one Retransmission Timer
 
-The receiver, for each pair of Rule ID and optional DTag values, MUST instantiate
+The receiver, for each pair of Rule ID and optional DTag values, MUST maintain
 
 - one Inactivity Timer
 
@@ -1380,10 +1378,15 @@ The receiver, for each pair of Rule ID and optional DTag values, MUST instantiat
 At the beginning of the fragmentation of a new SCHC Packet, the fragment sender MUST select a Rule ID and DTag value pair for this SCHC Packet.
 A Rule MUST NOT be selected if the values of M and MAX_WIND_FCN for that Rule are such that the SCHC Packet cannot be fragmented in (2ˆM) * (MAX_WIND_FCN+1) tiles or less.
 
+For brevity, the rest of {{ACK-on-Error-subsection}} only refers to SCHC F/R messages bearing the Rule ID and optional DTag values hereby selected.
+
 The fragment sender MUST initialize the Attempts counter to 0 for that Rule ID and DTag value pair.
 
 A SCHC Fragment message carries in its payload one or more tiles.
-If more than one tile is carried in one SCHC Fragment, the tiles MUST be consecutive and MUST be ordered from the start of the SCHC Packet toward its end.
+If more than one tile is carried in one SCHC Fragment
+
+- the selected tiles MUST be consecutive in the original SCHC Packet
+- they MUST be placed in the SCHC Fragment Payload adjacent to one another, in the order they appear in the SCHC Packet, from the start of the SCHC Packet toward its end.
 
 In a SCHC Fragment message, the sender MUST fill the W field with the window number of the first tile sent in that SCHC Fragment.
 
@@ -1394,23 +1397,21 @@ If a SCHC Fragment message carries only the last tile of the fragmented SCHC Pac
 
 Otherwise,
 
-- it MUST be of the regular type specified in {{NotLastFrag}}
+- it MUST be of the Regular type specified in {{NotLastFrag}}
 - the FCN field MUST contain the tile number of the first tile sent in that SCHC Fragment.
-- padding bits MUST be appended to the tiles as needed to fit the Payload size constraint of regular SCHC Fragments
+- padding bits are appended to the tiles as needed to fit the Payload size constraint of Regular SCHC Fragments
+- if MIC is used, these padding bits are not taken into account for the MIC computation
 
 The fragment sender MUST send SCHC Fragments such that, all together, they contain all the tiles of the fragmented SCHC Packet.
 
-The fragment sender MUST send
-
-- at least one All-1 SCHC Fragment
-- or at least one SCHC ACK REQ with the W field corresponding to the last window.
+The fragment sender MUST send at least one All-1 SCHC Fragment.
 
 The fragment sender MUST listen for SCHC ACK messages after having sent
 
 - an All-1 SCHC Fragment
 - or a SCHC ACK REQ with the W field corresponding to the last window.
 
-Profiles MAY specify other times at which the fragment sender MUST listen for SCHC ACK messages.
+A Profile MAY specify other times at which the fragment sender MUST listen for SCHC ACK messages.
 
 Each time a fragment sender sends an All-1 SCHC Fragment or a SCHC ACK REQ,
 
@@ -1429,12 +1430,12 @@ On receiving a SCHC ACK,
 
 - if the W field in the SCHC ACK corresponds to the last window of the SCHC Packet,
 
-  * if the C bit is set, the sender MUST release all resource associated with this SCHC Packet and MUST exit successfully
+  * if the C bit is set, the sender MAY release all resource associated with this SCHC Packet and MAY exit successfully
   * otherwise,
 
     - the fragment sender MUST send SCHC Fragment messages containing all the tiles that are reported missing in the SCHC ACK.
     - if the last message in this sequence of SCHC Fragment messages is not an All-1 SCHC Fragment,
-    then a SCHC ACK REQ with the W field corresponding to the last window MUST be sent after the sequence
+    then the fragment sender MUST send a SCHC ACK REQ with the W field corresponding to the last window after the sequence.
 
 - otherwise, the fragment sender
 
@@ -1442,7 +1443,7 @@ On receiving a SCHC ACK,
   * then it MAY send a SCHC ACK REQ with the W field corresponding to the last window
 
 
-See {{Fig-ACKonerrorSnd}} for an example of a Finite State Machine implementing the sender behaviour.
+See {{Fig-ACKonerrorSnd}} for one among several possible examples of a Finite State Machine implementing a sender behaviour obeying this specification.
 
 #### Receiver behaviour {#ACK-on-Error-receiver}
 
@@ -1460,7 +1461,7 @@ On reception of any SCHC F/R message, the receiver MUST reset the Inactivity Tim
 On reception of a SCHC Fragment message,
 the receiver MUST assemble the received tiles based on the W and FCN fields of the SCHC Fragment.
 
-- if the FCN is All-1, the full SCHC Fragment payload MUST be assembled.
+- if the FCN is All-1, the full SCHC Fragment Payload MUST be assembled.
   This is because the size of the last tile is not known by the receiver,
   therefore padding bits are indistinguishable from the tile data bits, at this stage.
   They will be removed by the SCHC C/D sublayer.
@@ -1473,13 +1474,13 @@ the receiver MUST assemble the received tiles based on the W and FCN fields of t
   * padding bits are always less than an L2 Word
 
 On reception of a SCHC ACK REQ or of an All-1 SCHC Fragment, the receiver
-MUST return a SCHC ACK for the lowest-numbered window that has tiles missing at the receiver.
+MUST return a SCHC ACK for the lowest-numbered window that it knows has tiles missing.
 If the receiver knows of no window that has tiles missing,
 it MUST return a SCHC ACK for the highest-numbered window it currently has tiles for.
 
 A Profile MAY specify other times and circumstances at which
-a receiver MUST send a SCHC ACK
-and which window(s) the SCHC ACK MUST report about.
+a receiver sends a SCHC ACK,
+and which window the SCHC ACK reports about in these circumstances.
 
 On sending a SCHC ACK, the receiver MUST increase the Attempts counter.
 
@@ -1509,7 +1510,8 @@ If MIC is used for integrity checking,
 the MIC computed at the receiver MUST be computed over the reassembled SCHC Packet
 and over the padding bits that were received in the All-1 SCHC Fragment.
 
-See {{Fig-ACKonerrorRcv}} for one possible example of a Finite State Machine implementing a receiver behaviour.
+See {{Fig-ACKonerrorRcv}} for one among several possible examples of a Finite State Machine implementing a receiver behaviour obeying this specification,
+and that is meant to match the sender Finite State Machine of {{Fig-ACKonerrorSnd}}.
 
 # Padding management {#Padding}
 
@@ -1560,6 +1562,7 @@ A packet (e.g. an IPv6 packet)
 Each Profile MUST specify the size of the L2 Word.
 The L2 Word might actually be a single bit, in which case at most zero bits of padding will be appended to any message, i.e. no padding will take place at all.
 
+A Profile MAY define the value of the padding bits. The RECOMMENDED value is 0.
 
 # SCHC Compression for IPv6 and UDP headers
 
