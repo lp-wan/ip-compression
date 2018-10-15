@@ -1032,6 +1032,8 @@ This mode supports LPWAN technologies that have a variable MTU.
 In No-ACK mode, there is no feedback communication from the fragment receiver to the fragment sender.
 The sender just transmits all the SCHC Fragments blindly.
 
+Padding is kept to a minimum: only the last SCHC Fragment is padded as needed.
+
 The tile sizes are not required to be uniform.
 Windows are not used.
 The Retransmission Timer is not used.
@@ -1117,6 +1119,7 @@ the receiver MAY release all resources associated with this Rule ID and optional
 
 In ACK-Always mode, windows are used.
 An acknowledgement, positive or negative, is fed by the fragment receiver back to the fragment sender at the end of the transmission of each window of SCHC Fragments.
+Padding is kept to a minimum: only the last SCHC Fragment is padded as needed.
 
 This mode has been designed under the following assumptions
 
@@ -1508,37 +1511,21 @@ and over the padding bits that were received in the All-1 SCHC Fragment.
 
 See {{Fig-ACKonerrorRcv}} for one possible example of a Finite State Machine implementing a receiver behaviour.
 
-## Supporting multiple window sizes
-
-For ACK-Always or ACK-on-Error, implementers MAY opt to support a single window size or multiple window sizes.  The latter, when feasible, may provide performance optimizations.  For example, a large window size SHOULD be used for packets that need to be carried by a large number of SCHC Fragments. However, when the number of SCHC Fragments required to carry a packet is low, a smaller window size, and thus a shorter Bitmap, MAY be sufficient to provide feedback on all SCHC Fragments. If multiple window sizes are supported, the Rule ID MAY be used to signal the window size in use for a specific packet transmission.
-
-Note that the same window size MUST be used for the transmission of all SCHC Fragments that belong to the same SCHC Packet.
-
-
-## Downlink SCHC Fragment transmission
-
-
-For downlink transmission of a fragmented SCHC Packet in ACK-Always mode, the SCHC Fragment receiver MAY support timer-based SCHC ACK retransmission. In this mechanism, the SCHC Fragment receiver initializes and starts a timer (the Inactivity Timer is used) after the transmission of a SCHC ACK, except when the SCHC ACK is sent in response to the last SCHC Fragment of a packet (All-1 fragment). In the latter case, the SCHC Fragment receiver does not start a timer after transmission of the SCHC ACK.
-
-If, after transmission of a SCHC ACK that is not an All-1 fragment, and before expiration of the corresponding Inactivity timer, the SCHC Fragment receiver receives a SCHC Fragment that belongs to the current window (e.g. a missing SCHC Fragment from the current window) or to the next window, the Inactivity timer for the SCHC ACK is stopped. However, if the Inactivity timer expires, the SCHC ACK is resent and the Inactivity timer is reinitialized and restarted.
-
-The default initial value for the Inactivity timer, as well as the maximum number of retries for a specific SCHC ACK, denoted MAX_ACK_RETRIES, are not defined in this document, and need to be defined in a Profile. The initial value of the Inactivity timer is expected to be greater than that of the Retransmission timer, in order to make sure that a (buffered) SCHC Fragment to be retransmitted can find an opportunity for that transmission.
-
-When the SCHC Fragment sender transmits the All-1 fragment, it starts its Retransmission Timer with a large timeout value (e.g. several times that of the initial Inactivity timer). If a SCHC ACK is received before expiration of this timer, the SCHC Fragment sender retransmits any lost SCHC Fragments reported by the SCHC ACK, or if the SCHC ACK confirms successful reception of all SCHC Fragments of the last window, the transmission of the fragmented SCHC Packet is considered complete. If the timer expires, and no SCHC ACK has been received since the start of the timer, the SCHC Fragment sender assumes that the All-1 fragment has been successfully received (and possibly, the last SCHC ACK has been lost: this mechanism assumes that the retransmission timer for the All-1 fragment is long enough to allow several SCHC ACK retries if the All-1 fragment has not;been received by the SCHC Fragment receiver, and it also assumes that it is unlikely that several ACKs become all lost).
-
 # Padding management {#Padding}
 
 
 SCHC C/D and SCHC F/R operate on bits, not bytes. SCHC itself does not have any alignment prerequisite.
-If the L2 below SCHC constrains the payload to align to some boundary, called L2 Words (for example, bytes),
+The size of SCHC Packets can be any number of bits.
+If the layer below SCHC constrains the payload to align to some boundary, called L2 Words (for example, bytes),
 SCHC will meet that constraint and produce messages with the correct alignement.
-This may entail adding extra bits (called padding bits).
+This may entail adding extra bits, called padding bits.
 
-When padding occurs, the number of appended bits is strictly less than the L2 Word size.
+When padding occurs, the number of appended bits MUST be strictly less than the L2 Word size.
 
 Padding happens at most once for each Packet during SCHC Compression and optional SCHC Fragmentation (see {{Fig-IntroLayers}}).
-If a SCHC Packet is sent unfragmented (see {{Fig-Operations-Pad}}), it is padded as needed.
-If a SCHC Packet is fragmented, only the last fragment is padded as needed.
+If a SCHC Packet is sent unfragmented (see {{Fig-Operations-Pad}}), it is padded as needed for transmission.
+If a SCHC Packet is fragmented, it is not padded in itself, only the SCHC Fragments are padded as needed for transmission.
+Some SCHC F/R modes only pad the very last SCHC Fragment.
 
 
 ~~~~
@@ -1561,8 +1548,7 @@ A packet (e.g. an IPv6 packet)
      |       |                                   |       |
      |       +------------- SCHC ACK ------------+       |
      |                                                   |
-     +--------------- SCHC Fragments --------------------+
-     +--- last SCHC Frag with MIC + padding as needed ---+
+     +------- SCHC Fragments + padding as needed---------+
 
         SENDER                                    RECEIVER
 
@@ -2536,6 +2522,21 @@ the LPWAN technology-specific documents:
 
     * The way the Rules as generated
 
+# Supporting multiple window sizes for fragmentation
+
+For ACK-Always or ACK-on-Error, implementers MAY opt to support a single window size or multiple window sizes.  The latter, when feasible, may provide performance optimizations.  For example, a large window size SHOULD be used for packets that need to be carried by a large number of SCHC Fragments. However, when the number of SCHC Fragments required to carry a packet is low, a smaller window size, and thus a shorter Bitmap, MAY be sufficient to provide feedback on all SCHC Fragments. If multiple window sizes are supported, the Rule ID MAY be used to signal the window size in use for a specific packet transmission.
+
+Note that the same window size MUST be used for the transmission of all SCHC Fragments that belong to the same SCHC Packet.
+
+# Downlink SCHC Fragment transmission
+
+For downlink transmission of a fragmented SCHC Packet in ACK-Always mode, the SCHC Fragment receiver MAY support timer-based SCHC ACK retransmission. In this mechanism, the SCHC Fragment receiver initializes and starts a timer (the Inactivity Timer is used) after the transmission of a SCHC ACK, except when the SCHC ACK is sent in response to the last SCHC Fragment of a packet (All-1 fragment). In the latter case, the SCHC Fragment receiver does not start a timer after transmission of the SCHC ACK.
+
+If, after transmission of a SCHC ACK that is not an All-1 fragment, and before expiration of the corresponding Inactivity timer, the SCHC Fragment receiver receives a SCHC Fragment that belongs to the current window (e.g. a missing SCHC Fragment from the current window) or to the next window, the Inactivity timer for the SCHC ACK is stopped. However, if the Inactivity timer expires, the SCHC ACK is resent and the Inactivity timer is reinitialized and restarted.
+
+The default initial value for the Inactivity timer, as well as the maximum number of retries for a specific SCHC ACK, denoted MAX_ACK_RETRIES, are not defined in this document, and need to be defined in a Profile. The initial value of the Inactivity timer is expected to be greater than that of the Retransmission timer, in order to make sure that a (buffered) SCHC Fragment to be retransmitted can find an opportunity for that transmission.
+
+When the SCHC Fragment sender transmits the All-1 fragment, it starts its Retransmission Timer with a large timeout value (e.g. several times that of the initial Inactivity timer). If a SCHC ACK is received before expiration of this timer, the SCHC Fragment sender retransmits any lost SCHC Fragments reported by the SCHC ACK, or if the SCHC ACK confirms successful reception of all SCHC Fragments of the last window, the transmission of the fragmented SCHC Packet is considered complete. If the timer expires, and no SCHC ACK has been received since the start of the timer, the SCHC Fragment sender assumes that the All-1 fragment has been successfully received (and possibly, the last SCHC ACK has been lost: this mechanism assumes that the retransmission timer for the All-1 fragment is long enough to allow several SCHC ACK retries if the All-1 fragment has not;been received by the SCHC Fragment receiver, and it also assumes that it is unlikely that several ACKs become all lost).
 
 # Note
 Carles Gomez has been funded in part by the Spanish Government (Ministerio de Educacion, Cultura y Deporte) through the Jose
