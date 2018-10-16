@@ -767,13 +767,11 @@ The DTag field and the W field are optional.
 
 
 ~~~~
-
  |--- SCHC Fragment Header ----|
            |-- T --|-M-|-- N --|
  +-- ... --+- ... -+---+- ... -+--------...-------+~~~~~~~~~~~~~~~~~~~~~
  | Rule ID | DTag  | W |  FCN  | Fragment Payload | padding (as needed)
  +-- ... --+- ... -+---+- ... -+--------...-------+~~~~~~~~~~~~~~~~~~~~~
-
 ~~~~
 {: #Fig-NotLastFrag title='Detailed Header Format for Fragments except the Last One'}
 
@@ -781,10 +779,8 @@ The FCN field MUST NOT contain all bits set to 1.
 
 The total size of the Fragment Header is not necessarily a multiple of the L2 Word size.
 
-If the size of the tiles carried in the SCHC Fragment Payload does not nicely complement the SCHC Header size
+If the size of the SCHC Fragment Payload does not nicely complement the SCHC Header size
 in a way that would make the SCHC Fragment a multiple of the L2 Word, then padding bits MUST be added.
-
-The padding bits that are added MUST be less that the L2 Word size.
 
 The Fragment Payload of a SCHC Fragment with FCN == 0 (called an All-0 SCHC Fragment) MUST be at least the size of an L2 Word.
 The rationale is that, even in the presence of padding, an All-0 SCHC Fragment needs to be distinguishable from the SCHC ACK REQ message, which has the same header but has no payload (see {{ACKREQ}}).
@@ -792,11 +788,11 @@ The rationale is that, even in the presence of padding, an All-0 SCHC Fragment n
 #### All-1 SCHC Fragment {#LastFrag}
 
 The All-1 SCHC Fragment format is shown in {{Fig-LastFrag}}.
-The All-1 SCHC Fragment is generally used to carry the very last tile of a SCHC Packet.
-The DTag field, the W field and the MIC field are optional.
+The All-1 SCHC Fragment is generally used to carry the very last tile of a SCHC Packet,
+or a MIC, or both.
+The DTag field, the W field, the MIC field and the Payload are optional.
 
 ~~~~
-
 |-------- SCHC Fragment Header -------|
           |-- T --|-M-|-- N --|
 +-- ... --+- ... -+---+- ... -+- ... -+------...-----+~~~~~~~~~~~~~~~~~~~~~
@@ -805,19 +801,18 @@ The DTag field, the W field and the MIC field are optional.
                         (FCN)
 ~~~~
 {: #Fig-LastFrag title='Detailed format for the All-1 SCHC Fragment'}
-The total size of the All-1 SCHC Fragment header is generally not a multiple of the L2 Word size.
 
-If the size of the tiles carried in the SCHC Fragment Payload does not nicely complement the SCHC Header size
-in a way that would make the SCHC Fragment a multiple of the L2 Word, then padding bits MUST be added.
-
-The padding bits that are added MUST be less that the L2 Word size.
-
-The optional MIC concatenated with the All-1 SCHC Fragment Payload MUST be at least the size of an L2 Word.
+The optional MIC concatenated with the optional All-1 SCHC Fragment Payload MUST be at least the size of an L2 Word.
 The rationale is that, even in the presence of padding, the All-1 SCHC Fragment needs to be distinguishable from the SCHC Sender-Abort (see {{SenderAbort}}).
 If the MIC is absent, or if it is present but its size is less than an L2 Word,
 this requirement places a constraint on the size of the Payload.
 Meeting this constraint may entail saving an L2 Word from the payload of the previous SCHC Fragment
 to make the payload of this All-1 SCHC Fragment big enough.
+
+The total size of the All-1 SCHC Fragment header is generally not a multiple of the L2 Word size.
+
+If the size of the SCHC Fragment Payload does not nicely complement the SCHC Header size
+in a way that would make the SCHC Fragment a multiple of the L2 Word, then padding bits MUST be added.
 
 
 ### SCHC ACK format {#ACK}
@@ -827,15 +822,14 @@ The DTag field, the W field and the Truncated Bitmap field are optional.
 The Truncated Bitmap field can only be present in SCHC F/R modes that use windows.
 
 ~~~~
-
 |---- SCHC ACK Header ----|
             |-- T --|-M-|1|
 +---- ... --+- ... -+---+-+~~~~~~~~~~~~~~~~~~
-|  Rule ID  |  DTag | W |1| padding as needed                   (integrity check success)
+|  Rule ID  |  DTag | W |1| padding as needed                   (check success)
 +---- ... --+- ... -+---+-+~~~~~~~~~~~~~~~~~~
 
 +---- ... --+- ... -+---+-+------ ... ------+~~~~~~~~~~~~~~~~~~
-|  Rule ID  |  DTag | W |0|Truncated Bitmap | padding as needed (integrity check failure)
+|  Rule ID  |  DTag | W |0|Truncated Bitmap | padding as needed (check failure)
 +---- ... --+- ... -+---+-+------ ... ------+~~~~~~~~~~~~~~~~~~
                          C
 ~~~~
@@ -855,8 +849,8 @@ For transmission, the Bitmap in the SCHC ACK message is truncated by applying th
 
 - Build a temporary SCHC ACK message that contains the Header and the original Bitmap.
 - Positioning scissors at the end of the Bitmap, after its last bit.
-- While the bit left to the scissors is 1 and belongs to the Bitmap, keep moving left, then stop. When this is done,
-- while the scissors are not on an L2 Word boundary of the SCHC ACK message and are strictly inside the Bitmap, keep moving right, then stop.
+- While the bit on the left of the scissors is 1 and belongs to the Bitmap, keep moving left, then stop. When this is done,
+- While the scissors are not on an L2 Word boundary of the SCHC ACK message and there is a Bitmap bit on the right of the scissors, keep moving right, then stop.
 - At this point, cut and drop off any bits to the right of the scissors
 
 When one or more bits have effectively been dropped off as a result of the above algorithm, the resulting SCHC ACK message is a multiple of L2 Words, and padding MUST NOT be appended.
@@ -869,64 +863,66 @@ Because the SCHC Fragment sender knows the size of the original Bitmap, it can r
 {{Fig-Localbitmap}} shows an example where L2 Words are actually bytes and where the original Bitmap contains 17 bits, the last 15 of which are all set to 1.
 
 ~~~~                                                  
-
-|--  SCHC ACK Header ----|--------       Bitmap    --------|
-|  Rule ID  |  DTag  |W|0|1|0|1|1|1|1|1|1|1|1|1|1|1|1|1|1|1|
-                        C
-       next L2 Word boundary ->|  next L2 Word |  next L2 Word |
+|---- SCHC ACK Header ----|--------      Bitmap     --------|
+            |-- T --|-M-|1|
++---- ... --+- ... -+---+-+---------------------------------+
+|  Rule ID  |  DTag | W |0|1 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1|
++---- ... --+- ... -+---+-+---------------------------------+
+                         C      |
+        next L2 Word boundary ->|
 ~~~~
 {: #Fig-Localbitmap title='Tentative SCHC ACK message with Bitmap before truncation'}
 
 {{Fig-transmittedbitmap}} shows that the last 14 bits are not sent.
 
 ~~~~   
+|---- SCHC ACK Header ----|TrBmp|
             |-- T --|-M-|1|
-+---- ... --+- ... -+---+-+-+-+-+
-|  Rule ID  |  DTag | W |0|1|0|1|
-+---- ... --+- ... -+---+-+-+-+-+
-                         C
++---- ... --+- ... -+---+-+-----+
+|  Rule ID  |  DTag | W |0|1 0 1|
++---- ... --+- ... -+---+-+-----+
+                         C      |
         next L2 Word boundary ->|
-
 ~~~~
-{: #Fig-transmittedbitmap title='Actual SCHC ACK message with Truncated Bitmap'}
+{: #Fig-transmittedbitmap title='Actual SCHC ACK message with Truncated Bitmap, no padding'}
 
-{{Fig-Bitmap-Win}} shows an example of a SCHC ACK with FCN ranging from 6 down to 0, where the Bitmap indicates that the second and the sixth tile of the window have not been correctly received.
+{{Fig-Bitmap-Win}} shows an example of a SCHC ACK with tile numbers ranging from 6 down to 0, where the Bitmap indicates that the second and the fourth tile of the window have not been correctly received.
 
 ~~~~                                                  
-                           6 5 4 3 2 1 0 (*)
-            |-- T --|-M-|1|
-+-----------+-------+---+-+-+-+-+-+-+-+-+
-|  Rule ID  |  DTag | W |0|1|0|1|1|1|0|1|        Tentative SCHC ACK with Original Bitmap
-+-----------+-------+---+-+-+-+-+-+-+-+-+
+|---- SCHC ACK Header ----|--- Bitmap --|
+            |-- T --|-M-|1|6 5 4 3 2 1 0| (tile #)
++-----------+-------+---+-+-------------+
+|  Rule ID  |  DTag | W |0|1 0 1 0 1 1 1|      SCHC ACK with Original Bitmap
++-----------+-------+---+-+-------------+
                          C
     next L2 Word boundary ->|<-- L2 Word -->|
-    (*)=(FCN values)
 
-+-----------+-------+---+-+-+-+-+-+-+-+-+~~~+
-|  Rule ID  |  DTag | W |0|1|0|1|1|1|0|1|Pad|    Actual SCHC ACK that is transmitted
-+-----------+-------+---+-+-+-+-+-+-+-+-+~~~+
++-----------+-------+---+-+-------------+~~~+
+|  Rule ID  |  DTag | W |0|1 0 1 0 1 1 1|Pad|  Actual SCHC ACK that is transmitted
++-----------+-------+---+-+-------------+~~~+
+                         C
     next L2 Word boundary ->|<-- L2 Word -->|
-
-
 ~~~~
-{: #Fig-Bitmap-Win title='Example of a SCHC ACK message, missing tiles'}
+{: #Fig-Bitmap-Win title='Example of a SCHC ACK message, missing tiles, with padding'}
 
 {{Fig-Bitmap-lastWin}} shows an example of a SCHC ACK with FCN ranging from 6 down to 0, where integrity check has not been performed or has failed and the Bitmap indicates that there is no missing tile in that window.
 
 ~~~~                                                  
-|- Fragmentation Header  -|6 5 4 3 2 1 7 (*)
-            |-- T --|-M-|
-|  Rule ID  |  DTag | W |0|1|1|1|1|1|1|1|      SCHC ACK with Original Bitmap
-    next L2 Word boundary ->|<-- L2 Word -->|
+|---- SCHC ACK Header ----|--- Bitmap --|
+            |-- T --|-M-|1|6 5 4 3 2 1 0| (tile #)
++-----------+-------+---+-+-------------+
+|  Rule ID  |  DTag | W |0|1 1 1 1 1 1 1|      SCHC ACK with Original Bitmap
++-----------+-------+---+-+-------------+
                          C
-+---- ... --+- ... -+---+-+-+
-|  Rule ID  |  DTag | W |0|1|                  transmitted SCHC ACK
-+---- ... --+- ... -+---+-+-+
     next L2 Word boundary ->|
-   (*) = (FCN values indicating the order)
 
++---- ... --+- ... -+---+-+-+
+|  Rule ID  |  DTag | W |0|1|                  Actual SCHC ACK that is transmitted
++---- ... --+- ... -+---+-+-+
+                         C
+    next L2 Word boundary ->|
 ~~~~
-{: #Fig-Bitmap-lastWin title='Example of a SCHC ACK message, no missing tile'}
+{: #Fig-Bitmap-lastWin title='Example of a SCHC ACK message, no missing tile, no padding'}
 
 
 ### SCHC ACK REQ format {#ACKREQ}
@@ -937,85 +933,106 @@ Its format is described in {{Fig-ACKREQ}}.
 The DTag field and the W field are optional.
 
 ~~~~
-
 |---- SCHC ACK REQ Header ----|
           |-- T --|-M-|-- N --|
 +-- ... --+- ... -+---+- ... -+~~~~~~~~~~~~~~~~~~~~~
 | Rule ID | DTag  | W |  0..0 | padding (as needed)      (no payload)
 +-- ... --+- ... -+---+- ... -+~~~~~~~~~~~~~~~~~~~~~
-
 ~~~~
 {: #Fig-ACKREQ title='SCHC ACK REQ detailed format'}
 
 
 The size of the SCHC ACK REQ header is generally not a multiple of the L2 Word size.
-Therefore, a SCHC ACK REQ generally needs padding bits. The padding bits are always less than an L2 Word.
+Therefore, a SCHC ACK REQ generally needs padding bits.
 
-Note that the SCHC ACK REQ has the same header as an All-0 SCHC Fragment but it doesn't have a payload.
-Since an All-0 SCHC Fragment payload is at least the size of an L2 Word, a receiver can distinguish a SCHC ACK REQ from an All-0 SCHC Fragment, even in the presence of padding.
+Note that the SCHC ACK REQ has the same header as an All-0 SCHC Fragment (see {{NotLastFrag}}) but it doesn't have a payload.
+A receiver can distinguish the former form the latter by the message length, even in the presence of padding.
+This is possible because
 
-
+- the padding bits are always stricly less than an L2 Word.
+- the size of an All-0 SCHC Fragment Payload is at least the size of an L2 Word,
 
 ### SCHC Abort formats {#Aborts}
 
 
 #### SCHC Sender-Abort {#SenderAbort}
 
-When a SCHC Fragment sender needs to abort an on-going fragmented SCHC Packet transmission, it sends a SCHC Sender-Abort.
-Its format is described in {{Fig-SenderAbort}}.
+When a SCHC Fragment sender needs to abort an on-going fragmented SCHC Packet transmission, it sends a SCHC Sender-Abort message to the SCHC Fragment receiver.
+
+The SCHC Sender-Abort format is described in {{Fig-SenderAbort}}.
 The DTag field and the W field are optional.
 
 ~~~~
-
-|------ Fragment Header ------|
+|---- Sender-Abort Header ----|
           |-- T --|-M-|-- N --|
 +-- ... --+- ... -+---+- ... -+~~~~~~~~~~~~~~~~~~~~~
 | Rule ID | DTag  | W | 11..1 | padding (as needed)
 +-- ... --+- ... -+---+- ... -+~~~~~~~~~~~~~~~~~~~~~
-
 ~~~~
 {: #Fig-SenderAbort title='SCHC Sender-Abort format'}
 
+If the W field is present,
+
+- the fragment sender MUST set it to all 1's.
+  Other values are RESERVED.
+- the fragment receiver MUST check its value.
+  If the value is different from all 1's, the message MUST be ignored.
 
 The size of the SCHC Sender-Abort header is generally not a multiple of the L2 Word size.
 Therefore, a SCHC Sender-Abort generally needs padding bits.
 
-Note that the SCHC Sender-Abort has the same header as an All-1 SCHC Fragment, but that it does not include a MIC nor a payload.
-Padding bits are strictly less than a L2 Word size.
-Since the total size of the MIC and the payload of an All-1 SCHC Fragment is at least the size of an L2 Word,
-a receiver can, by looking at the message length, distinguish a SCHC Sender-Abort from an All-1 SCHC Fragment (see {{LastFrag}}), even in the presence of padding.
+Note that the SCHC Sender-Abort has the same header as an All-1 SCHC Fragment (see {{LastFrag}}), but that it does not include a MIC nor a payload.
+The receiver distinguishes the former from the latter by the message length, even in the presence of padding.
+This is possible because
+
+- padding bits are always strictly less than a L2 Word size,
+- the total size of the MIC and the Payload of an All-1 SCHC Fragment is at least the size of an L2 Word.
 
 The SCHC Sender-Abort MUST NOT be acknowledged.
 
 
 #### SCHC Receiver-Abort
 
-When a SCHC Fragment receiver needs to abort an on-going fragmented SCHC Packet transmission, it transmits a SCHC Receiver-Abort.
-Its format is described in {{Fig-ReceiverAbort}}.
+When a SCHC Fragment receiver needs to abort an on-going fragmented SCHC Packet transmission, it transmits a SCHC Receiver-Abort message to the SCHC Fragment sender.
+
+The SCHC Receiver-Abort format is described in {{Fig-ReceiverAbort}}.
 The DTag field and the W field are optional.
 
 ~~~~
-
 |--- Receiver-Abort Header ---|
-
+              |--- T ---|-M-|1|
 +---- ... ----+-- ... --+---+-+-+-+-+-+-+-+-+-+-+-+-+
 |   Rule ID   |   DTag  | W |1| 1..1|      1..1     |
 +---- ... ----+-- ... --+---+-+-+-+-+-+-+-+-+-+-+-+-+
                              C
             next L2 Word boundary ->|<-- L2 Word -->|
-
 ~~~~
 {: #Fig-ReceiverAbort title='SCHC Receiver-Abort format'}
 
+If the W field is present,
+
+- the fragment receiver MUST set it to all 1's.
+  Other values are RESERVED.
+- the fragment sender MUST check its value.
+  If the value is different from all 1's, the message MUST be ignored.
+
 Note that the SCHC Receiver-Abort has the same header as a SCHC ACK message.
-The bits that follow the SCHC Receiver-Abort header look like a truncated Bitmap set to 1 up to
-the first L2 Word boundary, followed by an extra L2 Word full of 1's.
+The bits that follow the SCHC Receiver-Abort Header MUST be as follows
+
+- build a SCHC ACK out of an hypothetical Bitmap with all bits set to 1 (see {{ACK}})
+- append exactly one L2 Word with bits all set to 1's
+
+(alternate description: pick one for publication
+
+- if the Header does not end at an L2 Word boundary, append bits set to 1 as needed to reach the next L2 Word boundary
+- append exactly one more L2 Word with bits all set to 1's
+)
+
 Such a bit pattern never occurs in a regular SCHC ACK. This is how the fragment sender recognizes a SCHC Receiver-Abort.
 
 A SCHC Receiver-Abort is aligned to L2 Words, by design. Therefore, padding MUST NOT be appended.
 
-The SCHC Sender-Abort MUST NOT be acknowledged.
-
+The SCHC Receiver-Abort MUST NOT be acknowledged.
 
 ## SCHC F/R modes {#FragModes}
 
