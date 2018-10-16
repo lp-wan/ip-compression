@@ -411,7 +411,7 @@ address {
 <p>This document defines the Static Context Header Compression (SCHC) framework, which provides both header compression and fragmentation functionalities. SCHC has been designed for Low Power Wide Area Networks (LPWAN).</p>
 <p>SCHC compression is based on a common static context stored in both the LPWAN device and the network side. This document defines a header compression mechanism and its application to compress IPv6/UDP headers.</p>
 <p>This document also specifies a fragmentation and reassembly mechanism that is used to support the IPv6 MTU requirement over the LPWAN technologies. Fragmentation is needed for IPv6 datagrams that, after SCHC compression or when such compression was not possible, still exceed the layer-2 maximum payload size.</p>
-<p>The SCHC header compression and fragmentation mechanisms are independent of the specific LPWAN technology over which they are used. This document defines generic functionalities and offers flexibility with regard to parameter settings and mechanism choices. Technology-specific settings and choices are expected to be grouped into Profiles specified in other documents.</p>
+<p>The SCHC header compression and fragmentation mechanisms are independent of the specific LPWAN technology over which they are used. This document defines generic functionalities and offers flexibility with regard to parameter settings and mechanism choices. Technology-specific and product-specific settings and choices are expected to be grouped into Profiles specified in other documents.</p>
 <h1 id="rfc.status"><a href="#rfc.status">Status of This Memo</a></h1>
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at https://datatracker.ietf.org/drafts/current/.</p>
@@ -579,7 +579,7 @@ address {
 </ul>
 <p id="rfc.section.1.p.4">SCHC compression uses a context in which information about header fields is stored. This context is static: the values of the header fields do not change over time. This avoids complex resynchronization mechanisms, that would be incompatible with LPWAN characteristics. In most cases, a small context identifier is enough to represent the full IPv6/UDP headers. The SCHC header compression mechanism is independent of the specific LPWAN technology over which it is used.</p>
 <p id="rfc.section.1.p.5">LPWAN technologies impose some strict limitations on traffic. For instance, devices are sleeping most of the time and may receive data during short periods of time after transmission to preserve battery. LPWAN technologies are also characterized by a greatly reduced data unit and/or payload size (see <a href="#RFC8376" class="xref">[RFC8376]</a>).  However, some LPWAN technologies do not provide fragmentation functionality; to support the IPv6 MTU requirement of 1280 bytes <a href="#RFC8200" class="xref">[RFC8200]</a>, they require a fragmentation protocol at the adaptation layer below IPv6.  Accordingly, this document defines an fragmentation/reassembly mechanism for LPWAN technologies to supports the IPv6 MTU. Its implementation is optional. If not interested, the reader can safely skip its description.</p>
-<p id="rfc.section.1.p.6">This document defines generic functionality and offers flexibility with regard to parameters settings and mechanism choices. Technology-specific settings and choices are expected to be grouped into Profiles specified in other documents.</p>
+<p id="rfc.section.1.p.6">This document defines generic functionality and offers flexibility with regard to parameters settings and mechanism choices. Technology-specific settings and product-specific and choices are expected to be grouped into Profiles specified in other documents.</p>
 <h1 id="rfc.section.2">
 <a href="#rfc.section.2">2.</a> <a href="#requirements-notation" id="requirements-notation">Requirements Notation</a>
 </h1>
@@ -635,7 +635,7 @@ address {
 <li>L2 Word: this is the minimum subdivision of payload data that the L2 will carry. In most L2 technologies, the L2 Word is an octet.  In bit-oriented radio technologies, the L2 Word might be a single bit.  The L2 Word size is assumed to be constant over time for each device.</li>
 <li>MO: Matching Operator. An operator used to match a value contained in a header field with a value contained in a Rule.</li>
 <li>Padding (P). Extra bits that may be appended by SCHC to a data unit that it passes to the underlying Layer 2 for transmission.  SCHC itself operates on bits, not bytes, and does not have any alignment prerequisite. See <a href="#Padding" class="xref">Section 9</a>.</li>
-<li>Profile: SCHC offers variations in the way it is operated, with a number of parameters listed in <a href="#SCHCParams" class="xref">Appendix D</a>.  A Profile indicates a particular setting of all these parameters.  Both ends of a SCHC session must be provisioned with the same profile information and with the same set of Rules before the session starts, so that there is no ambiguity in how they expect to communicate.</li>
+<li>Profile: SCHC offers variations in the way it is operated, with a number of parameters listed in <a href="#SCHCParams" class="xref">Appendix D</a>.  A Profile indicates a particular setting of all these parameters.  Both ends of a SCHC session must be provisioned with the same Profile information and with the same set of Rules before the session starts, so that there is no ambiguity in how they expect to communicate.</li>
 <li>Rule: A set of header field values.</li>
 <li>Rule entry: A column in a Rule that describes a parameter of the header field.</li>
 <li>Rule ID: An identifier for a Rule. SCHC C/D on both sides share the same Rule ID for a given packet. A set of Rule IDs are used to support SCHC F/R functionality.</li>
@@ -963,7 +963,7 @@ Tiles    |    |  |     |   |    | |   |   |     |      |        |    |   |      
 
 </pre>
 <p class="figure">Figure 9: a SCHC Packet fragmented in tiles</p>
-<p id="rfc.section.8.2.2.p.3">Each SCHC Fragment message carries at least one tile in its Payload.</p>
+<p id="rfc.section.8.2.2.p.3">Each SCHC Fragment message carries at least one tile in its Payload, if the Payload field is present.</p>
 <h1 id="rfc.section.8.2.2.1">
 <a href="#rfc.section.8.2.2.1">8.2.2.1.</a> <a href="#Windows" id="Windows">Windows</a>
 </h1>
@@ -1006,13 +1006,13 @@ Window # |-------- 0 --------|-------- 1 --------|- 2 - ... - 27 -------|-- 28 -
 <h1 id="rfc.section.8.2.2.2">
 <a href="#rfc.section.8.2.2.2">8.2.2.2.</a> <a href="#Bitmap" id="Bitmap">Bitmap</a>
 </h1>
-<p id="rfc.section.8.2.2.2.p.1">Each bit in the Bitmap for a window corresponds to a tile in the window.  A Bitmap has therefore WINDOW_SIZE bits.  The bit at the left-most position corresponds to the tile numbered WINDOW_SIZE - 1.  Consecutive bits, going right, correspond to sequentially decreasing tile numbers.  In Bitmaps for windows that are not the last one of a SCHC Packet, the bit at the right-most position corresponds to the tile numbered 0.  In the Bitmap for the last window, the bit at the right-most position corresponds either to the tile numbered 0 or to a tile sent/received as &#8220;the last one of the SCHC Packet&#8221; without expliciting its number (see <a href="#LastFrag" class="xref">Section 8.3.1.2</a>).</p>
+<p id="rfc.section.8.2.2.2.p.1">Each bit in the Bitmap for a window corresponds to a tile in the window.  Each Bitmap has therefore WINDOW_SIZE bits.  The bit at the left-most position corresponds to the tile numbered WINDOW_SIZE - 1.  Consecutive bits, going right, correspond to sequentially decreasing tile numbers.  In Bitmaps for windows that are not the last one of a SCHC Packet, the bit at the right-most position corresponds to the tile numbered 0.  In the Bitmap for the last window, the bit at the right-most position corresponds either to the tile numbered 0 or to a tile that is sent/received as &#8220;the last one of the SCHC Packet&#8221; without expliciting its number (see <a href="#LastFrag" class="xref">Section 8.3.1.2</a>).</p>
 <p id="rfc.section.8.2.2.2.p.2">At the receiver</p>
 <p></p>
 
 <ul>
-<li>a bit set to 1 in the Bitmap indicates that a tile with the number corresponding to that bit position has been correctly received for that window.</li>
-<li>a bit set to 0 in the Bitmap indicates that no tile with the number corresponding to that bit position has been correctly received for that window.</li>
+<li>a bit set to 1 in the Bitmap indicates that a tile associated with that bit position has been correctly received for that window.</li>
+<li>a bit set to 0 in the Bitmap indicates that no tile associated with that bit position has been correctly received for that window.</li>
 </ul>
 <p id="rfc.section.8.2.2.2.p.4">WINDOW_SIZE finely controls the size of the Bitmap sent in the SCHC ACK message, which may be critical to some LPWAN technologies.</p>
 <h1 id="rfc.section.8.2.2.3">
@@ -1029,7 +1029,7 @@ Window # |-------- 0 --------|-------- 1 --------|- 2 - ... - 27 -------|-- 28 -
 <h1 id="rfc.section.8.2.3">
 <a href="#rfc.section.8.2.3">8.2.3.</a> <a href="#IntegrityChecking" id="IntegrityChecking">Integrity Checking</a>
 </h1>
-<p id="rfc.section.8.2.3.p.1">The reassembled SCHC Packet is checked for integrity at the receive end.  One way of doing integrity checking is by computing a MIC at the sender side and transmitting it to the receiver for comparison with the locally computed MIC.  Some leyers under SCHC may provide other means of ensuring that all fragments composing a SCHC Packet were correctly received and reassembled.  Profiles MUST define how integrity checking is done.</p>
+<p id="rfc.section.8.2.3.p.1">The reassembled SCHC Packet is checked for integrity at the receive end.  One way of doing integrity checking is by computing a MIC at the sender side and transmitting it to the receiver for comparison with the locally computed MIC.  Some layers under SCHC may provide other means of ensuring that all fragments composing a SCHC Packet were correctly received and reassembled.  Profiles MUST define how integrity checking is done.</p>
 <p id="rfc.section.8.2.3.p.2">If a Profile specifies that MIC is used, the SCHC F/R mode specifies on what fields of the SCHC Fragments the MIC is computed.</p>
 <p id="rfc.section.8.2.3.p.3">The MIC supports UDP checksum elision by SCHC C/D (see <a href="#UDPchecksum" class="xref">Section 10.11</a>).</p>
 <p id="rfc.section.8.2.3.p.4">The CRC32 polynomial 0xEDB88320 (i.e. the reverse representation of the polynomial used e.g. in the Ethernet standard <a href="#RFC3385" class="xref">[RFC3385]</a>) is RECOMMENDED as the default algorithm for computing the MIC. Nevertheless, other MIC lengths or other algorithms MAY be required by the Profile.</p>
@@ -1059,7 +1059,7 @@ Window # |-------- 0 --------|-------- 1 --------|- 2 - ... - 27 -------|-- 28 -
 </ul>
 </li>
 <li>W: The W field is optional. It is only present if windows are used.  Its presence and size (called M, in bits) is defined by each SCHC F/R mode and each Profile for each Rule ID.  <br><br> This field carries information pertaining to the window a SCHC F/R message relates to.  If present, W MUST carry the same value for all the SCHC F/R messages related to the same window.  Depending on the mode and Profile, W may carry the full window number, or just the least significant bit or any other partial representation of the window number.</li>
-<li>Fragment Compressed Number (FCN). The FCN field is present in the SCHC Fragment Header.  Its size (called N, in bits) is defined by each Profile for each Rule ID.  <br><br> This field conveys information about the progress in the sequence of tiles being transmitted by the SCHC Fragment.  For example, it can contain a truncated, efficient representation of a larger-sized tile number.  The description of the exact use of the FCN field is left to each SCHC F/R mode.  However, two values are reserved for special purposes. They help control the SCHC F/R process:  <ul>
+<li>Fragment Compressed Number (FCN). The FCN field is present in the SCHC Fragment Header.  Its size (called N, in bits) is defined by each Profile for each Rule ID.  <br><br> This field conveys information about the progress in the sequence of tiles being transmitted by SCHC Fragment messages.  For example, it can contain a truncated, efficient representation of a larger-sized tile number.  The description of the exact use of the FCN field is left to each SCHC F/R mode.  However, two values are reserved for special purposes. They help control the SCHC F/R process:  <ul>
 <li>The FCN value with all the bits equal to 1 (called All-1) signals the very last tile of a SCHC Packet.  By extension, if windows are used, the last window of a packet is called the All-1 window.</li>
 <li>If windows are used, the FCN value with all the bits equal to 0 (called All-0) signals the last tile of a window that is not the last one of the SCHC packet.  By extension, such a window is called an All-0 window.</li>
 </ul>
@@ -1340,7 +1340,7 @@ Window # |-------- 0 --------|-------- 1 --------|- 2 - ... - 27 -------|-- 28 -
 <p id="rfc.section.8.4.1.p.4">The tile sizes are not required to be uniform.  Windows are not used.  The Retransmission Timer is not used.  The Attempts counter is not used.</p>
 <p id="rfc.section.8.4.1.p.5">Each Profile MUST specify which Rule ID value(s) is (are) allocated to this mode.  For brevity, the rest of <a href="#No-ACK-subsection" class="xref">Section 8.4.1</a> only refers to Rule ID values that are allocated to this mode.</p>
 <p id="rfc.section.8.4.1.p.6">The W field MUST NOT be present in the SCHC F/R messages.  SCHC ACK MUST NOT be sent.  SCHC ACK REQ MUST NOT be sent.  SCHC Sender-Abort MAY be sent.  SCHC Receiver-Abort MUST NOT be sent.</p>
-<p id="rfc.section.8.4.1.p.7">The value of N (size of the FCN field) is RECOMMENDED to be 1, but a Profile MAY specify a different value.</p>
+<p id="rfc.section.8.4.1.p.7">The value of N (size of the FCN field) is RECOMMENDED to be 1.</p>
 <p id="rfc.section.8.4.1.p.8">Each Profile, for each Rule ID value, MUST define</p>
 <p></p>
 
@@ -2123,7 +2123,7 @@ Rule 0
     T   |-----W=1, FCN=2 -----&gt;| 1 tile sent
     U   |-----W=1, FCN=1 -----&gt;| 1 tile sent
         |-----W=1, FCN=0 -----&gt;| 1 tile sent
-    |   |&lt;------ACK, W=2-------| Bitmap:1111111111111101100000000000
+    |   |&lt;------ACK, W=2-------| Bitmap:1111111111111101000000000001
     |   |-----W=2, FCN=13-----&gt;| Integrity check: success
     V   |&lt;-----ACK, W=2, C=1 --| C=1
       (End)
@@ -2594,7 +2594,7 @@ Recv_window==window &amp;    | |   |   all missing frags sent
 <li>Assessment of LPWAN integrity checking</li>
 <li>Various potential channel conditions for the technology and the corresponding recommended use of SCHC C/D and F/R</li>
 </ul>
-<p id="rfc.section.D.p.3">This section lists the parameters that need to be defined in theProfile.</p>
+<p id="rfc.section.D.p.3">This section lists the parameters that need to be defined in the Profile.</p>
 <p></p>
 
 <ul>
@@ -2602,16 +2602,20 @@ Recv_window==window &amp;    | |   |   all missing frags sent
 <li>Padding: size of the L2 Word (for most LPWAN technologies, this would be a byte; for some technologies, a bit)</li>
 <li>Decision to use SCHC fragmentation mechanism or not. If yes:  <ul>
 <li>reliability mode(s) used, in which cases (e.g. based on link channel condition)</li>
-<li>number of bits for FCN (N), for W (M) and for DTag (T)</li>
+<li>Rule ID values assigned to each mode in use</li>
+<li>presence and number of bits for DTag (T) for each Rule ID value</li>
 <li>support for interleaved packet transmission, to what extent</li>
-<li>size of MIC and algorithm for its computation, if different from the default CRC32. Byte fill-up with zeroes or other mechanism, to be specified.</li>
-<li>Retransmission Timer duration</li>
-<li>Inactivity Timer duration</li>
-<li>MAX_ACK_REQUEST value</li>
+<li>WINDOW_SIZE, for modes that use windows</li>
+<li>number of bits for W (M) for each Rule ID value, for modes that use windows</li>
+<li>number of bits for FCN (N) for each Rule ID value</li>
+<li>value of MAX_WIND_FCN and use of FCN values, if applicable to the SCHC F/R mode.</li>
+<li>size of MIC and algorithm for its computation, for each Rule ID, if different from the default CRC32. Byte fill-up with zeroes or other mechanism, to be specified.</li>
+<li>Retransmission Timer duration for each Rule ID value, if applicable to the SCHC F/R mode</li>
+<li>Inactivity Timer duration for each Rule ID value, if applicable to the SCHC F/R mode</li>
+<li>MAX_ACK_REQUEST value for each Rule ID value, if applicable to the SCHC F/R mode</li>
 </ul>
 </li>
 <li>if L2 Word is wider than a bit and SCHC fragmentation is used, value of the padding bits (0 or 1). This is needed because the padding bits of the last fragment are included in the MIC computation.</li>
-<li>Note on the &#8220;C-bit bump&#8221;: When fragmenting in ACK-on-Error or ACK-Always mode, it is expected that the last window (called All-1 window) will not be fully utilised, i.e. there won&#8217;t be fragments with all FCN values from MAX_WIND_FCN downto 1 and finally All-1.  It is worth noting that this document does not mandate that other windows (called All-0 windows) are fully utilised either.  This document purposely does not specify that All-1 windows use Bitmaps with the same number of bits as All-0 windows do.  By default, Bitmaps for All-0 and All-1 windows are of the same size MAX_WIND_FCN + 1. But a Profile MAY revert that decision. The rationale for reverting the decision could be the following: Note that the SCHC ACK sent as a response to an All-1 fragment includes a C bit that SCHC ACK for other windows don&#8217;t have. Therefore, the SCHC ACK for the All-1 window is one bit bigger. An LPWAN technology with a severely constrained payload size might decide that this &#8220;bump&#8221; in the SCHC ACK for the last fragment is a bad resource usage. It could thus mandate that the All-1 window is not allowed to use the FCN value 1 and that the SCHC ACK Bitmap size is reduced by 1 bit. This provides room for the C bit without creating a bump in the SCHC ACK.</li>
 <li>Note on soliciting downlink transmissions: In some LPWAN technologies, as part of energy-saving techniques, downlink transmission is only possible immediately after an uplink transmission.  In order to avoid potentially high delay in the downlink transmission of a fragmented SCHC Packet, the SCHC Fragment receiver may want to perform an uplink transmission as soon as possible after reception of a SCHC Fragment that is not the last one.  Such uplink transmission may be triggered by the L2 (e.g. an L2 ACK sent in response to a SCHC Fragment encapsulated in a L2 PDU that requires an L2 ACK) or it may be triggered from an upper layer.</li>
 <li>the following parameters need to be addressed in documents other than this one but not forcely in the LPWAN technology-specific documents:  <ul>
 <li>The way the contexts are provisioned</li>
