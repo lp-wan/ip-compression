@@ -624,7 +624,11 @@ When windows are used
 Each bit in the Bitmap for a window corresponds to a tile in the window.
 A Bitmap has therefore WINDOW_SIZE bits.
 The bit at the left-most position corresponds to the tile numbered WINDOW_SIZE - 1.
-The bit at the right-most position corresponds to the tile numbered 0.
+Consecutive bits, going right, correspond to sequentially decreasing tile numbers.
+In Bitmaps for windows that are not the last one of a SCHC Packet,
+the bit at the right-most position corresponds to the tile numbered 0.
+In the Bitmap for the last window,
+the bit at the right-most position corresponds either to the tile numbered 0 or to a tile sent/received as "the last one of the SCHC Packet" without expliciting its number (see {{LastFrag}}).
 
 At the receiver
 
