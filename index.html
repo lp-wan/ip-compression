@@ -1572,9 +1572,14 @@ SCHC Fragment msg    |-----------|
 <h1 id="rfc.section.8.4.3.1">
 <a href="#rfc.section.8.4.3.1">8.4.3.1.</a> <a href="#ACK-on-Error-sender" id="ACK-on-Error-sender">Sender behaviour</a>
 </h1>
-<p id="rfc.section.8.4.3.1.p.1">At the beginning of the fragmentation of a new SCHC Packet, the fragment sender MUST select a Rule ID and DTag value pair for this SCHC Packet.  A Rule MUST NOT be selected if the values of M and MAX_WIND_FCN for that Rule are such that the SCHC Packet cannot be fragmented in (2&#710;M) * (MAX_WIND_FCN+1) tiles or less.</p>
-<p id="rfc.section.8.4.3.1.p.2">For brevity, the rest of <a href="#ACK-on-Error-subsection" class="xref">Section 8.4.3</a> only refers to SCHC F/R messages bearing the Rule ID and optional DTag values hereby selected.</p>
-<p id="rfc.section.8.4.3.1.p.3">The fragment sender MUST initialize the Attempts counter to 0 for that Rule ID and DTag value pair.</p>
+<p id="rfc.section.8.4.3.1.p.1">At the beginning of the fragmentation of a new SCHC Packet,</p>
+<p></p>
+
+<ul>
+<li>the fragment sender MUST select a Rule ID and DTag value pair for this SCHC Packet.  A Rule MUST NOT be selected if the values of M and MAX_WIND_FCN for that Rule are such that the SCHC Packet cannot be fragmented in (2&#710;M) * (MAX_WIND_FCN+1) tiles or less.</li>
+<li>the fragment sender MUST initialize the Attempts counter to 0 for that Rule ID and DTag value pair.</li>
+</ul>
+<p id="rfc.section.8.4.3.1.p.3">For brevity, the rest of <a href="#ACK-on-Error-subsection" class="xref">Section 8.4.3</a> only refers to SCHC F/R messages bearing the Rule ID and optional DTag values hereby selected.</p>
 <p id="rfc.section.8.4.3.1.p.4">A SCHC Fragment message carries in its payload one or more tiles.  If more than one tile is carried in one SCHC Fragment</p>
 <p></p>
 
@@ -1583,61 +1588,67 @@ SCHC Fragment msg    |-----------|
 <li>they MUST be placed in the SCHC Fragment Payload adjacent to one another, in the order they appear in the SCHC Packet, from the start of the SCHC Packet toward its end.</li>
 </ul>
 <p id="rfc.section.8.4.3.1.p.6">In a SCHC Fragment message, the sender MUST fill the W field with the window number of the first tile sent in that SCHC Fragment.</p>
-<p id="rfc.section.8.4.3.1.p.7">If a SCHC Fragment message carries only the last tile of the fragmented SCHC Packet,</p>
-<p></p>
-
-<ul>
-<li>it MUST be of the All-1 type specified in <a href="#LastFrag" class="xref">Section 8.3.1.2</a>.</li>
-<li>if MIC is used, the MIC that is sent MUST be computed on the SCHC Packet and on the padding bits that are appended to the Payload of the last SCHC Fragment</li>
-</ul>
-<p id="rfc.section.8.4.3.1.p.9">Otherwise,</p>
+<p id="rfc.section.8.4.3.1.p.7">If a SCHC Fragment carries more than one tile, or carries one tile that is not the last one of the SCHC Packet,</p>
 <p></p>
 
 <ul>
 <li>it MUST be of the Regular type specified in <a href="#NotLastFrag" class="xref">Section 8.3.1.1</a>
 </li>
-<li>the FCN field MUST contain the tile number of the first tile sent in that SCHC Fragment.</li>
+<li>the FCN field MUST contain the tile number of the first tile sent in that SCHC Fragment</li>
 <li>padding bits are appended to the tiles as needed to fit the Payload size constraint of Regular SCHC Fragments</li>
-<li>if MIC is used, these padding bits are not taken into account for the MIC computation</li>
 </ul>
+<p id="rfc.section.8.4.3.1.p.9">If MIC is used, the bits on which the MIC is computed MUST be the SCHC Packet concatenated with the padding bits that are appended to the Payload of the SCHC Fragment that carries the last tile.</p>
+<p id="rfc.section.8.4.3.1.p.10">The fragment sender MAY send the last tile as the Payload of an All-1 SCHC Fragment.</p>
 <p id="rfc.section.8.4.3.1.p.11">The fragment sender MUST send SCHC Fragments such that, all together, they contain all the tiles of the fragmented SCHC Packet.</p>
 <p id="rfc.section.8.4.3.1.p.12">The fragment sender MUST send at least one All-1 SCHC Fragment.</p>
-<p id="rfc.section.8.4.3.1.p.13">The fragment sender MUST listen for SCHC ACK messages after having sent</p>
+<p id="rfc.section.8.4.3.1.p.13">Note that the last tile of a SCHC Packet can be sent in different ways, depending on Profiles and implementations</p>
+<p></p>
+
+<ul>
+<li>in a Regular SCHC Fragment, either alone or as part of multiple tiles Payload</li>
+<li>in an All-1 SCHC Fragment</li>
+</ul>
+<p id="rfc.section.8.4.3.1.p.15">However, the last tile MUST NOT ever have been sent both in a Regular SCHC Fragment and in a All-1 SCHC Fragment.</p>
+<p id="rfc.section.8.4.3.1.p.16">The fragment sender MUST listen for SCHC ACK messages after having sent</p>
 <p></p>
 
 <ul>
 <li>an All-1 SCHC Fragment</li>
 <li>or a SCHC ACK REQ with the W field corresponding to the last window.</li>
 </ul>
-<p id="rfc.section.8.4.3.1.p.15">A Profile MAY specify other times at which the fragment sender MUST listen for SCHC ACK messages.</p>
-<p id="rfc.section.8.4.3.1.p.16">Each time a fragment sender sends an All-1 SCHC Fragment or a SCHC ACK REQ,</p>
+<p id="rfc.section.8.4.3.1.p.18">A Profile MAY specify other times at which the fragment sender MUST listen for SCHC ACK messages.</p>
+<p id="rfc.section.8.4.3.1.p.19">Each time a fragment sender sends an All-1 SCHC Fragment or a SCHC ACK REQ,</p>
 <p></p>
 
 <ul>
 <li>it MUST increment the Attempts counter</li>
 <li>it MUST reset the Retransmission Timer</li>
 </ul>
-<p id="rfc.section.8.4.3.1.p.18">On Retransmission Timer expiration</p>
+<p id="rfc.section.8.4.3.1.p.21">On Retransmission Timer expiration</p>
 <p></p>
 
 <ul>
 <li>if Attempts is strictly less than MAX_ACK_REQUESTS, the fragment sender MUST send a SCHC ACK REQ with the W field corresponding to the last window and it MUST increment the Attempts counter</li>
 <li>otherwise the fragment sender MUST send a SCHC Sender-Abort and it MUST release all resource associated with this SCHC Packet.</li>
 </ul>
-<p id="rfc.section.8.4.3.1.p.20">On receiving a SCHC ACK,</p>
+<p id="rfc.section.8.4.3.1.p.23">On receiving a SCHC ACK,</p>
 <p></p>
 
 <ul>
 <li>if the W field in the SCHC ACK corresponds to the last window of the SCHC Packet,  <ul>
 <li>if the C bit is set, the sender MAY release all resource associated with this SCHC Packet and MAY exit successfully</li>
 <li>otherwise,      <ul>
-<li>the fragment sender MUST send SCHC Fragment messages containing all the tiles that are reported missing in the SCHC ACK.  If the SCHC ACK shows no missing tile at the receiver, the sender          <ul>
+<li>if the SCHC ACK shows no missing tile at the receiver, the sender          <ul>
 <li>MUST send a SCHC Sender-Abort</li>
 <li>MUST release all resource associated with this SCHC Packet</li>
 <li>MAY exit with an error condition</li>
 </ul>
 </li>
+<li>otherwise          <ul>
+<li>the fragment sender MUST send SCHC Fragment messages containing all the tiles that are reported missing in the SCHC ACK.</li>
 <li>if the last message in this sequence of SCHC Fragment messages is not an All-1 SCHC Fragment, then the fragment sender MUST send a SCHC ACK REQ with the W field corresponding to the last window after the sequence.</li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -1648,34 +1659,39 @@ SCHC Fragment msg    |-----------|
 </ul>
 </li>
 </ul>
-<p id="rfc.section.8.4.3.1.p.22">See <a href="#Fig-ACKonerrorSnd" class="xref">Figure 40</a> for one among several possible examples of a Finite State Machine implementing a sender behaviour obeying this specification.</p>
+<p id="rfc.section.8.4.3.1.p.25">See <a href="#Fig-ACKonerrorSnd" class="xref">Figure 40</a> for one among several possible examples of a Finite State Machine implementing a sender behaviour obeying this specification.</p>
 <h1 id="rfc.section.8.4.3.2">
 <a href="#rfc.section.8.4.3.2">8.4.3.2.</a> <a href="#ACK-on-Error-receiver" id="ACK-on-Error-receiver">Receiver behaviour</a>
 </h1>
-<p id="rfc.section.8.4.3.2.p.1">On receiving a SCHC Fragment with a Rule ID and DTag pair not being processed at that time, the receiver MUST start a process to assemble a new SCHC Packet with that Rule ID and DTag value pair.  That process MUST only examine received SCHC F/R messages with that Rule ID and DTag value pair and MUST only transmit SCHC F/R messages with that Rule ID and DTag value pair.</p>
-<p id="rfc.section.8.4.3.2.p.2">(TODO: DTag filtering to avoid allocating a reassembly process for late-coming SCHC Fragments after an abort condition)</p>
-<p id="rfc.section.8.4.3.2.p.3">The receiver MUST start an Inactivity Timer. It MUST initialise an Attempts counter to 0.</p>
-<p id="rfc.section.8.4.3.2.p.4">On reception of any SCHC F/R message, the receiver MUST reset the Inactivity Timer.</p>
-<p id="rfc.section.8.4.3.2.p.5">On reception of a SCHC Fragment message, the receiver MUST assemble the received tiles based on the W and FCN fields of the SCHC Fragment.</p>
+<p id="rfc.section.8.4.3.2.p.1">On receiving a SCHC Fragment with a Rule ID and DTag pair not being processed at that time</p>
 <p></p>
 
 <ul>
-<li>if the FCN is All-1, the full SCHC Fragment Payload MUST be assembled.  This is because the size of the last tile is not known by the receiver, therefore padding bits are indistinguishable from the tile data bits, at this stage.  They will be removed by the SCHC C/D sublayer.  If the size of the SCHC Fragment Payload exceeds or equals the size of one regular tile plus the size of an L2 Word, this SHOULD raise an error flag.</li>
-<li>otherwise, padding bits MUST be discarded. This is possible because  <ul>
+<li>the receiver MUST start a process to assemble a new SCHC Packet with that Rule ID and DTag value pair.  That process MUST only examine received SCHC F/R messages with that Rule ID and DTag value pair and MUST only transmit SCHC F/R messages with that Rule ID and DTag value pair.</li>
+<li>(TODO: DTag filtering to avoid allocating a reassembly process for late-coming SCHC Fragments after an abort condition)</li>
+<li>the receiver MUST start an Inactivity Timer. It MUST initialise an Attempts counter to 0.</li>
+</ul>
+<p id="rfc.section.8.4.3.2.p.3">On reception of any SCHC F/R message, the receiver MUST reset the Inactivity Timer.</p>
+<p id="rfc.section.8.4.3.2.p.4">On reception of a SCHC Fragment message, the receiver MUST assemble the received tiles based on the W and FCN fields of the SCHC Fragment.</p>
+<p></p>
+
+<ul>
+<li>if the FCN is All-1, if a Payload is present, the full SCHC Fragment Payload MUST be assembled including the padding bits.  This is because the size of the last tile is not known by the receiver, therefore padding bits are indistinguishable from the tile data bits, at this stage.  They will be removed by the SCHC C/D sublayer.  If the size of the SCHC Fragment Payload exceeds or equals the size of one regular tile plus the size of an L2 Word, this SHOULD raise an error flag.</li>
+<li>otherwise, tiles MUST be assembled based on the a priori known size and padding bits MUST be discarded.  The latter is possible because  <ul>
 <li>the size of the tiles is known a priori,</li>
 <li>tiles are larger than an L2 Word</li>
 <li>padding bits are always strictly less than an L2 Word</li>
 </ul>
 </li>
 </ul>
-<p id="rfc.section.8.4.3.2.p.7">On reception of a SCHC ACK REQ or of an All-1 SCHC Fragment, the receiver MUST return a SCHC ACK for the lowest-numbered window that it knows has tiles missing.  If the receiver knows of no window that has tiles missing, it MUST return a SCHC ACK for the highest-numbered window it currently has tiles for.</p>
-<p id="rfc.section.8.4.3.2.p.8">A Profile MAY specify other times and circumstances at which a receiver sends a SCHC ACK, and which window the SCHC ACK reports about in these circumstances.</p>
-<p id="rfc.section.8.4.3.2.p.9">On sending a SCHC ACK, the receiver MUST increase the Attempts counter.</p>
-<p id="rfc.section.8.4.3.2.p.10">From reception of an All-1 SCHC Fragment onward, a receiver MUST check the integrity of the reassembled SCHC Packet at least every time it prepares for sending a SCHC ACK for the last window.</p>
-<p id="rfc.section.8.4.3.2.p.11">On reception of a SCHC Sender-Abort, the receiver MUST release all resource associated with this SCHC Packet.</p>
-<p id="rfc.section.8.4.3.2.p.12">On expiration of the Inactivity Timer, the receiver MUST send a SCHC Receiver-Abort and it MUST release all resource associated with this SCHC Packet.</p>
-<p id="rfc.section.8.4.3.2.p.13">On the Attempts counter exceeding MAX_ACK_REQUESTS, the receiver MUST send a SCHC Receiver-Abort and it MUST release all resource associated with this SCHC Packet.</p>
-<p id="rfc.section.8.4.3.2.p.14">Reassembly of the SCHC Packet concludes when</p>
+<p id="rfc.section.8.4.3.2.p.6">On reception of a SCHC ACK REQ or of an All-1 SCHC Fragment, the receiver MUST return a SCHC ACK for the lowest-numbered window that it knows has tiles missing.  If the receiver knows of no window that has tiles missing, it MUST return a SCHC ACK for the highest-numbered window it currently has tiles for.</p>
+<p id="rfc.section.8.4.3.2.p.7">A Profile MAY specify other times and circumstances at which a receiver sends a SCHC ACK, and which window the SCHC ACK reports about in these circumstances.</p>
+<p id="rfc.section.8.4.3.2.p.8">On sending a SCHC ACK, the receiver MUST increase the Attempts counter.</p>
+<p id="rfc.section.8.4.3.2.p.9">From reception of an All-1 SCHC Fragment onward, a receiver MUST check the integrity of the reassembled SCHC Packet at least every time it prepares for sending a SCHC ACK for the last window.</p>
+<p id="rfc.section.8.4.3.2.p.10">On reception of a SCHC Sender-Abort, the receiver MUST release all resource associated with this SCHC Packet.</p>
+<p id="rfc.section.8.4.3.2.p.11">On expiration of the Inactivity Timer, the receiver MUST send a SCHC Receiver-Abort and it MUST release all resource associated with this SCHC Packet.</p>
+<p id="rfc.section.8.4.3.2.p.12">On the Attempts counter exceeding MAX_ACK_REQUESTS, the receiver MUST send a SCHC Receiver-Abort and it MUST release all resource associated with this SCHC Packet.</p>
+<p id="rfc.section.8.4.3.2.p.13">Reassembly of the SCHC Packet concludes when</p>
 <p></p>
 
 <ul>
@@ -1684,8 +1700,8 @@ SCHC Fragment msg    |-----------|
 <li>or the Attempts counter has exceed MAX_ACK_REQUESTS</li>
 <li>or when at least on All-1 SCHC Fragment has been received and integrity checking of the reassembled SCHC Packet is successful.</li>
 </ul>
-<p id="rfc.section.8.4.3.2.p.16">If MIC is used for integrity checking, the MIC computed at the receiver MUST be computed over the reassembled SCHC Packet and over the padding bits that were received in the All-1 SCHC Fragment.</p>
-<p id="rfc.section.8.4.3.2.p.17">See <a href="#Fig-ACKonerrorRcv" class="xref">Figure 41</a> for one among several possible examples of a Finite State Machine implementing a receiver behaviour obeying this specification, and that is meant to match the sender Finite State Machine of <a href="#Fig-ACKonerrorSnd" class="xref">Figure 40</a>.</p>
+<p id="rfc.section.8.4.3.2.p.15">If MIC is used for integrity checking, the MIC computed at the receiver MUST be computed over the reassembled SCHC Packet and over the padding bits that were received in the All-1 SCHC Fragment.</p>
+<p id="rfc.section.8.4.3.2.p.16">See <a href="#Fig-ACKonerrorRcv" class="xref">Figure 41</a> for one among several possible examples of a Finite State Machine implementing a receiver behaviour obeying this specification, and that is meant to match the sender Finite State Machine of <a href="#Fig-ACKonerrorSnd" class="xref">Figure 40</a>.</p>
 <h1 id="rfc.section.9">
 <a href="#rfc.section.9">9.</a> <a href="#Padding" id="Padding">Padding management</a>
 </h1>
