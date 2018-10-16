@@ -1434,6 +1434,12 @@ On receiving a SCHC ACK,
   * otherwise,
 
     - the fragment sender MUST send SCHC Fragment messages containing all the tiles that are reported missing in the SCHC ACK.
+    If the SCHC ACK shows no missing tile at the receiver, the sender
+
+      * MUST send a SCHC Sender-Abort
+      * MUST release all resource associated with this SCHC Packet
+      * MAY exit with an error condition
+
     - if the last message in this sequence of SCHC Fragment messages is not an All-1 SCHC Fragment,
     then the fragment sender MUST send a SCHC ACK REQ with the W field corresponding to the last window after the sequence.
 
@@ -1470,8 +1476,8 @@ the receiver MUST assemble the received tiles based on the W and FCN fields of t
 - otherwise, padding bits MUST be discarded. This is possible because
 
   * the size of the tiles is known a priori,
-  * it is larger than an L2 Word
-  * padding bits are always less than an L2 Word
+  * tiles are larger than an L2 Word
+  * padding bits are always strictly less than an L2 Word
 
 On reception of a SCHC ACK REQ or of an All-1 SCHC Fragment, the receiver
 MUST return a SCHC ACK for the lowest-numbered window that it knows has tiles missing.
