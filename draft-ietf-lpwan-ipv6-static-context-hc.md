@@ -67,7 +67,7 @@ SCHC compression is based on a common static context stored in both the LPWAN de
 
 This document also specifies a fragmentation and reassembly mechanism that is used to support the IPv6 MTU requirement over the LPWAN technologies. Fragmentation is needed for IPv6 datagrams that, after SCHC compression or when such compression was not possible, still exceed the layer-2 maximum payload size.
 
-The SCHC header compression and fragmentation mechanisms are independent of the specific LPWAN technology over which they are used. This document defines generic functionalities and offers flexibility with regard to parameter settings and mechanism choices. Technology-specific settings and choices are expected to be grouped into Profiles specified in other documents.
+The SCHC header compression and fragmentation mechanisms are independent of the specific LPWAN technology over which they are used. This document defines generic functionalities and offers flexibility with regard to parameter settings and mechanism choices. Technology-specific and product-specific settings and choices are expected to be grouped into Profiles specified in other documents.
 
 --- middle
 
@@ -88,7 +88,7 @@ by a greatly reduced data unit and/or payload size (see {{RFC8376}}).  However, 
 Accordingly, this document defines an fragmentation/reassembly mechanism for LPWAN technologies to supports the IPv6 MTU. Its implementation is optional. If not interested, the reader can safely skip its description.
 
 This document defines generic functionality and offers flexibility with regard to parameters settings
-and mechanism choices. Technology-specific settings and choices are expected to be grouped into Profiles specified in other documents.
+and mechanism choices. Technology-specific settings and product-specific and choices are expected to be grouped into Profiles specified in other documents.
 
 # Requirements Notation
 
@@ -176,7 +176,7 @@ Note that the SCHC acronym is pronounced like "sheek" in English (or "chic" in F
 
 * Profile: SCHC offers variations in the way it is operated, with a number of parameters listed in {{SCHCParams}}.
   A Profile indicates a particular setting of all these parameters.
-  Both ends of a SCHC session must be provisioned with the same profile information and with the same set of Rules before the session starts,
+  Both ends of a SCHC session must be provisioned with the same Profile information and with the same set of Rules before the session starts,
   so that there is no ambiguity in how they expect to communicate.
 
 * Rule: A set of header field values.
@@ -2499,7 +2499,7 @@ This section lists the information that need to be provided in the LPWAN technol
 
 * Various potential channel conditions for the technology and the corresponding recommended use of SCHC C/D and F/R
 
-This section lists the parameters that need to be defined in theProfile.
+This section lists the parameters that need to be defined in the Profile.
 
 * Rule ID numbering scheme, fixed-sized or variable-sized Rule IDs, number of Rules, the way the Rule ID is transmitted
 
