@@ -1396,12 +1396,13 @@ The receiver, for each pair of Rule ID and optional DTag values, MUST maintain
 
 #### Sender behaviour {#ACK-on-Error-sender}
 
-At the beginning of the fragmentation of a new SCHC Packet, the fragment sender MUST select a Rule ID and DTag value pair for this SCHC Packet.
-A Rule MUST NOT be selected if the values of M and MAX_WIND_FCN for that Rule are such that the SCHC Packet cannot be fragmented in (2ˆM) * (MAX_WIND_FCN+1) tiles or less.
+At the beginning of the fragmentation of a new SCHC Packet,
+
+- the fragment sender MUST select a Rule ID and DTag value pair for this SCHC Packet.
+  A Rule MUST NOT be selected if the values of M and MAX_WIND_FCN for that Rule are such that the SCHC Packet cannot be fragmented in (2ˆM) * (MAX_WIND_FCN+1) tiles or less.
+- the fragment sender MUST initialize the Attempts counter to 0 for that Rule ID and DTag value pair.
 
 For brevity, the rest of {{ACK-on-Error-subsection}} only refers to SCHC F/R messages bearing the Rule ID and optional DTag values hereby selected.
-
-The fragment sender MUST initialize the Attempts counter to 0 for that Rule ID and DTag value pair.
 
 A SCHC Fragment message carries in its payload one or more tiles.
 If more than one tile is carried in one SCHC Fragment
@@ -1411,21 +1412,26 @@ If more than one tile is carried in one SCHC Fragment
 
 In a SCHC Fragment message, the sender MUST fill the W field with the window number of the first tile sent in that SCHC Fragment.
 
-If a SCHC Fragment message carries only the last tile of the fragmented SCHC Packet,
-
-- it MUST be of the All-1 type specified in {{LastFrag}}.
-- if MIC is used, the MIC that is sent MUST be computed on the SCHC Packet and on the padding bits that are appended to the Payload of the last SCHC Fragment
-
-Otherwise,
+If a SCHC Fragment carries more than one tile, or carries one tile that is not the last one of the SCHC Packet,
 
 - it MUST be of the Regular type specified in {{NotLastFrag}}
-- the FCN field MUST contain the tile number of the first tile sent in that SCHC Fragment.
+- the FCN field MUST contain the tile number of the first tile sent in that SCHC Fragment
 - padding bits are appended to the tiles as needed to fit the Payload size constraint of Regular SCHC Fragments
-- if MIC is used, these padding bits are not taken into account for the MIC computation
+
+If MIC is used, the bits on which the MIC is computed MUST be the SCHC Packet concatenated with the padding bits that are appended to the Payload of the SCHC Fragment that carries the last tile.
+
+The fragment sender MAY send the last tile as the Payload of an All-1 SCHC Fragment.
 
 The fragment sender MUST send SCHC Fragments such that, all together, they contain all the tiles of the fragmented SCHC Packet.
 
 The fragment sender MUST send at least one All-1 SCHC Fragment.
+
+Note that the last tile of a SCHC Packet can be sent in different ways, depending on Profiles and implementations
+
+- in a Regular SCHC Fragment, either alone or as part of multiple tiles Payload
+- in an All-1 SCHC Fragment
+
+However, the last tile MUST NOT ever have been sent both in a Regular SCHC Fragment and in a All-1 SCHC Fragment.
 
 The fragment sender MUST listen for SCHC ACK messages after having sent
 
@@ -1454,15 +1460,17 @@ On receiving a SCHC ACK,
   * if the C bit is set, the sender MAY release all resource associated with this SCHC Packet and MAY exit successfully
   * otherwise,
 
-    - the fragment sender MUST send SCHC Fragment messages containing all the tiles that are reported missing in the SCHC ACK.
-    If the SCHC ACK shows no missing tile at the receiver, the sender
+    - if the SCHC ACK shows no missing tile at the receiver, the sender
 
       * MUST send a SCHC Sender-Abort
       * MUST release all resource associated with this SCHC Packet
       * MAY exit with an error condition
 
-    - if the last message in this sequence of SCHC Fragment messages is not an All-1 SCHC Fragment,
-    then the fragment sender MUST send a SCHC ACK REQ with the W field corresponding to the last window after the sequence.
+    - otherwise
+
+      * the fragment sender MUST send SCHC Fragment messages containing all the tiles that are reported missing in the SCHC ACK.
+      * if the last message in this sequence of SCHC Fragment messages is not an All-1 SCHC Fragment,
+        then the fragment sender MUST send a SCHC ACK REQ with the W field corresponding to the last window after the sequence.
 
 - otherwise, the fragment sender
 
@@ -1474,27 +1482,28 @@ See {{Fig-ACKonerrorSnd}} for one among several possible examples of a Finite St
 
 #### Receiver behaviour {#ACK-on-Error-receiver}
 
-On receiving a SCHC Fragment with a Rule ID and DTag pair not being processed at that time,
-the receiver MUST start a process to assemble a new SCHC Packet with that Rule ID and DTag value pair.
-That process MUST only examine received SCHC F/R messages with that Rule ID and DTag value pair
-and MUST only transmit SCHC F/R messages with that Rule ID and DTag value pair.
+On receiving a SCHC Fragment with a Rule ID and DTag pair not being processed at that time
 
-(TODO: DTag filtering to avoid allocating a reassembly process for late-coming SCHC Fragments after an abort condition)
-
-The receiver MUST start an Inactivity Timer. It MUST initialise an Attempts counter to 0.
+- the receiver MUST start a process to assemble a new SCHC Packet with that Rule ID and DTag value pair.
+  That process MUST only examine received SCHC F/R messages with that Rule ID and DTag value pair
+  and MUST only transmit SCHC F/R messages with that Rule ID and DTag value pair.
+- (TODO: DTag filtering to avoid allocating a reassembly process for late-coming SCHC Fragments after an abort condition)
+- the receiver MUST start an Inactivity Timer. It MUST initialise an Attempts counter to 0.
 
 On reception of any SCHC F/R message, the receiver MUST reset the Inactivity Timer.
 
 On reception of a SCHC Fragment message,
 the receiver MUST assemble the received tiles based on the W and FCN fields of the SCHC Fragment.
 
-- if the FCN is All-1, the full SCHC Fragment Payload MUST be assembled.
+- if the FCN is All-1, if a Payload is present, the full SCHC Fragment Payload MUST be assembled including the padding bits.
   This is because the size of the last tile is not known by the receiver,
   therefore padding bits are indistinguishable from the tile data bits, at this stage.
   They will be removed by the SCHC C/D sublayer.
   If the size of the SCHC Fragment Payload exceeds or equals
   the size of one regular tile plus the size of an L2 Word, this SHOULD raise an error flag.
-- otherwise, padding bits MUST be discarded. This is possible because
+- otherwise, tiles MUST be assembled based on the a priori known size
+  and padding bits MUST be discarded.
+  The latter is possible because
 
   * the size of the tiles is known a priori,
   * tiles are larger than an L2 Word
