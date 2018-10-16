@@ -580,7 +580,7 @@ Tiles    |    |  |     |   |    | |   |   |     |      |        |    |   |      
 ~~~~
 {: #Fig-TilesExample title='a SCHC Packet fragmented in tiles'}
 
-Each SCHC Fragment message carries at least one tile in its Payload.
+Each SCHC Fragment message carries at least one tile in its Payload, if the Payload field is present.
 
 #### Windows {#Windows}
 
@@ -622,18 +622,18 @@ When windows are used
 #### Bitmap {#Bitmap}
 
 Each bit in the Bitmap for a window corresponds to a tile in the window.
-A Bitmap has therefore WINDOW_SIZE bits.
+Each Bitmap has therefore WINDOW_SIZE bits.
 The bit at the left-most position corresponds to the tile numbered WINDOW_SIZE - 1.
 Consecutive bits, going right, correspond to sequentially decreasing tile numbers.
 In Bitmaps for windows that are not the last one of a SCHC Packet,
 the bit at the right-most position corresponds to the tile numbered 0.
 In the Bitmap for the last window,
-the bit at the right-most position corresponds either to the tile numbered 0 or to a tile sent/received as "the last one of the SCHC Packet" without expliciting its number (see {{LastFrag}}).
+the bit at the right-most position corresponds either to the tile numbered 0 or to a tile that is sent/received as "the last one of the SCHC Packet" without expliciting its number (see {{LastFrag}}).
 
 At the receiver
 
-- a bit set to 1 in the Bitmap indicates that a tile with the number corresponding to that bit position has been correctly received for that window.
-- a bit set to 0 in the Bitmap indicates that no tile with the number corresponding to that bit position has been correctly received for that window.
+- a bit set to 1 in the Bitmap indicates that a tile associated with that bit position has been correctly received for that window.
+- a bit set to 0 in the Bitmap indicates that no tile associated with that bit position has been correctly received for that window.
 
 WINDOW_SIZE finely controls the size of the Bitmap sent in the SCHC ACK message, which may be critical to some LPWAN technologies.
 
@@ -652,7 +652,7 @@ Some SCHC F/R modes can use the following timers and counters
 
 The reassembled SCHC Packet is checked for integrity at the receive end.
 One way of doing integrity checking is by computing a MIC at the sender side and transmitting it to the receiver for comparison with the locally computed MIC.
-Some leyers under SCHC may provide other means of ensuring that all fragments composing a SCHC Packet were correctly received and reassembled.
+Some layers under SCHC may provide other means of ensuring that all fragments composing a SCHC Packet were correctly received and reassembled.
 Profiles MUST define how integrity checking is done.
 
 If a Profile specifies that MIC is used, the SCHC F/R mode specifies on what fields of the SCHC Fragments the MIC is computed.
@@ -709,7 +709,7 @@ The SCHC F/R messages use the following fields (see the related formats in {{Fra
 * Fragment Compressed Number (FCN). The FCN field is present in the SCHC Fragment Header.
   Its size (called N, in bits) is defined by each Profile for each Rule ID.
 
-  This field conveys information about the progress in the sequence of tiles being transmitted by the SCHC Fragment.
+  This field conveys information about the progress in the sequence of tiles being transmitted by SCHC Fragment messages.
   For example, it can contain a truncated, efficient representation of a larger-sized tile number.
   The description of the exact use of the FCN field is left to each SCHC F/R mode.
   However, two values are reserved for special purposes. They help control the SCHC F/R process:
@@ -1067,7 +1067,7 @@ SCHC ACK REQ MUST NOT be sent.
 SCHC Sender-Abort MAY be sent.
 SCHC Receiver-Abort MUST NOT be sent.
 
-The value of N (size of the FCN field) is RECOMMENDED to be 1, but a Profile MAY specify a different value.
+The value of N (size of the FCN field) is RECOMMENDED to be 1.
 
 Each Profile, for each Rule ID value, MUST define
 
@@ -2009,7 +2009,7 @@ In the following examples, N (i.e. the size if the FCN field) is 3 bits. Therefo
     T   |-----W=1, FCN=2 ----->| 1 tile sent
     U   |-----W=1, FCN=1 ----->| 1 tile sent
         |-----W=1, FCN=0 ----->| 1 tile sent
-    |   |<------ACK, W=2-------| Bitmap:1111111111111101100000000000
+    |   |<------ACK, W=2-------| Bitmap:1111111111111101000000000001
     |   |-----W=2, FCN=13----->| Integrity check: success
     V   |<-----ACK, W=2, C=1 --| C=1
       (End)
@@ -2509,32 +2509,30 @@ This section lists the parameters that need to be defined in the Profile.
 
     * reliability mode(s) used, in which cases (e.g. based on link channel condition)
 
-    * number of bits for FCN (N), for W (M) and for DTag (T)
+    * Rule ID values assigned to each mode in use
+
+    * presence and number of bits for DTag (T) for each Rule ID value
 
     * support for interleaved packet transmission, to what extent
 
-    * size of MIC and algorithm for its computation, if different from the default CRC32. Byte fill-up with zeroes or other mechanism, to be specified.
+    * WINDOW_SIZE, for modes that use windows
 
-    * Retransmission Timer duration
+    * number of bits for W (M) for each Rule ID value, for modes that use windows
 
-    * Inactivity Timer duration
+    * number of bits for FCN (N) for each Rule ID value
 
-    * MAX_ACK_REQUEST value
+    * value of MAX_WIND_FCN and use of FCN values, if applicable to the SCHC F/R mode.
+
+    * size of MIC and algorithm for its computation, for each Rule ID, if different from the default CRC32. Byte fill-up with zeroes or other mechanism, to be specified.
+
+    * Retransmission Timer duration for each Rule ID value, if applicable to the SCHC F/R mode
+
+    * Inactivity Timer duration for each Rule ID value, if applicable to the SCHC F/R mode
+
+    * MAX_ACK_REQUEST value for each Rule ID value, if applicable to the SCHC F/R mode
 
 * if L2 Word is wider than a bit and SCHC fragmentation is used, value of the padding bits (0 or 1). This is needed
 because the padding bits of the last fragment are included in the MIC computation.
-
-* Note on the "C-bit bump": When fragmenting in ACK-on-Error or ACK-Always mode, it is expected that the last window (called All-1 window) will not be
-  fully utilised, i.e. there won't be fragments with all FCN values from MAX_WIND_FCN downto 1 and finally All-1.
-  It is worth noting that this document does not mandate that other windows (called All-0 windows) are fully utilised either.
-  This document purposely does not specify that All-1 windows use Bitmaps with the same number of bits as All-0 windows do.
-  By default, Bitmaps for All-0 and All-1 windows are of the same size MAX_WIND_FCN + 1. But a Profile
-  MAY revert that decision. The rationale for reverting the decision could be the following: Note that the SCHC ACK sent as a
-  response to an All-1 fragment includes a C bit that SCHC ACK for other windows don't have. Therefore, the SCHC ACK for the
-  All-1 window is one bit bigger. An LPWAN technology with a severely constrained payload size might decide that this "bump" in
-  the SCHC ACK for the last fragment is a bad resource usage. It could thus mandate that the All-1 window is not allowed to use
-  the FCN value 1 and that the SCHC ACK Bitmap size is reduced by 1 bit. This provides room for the C bit without creating
-  a bump in the SCHC ACK.
 
 
 * Note on soliciting downlink transmissions: In some LPWAN technologies, as part of energy-saving techniques,
