@@ -45,6 +45,13 @@ author:
   - 38243 Meylan
   country: France
   email: dominique.barthel@orange.com  
+- ins: JC. Zuniga
+  name: Juan Carlos Zuniga
+  org: Sigfox
+  street:
+  - Montreal
+  country: Canada
+  email: juancarlos.zuniga@sigfox.com
 normative:
   RFC2119:
   RFC7217:
@@ -775,7 +782,7 @@ The DTag field and the W field are optional.
  | Rule ID | DTag  | W |  FCN  | Fragment Payload | padding (as needed)
  +-- ... --+- ... -+---+- ... -+--------...-------+~~~~~~~~~~~~~~~~~~~~~
 ~~~~
-{: #Fig-NotLastFrag title='Detailed Header Format for Fragments except the Last One'}
+{: #Fig-NotLastFrag title='Detailed Header Format for Regular SCHC Fragments'}
 
 The FCN field MUST NOT contain all bits set to 1.
 
