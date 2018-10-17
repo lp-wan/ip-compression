@@ -1485,12 +1485,13 @@ See {{Fig-ACKonerrorSnd}} for one among several possible examples of a Finite St
 
 #### Receiver behaviour {#ACK-on-Error-receiver}
 
-On receiving a SCHC Fragment with a Rule ID and DTag pair not being processed at that time
+On receiving a SCHC Fragment with a Rule ID and optional DTag pair not being processed at that time
 
+- the receiver MAY check if the optional DTag value has not recently been used for that Rule ID value,
+  thereby ensuring that the received SCHC Fragment is not a remnant of a prior fragmented SCHC Packet transmission,
 - the receiver MUST start a process to assemble a new SCHC Packet with that Rule ID and DTag value pair.
   That process MUST only examine received SCHC F/R messages with that Rule ID and DTag value pair
   and MUST only transmit SCHC F/R messages with that Rule ID and DTag value pair.
-- (TODO: DTag filtering to avoid allocating a reassembly process for late-coming SCHC Fragments after an abort condition)
 - the receiver MUST start an Inactivity Timer. It MUST initialise an Attempts counter to 0.
 
 On reception of any SCHC F/R message, the receiver MUST reset the Inactivity Timer.
@@ -1512,10 +1513,14 @@ the receiver MUST assemble the received tiles based on the W and FCN fields of t
   * tiles are larger than an L2 Word
   * padding bits are always strictly less than an L2 Word
 
-On reception of a SCHC ACK REQ or of an All-1 SCHC Fragment, the receiver
-MUST return a SCHC ACK for the lowest-numbered window that it knows has tiles missing.
-If the receiver knows of no window that has tiles missing,
-it MUST return a SCHC ACK for the highest-numbered window it currently has tiles for.
+On reception of a SCHC ACK REQ or of an All-1 SCHC Fragment,
+
+- if the receiver has at least one window that it knows has tiles missing, it
+  MUST return a SCHC ACK for the lowest-numbered such window,
+- otherwise,
+  * if it has received at least one tile, it MUST return a SCHC ACK for the highest-numbered window it currently has tiles for
+  * otherwise it MUST return a SCHC ACK for window numbered 0
+
 
 A Profile MAY specify other times and circumstances at which
 a receiver sends a SCHC ACK,
@@ -1547,7 +1552,7 @@ Reassembly of the SCHC Packet concludes when
 
 If MIC is used for integrity checking,
 the MIC computed at the receiver MUST be computed over the reassembled SCHC Packet
-and over the padding bits that were received in the All-1 SCHC Fragment.
+and over the padding bits that were received in the SCHC Fragment carrying the last tile.
 
 See {{Fig-ACKonerrorRcv}} for one among several possible examples of a Finite State Machine implementing a receiver behaviour obeying this specification,
 and that is meant to match the sender Finite State Machine of {{Fig-ACKonerrorSnd}}.
