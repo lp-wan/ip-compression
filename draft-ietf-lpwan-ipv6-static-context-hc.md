@@ -802,16 +802,14 @@ The DTag field, the W field, the MIC field and the Payload are optional.
 ~~~~
 {: #Fig-LastFrag title='Detailed format for the All-1 SCHC Fragment'}
 
-The optional MIC concatenated with the optional All-1 SCHC Fragment Payload MUST be at least the size of an L2 Word.
-The rationale is that, even in the presence of padding, the All-1 SCHC Fragment needs to be distinguishable from the SCHC Sender-Abort (see {{SenderAbort}}).
-If the MIC is absent, or if it is present but its size is less than an L2 Word,
-this requirement places a constraint on the size of the Payload.
-Meeting this constraint may entail saving an L2 Word from the payload of the previous SCHC Fragment
-to make the payload of this All-1 SCHC Fragment big enough.
-
 If the size of the SCHC Fragment Payload does not nicely complement the SCHC Header size
 in a way that would make the SCHC Fragment a multiple of the L2 Word, then padding bits MUST be added.
 
+The All-1 SCHC Fragment message MUST be distinguishable by size from a SCHC Sender-Abort message (see {{SenderAbort}}) that has the same T, M and N values.
+This is trivially achieved by having the MIC larger than an L2 Word,
+or by having the Payload larger than an L2 Word.
+This is also naturally achieved if the SCHC Sender-Abort Header is a multiple of L2 Words
+and at least the All-1 SCHC Fragment MIC or the Payload is present.
 
 ### SCHC ACK format {#ACK}
 
