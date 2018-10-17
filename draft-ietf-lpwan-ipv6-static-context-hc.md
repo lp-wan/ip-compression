@@ -565,6 +565,8 @@ The messages that can be used by SCHC F/R are the following
 
 ### Tiles, Windows, Bitmaps, Timers, Counters {#OtherTools}
 
+#### Tiles
+
 The SCHC Packet is fragmented into pieces, hereafter called tiles.
 The tiles MUST be contiguous.
 
@@ -619,7 +621,7 @@ When windows are used
 - Bitmaps MAY be sent back to the sender in a SCHC ACK message.
 - Each window has a Bitmap.
 
-#### Bitmap {#Bitmap}
+#### Bitmaps {#Bitmap}
 
 Each bit in the Bitmap for a window corresponds to a tile in the window.
 Each Bitmap has therefore WINDOW_SIZE bits.
@@ -638,7 +640,7 @@ At the receiver
 WINDOW_SIZE finely controls the size of the Bitmap sent in the SCHC ACK message, which may be critical to some LPWAN technologies.
 
 
-#### Misc tools {#MiscTools}
+#### Timers and counters {#MiscTools}
 
 Some SCHC F/R modes can use the following timers and counters
 
@@ -646,7 +648,7 @@ Some SCHC F/R modes can use the following timers and counters
 
 * Retransmission Timer: this timer can be used by a SCHC Fragment sender to set a timeout on expecting a SCHC ACK.
 
-* Attempts: this counter counts the requests for a missing SCHC ACK. MAX_ACK_REQUESTS is the threshold at which the SCHC Fragment sender stops sending repeated requests.
+* Attempts: this counter counts the requests for SCHC ACKs. MAX_ACK_REQUESTS is the threshold at which an exception is raised.
 
 ### Integrity Checking {#IntegrityChecking}
 
@@ -777,8 +779,6 @@ The DTag field and the W field are optional.
 
 The FCN field MUST NOT contain all bits set to 1.
 
-The total size of the Fragment Header is not necessarily a multiple of the L2 Word size.
-
 If the size of the SCHC Fragment Payload does not nicely complement the SCHC Header size
 in a way that would make the SCHC Fragment a multiple of the L2 Word, then padding bits MUST be added.
 
@@ -809,8 +809,6 @@ this requirement places a constraint on the size of the Payload.
 Meeting this constraint may entail saving an L2 Word from the payload of the previous SCHC Fragment
 to make the payload of this All-1 SCHC Fragment big enough.
 
-The total size of the All-1 SCHC Fragment header is generally not a multiple of the L2 Word size.
-
 If the size of the SCHC Fragment Payload does not nicely complement the SCHC Header size
 in a way that would make the SCHC Fragment a multiple of the L2 Word, then padding bits MUST be added.
 
@@ -836,27 +834,32 @@ The Truncated Bitmap field can only be present in SCHC F/R modes that use window
 {: #Fig-ACK-Format title='Format of the SCHC ACK message'}
 
 The SCHC ACK Header contains a C bit (see {{HeaderFields}}).
+
+If the C bit is set to 1 (integrity check successful),
+no Bitmap is carried and
+padding bits MUST be appended as needed to fill up the last L2 Word.
+
 If the C bit is set to 0 (integrity check not performed or failed) and if windows are used,
-a representation of the Bitmap for the window referred to by the W field MUST follow.
+
+- a representation of the Bitmap for the window referred to by the W field MUST follow the C bit
+- padding bits MUST be appended as needed to fill up the last L2 Word
+
+If the C bit is 1 or windows are not used, the C bit MUST be followed by padding bits as needed to fill up the last L2 Word.
+
 See {{Bitmap}} for a description of the Bitmap.
 
-In order to reduce the SCHC ACK size, the representation that is transmitted is a truncated version of the Bitmap (see {{BitmapTrunc}}).
-
-See {{SCHCParams}} for a discussion on the size of the Bitmaps.
+The representation of the Bitmap that is transmitted MUST be the truncated version specified in {{BitmapTrunc}}, in order to reduce the SCHC ACK message size.
 
 #### Bitmap Truncation {#BitmapTrunc}
-For transmission, the Bitmap in the SCHC ACK message is truncated by applying the following algorithm (see {{Fig-Localbitmap}} for a follow-along example):
+For transmission, the truncated Bitmap in the SCHC ACK message is defined by the following algorithm (see {{Fig-Localbitmap}} for a follow-along example):
 
-- Build a temporary SCHC ACK message that contains the Header and the original Bitmap.
+- Build a temporary SCHC ACK message that contains the Header followed by the original Bitmap.
 - Positioning scissors at the end of the Bitmap, after its last bit.
 - While the bit on the left of the scissors is 1 and belongs to the Bitmap, keep moving left, then stop. When this is done,
 - While the scissors are not on an L2 Word boundary of the SCHC ACK message and there is a Bitmap bit on the right of the scissors, keep moving right, then stop.
 - At this point, cut and drop off any bits to the right of the scissors
 
-When one or more bits have effectively been dropped off as a result of the above algorithm, the resulting SCHC ACK message is a multiple of L2 Words, and padding MUST NOT be appended.
-Otherwise, padding bits MUST be appended as needed to fill up the last L2 Word.
-
-The result of this algorithm is the SCHC ACK message that MUST be sent.
+When one or more bits have effectively been dropped off as a result of the above algorithm, the SCHC ACK message is a multiple of L2 Words, no padding bits will be appended.
 
 Because the SCHC Fragment sender knows the size of the original Bitmap, it can reconstruct the original Bitmap from the Truncated Bitmap received in the SCH ACK message.
 
@@ -1431,7 +1434,7 @@ Note that the last tile of a SCHC Packet can be sent in different ways, dependin
 - in a Regular SCHC Fragment, either alone or as part of multiple tiles Payload
 - in an All-1 SCHC Fragment
 
-However, the last tile MUST NOT ever have been sent both in a Regular SCHC Fragment and in a All-1 SCHC Fragment.
+However, the last tile MUST NOT have ever been sent both in a Regular SCHC Fragment and in a All-1 SCHC Fragment.
 
 The fragment sender MUST listen for SCHC ACK messages after having sent
 
@@ -1539,8 +1542,8 @@ Reassembly of the SCHC Packet concludes when
 
 - a Sender-Abort has been received
 - or the Inactivity Timer has expired
-- or the Attempts counter has exceed MAX_ACK_REQUESTS
-- or when at least on All-1 SCHC Fragment has been received and integrity checking of the reassembled SCHC Packet is successful.
+- or the Attempts counter has exceeded MAX_ACK_REQUESTS
+- or when at least an All-1 SCHC Fragment has been received and integrity checking of the reassembled SCHC Packet is successful.
 
 If MIC is used for integrity checking,
 the MIC computed at the receiver MUST be computed over the reassembled SCHC Packet
