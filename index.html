@@ -352,7 +352,7 @@ address {
 
   <meta name="dct.creator" content="Minaburo, A., Toutain, L., Gomez, C., Barthel, D., and JC. Zuniga" />
   <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-lpwan-ipv6-static-context-hc-16" />
-  <meta name="dct.issued" scheme="ISO8601" content="2018-10-17" />
+  <meta name="dct.issued" scheme="ISO8601" content="2018-10-18" />
   <meta name="dct.abstract" content="This document defines the Static Context Header Compression (SCHC) framework, which provides both header compression and fragmentation functionalities. SCHC has been designed for Low Power Wide Area Networks (LPWAN)." />
   <meta name="description" content="This document defines the Static Context Header Compression (SCHC) framework, which provides both header compression and fragmentation functionalities. SCHC has been designed for Low Power Wide Area Networks (LPWAN)." />
 
@@ -376,7 +376,7 @@ address {
 <td class="right">L. Toutain</td>
 </tr>
 <tr>
-<td class="left">Expires: April 20, 2019</td>
+<td class="left">Expires: April 21, 2019</td>
 <td class="right">IMT-Atlantique</td>
 </tr>
 <tr>
@@ -405,7 +405,7 @@ address {
 </tr>
 <tr>
 <td class="left"></td>
-<td class="right">October 17, 2018</td>
+<td class="right">October 18, 2018</td>
 </tr>
 
     	
@@ -424,7 +424,7 @@ address {
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at https://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on April 20, 2019.</p>
+<p>This Internet-Draft will expire on April 21, 2019.</p>
 <h1 id="rfc.copyrightnotice"><a href="#rfc.copyrightnotice">Copyright Notice</a></h1>
 <p>Copyright (c) 2018 IETF Trust and the persons identified as the document authors.  All rights reserved.</p>
 <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (https://trustee.ietf.org/license-info) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.</p>
@@ -1883,7 +1883,7 @@ A packet (e.g. an IPv6 packet)
 <h1 id="rfc.section.13">
 <a href="#rfc.section.13">13.</a> <a href="#acknowledgements" id="acknowledgements">Acknowledgements</a>
 </h1>
-<p id="rfc.section.13.p.1">Thanks to Carsten Bormann, Philippe Clavier, Diego Dujovne, Eduardo Ingles Sanchez, Arunprabhu Kandasamy, Rahul Jadhav, Sergio Lopez Bernal, Antony Markovski, Alexander Pelov, Charles Perkins, Edgar Ramos, Shoichi Sakane, Pascal Thubert and Juan Carlos Zuniga for useful design consideration and comments.</p>
+<p id="rfc.section.13.p.1">Thanks to Carsten Bormann, Philippe Clavier, Diego Dujovne, Eduardo Ingles Sanchez, Arunprabhu Kandasamy, Rahul Jadhav, Sergio Lopez Bernal, Antony Markovski, Alexander Pelov, Charles Perkins, Edgar Ramos, Shoichi Sakane, and Pascal Thubert for useful design consideration and comments.</p>
 <h1 id="rfc.references">
 <a href="#rfc.references">14.</a> References</h1>
 <h1 id="rfc.references.1">
@@ -2059,7 +2059,7 @@ Rule 0
 <a href="#rfc.appendix.B">Appendix B.</a> <a href="#fragmentation-examples" id="fragmentation-examples">Fragmentation Examples</a>
 </h1>
 <p id="rfc.section.B.p.1">This section provides examples for the different fragment reliability modes specified in this document.</p>
-<p><a href="#Fig-Example-Unreliable" class="xref">Figure 26</a> illustrates the transmission in No-ACK mode of an IPv6 packet that needs 11 fragments. FCN is 1 bit wide.</p>
+<p><a href="#Fig-Example-Unreliable" class="xref">Figure 26</a> illustrates the transmission in No-ACK mode of a SCHC Packet that needs 11 SCHC Fragments. FCN is 1 bit wide.</p>
 <div id="rfc.figure.26"></div>
 <div id="Fig-Example-Unreliable"></div>
 <pre>
@@ -2074,12 +2074,12 @@ Rule 0
           |-------FCN=0--------&gt;|
           |-------FCN=0--------&gt;|
           |-------FCN=0--------&gt;|
-          |-----FCN=1 + MIC ---&gt;|MIC checked: success =&gt;
- &#160; &#160; &#160; &#160;
+          |-----FCN=1 + MIC ---&gt;| Integrity check: success
+        (End) &#160; &#160; &#160;
 </pre>
-<p class="figure">Figure 26: Transmission in No-ACK mode of an IPv6 packet carried by 11 fragments</p>
+<p class="figure">Figure 26: Transmission in No-ACK mode of a SCHC Packet carried by 11 SCHC Fragments</p>
 <p id="rfc.section.B.p.3">In the following examples, N (i.e. the size if the FCN field) is 3 bits. Therefore, the All-1 FCN value is 7.</p>
-<p><a href="#Fig-Example-Win-NoLoss-NACK" class="xref">Figure 27</a> illustrates the transmission in ACK-on-Error of an IPv6 packet that needs 11 fragments, with MAX_WIND_FCN=6 and no fragment loss.</p>
+<p><a href="#Fig-Example-Win-NoLoss-NACK" class="xref">Figure 27</a> illustrates the transmission in ACK-on-Error mode of a SCHC Packet fragmented in 11 tiles, with one tile per SCHC Fragment, MAX_WIND_FCN=6 and no lost SCHC Fragment.</p>
 <div id="rfc.figure.27"></div>
 <div id="Fig-Example-Win-NoLoss-NACK"></div>
 <pre>
@@ -2095,12 +2095,12 @@ Rule 0
           |-----W=1, FCN=6-----&gt;|
           |-----W=1, FCN=5-----&gt;|
           |-----W=1, FCN=4-----&gt;|
-          |--W=1, FCN=7 + MIC--&gt;|MIC checked: success =&gt;
+          |--W=1, FCN=7 + MIC--&gt;| Integrity check: success
           |&lt;---- ACK, W=1 ------|
-
+        (End)
 </pre>
-<p class="figure">Figure 27: Transmission in ACK-on-Error mode of an IPv6 packet carried by 11 fragments, with MAX_WIND_FCN=6 and no loss.</p>
-<p><a href="#Fig-Example-Rel-Window-NACK-Loss" class="xref">Figure 28</a> illustrates the transmission in ACK-on-Error mode of an IPv6 packet that needs 11 fragments, with MAX_WIND_FCN=6 and three lost fragments.</p>
+<p class="figure">Figure 27: Transmission in ACK-on-Error mode of a SCHC Packet fragmented in 11 tiles, with one tile per SCHC Fragment, MAX_WIND_FCN=6 and no lost SCHC Fragment.</p>
+<p><a href="#Fig-Example-Rel-Window-NACK-Loss" class="xref">Figure 28</a> illustrates the transmission in ACK-on-Error mode of a SCHC Packet fragmented in 11 tiles, with one tile per SCHC Fragment, MAX_WIND_FCN=6 and three lost SCHC Fragments.</p>
 <div id="rfc.figure.28"></div>
 <div id="Fig-Example-Rel-Window-NACK-Loss"></div>
 <pre>
@@ -2109,24 +2109,24 @@ Rule 0
           |-----W=0, FCN=5-----&gt;|
           |-----W=0, FCN=4--X--&gt;|
           |-----W=0, FCN=3-----&gt;|
-          |-----W=0, FCN=2--X--&gt;|             7
-          |-----W=0, FCN=1-----&gt;|             /
-          |-----W=0, FCN=0-----&gt;|       6543210
-          |&lt;-----ACK, W=0-------|Bitmap:1101011
+          |-----W=0, FCN=2--X--&gt;|
+          |-----W=0, FCN=1-----&gt;|
+          |-----W=0, FCN=0-----&gt;|        6543210
+          |&lt;-- ACK, W=0, C=0 ---| Bitmap:1101011
           |-----W=0, FCN=4-----&gt;|
           |-----W=0, FCN=2-----&gt;|   
       (no ACK)     
           |-----W=1, FCN=6-----&gt;|
           |-----W=1, FCN=5-----&gt;|
           |-----W=1, FCN=4--X--&gt;|
-          |- W=1, FCN=7 + MIC -&gt;|MIC checked: failed
-          |&lt;-----ACK, W=1-------|C=0 Bitmap:1100001
-          |-----W=1, FCN=4-----&gt;|MIC checked: success =&gt;
-          |&lt;---- ACK, W=1 ------|C=1, no Bitmap
-
+          |- W=1, FCN=7 + MIC -&gt;| Integrity check: failure
+          |&lt;-- ACK, W=1, C=0 ---| C=0, Bitmap:1100001
+          |-----W=1, FCN=4-----&gt;| Integrity check: success
+          |&lt;-- ACK, W=1, C=1 ---| C=1
+        (End)
 </pre>
-<p class="figure">Figure 28: Transmission in ACK-on-Error mode of an IPv6 packet carried by 11 fragments, with MAX_WIND_FCN=6 and three lost fragments.</p>
-<p><a href="#Figure-Example-ACK-on-Error-VarMTU" class="xref">Figure 29</a> shows an example of a transmission in ACK-on-Error mode of a SCHC Packet broken into 73 tiles, with N=5, MAX_WIND_FCN=27, M=2 and 3 lost SCHC Fragments.</p>
+<p class="figure">Figure 28: Transmission in ACK-on-Error mode of a SCHC Packet fragmented in 11 tiles, with one tile per SCHC Fragment, MAX_WIND_FCN=6 and three lost SCHC Fragments.</p>
+<p><a href="#Figure-Example-ACK-on-Error-VarMTU" class="xref">Figure 29</a> shows an example of a transmission in ACK-on-Error mode of a SCHC Packet fragmented in 73 tiles, with N=5, MAX_WIND_FCN=27, M=2 and 3 lost SCHC Fragments.</p>
 <div id="rfc.figure.29"></div>
 <div id="Figure-Example-ACK-on-Error-VarMTU"></div>
 <pre>
@@ -2156,26 +2156,26 @@ Rule 0
     a   |-----W=2, FCN=13--X--&gt;| 1 tile sent (not received)
     l   |-----W=2, FCN=12-----&gt;| 1 tile sent
     l   |---W=2, FCN=31 + MIC-&gt;| Integrity check: failure
-    e   |&lt;------ACK, W=0-------| Bitmap:1111111111110000111111111111
+    e   |&lt;--- ACK, W=0, C=0 ---| C=0, Bitmap:1111111111110000111111111111
     r   |-----W=0, FCN=15-----&gt;| 1 tile sent
         |-----W=0, FCN=14-----&gt;| 1 tile sent
     L   |-----W=0, FCN=13-----&gt;| 1 tile sent
     2   |-----W=0, FCN=12-----&gt;| 1 tile sent
-        |&lt;------ACK, W=1-------| Bitmap:1111111111111111111111110000
+        |&lt;--- ACK, W=1, C=0 ---| C=0, Bitmap:1111111111111111111111110000
     M   |-----W=1, FCN=3 -----&gt;| 1 tile sent
     T   |-----W=1, FCN=2 -----&gt;| 1 tile sent
     U   |-----W=1, FCN=1 -----&gt;| 1 tile sent
         |-----W=1, FCN=0 -----&gt;| 1 tile sent
-    |   |&lt;------ACK, W=2-------| Bitmap:1111111111111101000000000001
+    |   |&lt;--- ACK, W=2, C=0 ---| C=0, Bitmap:1111111111111101000000000001
     |   |-----W=2, FCN=13-----&gt;| Integrity check: success
-    V   |&lt;-----ACK, W=2, C=1 --| C=1
+    V   |&lt;--- ACK, W=2, C=1 ---| C=1
       (End)
-
 </pre>
 <p class="figure">Figure 29: ACK-on-Error mode with variable MTU.</p>
 <p id="rfc.section.B.p.7">In this example, the L2 MTU becomes reduced just before sending the &#8220;W=2, FCN=19&#8221; fragment, leaving space for only 1 tile in each forthcoming SCHC Fragment.  Before retransmissions, the 73 tiles are carried by a total of 25 SCHC Fragments, the last 9 being of smaller size.</p>
-<p id="rfc.section.B.p.8">Note 1: Bitmaps are shown prior to truncation for transmission Note 2: other behaviors (e.g. regarding when ACKs are sent by the Receiver) are also allowed in ACK-on-Error.</p>
-<p><a href="#Fig-Example-Rel-Window-ACK-NoLoss" class="xref">Figure 30</a> illustrates the transmission in ACK-Always mode of an IPv6 packet that needs 11 fragments, with MAX_WIND_FCN=6 and no loss.</p>
+<p id="rfc.section.B.p.8">Note 1: Bitmaps are shown prior to truncation for transmission</p>
+<p id="rfc.section.B.p.9">Note 2: other sequences of events (e.g. regarding when ACKs are sent by the Receiver) are also allowed by this specification of ACK-on-Error.</p>
+<p><a href="#Fig-Example-Rel-Window-ACK-NoLoss" class="xref">Figure 30</a> illustrates the transmission in ACK-Always mode of a SCHC Packet fragmented in 11 tiles, with one tile per SCHC Fragment, with N=3, MAX_WIND_FCN=6 and no loss.</p>
 <div id="rfc.figure.30"></div>
 <div id="Fig-Example-Rel-Window-ACK-NoLoss"></div>
 <pre>
@@ -2187,44 +2187,42 @@ Rule 0
           |-----W=0, FCN=2-----&gt;|
           |-----W=0, FCN=1-----&gt;|
           |-----W=0, FCN=0-----&gt;|
-          |&lt;-----ACK, W=0-------| Bitmap:1111111
+          |&lt;-- ACK, W=0, C=0 ---| Bitmap:1111111
           |-----W=1, FCN=6-----&gt;|
           |-----W=1, FCN=5-----&gt;|   
           |-----W=1, FCN=4-----&gt;|
-          |--W=1, FCN=7 + MIC--&gt;|MIC checked: success =&gt;
-          |&lt;-----ACK, W=1-------| C=1 no Bitmap
+          |--W=1, FCN=7 + MIC--&gt;| Integrity check: success
+          |&lt;-- ACK, W=1, C=1 ---| C=1
         (End)    
-
 </pre>
-<p class="figure">Figure 30: Transmission in ACK-Always mode of an IPv6 packet carried by 11 fragments, with MAX_WIND_FCN=6 and no lost fragment.</p>
-<p><a href="#Fig-Example-Rel-Window-ACK-Loss" class="xref">Figure 31</a> illustrates the transmission in ACK-Always mode of an IPv6 packet that needs 11 fragments, with MAX_WIND_FCN=6 and three lost fragments.</p>
+<p class="figure">Figure 30: Transmission in ACK-Always mode of a SCHC Packet fragmented in 11 tiles, with one tile per SCHC Fragment, with N=3, MAX_WIND_FCN=6 and no loss.</p>
+<p><a href="#Fig-Example-Rel-Window-ACK-Loss" class="xref">Figure 31</a> illustrates the transmission in ACK-Always mode of a SCHC Packet fragmented in 11 tiles, with one tile per SCHC Fragment, N=3, MAX_WIND_FCN=6 and three lost SCHC Fragments.</p>
 <div id="rfc.figure.31"></div>
 <div id="Fig-Example-Rel-Window-ACK-Loss"></div>
 <pre>
  &#160; &#160; &#160; &#160;Sender &#160; &#160; &#160; &#160; &#160; &#160; &#160; Receiver
+          |-----W=0, FCN=6-----&gt;|
+          |-----W=0, FCN=5-----&gt;|
+          |-----W=0, FCN=4--X--&gt;|
+          |-----W=0, FCN=3-----&gt;|
+          |-----W=0, FCN=2--X--&gt;|
+          |-----W=0, FCN=1-----&gt;|
+          |-----W=0, FCN=0-----&gt;|        6543210
+          |&lt;-- ACK, W=0, C=0 ---| Bitmap:1101011
+          |-----W=0, FCN=4-----&gt;|
+          |-----W=0, FCN=2-----&gt;|
+          |&lt;-- ACK, W=0, C=0 ---| Bitmap:1111111
           |-----W=1, FCN=6-----&gt;|
           |-----W=1, FCN=5-----&gt;|
           |-----W=1, FCN=4--X--&gt;|
-          |-----W=1, FCN=3-----&gt;|
-          |-----W=1, FCN=2--X--&gt;|             7
-          |-----W=1, FCN=1-----&gt;|             /
-          |-----W=1, FCN=0-----&gt;|       6543210
-          |&lt;-----ACK, W=1-------|Bitmap:1101011
-          |-----W=1, FCN=4-----&gt;|
-          |-----W=1, FCN=2-----&gt;|
-          |&lt;-----ACK, W=1-------|Bitmap:
-          |-----W=0, FCN=6-----&gt;|
-          |-----W=0, FCN=5-----&gt;|   
-          |-----W=0, FCN=4--X--&gt;|
-          |--W=0, FCN=7 + MIC--&gt;|MIC checked: failed
-          |&lt;-----ACK, W=0-------| C= 0 Bitmap:11000001
-          |-----W=0, FCN=4-----&gt;|MIC checked: success =&gt;
-          |&lt;-----ACK, W=0-------| C= 1 no Bitmap
-        (End)    
-
+          |--W=1, FCN=7 + MIC--&gt;| Integrity check: failure
+          |&lt;-- ACK, W=1, C=0 ---| C=0, Bitmap:11000001
+          |-----W=1, FCN=4-----&gt;| Integrity check: success
+          |&lt;-- ACK, W=1, C=1 ---| C=1
+        (End)
 </pre>
-<p class="figure">Figure 31: Transmission in ACK-Always mode of an IPv6 packet carried by 11 fragments, with MAX_WIND_FCN=6 and three lost fragments.</p>
-<p><a href="#Fig-Example-Rel-Window-ACK-Loss-Last-A" class="xref">Figure 32</a> illustrates the transmission in ACK-Always mode of an IPv6 packet that needs 6 fragments, with MAX_WIND_FCN=6, three lost fragments and only one retry needed to recover each lost fragment.</p>
+<p class="figure">Figure 31: Transmission in ACK-Always mode of a SCHC Packet fragmented in 11 tiles, with one tile per SCHC Fragment, N=3, MAX_WIND_FCN=6 and three lost SCHC Fragments.</p>
+<p><a href="#Fig-Example-Rel-Window-ACK-Loss-Last-A" class="xref">Figure 32</a> illustrates the transmission in ACK-Always mode of a SCHC Packet fragmented in 6 tiles, with one tile per SCHC Fragment, N=3, MAX_WIND_FCN=6, three lost SCHC Fragments and only one retry needed to recover each lost SCHC Fragment.</p>
 <div id="rfc.figure.32"></div>
 <div id="Fig-Example-Rel-Window-ACK-Loss-Last-A"></div>
 <pre>
@@ -2234,16 +2232,16 @@ Rule 0
              |-----W=0, FCN=4--X--&gt;|
              |-----W=0, FCN=3--X--&gt;|
              |-----W=0, FCN=2--X--&gt;|
-             |--W=0, FCN=7 + MIC--&gt;|MIC checked: failed
-             |&lt;-----ACK, W=0-------|C= 0 Bitmap:1100001
-             |-----W=0, FCN=4-----&gt;|MIC checked: failed
-             |-----W=0, FCN=3-----&gt;|MIC checked: failed
-             |-----W=0, FCN=2-----&gt;|MIC checked: success
-             |&lt;-----ACK, W=0-------|C=1 no Bitmap
+             |--W=0, FCN=7 + MIC--&gt;| Integrity check: failure
+             |&lt;-- ACK, W=0, C=0 ---| C=0, Bitmap:1100001
+             |-----W=0, FCN=4-----&gt;| Integrity check: failure
+             |-----W=0, FCN=3-----&gt;| Integrity check: failure
+             |-----W=0, FCN=2-----&gt;| Integrity check: success
+             |&lt;-- ACK, W=0, C=1 ---| C=1
            (End)
 </pre>
-<p class="figure">Figure 32: Transmission in ACK-Always mode of an IPv6 packet carried by 11 fragments, with MAX_WIND_FCN=6, three lost fragments and only one retry needed for each lost fragment.</p>
-<p><a href="#Fig-Example-Rel-Window-ACK-Loss-Last-B" class="xref">Figure 33</a> illustrates the transmission in ACK-Always mode of an IPv6 packet that needs 6 fragments, with MAX_WIND_FCN=6, three lost fragments, and the second ACK lost.</p>
+<p class="figure">Figure 32: Transmission in ACK-Always mode of a SCHC Packet fragmented in 6 tiles, with one tile per SCHC Fragment, N=3, MAX_WIND_FCN=6, three lost SCHC Fragments.</p>
+<p><a href="#Fig-Example-Rel-Window-ACK-Loss-Last-B" class="xref">Figure 33</a> illustrates the transmission in ACK-Always mode of a SCHC Packet fragmented in 6 tiles, with one tile per SCHC Fragment, N=3, MAX_WIND_FCN=6, three lost SCHC Fragments, and the second SCHC ACK lost.</p>
 <div id="rfc.figure.33"></div>
 <div id="Fig-Example-Rel-Window-ACK-Loss-Last-B"></div>
 <pre>
@@ -2253,20 +2251,19 @@ Rule 0
              |-----W=0, FCN=4--X--&gt;|
              |-----W=0, FCN=3--X--&gt;|
              |-----W=0, FCN=2--X--&gt;|
-             |--W=0, FCN=7 + MIC--&gt;|MIC checked: failed
-             |&lt;-----ACK, W=0-------|C=0  Bitmap:1100001
-             |-----W=0, FCN=4-----&gt;|MIC checked: failed
-             |-----W=0, FCN=3-----&gt;|MIC checked: failed
-             |-----W=0, FCN=2-----&gt;|MIC checked: success
-             |  X---ACK, W=0-------|C= 1 no Bitmap
+             |--W=0, FCN=7 + MIC--&gt;| Integrity check: failure
+             |&lt;-- ACK, W=0, C=0 ---| C=0, Bitmap:1100001
+             |-----W=0, FCN=4-----&gt;| Integrity check: failure
+             |-----W=0, FCN=3-----&gt;| Integrity check: failure
+             |-----W=0, FCN=2-----&gt;| Integrity check: success
+             |&lt;-X-ACK, W=0, C=1 ---| C=1
     timeout  |                     |
-             |--W=0, FCN=7 + MIC--&gt;|
-             |&lt;-----ACK, W=0-------|C= 1 no Bitmap  
-
+             |--- W=0, ACK REQ ---&gt;| ACK REQ
+             |&lt;-- ACK, W=0, C=1 ---| C=1
            (End)
 </pre>
-<p class="figure">Figure 33: Transmission in ACK-Always mode of an IPv6 packet carried by 11 fragments, with MAX_WIND_FCN=6, three lost fragments, and the second ACK lost.</p>
-<p><a href="#Fig-Example-Rel-Window-ACK-Loss-Last-C" class="xref">Figure 34</a> illustrates the transmission in ACK-Always mode of an IPv6 packet that needs 6 fragments, with MAX_WIND_FCN=6, with three lost fragments, and one retransmitted fragment lost again.</p>
+<p class="figure">Figure 33: Transmission in ACK-Always mode of a SCHC Packet fragmented in 6 tiles, with one tile per SCHC Fragment, N=3, MAX_WIND_FCN=6, three lost SCHC Fragments, and the second SCHC ACK lost.</p>
+<p><a href="#Fig-Example-Rel-Window-ACK-Loss-Last-C" class="xref">Figure 34</a> illustrates the transmission in ACK-Always mode of a SCHC Packet fragmented in 6 tiles, with N=3, MAX_WIND_FCN=6, with three lost SCHC Fragments, and one retransmitted SCHC Fragment lost again.</p>
 <div id="rfc.figure.34"></div>
 <div id="Fig-Example-Rel-Window-ACK-Loss-Last-C"></div>
 <pre>
@@ -2276,20 +2273,20 @@ Rule 0
              |-----W=0, FCN=4--X--&gt;|
              |-----W=0, FCN=3--X--&gt;|
              |-----W=0, FCN=2--X--&gt;|
-             |--W=0, FCN=7 + MIC--&gt;|MIC checked: failed
-             |&lt;-----ACK, W=0-------|C=0 Bitmap:1100001
-             |-----W=0, FCN=4-----&gt;|MIC checked: failed
-             |-----W=0, FCN=3-----&gt;|MIC checked: failed
+             |--W=0, FCN=7 + MIC--&gt;| Integrity check: failure
+             |&lt;-- ACK, W=0, C=0 ---| C=0, Bitmap:1100001
+             |-----W=0, FCN=4-----&gt;| Integrity check: failure
+             |-----W=0, FCN=3-----&gt;| Integrity check: failure
              |-----W=0, FCN=2--X--&gt;|
       timeout|                     |
-             |--W=0, FCN=7 + MIC--&gt;|All-0 empty
-             |&lt;-----ACK, W=0-------|C=0 Bitmap: 1111101
-             |-----W=0, FCN=2-----&gt;|MIC checked: success
-             |&lt;-----ACK, W=0-------|C=1 no Bitmap
+             |--- W=0, ACK REQ ---&gt;| ACK REQ
+             |&lt;-- ACK, W=0, C=0 ---| C=0, Bitmap: 1111101
+             |-----W=0, FCN=2-----&gt;| Integrity check: success
+             |&lt;-- ACK, W=0, C=1 ---| C=1
            (End)
 </pre>
-<p class="figure">Figure 34: Transmission in ACK-Always mode of an IPv6 packet carried by 11 fragments, with MAX_WIND_FCN=6, with three lost fragments, and one retransmitted fragment lost again.</p>
-<p><a href="#Fig-Example-MaxWindFCN" class="xref">Figure 35</a> illustrates the transmission in ACK-Always mode of an IPv6 packet that needs 28 fragments, with N=5, MAX_WIND_FCN=23 and two lost fragments. Note that MAX_WIND_FCN=23 may be useful when the maximum possible Bitmap size, considering the maximum lower layer technology payload size and the value of R, is 3 bytes. Note also that the FCN of the last fragment of the packet is the one with FCN=31 (i.e. FCN=(2^N)-1 for N=5, or equivalently, all FCN bits set to 1).</p>
+<p class="figure">Figure 34: Transmission in ACK-Always mode of a SCHC Packet fragmented in 6 tiles, with N=3, MAX_WIND_FCN=6, with three lost SCHC Fragments, and one retransmitted SCHC Fragment lost again.</p>
+<p><a href="#Fig-Example-MaxWindFCN" class="xref">Figure 35</a> illustrates the transmission in ACK-Always mode of a SCHC Packet fragmented in 28 tiles, with one tile per SCHC Fragment, N=5, MAX_WIND_FCN=23 and two lost SCHC Fragments.</p>
 <div id="rfc.figure.35"></div>
 <div id="Fig-Example-MaxWindFCN"></div>
 <pre>
@@ -2318,19 +2315,19 @@ Rule 0
         |-----W=0, FCN=2 -----&gt;|
         |-----W=0, FCN=1 -----&gt;|
         |-----W=0, FCN=0 -----&gt;|
-        |                      |lcl-Bitmap:110111111111101111111111
-        |&lt;------ACK, W=0-------|truncated Bitmap:1101111111111011
+        |                      |
+        |&lt;--- ACK, W=0, C=0 ---| Bitmap:110111111111101111111111
         |-----W=0, FCN=21-----&gt;|
         |-----W=0, FCN=10-----&gt;|
-        |&lt;------ACK, W=0-------|no Bitmap
+        |&lt;--- ACK, W=0, C=0 ---| Bitmap:111111111111111111111111
         |-----W=1, FCN=23-----&gt;|
         |-----W=1, FCN=22-----&gt;|
         |-----W=1, FCN=21-----&gt;|
-        |--W=1, FCN=31 + MIC--&gt;|MIC checked: sucess =&gt;
-        |&lt;------ACK, W=1-------|no Bitmap
+        |--W=1, FCN=31 + MIC--&gt;| Integrity check: success
+        |&lt;--- ACK, W=1, C=1 ---| C=1
       (End)
 </pre>
-<p class="figure">Figure 35: Transmission in ACK-Always mode of an IPv6 packet carried by 28 fragments, with N=5, MAX_WIND_FCN=23 and two lost fragments.</p>
+<p class="figure">Figure 35: Transmission in ACK-Always mode of a SCHC Packet fragmented in 28 tiles, with one tile per SCHC Fragment, N=5, MAX_WIND_FCN=23 and two lost SCHC Fragments.</p>
 <h1 id="rfc.appendix.C">
 <a href="#rfc.appendix.C">Appendix C.</a> <a href="#FSM" id="FSM">Fragmentation State Machines</a>
 </h1>
