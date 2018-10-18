@@ -1794,8 +1794,7 @@ Alexander Pelov,
 Charles Perkins,
 Edgar Ramos,
 Shoichi Sakane,
-Pascal Thubert
-and Juan Carlos Zuniga
+and Pascal Thubert
 for useful design consideration and comments.
 
 --- back
@@ -1922,7 +1921,7 @@ The third Rule compresses port numbers to 4 bits.
 
 This section provides examples for the different fragment reliability modes specified in this document.
 
-{{Fig-Example-Unreliable}} illustrates the transmission in No-ACK mode of an IPv6 packet that needs 11 fragments. FCN is 1 bit wide.
+{{Fig-Example-Unreliable}} illustrates the transmission in No-ACK mode of a SCHC Packet that needs 11 SCHC Fragments. FCN is 1 bit wide.
 
 ~~~~
         Sender               Receiver
@@ -1936,14 +1935,14 @@ This section provides examples for the different fragment reliability modes spec
           |-------FCN=0-------->|
           |-------FCN=0-------->|
           |-------FCN=0-------->|
-          |-----FCN=1 + MIC --->|MIC checked: success =>
-        
+          |-----FCN=1 + MIC --->| Integrity check: success
+        (End)      
 ~~~~
-{: #Fig-Example-Unreliable title='Transmission in No-ACK mode of an IPv6 packet carried by 11 fragments'}
+{: #Fig-Example-Unreliable title='Transmission in No-ACK mode of a SCHC Packet carried by 11 SCHC Fragments'}
 
 In the following examples, N (i.e. the size if the FCN field) is 3 bits. Therefore, the All-1 FCN value is 7.
 
-{{Fig-Example-Win-NoLoss-NACK}} illustrates the transmission in ACK-on-Error of an IPv6 packet that needs 11 fragments, with MAX_WIND_FCN=6 and no fragment loss.
+{{Fig-Example-Win-NoLoss-NACK}} illustrates the transmission in ACK-on-Error mode of a SCHC Packet fragmented in 11 tiles, with one tile per SCHC Fragment, MAX_WIND_FCN=6 and no lost SCHC Fragment.
 
 ~~~~
         Sender               Receiver
@@ -1958,13 +1957,13 @@ In the following examples, N (i.e. the size if the FCN field) is 3 bits. Therefo
           |-----W=1, FCN=6----->|
           |-----W=1, FCN=5----->|
           |-----W=1, FCN=4----->|
-          |--W=1, FCN=7 + MIC-->|MIC checked: success =>
+          |--W=1, FCN=7 + MIC-->| Integrity check: success
           |<---- ACK, W=1 ------|
-
+        (End)
 ~~~~
-{: #Fig-Example-Win-NoLoss-NACK title='Transmission in ACK-on-Error mode of an IPv6 packet carried by 11 fragments, with MAX_WIND_FCN=6 and no loss.'}
+{: #Fig-Example-Win-NoLoss-NACK title='Transmission in ACK-on-Error mode of a SCHC Packet fragmented in 11 tiles, with one tile per SCHC Fragment, MAX_WIND_FCN=6 and no lost SCHC Fragment.'}
 
-{{Fig-Example-Rel-Window-NACK-Loss}} illustrates the transmission in ACK-on-Error mode of an IPv6 packet that needs 11 fragments, with MAX_WIND_FCN=6 and three lost fragments.
+{{Fig-Example-Rel-Window-NACK-Loss}} illustrates the transmission in ACK-on-Error mode of a SCHC Packet fragmented in 11 tiles, with one tile per SCHC Fragment, MAX_WIND_FCN=6 and three lost SCHC Fragments.
 
 ~~~~
          Sender             Receiver
@@ -1972,26 +1971,26 @@ In the following examples, N (i.e. the size if the FCN field) is 3 bits. Therefo
           |-----W=0, FCN=5----->|
           |-----W=0, FCN=4--X-->|
           |-----W=0, FCN=3----->|
-          |-----W=0, FCN=2--X-->|             7
-          |-----W=0, FCN=1----->|             /
-          |-----W=0, FCN=0----->|       6543210
-          |<-----ACK, W=0-------|Bitmap:1101011
+          |-----W=0, FCN=2--X-->|
+          |-----W=0, FCN=1----->|
+          |-----W=0, FCN=0----->|        6543210
+          |<-- ACK, W=0, C=0 ---| Bitmap:1101011
           |-----W=0, FCN=4----->|
           |-----W=0, FCN=2----->|   
       (no ACK)     
           |-----W=1, FCN=6----->|
           |-----W=1, FCN=5----->|
           |-----W=1, FCN=4--X-->|
-          |- W=1, FCN=7 + MIC ->|MIC checked: failed
-          |<-----ACK, W=1-------|C=0 Bitmap:1100001
-          |-----W=1, FCN=4----->|MIC checked: success =>
-          |<---- ACK, W=1 ------|C=1, no Bitmap
-
+          |- W=1, FCN=7 + MIC ->| Integrity check: failure
+          |<-- ACK, W=1, C=0 ---| C=0, Bitmap:1100001
+          |-----W=1, FCN=4----->| Integrity check: success
+          |<-- ACK, W=1, C=1 ---| C=1
+        (End)
 ~~~~
-{: #Fig-Example-Rel-Window-NACK-Loss title='Transmission in ACK-on-Error mode of an IPv6 packet carried by 11 fragments, with MAX_WIND_FCN=6 and three lost fragments.'}
+{: #Fig-Example-Rel-Window-NACK-Loss title='Transmission in ACK-on-Error mode of a SCHC Packet fragmented in 11 tiles, with one tile per SCHC Fragment, MAX_WIND_FCN=6 and three lost SCHC Fragments.'}
 
 
-{{Figure-Example-ACK-on-Error-VarMTU}} shows an example of a transmission in ACK-on-Error mode of a SCHC Packet broken into
+{{Figure-Example-ACK-on-Error-VarMTU}} shows an example of a transmission in ACK-on-Error mode of a SCHC Packet fragmented in
 73 tiles, with N=5, MAX_WIND_FCN=27, M=2 and 3 lost SCHC Fragments.
 
 ~~~~
@@ -2021,21 +2020,20 @@ In the following examples, N (i.e. the size if the FCN field) is 3 bits. Therefo
     a   |-----W=2, FCN=13--X-->| 1 tile sent (not received)
     l   |-----W=2, FCN=12----->| 1 tile sent
     l   |---W=2, FCN=31 + MIC->| Integrity check: failure
-    e   |<------ACK, W=0-------| Bitmap:1111111111110000111111111111
+    e   |<--- ACK, W=0, C=0 ---| C=0, Bitmap:1111111111110000111111111111
     r   |-----W=0, FCN=15----->| 1 tile sent
         |-----W=0, FCN=14----->| 1 tile sent
     L   |-----W=0, FCN=13----->| 1 tile sent
     2   |-----W=0, FCN=12----->| 1 tile sent
-        |<------ACK, W=1-------| Bitmap:1111111111111111111111110000
+        |<--- ACK, W=1, C=0 ---| C=0, Bitmap:1111111111111111111111110000
     M   |-----W=1, FCN=3 ----->| 1 tile sent
     T   |-----W=1, FCN=2 ----->| 1 tile sent
     U   |-----W=1, FCN=1 ----->| 1 tile sent
         |-----W=1, FCN=0 ----->| 1 tile sent
-    |   |<------ACK, W=2-------| Bitmap:1111111111111101000000000001
+    |   |<--- ACK, W=2, C=0 ---| C=0, Bitmap:1111111111111101000000000001
     |   |-----W=2, FCN=13----->| Integrity check: success
-    V   |<-----ACK, W=2, C=1 --| C=1
+    V   |<--- ACK, W=2, C=1 ---| C=1
       (End)
-
 ~~~~
 {: #Figure-Example-ACK-on-Error-VarMTU title='ACK-on-Error mode with variable MTU.'}
 
@@ -2043,10 +2041,11 @@ In this example, the L2 MTU becomes reduced just before sending the "W=2, FCN=19
 Before retransmissions, the 73 tiles are carried by a total of 25 SCHC Fragments, the last 9 being of smaller size.
 
 Note 1: Bitmaps are shown prior to truncation for transmission
-Note 2: other behaviors (e.g. regarding when ACKs are sent by the Receiver) are also allowed in ACK-on-Error.
+
+Note 2: other sequences of events (e.g. regarding when ACKs are sent by the Receiver) are also allowed by this specification of ACK-on-Error.
 
 
-{{Fig-Example-Rel-Window-ACK-NoLoss}} illustrates the transmission in ACK-Always mode of an IPv6 packet that needs 11 fragments, with MAX_WIND_FCN=6 and no loss.
+{{Fig-Example-Rel-Window-ACK-NoLoss}} illustrates the transmission in ACK-Always mode of a SCHC Packet fragmented in 11 tiles, with one tile per SCHC Fragment, with N=3, MAX_WIND_FCN=6 and no loss.
 
 ~~~~
         Sender               Receiver
@@ -2057,46 +2056,44 @@ Note 2: other behaviors (e.g. regarding when ACKs are sent by the Receiver) are 
           |-----W=0, FCN=2----->|
           |-----W=0, FCN=1----->|
           |-----W=0, FCN=0----->|
-          |<-----ACK, W=0-------| Bitmap:1111111
+          |<-- ACK, W=0, C=0 ---| Bitmap:1111111
           |-----W=1, FCN=6----->|
           |-----W=1, FCN=5----->|   
           |-----W=1, FCN=4----->|
-          |--W=1, FCN=7 + MIC-->|MIC checked: success =>
-          |<-----ACK, W=1-------| C=1 no Bitmap
+          |--W=1, FCN=7 + MIC-->| Integrity check: success
+          |<-- ACK, W=1, C=1 ---| C=1
         (End)    
-
 ~~~~
-{: #Fig-Example-Rel-Window-ACK-NoLoss title='Transmission in ACK-Always mode of an IPv6 packet carried by 11 fragments, with MAX_WIND_FCN=6 and no lost fragment.'}
+{: #Fig-Example-Rel-Window-ACK-NoLoss title='Transmission in ACK-Always mode of a SCHC Packet fragmented in 11 tiles, with one tile per SCHC Fragment, with N=3, MAX_WIND_FCN=6 and no loss.'}
 
-{{Fig-Example-Rel-Window-ACK-Loss}} illustrates the transmission in ACK-Always mode of an IPv6 packet that needs 11 fragments, with MAX_WIND_FCN=6 and three lost fragments.
+{{Fig-Example-Rel-Window-ACK-Loss}} illustrates the transmission in ACK-Always mode of a SCHC Packet fragmented in 11 tiles, with one tile per SCHC Fragment, N=3, MAX_WIND_FCN=6 and three lost SCHC Fragments.
 
 ~~~~
         Sender               Receiver
+          |-----W=0, FCN=6----->|
+          |-----W=0, FCN=5----->|
+          |-----W=0, FCN=4--X-->|
+          |-----W=0, FCN=3----->|
+          |-----W=0, FCN=2--X-->|
+          |-----W=0, FCN=1----->|
+          |-----W=0, FCN=0----->|        6543210
+          |<-- ACK, W=0, C=0 ---| Bitmap:1101011
+          |-----W=0, FCN=4----->|
+          |-----W=0, FCN=2----->|
+          |<-- ACK, W=0, C=0 ---| Bitmap:1111111
           |-----W=1, FCN=6----->|
           |-----W=1, FCN=5----->|
           |-----W=1, FCN=4--X-->|
-          |-----W=1, FCN=3----->|
-          |-----W=1, FCN=2--X-->|             7
-          |-----W=1, FCN=1----->|             /
-          |-----W=1, FCN=0----->|       6543210
-          |<-----ACK, W=1-------|Bitmap:1101011
-          |-----W=1, FCN=4----->|
-          |-----W=1, FCN=2----->|
-          |<-----ACK, W=1-------|Bitmap:
-          |-----W=0, FCN=6----->|
-          |-----W=0, FCN=5----->|   
-          |-----W=0, FCN=4--X-->|
-          |--W=0, FCN=7 + MIC-->|MIC checked: failed
-          |<-----ACK, W=0-------| C= 0 Bitmap:11000001
-          |-----W=0, FCN=4----->|MIC checked: success =>
-          |<-----ACK, W=0-------| C= 1 no Bitmap
-        (End)    
-
+          |--W=1, FCN=7 + MIC-->| Integrity check: failure
+          |<-- ACK, W=1, C=0 ---| C=0, Bitmap:11000001
+          |-----W=1, FCN=4----->| Integrity check: success
+          |<-- ACK, W=1, C=1 ---| C=1
+        (End)
 ~~~~
-{: #Fig-Example-Rel-Window-ACK-Loss title='Transmission in ACK-Always mode of an IPv6 packet carried by 11 fragments, with
-MAX_WIND_FCN=6 and three lost fragments.'}
+{: #Fig-Example-Rel-Window-ACK-Loss title='Transmission in ACK-Always mode of a SCHC Packet fragmented in 11 tiles, with one tile per SCHC Fragment, N=3, MAX_WIND_FCN=6 and three lost SCHC Fragments.'}
 
-{{Fig-Example-Rel-Window-ACK-Loss-Last-A}} illustrates the transmission in ACK-Always mode of an IPv6 packet that needs 6 fragments, with MAX_WIND_FCN=6, three lost fragments and only one retry needed to recover each lost fragment.
+{{Fig-Example-Rel-Window-ACK-Loss-Last-A}} illustrates the transmission in ACK-Always mode of a SCHC Packet fragmented in 6 tiles,
+with one tile per SCHC Fragment, N=3, MAX_WIND_FCN=6, three lost SCHC Fragments and only one retry needed to recover each lost SCHC Fragment.
 
 ~~~~
           Sender                Receiver
@@ -2105,18 +2102,19 @@ MAX_WIND_FCN=6 and three lost fragments.'}
              |-----W=0, FCN=4--X-->|
              |-----W=0, FCN=3--X-->|
              |-----W=0, FCN=2--X-->|
-             |--W=0, FCN=7 + MIC-->|MIC checked: failed
-             |<-----ACK, W=0-------|C= 0 Bitmap:1100001
-             |-----W=0, FCN=4----->|MIC checked: failed
-             |-----W=0, FCN=3----->|MIC checked: failed
-             |-----W=0, FCN=2----->|MIC checked: success
-             |<-----ACK, W=0-------|C=1 no Bitmap
+             |--W=0, FCN=7 + MIC-->| Integrity check: failure
+             |<-- ACK, W=0, C=0 ---| C=0, Bitmap:1100001
+             |-----W=0, FCN=4----->| Integrity check: failure
+             |-----W=0, FCN=3----->| Integrity check: failure
+             |-----W=0, FCN=2----->| Integrity check: success
+             |<-- ACK, W=0, C=1 ---| C=1
            (End)
 ~~~~
-{: #Fig-Example-Rel-Window-ACK-Loss-Last-A title='Transmission in ACK-Always mode of an IPv6 packet carried by 11 fragments,
-with MAX_WIND_FCN=6, three lost fragments and only one retry needed for each lost fragment.'}
+{: #Fig-Example-Rel-Window-ACK-Loss-Last-A title='Transmission in ACK-Always mode of a SCHC Packet fragmented in 6 tiles,
+with one tile per SCHC Fragment, N=3, MAX_WIND_FCN=6, three lost SCHC Fragments.'}
 
-{{Fig-Example-Rel-Window-ACK-Loss-Last-B}} illustrates the transmission in ACK-Always mode of an IPv6 packet that needs 6 fragments, with MAX_WIND_FCN=6, three lost fragments, and the second ACK lost.
+{{Fig-Example-Rel-Window-ACK-Loss-Last-B}} illustrates the transmission in ACK-Always mode of a SCHC Packet fragmented in 6 tiles,
+with one tile per SCHC Fragment, N=3, MAX_WIND_FCN=6, three lost SCHC Fragments, and the second SCHC ACK lost.
 
 ~~~~
           Sender                Receiver
@@ -2125,22 +2123,22 @@ with MAX_WIND_FCN=6, three lost fragments and only one retry needed for each los
              |-----W=0, FCN=4--X-->|
              |-----W=0, FCN=3--X-->|
              |-----W=0, FCN=2--X-->|
-             |--W=0, FCN=7 + MIC-->|MIC checked: failed
-             |<-----ACK, W=0-------|C=0  Bitmap:1100001
-             |-----W=0, FCN=4----->|MIC checked: failed
-             |-----W=0, FCN=3----->|MIC checked: failed
-             |-----W=0, FCN=2----->|MIC checked: success
-             |  X---ACK, W=0-------|C= 1 no Bitmap
+             |--W=0, FCN=7 + MIC-->| Integrity check: failure
+             |<-- ACK, W=0, C=0 ---| C=0, Bitmap:1100001
+             |-----W=0, FCN=4----->| Integrity check: failure
+             |-----W=0, FCN=3----->| Integrity check: failure
+             |-----W=0, FCN=2----->| Integrity check: success
+             |<-X-ACK, W=0, C=1 ---| C=1
     timeout  |                     |
-             |--W=0, FCN=7 + MIC-->|
-             |<-----ACK, W=0-------|C= 1 no Bitmap  
-
+             |--- W=0, ACK REQ --->| ACK REQ
+             |<-- ACK, W=0, C=1 ---| C=1
            (End)
 ~~~~
-{: #Fig-Example-Rel-Window-ACK-Loss-Last-B title='Transmission in ACK-Always mode of an IPv6 packet carried by 11 fragments,
-with MAX_WIND_FCN=6, three lost fragments, and the second ACK lost.'}
+{: #Fig-Example-Rel-Window-ACK-Loss-Last-B title='Transmission in ACK-Always mode of a SCHC Packet fragmented in 6 tiles,
+with one tile per SCHC Fragment, N=3, MAX_WIND_FCN=6, three lost SCHC Fragments, and the second SCHC ACK lost.'}
 
-{{Fig-Example-Rel-Window-ACK-Loss-Last-C}} illustrates the transmission in ACK-Always mode of an IPv6 packet that needs 6 fragments, with MAX_WIND_FCN=6, with three lost fragments, and one retransmitted fragment lost again.
+{{Fig-Example-Rel-Window-ACK-Loss-Last-C}} illustrates the transmission in ACK-Always mode of a SCHC Packet fragmented in 6 tiles,
+with N=3, MAX_WIND_FCN=6, with three lost SCHC Fragments, and one retransmitted SCHC Fragment lost again.
 
 ~~~~
            Sender                Receiver
@@ -2149,23 +2147,24 @@ with MAX_WIND_FCN=6, three lost fragments, and the second ACK lost.'}
              |-----W=0, FCN=4--X-->|
              |-----W=0, FCN=3--X-->|
              |-----W=0, FCN=2--X-->|
-             |--W=0, FCN=7 + MIC-->|MIC checked: failed
-             |<-----ACK, W=0-------|C=0 Bitmap:1100001
-             |-----W=0, FCN=4----->|MIC checked: failed
-             |-----W=0, FCN=3----->|MIC checked: failed
+             |--W=0, FCN=7 + MIC-->| Integrity check: failure
+             |<-- ACK, W=0, C=0 ---| C=0, Bitmap:1100001
+             |-----W=0, FCN=4----->| Integrity check: failure
+             |-----W=0, FCN=3----->| Integrity check: failure
              |-----W=0, FCN=2--X-->|
       timeout|                     |
-             |--W=0, FCN=7 + MIC-->|All-0 empty
-             |<-----ACK, W=0-------|C=0 Bitmap: 1111101
-             |-----W=0, FCN=2----->|MIC checked: success
-             |<-----ACK, W=0-------|C=1 no Bitmap
+             |--- W=0, ACK REQ --->| ACK REQ
+             |<-- ACK, W=0, C=0 ---| C=0, Bitmap: 1111101
+             |-----W=0, FCN=2----->| Integrity check: success
+             |<-- ACK, W=0, C=1 ---| C=1
            (End)
 ~~~~
-{: #Fig-Example-Rel-Window-ACK-Loss-Last-C title='Transmission in ACK-Always mode of an IPv6 packet carried by 11 fragments,
-with MAX_WIND_FCN=6, with three lost fragments, and one retransmitted fragment lost again.'}
+{: #Fig-Example-Rel-Window-ACK-Loss-Last-C title='Transmission in ACK-Always mode of a SCHC Packet fragmented in 6 tiles,
+with N=3, MAX_WIND_FCN=6, with three lost SCHC Fragments, and one retransmitted SCHC Fragment lost again.'}
 
 
-{{Fig-Example-MaxWindFCN}} illustrates the transmission in ACK-Always mode of an IPv6 packet that needs 28 fragments, with N=5, MAX_WIND_FCN=23 and two lost fragments. Note that MAX_WIND_FCN=23 may be useful when the maximum possible Bitmap size, considering the maximum lower layer technology payload size and the value of R, is 3 bytes. Note also that the FCN of the last fragment of the packet is the one with FCN=31 (i.e. FCN=(2^N)-1 for N=5, or equivalently, all FCN bits set to 1).
+{{Fig-Example-MaxWindFCN}} illustrates the transmission in ACK-Always mode of a SCHC Packet fragmented in 28 tiles,
+with one tile per SCHC Fragment, N=5, MAX_WIND_FCN=23 and two lost SCHC Fragments.
 
 ~~~~
       Sender               Receiver
@@ -2193,20 +2192,20 @@ with MAX_WIND_FCN=6, with three lost fragments, and one retransmitted fragment l
         |-----W=0, FCN=2 ----->|
         |-----W=0, FCN=1 ----->|
         |-----W=0, FCN=0 ----->|
-        |                      |lcl-Bitmap:110111111111101111111111
-        |<------ACK, W=0-------|truncated Bitmap:1101111111111011
+        |                      |
+        |<--- ACK, W=0, C=0 ---| Bitmap:110111111111101111111111
         |-----W=0, FCN=21----->|
         |-----W=0, FCN=10----->|
-        |<------ACK, W=0-------|no Bitmap
+        |<--- ACK, W=0, C=0 ---| Bitmap:111111111111111111111111
         |-----W=1, FCN=23----->|
         |-----W=1, FCN=22----->|
         |-----W=1, FCN=21----->|
-        |--W=1, FCN=31 + MIC-->|MIC checked: sucess =>
-        |<------ACK, W=1-------|no Bitmap
+        |--W=1, FCN=31 + MIC-->| Integrity check: success
+        |<--- ACK, W=1, C=1 ---| C=1
       (End)
 ~~~~
-{: #Fig-Example-MaxWindFCN title='Transmission in ACK-Always mode of an IPv6 packet carried by 28 fragments, with N=5,
-MAX_WIND_FCN=23 and two lost fragments.'}
+{: #Fig-Example-MaxWindFCN title='Transmission in ACK-Always mode of a SCHC Packet fragmented in 28 tiles,
+with one tile per SCHC Fragment, N=5, MAX_WIND_FCN=23 and two lost SCHC Fragments.'}
 
 
 # Fragmentation State Machines {#FSM}
