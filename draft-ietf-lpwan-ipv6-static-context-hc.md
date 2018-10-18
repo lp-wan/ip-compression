@@ -1951,7 +1951,7 @@ This section provides examples for the different fragment reliability modes spec
 ~~~~
 {: #Fig-Example-Unreliable title='Transmission in No-ACK mode of a SCHC Packet carried by 11 SCHC Fragments'}
 
-In the following examples, N (i.e. the size if the FCN field) is 3 bits. Therefore, the All-1 FCN value is 7.
+In the following examples, N (the size of the FCN field) is 3 bits. Therefore, the All-1 FCN value is 7.
 
 {{Fig-Example-Win-NoLoss-NACK}} illustrates the transmission in ACK-on-Error mode of a SCHC Packet fragmented in 11 tiles, with one tile per SCHC Fragment, MAX_WIND_FCN=6 and no lost SCHC Fragment.
 
@@ -1969,7 +1969,7 @@ In the following examples, N (i.e. the size if the FCN field) is 3 bits. Therefo
           |-----W=1, FCN=5----->|
           |-----W=1, FCN=4----->|
           |--W=1, FCN=7 + MIC-->| Integrity check: success
-          |<---- ACK, W=1 ------|
+          |<-- ACK, W=1, C=1 ---| C=1
         (End)
 ~~~~
 {: #Fig-Example-Win-NoLoss-NACK title='Transmission in ACK-on-Error mode of a SCHC Packet fragmented in 11 tiles, with one tile per SCHC Fragment, MAX_WIND_FCN=6 and no lost SCHC Fragment.'}
@@ -2053,7 +2053,7 @@ Before retransmissions, the 73 tiles are carried by a total of 25 SCHC Fragments
 
 Note 1: Bitmaps are shown prior to truncation for transmission
 
-Note 2: other sequences of events (e.g. regarding when ACKs are sent by the Receiver) are also allowed by this specification of ACK-on-Error.
+Note 2: other sequences of events (e.g. regarding when ACKs are sent by the Receiver) are also allowed by this specification. Profiles may restrict this flexibility.
 
 
 {{Fig-Example-Rel-Window-ACK-NoLoss}} illustrates the transmission in ACK-Always mode of a SCHC Packet fragmented in 11 tiles, with one tile per SCHC Fragment, with N=3, MAX_WIND_FCN=6 and no loss.
