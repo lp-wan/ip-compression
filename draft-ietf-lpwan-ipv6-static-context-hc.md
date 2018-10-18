@@ -637,7 +637,7 @@ Consecutive bits, going right, correspond to sequentially decreasing tile number
 In Bitmaps for windows that are not the last one of a SCHC Packet,
 the bit at the right-most position corresponds to the tile numbered 0.
 In the Bitmap for the last window,
-the bit at the right-most position corresponds either to the tile numbered 0 or to a tile that is sent/received as "the last one of the SCHC Packet" without expliciting its number (see {{LastFrag}}).
+the bit at the right-most position corresponds either to the tile numbered 0 or to a tile that is sent/received as "the last one of the SCHC Packet" without explicitely stating its number (see {{LastFrag}}).
 
 At the receiver
 
@@ -1144,33 +1144,44 @@ the receiver MAY release all resources associated with this Rule ID and optional
 
 ### ACK-Always {#ACK-Always-subsection}
 
-In ACK-Always mode, windows are used.
-An acknowledgement, positive or negative, is fed by the fragment receiver back to the fragment sender at the end of the transmission of each window of SCHC Fragments.
-Padding is kept to a minimum: only the last SCHC Fragment is padded as needed.
-
-This mode has been designed under the following assumptions
+The ACK-Always mode has been designed under the following assumptions
 
 * Data unit out-of-sequence delivery does not occur between the entity performing fragmentation and the entity performing reassembly
 
 * The L2 MTU value does not change while a fragmented SCHC Packet is being transmitted.
 
-In a nutshell, the fragment sender iterates retransmitting the SCHC Fragments that are reported missing until the fragment receiver reports that all the SCHC Fragments belonging to the window have been correctly received, or until too many attempts were made.
-The fragment sender only advances to the next window of SCHC Fragments when it has ascertained that all the SCHC Fragments belonging to the current window have been fully and correctly received (lock-step behaviour between the sender and the receiver, at the window granularity).
+In ACK-Always mode, windows are used.
+An acknowledgement, positive or negative, is fed by the fragment receiver back to the fragment sender at the end of the transmission of each window of SCHC Fragments.
 
-The W field MUST be present and its size MUST be 1 bit.
+The tiles are not required to be of uniform size. Padding is kept to a minimum: only the last SCHC Fragment is padded as needed.
 
-At the sender, one W bit and one FCN counter MUST be instantiated for each pair of Rule ID and optional DTag values.
-At the receiver, one W bit, one FCN counter and one Bitmap MUST be instantiated for each pair of Rule ID and optional DTag values.
-At the sender, one Attempts counter MUST be instantiated for each pair of Rule ID and optional DTag values.
-At the sender, one Retransmission Timer MUST be instantiated for each pair of Rule ID and optional DTag values.
-At the receiver, one Inactivity Timer MUST be instantiated for each pair of Rule ID and optional DTag values.
-The expiration values of the Retransmission Timer and of the Inactivity Timer are based on the characteristics of the underlying LPWAN technology
-and MUST be defined in a Profile.
+In a nutshell, the algorithm is the following: after a first blind transmission of all the tiles of a window, the fragment sender iterates retransmitting the tiles that are reported missing until the fragment receiver reports that all the tiles belonging to the window have been correctly received, or until too many attempts were made.
+The fragment sender only advances to the next window of tiles when it has ascertained that all the tiles belonging to the current window have been fully and correctly received. This results in a lock-step behaviour between the sender and the receiver, at the window granularity.
 
-The presence and size of the MIC and DTag fields MUST be defined by each Profile.
+Each Profile MUST specify which Rule ID value(s) is (are) allocated to this mode.
+For brevity, the rest of {{No-ACK-subsection}} only refers to Rule ID values that are allocated to this mode.
 
-The value of N (size of the FCN field) and the value of MAX_WIND_FCN MUST be defined by each Profile.
-WINDOW_SIZE MUST be equal to MAX_WIND_FCN + 1.
+The W field MUST be present and its size M MUST be 1 bit. WINDOW_SIZE MUST be equal to MAX_WIND_FCN + 1.
+
+Each Profile, for each Rule ID value, MUST define
+
+- the value of N (size of the FCN field),
+- the value of MAX_WIND_FCN
+- the presence or absence of the MIC field in the SCHC F/R messages, as well as its size if it is present,
+- the presence or absence of the DTag field in the SCHC F/R messages, as well as its size if it is present,
+- the value of MAX_ACK_REQUESTS,
+- the expiration time of the Retransmission Timer
+- the expiration time of the Inactivity Timer
+
+The sender, for each active pair of Rule ID and optional DTag values, MUST maintain
+
+- one Attempts counter
+- one Retransmission Timer
+
+The receiver, for each pair of Rule ID and optional DTag values, MUST maintain
+
+- one Inactivity Timer
+
 
 The value of MAX_ACK_REQUESTS MUST be defined by each Profile.
 
@@ -1385,7 +1396,7 @@ Each Profile, for each Rule ID value, MUST define
 - the tile size (a tile does not need to be multiple of an L2 Word, but it MUST be at least the size of an L2 Word)
 - the value of M (size of the W field),
 - the value of N (size of the FCN field),
-- the value of MAX_WIND_FCN, which MUST be strictly less than (2^N)-1
+- the value of MAX_WIND_FCN
 - the presence or absence of the MIC field in the SCHC F/R messages, as well as its size if it is present,
 - the presence or absence of the DTag field in the SCHC F/R messages, as well as its size if it is present,
 - the value of MAX_ACK_REQUESTS,
