@@ -1017,7 +1017,7 @@ Window # |-------- 0 --------|-------- 1 --------|- 2 - ... - 27 -------|-- 28 -
 <h1 id="rfc.section.8.2.2.3">
 <a href="#rfc.section.8.2.2.3">8.2.2.3.</a> <a href="#Bitmap" id="Bitmap">Bitmaps</a>
 </h1>
-<p id="rfc.section.8.2.2.3.p.1">Each bit in the Bitmap for a window corresponds to a tile in the window.  Each Bitmap has therefore WINDOW_SIZE bits.  The bit at the left-most position corresponds to the tile numbered WINDOW_SIZE - 1.  Consecutive bits, going right, correspond to sequentially decreasing tile numbers.  In Bitmaps for windows that are not the last one of a SCHC Packet, the bit at the right-most position corresponds to the tile numbered 0.  In the Bitmap for the last window, the bit at the right-most position corresponds either to the tile numbered 0 or to a tile that is sent/received as &#8220;the last one of the SCHC Packet&#8221; without expliciting its number (see <a href="#LastFrag" class="xref">Section 8.3.1.2</a>).</p>
+<p id="rfc.section.8.2.2.3.p.1">Each bit in the Bitmap for a window corresponds to a tile in the window.  Each Bitmap has therefore WINDOW_SIZE bits.  The bit at the left-most position corresponds to the tile numbered WINDOW_SIZE - 1.  Consecutive bits, going right, correspond to sequentially decreasing tile numbers.  In Bitmaps for windows that are not the last one of a SCHC Packet, the bit at the right-most position corresponds to the tile numbered 0.  In the Bitmap for the last window, the bit at the right-most position corresponds either to the tile numbered 0 or to a tile that is sent/received as &#8220;the last one of the SCHC Packet&#8221; without explicitely stating its number (see <a href="#LastFrag" class="xref">Section 8.3.1.2</a>).</p>
 <p id="rfc.section.8.2.2.3.p.2">At the receiver</p>
 <p></p>
 
@@ -1413,20 +1413,42 @@ Window # |-------- 0 --------|-------- 1 --------|- 2 - ... - 27 -------|-- 28 -
 <h1 id="rfc.section.8.4.2">
 <a href="#rfc.section.8.4.2">8.4.2.</a> <a href="#ACK-Always-subsection" id="ACK-Always-subsection">ACK-Always</a>
 </h1>
-<p id="rfc.section.8.4.2.p.1">In ACK-Always mode, windows are used.  An acknowledgement, positive or negative, is fed by the fragment receiver back to the fragment sender at the end of the transmission of each window of SCHC Fragments.  Padding is kept to a minimum: only the last SCHC Fragment is padded as needed.</p>
-<p id="rfc.section.8.4.2.p.2">This mode has been designed under the following assumptions</p>
+<p id="rfc.section.8.4.2.p.1">The ACK-Always mode has been designed under the following assumptions</p>
 <p></p>
 
 <ul>
 <li>Data unit out-of-sequence delivery does not occur between the entity performing fragmentation and the entity performing reassembly</li>
 <li>The L2 MTU value does not change while a fragmented SCHC Packet is being transmitted.</li>
 </ul>
-<p id="rfc.section.8.4.2.p.4">In a nutshell, the fragment sender iterates retransmitting the SCHC Fragments that are reported missing until the fragment receiver reports that all the SCHC Fragments belonging to the window have been correctly received, or until too many attempts were made.  The fragment sender only advances to the next window of SCHC Fragments when it has ascertained that all the SCHC Fragments belonging to the current window have been fully and correctly received (lock-step behaviour between the sender and the receiver, at the window granularity).</p>
-<p id="rfc.section.8.4.2.p.5">The W field MUST be present and its size MUST be 1 bit.</p>
-<p id="rfc.section.8.4.2.p.6">At the sender, one W bit and one FCN counter MUST be instantiated for each pair of Rule ID and optional DTag values.  At the receiver, one W bit, one FCN counter and one Bitmap MUST be instantiated for each pair of Rule ID and optional DTag values.  At the sender, one Attempts counter MUST be instantiated for each pair of Rule ID and optional DTag values.  At the sender, one Retransmission Timer MUST be instantiated for each pair of Rule ID and optional DTag values.  At the receiver, one Inactivity Timer MUST be instantiated for each pair of Rule ID and optional DTag values.  The expiration values of the Retransmission Timer and of the Inactivity Timer are based on the characteristics of the underlying LPWAN technology and MUST be defined in a Profile.</p>
-<p id="rfc.section.8.4.2.p.7">The presence and size of the MIC and DTag fields MUST be defined by each Profile.</p>
-<p id="rfc.section.8.4.2.p.8">The value of N (size of the FCN field) and the value of MAX_WIND_FCN MUST be defined by each Profile.  WINDOW_SIZE MUST be equal to MAX_WIND_FCN + 1.</p>
-<p id="rfc.section.8.4.2.p.9">The value of MAX_ACK_REQUESTS MUST be defined by each Profile.</p>
+<p id="rfc.section.8.4.2.p.3">In ACK-Always mode, windows are used.  An acknowledgement, positive or negative, is fed by the fragment receiver back to the fragment sender at the end of the transmission of each window of SCHC Fragments.</p>
+<p id="rfc.section.8.4.2.p.4">The tiles are not required to be of uniform size. Padding is kept to a minimum: only the last SCHC Fragment is padded as needed.</p>
+<p id="rfc.section.8.4.2.p.5">In a nutshell, the algorithm is the following: after a first blind transmission of all the tiles of a window, the fragment sender iterates retransmitting the tiles that are reported missing until the fragment receiver reports that all the tiles belonging to the window have been correctly received, or until too many attempts were made.  The fragment sender only advances to the next window of tiles when it has ascertained that all the tiles belonging to the current window have been fully and correctly received. This results in a lock-step behaviour between the sender and the receiver, at the window granularity.</p>
+<p id="rfc.section.8.4.2.p.6">Each Profile MUST specify which Rule ID value(s) is (are) allocated to this mode.  For brevity, the rest of <a href="#No-ACK-subsection" class="xref">Section 8.4.1</a> only refers to Rule ID values that are allocated to this mode.</p>
+<p id="rfc.section.8.4.2.p.7">The W field MUST be present and its size M MUST be 1 bit. WINDOW_SIZE MUST be equal to MAX_WIND_FCN + 1.</p>
+<p id="rfc.section.8.4.2.p.8">Each Profile, for each Rule ID value, MUST define</p>
+<p></p>
+
+<ul>
+<li>the value of N (size of the FCN field),</li>
+<li>the value of MAX_WIND_FCN</li>
+<li>the presence or absence of the MIC field in the SCHC F/R messages, as well as its size if it is present,</li>
+<li>the presence or absence of the DTag field in the SCHC F/R messages, as well as its size if it is present,</li>
+<li>the value of MAX_ACK_REQUESTS,</li>
+<li>the expiration time of the Retransmission Timer</li>
+<li>the expiration time of the Inactivity Timer</li>
+</ul>
+<p id="rfc.section.8.4.2.p.10">The sender, for each active pair of Rule ID and optional DTag values, MUST maintain</p>
+<p></p>
+
+<ul>
+<li>one Attempts counter</li>
+<li>one Retransmission Timer</li>
+</ul>
+<p id="rfc.section.8.4.2.p.12">The receiver, for each pair of Rule ID and optional DTag values, MUST maintain</p>
+<p></p>
+
+<ul><li>one Inactivity Timer</li></ul>
+<p id="rfc.section.8.4.2.p.14">The value of MAX_ACK_REQUESTS MUST be defined by each Profile.</p>
 <h1 id="rfc.section.8.4.2.1">
 <a href="#rfc.section.8.4.2.1">8.4.2.1.</a> <a href="#sender-behaviour-1" id="sender-behaviour-1">Sender behaviour</a>
 </h1>
@@ -1568,7 +1590,7 @@ SCHC Fragment msg    |-----------|
 <li>the tile size (a tile does not need to be multiple of an L2 Word, but it MUST be at least the size of an L2 Word)</li>
 <li>the value of M (size of the W field),</li>
 <li>the value of N (size of the FCN field),</li>
-<li>the value of MAX_WIND_FCN, which MUST be strictly less than (2^N)-1</li>
+<li>the value of MAX_WIND_FCN</li>
 <li>the presence or absence of the MIC field in the SCHC F/R messages, as well as its size if it is present,</li>
 <li>the presence or absence of the DTag field in the SCHC F/R messages, as well as its size if it is present,</li>
 <li>the value of MAX_ACK_REQUESTS,</li>
@@ -2078,7 +2100,7 @@ Rule 0
         (End) &#160; &#160; &#160;
 </pre>
 <p class="figure">Figure 26: Transmission in No-ACK mode of a SCHC Packet carried by 11 SCHC Fragments</p>
-<p id="rfc.section.B.p.3">In the following examples, N (i.e. the size if the FCN field) is 3 bits. Therefore, the All-1 FCN value is 7.</p>
+<p id="rfc.section.B.p.3">In the following examples, N (the size of the FCN field) is 3 bits. Therefore, the All-1 FCN value is 7.</p>
 <p><a href="#Fig-Example-Win-NoLoss-NACK" class="xref">Figure 27</a> illustrates the transmission in ACK-on-Error mode of a SCHC Packet fragmented in 11 tiles, with one tile per SCHC Fragment, MAX_WIND_FCN=6 and no lost SCHC Fragment.</p>
 <div id="rfc.figure.27"></div>
 <div id="Fig-Example-Win-NoLoss-NACK"></div>
@@ -2096,7 +2118,7 @@ Rule 0
           |-----W=1, FCN=5-----&gt;|
           |-----W=1, FCN=4-----&gt;|
           |--W=1, FCN=7 + MIC--&gt;| Integrity check: success
-          |&lt;---- ACK, W=1 ------|
+          |&lt;-- ACK, W=1, C=1 ---| C=1
         (End)
 </pre>
 <p class="figure">Figure 27: Transmission in ACK-on-Error mode of a SCHC Packet fragmented in 11 tiles, with one tile per SCHC Fragment, MAX_WIND_FCN=6 and no lost SCHC Fragment.</p>
@@ -2174,7 +2196,7 @@ Rule 0
 <p class="figure">Figure 29: ACK-on-Error mode with variable MTU.</p>
 <p id="rfc.section.B.p.7">In this example, the L2 MTU becomes reduced just before sending the &#8220;W=2, FCN=19&#8221; fragment, leaving space for only 1 tile in each forthcoming SCHC Fragment.  Before retransmissions, the 73 tiles are carried by a total of 25 SCHC Fragments, the last 9 being of smaller size.</p>
 <p id="rfc.section.B.p.8">Note 1: Bitmaps are shown prior to truncation for transmission</p>
-<p id="rfc.section.B.p.9">Note 2: other sequences of events (e.g. regarding when ACKs are sent by the Receiver) are also allowed by this specification of ACK-on-Error.</p>
+<p id="rfc.section.B.p.9">Note 2: other sequences of events (e.g. regarding when ACKs are sent by the Receiver) are also allowed by this specification. Profiles may restrict this flexibility.</p>
 <p><a href="#Fig-Example-Rel-Window-ACK-NoLoss" class="xref">Figure 30</a> illustrates the transmission in ACK-Always mode of a SCHC Packet fragmented in 11 tiles, with one tile per SCHC Fragment, with N=3, MAX_WIND_FCN=6 and no loss.</p>
 <div id="rfc.figure.30"></div>
 <div id="Fig-Example-Rel-Window-ACK-NoLoss"></div>
