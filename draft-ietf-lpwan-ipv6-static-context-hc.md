@@ -1187,57 +1187,74 @@ The value of MAX_ACK_REQUESTS MUST be defined by each Profile.
 
 #### Sender behaviour
 
-At the beginning of the fragmentation of a new SCHC Packet, the fragment sender MUST select a Rule ID and DTag value pair for this SCHC Packet and it MUST initialize the W bit to 0.
-The SCHC Packet is fragmented into pieces that will be carried by SCHC Fragment messages, which are grouped in windows.
-The SCHC Fragment that comes first in a window, in fragmentation order, MUST have an FCN value of MAX_WIND_FCN.
-Within a window, each successive SCHC Fragment MUST bear an FCN field decremented by 1 (unsigned integer) compared to the fragment preceding it in fragmentation order, except for the last SCHC Fragment of the SCHC Packet.
-Except for the last window, a window MUST be composed of exactly one SCHC Fragment bearing each possible value of FCN between MAX_WIND_FCN and 0.
-In the last window, the last SCHC Fragment in fragmentation order MUST have the FCN value of All-1 and MUST use the format described in {{LastFrag}}.
-The other SCHC Fragments MUST use the format described in {{NotLastFrag}}.
+At the beginning of the fragmentation of a new SCHC Packet, the fragment sender MUST select a Rule ID and DTag value pair for this SCHC Packet.
+For brevity, the rest of {{ACK-Always-subsection}} only refers to SCHC F/R messages bearing the Rule ID and optional DTag values hereby selected.
 
-The fragment sender MUST start by processing the window that is first in fragmentation order.
-With this window, it MUST enter a **first state** in which it MUST transmit all the SCHC Fragments composing the window.
-The SCHC Fragment that bears the FCN value of All-0 or All-1 MUST be sent last in that series.
+Each SCHC Fragment MUST contain exactly one tile in its Payload.
+All tiles with the number 0 in their window, as well as the last tile, MUST be at least the size of an L2 Word.
 
-Then, the fragment sender MUST initialize an Attempts counter to 0 for that Rule ID and DTag value pair and it MUST enter a **second state**
-where it MUST start a Retransmission Timer for that Rule ID and DTag value pair
-and where it MUST expect to receive a SCHC ACK.
+In all SCHC Fragment messages, the W field MUST be filled with the least significant bit of the window number that the sender is currently processing.
 
-  - On Retransmission Timer expiration, if Attempts is strictly less that MAX_ACK_REQUESTS, the fragment sender MUST send a SCHC ACK REQ and MUST increment the Attempts counter.
-  - If the Retransmission Timer expires while Attempts is greater or equal to MAX_ACK_REQUESTS,
-  the fragment sender MUST send a SCHC Sender-Abort,
-  it MUST release all resource associated with this SCHC Packet
-  and it MUST exit with an error condition.
-  - On receiving a SCHC ACK,
-    * if the SCHC ACK indicates that some fragments are missing at the receiver,
-    the sender MUST increment Attempts,
-    it MUST stop the Retransmission Timer
-    and MUST enter a **third state**.
-    * If the current window is not the last one (All-0) and the SCHC ACK indicates that all fragments were received correctly,
+If a SCHC Fragment carries a tile that is not the last one of the SCHC Packet,
+
+- it MUST be of the Regular type specified in {{NotLastFrag}}
+- the FCN field MUST contain the tile number
+- each tile MUST be of a size
+  that complements the SCHC Fragment Header so
+  that the SCHC Fragment is a multiple of L2 Words without the need for padding bits.
+
+The SCHC Fragment that carries the last tile MUST an All-1 SCHC Fragment, described in {{LastFrag}}.
+
+If MIC is used, the bits on which the MIC is computed MUST be the SCHC Packet concatenated with the padding bits that are appended to the Payload of the SCHC Fragment that carries the last tile.
+
+The fragment sender MUST start by processing the window numbered 0.
+
+In a "blind transmission" phase, it MUST transmit all the tiles composing the window, in decreasing tile number.
+
+Then, it enters an "equalization phase" in which
+it MUST initialize an Attempts counter to 0,
+it MUST start a Retransmission Timer
+and it MUST expect to receive a SCHC ACK. Then,
+
+- on receiving a SCHC ACK,
+
+  * if the SCHC ACK indicates that some tiles are missing at the receiver, then
+    the sender MUST transmit all the tiles that have been reported missing,
+    it MUST increment Attempts,
+    it MUST reset the Retransmission Timer
+    and MUST expect to receive a SCHC ACK again.
+  * if the current window is not the last one and the SCHC ACK indicates that all tiles were correctly received,
     the sender MUST stop the Retransmission Timer,
-    it MUST increment W,
     it MUST advance to the next fragmentation window
-    and it MUST return to the **first state**.
-    * If the current window is the last one (All-1) and the SCHC ACK indicates that more fragments were received than the sender actually sent,
+    and it MUST start a blind transmission phase as described above.
+  * if the current window is the last one and the SCHC ACK indicates that more tiles were received than the sender actually sent,
     the fragment sender MUST send a SCHC Sender-Abort,
     it MUST release all resource associated with this SCHC Packet
-    and it MUST exit with an error condition.
-    * If the current window is the last one (All-1) and the SCHC ACK indicates that all fragments were received correctly yet integrity checking does not match,
+    and it MAY exit with an error condition.
+  * if the current window is the last one and the SCHC ACK indicates that all tiles were correctly received yet integrity check was a failure,
     the fragment sender MUST send a SCHC Sender-Abort,
     it MUST release all resource associated with this SCHC Packet
-    and it MUST exit with an error condition.
-    * If the current window is the last one (All-1) and the SCHC ACK indicates that all fragments were received correctly and integrity checking does match,
+    and it MAY exit with an error condition.
+  * if the current window is the last one and the SCHC ACK indicates that integrity checking was successful,
     the sender exits successfully.
 
-In the **third state**, the fragment sender MUST transmit all the SCHC Fragments that have been reported missing, then it MUST return to the **second state**.
+- on Retransmission Timer expiration,
 
-At any time in the **second state**, the sender MUST silently discard and ignore any SCHC ACK bearing a W value different from its own W value.
+  * if Attempts is strictly less that MAX_ACK_REQUESTS,
+    the fragment sender MUST send a SCHC ACK REQ
+    and MUST increment the Attempts counter.
+  * otherwise
+    the fragment sender MUST send a SCHC Sender-Abort,
+    it MUST release all resource associated with this SCHC Packet
+    and it MAY exit with an error condition.
 
-At any time, on receiving a SCHC Receiver-Abort with the correct Rule ID and DTag value pair, the fragment sender MUST release all resource associated with this SCHC Packet and it MUST exit with an error condition.
+At any time,
+
+- on receiving a SCHC Receiver-Abort, the fragment sender MUST release all resource associated with this SCHC Packet and it MAY exit with an error condition.
+- on receiving a SCHC ACK that bears a W value different from the W value that it currently uses, the fragment sender MUST silently discard and ignore that SCHC ACK.
+
 
 {{Fig-ACKAlwaysSnd}} shows an example of a corresponding state machine.
-
-A delay between each SCHC Fragment transmission can be added to respect local regulations or other constraints imposed by the applications.
 
 
 #### Receiver behaviour
@@ -2566,6 +2583,7 @@ This section lists the parameters that need to be defined in the Profile.
 * if L2 Word is wider than a bit and SCHC fragmentation is used, value of the padding bits (0 or 1). This is needed
 because the padding bits of the last fragment are included in the MIC computation.
 
+A Profile MAY define a delay to be added between each SCHC message transmission to respect local regulations or other constraints imposed by the applications.
 
 * Note on soliciting downlink transmissions: In some LPWAN technologies, as part of energy-saving techniques,
 downlink transmission is only possible immediately after an uplink transmission.
