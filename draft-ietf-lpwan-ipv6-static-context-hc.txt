@@ -2026,46 +2026,46 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
    At the beginning of the fragmentation of a new SCHC Packet, the
    fragment sender MUST select a Rule ID and DTag value pair for this
-   SCHC Packet and it MUST initialize the W bit to 0.  The SCHC Packet
-   is fragmented into pieces that will be carried by SCHC Fragment
-   messages, which are grouped in windows.  The SCHC Fragment that comes
-   first in a window, in fragmentation order, MUST have an FCN value of
-   MAX_WIND_FCN.  Within a window, each successive SCHC Fragment MUST
-   bear an FCN field decremented by 1 (unsigned integer) compared to the
-   fragment preceding it in fragmentation order, except for the last
-   SCHC Fragment of the SCHC Packet.  Except for the last window, a
-   window MUST be composed of exactly one SCHC Fragment bearing each
-   possible value of FCN between MAX_WIND_FCN and 0.  In the last
-   window, the last SCHC Fragment in fragmentation order MUST have the
-   FCN value of All-1 and MUST use the format described in
-   Section 8.3.1.2.  The other SCHC Fragments MUST use the format
-   described in Section 8.3.1.1.
+   SCHC Packet.  For brevity, the rest of Section 8.4.2 only refers to
+   SCHC F/R messages bearing the Rule ID and optional DTag values hereby
+   selected.
 
-   The fragment sender MUST start by processing the window that is first
-   in fragmentation order.  With this window, it MUST enter a *first
-   state* in which it MUST transmit all the SCHC Fragments composing the
-   window.  The SCHC Fragment that bears the FCN value of All-0 or All-1
-   MUST be sent last in that series.
+   Each SCHC Fragment MUST contain exactly one tile in its Payload.  All
+   tiles with the number 0 in their window, as well as the last tile,
+   MUST be at least the size of an L2 Word.
 
-   Then, the fragment sender MUST initialize an Attempts counter to 0
-   for that Rule ID and DTag value pair and it MUST enter a *second
-   state* where it MUST start a Retransmission Timer for that Rule ID
-   and DTag value pair and where it MUST expect to receive a SCHC ACK.
+   In all SCHC Fragment messages, the W field MUST be filled with the
+   least significant bit of the window number that the sender is
+   currently processing.
 
-   o  On Retransmission Timer expiration, if Attempts is strictly less
-      that MAX_ACK_REQUESTS, the fragment sender MUST send a SCHC ACK
-      REQ and MUST increment the Attempts counter.
+   If a SCHC Fragment carries a tile that is not the last one of the
+   SCHC Packet,
 
-   o  If the Retransmission Timer expires while Attempts is greater or
-      equal to MAX_ACK_REQUESTS, the fragment sender MUST send a SCHC
-      Sender-Abort, it MUST release all resource associated with this
-      SCHC Packet and it MUST exit with an error condition.
+   o  it MUST be of the Regular type specified in Section 8.3.1.1
 
-   o  On receiving a SCHC ACK,
+   o  the FCN field MUST contain the tile number
 
-      *  if the SCHC ACK indicates that some fragments are missing at
-         the receiver, the sender MUST increment Attempts, it MUST stop
-         the Retransmission Timer and MUST enter a *third state*.
+   o  each tile MUST be of a size that complements the SCHC Fragment
+      Header so that the SCHC Fragment is a multiple of L2 Words without
+      the need for padding bits.
+
+   The SCHC Fragment that carries the last tile MUST an All-1 SCHC
+   Fragment, described in Section 8.3.1.2.
+
+   If MIC is used, the bits on which the MIC is computed MUST be the
+   SCHC Packet concatenated with the padding bits that are appended to
+   the Payload of the SCHC Fragment that carries the last tile.
+
+   The fragment sender MUST start by processing the window numbered 0.
+
+   In a "blind transmission" phase, it MUST transmit all the tiles
+   composing the window, in decreasing tile number.
+
+   Then, it enters an "equalization phase" in which it MUST initialize
+   an Attempts counter to 0, it MUST start a Retransmission Timer and it
+   MUST expect to receive a SCHC ACK.  Then,
+
+   o  on receiving a SCHC ACK,
 
 
 
@@ -2074,54 +2074,54 @@ Minaburo, et al.         Expires April 21, 2019                [Page 37]
 Internet-Draft                 LPWAN SCHC                   October 2018
 
 
-      *  If the current window is not the last one (All-0) and the SCHC
-         ACK indicates that all fragments were received correctly, the
-         sender MUST stop the Retransmission Timer, it MUST increment W,
-         it MUST advance to the next fragmentation window and it MUST
-         return to the *first state*.
+      *  if the SCHC ACK indicates that some tiles are missing at the
+         receiver, then the sender MUST transmit all the tiles that have
+         been reported missing, it MUST increment Attempts, it MUST
+         reset the Retransmission Timer and MUST expect to receive a
+         SCHC ACK again.
 
-      *  If the current window is the last one (All-1) and the SCHC ACK
-         indicates that more fragments were received than the sender
+      *  if the current window is not the last one and the SCHC ACK
+         indicates that all tiles were correctly received, the sender
+         MUST stop the Retransmission Timer, it MUST advance to the next
+         fragmentation window and it MUST start a blind transmission
+         phase as described above.
+
+      *  if the current window is the last one and the SCHC ACK
+         indicates that more tiles were received than the sender
          actually sent, the fragment sender MUST send a SCHC Sender-
          Abort, it MUST release all resource associated with this SCHC
-         Packet and it MUST exit with an error condition.
+         Packet and it MAY exit with an error condition.
 
-      *  If the current window is the last one (All-1) and the SCHC ACK
-         indicates that all fragments were received correctly yet
-         integrity checking does not match, the fragment sender MUST
-         send a SCHC Sender-Abort, it MUST release all resource
-         associated with this SCHC Packet and it MUST exit with an error
-         condition.
+      *  if the current window is the last one and the SCHC ACK
+         indicates that all tiles were correctly received yet integrity
+         check was a failure, the fragment sender MUST send a SCHC
+         Sender-Abort, it MUST release all resource associated with this
+         SCHC Packet and it MAY exit with an error condition.
 
-      *  If the current window is the last one (All-1) and the SCHC ACK
-         indicates that all fragments were received correctly and
-         integrity checking does match, the sender exits successfully.
+      *  if the current window is the last one and the SCHC ACK
+         indicates that integrity checking was successful, the sender
+         exits successfully.
 
-   In the *third state*, the fragment sender MUST transmit all the SCHC
-   Fragments that have been reported missing, then it MUST return to the
-   *second state*.
+   o  on Retransmission Timer expiration,
 
-   At any time in the *second state*, the sender MUST silently discard
-   and ignore any SCHC ACK bearing a W value different from its own W
-   value.
+      *  if Attempts is strictly less that MAX_ACK_REQUESTS, the
+         fragment sender MUST send a SCHC ACK REQ and MUST increment the
+         Attempts counter.
 
-   At any time, on receiving a SCHC Receiver-Abort with the correct Rule
-   ID and DTag value pair, the fragment sender MUST release all resource
-   associated with this SCHC Packet and it MUST exit with an error
-   condition.
+      *  otherwise the fragment sender MUST send a SCHC Sender-Abort, it
+         MUST release all resource associated with this SCHC Packet and
+         it MAY exit with an error condition.
 
-   Figure 38 shows an example of a corresponding state machine.
+   At any time,
 
-   A delay between each SCHC Fragment transmission can be added to
-   respect local regulations or other constraints imposed by the
-   applications.
+   o  on receiving a SCHC Receiver-Abort, the fragment sender MUST
+      release all resource associated with this SCHC Packet and it MAY
+      exit with an error condition.
 
-8.4.2.2.  Receiver behaviour
+   o  on receiving a SCHC ACK that bears a W value different from the W
+      value that it currently uses, the fragment sender MUST silently
+      discard and ignore that SCHC ACK.
 
-   On receiving a SCHC Fragment with a Rule ID and DTag pair not being
-   processed at that time, the receiver MUST start a process to assemble
-   a new SCHC Packet with that Rule ID and DTag value pair.  That
-   process MUST only examine received SCHC F/R messages with that Rule
 
 
 
@@ -2130,6 +2130,14 @@ Minaburo, et al.         Expires April 21, 2019                [Page 38]
 Internet-Draft                 LPWAN SCHC                   October 2018
 
 
+   Figure 38 shows an example of a corresponding state machine.
+
+8.4.2.2.  Receiver behaviour
+
+   On receiving a SCHC Fragment with a Rule ID and DTag pair not being
+   processed at that time, the receiver MUST start a process to assemble
+   a new SCHC Packet with that Rule ID and DTag value pair.  That
+   process MUST only examine received SCHC F/R messages with that Rule
    ID and DTag value pair and MUST only transmit SCHC F/R messages with
    that Rule ID and DTag value pair.  It MUST intialise its current
    window number to be the first one, it MUST initialise its current W
@@ -2171,14 +2179,6 @@ Internet-Draft                 LPWAN SCHC                   October 2018
          increment its current window number, it MUST flip its current W
          bit and it MUST re-enter the *first state*.
 
-      *  If the Bitmap indicates that at least one SCHC Fragment is
-         missing in the current window, the receiver MUST enter a
-         *second state*.
-
-   o  On receiving an All-1 SCHC Fragment, the receiver MUST send a SCHC
-      ACK (specified in Section 8.3.2).  Reminder: the SCHC ACK reports
-      on the integrity check of the whole reassembled SCHC Packet and
-
 
 
 Minaburo, et al.         Expires April 21, 2019                [Page 39]
@@ -2186,6 +2186,13 @@ Minaburo, et al.         Expires April 21, 2019                [Page 39]
 Internet-Draft                 LPWAN SCHC                   October 2018
 
 
+      *  If the Bitmap indicates that at least one SCHC Fragment is
+         missing in the current window, the receiver MUST enter a
+         *second state*.
+
+   o  On receiving an All-1 SCHC Fragment, the receiver MUST send a SCHC
+      ACK (specified in Section 8.3.2).  Reminder: the SCHC ACK reports
+      on the integrity check of the whole reassembled SCHC Packet and
       optionally on the SCHC Fragments that were correctly received in
       the current window.
 
@@ -2227,13 +2234,6 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
    o  On expiration of the Inactivity Timer, the receiver MUST send a
       SCHC Receiver-Abort, it MUST release all resource associated with
-      this SCHC Packet and it MUST exit the receive process for that
-      SCHC Packet.
-
-   o  On reception of a SCHC Fragment with a W bit different from that
-      of the receiving process
-
-
 
 
 
@@ -2241,6 +2241,12 @@ Minaburo, et al.         Expires April 21, 2019                [Page 40]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
+
+      this SCHC Packet and it MUST exit the receive process for that
+      SCHC Packet.
+
+   o  On reception of a SCHC Fragment with a W bit different from that
+      of the receiving process
 
       *  If the Bitmap is fully populated with 1's, the receiver MUST
          increment its current window number, it MUST flip its current W
@@ -2283,13 +2289,7 @@ Internet-Draft                 LPWAN SCHC                   October 2018
       this SCHC Packet and it MUST exit the receive process for that
       SCHC Packet.
 
-   o  On reception of a SCHC Fragment with a W bit different from that
-      of the receiving process, the receiver MUST silently ignore and
-      discard the SCHC Fragment just received.
 
-   Note: the purpose in the *fourth state* is to increase the chances
-   that the sender receives a SCHC ACK with positive integrity check for
-   this SCHC Packet.
 
 
 
@@ -2297,6 +2297,14 @@ Minaburo, et al.         Expires April 21, 2019                [Page 41]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
+
+   o  On reception of a SCHC Fragment with a W bit different from that
+      of the receiving process, the receiver MUST silently ignore and
+      discard the SCHC Fragment just received.
+
+   Note: the purpose in the *fourth state* is to increase the chances
+   that the sender receives a SCHC ACK with positive integrity check for
+   this SCHC Packet.
 
    On entering the *fourth state*, the receiver MUST reset the
    Inactivity Timer.
@@ -2337,14 +2345,6 @@ Internet-Draft                 LPWAN SCHC                   October 2018
    smaller than the preceding ones.  WINDOW_SIZE MUST be equal to
    MAX_WIND_FCN + 1.
 
-   A SCHC Fragment message carries one or more tiles, which may span
-   multiple windows.  A SCHC ACK reports on the reception of exactly one
-   window of tiles.
-
-   See Figure 22 for an example.
-
-
-
 
 
 
@@ -2353,6 +2353,12 @@ Minaburo, et al.         Expires April 21, 2019                [Page 42]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
+
+   A SCHC Fragment message carries one or more tiles, which may span
+   multiple windows.  A SCHC ACK reports on the reception of exactly one
+   window of tiles.
+
+   See Figure 22 for an example.
 
          +----------------------------------------------...-------------------+
          |                            SCHC Packet                             |
@@ -2396,12 +2402,6 @@ SCHC Fragment msg    |-----------|
 
    The W field MUST be present in the SCHC F/R messages.
 
-   Each Profile, for each Rule ID value, MUST define
-
-   o  the tile size (a tile does not need to be multiple of an L2 Word,
-      but it MUST be at least the size of an L2 Word)
-
-   o  the value of M (size of the W field),
 
 
 
@@ -2409,6 +2409,13 @@ Minaburo, et al.         Expires April 21, 2019                [Page 43]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
+
+   Each Profile, for each Rule ID value, MUST define
+
+   o  the tile size (a tile does not need to be multiple of an L2 Word,
+      but it MUST be at least the size of an L2 Word)
+
+   o  the value of M (size of the W field),
 
    o  the value of N (size of the FCN field),
 
@@ -2451,13 +2458,6 @@ Internet-Draft                 LPWAN SCHC                   October 2018
    o  the fragment sender MUST initialize the Attempts counter to 0 for
       that Rule ID and DTag value pair.
 
-   For brevity, the rest of Section 8.4.3 only refers to SCHC F/R
-   messages bearing the Rule ID and optional DTag values hereby
-   selected.
-
-   A SCHC Fragment message carries in its payload one or more tiles.  If
-   more than one tile is carried in one SCHC Fragment
-
 
 
 
@@ -2465,6 +2465,13 @@ Minaburo, et al.         Expires April 21, 2019                [Page 44]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
+
+   For brevity, the rest of Section 8.4.3 only refers to SCHC F/R
+   messages bearing the Rule ID and optional DTag values hereby
+   selected.
+
+   A SCHC Fragment message carries in its payload one or more tiles.  If
+   more than one tile is carried in one SCHC Fragment
 
    o  the selected tiles MUST be consecutive in the original SCHC Packet
 
@@ -2506,13 +2513,6 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
    o  in an All-1 SCHC Fragment
 
-   However, the last tile MUST NOT have ever been sent both in a Regular
-   SCHC Fragment and in a All-1 SCHC Fragment.
-
-   The fragment sender MUST listen for SCHC ACK messages after having
-   sent
-
-   o  an All-1 SCHC Fragment
 
 
 
@@ -2521,6 +2521,14 @@ Minaburo, et al.         Expires April 21, 2019                [Page 45]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
+
+   However, the last tile MUST NOT have ever been sent both in a Regular
+   SCHC Fragment and in a All-1 SCHC Fragment.
+
+   The fragment sender MUST listen for SCHC ACK messages after having
+   sent
+
+   o  an All-1 SCHC Fragment
 
    o  or a SCHC ACK REQ with the W field corresponding to the last
       window.
@@ -2562,14 +2570,6 @@ Internet-Draft                 LPWAN SCHC                   October 2018
             -  MUST release all resource associated with this SCHC
                Packet
 
-            -  MAY exit with an error condition
-
-         +  otherwise
-
-            -  the fragment sender MUST send SCHC Fragment messages
-               containing all the tiles that are reported missing in the
-               SCHC ACK.
-
 
 
 
@@ -2577,6 +2577,14 @@ Minaburo, et al.         Expires April 21, 2019                [Page 46]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
+
+            -  MAY exit with an error condition
+
+         +  otherwise
+
+            -  the fragment sender MUST send SCHC Fragment messages
+               containing all the tiles that are reported missing in the
+               SCHC ACK.
 
             -  if the last message in this sequence of SCHC Fragment
                messages is not an All-1 SCHC Fragment, then the fragment
@@ -2617,6 +2625,15 @@ Internet-Draft                 LPWAN SCHC                   October 2018
    On reception of any SCHC F/R message, the receiver MUST reset the
    Inactivity Timer.
 
+
+
+
+
+Minaburo, et al.         Expires April 21, 2019                [Page 47]
+
+Internet-Draft                 LPWAN SCHC                   October 2018
+
+
    On reception of a SCHC Fragment message, the receiver MUST assemble
    the received tiles based on the W and FCN fields of the SCHC
    Fragment.
@@ -2626,14 +2643,6 @@ Internet-Draft                 LPWAN SCHC                   October 2018
       This is because the size of the last tile is not known by the
       receiver, therefore padding bits are indistinguishable from the
       tile data bits, at this stage.  They will be removed by the SCHC
-
-
-
-Minaburo, et al.         Expires April 21, 2019                [Page 47]
-
-Internet-Draft                 LPWAN SCHC                   October 2018
-
-
       C/D sublayer.  If the size of the SCHC Fragment Payload exceeds or
       equals the size of one regular tile plus the size of an L2 Word,
       this SHOULD raise an error flag.
@@ -2672,6 +2681,15 @@ Internet-Draft                 LPWAN SCHC                   October 2018
    check the integrity of the reassembled SCHC Packet at least every
    time it prepares for sending a SCHC ACK for the last window.
 
+
+
+
+
+Minaburo, et al.         Expires April 21, 2019                [Page 48]
+
+Internet-Draft                 LPWAN SCHC                   October 2018
+
+
    On reception of a SCHC Sender-Abort, the receiver MUST release all
    resource associated with this SCHC Packet.
 
@@ -2682,13 +2700,6 @@ Internet-Draft                 LPWAN SCHC                   October 2018
    On the Attempts counter exceeding MAX_ACK_REQUESTS, the receiver MUST
    send a SCHC Receiver-Abort and it MUST release all resource
    associated with this SCHC Packet.
-
-
-
-Minaburo, et al.         Expires April 21, 2019                [Page 48]
-
-Internet-Draft                 LPWAN SCHC                   October 2018
-
 
    Reassembly of the SCHC Packet concludes when
 
@@ -2727,17 +2738,6 @@ Internet-Draft                 LPWAN SCHC                   October 2018
    and optional SCHC Fragmentation (see Figure 2).  If a SCHC Packet is
    sent unfragmented (see Figure 23), it is padded as needed for
    transmission.  If a SCHC Packet is fragmented, it is not padded in
-   itself, only the SCHC Fragments are padded as needed for
-   transmission.  Some SCHC F/R modes only pad the very last SCHC
-   Fragment.
-
-
-
-
-
-
-
-
 
 
 
@@ -2745,6 +2745,10 @@ Minaburo, et al.         Expires April 21, 2019                [Page 49]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
 
+
+   itself, only the SCHC Fragments are padded as needed for
+   transmission.  Some SCHC F/R modes only pad the very last SCHC
+   Fragment.
 
    A packet (e.g. an IPv6 packet)
             |                                           ^ (padding bits
@@ -2789,10 +2793,6 @@ Internet-Draft                 LPWAN SCHC                   October 2018
 
    This field always holds the same value.  Therefore, in the Rule, TV
    is set to 6, MO to "equal" and CDA to "not-sent".
-
-
-
-
 
 
 
@@ -4247,9 +4247,9 @@ Internet-Draft                 LPWAN SCHC                   October 2018
       padding bits of the last fragment are included in the MIC
       computation.
 
-   o  Note on soliciting downlink transmissions: In some LPWAN
-      technologies, as part of energy-saving techniques, downlink
-      transmission is only possible immediately after an uplink
+   A Profile MAY define a delay to be added between each SCHC message
+   transmission to respect local regulations or other constraints
+   imposed by the applications.
 
 
 
@@ -4258,6 +4258,9 @@ Minaburo, et al.         Expires April 21, 2019                [Page 76]
 Internet-Draft                 LPWAN SCHC                   October 2018
 
 
+   o  Note on soliciting downlink transmissions: In some LPWAN
+      technologies, as part of energy-saving techniques, downlink
+      transmission is only possible immediately after an uplink
       transmission.  In order to avoid potentially high delay in the
       downlink transmission of a fragmented SCHC Packet, the SCHC
       Fragment receiver may want to perform an uplink transmission as
@@ -4302,10 +4305,7 @@ Appendix F.  Downlink SCHC Fragment transmission
    the latter case, the SCHC Fragment receiver does not start a timer
    after transmission of the SCHC ACK.
 
-   If, after transmission of a SCHC ACK that is not an All-1 fragment,
-   and before expiration of the corresponding Inactivity timer, the SCHC
-   Fragment receiver receives a SCHC Fragment that belongs to the
-   current window (e.g. a missing SCHC Fragment from the current window)
+
 
 
 
@@ -4314,6 +4314,10 @@ Minaburo, et al.         Expires April 21, 2019                [Page 77]
 Internet-Draft                 LPWAN SCHC                   October 2018
 
 
+   If, after transmission of a SCHC ACK that is not an All-1 fragment,
+   and before expiration of the corresponding Inactivity timer, the SCHC
+   Fragment receiver receives a SCHC Fragment that belongs to the
+   current window (e.g. a missing SCHC Fragment from the current window)
    or to the next window, the Inactivity timer for the SCHC ACK is
    stopped.  However, if the Inactivity timer expires, the SCHC ACK is
    resent and the Inactivity timer is reinitialized and restarted.
@@ -4353,13 +4357,9 @@ Appendix G.  Note
 
 Authors' Addresses
 
-   Ana Minaburo
-   Acklio
-   1137A avenue des Champs Blancs
-   35510 Cesson-Sevigne Cedex
-   France
 
-   Email: ana@ackl.io
+
+
 
 
 
@@ -4368,6 +4368,15 @@ Authors' Addresses
 Minaburo, et al.         Expires April 21, 2019                [Page 78]
 
 Internet-Draft                 LPWAN SCHC                   October 2018
+
+
+   Ana Minaburo
+   Acklio
+   1137A avenue des Champs Blancs
+   35510 Cesson-Sevigne Cedex
+   France
+
+   Email: ana@ackl.io
 
 
    Laurent Toutain
@@ -4404,15 +4413,6 @@ Internet-Draft                 LPWAN SCHC                   October 2018
    Canada
 
    Email: juancarlos.zuniga@sigfox.com
-
-
-
-
-
-
-
-
-
 
 
 
