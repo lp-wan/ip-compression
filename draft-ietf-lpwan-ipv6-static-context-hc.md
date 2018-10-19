@@ -47,11 +47,12 @@ author:
   email: dominique.barthel@orange.com  
 - ins: JC. Zuniga
   name: Juan Carlos Zuniga
-  org: Sigfox
+  org: SIGFOX
   street:
-  - Montreal
-  country: Canada
-  email: juancarlos.zuniga@sigfox.com
+  - 425 rue Jean Rostand
+  - Labege  31670
+  country: France
+  email: JuanCarlos.Zuniga@sigfox.com
 normative:
   RFC2119:
   RFC7217:
