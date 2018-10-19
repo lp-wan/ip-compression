@@ -1184,8 +1184,6 @@ The receiver, for each pair of Rule ID and optional DTag values, MUST maintain
 - one Inactivity Timer
 
 
-The value of MAX_ACK_REQUESTS MUST be defined by each Profile.
-
 #### Sender behaviour
 
 At the beginning of the fragmentation of a new SCHC Packet, the fragment sender MUST select a Rule ID and DTag value pair for this SCHC Packet.
@@ -1204,9 +1202,9 @@ If a SCHC Fragment carries a tile that is not the last one of the SCHC Packet,
   that complements the SCHC Fragment Header so
   that the SCHC Fragment is a multiple of L2 Words without the need for padding bits.
 
-The SCHC Fragment that carries the last tile MUST an All-1 SCHC Fragment, described in {{LastFrag}}.
+The SCHC Fragment that carries the last tile MUST be an All-1 SCHC Fragment, described in {{LastFrag}}.
 
-If MIC is used, the bits on which the MIC is computed MUST be the SCHC Packet concatenated with the padding bits that are appended to the Payload of the SCHC Fragment that carries the last tile.
+If MIC is used, the bits on which the MIC is computed MUST be the SCHC Packet concatenated with the potential padding bits that are appended to the Payload of the SCHC Fragment that carries the last tile.
 
 The fragment sender MUST start by processing the window numbered 0.
 
