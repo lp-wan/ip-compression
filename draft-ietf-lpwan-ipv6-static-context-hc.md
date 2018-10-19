@@ -659,11 +659,7 @@ Some SCHC F/R modes can use the following timers and counters
 ### Integrity Checking {#IntegrityChecking}
 
 The reassembled SCHC Packet is checked for integrity at the receive end.
-One way of doing integrity checking is by computing a MIC at the sender side and transmitting it to the receiver for comparison with the locally computed MIC.
-Some layers under SCHC may provide other means of ensuring that all fragments composing a SCHC Packet were correctly received and reassembled.
-Profiles MUST define how integrity checking is done.
-
-If a Profile specifies that MIC is used, the SCHC F/R mode specifies on what fields of the SCHC Fragments the MIC is computed.
+Integrity checking is performed by computing a MIC at the sender side and transmitting it to the receiver for comparison with the locally computed MIC.
 
 The MIC supports UDP checksum elision by SCHC C/D (see {{UDPchecksum}}).
 
@@ -733,8 +729,8 @@ The SCHC F/R messages use the following fields (see the related formats in {{Fra
   Since All-1 is reserved, MAX_WIND_FCN MUST be stricly less that (2^N)-1.
 
 * Message Integrity Check (MIC).
-  This field is optional. If present, it only appears in the All-1 SCHC Fragments.
-  Its presence and size (called T, in bits) is defined by each Profile for each Rule ID.
+  This field only appears in the All-1 SCHC Fragments.
+  Its size (called T, in bits) is defined by each Profile for each Rule ID.
 
   See {{IntegrityChecking}} for the MIC default size, default polynomials and details on its computation.
 
@@ -794,9 +790,9 @@ The rationale is that, even in the presence of padding, an All-0 SCHC Fragment n
 #### All-1 SCHC Fragment {#LastFrag}
 
 The All-1 SCHC Fragment format is shown in {{Fig-LastFrag}}.
-The All-1 SCHC Fragment is generally used to carry the very last tile of a SCHC Packet,
-or a MIC, or both.
-The DTag field, the W field, the MIC field and the Payload are optional.
+The All-1 SCHC Fragment is generally used to carry the very last tile of a SCHC Packet and a MIC,
+or a MIC only.
+The DTag field, the W field and the Payload are optional.
 
 ~~~~
 |-------- SCHC Fragment Header -------|
@@ -814,8 +810,7 @@ in a way that would make the SCHC Fragment a multiple of the L2 Word, then paddi
 The All-1 SCHC Fragment message MUST be distinguishable by size from a SCHC Sender-Abort message (see {{SenderAbort}}) that has the same T, M and N values.
 This is trivially achieved by having the MIC larger than an L2 Word,
 or by having the Payload larger than an L2 Word.
-This is also naturally achieved if the SCHC Sender-Abort Header is a multiple of L2 Words
-and at least the All-1 SCHC Fragment MIC or the Payload is present.
+This is also naturally achieved if the SCHC Sender-Abort Header is a multiple of L2 Words.
 
 ### SCHC ACK format {#ACK}
 
@@ -990,10 +985,11 @@ Therefore, a SCHC Sender-Abort generally needs padding bits.
 
 Note that the SCHC Sender-Abort has the same header as an All-1 SCHC Fragment (see {{LastFrag}}), but that it does not include a MIC nor a payload.
 The receiver distinguishes the former from the latter by the message length, even in the presence of padding.
-This is possible because
+This is possible through different combinations
 
-- padding bits are always strictly less than a L2 Word size,
-- the total size of the MIC and the Payload of an All-1 SCHC Fragment is at least the size of an L2 Word.
+- the size of the Sender-Abort Header may be made such that it is not padded
+- or the total size of the MIC and the Payload of an All-1 SCHC Fragment is at least the size of an L2 Word
+- or through other alignement and size combinations
 
 The SCHC Sender-Abort MUST NOT be acknowledged.
 
@@ -1079,7 +1075,7 @@ The value of N (size of the FCN field) is RECOMMENDED to be 1.
 Each Profile, for each Rule ID value, MUST define
 
 - the presence or absence of the DTag field in the SCHC F/R messages, as well as its size if it is present,
-- the presence or absence of the MIC field in the SCHC F/R messages, as well as its size if it is present,
+- the size and algorithm for the MIC field in the SCHC F/R messages, if different from the default,
 - the expiration time of the Inactivity Timer
 
 Each Profile, for each Rule ID value, MAY define
@@ -1106,7 +1102,7 @@ that the SCHC Fragment is a multiple of L2 Words without the need for padding bi
 Except for the last one, the SCHC Fragments MUST use the Regular SCHC Fragment format specified in {{NotLastFrag}}.
 The last SCHC Fragment MUST use the All-1 format specified in {{LastFrag}}.
 
-If the Profile mandates the use of a MIC, the MIC MUST be computed on the reassembled SCHC Packet concatenated with the padding bits of the last SCHC Fragment.
+The MIC MUST be computed on the reassembled SCHC Packet concatenated with the padding bits of the last SCHC Fragment.
 The rationale is that the SCHC Reassembler has no way of knowing where the payload of the last SCHC Fragment ends.
 Indeed, this requires decompressing the SCHC Packet, which is out of the scope of the SCHC Reassembler.
 
@@ -1139,6 +1135,9 @@ and it MUST release all resources associated with this Rule ID and optional DTag
 On receiving a SCHC Sender-Abort,
 the receiver MAY release all resources associated with this Rule ID and optional DTag values.
 
+The MIC computed at the receiver MUST be computed over the reassembled SCHC Packet
+and over the padding bits that were received in the SCHC Fragment carrying the last tile.
+
 {{Fig-NoACKModeRcv}} shows an example of a corresponding state machine.
 
 ### ACK-Always {#ACK-Always-subsection}
@@ -1166,7 +1165,7 @@ Each Profile, for each Rule ID value, MUST define
 
 - the value of N (size of the FCN field),
 - the value of MAX_WIND_FCN
-- the presence or absence of the MIC field in the SCHC F/R messages, as well as its size if it is present,
+- the size and algorithm for the MIC field in the SCHC F/R messages, if different from the default,
 - the presence or absence of the DTag field in the SCHC F/R messages, as well as its size if it is present,
 - the value of MAX_ACK_REQUESTS,
 - the expiration time of the Retransmission Timer
@@ -1202,7 +1201,7 @@ If a SCHC Fragment carries a tile that is not the last one of the SCHC Packet,
 
 The SCHC Fragment that carries the last tile MUST be an All-1 SCHC Fragment, described in {{LastFrag}}.
 
-If MIC is used, the bits on which the MIC is computed MUST be the SCHC Packet concatenated with the potential padding bits that are appended to the Payload of the SCHC Fragment that carries the last tile.
+The bits on which the MIC is computed MUST be the SCHC Packet concatenated with the potential padding bits that are appended to the Payload of the SCHC Fragment that carries the last tile.
 
 The fragment sender MUST start by processing the window numbered 0.
 
@@ -1362,6 +1361,8 @@ the receiver MUST send a SCHC Receiver-Abort,
 it MUST release all resource associated with this SCHC Packet
 and it MAY exit the receive process for that SCHC Packet.
 
+The MIC computed at the receiver MUST be computed over the reassembled SCHC Packet
+and over the padding bits that were received in the SCHC Fragment carrying the last tile.
 
 {{Fig-ACKAlwaysRcv}} shows an example of a corresponding state machine.
 
@@ -1420,7 +1421,7 @@ Each Profile, for each Rule ID value, MUST define
 - the value of M (size of the W field),
 - the value of N (size of the FCN field),
 - the value of MAX_WIND_FCN
-- the presence or absence of the MIC field in the SCHC F/R messages, as well as its size if it is present,
+- the size and algorithm for the MIC field in the SCHC F/R messages, if different from the default,
 - the presence or absence of the DTag field in the SCHC F/R messages, as well as its size if it is present,
 - the value of MAX_ACK_REQUESTS,
 - the expiration time of the Retransmission Timer
@@ -1460,7 +1461,7 @@ If a SCHC Fragment carries more than one tile, or carries one tile that is not t
 - the FCN field MUST contain the tile number of the first tile sent in that SCHC Fragment
 - padding bits are appended to the tiles as needed to fit the Payload size constraint of Regular SCHC Fragments
 
-If MIC is used, the bits on which the MIC is computed MUST be the SCHC Packet concatenated with the padding bits that are appended to the Payload of the SCHC Fragment that carries the last tile.
+The bits on which the MIC is computed MUST be the SCHC Packet concatenated with the padding bits that are appended to the Payload of the SCHC Fragment that carries the last tile.
 
 The fragment sender MAY send the last tile as the Payload of an All-1 SCHC Fragment.
 
@@ -1589,8 +1590,7 @@ Reassembly of the SCHC Packet concludes when
 - or the Attempts counter has exceeded MAX_ACK_REQUESTS
 - or when at least an All-1 SCHC Fragment has been received and integrity checking of the reassembled SCHC Packet is successful.
 
-If MIC is used for integrity checking,
-the MIC computed at the receiver MUST be computed over the reassembled SCHC Packet
+The MIC computed at the receiver MUST be computed over the reassembled SCHC Packet
 and over the padding bits that were received in the SCHC Fragment carrying the last tile.
 
 See {{Fig-ACKonerrorRcv}} for one among several possible examples of a Finite State Machine implementing a receiver behaviour obeying this specification,
