@@ -740,7 +740,7 @@ The SCHC F/R messages use the following fields (see the related formats in {{Fra
   A value of 1 tells that the integrity check was performed and is successful.
   A value of 0 tells that the integrity check was not performed, or that is was a failure.
 
-* Truncated Bitmap. The Truncated Bitmap is used together with windows and Bitmaps (see {{Bitmap}}).
+* Compressed Bitmap. The Compressed Bitmap is used together with windows and Bitmaps (see {{Bitmap}}).
   Its presence and size is defined for each F/R mode for each Rule ID.
 
   This field appears in the SCHC ACK message to report on the receiver Bitmap (see {{BitmapTrunc}}).
@@ -815,8 +815,8 @@ This is also naturally achieved if the SCHC Sender-Abort Header is a multiple of
 ### SCHC ACK format {#ACK}
 
 The SCHC ACK message MUST obey the format shown in {{Fig-ACK-Format}}.
-The DTag field, the W field and the Truncated Bitmap field are optional.
-The Truncated Bitmap field can only be present in SCHC F/R modes that use windows.
+The DTag field, the W field and the Compressed Bitmap field are optional.
+The Compressed Bitmap field can only be present in SCHC F/R modes that use windows.
 
 ~~~~
 |---- SCHC ACK Header ----|
@@ -826,7 +826,7 @@ The Truncated Bitmap field can only be present in SCHC F/R modes that use window
 +---- ... --+- ... -+---+-+~~~~~~~~~~~~~~~~~~
 
 +---- ... --+- ... -+---+-+------ ... ------+~~~~~~~~~~~~~~~~~~
-|  Rule ID  |  DTag | W |0|Truncated Bitmap | padding as needed (check failure)
+|  Rule ID  |  DTag | W |0|Compressed Bitmap| padding as needed (check failure)
 +---- ... --+- ... -+---+-+------ ... ------+~~~~~~~~~~~~~~~~~~
                          C
 ~~~~
@@ -847,10 +847,10 @@ If the C bit is 1 or windows are not used, the C bit MUST be followed by padding
 
 See {{Bitmap}} for a description of the Bitmap.
 
-The representation of the Bitmap that is transmitted MUST be the truncated version specified in {{BitmapTrunc}}, in order to reduce the SCHC ACK message size.
+The representation of the Bitmap that is transmitted MUST be the compressed version specified in {{BitmapTrunc}}, in order to reduce the SCHC ACK message size.
 
-#### Bitmap Truncation {#BitmapTrunc}
-For transmission, the truncated Bitmap in the SCHC ACK message is defined by the following algorithm (see {{Fig-Localbitmap}} for a follow-along example):
+#### Bitmap Compression {#BitmapTrunc}
+For transmission, the Compressed Bitmap in the SCHC ACK message is defined by the following algorithm (see {{Fig-Localbitmap}} for a follow-along example):
 
 - Build a temporary SCHC ACK message that contains the Header followed by the original Bitmap.
 - Positioning scissors at the end of the Bitmap, after its last bit.
@@ -860,7 +860,7 @@ For transmission, the truncated Bitmap in the SCHC ACK message is defined by the
 
 When one or more bits have effectively been dropped off as a result of the above algorithm, the SCHC ACK message is a multiple of L2 Words, no padding bits will be appended.
 
-Because the SCHC Fragment sender knows the size of the original Bitmap, it can reconstruct the original Bitmap from the Truncated Bitmap received in the SCH ACK message.
+Because the SCHC Fragment sender knows the size of the original Bitmap, it can reconstruct the original Bitmap from the Compressed Bitmap received in the SCH ACK message.
 
 {{Fig-Localbitmap}} shows an example where L2 Words are actually bytes and where the original Bitmap contains 17 bits, the last 15 of which are all set to 1.
 
@@ -873,12 +873,12 @@ Because the SCHC Fragment sender knows the size of the original Bitmap, it can r
                          C      |
         next L2 Word boundary ->|
 ~~~~
-{: #Fig-Localbitmap title='Tentative SCHC ACK message with Bitmap before truncation'}
+{: #Fig-Localbitmap title='Tentative SCHC ACK message with Bitmap before compression'}
 
 {{Fig-transmittedbitmap}} shows that the last 14 bits are not sent.
 
 ~~~~   
-|---- SCHC ACK Header ----|TrBmp|
+|---- SCHC ACK Header ----|CpBmp|
             |-- T --|-M-|1|
 +---- ... --+- ... -+---+-+-----+
 |  Rule ID  |  DTag | W |0|1 0 1|
@@ -886,7 +886,7 @@ Because the SCHC Fragment sender knows the size of the original Bitmap, it can r
                          C      |
         next L2 Word boundary ->|
 ~~~~
-{: #Fig-transmittedbitmap title='Actual SCHC ACK message with Truncated Bitmap, no padding'}
+{: #Fig-transmittedbitmap title='Actual SCHC ACK message with Compressed Bitmap, no padding'}
 
 {{Fig-Bitmap-Win}} shows an example of a SCHC ACK with tile numbers ranging from 6 down to 0, where the Bitmap indicates that the second and the fourth tile of the window have not been correctly received.
 
@@ -1022,14 +1022,8 @@ If the W field is present,
 Note that the SCHC Receiver-Abort has the same header as a SCHC ACK message.
 The bits that follow the SCHC Receiver-Abort Header MUST be as follows
 
-- build a SCHC ACK out of an hypothetical Bitmap with all bits set to 1 (see {{ACK}})
-- append exactly one L2 Word with bits all set to 1's
-
-(alternate description: pick one for publication
-
 - if the Header does not end at an L2 Word boundary, append bits set to 1 as needed to reach the next L2 Word boundary
 - append exactly one more L2 Word with bits all set to 1's
-)
 
 Such a bit pattern never occurs in a regular SCHC ACK. This is how the fragment sender recognizes a SCHC Receiver-Abort.
 
@@ -2074,7 +2068,7 @@ In the following examples, N (the size of the FCN field) is 3 bits. Therefore, t
 In this example, the L2 MTU becomes reduced just before sending the "W=2, FCN=19" fragment, leaving space for only 1 tile in each forthcoming SCHC Fragment.
 Before retransmissions, the 73 tiles are carried by a total of 25 SCHC Fragments, the last 9 being of smaller size.
 
-Note 1: Bitmaps are shown prior to truncation for transmission
+Note 1: Bitmaps are shown prior to compression for transmission
 
 Note 2: other sequences of events (e.g. regarding when ACKs are sent by the Receiver) are also allowed by this specification. Profiles may restrict this flexibility.
 
