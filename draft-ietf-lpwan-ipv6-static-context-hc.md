@@ -1259,102 +1259,111 @@ At any time,
 
 #### Receiver behaviour
 
-On receiving a SCHC Fragment with a Rule ID and DTag pair not being processed at that time,
-the receiver MUST start a process to assemble a new SCHC Packet with that Rule ID and DTag value pair.
-That process MUST only examine received SCHC F/R messages with that Rule ID and DTag value pair
-and MUST only transmit SCHC F/R messages with that Rule ID and DTag value pair.
-It MUST intialise its current window number to be the first one, it MUST initialise its current W bit to 0
-and it MUST enter a **first state** and MUST process the SCHC Fragment that was just received.
+On receiving a SCHC Fragment with a Rule ID and optional DTag pair not being processed at that time
 
-Note: the purpose in the **first state** is to receive the initial transmission of the SCHC Fragments of the current window.
+- the receiver MAY check if the optional DTag value has not recently been used for that Rule ID value,
+  thereby ensuring that the received SCHC Fragment is not a remnant of a prior fragmented SCHC Packet transmission,
+- the receiver MUST start a process to assemble a new SCHC Packet with that Rule ID and DTag value pair.
+  That process MUST only examine received SCHC F/R messages with that Rule ID and DTag value pair
+  and MUST only transmit SCHC F/R messages with that Rule ID and DTag value pair.
+- the receiver MUST start an Inactivity Timer. It MUST initialise an Attempts counter to 0.
+  It MUST initialise a window counter to 0.
 
-On entering the **first state**, the receiver MUST start an Inactivity Timer and it MUST initialise an empty Bitmap for the current window.
+In the rest of this section, "local W bit" means the least significant bit of the window counter of the receiver.
 
-In the **first state**:
+On reception of any SCHC F/R message, the receiver MUST reset the Inactivity Timer.
 
-  - Any received SCHC Fragment bearing a W bit different from the current W bit of the receiver process MUST be silently ignored and discarded.
-  In the rest of this list of actions, only SCHC Fragments that have the correct W bit are considered.
-  - On reception of each SCHC Fragment, the receiver MUST reset the Inactivity Timer and MUST update the Bitmap.
-  - The receiver MUST assemble the payloads of the received SCHC Fragments, based on their FCN
-  and based on the current window number.
-  - On expiration of the Inactivity Timer, the receiver MUST send a SCHC Receiver-Abort,
-  it MUST release all resource associated with this SCHC Packet
-  and it MUST exit the receive process for that SCHC Packet.
-  - On receiving an All-0 SCHC Fragment, the receiver MUST send a SCHC ACK (specified in {{ACK}}).
-  Reminder: the SCHC ACK reports on the SCHC Fragments that have been correctly received in the current window.
-    * If the Bitmap indicates that all the SCHC Fragments of the current window have been correctly received,
-    the receiver MUST increment its current window number,
-    it MUST flip its current W bit
-    and it MUST re-enter the **first state**.
-    * If the Bitmap indicates that at least one SCHC Fragment is missing in the current window,
-    the receiver MUST enter a **second state**.
-  - On receiving an All-1 SCHC Fragment, the receiver MUST send a SCHC ACK (specified in {{ACK}}).
-  Reminder: the SCHC ACK reports on the integrity check of the whole reassembled SCHC Packet
-  and optionally on the SCHC Fragments that were correctly received in the current window.
-    * If the integrity check indicates that the full SCHC Packet has been correctly reassembled,
-    the receiver MUST enter the **fourth state**.
-    * If the integrity check indicates that the full SCHC Packet has not been correctly reassembled,
-    the receiver MUST enter a **third state**.
+Entering an "acceptance phase", the receiver MUST first initialise an empty Bitmap for this window, then
 
+- on receiving a SCHC Fragment or SCHC ACK REQ with the W bit different from the local W bit,
+  the receiver MUST silently ignore and discard that message.
+- on receiving a SCHC Fragment with the W bit equal to the local W bit,
+  the receiver MUST assemble the received tile based on the window counter and on the FCN field in the SCHC Fragment
+  and it MUST update the Bitmap.
+  * if the SCHC Fragment received is an All-0 SCHC Fragment,
+    the current window is determined to be a not-last window,
+    and the receiver MUST send a SCHC ACK for this window.
+    Then,
 
-Note: the purpose in the **second state** is to receive the retransmitted SCHC Fragments of the current window before advancing to the next window.
+    - If the Bitmap indicates that all the tiles of the current window have been correctly received,
+      the receiver MUST increment its window counter
+      and it enters the "acceptance phase" for that new window.
+    - If the Bitmap indicates that at least one tile is missing in the current window,
+      the receiver enters the "equalization phase" for this window.
 
-On entering the **second state**, the receiver MUST reset the Inactivity Timer.
+  * if the SCHC Fragment received is an All-1 SCHC Fragment,
+    the padding bits of the All-1 SCHC Fragment MUST be assembled after the received tile,
+    the current window is determined to be the last window,
+    the receiver MUST perform the integrity check
+    and it MUST send a SCHC ACK for this window. Then,
 
-In the **second state**:
+    - If the integrity check indicates that the full SCHC Packet has been correctly reassembled,
+      the receiver MUST enter the "clean-up phase".
+    - If the integrity check indicates that the full SCHC Packet has not been correctly reassembled,
+      the receiver enters the "equalization phase" for this window.
 
-  - On reception of each SCHC Fragment or SCHC ACK REQ, the receiver MUST reset the Inactivity Timer.
-  - On reception of a SCHC ACK REQ with a W bit equal to that of the receiving process, the receiver MUST send a SCHC ACK and MUST reset the Inactivity Timer.
-  - On reception of a SCHC Fragment with a W bit equal to that of the receiving process,
-    * If the Bitmap indicates that the SCHC Fragment had already been received, the receiver MUST silently ignore it and discard it.
-    * Otherwise it MUST update the Bitmap and assemble the payload of the SCHC Fragment received.
-  - On the Bitmap becoming fully populated with 1's, the receiver MUST send an All-0 SCHC ACK and MUST reset the Inactivity Timer
-  - On expiration of the Inactivity Timer, the receiver MUST send a SCHC Receiver-Abort,
-  it MUST release all resource associated with this SCHC Packet
-  and it MUST exit the receive process for that SCHC Packet.
-  - On reception of a SCHC Fragment with a W bit different from that of the receiving process
-    * If the Bitmap is fully populated with 1's,
-    the receiver MUST increment its current window number,
-    it MUST flip its current W bit,
-    it MUST enter the **first state** and it MUST the SCHC Fragment that was just received.
-    * Otherwise, the receiver MUST silently ignore and discard the SCHC Fragment just received.
+- on receiving a SCHC ACK REQ with the W bit equal to the local W bit,
+  the current window is an undetermined window,
+  the receiver MUST send a SCHC ACK for this window,
+  and it keeps accepting incoming messages.
 
-Note: the purpose in the **third state** is to receive the retransmitted SCHC Fragments of the last window.
+In the "equalization phase":
 
-On entering the **third state**, the receiver MUST reset the Inactivity Timer.
+- if the window is a not-last window
 
-In the **third state**
+  * on receiving a SCHC Fragment or SCHC ACK REQ with a W bit different from the local W bit
+    the receiver MUST silently ignore and discard that message.
+  * on receiving a SCHC ACK REQ with a W bit equal to the local W bit,
+    the receiver MUST send a SCHC ACK for this window.
+  * on receiving a SCHC Fragment with a W bit equal to the local W bit,
 
-  - On reception of each SCHC Fragment or SCHC ACK REQ, the receiver MUST reset the Inactivity Timer.
-  - On reception of a SCHC ACK REQ with a W bit equal to that of the receiving process, the receiver MUST send a SCHC ACK and MUST reset the Inactivity Timer.
-  - On reception of a SCHC Fragment with a W bit equal to that of the receiving process,
-    * If the Bitmap indicates that the SCHC Fragment had already been received, the receiver MUST silently ignore it and discard it.
-    * Otherwise it MUST update the Bitmap and assemble the payload of the SCHC Fragment received. It MUST compute the integrity check.
-  - On the integrity check becoming True, the receiver MUST send a SCHC ACK and MUST reset the Inactivity Timer
-  - On expiration of the Inactivity Timer, the receiver MUST send a SCHC Receiver-Abort,
-  it MUST release all resource associated with this SCHC Packet
-  and it MUST exit the receive process for that SCHC Packet.
-  - On reception of a SCHC Fragment with a W bit different from that of the receiving process, the receiver MUST silently ignore and discard the SCHC Fragment just received.
+    - if the SCHC Fragment received is an All-1 SCHC Fragment,
+      the receiver MUST silently ignore it and discard it.
+    - otherwise,
+      the receiver MUST update the Bitmap and it MUST assemble the tile received.
 
-Note: the purpose in the **fourth state** is to increase the chances that the sender receives a SCHC ACK with positive integrity check for this SCHC Packet.
+  * on the Bitmap becoming fully populated with 1's,
+    the receiver MUST send a SCHC ACK for this window,
+    it MUST increment its window counter
+    and it enters the "acceptance phase" for the new window.
 
-On entering the **fourth state**, the receiver MUST reset the Inactivity Timer.
+- if the window is the last window
 
-In the **fourth state**
+  * on receiving a SCHC Fragment or SCHC ACK REQ with a W bit different from the local W bit
+    the receiver MUST silently ignore and discard that message.
+  * on receiving a SCHC ACK REQ with a W bit equal to the local W bit,
+    the receiver MUST send a SCHC ACK for this window.
+  * on receiving a SCHC Fragment with a W bit equal to the local W bit,
 
-  - Any received SCHC F/R message with a W bit different from the current W bit of the receiver process MUST be silently ignored and discarded. 
-  - Any received SCHC F/R message different from an All-1 SCHC Fragment or a SCHC ACK REQ MUST be silently ignored and discarded.
-  - On receiving an All-1 SCHC Fragment or a SCHC ACK REQ, the receiver MUST send a SCHC ACK.
-  - On expiration of the Inactivity Timer, the receive process for that SCHC Packet MUST exit
+    - if the SCHC Fragment received is an All-0 SCHC Fragment,
+      the receiver MUST silently ignore it and discard it.
+    - otherwise, the receiver MUST update the Bitmap
+      and it MUST assemble the tile received.
+      If the SCHC Fragment received is an All-1 SCHC Fragment,
+        the receiver MUST assemble the padding bits of the All-1 SCHC Fragment after the received tile.
+      It MUST perform the integrity check. Then
 
-At any time, when Attempts reaches MAC_ACK_REQUESTS,
+      * if the integrity check indicates that the full SCHC Packet has been correctly reassembled,
+        the receiver MUST send a SCHC ACK
+        and it enters the "clean-up phase".
+      * if the integrity check indicates that the full SCHC Packet has not been correctly reassembled,
+        - if the SCHC Fragment received was an All-1 SCHC Fragment, the receiver MUST send a SCHC ACK for this window
+        - it keeps accepting incoming messages.
+
+In the "clean-up phase":
+
+- Any received SCHC F/R message with a W bit different from the local W bit MUST be silently ignored and discarded.
+- Any received SCHC F/R message different from an All-1 SCHC Fragment or a SCHC ACK REQ MUST be silently ignored and discarded.
+- On receiving an All-1 SCHC Fragment or a SCHC ACK REQ, the receiver MUST send a SCHC ACK.
+- On expiration of the Inactivity Timer, the receive process for that SCHC Packet MAY exit
+
+At any time,
+on expiration of the Inactivity Timer,
+on receiving a SCHC Sender-Abort or
+when Attempts reaches MAC_ACK_REQUESTS,
 the receiver MUST send a SCHC Receiver-Abort,
 it MUST release all resource associated with this SCHC Packet
-and it MUST exit the receive process for that SCHC Packet.
-
-At any time, on receiving a SCHC Sender-Abort,
-the fragment sender MUST release all resource associated with this SCHC Packet
-and it MUST exit the receive process for that SCHC Packet.
+and it MAY exit the receive process for that SCHC Packet.
 
 
 {{Fig-ACKAlwaysRcv}} shows an example of a corresponding state machine.
