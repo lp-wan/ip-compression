@@ -145,7 +145,7 @@ Note that the SCHC acronym is pronounced like "sheek" in English (or "chic" in F
 
 * AppIID: Application Interface Identifier. The IID that identifies the application server interface.
 
-* Bi: Bidirectional. Characterises a Rule Entry that applies to headers of packets travelling in either direction (Up and Dw, see this glossary).
+* Bi: Bidirectional. Characterises a Field Descriptor that applies to headers of packets travelling in either direction (Up and Dw, see this glossary).
 
 * CDA: Compression/Decompression Action. Describes the reciprocal pair of actions that are performed at the compressor to compress a header field and at the decompressor to recover the original header field value.
 
@@ -188,8 +188,6 @@ Note that the SCHC acronym is pronounced like "sheek" in English (or "chic" in F
   so that there is no ambiguity in how they expect to communicate.
 
 * Rule: A set of header field values.
-
-* Rule entry: A column in a Rule that describes a parameter of the header field.
 
 * Rule ID: An identifier for a Rule. SCHC C/D on both sides share the same Rule ID for a given packet. A set of Rule IDs are used to support SCHC F/R functionality.
   
@@ -476,7 +474,7 @@ If the field is identified in the Field Description as being of variable size, t
 
 * For values between 15 and 254, 0b1111 is transmitted and then the size is sent as an 8 bits unsigned integer.
 
-* For larger values of the size, 0xffff is transmitted and then the next two bytes contain the size value as a 16 bits unsigned integer.
+* For larger values of the size, 0xfff is transmitted and then the next two bytes contain the size value as a 16 bits unsigned integer.
 
 If a field is not present in the packet but exists in the Rule and its FL is specified as being variable, size 0 MUST be sent to denote its absence.
 
