@@ -580,10 +580,10 @@ See {{Fig-TilesExample}} for an example.
 
 ~~~~
 
-                                      SCHC Packet
-         +----+--+-----+---+----+-+---+---+-----+------+...-----+----+---+------+
-Tiles    |    |  |     |   |    | |   |   |     |      |        |    |   |      |
-         +----+--+-----+---+----+-+---+---+-----+------+...-----+----+---+------+
+                                  SCHC Packet
+       +----+--+-----+---+----+-+---+---+-----+...-----+----+---+------+
+Tiles  |    |  |     |   |    | |   |   |     |        |    |   |      |
+       +----+--+-----+---+----+-+---+---+-----+...-----+----+---+------+
 
 ~~~~
 {: #Fig-TilesExample title='a SCHC Packet fragmented in tiles'}
@@ -610,12 +610,12 @@ See {{Fig-WindowsExample}} for an example.
 
 ~~~~
 
-         +----------------------------------------------...---------------------+
-         |                            SCHC Packet                               |
-         +----------------------------------------------...---------------------+
+         +---------------------------------------------...-------------+
+         |                         SCHC Packet                         |
+         +---------------------------------------------...-------------+
 
-Tile #   | 4 | 3 | 2 | 1 | 0 | 4 | 3 | 2 | 1 | 0 | 4 |      | 2 | 1 | 0 | 4 | 3 |
-Window # |-------- 0 --------|-------- 1 --------|- 2 - ... - 27 -------|-- 28 -|
+Tile #   | 4 | 3 | 2 | 1 | 0 | 4 | 3 | 2 | 1 | 0 | 4 |     | 0 | 4 | 3 |
+Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 
 ~~~~
 {: #Fig-WindowsExample title='a SCHC Packet fragmented in tiles grouped in 28 windows, with WINDOW_SIZE = 5'}
@@ -798,9 +798,9 @@ The DTag field, the W field and the Payload are optional.
 ~~~~
 |-------- SCHC Fragment Header -------|
           |-- T --|-M-|-- N --|
-+-- ... --+- ... -+---+- ... -+- ... -+------...-----+~~~~~~~~~~~~~~~~~~~~~
-| Rule ID | DTag  | W | 11..1 |  MIC  | Frag Payload | padding (as needed)
-+-- ... --+- ... -+---+- ... -+- ... -+------...-----+~~~~~~~~~~~~~~~~~~~~~
++-- ... --+- ... -+---+- ... -+- ... -+------...-----+~~~~~~~~~~~~~~~~~~
+| Rule ID | DTag  | W | 11..1 |  MIC  | Frag Payload | pad. (as needed)
++-- ... --+- ... -+---+- ... -+- ... -+------...-----+~~~~~~~~~~~~~~~~~~
                         (FCN)
 ~~~~
 {: #Fig-LastFrag title='Detailed format for the All-1 SCHC Fragment'}
@@ -823,12 +823,12 @@ The Compressed Bitmap field can only be present in SCHC F/R modes that use windo
 |---- SCHC ACK Header ----|
             |-- T --|-M-|1|
 +---- ... --+- ... -+---+-+~~~~~~~~~~~~~~~~~~
-|  Rule ID  |  DTag | W |1| padding as needed                   (check success)
+|  Rule ID  |  DTag | W |1| padding as needed                (success)
 +---- ... --+- ... -+---+-+~~~~~~~~~~~~~~~~~~
 
-+---- ... --+- ... -+---+-+------ ... ------+~~~~~~~~~~~~~~~~~~
-|  Rule ID  |  DTag | W |0|Compressed Bitmap| padding as needed (check failure)
-+---- ... --+- ... -+---+-+------ ... ------+~~~~~~~~~~~~~~~~~~
++---- ... --+- ... -+---+-+------ ... ------+~~~~~~~~~~~~~~~
+|  Rule ID  |  DTag | W |0|Compressed Bitmap| pad. as needed (failure)
++---- ... --+- ... -+---+-+------ ... ------+~~~~~~~~~~~~~~~
                          C
 ~~~~
 {: #Fig-ACK-Format title='Format of the SCHC ACK message'}
@@ -895,13 +895,13 @@ Because the SCHC Fragment sender knows the size of the original Bitmap, it can r
 |---- SCHC ACK Header ----|--- Bitmap --|
             |-- T --|-M-|1|6 5 4 3 2 1 0| (tile #)
 +-----------+-------+---+-+-------------+
-|  Rule ID  |  DTag | W |0|1 0 1 0 1 1 1|      SCHC ACK with Original Bitmap
+|  Rule ID  |  DTag | W |0|1 0 1 0 1 1 1|      with Original Bitmap
 +-----------+-------+---+-+-------------+
                          C
     next L2 Word boundary ->|<-- L2 Word -->|
 
 +-----------+-------+---+-+-------------+~~~+
-|  Rule ID  |  DTag | W |0|1 0 1 0 1 1 1|Pad|  Actual SCHC ACK that is transmitted
+|  Rule ID  |  DTag | W |0|1 0 1 0 1 1 1|Pad|  transmitted SCHC ACK
 +-----------+-------+---+-+-------------+~~~+
                          C
     next L2 Word boundary ->|<-- L2 Word -->|
@@ -914,13 +914,13 @@ Because the SCHC Fragment sender knows the size of the original Bitmap, it can r
 |---- SCHC ACK Header ----|--- Bitmap --|
             |-- T --|-M-|1|6 5 4 3 2 1 0| (tile #)
 +-----------+-------+---+-+-------------+
-|  Rule ID  |  DTag | W |0|1 1 1 1 1 1 1|      SCHC ACK with Original Bitmap
+|  Rule ID  |  DTag | W |0|1 1 1 1 1 1 1|      with Original Bitmap
 +-----------+-------+---+-+-------------+
                          C
     next L2 Word boundary ->|
 
 +---- ... --+- ... -+---+-+-+
-|  Rule ID  |  DTag | W |0|1|                  Actual SCHC ACK that is transmitted
+|  Rule ID  |  DTag | W |0|1|                  transmitted SCHC ACK
 +---- ... --+- ... -+---+-+-+
                          C
     next L2 Word boundary ->|
@@ -1378,12 +1378,12 @@ See {{Fig-TilesACKonError}} for an example.
 
 ~~~~
 
-         +----------------------------------------------...-------------------+
-         |                            SCHC Packet                             |
-         +----------------------------------------------...-------------------+
+         +---------------------------------------------...-----------+
+         |                       SCHC Packet                         |
+         +---------------------------------------------...-----------+
 
-Tile #   | 4 | 3 | 2 | 1 | 0 | 4 | 3 | 2 | 1 | 0 | 4 |      | 2 | 1 | 0 | 4 |3|
-Window # |-------- 0 --------|-------- 1 --------|- 2 - ... - 27 -------|- 28-|
+Tile #   | 4 | 3 | 2 | 1 | 0 | 4 | 3 | 2 | 1 | 0 | 4 |     | 0 | 4 |3|
+Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|- 28-|
 
 
 SCHC Fragment msg    |-----------|
@@ -1898,10 +1898,10 @@ Rule 0
  |IPv6 Length     |16|1 |Bi|         | ignore | comp-length||      |
  |IPv6 Next Header|8 |1 |Bi|17       | equal  | not-sent   ||      |
  |IPv6 Hop Limit  |8 |1 |Bi|255      | ignore | not-sent   ||      |
- |IPv6 DEVprefix  |64|1 |Bi|[alpha/64, match- |mapping-sent||  [1] |
+ |IPv6 DEVprefix  |64|1 |Bi|[alpha/64, match- |mapping-sent||   1  |
  |                |  |  |  |fe80::/64] mapping|            ||      |
  |IPv6 DevIID     |64|1 |Bi|         | ignore | DevIID     ||      |
- |IPv6 APPprefix  |64|1 |Bi|[beta/64,| match- |mapping-sent||  [2] |
+ |IPv6 APPprefix  |64|1 |Bi|[beta/64,| match- |mapping-sent||   2  |
  |                |  |  |  |alpha/64,| mapping|            ||      |
  |                |  |  |  |fe80::64]|        |            ||      |
  |IPv6 AppIID     |64|1 |Bi|::1000   | equal  | not-sent   ||      |
@@ -1923,14 +1923,14 @@ Rule 0
  |IPv6 Length     |16|1 |Bi|         | ignore | comp-length||      |
  |IPv6 Next Header|8 |1 |Bi|17       | equal  | not-sent   ||      |
  |IPv6 Hop Limit  |8 |1 |Up|255      | ignore | not-sent   ||      |
- |IPv6 Hop Limit  |8 |1 |Dw|         | ignore | value-sent ||  [8] |
+ |IPv6 Hop Limit  |8 |1 |Dw|         | ignore | value-sent ||   8  |
  |IPv6 DEVprefix  |64|1 |Bi|alpha/64 | equal  | not-sent   ||      |
  |IPv6 DevIID     |64|1 |Bi|         | ignore | DevIID     ||      |
  |IPv6 APPprefix  |64|1 |Bi|gamma/64 | equal  | not-sent   ||      |
  |IPv6 AppIID     |64|1 |Bi|::1000   | equal  | not-sent   ||      |
  +================+==+==+==+=========+========+============++======+
- |UDP DEVport     |16|1 |Bi|8720     | MSB(12)| LSB        || [4]  |
- |UDP APPport     |16|1 |Bi|8720     | MSB(12)| LSB        || [4]  |
+ |UDP DEVport     |16|1 |Bi|8720     | MSB(12)| LSB        ||   4  |
+ |UDP APPport     |16|1 |Bi|8720     | MSB(12)| LSB        ||   4  |
  |UDP Length      |16|1 |Bi|         | ignore | comp-length||      |
  |UDP checksum    |16|1 |Bi|         | ignore | comp-chk   ||      |
  +================+==+==+==+=========+========+============++======+
@@ -2024,45 +2024,45 @@ In the following examples, N (the size of the FCN field) is 3 bits. Therefore, t
 
 ~~~~
       Sender               Receiver
-        |-----W=0, FCN=27----->| 4 tiles sent
-        |-----W=0, FCN=23----->| 4 tiles sent
-        |-----W=0, FCN=19----->| 4 tiles sent
-        |-----W=0, FCN=15--X-->| 4 tiles sent (not received)
-        |-----W=0, FCN=11----->| 4 tiles sent
-        |-----W=0, FCN=7 ----->| 4 tiles sent
-        |-----W=0, FCN=3 ----->| 4 tiles sent
-        |-----W=1, FCN=27----->| 4 tiles sent
-        |-----W=1, FCN=23----->| 4 tiles sent
-        |-----W=1, FCN=19----->| 4 tiles sent
-        |-----W=1, FCN=15----->| 4 tiles sent
-        |-----W=1, FCN=11----->| 4 tiles sent
-        |-----W=1, FCN=7 ----->| 4 tiles sent
-        |-----W=1, FCN=3 --X-->| 4 tiles sent (not received)
-        |-----W=2, FCN=27----->| 4 tiles sent
-        |-----W=2, FCN=23----->| 4 tiles sent
-    ^   |-----W=2, FCN=19----->| 1 tile sent
-    |   |-----W=2, FCN=18----->| 1 tile sent
-    |   |-----W=2, FCN=17----->| 1 tile sent
-        |-----W=2, FCN=16----->| 1 tile sent
-    s   |-----W=2, FCN=15----->| 1 tile sent
-    m   |-----W=2, FCN=14----->| 1 tile sent
-    a   |-----W=2, FCN=13--X-->| 1 tile sent (not received)
-    l   |-----W=2, FCN=12----->| 1 tile sent
-    l   |---W=2, FCN=31 + MIC->| Integrity check: failure
-    e   |<--- ACK, W=0, C=0 ---| C=0, Bitmap:1111111111110000111111111111
-    r   |-----W=0, FCN=15----->| 1 tile sent
-        |-----W=0, FCN=14----->| 1 tile sent
-    L   |-----W=0, FCN=13----->| 1 tile sent
-    2   |-----W=0, FCN=12----->| 1 tile sent
-        |<--- ACK, W=1, C=0 ---| C=0, Bitmap:1111111111111111111111110000
-    M   |-----W=1, FCN=3 ----->| 1 tile sent
-    T   |-----W=1, FCN=2 ----->| 1 tile sent
-    U   |-----W=1, FCN=1 ----->| 1 tile sent
-        |-----W=1, FCN=0 ----->| 1 tile sent
-    |   |<--- ACK, W=2, C=0 ---| C=0, Bitmap:1111111111111101000000000001
-    |   |-----W=2, FCN=13----->| Integrity check: success
-    V   |<--- ACK, W=2, C=1 ---| C=1
-      (End)
+       |-----W=0, FCN=27----->| 4 tiles sent
+       |-----W=0, FCN=23----->| 4 tiles sent
+       |-----W=0, FCN=19----->| 4 tiles sent
+       |-----W=0, FCN=15--X-->| 4 tiles sent (not received)
+       |-----W=0, FCN=11----->| 4 tiles sent
+       |-----W=0, FCN=7 ----->| 4 tiles sent
+       |-----W=0, FCN=3 ----->| 4 tiles sent
+       |-----W=1, FCN=27----->| 4 tiles sent
+       |-----W=1, FCN=23----->| 4 tiles sent
+       |-----W=1, FCN=19----->| 4 tiles sent
+       |-----W=1, FCN=15----->| 4 tiles sent
+       |-----W=1, FCN=11----->| 4 tiles sent
+       |-----W=1, FCN=7 ----->| 4 tiles sent
+       |-----W=1, FCN=3 --X-->| 4 tiles sent (not received)
+       |-----W=2, FCN=27----->| 4 tiles sent
+       |-----W=2, FCN=23----->| 4 tiles sent
+   ^   |-----W=2, FCN=19----->| 1 tile sent
+   |   |-----W=2, FCN=18----->| 1 tile sent
+   |   |-----W=2, FCN=17----->| 1 tile sent
+       |-----W=2, FCN=16----->| 1 tile sent
+   s   |-----W=2, FCN=15----->| 1 tile sent
+   m   |-----W=2, FCN=14----->| 1 tile sent
+   a   |-----W=2, FCN=13--X-->| 1 tile sent (not received)
+   l   |-----W=2, FCN=12----->| 1 tile sent
+   l   |---W=2, FCN=31 + MIC->| Integrity check: failure
+   e   |<--- ACK, W=0, C=0 ---| C=0, Bitmap:1111111111110000111111111111
+   r   |-----W=0, FCN=15----->| 1 tile sent
+       |-----W=0, FCN=14----->| 1 tile sent
+   L   |-----W=0, FCN=13----->| 1 tile sent
+   2   |-----W=0, FCN=12----->| 1 tile sent
+       |<--- ACK, W=1, C=0 ---| C=0, Bitmap:1111111111111111111111110000
+   M   |-----W=1, FCN=3 ----->| 1 tile sent
+   T   |-----W=1, FCN=2 ----->| 1 tile sent
+   U   |-----W=1, FCN=1 ----->| 1 tile sent
+       |-----W=1, FCN=0 ----->| 1 tile sent
+   |   |<--- ACK, W=2, C=0 ---| C=0, Bitmap:1111111111111101000000000001
+   |   |-----W=2, FCN=13----->| Integrity check: success
+   V   |<--- ACK, W=2, C=1 ---| C=1
+     (End)
 ~~~~
 {: #Figure-Example-ACK-on-Error-VarMTU title='ACK-on-Error mode with variable MTU.'}
 
@@ -2401,55 +2401,55 @@ Recv_window==window &    | |   |   all missing frags sent
 
 
 ~~~~
-                      +=======+
-                      |       |
-                      | INIT  |
-                      |       |       FCN!=0 & more frags
-                      +======++       ~~~~~~~~~~~~~~~~~~~~~~
-         Frag RuleID trigger |   +--+ Send cur_W + frag(FCN);
-         ~~~~~~~~~~~~~~~~~~~ |   |  | FCN--;
-      cur_W=0; FCN=max_value;|   |  | set [cur_W, cur_Bmp]
-        clear [cur_W, Bmp_n];|   |  v
-              clear rcv_Bmp  |  ++==+==========+         **BACK_TO_SEND
-                             +->+              |     cur_W==rcv_W &
-          **BACK_TO_SEND        |     SEND     |     [cur_W,Bmp_n]==rcv_Bmp
-    +-------------------------->+              |     & more frags
-    |  +----------------------->+              |     ~~~~~~~~~~~~
-    |  |                        ++===+=========+     cur_W++;
-    |  |      FCN==0 & more frags|   |last frag      clear [cur_W, Bmp_n]
-    |  |  ~~~~~~~~~~~~~~~~~~~~~~~|   |~~~~~~~~~
-    |  |        set cur_Bmp;     |   |set [cur_W, Bmp_n];
-    |  |send cur_W + frag(All-0);|   |send cur_W + frag(All-1)+MIC;
-    |  |        set Retrans_Timer|   |set Retrans_Timer
-    |  |                         |   | +-----------------------------------+
-    |  |Retrans_Timer expires &  |   | |cur_W==rcv_W&[cur_W,Bmp_n]!=rcv_Bmp|
-    |  |more Frags               |   | |  ~~~~~~~~~~~~~~~~~~~              |
-    |  |~~~~~~~~~~~~~~~~~~~~     |   | |  Attempts++; W=cur_W              |
-    |  |stop Retrans_Timer;      |   | | +--------+             rcv_W==Wn &|
-    |  |[cur_W,Bmp_n]==cur_Bmp;  v   v | |        v     [Wn,Bmp_n]!=rcv_Bmp|
-    |  |cur_W++            +=====+===+=+=+==+   +=+=========+   ~~~~~~~~~~~|
-    |  +-------------------+                |   | Resend    |   Attempts++;|
-    +----------------------+   Wait x ACK   |   | Missing   |         W=Wn |
-    +--------------------->+                |   | Frags(W)  +<-------------+
-    |         rcv_W==Wn &+-+                |   +======+====+
-    | [Wn,Bmp_n]!=rcv_Bmp| ++=+===+===+==+==+          |
-    |      ~~~~~~~~~~~~~~|  ^ |   |   |  ^             |
-    |        send (cur_W,+--+ |   |   |  +-------------+
-    |        ALL-0-empty)     |   |   |     all missing frag sent(W)
-    |                         |   |   |     ~~~~~~~~~~~~~~~~~
-    |  Retrans_Timer expires &|   |   |     set Retrans_Timer
-    |            No more Frags|   |   |
-    |           ~~~~~~~~~~~~~~|   |   |
-    |      stop Retrans_Timer;|   |   |
-    |(re)send frag(All-1)+MIC |   |   |
-    +-------------------------+   |   |
-                     cur_W==rcv_W&|   |
-           [cur_W,Bmp_n]==rcv_Bmp&|   | Attempts > MAX_ACK_REQUESTS
-      No more Frags & MIC flag==OK|   | ~~~~~~~~~~
-                ~~~~~~~~~~~~~~~~~~|   | send Abort
-     +=========+stop Retrans_Timer|   |  +===========+
-     |   END   +<-----------------+   +->+   ERROR   |
-     +=========+                         +===========+
+                  +=======+
+                  |       |
+                  | INIT  |
+                  |       |       FCN!=0 & more frags
+                  +======++       ~~~~~~~~~~~~~~~~~~~~~~
+     Frag RuleID trigger |   +--+ Send cur_W + frag(FCN);
+     ~~~~~~~~~~~~~~~~~~~ |   |  | FCN--;
+  cur_W=0; FCN=max_value;|   |  | set [cur_W, cur_Bmp]
+    clear [cur_W, Bmp_n];|   |  v
+          clear rcv_Bmp  |  ++==+==========+         **BACK_TO_SEND
+                         +->+              |     cur_W==rcv_W &
+      **BACK_TO_SEND        |     SEND     |     [cur_W,Bmp_n]==rcv_Bmp
++-------------------------->+              |     & more frags
+|  +----------------------->+              |     ~~~~~~~~~~~~
+|  |                        ++===+=========+     cur_W++;
+|  |      FCN==0 & more frags|   |last frag      clear [cur_W, Bmp_n]
+|  |  ~~~~~~~~~~~~~~~~~~~~~~~|   |~~~~~~~~~
+|  |        set cur_Bmp;     |   |set [cur_W, Bmp_n];
+|  |send cur_W + frag(All-0);|   |send cur_W + frag(All-1)+MIC;
+|  |        set Retrans_Timer|   |set Retrans_Timer
+|  |                         |   | +-----------------------------------+
+|  |Retrans_Timer expires &  |   | |cur_W==rcv_W&[cur_W,Bmp_n]!=rcv_Bmp|
+|  |more Frags               |   | |  ~~~~~~~~~~~~~~~~~~~              |
+|  |~~~~~~~~~~~~~~~~~~~~     |   | |  Attempts++; W=cur_W              |
+|  |stop Retrans_Timer;      |   | | +--------+             rcv_W==Wn &|
+|  |[cur_W,Bmp_n]==cur_Bmp;  v   v | |        v     [Wn,Bmp_n]!=rcv_Bmp|
+|  |cur_W++            +=====+===+=+=+==+   +=+=========+   ~~~~~~~~~~~|
+|  +-------------------+                |   | Resend    |   Attempts++;|
++----------------------+   Wait x ACK   |   | Missing   |         W=Wn |
++--------------------->+                |   | Frags(W)  +<-------------+
+|         rcv_W==Wn &+-+                |   +======+====+
+| [Wn,Bmp_n]!=rcv_Bmp| ++=+===+===+==+==+          |
+|      ~~~~~~~~~~~~~~|  ^ |   |   |  ^             |
+|        send (cur_W,+--+ |   |   |  +-------------+
+|        ALL-0-empty)     |   |   |     all missing frag sent(W)
+|                         |   |   |     ~~~~~~~~~~~~~~~~~
+|  Retrans_Timer expires &|   |   |     set Retrans_Timer
+|            No more Frags|   |   |
+|           ~~~~~~~~~~~~~~|   |   |
+|      stop Retrans_Timer;|   |   |
+|(re)send frag(All-1)+MIC |   |   |
++-------------------------+   |   |
+                 cur_W==rcv_W&|   |
+       [cur_W,Bmp_n]==rcv_Bmp&|   | Attempts > MAX_ACK_REQUESTS
+  No more Frags & MIC flag==OK|   | ~~~~~~~~~~
+            ~~~~~~~~~~~~~~~~~~|   | send Abort
+ +=========+stop Retrans_Timer|   |  +===========+
+ |   END   +<-----------------+   +->+   ERROR   |
+ +=========+                         +===========+
 ~~~~
 {: #Fig-ACKonerrorSnd title='Sender State Machine for the ACK-on-Error Mode'}
 
