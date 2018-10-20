@@ -87,9 +87,13 @@ Header compression is needed for efficient Internet connectivity to the node wit
 
 * The network topology is star-oriented, which means that all packets between the same source-destination pair follow the same path. For the needs of this document, the architecture can simply be described as Devices (Dev) exchanging information with LPWAN Application Servers (App) through a Network Gateway (NGW).
 
-* Because devices embed built-in applications, the traffic flows to be compressed are known in advance. Indeed, new applications cannot be easily installed in LPWAN devices, as they would in computers or smartphones.
+* Because devices embed built-in applications, the traffic flows to be compressed are known in advance. Indeed, new applications are less frequently installed in an LPWAN device, as they are in a computer or smartphone.
 
-SCHC compression uses a context in which information about header fields is stored. This context is static: the values of the header fields do not change over time. This avoids complex resynchronization mechanisms, that would be incompatible with LPWAN characteristics. In most cases, a small context identifier is enough to represent the full IPv6/UDP headers. The SCHC header compression mechanism is independent of the specific LPWAN technology over which it is used.
+SCHC compression uses a context in which information about header fields is stored. This context is static: the values of the header fields do not change over time. This avoids complex resynchronization mechanisms. Indeed,
+downlink is often more restricted/expensive, perhaps completely unavailable {{RFC8376}}.
+A compression protocol that relies on feedback is not compatible with the characteristics of such LPWANs.
+
+In most cases, a small context identifier is enough to represent the full IPv6/UDP headers. The SCHC header compression mechanism is independent of the specific LPWAN technology over which it is used.
 
 LPWAN technologies impose some strict limitations on traffic. For instance, devices are sleeping most of the time and may receive data during short periods of time after transmission to preserve battery. LPWAN technologies are also characterized
 by a greatly reduced data unit and/or payload size (see {{RFC8376}}).  However, some LPWAN technologies do not provide fragmentation functionality; to support the IPv6 MTU requirement of 1280 bytes {{RFC8200}}, they require a fragmentation protocol at the adaptation layer below IPv6.
@@ -165,7 +169,7 @@ Note that the SCHC acronym is pronounced like "sheek" in English (or "chic" in F
 
 * FID: Field Identifier. This is an index to describe the header fields in a Rule.
 
-* FL: Field Length is the length of the packet header field. It is expressed in bits for header fields of fixed lengths or as a type (e.g. variable, token length, ...) for field lengths that are unknown at the time of Rule creation. The length of a header field is defined in the corresponding protocol specification.
+* FL: Field Length is the length of the packet header field. It is expressed in bits for header fields of fixed lengths or as a type (e.g. variable, token length, ...) for field lengths that are unknown at the time of Rule creation. The length of a header field is defined in the corresponding protocol specification (such as IPv6 or UDP).
 
 * FP: Field Position is a value that is used to identify the position where each instance of a field appears in the header.  
 
@@ -255,7 +259,8 @@ A packet (e.g. an IPv6 packet)
 ## SCHC Packet format
 
 The SCHC Packet is composed of the Compressed Header followed by the payload from the original packet (see {{Fig-SCHCpckt}}).
-The Compressed Header itself is composed of a Rule ID and a Compression Residue. The Compression Residue may be empty, see {{SCHComp}}. Both the Rule ID and the Compression Residue potentially have a variable size, and generally are not a mutiple of bytes in size.
+The Compressed Header itself is composed of the Rule ID and a Compression Residue, which is the output of the compression actions of the Rule that was applied (see {{SCHComp}}).
+The Compression Residue may be empty. Both the Rule ID and the Compression Residue potentially have a variable size, and generally are not a mutiple of bytes in size.
   
 ~~~~
 
@@ -407,24 +412,15 @@ The compression/decompression process follows several steps:
 
     If all the fields in the packet's header satisfy all the matching operators (MO) of a Rule (i.e. all MO results are True), the fields of the header are then compressed according to the Compression/Decompression Actions (CDAs) and a compressed header (with possibly a Compression Residue) SHOULD be obtained. Otherwise, the next Rule is tested.
 
-  * If no eligible Rule is found, then the header MUST be sent without compression (but may require the use of the SCHC F/R process).
+  * If no eligible compression Rule is found, then the header MUST be sent without compression,
+    using a Rule ID dedicated to this purpose. Sending the header uncompressed but may require the use of the SCHC F/R process.
 
-* Sending: If an eligible Rule is found, the Rule ID is sent to the other end followed by the Compression Residue (which could be empty) and directly followed by the payload. The Compression Residue is the concatenation of the Compression Residues for each field according to the CDAs for that Rule. The way the Rule ID is sent depends on the Profile. For example, it can be either included in an L2 header or sent in the first byte of the L2 payload. (see {{Fig-FormatPckt}}). This process will be specified in the Profile and is out of the scope of the present document. On LPWAN technologies that are byte-oriented, the compressed header concatenated with the original packet payload is padded to a multiple of 8 bits, if needed. See {{Padding}} for details.
+* Sending: The Rule ID is sent to the other end followed by the Compression Residue (which could be empty) or the uncompressed header, and directly followed by the payload. The Compression Residue is the concatenation of the Compression Residues for each field according to the CDAs for that Rule. The way the Rule ID is sent depends on the Profile. For example, it can be either included in an L2 header or sent in the first byte of the L2 payload. (see {{Fig-SCHCpckt}}). This process will be specified in the Profile and is out of the scope of the present document. On LPWAN technologies that are byte-oriented, the compressed header concatenated with the original packet payload is padded to a multiple of 8 bits, if needed. See {{Padding}} for details.
 
 * Decompression: When doing decompression, on the network side the SCHC C/D needs to find the correct Rule based on the L2 address and in this way, it can use the DevIID and the Rule ID. On the Dev side, only the Rule ID is needed to identify the correct Rule since the Dev only holds Rules that apply to itself.
 
-  The receiver identifies the sender through its device-id or source identifier (e.g. MAC address, if it exists) and selects the Rule using the Rule ID. This Rule describes the compressed header format and associates the values to the header fields.  The receiver applies the CDA action to reconstruct the original header fields. The CDA application order can be different from the order given by the Rule. For instance, Compute-\* SHOULD be applied at the end, after all the other CDAs.
-
-~~~~
-
-+--- ... --+------- ... -------+------------------+
-|  Rule ID |Compression Residue|  packet payload  |
-+--- ... --+------- ... -------+------------------+
-
-|----- compressed header ------|
-
-~~~~
-{: #Fig-FormatPckt title='SCHC C/D Packet Format'}
+  The receiver identifies the sender through its device-id or source identifier (e.g. MAC address, if it exists) and selects the Rule using the Rule ID. This Rule describes the compressed header format and associates the received Compression Residue to each of the header fields.
+  For each field in the header, the receiver applies the CDA action associated to that field in order to reconstruct the original header field value. The CDA application order can be different from the order in which the fields are listed in the Rule. In particular, Compute-\* MUST be applied after the application of the CDAs of all the fields it computes on.
 
 
 ## Matching operators {#chap-MO}
