@@ -700,8 +700,9 @@ The SCHC F/R messages use the following fields (see the related formats in {{Fra
   If present, DTag
 
   * MUST be set to the same value for all the SCHC F/R messages related to the same fragmented SCHC Packet,
-  * MUST be set to different values for SCHC F/R messages related to different SCHC Packets that are being fragmented under the same Rule ID,
-  * MUST be incremented for each new SCHC Packet fragmented under the same Rule ID, counting from 0 upto (2^T) – 1 and wrapping back to 0.
+  * MUST be set to different values for SCHC F/R messages related to different SCHC Packets that are being fragmented under the same Rule ID and that may overlap during the fragmented transmission.
+
+  A sequence counter that is incremented for each new fragmented SCHC Packet, counting from 0 to up to (2^T)-1 and wrapping back to 0 is RECOMMENDED for maximum traceability and replay avoidance.
 
 * W: The W field is optional. It is only present if windows are used.
   Its presence and size (called M, in bits) is defined by each SCHC F/R mode and each Profile for each Rule ID.
