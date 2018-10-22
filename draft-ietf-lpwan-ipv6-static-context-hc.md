@@ -551,7 +551,7 @@ The tools are described here in a generic manner. Their application to each SCHC
 
 ### Messages
 
-The messages that can be used by SCHC F/R are the following
+The messages that can be used by SCHC F/R are the following:
 
 * SCHC Fragment: A data unit that carries a piece of a SCHC Packet from the sender to the receiver.
 
@@ -711,7 +711,7 @@ The SCHC F/R messages use the following fields (see the related formats in {{Fra
   Its size (called N, in bits) is defined by each Profile for each Rule ID.
 
   This field conveys information about the progress in the sequence of tiles being transmitted by SCHC Fragment messages.
-  For example, it can contain a truncated, efficient representation of a larger-sized tile number.
+  For example, it can contain a partial, efficient representation of a larger-sized tile number.
   The description of the exact use of the FCN field is left to each SCHC F/R mode.
   However, two values are reserved for special purposes. They help control the SCHC F/R process:
 
@@ -986,7 +986,7 @@ This is possible through different combinations
 
 - the size of the Sender-Abort Header may be made such that it is not padded
 - or the total size of the MIC and the Payload of an All-1 SCHC Fragment is at least the size of an L2 Word
-- or through other alignement and size combinations
+- or through other alignment and size combinations
 
 The SCHC Sender-Abort MUST NOT be acknowledged.
 
@@ -1249,7 +1249,8 @@ At any time,
 On receiving a SCHC Fragment with a Rule ID and optional DTag pair not being processed at that time
 
 - the receiver MAY check if the optional DTag value has not recently been used for that Rule ID value,
-  thereby ensuring that the received SCHC Fragment is not a remnant of a prior fragmented SCHC Packet transmission,
+  thereby ensuring that the received SCHC Fragment is not a remnant of a prior fragmented SCHC Packet transmission.
+  If the SCHC Fragment is determined to be such a remant, the receiver MAY silently ignore it and discard it.
 - the receiver MUST start a process to assemble a new SCHC Packet with that Rule ID and DTag value pair.
   That process MUST only examine received SCHC F/R messages with that Rule ID and DTag value pair
   and MUST only transmit SCHC F/R messages with that Rule ID and DTag value pair.
@@ -1290,7 +1291,7 @@ Entering an "acceptance phase", the receiver MUST first initialise an empty Bitm
       the receiver enters the "equalization phase" for this window.
 
 - on receiving a SCHC ACK REQ with the W bit equal to the local W bit,
-  the current window is an undetermined window,
+  the receiver has not yet determined if the current window is a not-last one or the last one,
   the receiver MUST send a SCHC ACK for this window,
   and it keeps accepting incoming messages.
 
@@ -1347,7 +1348,7 @@ In the "clean-up phase":
 At any time,
 on expiration of the Inactivity Timer,
 on receiving a SCHC Sender-Abort or
-when Attempts reaches MAC_ACK_REQUESTS,
+when Attempts reaches MAX_ACK_REQUESTS,
 the receiver MUST send a SCHC Receiver-Abort,
 it MUST release all resource associated with this SCHC Packet
 and it MAY exit the receive process for that SCHC Packet.
@@ -1519,7 +1520,8 @@ See {{Fig-ACKonerrorSnd}} for one among several possible examples of a Finite St
 On receiving a SCHC Fragment with a Rule ID and optional DTag pair not being processed at that time
 
 - the receiver MAY check if the optional DTag value has not recently been used for that Rule ID value,
-  thereby ensuring that the received SCHC Fragment is not a remnant of a prior fragmented SCHC Packet transmission,
+  thereby ensuring that the received SCHC Fragment is not a remnant of a prior fragmented SCHC Packet transmission.
+  If the SCHC Fragment is determined to be such a remant, the receiver MAY silently ignore it and discard it.
 - the receiver MUST start a process to assemble a new SCHC Packet with that Rule ID and DTag value pair.
   That process MUST only examine received SCHC F/R messages with that Rule ID and DTag value pair
   and MUST only transmit SCHC F/R messages with that Rule ID and DTag value pair.
