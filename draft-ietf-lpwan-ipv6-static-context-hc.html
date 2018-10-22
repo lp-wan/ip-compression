@@ -351,8 +351,8 @@ address {
   <link rel="schema.dct" href="http://purl.org/dc/terms/" />
 
   <meta name="dct.creator" content="Minaburo, A., Toutain, L., Gomez, C., Barthel, D., and JC. Zuniga" />
-  <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-lpwan-ipv6-static-context-hc-16" />
-  <meta name="dct.issued" scheme="ISO8601" content="2018-10-20" />
+  <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-lpwan-ipv6-static-context-hc-17" />
+  <meta name="dct.issued" scheme="ISO8601" content="2018-10-22" />
   <meta name="dct.abstract" content="This document defines the Static Context Header Compression (SCHC) framework, which provides both header compression and fragmentation functionalities. SCHC has been designed for Low Power Wide Area Networks (LPWAN)." />
   <meta name="description" content="This document defines the Static Context Header Compression (SCHC) framework, which provides both header compression and fragmentation functionalities. SCHC has been designed for Low Power Wide Area Networks (LPWAN)." />
 
@@ -376,7 +376,7 @@ address {
 <td class="right">L. Toutain</td>
 </tr>
 <tr>
-<td class="left">Expires: April 23, 2019</td>
+<td class="left">Expires: April 25, 2019</td>
 <td class="right">IMT-Atlantique</td>
 </tr>
 <tr>
@@ -405,7 +405,7 @@ address {
 </tr>
 <tr>
 <td class="left"></td>
-<td class="right">October 20, 2018</td>
+<td class="right">October 22, 2018</td>
 </tr>
 
     	
@@ -413,7 +413,7 @@ address {
   </table>
 
   <p class="title">LPWAN Static Context Header Compression (SCHC) and fragmentation for IPv6 and UDP<br />
-  <span class="filename">draft-ietf-lpwan-ipv6-static-context-hc-16</span></p>
+  <span class="filename">draft-ietf-lpwan-ipv6-static-context-hc-17</span></p>
   
   <h1 id="rfc.abstract"><a href="#rfc.abstract">Abstract</a></h1>
 <p>This document defines the Static Context Header Compression (SCHC) framework, which provides both header compression and fragmentation functionalities. SCHC has been designed for Low Power Wide Area Networks (LPWAN).</p>
@@ -424,7 +424,7 @@ address {
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at https://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on April 23, 2019.</p>
+<p>This Internet-Draft will expire on April 25, 2019.</p>
 <h1 id="rfc.copyrightnotice"><a href="#rfc.copyrightnotice">Copyright Notice</a></h1>
 <p>Copyright (c) 2018 IETF Trust and the persons identified as the document authors.  All rights reserved.</p>
 <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (https://trustee.ietf.org/license-info) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.</p>
@@ -935,7 +935,7 @@ A packet (e.g. an IPv6 packet)
 <h1 id="rfc.section.8.2.1">
 <a href="#rfc.section.8.2.1">8.2.1.</a> <a href="#messages" id="messages">Messages</a>
 </h1>
-<p id="rfc.section.8.2.1.p.1">The messages that can be used by SCHC F/R are the following</p>
+<p id="rfc.section.8.2.1.p.1">The messages that can be used by SCHC F/R are the following:</p>
 <p></p>
 
 <ul>
@@ -1058,7 +1058,7 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 <p> A sequence counter that is incremented for each new fragmented SCHC Packet, counting from 0 to up to (2^T)-1 and wrapping back to 0 is RECOMMENDED for maximum traceability and replay avoidance.</p>
 </li>
 <li>W: The W field is optional. It is only present if windows are used.  Its presence and size (called M, in bits) is defined by each SCHC F/R mode and each Profile for each Rule ID.  <br><br> This field carries information pertaining to the window a SCHC F/R message relates to.  If present, W MUST carry the same value for all the SCHC F/R messages related to the same window.  Depending on the mode and Profile, W may carry the full window number, or just the least significant bit or any other partial representation of the window number.</li>
-<li>Fragment Compressed Number (FCN). The FCN field is present in the SCHC Fragment Header.  Its size (called N, in bits) is defined by each Profile for each Rule ID.  <br><br> This field conveys information about the progress in the sequence of tiles being transmitted by SCHC Fragment messages.  For example, it can contain a truncated, efficient representation of a larger-sized tile number.  The description of the exact use of the FCN field is left to each SCHC F/R mode.  However, two values are reserved for special purposes. They help control the SCHC F/R process:  <ul>
+<li>Fragment Compressed Number (FCN). The FCN field is present in the SCHC Fragment Header.  Its size (called N, in bits) is defined by each Profile for each Rule ID.  <br><br> This field conveys information about the progress in the sequence of tiles being transmitted by SCHC Fragment messages.  For example, it can contain a partial, efficient representation of a larger-sized tile number.  The description of the exact use of the FCN field is left to each SCHC F/R mode.  However, two values are reserved for special purposes. They help control the SCHC F/R process:  <ul>
 <li>The FCN value with all the bits equal to 1 (called All-1) signals the very last tile of a SCHC Packet.  By extension, if windows are used, the last window of a packet is called the All-1 window.</li>
 <li>If windows are used, the FCN value with all the bits equal to 0 (called All-0) signals the last tile of a window that is not the last one of the SCHC packet.  By extension, such a window is called an All-0 window.</li>
 </ul>
@@ -1282,7 +1282,7 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 <ul>
 <li>the size of the Sender-Abort Header may be made such that it is not padded</li>
 <li>or the total size of the MIC and the Payload of an All-1 SCHC Fragment is at least the size of an L2 Word</li>
-<li>or through other alignement and size combinations</li>
+<li>or through other alignment and size combinations</li>
 </ul>
 <p id="rfc.section.8.3.4.1.p.8">The SCHC Sender-Abort MUST NOT be acknowledged.</p>
 <h1 id="rfc.section.8.3.4.2">
@@ -1483,7 +1483,7 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 <p></p>
 
 <ul>
-<li>the receiver MAY check if the optional DTag value has not recently been used for that Rule ID value, thereby ensuring that the received SCHC Fragment is not a remnant of a prior fragmented SCHC Packet transmission,</li>
+<li>the receiver MAY check if the optional DTag value has not recently been used for that Rule ID value, thereby ensuring that the received SCHC Fragment is not a remnant of a prior fragmented SCHC Packet transmission.  If the SCHC Fragment is determined to be such a remant, the receiver MAY silently ignore it and discard it.</li>
 <li>the receiver MUST start a process to assemble a new SCHC Packet with that Rule ID and DTag value pair.  That process MUST only examine received SCHC F/R messages with that Rule ID and DTag value pair and MUST only transmit SCHC F/R messages with that Rule ID and DTag value pair.</li>
 <li>the receiver MUST start an Inactivity Timer. It MUST initialise an Attempts counter to 0.  It MUST initialise a window counter to 0.</li>
 </ul>
@@ -1507,7 +1507,7 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 </li>
 </ul>
 </li>
-<li>on receiving a SCHC ACK REQ with the W bit equal to the local W bit, the current window is an undetermined window, the receiver MUST send a SCHC ACK for this window, and it keeps accepting incoming messages.</li>
+<li>on receiving a SCHC ACK REQ with the W bit equal to the local W bit, the receiver has not yet determined if the current window is a not-last one or the last one, the receiver MUST send a SCHC ACK for this window, and it keeps accepting incoming messages.</li>
 </ul>
 <p id="rfc.section.8.4.2.2.p.7">In the &#8220;equalization phase&#8221;:</p>
 <p></p>
@@ -1552,7 +1552,7 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 <li>On receiving an All-1 SCHC Fragment or a SCHC ACK REQ, the receiver MUST send a SCHC ACK.</li>
 <li>On expiration of the Inactivity Timer, the receive process for that SCHC Packet MAY exit</li>
 </ul>
-<p id="rfc.section.8.4.2.2.p.11">At any time, on expiration of the Inactivity Timer, on receiving a SCHC Sender-Abort or when Attempts reaches MAC_ACK_REQUESTS, the receiver MUST send a SCHC Receiver-Abort, it MUST release all resource associated with this SCHC Packet and it MAY exit the receive process for that SCHC Packet.</p>
+<p id="rfc.section.8.4.2.2.p.11">At any time, on expiration of the Inactivity Timer, on receiving a SCHC Sender-Abort or when Attempts reaches MAX_ACK_REQUESTS, the receiver MUST send a SCHC Receiver-Abort, it MUST release all resource associated with this SCHC Packet and it MAY exit the receive process for that SCHC Packet.</p>
 <p id="rfc.section.8.4.2.2.p.12">The MIC computed at the receiver MUST be computed over the reassembled SCHC Packet and over the padding bits that were received in the SCHC Fragment carrying the last tile.</p>
 <p><a href="#Fig-ACKAlwaysRcv" class="xref">Figure 38</a> shows an example of a corresponding state machine.</p>
 <h1 id="rfc.section.8.4.3">
@@ -1710,7 +1710,7 @@ SCHC Fragment msg    |-----------|
 <p></p>
 
 <ul>
-<li>the receiver MAY check if the optional DTag value has not recently been used for that Rule ID value, thereby ensuring that the received SCHC Fragment is not a remnant of a prior fragmented SCHC Packet transmission,</li>
+<li>the receiver MAY check if the optional DTag value has not recently been used for that Rule ID value, thereby ensuring that the received SCHC Fragment is not a remnant of a prior fragmented SCHC Packet transmission.  If the SCHC Fragment is determined to be such a remant, the receiver MAY silently ignore it and discard it.</li>
 <li>the receiver MUST start a process to assemble a new SCHC Packet with that Rule ID and DTag value pair.  That process MUST only examine received SCHC F/R messages with that Rule ID and DTag value pair and MUST only transmit SCHC F/R messages with that Rule ID and DTag value pair.</li>
 <li>the receiver MUST start an Inactivity Timer. It MUST initialise an Attempts counter to 0.</li>
 </ul>
