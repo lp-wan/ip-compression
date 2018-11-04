@@ -723,11 +723,11 @@ The SCHC F/R messages use the following fields (see the related formats in {{Fra
   By extension, such a window is called an All-0 window.
 
   The highest value of FCN (an unsigned integer) is called MAX_WIND_FCN.
-  Since All-1 is reserved, MAX_WIND_FCN MUST be stricly less that (2^N)-1.
+  Since All-1 is reserved, MAX_WIND_FCN MUST be strictly less that (2^N)-1.
 
 * Message Integrity Check (MIC).
   This field only appears in the All-1 SCHC Fragments.
-  Its size (called T, in bits) is defined by each Profile for each Rule ID.
+  Its size is defined by each Profile for each Rule ID.
 
   See {{IntegrityChecking}} for the MIC default size, default polynomials and details on its computation.
 
@@ -948,8 +948,8 @@ Note that the SCHC ACK REQ has the same header as an All-0 SCHC Fragment (see {{
 A receiver can distinguish the former form the latter by the message length, even in the presence of padding.
 This is possible because
 
-- the padding bits are always stricly less than an L2 Word.
-- the size of an All-0 SCHC Fragment Payload is at least the size of an L2 Word,
+- the padding bits are always strictly less than an L2 Word,
+- the size of an All-0 SCHC Fragment Payload is at least the size of an L2 Word.
 
 ### SCHC Abort formats {#Aborts}
 
@@ -1131,7 +1131,7 @@ and over the padding bits that were received in the SCHC Fragment carrying the l
 
 {{Fig-NoACKModeRcv}} shows an example of a corresponding state machine.
 
-### ACK-Always {#ACK-Always-subsection}
+### ACK-Always mode {#ACK-Always-subsection}
 
 The ACK-Always mode has been designed under the following assumptions
 
@@ -1359,7 +1359,7 @@ and over the padding bits that were received in the SCHC Fragment carrying the l
 {{Fig-ACKAlwaysRcv}} shows an example of a corresponding state machine.
 
 
-### ACK-on-Error {#ACK-on-Error-subsection}
+### ACK-on-Error mode {#ACK-on-Error-subsection}
 
 The ACK-on-Error mode supports LPWAN technologies that have variable MTU and out-of-order delivery.
 
@@ -1434,7 +1434,7 @@ The receiver, for each pair of Rule ID and optional DTag values, MUST maintain
 At the beginning of the fragmentation of a new SCHC Packet,
 
 - the fragment sender MUST select a Rule ID and DTag value pair for this SCHC Packet.
-  A Rule MUST NOT be selected if the values of M and MAX_WIND_FCN for that Rule are such that the SCHC Packet cannot be fragmented in (2ˆM) * (MAX_WIND_FCN+1) tiles or less.
+  A Rule MUST NOT be selected if the values of M and MAX_WIND_FCN for that Rule are such that the SCHC Packet cannot be fragmented in (2^M) * (MAX_WIND_FCN+1) tiles or less.
 - the fragment sender MUST initialize the Attempts counter to 0 for that Rule ID and DTag value pair.
 
 For brevity, the rest of {{ACK-on-Error-subsection}} only refers to SCHC F/R messages bearing the Rule ID and optional DTag values hereby selected.
