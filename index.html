@@ -312,8 +312,8 @@ address {
 <link href="#rfc.section.8.3.4" rel="Chapter" title="8.3.4 SCHC Abort formats">
 <link href="#rfc.section.8.4" rel="Chapter" title="8.4 SCHC F/R modes">
 <link href="#rfc.section.8.4.1" rel="Chapter" title="8.4.1 No-ACK mode">
-<link href="#rfc.section.8.4.2" rel="Chapter" title="8.4.2 ACK-Always">
-<link href="#rfc.section.8.4.3" rel="Chapter" title="8.4.3 ACK-on-Error">
+<link href="#rfc.section.8.4.2" rel="Chapter" title="8.4.2 ACK-Always mode">
+<link href="#rfc.section.8.4.3" rel="Chapter" title="8.4.3 ACK-on-Error mode">
 <link href="#rfc.section.9" rel="Chapter" title="9 Padding management">
 <link href="#rfc.section.10" rel="Chapter" title="10 SCHC Compression for IPv6 and UDP headers">
 <link href="#rfc.section.10.1" rel="Chapter" title="10.1 IPv6 version field">
@@ -347,12 +347,12 @@ address {
 <link href="#rfc.authors" rel="Chapter">
 
 
-  <meta name="generator" content="xml2rfc version 2.11.1 - https://tools.ietf.org/tools/xml2rfc" />
+  <meta name="generator" content="xml2rfc version 2.12.3 - https://tools.ietf.org/tools/xml2rfc" />
   <link rel="schema.dct" href="http://purl.org/dc/terms/" />
 
   <meta name="dct.creator" content="Minaburo, A., Toutain, L., Gomez, C., Barthel, D., and JC. Zuniga" />
   <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-lpwan-ipv6-static-context-hc-17" />
-  <meta name="dct.issued" scheme="ISO8601" content="2018-10-22" />
+  <meta name="dct.issued" scheme="ISO8601" content="2018-11-04" />
   <meta name="dct.abstract" content="This document defines the Static Context Header Compression (SCHC) framework, which provides both header compression and fragmentation functionalities. SCHC has been designed for Low Power Wide Area Networks (LPWAN)." />
   <meta name="description" content="This document defines the Static Context Header Compression (SCHC) framework, which provides both header compression and fragmentation functionalities. SCHC has been designed for Low Power Wide Area Networks (LPWAN)." />
 
@@ -376,7 +376,7 @@ address {
 <td class="right">L. Toutain</td>
 </tr>
 <tr>
-<td class="left">Expires: April 25, 2019</td>
+<td class="left">Expires: May 8, 2019</td>
 <td class="right">IMT-Atlantique</td>
 </tr>
 <tr>
@@ -405,7 +405,7 @@ address {
 </tr>
 <tr>
 <td class="left"></td>
-<td class="right">October 22, 2018</td>
+<td class="right">November 04, 2018</td>
 </tr>
 
     	
@@ -424,7 +424,7 @@ address {
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at https://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on April 25, 2019.</p>
+<p>This Internet-Draft will expire on May 8, 2019.</p>
 <h1 id="rfc.copyrightnotice"><a href="#rfc.copyrightnotice">Copyright Notice</a></h1>
 <p>Copyright (c) 2018 IETF Trust and the persons identified as the document authors.  All rights reserved.</p>
 <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (https://trustee.ietf.org/license-info) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.</p>
@@ -504,9 +504,9 @@ address {
 </li>
 <ul><li>8.4.1.   <a href="#rfc.section.8.4.1">No-ACK mode</a>
 </li>
-<li>8.4.2.   <a href="#rfc.section.8.4.2">ACK-Always</a>
+<li>8.4.2.   <a href="#rfc.section.8.4.2">ACK-Always mode</a>
 </li>
-<li>8.4.3.   <a href="#rfc.section.8.4.3">ACK-on-Error</a>
+<li>8.4.3.   <a href="#rfc.section.8.4.3">ACK-on-Error mode</a>
 </li>
 </ul></ul><li>9.   <a href="#rfc.section.9">Padding management</a>
 </li>
@@ -1062,9 +1062,9 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 <li>The FCN value with all the bits equal to 1 (called All-1) signals the very last tile of a SCHC Packet.  By extension, if windows are used, the last window of a packet is called the All-1 window.</li>
 <li>If windows are used, the FCN value with all the bits equal to 0 (called All-0) signals the last tile of a window that is not the last one of the SCHC packet.  By extension, such a window is called an All-0 window.</li>
 </ul>
-<p> The highest value of FCN (an unsigned integer) is called MAX_WIND_FCN.  Since All-1 is reserved, MAX_WIND_FCN MUST be stricly less that (2^N)-1.</p>
+<p> The highest value of FCN (an unsigned integer) is called MAX_WIND_FCN.  Since All-1 is reserved, MAX_WIND_FCN MUST be strictly less that (2^N)-1.</p>
 </li>
-<li>Message Integrity Check (MIC).  This field only appears in the All-1 SCHC Fragments.  Its size (called T, in bits) is defined by each Profile for each Rule ID.  <br><br> See <a href="#IntegrityChecking" class="xref">Section 8.2.3</a> for the MIC default size, default polynomials and details on its computation.</li>
+<li>Message Integrity Check (MIC).  This field only appears in the All-1 SCHC Fragments.  Its size is defined by each Profile for each Rule ID.  <br><br> See <a href="#IntegrityChecking" class="xref">Section 8.2.3</a> for the MIC default size, default polynomials and details on its computation.</li>
 <li>C (integrity Check): C is a 1-bit field.  This field is used in the SCHC ACK message to report on the reassembled SCHC Packet integrity check (see <a href="#IntegrityChecking" class="xref">Section 8.2.3</a>).  <br><br> A value of 1 tells that the integrity check was performed and is successful.  A value of 0 tells that the integrity check was not performed, or that is was a failure.</li>
 <li>Compressed Bitmap. The Compressed Bitmap is used together with windows and Bitmaps (see <a href="#Bitmap" class="xref">Section 8.2.2.3</a>).  Its presence and size is defined for each F/R mode for each Rule ID.  <br><br> This field appears in the SCHC ACK message to report on the receiver Bitmap (see <a href="#BitmapTrunc" class="xref">Section 8.3.2.1</a>).</li>
 </ul>
@@ -1247,8 +1247,8 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 <p></p>
 
 <ul>
-<li>the padding bits are always stricly less than an L2 Word.</li>
-<li>the size of an All-0 SCHC Fragment Payload is at least the size of an L2 Word,</li>
+<li>the padding bits are always strictly less than an L2 Word,</li>
+<li>the size of an All-0 SCHC Fragment Payload is at least the size of an L2 Word.</li>
 </ul>
 <h1 id="rfc.section.8.3.4">
 <a href="#rfc.section.8.3.4">8.3.4.</a> <a href="#Aborts" id="Aborts">SCHC Abort formats</a>
@@ -1394,7 +1394,7 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 <p id="rfc.section.8.4.1.2.p.7">The MIC computed at the receiver MUST be computed over the reassembled SCHC Packet and over the padding bits that were received in the SCHC Fragment carrying the last tile.</p>
 <p><a href="#Fig-NoACKModeRcv" class="xref">Figure 36</a> shows an example of a corresponding state machine.</p>
 <h1 id="rfc.section.8.4.2">
-<a href="#rfc.section.8.4.2">8.4.2.</a> <a href="#ACK-Always-subsection" id="ACK-Always-subsection">ACK-Always</a>
+<a href="#rfc.section.8.4.2">8.4.2.</a> <a href="#ACK-Always-subsection" id="ACK-Always-subsection">ACK-Always mode</a>
 </h1>
 <p id="rfc.section.8.4.2.p.1">The ACK-Always mode has been designed under the following assumptions</p>
 <p></p>
@@ -1556,7 +1556,7 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 <p id="rfc.section.8.4.2.2.p.12">The MIC computed at the receiver MUST be computed over the reassembled SCHC Packet and over the padding bits that were received in the SCHC Fragment carrying the last tile.</p>
 <p><a href="#Fig-ACKAlwaysRcv" class="xref">Figure 38</a> shows an example of a corresponding state machine.</p>
 <h1 id="rfc.section.8.4.3">
-<a href="#rfc.section.8.4.3">8.4.3.</a> <a href="#ACK-on-Error-subsection" id="ACK-on-Error-subsection">ACK-on-Error</a>
+<a href="#rfc.section.8.4.3">8.4.3.</a> <a href="#ACK-on-Error-subsection" id="ACK-on-Error-subsection">ACK-on-Error mode</a>
 </h1>
 <p id="rfc.section.8.4.3.p.1">The ACK-on-Error mode supports LPWAN technologies that have variable MTU and out-of-order delivery.</p>
 <p id="rfc.section.8.4.3.p.2">In ACK-on-Error mode, windows are used.  All tiles MUST be of equal size, except for the last one, which MUST be of the same size or smaller than the preceding ones.  WINDOW_SIZE MUST be equal to MAX_WIND_FCN + 1.</p>
@@ -1619,7 +1619,7 @@ SCHC Fragment msg    |-----------|
 <p></p>
 
 <ul>
-<li>the fragment sender MUST select a Rule ID and DTag value pair for this SCHC Packet.  A Rule MUST NOT be selected if the values of M and MAX_WIND_FCN for that Rule are such that the SCHC Packet cannot be fragmented in (2&#710;M) * (MAX_WIND_FCN+1) tiles or less.</li>
+<li>the fragment sender MUST select a Rule ID and DTag value pair for this SCHC Packet.  A Rule MUST NOT be selected if the values of M and MAX_WIND_FCN for that Rule are such that the SCHC Packet cannot be fragmented in (2^M) * (MAX_WIND_FCN+1) tiles or less.</li>
 <li>the fragment sender MUST initialize the Attempts counter to 0 for that Rule ID and DTag value pair.</li>
 </ul>
 <p id="rfc.section.8.4.3.1.p.3">For brevity, the rest of <a href="#ACK-on-Error-subsection" class="xref">Section 8.4.3</a> only refers to SCHC F/R messages bearing the Rule ID and optional DTag values hereby selected.</p>
