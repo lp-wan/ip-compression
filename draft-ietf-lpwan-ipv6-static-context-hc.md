@@ -658,8 +658,8 @@ Some SCHC F/R modes can use the following timers and counters
 
 ### Integrity Checking {#IntegrityChecking}
 
-The reassembled SCHC Packet is checked for integrity at the receive end.
-Integrity checking is performed by computing a MIC at the sender side and transmitting it to the receiver for comparison with the locally computed MIC.
+The reassembled SCHC Packet MUST be checked for integrity at the receive end.
+By default, integrity checking is performed by computing a MIC at the sender side and transmitting it to the receiver for comparison with the locally computed MIC.
 
 The MIC supports UDP checksum elision by SCHC C/D (see {{UDPchecksum}}).
 
@@ -731,7 +731,7 @@ The SCHC F/R messages contain the following fields (see the formats in {{Fragfor
 
 * Message Integrity Check (MIC).
   This field only appears in the All-1 SCHC Fragments.
-  Its size is defined by each Profile for each Rule ID.
+  Its size (called U, in bits) is defined by each Profile for each Rule ID.
 
   See {{IntegrityChecking}} for the MIC default size, default polynomial and details on MIC computation.
 
@@ -783,19 +783,18 @@ The DTag field and the W field are optional.
 The FCN field MUST NOT contain all bits set to 1.
 
 The Fragment Payload of a SCHC Fragment with FCN equal to 0 (called an All-0 SCHC Fragment) MUST be distinguishable by size from a SCHC ACK REQ message (see {{ACKREQ}}) that has the same T, M and N values, even in the presence of padding.
-This is trivially achieved by having the Payload at least the size of an L2 Word.
-This is also naturally achieved if the SCHC Fragment Header is a multiple of L2 Words.
+This condition is met if the Payload is at least the size of an L2 Word.
+This condition is also met if the SCHC Fragment Header is a multiple of L2 Words.
 
 #### All-1 SCHC Fragment {#LastFrag}
 
 The All-1 SCHC Fragment format is shown in {{Fig-LastFrag}}.
-The All-1 SCHC Fragment is generally used to carry the very last tile of a SCHC Packet and a MIC,
-or a MIC only.
-The DTag field, the W field and the Payload are optional.
+The sender generally uses the All-1 SCHC Fragment format for the message that completes the emission of a fragmented SCHC Packet.
+The DTag field, the W field, the MIC field and the Payload are optional. At least one of MIC field or Payload MUST be present.
 
 ~~~~
 |-------- SCHC Fragment Header -------|
-          |-- T --|-M-|-- N --|
+          |-- T --|-M-|-- N --|-- U --|
 +-- ... --+- ... -+---+- ... -+- ... -+------...-----+~~~~~~~~~~~~~~~~~~
 | Rule ID | DTag  | W | 11..1 |  MIC  | Frag Payload | pad. (as needed)
 +-- ... --+- ... -+---+- ... -+- ... -+------...-----+~~~~~~~~~~~~~~~~~~
@@ -804,9 +803,9 @@ The DTag field, the W field and the Payload are optional.
 {: #Fig-LastFrag title='Detailed format for the All-1 SCHC Fragment'}
 
 The All-1 SCHC Fragment message MUST be distinguishable by size from a SCHC Sender-Abort message (see {{SenderAbort}}) that has the same T, M and N values, even in the presence of padding.
-This is trivially achieved by having the MIC present and at least the size of an L2 Word,
-or by having the Payload present and at least the size an L2 Word.
-This is also naturally achieved if the SCHC Sender-Abort Header is a multiple of L2 Words.
+This condition is met if the MIC is present and at least the size of an L2 Word,
+or if the Payload is present and at least the size an L2 Word.
+This condition is also met if the SCHC Sender-Abort Header is a multiple of L2 Words.
 
 ### SCHC ACK format {#ACK}
 
@@ -1584,8 +1583,8 @@ A packet (e.g. an IPv6 packet)
          |                                           ^
          |   If no fragmentation                     |
          +---- SCHC Packet + padding as needed ----->|
-         |                                           | (MIC checked
-         v                                           |  and removed)
+         |                                           | (integrity
+         v                                           |  checked)
 +--------------------+                       +-----------------+
 | SCHC Fragmentation |                       | SCHC Reassembly |
 +--------------------+                       +-----------------+
@@ -1712,7 +1711,7 @@ In other cases, the length SHOULD be sent and the CDA is replaced by "value-sent
 ## UDP Checksum field {#UDPchecksum}
 
 The UDP checksum operation is mandatory with IPv6 [RFC8200] for most
-packets but recognizes that there are exceptions to that default
+packets but [RFC8200] recognizes that there are exceptions to that default
 behavior.
 
 For instance, protocols that use UDP as a tunnel encapsulation may
@@ -1726,7 +1725,7 @@ Zero Checksums" [RFC6936].
 datagram that are deprived of the checksum protection when an upper
 layer guarantees the integrity of the UDP payload and pseudo-header
 all the way between the compressor that elides the UDP checksum and
-the decompressor that computes again it. A specific example of this is
+the decompressor that computes it again. A specific example of this is
 when a Message Integrity Check (MIC) protects the compressed message
 all along that path with a strength that is identical or better to
 the UDP checksum.
