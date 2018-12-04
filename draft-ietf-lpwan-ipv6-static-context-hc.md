@@ -415,7 +415,7 @@ The compression/decompression process follows several steps:
   * If no eligible compression Rule is found, then the header MUST be sent without compression,
     using a Rule ID dedicated to this purpose. Sending the header uncompressed but may require the use of the SCHC F/R process.
 
-* Sending: The Rule ID is sent to the other end followed by the Compression Residue (which could be empty) or the uncompressed header, and directly followed by the payload. The Compression Residue is the concatenation of the Compression Residues for each field according to the CDAs for that Rule. The way the Rule ID is sent depends on the Profile. For example, it can be either included in an L2 header or sent in the first byte of the L2 payload. (see {{Fig-SCHCpckt}}). This process will be specified in the Profile and is out of the scope of the present document. On LPWAN technologies that are byte-oriented, the compressed header concatenated with the original packet payload is padded to a multiple of 8 bits, if needed. See {{Padding}} for details.
+* Sending: The Rule ID is sent to the other end followed by the Compression Residue (which could be empty) or the uncompressed header, and directly followed by the payload. The Compression Residue is the concatenation of the Compression Residues for each field according to the CDAs for that Rule. The way the Rule ID is sent depends on the Profile. For example, it can be either included in an L2 header or sent in the first byte of the L2 payload. (see {{Fig-SCHCpckt}}). This process will be specified in the Profile and is out of the scope of the present document.
 
 * Decompression: When doing decompression, on the network side the SCHC C/D needs to find the correct Rule based on the L2 address and in this way, it can use the DevIID and the Rule ID. On the Dev side, only the Rule ID is needed to identify the correct Rule since the Dev only holds Rules that apply to itself.
 
@@ -778,9 +778,6 @@ The DTag field and the W field are optional.
 
 The FCN field MUST NOT contain all bits set to 1.
 
-If the size of the SCHC Fragment Payload does not nicely complement the SCHC Header size
-in a way that would make the SCHC Fragment a multiple of the L2 Word, then padding bits MUST be added.
-
 The Fragment Payload of a SCHC Fragment with FCN equal to 0 (called an All-0 SCHC Fragment) MUST be distinguishable by size from a SCHC ACK REQ message (see {{ACKREQ}}) that has the same T, M and N values, even in the presence of padding.
 This is trivially achieved by having the Payload at least the size of an L2 Word.
 This is also naturally achieved if the SCHC Fragment Header is a multiple of L2 Words.
@@ -801,9 +798,6 @@ The DTag field, the W field and the Payload are optional.
                         (FCN)
 ~~~~
 {: #Fig-LastFrag title='Detailed format for the All-1 SCHC Fragment'}
-
-If the size of the SCHC Fragment Payload does not nicely complement the SCHC Header size
-in a way that would make the SCHC Fragment a multiple of the L2 Word, then padding bits MUST be added.
 
 The All-1 SCHC Fragment message MUST be distinguishable by size from a SCHC Sender-Abort message (see {{SenderAbort}}) that has the same T, M and N values, even in the presence of padding.
 This is trivially achieved by having the MIC present and at least the size of an L2 Word,
@@ -833,19 +827,12 @@ The Compressed Bitmap field can only be present in SCHC F/R modes that use windo
 The SCHC ACK Header contains a C bit (see {{HeaderFields}}).
 
 If the C bit is set to 1 (integrity check successful),
-no Bitmap is carried and
-padding bits MUST be appended as needed to fill up the last L2 Word.
+no Bitmap is carried.
 
 If the C bit is set to 0 (integrity check not performed or failed) and if windows are used,
+a compressed representation (see {{BitmapTrunc}}) of the Bitmap for the window referred to by the W field MUST follow the C bit.
 
-- a representation of the Bitmap for the window referred to by the W field MUST follow the C bit
-- padding bits MUST be appended as needed to fill up the last L2 Word
-
-If the C bit is 1 or windows are not used, the C bit MUST be followed by padding bits as needed to fill up the last L2 Word.
-
-See {{Bitmap}} for a description of the Bitmap.
-
-The representation of the Bitmap that is transmitted MUST be the compressed version specified in {{BitmapTrunc}}, in order to reduce the SCHC ACK message size.
+See {{Bitmap}} for a description of Bitmaps.
 
 #### Bitmap Compression {#BitmapTrunc}
 For transmission, the Compressed Bitmap in the SCHC ACK message is defined by the following algorithm (see {{Fig-Localbitmap}} for a follow-along example):
@@ -884,7 +871,7 @@ Because the SCHC Fragment sender knows the size of the original Bitmap, it can r
                          C      |
         next L2 Word boundary ->|
 ~~~~
-{: #Fig-transmittedbitmap title='Actual SCHC ACK message with Compressed Bitmap, no padding'}
+{: #Fig-transmittedbitmap title='Actual SCHC ACK message with Compressed Bitmap'}
 
 {{Fig-Bitmap-Win}} shows an example of a SCHC ACK with tile numbers ranging from 6 down to 0, where the Bitmap indicates that the second and the fourth tile of the window have not been correctly received.
 
@@ -903,7 +890,7 @@ Because the SCHC Fragment sender knows the size of the original Bitmap, it can r
                          C
     next L2 Word boundary ->|<-- L2 Word -->|
 ~~~~
-{: #Fig-Bitmap-Win title='Example of a SCHC ACK message, missing tiles, with padding'}
+{: #Fig-Bitmap-Win title='Example of a SCHC ACK message, missing tiles'}
 
 {{Fig-Bitmap-lastWin}} shows an example of a SCHC ACK with FCN ranging from 6 down to 0, where integrity check has not been performed or has failed and the Bitmap indicates that there is no missing tile in that window.
 
@@ -922,7 +909,7 @@ Because the SCHC Fragment sender knows the size of the original Bitmap, it can r
                          C
     next L2 Word boundary ->|
 ~~~~
-{: #Fig-Bitmap-lastWin title='Example of a SCHC ACK message, no missing tile, no padding'}
+{: #Fig-Bitmap-lastWin title='Example of a SCHC ACK message, no missing tile'}
 
 
 ### SCHC ACK REQ format {#ACKREQ}
@@ -940,10 +927,6 @@ The DTag field and the W field are optional.
 +-- ... --+- ... -+---+- ... -+~~~~~~~~~~~~~~~~~~~~~
 ~~~~
 {: #Fig-ACKREQ title='SCHC ACK REQ detailed format'}
-
-
-The size of the SCHC ACK REQ header is generally not a multiple of the L2 Word size.
-Therefore, a SCHC ACK REQ generally needs padding bits.
 
 
 ### SCHC Abort formats {#Aborts}
@@ -971,9 +954,6 @@ If the W field is present,
   Other values are RESERVED.
 - the fragment receiver MUST check its value.
   If the value is different from all 1's, the message MUST be ignored.
-
-The size of the SCHC Sender-Abort header is generally not a multiple of the L2 Word size.
-Therefore, a SCHC Sender-Abort generally needs padding bits.
 
 The SCHC Sender-Abort MUST NOT be acknowledged.
 
@@ -1010,8 +990,6 @@ The bits that follow the SCHC Receiver-Abort Header MUST be as follows
 - append exactly one more L2 Word with bits all set to 1's
 
 Such a bit pattern never occurs in a regular SCHC ACK. This is how the fragment sender recognizes a SCHC Receiver-Abort.
-
-A SCHC Receiver-Abort is aligned to L2 Words, by design. Therefore, padding MUST NOT be appended.
 
 The SCHC Receiver-Abort MUST NOT be acknowledged.
 
