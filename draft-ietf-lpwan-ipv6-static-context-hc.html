@@ -347,14 +347,14 @@ address {
 <link href="#rfc.authors" rel="Chapter">
 
 
-  <meta name="generator" content="xml2rfc version 2.12.3 - https://tools.ietf.org/tools/xml2rfc" />
+  <meta name="generator" content="xml2rfc version 2.15.2 - https://tools.ietf.org/tools/xml2rfc" />
   <link rel="schema.dct" href="http://purl.org/dc/terms/" />
 
   <meta name="dct.creator" content="Minaburo, A., Toutain, L., Gomez, C., Barthel, D., and JC. Zuniga" />
   <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-lpwan-ipv6-static-context-hc-17" />
-  <meta name="dct.issued" scheme="ISO8601" content="2018-11-04" />
-  <meta name="dct.abstract" content="This document defines the Static Context Header Compression (SCHC) framework, which provides both header compression and fragmentation functionalities. SCHC has been designed for Low Power Wide Area Networks (LPWAN)." />
-  <meta name="description" content="This document defines the Static Context Header Compression (SCHC) framework, which provides both header compression and fragmentation functionalities. SCHC has been designed for Low Power Wide Area Networks (LPWAN)." />
+  <meta name="dct.issued" scheme="ISO8601" content="2018-12-04" />
+  <meta name="dct.abstract" content="This document defines the Static Context Header Compression (SCHC) framework, which provides both header compression and fragmentation functionalities. SCHC has been designed for Low Power Wide Area Networks (LPWAN).SCHC compression is based on a common static context stored in both the LPWAN device and the network side. This document defines a header compression mechanism and its application to compress IPv6/UDP headers.This document also specifies a fragmentation and reassembly mechanism that is used to support the IPv6 MTU requirement over the LPWAN technologies. Fragmentation is needed for IPv6 datagrams that, after SCHC compression or when such compression was not possible, still exceed the layer-2 maximum payload size.The SCHC header compression and fragmentation mechanisms are independent of the specific LPWAN technology over which they are used. This document defines generic functionalities and offers flexibility with regard to parameter settings and mechanism choices. Technology-specific and product-specific settings and choices are expected to be grouped into Profiles specified in other documents." />
+  <meta name="description" content="This document defines the Static Context Header Compression (SCHC) framework, which provides both header compression and fragmentation functionalities. SCHC has been designed for Low Power Wide Area Networks (LPWAN).SCHC compression is based on a common static context stored in both the LPWAN device and the network side. This document defines a header compression mechanism and its application to compress IPv6/UDP headers.This document also specifies a fragmentation and reassembly mechanism that is used to support the IPv6 MTU requirement over the LPWAN technologies. Fragmentation is needed for IPv6 datagrams that, after SCHC compression or when such compression was not possible, still exceed the layer-2 maximum payload size.The SCHC header compression and fragmentation mechanisms are independent of the specific LPWAN technology over which they are used. This document defines generic functionalities and offers flexibility with regard to parameter settings and mechanism choices. Technology-specific and product-specific settings and choices are expected to be grouped into Profiles specified in other documents." />
 
 </head>
 
@@ -376,7 +376,7 @@ address {
 <td class="right">L. Toutain</td>
 </tr>
 <tr>
-<td class="left">Expires: May 8, 2019</td>
+<td class="left">Expires: June 7, 2019</td>
 <td class="right">IMT-Atlantique</td>
 </tr>
 <tr>
@@ -405,7 +405,7 @@ address {
 </tr>
 <tr>
 <td class="left"></td>
-<td class="right">November 04, 2018</td>
+<td class="right">December 04, 2018</td>
 </tr>
 
     	
@@ -424,7 +424,7 @@ address {
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at https://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on May 8, 2019.</p>
+<p>This Internet-Draft will expire on June 7, 2019.</p>
 <h1 id="rfc.copyrightnotice"><a href="#rfc.copyrightnotice">Copyright Notice</a></h1>
 <p>Copyright (c) 2018 IETF Trust and the persons identified as the document authors.  All rights reserved.</p>
 <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (https://trustee.ietf.org/license-info) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.</p>
@@ -826,7 +826,7 @@ A packet (e.g. an IPv6 packet)
 <li>If no eligible compression Rule is found, then the header MUST be sent without compression, using a Rule ID dedicated to this purpose. Sending the header uncompressed but may require the use of the SCHC F/R process.</li>
 </ul>
 </li>
-<li>Sending: The Rule ID is sent to the other end followed by the Compression Residue (which could be empty) or the uncompressed header, and directly followed by the payload. The Compression Residue is the concatenation of the Compression Residues for each field according to the CDAs for that Rule. The way the Rule ID is sent depends on the Profile. For example, it can be either included in an L2 header or sent in the first byte of the L2 payload. (see <a href="#Fig-SCHCpckt" class="xref">Figure 4</a>). This process will be specified in the Profile and is out of the scope of the present document. On LPWAN technologies that are byte-oriented, the compressed header concatenated with the original packet payload is padded to a multiple of 8 bits, if needed. See <a href="#Padding" class="xref">Section 9</a> for details.</li>
+<li>Sending: The Rule ID is sent to the other end followed by the Compression Residue (which could be empty) or the uncompressed header, and directly followed by the payload. The Compression Residue is the concatenation of the Compression Residues for each field according to the CDAs for that Rule. The way the Rule ID is sent depends on the Profile. For example, it can be either included in an L2 header or sent in the first byte of the L2 payload. (see <a href="#Fig-SCHCpckt" class="xref">Figure 4</a>). This process will be specified in the Profile and is out of the scope of the present document.</li>
 <li>Decompression: When doing decompression, on the network side the SCHC C/D needs to find the correct Rule based on the L2 address and in this way, it can use the DevIID and the Rule ID. On the Dev side, only the Rule ID is needed to identify the correct Rule since the Dev only holds Rules that apply to itself.  <br><br> The receiver identifies the sender through its device-id or source identifier (e.g. MAC address, if it exists) and selects the Rule using the Rule ID. This Rule describes the compressed header format and associates the received Compression Residue to each of the header fields.  For each field in the header, the receiver applies the CDA action associated to that field in order to reconstruct the original header field value. The CDA application order can be different from the order in which the fields are listed in the Rule. In particular, Compute-* MUST be applied after the application of the CDAs of all the fields it computes on.</li>
 </ul>
 <h1 id="rfc.section.7.4">
@@ -1099,8 +1099,7 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 </pre>
 <p class="figure">Figure 11: Detailed Header Format for Regular SCHC Fragments</p>
 <p id="rfc.section.8.3.1.1.p.2">The FCN field MUST NOT contain all bits set to 1.</p>
-<p id="rfc.section.8.3.1.1.p.3">If the size of the SCHC Fragment Payload does not nicely complement the SCHC Header size in a way that would make the SCHC Fragment a multiple of the L2 Word, then padding bits MUST be added.</p>
-<p id="rfc.section.8.3.1.1.p.4">The Fragment Payload of a SCHC Fragment with FCN == 0 (called an All-0 SCHC Fragment) MUST be at least the size of an L2 Word.  The rationale is that, even in the presence of padding, an All-0 SCHC Fragment needs to be distinguishable from the SCHC ACK REQ message, which has the same header but has no payload (see <a href="#ACKREQ" class="xref">Section 8.3.3</a>).</p>
+<p id="rfc.section.8.3.1.1.p.3">The Fragment Payload of a SCHC Fragment with FCN equal to 0 (called an All-0 SCHC Fragment) MUST be distinguishable by size from a SCHC ACK REQ message (see <a href="#ACKREQ" class="xref">Section 8.3.3</a>) that has the same T, M and N values, even in the presence of padding.  This is trivially achieved by having the Payload at least the size of an L2 Word.  This is also naturally achieved if the SCHC Fragment Header is a multiple of L2 Words.</p>
 <h1 id="rfc.section.8.3.1.2">
 <a href="#rfc.section.8.3.1.2">8.3.1.2.</a> <a href="#LastFrag" id="LastFrag">All-1 SCHC Fragment</a>
 </h1>
@@ -1116,8 +1115,7 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
                         (FCN)
 </pre>
 <p class="figure">Figure 12: Detailed format for the All-1 SCHC Fragment</p>
-<p id="rfc.section.8.3.1.2.p.2">If the size of the SCHC Fragment Payload does not nicely complement the SCHC Header size in a way that would make the SCHC Fragment a multiple of the L2 Word, then padding bits MUST be added.</p>
-<p id="rfc.section.8.3.1.2.p.3">The All-1 SCHC Fragment message MUST be distinguishable by size from a SCHC Sender-Abort message (see <a href="#SenderAbort" class="xref">Section 8.3.4.1</a>) that has the same T, M and N values.  This is trivially achieved by having the MIC larger than an L2 Word, or by having the Payload larger than an L2 Word.  This is also naturally achieved if the SCHC Sender-Abort Header is a multiple of L2 Words.</p>
+<p id="rfc.section.8.3.1.2.p.2">The All-1 SCHC Fragment message MUST be distinguishable by size from a SCHC Sender-Abort message (see <a href="#SenderAbort" class="xref">Section 8.3.4.1</a>) that has the same T, M and N values, even in the presence of padding.  This is trivially achieved by having the MIC present and at least the size of an L2 Word, or by having the Payload present and at least the size an L2 Word.  This is also naturally achieved if the SCHC Sender-Abort Header is a multiple of L2 Words.</p>
 <h1 id="rfc.section.8.3.2">
 <a href="#rfc.section.8.3.2">8.3.2.</a> <a href="#ACK" id="ACK">SCHC ACK format</a>
 </h1>
@@ -1138,17 +1136,9 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 </pre>
 <p class="figure">Figure 13: Format of the SCHC ACK message</p>
 <p id="rfc.section.8.3.2.p.2">The SCHC ACK Header contains a C bit (see <a href="#HeaderFields" class="xref">Section 8.2.4</a>).</p>
-<p id="rfc.section.8.3.2.p.3">If the C bit is set to 1 (integrity check successful), no Bitmap is carried and padding bits MUST be appended as needed to fill up the last L2 Word.</p>
-<p id="rfc.section.8.3.2.p.4">If the C bit is set to 0 (integrity check not performed or failed) and if windows are used,</p>
-<p></p>
-
-<ul>
-<li>a representation of the Bitmap for the window referred to by the W field MUST follow the C bit</li>
-<li>padding bits MUST be appended as needed to fill up the last L2 Word</li>
-</ul>
-<p id="rfc.section.8.3.2.p.6">If the C bit is 1 or windows are not used, the C bit MUST be followed by padding bits as needed to fill up the last L2 Word.</p>
-<p id="rfc.section.8.3.2.p.7">See <a href="#Bitmap" class="xref">Section 8.2.2.3</a> for a description of the Bitmap.</p>
-<p id="rfc.section.8.3.2.p.8">The representation of the Bitmap that is transmitted MUST be the compressed version specified in <a href="#BitmapTrunc" class="xref">Section 8.3.2.1</a>, in order to reduce the SCHC ACK message size.</p>
+<p id="rfc.section.8.3.2.p.3">If the C bit is set to 1 (integrity check successful), no Bitmap is carried.</p>
+<p id="rfc.section.8.3.2.p.4">If the C bit is set to 0 (integrity check not performed or failed) and if windows are used, a compressed representation (see <a href="#BitmapTrunc" class="xref">Section 8.3.2.1</a>) of the Bitmap for the window referred to by the W field MUST follow the C bit.</p>
+<p id="rfc.section.8.3.2.p.5">See <a href="#Bitmap" class="xref">Section 8.2.2.3</a> for a description of Bitmaps.</p>
 <h1 id="rfc.section.8.3.2.1">
 <a href="#rfc.section.8.3.2.1">8.3.2.1.</a> <a href="#BitmapTrunc" id="BitmapTrunc">Bitmap Compression</a>
 </h1>
@@ -1189,7 +1179,7 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
                          C      |
         next L2 Word boundary -&gt;|
 </pre>
-<p class="figure">Figure 15: Actual SCHC ACK message with Compressed Bitmap, no padding</p>
+<p class="figure">Figure 15: Actual SCHC ACK message with Compressed Bitmap</p>
 <p><a href="#Fig-Bitmap-Win" class="xref">Figure 16</a> shows an example of a SCHC ACK with tile numbers ranging from 6 down to 0, where the Bitmap indicates that the second and the fourth tile of the window have not been correctly received.</p>
 <div id="rfc.figure.16"></div>
 <div id="Fig-Bitmap-Win"></div>
@@ -1208,7 +1198,7 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
                          C
     next L2 Word boundary -&gt;|&lt;-- L2 Word --&gt;|
 </pre>
-<p class="figure">Figure 16: Example of a SCHC ACK message, missing tiles, with padding</p>
+<p class="figure">Figure 16: Example of a SCHC ACK message, missing tiles</p>
 <p><a href="#Fig-Bitmap-lastWin" class="xref">Figure 17</a> shows an example of a SCHC ACK with FCN ranging from 6 down to 0, where integrity check has not been performed or has failed and the Bitmap indicates that there is no missing tile in that window.</p>
 <div id="rfc.figure.17"></div>
 <div id="Fig-Bitmap-lastWin"></div>
@@ -1227,7 +1217,7 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
                          C
     next L2 Word boundary -&gt;|
 </pre>
-<p class="figure">Figure 17: Example of a SCHC ACK message, no missing tile, no padding</p>
+<p class="figure">Figure 17: Example of a SCHC ACK message, no missing tile</p>
 <h1 id="rfc.section.8.3.3">
 <a href="#rfc.section.8.3.3">8.3.3.</a> <a href="#ACKREQ" id="ACKREQ">SCHC ACK REQ format</a>
 </h1>
@@ -1242,14 +1232,6 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 +-- ... --+- ... -+---+- ... -+~~~~~~~~~~~~~~~~~~~~~
 </pre>
 <p class="figure">Figure 18: SCHC ACK REQ detailed format</p>
-<p id="rfc.section.8.3.3.p.2">The size of the SCHC ACK REQ header is generally not a multiple of the L2 Word size.  Therefore, a SCHC ACK REQ generally needs padding bits.</p>
-<p id="rfc.section.8.3.3.p.3">Note that the SCHC ACK REQ has the same header as an All-0 SCHC Fragment (see <a href="#NotLastFrag" class="xref">Section 8.3.1.1</a>) but it doesn&#8217;t have a payload.  A receiver can distinguish the former form the latter by the message length, even in the presence of padding.  This is possible because</p>
-<p></p>
-
-<ul>
-<li>the padding bits are always strictly less than an L2 Word,</li>
-<li>the size of an All-0 SCHC Fragment Payload is at least the size of an L2 Word.</li>
-</ul>
 <h1 id="rfc.section.8.3.4">
 <a href="#rfc.section.8.3.4">8.3.4.</a> <a href="#Aborts" id="Aborts">SCHC Abort formats</a>
 </h1>
@@ -1275,16 +1257,7 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 <li>the fragment sender MUST set it to all 1&#8217;s.  Other values are RESERVED.</li>
 <li>the fragment receiver MUST check its value.  If the value is different from all 1&#8217;s, the message MUST be ignored.</li>
 </ul>
-<p id="rfc.section.8.3.4.1.p.5">The size of the SCHC Sender-Abort header is generally not a multiple of the L2 Word size.  Therefore, a SCHC Sender-Abort generally needs padding bits.</p>
-<p id="rfc.section.8.3.4.1.p.6">Note that the SCHC Sender-Abort has the same header as an All-1 SCHC Fragment (see <a href="#LastFrag" class="xref">Section 8.3.1.2</a>), but that it does not include a MIC nor a payload.  The receiver distinguishes the former from the latter by the message length, even in the presence of padding.  This is possible through different combinations</p>
-<p></p>
-
-<ul>
-<li>the size of the Sender-Abort Header may be made such that it is not padded</li>
-<li>or the total size of the MIC and the Payload of an All-1 SCHC Fragment is at least the size of an L2 Word</li>
-<li>or through other alignment and size combinations</li>
-</ul>
-<p id="rfc.section.8.3.4.1.p.8">The SCHC Sender-Abort MUST NOT be acknowledged.</p>
+<p id="rfc.section.8.3.4.1.p.5">The SCHC Sender-Abort MUST NOT be acknowledged.</p>
 <h1 id="rfc.section.8.3.4.2">
 <a href="#rfc.section.8.3.4.2">8.3.4.2.</a> <a href="#schc-receiver-abort" id="schc-receiver-abort">SCHC Receiver-Abort</a>
 </h1>
@@ -1317,8 +1290,7 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 <li>append exactly one more L2 Word with bits all set to 1&#8217;s</li>
 </ul>
 <p id="rfc.section.8.3.4.2.p.7">Such a bit pattern never occurs in a regular SCHC ACK. This is how the fragment sender recognizes a SCHC Receiver-Abort.</p>
-<p id="rfc.section.8.3.4.2.p.8">A SCHC Receiver-Abort is aligned to L2 Words, by design. Therefore, padding MUST NOT be appended.</p>
-<p id="rfc.section.8.3.4.2.p.9">The SCHC Receiver-Abort MUST NOT be acknowledged.</p>
+<p id="rfc.section.8.3.4.2.p.8">The SCHC Receiver-Abort MUST NOT be acknowledged.</p>
 <h1 id="rfc.section.8.4">
 <a href="#rfc.section.8.4">8.4.</a> <a href="#FragModes" id="FragModes">SCHC F/R modes</a>
 </h1>
