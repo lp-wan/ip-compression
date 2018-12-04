@@ -781,8 +781,9 @@ The FCN field MUST NOT contain all bits set to 1.
 If the size of the SCHC Fragment Payload does not nicely complement the SCHC Header size
 in a way that would make the SCHC Fragment a multiple of the L2 Word, then padding bits MUST be added.
 
-The Fragment Payload of a SCHC Fragment with FCN == 0 (called an All-0 SCHC Fragment) MUST be at least the size of an L2 Word.
-The rationale is that, even in the presence of padding, an All-0 SCHC Fragment needs to be distinguishable from the SCHC ACK REQ message, which has the same header but has no payload (see {{ACKREQ}}).
+The Fragment Payload of a SCHC Fragment with FCN equal to 0 (called an All-0 SCHC Fragment) MUST be distinguishable by size from a SCHC ACK REQ message (see {{ACKREQ}}) that has the same T, M and N values, even in the presence of padding.
+This is trivially achieved by having the Payload at least the size of an L2 Word.
+This is also naturally achieved if the SCHC Fragment Header is a multiple of L2 Words.
 
 #### All-1 SCHC Fragment {#LastFrag}
 
@@ -804,9 +805,9 @@ The DTag field, the W field and the Payload are optional.
 If the size of the SCHC Fragment Payload does not nicely complement the SCHC Header size
 in a way that would make the SCHC Fragment a multiple of the L2 Word, then padding bits MUST be added.
 
-The All-1 SCHC Fragment message MUST be distinguishable by size from a SCHC Sender-Abort message (see {{SenderAbort}}) that has the same T, M and N values.
-This is trivially achieved by having the MIC larger than an L2 Word,
-or by having the Payload larger than an L2 Word.
+The All-1 SCHC Fragment message MUST be distinguishable by size from a SCHC Sender-Abort message (see {{SenderAbort}}) that has the same T, M and N values, even in the presence of padding.
+This is trivially achieved by having the MIC present and at least the size of an L2 Word,
+or by having the Payload present and at least the size an L2 Word.
 This is also naturally achieved if the SCHC Sender-Abort Header is a multiple of L2 Words.
 
 ### SCHC ACK format {#ACK}
@@ -944,12 +945,6 @@ The DTag field and the W field are optional.
 The size of the SCHC ACK REQ header is generally not a multiple of the L2 Word size.
 Therefore, a SCHC ACK REQ generally needs padding bits.
 
-Note that the SCHC ACK REQ has the same header as an All-0 SCHC Fragment (see {{NotLastFrag}}) but it doesn't have a payload.
-A receiver can distinguish the former form the latter by the message length, even in the presence of padding.
-This is possible because
-
-- the padding bits are always strictly less than an L2 Word,
-- the size of an All-0 SCHC Fragment Payload is at least the size of an L2 Word.
 
 ### SCHC Abort formats {#Aborts}
 
@@ -979,14 +974,6 @@ If the W field is present,
 
 The size of the SCHC Sender-Abort header is generally not a multiple of the L2 Word size.
 Therefore, a SCHC Sender-Abort generally needs padding bits.
-
-Note that the SCHC Sender-Abort has the same header as an All-1 SCHC Fragment (see {{LastFrag}}), but that it does not include a MIC nor a payload.
-The receiver distinguishes the former from the latter by the message length, even in the presence of padding.
-This is possible through different combinations
-
-- the size of the Sender-Abort Header may be made such that it is not padded
-- or the total size of the MIC and the Payload of an All-1 SCHC Fragment is at least the size of an L2 Word
-- or through other alignment and size combinations
 
 The SCHC Sender-Abort MUST NOT be acknowledged.
 
