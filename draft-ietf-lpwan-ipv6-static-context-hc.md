@@ -1739,7 +1739,9 @@ In particular, when SCHC fragmentation is used, a fragmentation MIC
 of 2 bytes or more provides equal or better protection than the UDP
 checksum; in that case, if the compressor is collocated with the
 fragmentation point and the decompressor is collocated with the
-packet reassembly point, then compressor MAY elide the UDP checksum.
+packet reassembly point,
+and if the SCHC Packet is fragmented even when it would fit unfragmented in the L2 MTU,
+then the compressor MAY elide the UDP checksum.
 Whether and when the UDP Checksum is elided is to be specified in the
 Profile.
 
