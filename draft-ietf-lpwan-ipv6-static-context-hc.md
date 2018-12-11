@@ -343,12 +343,13 @@ is based on using a list of Rules, called the Context, to compress or decompress
 
 ## SCHC C/D Rules
 
-The main idea of the SCHC compression scheme is to transmit the Rule ID to the other end instead of sending known field values. This Rule ID identifies a Rule that provides the closest match to the original packet values. Hence, when a value is known by both ends, it is only necessary to send the corresponding Rule ID over the LPWAN network.
+The main idea of the SCHC compression scheme is to transmit the Rule ID to the other end instead of sending known field values. This Rule ID identifies a Rule that matches the original packet values. Hence, when a value is known by both ends, it is only necessary to send the corresponding Rule ID over the LPWAN network.
 The manner by which Rules are generated is out of the scope of this document. The Rules MAY be changed at run-time but the mechanism is out of scope of this document.
 
 The Context is a list of Rules.
 See {{Fig-ctxt}} for a high level, abstract representation of the Context.
 The formal specification of the representation of the Rules is outside the scope of this document.
+
 Each Rule itself contains a list of Field Descriptions composed of a Field Identifier (FID), a Field Length (FL), a Field Position (FP), a Direction Indicator (DI), a Target Value (TV), a Matching Operator (MO) and a Compression/Decompression Action (CDA).
 
 
@@ -376,7 +377,9 @@ Each Rule itself contains a list of Field Descriptions composed of a Field Ident
 
 
 A Rule does not describe how the compressor parses a packet header to find and identify each field (e.g. the IPv6 Source Address, the UDP Destination Port or a CoAP URI path option).
-This MUST be known from the compressor/decompressor. Rules only describe the compression/decompression behavior for each header field, which are identified by the compressor prior to testing for a Rule match.
+This MUST be known from the compressor/decompressor. Rules only describe the compression/decompression behavior for each header field.
+The header fields need to be identified by the compressor prior to testing for a Rule match.
+
 In a Rule, the Field Descriptions are listed in the order in which the fields appear in the packet header.
 
 A Rule also describes what is sent in the Compression Residue. The Compression Residue is assembled by concatenating the residues for each field, in the order the Field Descriptions appear in the Rule.
@@ -415,7 +418,9 @@ Similarly, the SCHC Compressor on the network side first identifies the destinat
 
 The compression/decompression process follows several steps:
 
-* Compression Rule selection: The goal is to identify which Rule(s) will be used to compress the packet's headers. When decompressing, on the network side the SCHC C/D needs to find the correct Rule based on the L2 address; in this way, it can use the DevIID and the Rule ID. On the Dev side, only the Rule ID is needed to identify the correct Rule since the Dev typically only holds Rules that apply to itself. The Rule will be selected by matching the Fields Descriptions to the packet header as described below. When the selection of a Rule is done, this Rule is used to compress the header. The detailed steps for compression Rule selection are the following:
+* Compression Rule selection: the goal is to identify which Rule(s) will be used to compress the packet header.
+The Rule will be selected by matching the Fields Descriptions to the packet header.
+The detailed steps are the following:
 
   * The first step is to check the Field Identifiers (FID).
     If any header field of the packet being examined cannot be matched with a Field Description with the correct FID, the Rule MUST be discarded and SCHC C/D proceeds to consider the next Rule.
@@ -426,17 +431,21 @@ The compression/decompression process follows several steps:
   * Then the Field Descriptions are further selected according to Field Position (FP). If any field of the packet header cannot be matched with a Field Description with the correct FID, DI and FP, the Rule MUST be discarded and the SCHC C/D proceeds to consider the next Rule.
 
   * Once each header field has been associated with a Field Description with matching FID, DI and FP, each packet field's value is then compared to the corresponding Target Value (TV) stored in the Rule for that specific field, using the matching operator (MO).
-
-    If all the fields in the packet's header satisfy all the matching operators (MO) of a Rule (i.e. all MO results are True), the fields of the header are then compressed according to the Compression/Decompression Actions (CDAs). Otherwise, the next Rule is tested.
+    If all the fields in the packet header satisfy all the matching operators (MO) of a Rule (i.e. all MO results are True), the Rule is used for compression.
+    Otherwise, the next Rule is tested.
 
   * If no eligible compression Rule is found, then the header MUST be sent 
     using a Rule ID dedicated to this purpose. Sending an uncompressed header may require SCHC F/R.
 
-* Sending: The Rule ID is sent to the other end followed by the Compression Residue (which could be empty) or the uncompressed header, and directly followed by the payload (see {{Fig-SCHCpckt}}).
-  The Compression Residue is the concatenation of the Compression Residues for each field according to the CDAs for that Rule.
-  The way the Rule ID is sent depends on the Profile. For example, it can be either included in an L2 header or sent as part of the L2 payload.  This process will be specified in the Profile and is out of the scope of the present document.
+* Compression: each field of the header is compressed according to the Compression/Decompression Actions (CDAs).
+  The compression of each field results in a Compression Residue, which may be empty.
+  The Compression Residue for the packet header is the concatenation of the Compression Residues for each field of the header, in the order the Field Descriptions appear in the Rule.
 
-* Decompression: When doing decompression, on the network side the SCHC C/D needs to find the correct Rule based on the L2 address and in this way, it can use the DevIID and the Rule ID. On the Dev side, only the Rule ID is needed to identify the correct Rule since the Dev only holds Rules that apply to itself.
+* Sending: The Rule ID is sent to the other end followed by the Compression Residue (which could be empty) or the uncompressed header, and directly followed by the payload (see {{Fig-SCHCpckt}}).
+  The way the Rule ID is sent will be specified in the Profile and is out of the scope of the present document.
+  For example, it could be included in an L2 header or sent as part of the L2 payload.
+
+* Decompression: when decompressing, on the network side the SCHC C/D needs to find the correct Rule based on the L2 address; in this way, it can use the DevIID and the Rule ID. On the Dev side, only the Rule ID is needed to identify the correct Rule since the Dev typically only holds Rules that apply to itself.
 
   The receiver identifies the sender through its device-id or source identifier (e.g. MAC address, if it exists) and selects the Rule using the Rule ID. This Rule describes the compressed header format and associates the received Compression Residue to each of the header fields.
   For each field in the header, the receiver applies the CDA action associated to that field in order to reconstruct the original header field value. The CDA application order can be different from the order in which the fields are listed in the Rule. In particular, Compute-\* MUST be applied after the application of the CDAs of all the fields it computes on.
