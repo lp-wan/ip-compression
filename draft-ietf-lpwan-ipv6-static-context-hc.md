@@ -689,6 +689,10 @@ The CRC32 polynomial 0xEDB88320 (i.e. the reverse representation
 of the polynomial used e.g. in the Ethernet standard {{RFC3385}}) is RECOMMENDED as the default algorithm for computing the
 MIC. Nevertheless, other MIC lengths or other algorithms MAY be required by the Profile.
 
+The MIC MUST be computed on the full SCHC Packet concatenated with the padding bits, if any, of the SCHC Fragment carrying the last tile.
+The rationale is that the SCHC Reassembler has no way of knowing the boundary between the last tile and the padding bits.
+Indeed, this requires decompressing the SCHC Packet, which is out of the scope of the SCHC Reassembler.
+
 Note that the concatenation of the complete SCHC Packet and the potential padding bits of the last SCHC Fragment does not
 generally constitute an integer number of bytes.
 For implementers to be able to use byte-oriented CRC libraries, it is RECOMMENDED that the concatenation of the
@@ -785,7 +789,7 @@ The SCHC Fragment Payload carries one or several tile(s).
 | Fragment Header |   Fragment Payload    | padding (as needed)
 +-----------------+-----------------------+~~~~~~~~~~~~~~~~~~~~~
 ~~~~
-{: #Fig-FragFormat title='SCHC Fragment general format. Presence of a padding field is optional'}
+{: #Fig-FragFormat title='SCHC Fragment general format'}
 
 #### Regular SCHC Fragment {#NotLastFrag}
 
@@ -1035,7 +1039,7 @@ This mode supports LPWAN technologies that have a variable MTU.
 In No-ACK mode, there is no communication from the fragment receiver to the fragment sender.
 The sender transmits all the SCHC Fragments without expecting ackowledgement.
 
-Padding is kept to a minimum: only the last SCHC Fragment is padded as needed.
+In No-ACK mode, only the All-1 SCHC Fragment is padded as needed. The other SCHC Fragments are intrinsically aligned to L2 Words.
 
 The tile sizes are not required to be uniform.
 Windows are not used.
@@ -1081,10 +1085,6 @@ that the SCHC Fragment is a multiple of L2 Words without the need for padding bi
 Except for the last one, the SCHC Fragments MUST use the Regular SCHC Fragment format specified in {{NotLastFrag}}.
 The last SCHC Fragment MUST use the All-1 format specified in {{LastFrag}}.
 
-The MIC MUST be computed on the reassembled SCHC Packet concatenated with the padding bits of the last SCHC Fragment.
-The rationale is that the SCHC Reassembler has no way of knowing where the payload of the last SCHC Fragment ends.
-Indeed, this requires decompressing the SCHC Packet, which is out of the scope of the SCHC Reassembler.
-
 The sender MAY transmit a SCHC Sender-Abort.
 
 {{Fig-NoACKModeSnd}} shows an example of a corresponding state machine.
@@ -1113,9 +1113,6 @@ and it MUST release all resources associated with this Rule ID and DTag value pa
 On receiving a SCHC Sender-Abort,
 the receiver MAY release all resources associated with this Rule ID and DTag value pair.
 
-The MIC computed at the receiver MUST be computed over the fully reassembled SCHC Packet
-and over the padding bits that were received in the SCHC Fragment carrying the last tile.
-
 {{Fig-NoACKModeRcv}} shows an example of a corresponding state machine.
 
 ### ACK-Always mode {#ACK-Always-subsection}
@@ -1129,7 +1126,7 @@ The ACK-Always mode has been designed under the following assumptions
 In ACK-Always mode, windows are used.
 An acknowledgement, positive or negative, is transmitted by the fragment receiver to the fragment sender at the end of the transmission of each window of SCHC Fragments.
 
-The tiles are not required to be of uniform size. Padding is kept to a minimum: only the last SCHC Fragment is padded as needed.
+The tiles are not required to be of uniform size. In ACK-Always mode, only the All-1 SCHC Fragment is padded as needed. The other SCHC Fragments are intrinsically aligned to L2 Words.
 
 Briefly, the algorithm is as follows: after a first blind transmission of all the tiles of a window, the fragment sender iterates retransmitting the tiles that are reported missing until the fragment receiver reports that all the tiles belonging to the window have been correctly received, or until too many attempts were made.
 The fragment sender only advances to the next window of tiles when it has ascertained that all the tiles belonging to the current window have been fully and correctly received. This results in a per-window lock-step behavior between the sender and the receiver.
@@ -1176,8 +1173,6 @@ For a SCHC Fragment that carries a tile other than the last one of the SCHC Pack
   that the SCHC Fragment is a multiple of L2 Words without the need for padding bits.
 
 The SCHC Fragment that carries the last tile MUST be an All-1 SCHC Fragment, described in {{LastFrag}}.
-
-The MIC MUST be computed on the SCHC Packet concatenated with the padding bits (if any) that are appended to the Payload of the SCHC Fragment that carries the last tile.
 
 The fragment sender MUST start by transmitting the window numbered 0.
 
@@ -1338,9 +1333,6 @@ the receiver MUST send a SCHC Receiver-Abort,
 it MUST release all resource associated with this SCHC Packet
 and it MAY exit the receive process for that SCHC Packet.
 
-The MIC computed at the receiver MUST be computed over the reassembled SCHC Packet
-and over the padding bits that were received in the SCHC Fragment carrying the last tile.
-
 {{Fig-ACKAlwaysRcv}} shows an example of a corresponding state machine.
 
 
@@ -1434,9 +1426,6 @@ If a SCHC Fragment carries more than one tile, or carries one tile that is not t
 
 - it MUST be of the Regular type specified in {{NotLastFrag}}
 - the FCN field MUST contain the tile number of the first tile sent in that SCHC Fragment
-- padding bits are appended to the tiles as needed to fit the Payload size constraint of Regular SCHC Fragments
-
-The bits on which the MIC is computed MUST be the SCHC Packet concatenated with the padding bits that are appended to the Payload of the SCHC Fragment that carries the last tile.
 
 The fragment sender MAY send the last tile as the Payload of an All-1 SCHC Fragment.
 
@@ -1567,9 +1556,6 @@ Reassembly of the SCHC Packet concludes when
 - or the Attempts counter has exceeded MAX_ACK_REQUESTS
 - or when at least an All-1 SCHC Fragment has been received and integrity checking of the reassembled SCHC Packet is successful.
 
-The MIC computed at the receiver MUST be computed over the reassembled SCHC Packet
-and over the padding bits that were received in the SCHC Fragment carrying the last tile.
-
 See {{Fig-ACKonerrorRcv}} for one among several possible examples of a Finite State Machine implementing a receiver behavior obeying this specification,
 and that is meant to match the sender Finite State Machine of {{Fig-ACKonerrorSnd}}.
 
@@ -1578,16 +1564,15 @@ and that is meant to match the sender Finite State Machine of {{Fig-ACKonerrorSn
 
 SCHC C/D and SCHC F/R operate on bits, not bytes. SCHC itself does not have any alignment prerequisite.
 The size of SCHC Packets can be any number of bits.
-If the layer below SCHC constrains the payload to align to some boundary, called L2 Words (for example, bytes),
-SCHC will meet that constraint and produce messages with the correct alignement.
-This may entail adding extra bits, called padding bits.
 
+If the layer below SCHC constrains the payload to align to some boundary, called L2 Words (for example, bytes),
+the SCHC messages MUST be padded.
 When padding occurs, the number of appended bits MUST be strictly less than the L2 Word size.
 
-Padding happens at most once for each Packet during SCHC Compression and optional SCHC Fragmentation (see {{Fig-IntroLayers}}).
 If a SCHC Packet is sent unfragmented (see {{Fig-Operations-Pad}}), it is padded as needed for transmission.
-If a SCHC Packet is fragmented, it is not padded in itself, only the SCHC Fragments are padded as needed for transmission.
-Some SCHC F/R modes only pad the very last SCHC Fragment.
+
+If a SCHC Packet needs to be fragmented for transmission, it is not padded in itself. Only the SCHC F/R messages are padded as needed for transmission.
+Some SCHC F/R messages are intrinsically aligned to L2 Words.
 
 
 ~~~~
