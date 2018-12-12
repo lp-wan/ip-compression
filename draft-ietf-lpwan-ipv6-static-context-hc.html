@@ -344,7 +344,6 @@ address {
 <link href="#rfc.appendix.D" rel="Chapter" title="D SCHC Parameters">
 <link href="#rfc.appendix.E" rel="Chapter" title="E Supporting multiple window sizes for fragmentation">
 <link href="#rfc.appendix.F" rel="Chapter" title="F Downlink SCHC Fragment transmission">
-<link href="#rfc.appendix.G" rel="Chapter" title="G Note">
 <link href="#rfc.authors" rel="Chapter">
 
 
@@ -569,8 +568,6 @@ address {
 </li>
 <li>Appendix F.   <a href="#rfc.appendix.F">Downlink SCHC Fragment transmission</a>
 </li>
-<li>Appendix G.   <a href="#rfc.appendix.G">Note</a>
-</li>
 <li><a href="#rfc.authors">Authors' Addresses</a>
 </li>
 
@@ -611,7 +608,7 @@ address {
  ()   ()   ()       |                      |LPWAN-|
   ()  () () ()     / \       +---------+   | AAA  |
 () () () () () () /   \======|    ^    |===|Server|  +-----------+
- ()  ()   ()     |           | &lt;--|--&gt; |   +------+  |APPLICATION|
+ ()  ()   ()     |           | &lt;--|--&gt; |   +------+  |Application|
 ()  ()  ()  ()  / \==========|    v    |=============|   (App)   |
   ()  ()  ()   /   \         +---------+             +-----------+
  Dev        Radio Gateways         NGW
@@ -628,13 +625,13 @@ address {
 <ul>
 <li>App: LPWAN Application, as defined by <a href="#RFC8376" class="xref">[RFC8376]</a>. An application sending/receiving packets to/from the Dev.</li>
 <li>AppIID: Application Interface Identifier. The IID that identifies the application server interface.</li>
-<li>Bi: Bidirectional. Characterises a Field Descriptor that applies to headers of packets travelling in either direction (Up and Dw, see this glossary).</li>
+<li>Bi: Bidirectional. Characterizes a Field Descriptor that applies to headers of packets traveling in either direction (Up and Dw, see this glossary).</li>
 <li>CDA: Compression/Decompression Action. Describes the pair of inverse actions that are performed at the compressor to compress a header field and at the decompressor to recover the original header field value.</li>
 <li>Compression Residue. The bits that remain to be sent (beyond the Rule ID itself) after applying the SCHC compression.</li>
 <li>Context: A list of Rules used to compress/decompress headers.</li>
 <li>Dev: Device, as defined by <a href="#RFC8376" class="xref">[RFC8376]</a>.</li>
 <li>DevIID: Device Interface Identifier. The IID that identifies the Dev interface.</li>
-<li>DI: Direction Indicator. This field tells which direction of packet travel (Up, Dw or Bi) a Rule applies to. This allows for assymmetric processing.</li>
+<li>DI: Direction Indicator. This field tells which direction of packet travel (Up, Dw or Bi) a Rule applies to. This allows for asymmetric processing.</li>
 <li>Dw: Downlink direction for compression/decompression, from SCHC C/D in the network to SCHC C/D in the Dev.</li>
 <li>Field Description. A line in the Rule table.</li>
 <li>FID: Field Identifier. This identifies the protocol and field a Field Description applies to.</li>
@@ -729,7 +726,7 @@ A packet (e.g. an IPv6 packet)
 <pre>
         Dev                                               App
 +----------------+                                +----+ +----+ +----+
-| APP1 APP2 APP3 |                                |APP1| |APP2| |APP3|
+| App1 App2 App3 |                                |App1| |App2| |App3|
 |                |                                |    | |    | |    |
 |       UDP      |                                |UDP | |UDP | |UDP |
 |      IPv6      |                                |IPv6| |IPv6| |IPv6|   
@@ -803,14 +800,14 @@ A packet (e.g. an IPv6 packet)
 <ul>
 <li>Field ID (FID) designates a protocol and field (e.g. UDP Destination Port), unambiguously among all protocols that a SCHC compressor processes.</li>
 <li>Field Length (FL) represents the length of the field. It can be either a fixed value (in bits) if the length is known when the Rule is created or a type if the length is variable. The length of a header field is defined by its own protocol specification (e.g. IPv6 or UDP). If the length is variable, the type defines the process to compute the length, its unit (bits, bytes,&#8230;) and the value to be sent before the Compression Residue.</li>
-<li>Field Position (FP): most often, a field only occurs once in a packet header. Some fields may occur multiple times in a header. FP indicates which occurrence  this Field Description applies to. The default value is 1 (first occurence).</li>
+<li>Field Position (FP): most often, a field only occurs once in a packet header. Some fields may occur multiple times in a header. FP indicates which occurrence  this Field Description applies to. The default value is 1 (first occurrence).</li>
 <li>A Direction Indicator (DI) indicates the packet direction(s) this Field Description applies to. Three values are possible:  <ul>
 <li>UPLINK (Up): this Field Description is only applicable to packets sent by the Dev to the App,</li>
 <li>DOWNLINK (Dw): this Field Description is only applicable to packets sent from the App to the Dev,</li>
-<li>BIDIRECTIONAL (Bi): this Field Description is applicable to packets travelling both Up and Dw.</li>
+<li>BIDIRECTIONAL (Bi): this Field Description is applicable to packets traveling both Up and Dw.</li>
 </ul>
 </li>
-<li>Target Value (TV) is the value used to match against the packet header field. The Target Value can be a scalar value of any type (integer, strings, etc.) or a more complex structure (array, list, etc.). The types and representations are out of scope for this documemt.</li>
+<li>Target Value (TV) is the value used to match against the packet header field. The Target Value can be a scalar value of any type (integer, strings, etc.) or a more complex structure (array, list, etc.). The types and representations are out of scope for this document.</li>
 <li>Matching Operator (MO) is the operator used to match the Field Value and the Target Value. The Matching Operator may require some parameters. MO is only used during the compression phase. The set of MOs defined in this document can be found in <a href="#chap-MO" class="xref">Section 7.4</a>.</li>
 <li>Compression Decompression Action (CDA) describes the compression and decompression processes to be performed after the MO is applied. Some CDAs might use parameter values for their operation. CDAs are used in both the compression and the decompression functions. The set of CDAs defined in this document can be found in <a href="#chap-CDA" class="xref">Section 7.5</a>.</li>
 </ul>
@@ -1012,7 +1009,7 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 <h1 id="rfc.section.8.2.2.3">
 <a href="#rfc.section.8.2.2.3">8.2.2.3.</a> <a href="#Bitmap" id="Bitmap">Bitmaps</a>
 </h1>
-<p id="rfc.section.8.2.2.3.p.1">Each bit in the Bitmap for a window corresponds to a tile in the window.  Each Bitmap has therefore WINDOW_SIZE bits.  The bit at the left-most position corresponds to the tile numbered WINDOW_SIZE - 1.  Consecutive bits, going right, correspond to sequentially decreasing tile numbers.  In Bitmaps for windows that are not the last one of a SCHC Packet, the bit at the right-most position corresponds to the tile numbered 0.  In the Bitmap for the last window, the bit at the right-most position corresponds either to the tile numbered 0 or to a tile that is sent/received as &#8220;the last one of the SCHC Packet&#8221; without explicitely stating its number (see <a href="#LastFrag" class="xref">Section 8.3.1.2</a>).</p>
+<p id="rfc.section.8.2.2.3.p.1">Each bit in the Bitmap for a window corresponds to a tile in the window.  Each Bitmap has therefore WINDOW_SIZE bits.  The bit at the left-most position corresponds to the tile numbered WINDOW_SIZE - 1.  Consecutive bits, going right, correspond to sequentially decreasing tile numbers.  In Bitmaps for windows that are not the last one of a SCHC Packet, the bit at the right-most position corresponds to the tile numbered 0.  In the Bitmap for the last window, the bit at the right-most position corresponds either to the tile numbered 0 or to a tile that is sent/received as &#8220;the last one of the SCHC Packet&#8221; without explicitly stating its number (see <a href="#LastFrag" class="xref">Section 8.3.1.2</a>).</p>
 <p id="rfc.section.8.2.2.3.p.2">At the receiver</p>
 <p></p>
 
@@ -1259,7 +1256,7 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 <a href="#rfc.section.8.3.5">8.3.5.</a> <a href="#schc-receiver-abort-format" id="schc-receiver-abort-format">SCHC Receiver-Abort format</a>
 </h1>
 <p id="rfc.section.8.3.5.p.1">When a SCHC Fragment receiver needs to abort an on-going fragmented SCHC Packet transmission, it transmits a SCHC Receiver-Abort message to the SCHC Fragment sender.</p>
-<p id="rfc.section.8.3.5.p.2">The SCHC Receiver-Abort format is shwon in <a href="#Fig-ReceiverAbort" class="xref">Figure 20</a>.  The DTag field and the W field are optional.</p>
+<p id="rfc.section.8.3.5.p.2">The SCHC Receiver-Abort format is shown in <a href="#Fig-ReceiverAbort" class="xref">Figure 20</a>.  The DTag field and the W field are optional.</p>
 <div id="rfc.figure.20"></div>
 <div id="Fig-ReceiverAbort"></div>
 <pre>
@@ -1302,7 +1299,7 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 <a href="#rfc.section.8.4.1">8.4.1.</a> <a href="#No-ACK-subsection" id="No-ACK-subsection">No-ACK mode</a>
 </h1>
 <p id="rfc.section.8.4.1.p.1">The No-ACK mode has been designed under the assumption that data unit out-of-sequence delivery does not occur between the entity performing fragmentation and the entity performing reassembly.  This mode supports LPWAN technologies that have a variable MTU.</p>
-<p id="rfc.section.8.4.1.p.2">In No-ACK mode, there is no communication from the fragment receiver to the fragment sender.  The sender transmits all the SCHC Fragments without expecting ackowledgement.</p>
+<p id="rfc.section.8.4.1.p.2">In No-ACK mode, there is no communication from the fragment receiver to the fragment sender.  The sender transmits all the SCHC Fragments without expecting acknowledgement.</p>
 <p id="rfc.section.8.4.1.p.3">In No-ACK mode, only the All-1 SCHC Fragment is padded as needed. The other SCHC Fragments are intrinsically aligned to L2 Words.</p>
 <p id="rfc.section.8.4.1.p.4">The tile sizes are not required to be uniform.  Windows are not used.  The Retransmission Timer is not used.  The Attempts counter is not used.</p>
 <p id="rfc.section.8.4.1.p.5">Each Profile MUST specify which Rule ID value(s) is (are) allocated to this mode.  For brevity, the rest of <a href="#No-ACK-subsection" class="xref">Section 8.4.1</a> only refers to Rule ID values that are allocated to this mode.</p>
@@ -1441,11 +1438,11 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 <ul>
 <li>the receiver MAY check if the DTag value has not recently been used for that Rule ID value, thereby ensuring that the received SCHC Fragment is not a remnant of a prior fragmented SCHC Packet transmission.  If the SCHC Fragment is determined to be such a remnant, the receiver MAY silently ignore it and discard it.</li>
 <li>the receiver MUST start a process to assemble a new SCHC Packet with that Rule ID and DTag value pair.  That process MUST only examine received SCHC F/R messages with that Rule ID and DTag value pair and MUST only transmit SCHC F/R messages with that Rule ID and DTag value pair.</li>
-<li>the receiver MUST start an Inactivity Timer. It MUST initialise an Attempts counter to 0.  It MUST initialise a window counter to 0.</li>
+<li>the receiver MUST start an Inactivity Timer. It MUST initialize an Attempts counter to 0.  It MUST initialize a window counter to 0.</li>
 </ul>
 <p id="rfc.section.8.4.2.2.p.3">In the rest of this section, &#8220;local W bit&#8221; means the least significant bit of the window counter of the receiver.</p>
 <p id="rfc.section.8.4.2.2.p.4">On reception of any SCHC F/R message, the receiver MUST reset the Inactivity Timer.</p>
-<p id="rfc.section.8.4.2.2.p.5">Entering an &#8220;acceptance phase&#8221;, the receiver MUST first initialise an empty Bitmap for this window, then</p>
+<p id="rfc.section.8.4.2.2.p.5">Entering an &#8220;acceptance phase&#8221;, the receiver MUST first initialize an empty Bitmap for this window, then</p>
 <p></p>
 
 <ul>
@@ -1601,7 +1598,7 @@ SCHC Fragment msg    |-----------|
 <li>in a Regular SCHC Fragment, either alone or as part of multiple tiles Payload</li>
 <li>in an All-1 SCHC Fragment</li>
 </ul>
-<p id="rfc.section.8.4.3.1.p.14">However, the last tile MUST NOT have ever been sent both in a Regular SCHC Fragment and in a All-1 SCHC Fragment.</p>
+<p id="rfc.section.8.4.3.1.p.14">However, if the last tile has been sent in a Regular SCHC Fragment, it MUST NOT been sent again in an All-1 SCHC Fragment.  If it has been sent in an All-1 SCHC Fragment, it MUST not be sent again in a Regular SCHC Fragment.</p>
 <p id="rfc.section.8.4.3.1.p.15">The fragment sender MUST listen for SCHC ACK messages after having sent</p>
 <p></p>
 
@@ -1662,7 +1659,7 @@ SCHC Fragment msg    |-----------|
 <ul>
 <li>the receiver SHOULD check if the DTag value has not recently been used for that Rule ID value, thereby ensuring that the received SCHC Fragment is not a remnant of a prior fragmented SCHC Packet transmission.  If the SCHC Fragment is determined to be such a remnant, the receiver MAY silently ignore it and discard it.</li>
 <li>the receiver MUST start a process to assemble a new SCHC Packet with that Rule ID and DTag value pair.  That process MUST only examine received SCHC F/R messages with that Rule ID and DTag value pair and MUST only transmit SCHC F/R messages with that Rule ID and DTag value pair.</li>
-<li>the receiver MUST start an Inactivity Timer. It MUST initialise an Attempts counter to 0.</li>
+<li>the receiver MUST start an Inactivity Timer. It MUST initialize an Attempts counter to 0.</li>
 </ul>
 <p id="rfc.section.8.4.3.2.p.3">On receiving any SCHC F/R message, the receiver MUST reset the Inactivity Timer.</p>
 <p id="rfc.section.8.4.3.2.p.4">On receiving a SCHC Fragment message, the receiver MUST assemble the received tiles based on the W and FCN fields of the SCHC Fragment.</p>
@@ -1744,7 +1741,7 @@ A packet (e.g. an IPv6 packet)
 <h1 id="rfc.section.10">
 <a href="#rfc.section.10">10.</a> <a href="#schc-compression-for-ipv6-and-udp-headers" id="schc-compression-for-ipv6-and-udp-headers">SCHC Compression for IPv6 and UDP headers</a>
 </h1>
-<p id="rfc.section.10.p.1">This section lists the different IPv6 and UDP header fields and how they can be compressed.</p>
+<p id="rfc.section.10.p.1">This section lists the IPv6 and UDP header fields and describes how they can be compressed.</p>
 <h1 id="rfc.section.10.1">
 <a href="#rfc.section.10.1">10.1.</a> <a href="#ipv6-version-field" id="ipv6-version-field">IPv6 version field</a>
 </h1>
@@ -1784,7 +1781,7 @@ A packet (e.g. an IPv6 packet)
 <h1 id="rfc.section.10.6">
 <a href="#rfc.section.10.6">10.6.</a> <a href="#hop-limit-field" id="hop-limit-field">Hop Limit field</a>
 </h1>
-<p id="rfc.section.10.6.p.1">The field behavior for this field is different for Uplink and Downlink. In Uplink, since there is no IP forwarding between the Dev and the SCHC C/D, the value is relatively constant. On the other hand, the Downlink value depends of Internet routing and MAY change more frequently. One neat way of processing this field is to use the Direction Indicator (DI) to distinguish both directions:</p>
+<p id="rfc.section.10.6.p.1">The field behavior for this field is different for Uplink and Downlink.  In Uplink, since there is no IP forwarding between the Dev and the SCHC C/D, the value is relatively constant.  On the other hand, the Downlink value depends on Internet routing and can change more frequently.  The Direction Indicator (DI) can be used to distinguish both directions:</p>
 <p></p>
 
 <ul>
@@ -1794,29 +1791,29 @@ A packet (e.g. an IPv6 packet)
 <h1 id="rfc.section.10.7">
 <a href="#rfc.section.10.7">10.7.</a> <a href="#ipv6-addresses-fields" id="ipv6-addresses-fields">IPv6 addresses fields</a>
 </h1>
-<p id="rfc.section.10.7.p.1">As in 6LoWPAN <a href="#RFC4944" class="xref">[RFC4944]</a>, IPv6 addresses are split into two 64-bit long fields; one for the prefix and one for the Interface Identifier (IID). These fields SHOULD be compressed. To allow for a single Rule being used for both directions, these values are identified by their role (Dev or APP) and not by their position in the header (source or destination).</p>
+<p id="rfc.section.10.7.p.1">As in 6LoWPAN <a href="#RFC4944" class="xref">[RFC4944]</a>, IPv6 addresses are split into two 64-bit long fields; one for the prefix and one for the Interface Identifier (IID). These fields SHOULD be compressed. To allow for a single Rule being used for both directions, these values are identified by their role (Dev or App) and not by their position in the header (source or destination).</p>
 <h1 id="rfc.section.10.7.1">
 <a href="#rfc.section.10.7.1">10.7.1.</a> <a href="#ipv6-source-and-destination-prefixes" id="ipv6-source-and-destination-prefixes">IPv6 source and destination prefixes</a>
 </h1>
-<p id="rfc.section.10.7.1.p.1">Both ends MUST be synchronized with the appropriate prefixes. For a specific flow, the source and destination prefixes can be unique and stored in the Context. It can be either a link-local prefix or a global prefix. In that case, the TV for the source and destination prefixes contain the values, the MO is set to &#8220;equal&#8221; and the CDA is set to &#8220;not-sent&#8221;.</p>
+<p id="rfc.section.10.7.1.p.1">Both ends MUST be configured with the appropriate prefixes. For a specific flow, the source and destination prefixes can be unique and stored in the Context. It can be either a link-local prefix or a global prefix. In that case, the TV for the source and destination prefixes contain the values, the MO is set to &#8220;equal&#8221; and the CDA is set to &#8220;not-sent&#8221;.</p>
 <p id="rfc.section.10.7.1.p.2">If the Rule is intended to compress packets with different prefix values, match-mapping SHOULD be used. The different prefixes are listed in the TV, the MO is set to &#8220;match-mapping&#8221; and the CDA is set to &#8220;mapping-sent&#8221;. See <a href="#Fig-fields" class="xref">Figure 24</a></p>
 <p id="rfc.section.10.7.1.p.3">Otherwise, the TV contains the prefix, the MO is set to &#8220;equal&#8221; and the CDA is set to &#8220;value-sent&#8221;.</p>
 <h1 id="rfc.section.10.7.2">
 <a href="#rfc.section.10.7.2">10.7.2.</a> <a href="#ipv6-source-and-destination-iid" id="ipv6-source-and-destination-iid">IPv6 source and destination IID</a>
 </h1>
-<p id="rfc.section.10.7.2.p.1">If the Dev or APP IID are based on an LPWAN address, then the IID can be reconstructed with information coming from the LPWAN header. In that case, the TV is not set, the MO is set to &#8220;ignore&#8221; and the CDA is set to &#8220;DevIID&#8221; or &#8220;AppIID&#8221;. The LPWAN technology generally carries a single identifier corresponding to the Dev. AppIID cannot be used.</p>
+<p id="rfc.section.10.7.2.p.1">If the Dev or App IID are based on an LPWAN address, then the IID can be reconstructed with information coming from the LPWAN header. In that case, the TV is not set, the MO is set to &#8220;ignore&#8221; and the CDA is set to &#8220;DevIID&#8221; or &#8220;AppIID&#8221;. The LPWAN technology generally carries a single identifier corresponding to the Dev. AppIID cannot be used.</p>
 <p id="rfc.section.10.7.2.p.2">For privacy reasons or if the Dev address is changing over time, a static value that is not equal to the Dev address SHOULD be used. In that case, the TV contains the static value, the MO operator is set to &#8220;equal&#8221; and the CDA is set to &#8220;not-sent&#8221;.  <a href="#RFC7217" class="xref">[RFC7217]</a> provides some methods that MAY be used to derive this static identifier.</p>
 <p id="rfc.section.10.7.2.p.3">If several IIDs are possible, then the TV contains the list of possible IIDs, the MO is set to &#8220;match-mapping&#8221; and the CDA is set to &#8220;mapping-sent&#8221;.</p>
 <p id="rfc.section.10.7.2.p.4">It MAY also happen that the IID variability only expresses itself on a few bytes. In that case, the TV is set to the stable part of the IID, the MO is set to &#8220;MSB&#8221; and the CDA is set to &#8220;LSB&#8221;.</p>
-<p id="rfc.section.10.7.2.p.5">Finally, the IID can be sent in extenso on the LPWAN. In that case, the TV is not set, the MO is set to &#8220;ignore&#8221; and the CDA is set to &#8220;value-sent&#8221;.</p>
+<p id="rfc.section.10.7.2.p.5">Finally, the IID can be sent in its entirety on the LPWAN. In that case, the TV is not set, the MO is set to &#8220;ignore&#8221; and the CDA is set to &#8220;value-sent&#8221;.</p>
 <h1 id="rfc.section.10.8">
 <a href="#rfc.section.10.8">10.8.</a> <a href="#ipv6-extensions" id="ipv6-extensions">IPv6 extensions</a>
 </h1>
-<p id="rfc.section.10.8.p.1">No Rule is currently defined that processes IPv6 extensions. If such extensions are needed, their compression/decompression Rules can be based on the MOs and CDAs described above.</p>
+<p id="rfc.section.10.8.p.1">No Rule is currently defined that processes IPv6 extensions.</p>
 <h1 id="rfc.section.10.9">
 <a href="#rfc.section.10.9">10.9.</a> <a href="#udp-source-and-destination-port" id="udp-source-and-destination-port">UDP source and destination port</a>
 </h1>
-<p id="rfc.section.10.9.p.1">To allow for a single Rule being used for both directions, the UDP port values are identified by their role (Dev or APP) and not by their position in the header (source or destination). The SCHC C/D MUST be aware of the traffic direction (Uplink, Downlink) to select the appropriate field. The following Rules apply for Dev and APP port numbers.</p>
+<p id="rfc.section.10.9.p.1">To allow for a single Rule being used for both directions, the UDP port values are identified by their role (Dev or App) and not by their position in the header (source or destination). The SCHC C/D MUST be aware of the traffic direction (Uplink, Downlink) to select the appropriate field. The following Rules apply for Dev and App port numbers.</p>
 <p id="rfc.section.10.9.p.2">If both ends know the port number, it can be elided. The TV contains the port number, the MO is set to &#8220;equal&#8221; and the CDA is set to &#8220;not-sent&#8221;.</p>
 <p id="rfc.section.10.9.p.3">If the port variation is on few bits, the TV contains the stable part of the port number, the MO is set to &#8220;MSB&#8221; and the CDA is set to &#8220;LSB&#8221;.</p>
 <p id="rfc.section.10.9.p.4">If some well-known values are used,  the TV can contain the list of these values, the MO is set to &#8220;match-mapping&#8221; and the CDA is set to &#8220;mapping-sent&#8221;.</p>
@@ -1830,10 +1827,10 @@ A packet (e.g. an IPv6 packet)
 <h1 id="rfc.section.10.11">
 <a href="#rfc.section.10.11">10.11.</a> <a href="#UDPchecksum" id="UDPchecksum">UDP Checksum field</a>
 </h1>
-<p id="rfc.section.10.11.p.1">The UDP checksum operation is mandatory with IPv6 <a href="#RFC8200" class="xref">[RFC8200]</a> for most packets but <a href="#RFC8200" class="xref">[RFC8200]</a> recognizes that there are exceptions to that default behavior.</p>
-<p id="rfc.section.10.11.p.2">For instance, protocols that use UDP as a tunnel encapsulation may enable zero-checksum mode for a specific port (or set of ports) for sending and/or receiving. <a href="#RFC8200" class="xref">[RFC8200]</a> also stipulates that any node implementing zero-checksum mode must follow the requirements specified in &#8220;Applicability Statement for the Use of IPv6 UDP Datagrams with Zero Checksums&#8221; <a href="#RFC6936" class="xref">[RFC6936]</a>.</p>
-<p id="rfc.section.10.11.p.3">6LoWPAN Header Compression <a href="#RFC6282" class="xref">[RFC6282]</a> also authorizes to send UDP datagram that are deprived of the checksum protection when an upper layer guarantees the integrity of the UDP payload and pseudo-header all the way between the compressor that elides the UDP checksum and the decompressor that computes it again. A specific example of this is when a Message Integrity Check (MIC) protects the compressed message all along that path with a strength that is identical or better to the UDP checksum.</p>
-<p id="rfc.section.10.11.p.4">In a similar fashion, this specification allows a SCHC compressor to elide the UDP checks when another layer guarantees an identical or better integrity protection for the UDP payload and the pseudo-header.  In this case, the TV is not set, the MO is set to &#8220;ignore&#8221; and the CDA is set to &#8220;compute-checksum&#8221;.</p>
+<p id="rfc.section.10.11.p.1">The UDP checksum operation is mandatory with IPv6 for most packets but there are exceptions <a href="#RFC8200" class="xref">[RFC8200]</a>.</p>
+<p id="rfc.section.10.11.p.2">For instance, protocols that use UDP as a tunnel encapsulation may enable zero-checksum mode for a specific port (or set of ports) for sending and/or receiving. <a href="#RFC8200" class="xref">[RFC8200]</a> requires any node implementing zero-checksum mode to follow the requirements specified in &#8220;Applicability Statement for the Use of IPv6 UDP Datagrams with Zero Checksums&#8221; <a href="#RFC6936" class="xref">[RFC6936]</a>.</p>
+<p id="rfc.section.10.11.p.3">6LoWPAN Header Compression <a href="#RFC6282" class="xref">[RFC6282]</a> also specifies that a UDP datagram can be sent without a checksum when an upper layer guarantees the integrity of the UDP payload and pseudo-header.  all the way between the compressor that elides the UDP checksum and the decompressor that computes it again. A specific example of this is when a Message Integrity Check (MIC) protects the compressed message between the compressor that elides the UDP checksum and the decompressor that computes it, with a strength that is identical or better to the UDP checksum.</p>
+<p id="rfc.section.10.11.p.4">Similarly, a SCHC compressor MAY elide the UDP checksum when another layer guarantees at least equal integrity protection for the UDP payload and the pseudo-header.  In this case, the TV is not set, the MO is set to &#8220;ignore&#8221; and the CDA is set to &#8220;compute-checksum&#8221;.</p>
 <p id="rfc.section.10.11.p.5">In particular, when SCHC fragmentation is used, a fragmentation MIC of 2 bytes or more provides equal or better protection than the UDP checksum; in that case, if the compressor is collocated with the fragmentation point and the decompressor is collocated with the packet reassembly point, and if the SCHC Packet is fragmented even when it would fit unfragmented in the L2 MTU, then the compressor MAY elide the UDP checksum.  Whether and when the UDP Checksum is elided is to be specified in the Profile.</p>
 <p id="rfc.section.10.11.p.6">Since the compression happens before the fragmentation, implementors should understand the risks when dealing with unprotected data below the transport layer and take special care when manipulating that data.</p>
 <p id="rfc.section.10.11.p.7">In other cases, the checksum SHOULD be explicitly sent. The TV is not set, the MO is set to &#8220;ignore&#8221; and the CDA is set to &#8220;value-sent&#8221;.</p>
@@ -1842,24 +1839,25 @@ A packet (e.g. an IPv6 packet)
 </h1>
 <p id="rfc.section.11.p.1">This document has no request to IANA.</p>
 <h1 id="rfc.section.12">
-<a href="#rfc.section.12">12.</a> <a href="#security-considerations" id="security-considerations">Security considerations</a>
+<a href="#rfc.section.12">12.</a> <a href="#SecConsiderations" id="SecConsiderations">Security considerations</a>
 </h1>
 <h1 id="rfc.section.12.1">
 <a href="#rfc.section.12.1">12.1.</a> <a href="#security-considerations-for-schc-compressiondecompression" id="security-considerations-for-schc-compressiondecompression">Security considerations for SCHC Compression/Decompression</a>
 </h1>
-<p id="rfc.section.12.1.p.1">A malicious header compression could cause the reconstruction of a wrong packet that does not match with the original one. Such a corruption MAY be detected with end-to-end authentication and integrity mechanisms. Header Compression does not add more security problem than what is already needed in a transmission. For instance, to avoid an attack, never re-construct a packet bigger than some configured size (with 1500 bytes as generic default).</p>
+<p id="rfc.section.12.1.p.1">A malicious header compression could cause the reconstruction of a wrong packet that does not match with the original one. Such a corruption MAY be detected with end-to-end authentication and integrity mechanisms. Header Compression does not add more security problem than what is already needed in a transmission. For instance, to avoid an attack, never re-construct a packet bigger than MAX_PACKET_SIZE (with 1500 bytes as generic default).</p>
 <h1 id="rfc.section.12.2">
 <a href="#rfc.section.12.2">12.2.</a> <a href="#security-considerations-for-schc-fragmentationreassembly" id="security-considerations-for-schc-fragmentationreassembly">Security considerations for SCHC Fragmentation/Reassembly</a>
 </h1>
 <p id="rfc.section.12.2.p.1">This subsection describes potential attacks to LPWAN SCHC F/R and suggests possible countermeasures.</p>
 <p id="rfc.section.12.2.p.2">A node can perform a buffer reservation attack by sending a first SCHC Fragment to a target.  Then, the receiver will reserve buffer space for the IPv6 packet.  Other incoming fragmented SCHC Packets will be dropped while the reassembly buffer is occupied during the reassembly timeout.  Once that timeout expires, the attacker can repeat the same procedure, and iterate, thus creating a denial of service attack.  The (low) cost to mount this attack is linear with the number of buffers at the target node.  However, the cost for an attacker can be increased if individual SCHC Fragments of multiple packets can be stored in the reassembly buffer.  To further increase the attack cost, the reassembly buffer can be split into SCHC Fragment-sized buffer slots. Once a packet is complete, it is processed normally.  If buffer overload occurs, a receiver can discard packets based on the sender behavior, which MAY help identify which SCHC Fragments have been sent by an attacker.</p>
 <p id="rfc.section.12.2.p.3">In another type of attack, the malicious node is required to have overhearing capabilities.  If an attacker can overhear a SCHC Fragment, it can send a spoofed duplicate (e.g. with random payload) to the destination. If the LPWAN technology does not support suitable protection (e.g. source authentication and frame counters to prevent replay attacks), a receiver cannot distinguish legitimate from spoofed SCHC Fragments.  The original IPv6 packet will be considered corrupt and will be dropped. To protect resource-constrained nodes from this attack, it has been proposed to establish a binding among the SCHC Fragments to be transmitted by a node, by applying content-chaining to the different SCHC Fragments, based on cryptographic hash functionality.  The aim of this technique is to allow a receiver to identify illegitimate SCHC Fragments.</p>
-<p id="rfc.section.12.2.p.4">Further attacks MAY involve sending overlapped fragments (i.e. comprising some overlapping parts of the original IPv6 datagram). Implementers SHOULD make sure that the correct operation is not affected by such event.</p>
+<p id="rfc.section.12.2.p.4">Further attacks can involve sending overlapped fragments (i.e. comprising some overlapping parts of the original IPv6 datagram). Implementers MUST ensure that the correct operation is not affected by such event.</p>
 <p id="rfc.section.12.2.p.5">In ACK-on-Error, a malicious node MAY force a SCHC Fragment sender to resend a SCHC Fragment a number of times, with the aim to increase consumption of the SCHC Fragment sender&#8217;s resources. To this end, the malicious node MAY repeatedly send a fake ACK to the SCHC Fragment sender, with a Bitmap that reports that one or more SCHC Fragments have been lost. In order to mitigate this possible attack, MAX_ACK_RETRIES MAY be set to a safe value which allows to limit the maximum damage of the attack to an acceptable extent. However, note that a high setting for MAX_ACK_RETRIES benefits SCHC Fragment reliability modes, therefore the trade-off needs to be carefully considered.</p>
 <h1 id="rfc.section.13">
 <a href="#rfc.section.13">13.</a> <a href="#acknowledgements" id="acknowledgements">Acknowledgements</a>
 </h1>
 <p id="rfc.section.13.p.1">Thanks to Carsten Bormann, Philippe Clavier, Diego Dujovne, Eduardo Ingles Sanchez, Arunprabhu Kandasamy, Rahul Jadhav, Sergio Lopez Bernal, Antony Markovski, Alexander Pelov, Charles Perkins, Edgar Ramos, Shoichi Sakane, and Pascal Thubert for useful design consideration and comments.</p>
+<p id="rfc.section.13.p.2">Carles Gomez has been funded in part by the Spanish Government (Ministerio de Educacion, Cultura y Deporte) through the Jose Castillejo grant CAS15/00336, and by the ERDF and the Spanish Government through project TEC2016-79988-P.  Part of his contribution to this work has been carried out during his stay as a visiting scholar at the Computer Laboratory of the University of Cambridge.</p>
 <h1 id="rfc.references">
 <a href="#rfc.references">14.</a> References</h1>
 <h1 id="rfc.references.1">
@@ -1929,7 +1927,7 @@ A packet (e.g. an IPv6 packet)
 <a href="#rfc.appendix.A">Appendix A.</a> <a href="#compressIPv6" id="compressIPv6">SCHC Compression Examples</a>
 </h1>
 <p id="rfc.section.A.p.1">This section gives some scenarios of the compression mechanism for IPv6/UDP. The goal is to illustrate the behavior of SCHC.</p>
-<p id="rfc.section.A.p.2">The most common case using the mechanisms defined in this document will be a LPWAN Dev that embeds some applications running over CoAP. In this example, three flows are considered. The first flow is for the device management based on CoAP using Link Local IPv6 addresses and UDP ports 123 and 124 for Dev and App, respectively.  The second flow will be a CoAP server for measurements done by the Dev (using ports 5683) and Global IPv6 Address prefixes alpha::IID/64 to beta::1/64.  The last flow is for legacy applications using different ports numbers, the destination IPv6 address prefix is gamma::1/64.</p>
+<p id="rfc.section.A.p.2">The mechanisms defined in this document can be applied to an LPWAN Dev that embeds some applications running over CoAP. In this example, three flows are considered. The first flow is for the device management based on CoAP using Link Local IPv6 addresses and UDP ports 123 and 124 for Dev and App, respectively.  The second flow will be a CoAP server for measurements done by the Dev (using ports 5683) and Global IPv6 Address prefixes alpha::IID/64 to beta::1/64.  The last flow is for legacy applications using different ports numbers, the destination IPv6 address prefix is gamma::1/64.</p>
 <p><a href="#FigStack" class="xref">Figure 23</a> presents the protocol stack. IPv6 and UDP are represented with dotted lines since these protocols are compressed on the radio link.</p>
 <div id="rfc.figure.23"></div>
 <div id="FigStack"></div>
@@ -1966,13 +1964,13 @@ Rule 0
  |IPv6 Length     |16|1 |Bi|         | ignore | comp-length||      |
  |IPv6 Next Header|8 |1 |Bi|17       | equal  | not-sent   ||      |
  |IPv6 Hop Limit  |8 |1 |Bi|255      | ignore | not-sent   ||      |
- |IPv6 DEVprefix  |64|1 |Bi|FE80::/64| equal  | not-sent   ||      |
+ |IPv6 DevPrefix  |64|1 |Bi|FE80::/64| equal  | not-sent   ||      |
  |IPv6 DevIID     |64|1 |Bi|         | ignore | DevIID     ||      |
- |IPv6 APPprefix  |64|1 |Bi|FE80::/64| equal  | not-sent   ||      |
+ |IPv6 AppPrefix  |64|1 |Bi|FE80::/64| equal  | not-sent   ||      |
  |IPv6 AppIID     |64|1 |Bi|::1      | equal  | not-sent   ||      |
  +================+==+==+==+=========+========+============++======+
- |UDP DEVport     |16|1 |Bi|123      | equal  | not-sent   ||      |
- |UDP APPport     |16|1 |Bi|124      | equal  | not-sent   ||      |
+ |UDP DevPort     |16|1 |Bi|123      | equal  | not-sent   ||      |
+ |UDP AppPort     |16|1 |Bi|124      | equal  | not-sent   ||      |
  |UDP Length      |16|1 |Bi|         | ignore | comp-length||      |
  |UDP checksum    |16|1 |Bi|         | ignore | comp-chk   ||      |
  +================+==+==+==+=========+========+============++======+
@@ -1988,16 +1986,16 @@ Rule 0
  |IPv6 Length     |16|1 |Bi|         | ignore | comp-length||      |
  |IPv6 Next Header|8 |1 |Bi|17       | equal  | not-sent   ||      |
  |IPv6 Hop Limit  |8 |1 |Bi|255      | ignore | not-sent   ||      |
- |IPv6 DEVprefix  |64|1 |Bi|[alpha/64, match- |mapping-sent||   1  |
+ |IPv6 DevPrefix  |64|1 |Bi|[alpha/64, match- |mapping-sent||   1  |
  |                |  |  |  |fe80::/64] mapping|            ||      |
  |IPv6 DevIID     |64|1 |Bi|         | ignore | DevIID     ||      |
- |IPv6 APPprefix  |64|1 |Bi|[beta/64,| match- |mapping-sent||   2  |
+ |IPv6 AppPrefix  |64|1 |Bi|[beta/64,| match- |mapping-sent||   2  |
  |                |  |  |  |alpha/64,| mapping|            ||      |
  |                |  |  |  |fe80::64]|        |            ||      |
  |IPv6 AppIID     |64|1 |Bi|::1000   | equal  | not-sent   ||      |
  +================+==+==+==+=========+========+============++======+
- |UDP DEVport     |16|1 |Bi|5683     | equal  | not-sent   ||      |
- |UDP APPport     |16|1 |Bi|5683     | equal  | not-sent   ||      |
+ |UDP DevPort     |16|1 |Bi|5683     | equal  | not-sent   ||      |
+ |UDP AppPort     |16|1 |Bi|5683     | equal  | not-sent   ||      |
  |UDP Length      |16|1 |Bi|         | ignore | comp-length||      |
  |UDP checksum    |16|1 |Bi|         | ignore | comp-chk   ||      |
  +================+==+==+==+=========+========+============++======+
@@ -2014,13 +2012,13 @@ Rule 0
  |IPv6 Next Header|8 |1 |Bi|17       | equal  | not-sent   ||      |
  |IPv6 Hop Limit  |8 |1 |Up|255      | ignore | not-sent   ||      |
  |IPv6 Hop Limit  |8 |1 |Dw|         | ignore | value-sent ||   8  |
- |IPv6 DEVprefix  |64|1 |Bi|alpha/64 | equal  | not-sent   ||      |
+ |IPv6 DevPrefix  |64|1 |Bi|alpha/64 | equal  | not-sent   ||      |
  |IPv6 DevIID     |64|1 |Bi|         | ignore | DevIID     ||      |
- |IPv6 APPprefix  |64|1 |Bi|gamma/64 | equal  | not-sent   ||      |
+ |IPv6 AppPrefix  |64|1 |Bi|gamma/64 | equal  | not-sent   ||      |
  |IPv6 AppIID     |64|1 |Bi|::1000   | equal  | not-sent   ||      |
  +================+==+==+==+=========+========+============++======+
- |UDP DEVport     |16|1 |Bi|8720     | MSB(12)| LSB        ||   4  |
- |UDP APPport     |16|1 |Bi|8720     | MSB(12)| LSB        ||   4  |
+ |UDP DevPort     |16|1 |Bi|8720     | MSB(12)| LSB        ||   4  |
+ |UDP AppPort     |16|1 |Bi|8720     | MSB(12)| LSB        ||   4  |
  |UDP Length      |16|1 |Bi|         | ignore | comp-length||      |
  |UDP checksum    |16|1 |Bi|         | ignore | comp-chk   ||      |
  +================+==+==+==+=========+========+============++======+
@@ -2030,11 +2028,11 @@ Rule 0
 <p class="figure">Figure 24: Context Rules</p>
 <p id="rfc.section.A.p.5">All the fields described in the three Rules depicted on <a href="#Fig-fields" class="xref">Figure 24</a> are present in the IPv6 and UDP headers.  The DevIID-DID value is found in the L2 header.</p>
 <p id="rfc.section.A.p.6">The second and third Rules use global addresses. The way the Dev learns the prefix is not in the scope of the document.</p>
-<p id="rfc.section.A.p.7">The third Rule compresses port numbers to 4 bits.</p>
+<p id="rfc.section.A.p.7">The third Rule compresses each port number to 4 bits.</p>
 <h1 id="rfc.appendix.B">
 <a href="#rfc.appendix.B">Appendix B.</a> <a href="#fragmentation-examples" id="fragmentation-examples">Fragmentation Examples</a>
 </h1>
-<p id="rfc.section.B.p.1">This section provides examples for the different fragment reliability modes specified in this document.</p>
+<p id="rfc.section.B.p.1">This section provides examples for the various fragment reliability modes specified in this document.  In the drawings, Bitmaps are shown in their uncompressed form.</p>
 <p><a href="#Fig-Example-Unreliable" class="xref">Figure 25</a> illustrates the transmission in No-ACK mode of a SCHC Packet that needs 11 SCHC Fragments. FCN is 1 bit wide.</p>
 <div id="rfc.figure.25"></div>
 <div id="Fig-Example-Unreliable"></div>
@@ -2053,7 +2051,7 @@ Rule 0
           |-----FCN=1 + MIC ---&gt;| Integrity check: success
         (End) &#160; &#160; &#160;
 </pre>
-<p class="figure">Figure 25: Transmission in No-ACK mode of a SCHC Packet carried by 11 SCHC Fragments</p>
+<p class="figure">Figure 25: No-ACK mode, 11 SCHC Fragments</p>
 <p id="rfc.section.B.p.3">In the following examples, N (the size of the FCN field) is 3 bits. The All-1 FCN value is 7.</p>
 <p><a href="#Fig-Example-Win-NoLoss-NACK" class="xref">Figure 26</a> illustrates the transmission in ACK-on-Error mode of a SCHC Packet fragmented in 11 tiles, with one tile per SCHC Fragment, MAX_WIND_FCN=6 and no lost SCHC Fragment.</p>
 <div id="rfc.figure.26"></div>
@@ -2075,7 +2073,7 @@ Rule 0
           |&lt;-- ACK, W=1, C=1 ---| C=1
         (End)
 </pre>
-<p class="figure">Figure 26: Transmission in ACK-on-Error mode of a SCHC Packet fragmented in 11 tiles, with one tile per SCHC Fragment, MAX_WIND_FCN=6 and no lost SCHC Fragment.</p>
+<p class="figure">Figure 26: ACK-on-Error mode, 11 tiles, one tile per SCHC Fragment, no lost SCHC Fragment.</p>
 <p><a href="#Fig-Example-Rel-Window-NACK-Loss" class="xref">Figure 27</a> illustrates the transmission in ACK-on-Error mode of a SCHC Packet fragmented in 11 tiles, with one tile per SCHC Fragment, MAX_WIND_FCN=6 and three lost SCHC Fragments.</p>
 <div id="rfc.figure.27"></div>
 <div id="Fig-Example-Rel-Window-NACK-Loss"></div>
@@ -2101,7 +2099,7 @@ Rule 0
           |&lt;-- ACK, W=1, C=1 ---| C=1
         (End)
 </pre>
-<p class="figure">Figure 27: Transmission in ACK-on-Error mode of a SCHC Packet fragmented in 11 tiles, with one tile per SCHC Fragment, MAX_WIND_FCN=6 and three lost SCHC Fragments.</p>
+<p class="figure">Figure 27: ACK-on-Error mode, 11 tiles, one tile per SCHC Fragment, lost SCHC Fragments.</p>
 <p><a href="#Figure-Example-ACK-on-Error-VarMTU" class="xref">Figure 28</a> shows an example of a transmission in ACK-on-Error mode of a SCHC Packet fragmented in 73 tiles, with N=5, MAX_WIND_FCN=27, M=2 and 3 lost SCHC Fragments.</p>
 <div id="rfc.figure.28"></div>
 <div id="Figure-Example-ACK-on-Error-VarMTU"></div>
@@ -2147,10 +2145,9 @@ Rule 0
    V   |&lt;--- ACK, W=2, C=1 ---| C=1
      (End)
 </pre>
-<p class="figure">Figure 28: ACK-on-Error mode with variable MTU.</p>
+<p class="figure">Figure 28: ACK-on-Error mode, variable MTU.</p>
 <p id="rfc.section.B.p.7">In this example, the L2 MTU becomes reduced just before sending the &#8220;W=2, FCN=19&#8221; fragment, leaving space for only 1 tile in each forthcoming SCHC Fragment.  Before retransmissions, the 73 tiles are carried by a total of 25 SCHC Fragments, the last 9 being of smaller size.</p>
-<p id="rfc.section.B.p.8">Note 1: Bitmaps are shown prior to compression for transmission</p>
-<p id="rfc.section.B.p.9">Note 2: other sequences of events (e.g. regarding when ACKs are sent by the Receiver) are also allowed by this specification. Profiles may restrict this flexibility.</p>
+<p id="rfc.section.B.p.8">Note: other sequences of events (e.g. regarding when ACKs are sent by the Receiver) are also allowed by this specification. Profiles may restrict this flexibility.</p>
 <p><a href="#Fig-Example-Rel-Window-ACK-NoLoss" class="xref">Figure 29</a> illustrates the transmission in ACK-Always mode of a SCHC Packet fragmented in 11 tiles, with one tile per SCHC Fragment, with N=3, MAX_WIND_FCN=6 and no loss.</p>
 <div id="rfc.figure.29"></div>
 <div id="Fig-Example-Rel-Window-ACK-NoLoss"></div>
@@ -2171,7 +2168,7 @@ Rule 0
           |&lt;-- ACK, W=1, C=1 ---| C=1
         (End)    
 </pre>
-<p class="figure">Figure 29: Transmission in ACK-Always mode of a SCHC Packet fragmented in 11 tiles, with one tile per SCHC Fragment, with N=3, MAX_WIND_FCN=6 and no loss.</p>
+<p class="figure">Figure 29: ACK-Always mode, 11 tiles, one tile per SCHC Fragment, no loss.</p>
 <p><a href="#Fig-Example-Rel-Window-ACK-Loss" class="xref">Figure 30</a> illustrates the transmission in ACK-Always mode of a SCHC Packet fragmented in 11 tiles, with one tile per SCHC Fragment, N=3, MAX_WIND_FCN=6 and three lost SCHC Fragments.</p>
 <div id="rfc.figure.30"></div>
 <div id="Fig-Example-Rel-Window-ACK-Loss"></div>
@@ -2197,7 +2194,7 @@ Rule 0
           |&lt;-- ACK, W=1, C=1 ---| C=1
         (End)
 </pre>
-<p class="figure">Figure 30: Transmission in ACK-Always mode of a SCHC Packet fragmented in 11 tiles, with one tile per SCHC Fragment, N=3, MAX_WIND_FCN=6 and three lost SCHC Fragments.</p>
+<p class="figure">Figure 30: ACK-Always mode, 11 tiles, one tile per SCHC Fragment, three lost SCHC Fragments.</p>
 <p><a href="#Fig-Example-Rel-Window-ACK-Loss-Last-A" class="xref">Figure 31</a> illustrates the transmission in ACK-Always mode of a SCHC Packet fragmented in 6 tiles, with one tile per SCHC Fragment, N=3, MAX_WIND_FCN=6, three lost SCHC Fragments and only one retry needed to recover each lost SCHC Fragment.</p>
 <div id="rfc.figure.31"></div>
 <div id="Fig-Example-Rel-Window-ACK-Loss-Last-A"></div>
@@ -2216,7 +2213,7 @@ Rule 0
              |&lt;-- ACK, W=0, C=1 ---| C=1
            (End)
 </pre>
-<p class="figure">Figure 31: Transmission in ACK-Always mode of a SCHC Packet fragmented in 6 tiles, with one tile per SCHC Fragment, N=3, MAX_WIND_FCN=6, three lost SCHC Fragments.</p>
+<p class="figure">Figure 31: ACK-Always mode, 6 tiles, one tile per SCHC Fragment, three lost SCHC Fragments.</p>
 <p><a href="#Fig-Example-Rel-Window-ACK-Loss-Last-B" class="xref">Figure 32</a> illustrates the transmission in ACK-Always mode of a SCHC Packet fragmented in 6 tiles, with one tile per SCHC Fragment, N=3, MAX_WIND_FCN=6, three lost SCHC Fragments, and the second SCHC ACK lost.</p>
 <div id="rfc.figure.32"></div>
 <div id="Fig-Example-Rel-Window-ACK-Loss-Last-B"></div>
@@ -2238,7 +2235,7 @@ Rule 0
              |&lt;-- ACK, W=0, C=1 ---| C=1
            (End)
 </pre>
-<p class="figure">Figure 32: Transmission in ACK-Always mode of a SCHC Packet fragmented in 6 tiles, with one tile per SCHC Fragment, N=3, MAX_WIND_FCN=6, three lost SCHC Fragments, and the second SCHC ACK lost.</p>
+<p class="figure">Figure 32: ACK-Always mode, 6 tiles, one tile per SCHC Fragment, SCHC ACK loss.</p>
 <p><a href="#Fig-Example-Rel-Window-ACK-Loss-Last-C" class="xref">Figure 33</a> illustrates the transmission in ACK-Always mode of a SCHC Packet fragmented in 6 tiles, with N=3, MAX_WIND_FCN=6, with three lost SCHC Fragments, and one retransmitted SCHC Fragment lost again.</p>
 <div id="rfc.figure.33"></div>
 <div id="Fig-Example-Rel-Window-ACK-Loss-Last-C"></div>
@@ -2261,7 +2258,7 @@ Rule 0
              |&lt;-- ACK, W=0, C=1 ---| C=1
            (End)
 </pre>
-<p class="figure">Figure 33: Transmission in ACK-Always mode of a SCHC Packet fragmented in 6 tiles, with N=3, MAX_WIND_FCN=6, with three lost SCHC Fragments, and one retransmitted SCHC Fragment lost again.</p>
+<p class="figure">Figure 33: ACK-Always mode, 6 tiles, retransmitted SCHC Fragment lost again.</p>
 <p><a href="#Fig-Example-MaxWindFCN" class="xref">Figure 34</a> illustrates the transmission in ACK-Always mode of a SCHC Packet fragmented in 28 tiles, with one tile per SCHC Fragment, N=5, MAX_WIND_FCN=23 and two lost SCHC Fragments.</p>
 <div id="rfc.figure.34"></div>
 <div id="Fig-Example-MaxWindFCN"></div>
@@ -2303,7 +2300,7 @@ Rule 0
         |&lt;--- ACK, W=1, C=1 ---| C=1
       (End)
 </pre>
-<p class="figure">Figure 34: Transmission in ACK-Always mode of a SCHC Packet fragmented in 28 tiles, with one tile per SCHC Fragment, N=5, MAX_WIND_FCN=23 and two lost SCHC Fragments.</p>
+<p class="figure">Figure 34: ACK-Always mode, 28 tiles, one tile per SCHC Fragment, lost SCHC Fragments.</p>
 <h1 id="rfc.appendix.C">
 <a href="#rfc.appendix.C">Appendix C.</a> <a href="#FSM" id="FSM">Fragmentation State Machines</a>
 </h1>
@@ -2369,10 +2366,10 @@ Rule 0
 |       set Retrans_Timer  |   | set Retrans_Timer
 |                          |   |
 |Recv_wnd == wnd &amp;         |   |  
-|lcl_bm==recv_bm &amp;         |   |  +-----------------------+
-|more frag                 |   |  | lcl_bm!=rcv-bm        |
-|~~~~~~~~~~~~~~~~~~~~~~    |   |  | ~~~~~~~~~             |
-|Stop Retrans_Timer        |   |  | Attempt++             v
+|lcl_bm==recv_bm &amp;         |   |  +----------------------+
+|more frag                 |   |  | lcl_bm!=rcv-bm       |
+|~~~~~~~~~~~~~~~~~~~~~~    |   |  | ~~~~~~~~~            |
+|Stop Retrans_Timer        |   |  | Attempt++            v
 |clear lcl_bm              v   v  |                +=====+=+
 |window=next_window   +====+===+==+===+            |Resend |
 +---------------------+               |            |Missing|
@@ -2516,7 +2513,7 @@ Recv_window==window &amp;    | |   |   all missing frags sent
  +=========+                         +===========+
 </pre>
 <p class="figure">Figure 39: Sender State Machine for the ACK-on-Error Mode</p>
-<p id="rfc.section.C.p.2">This is an example only. The specification in <a href="#ACK-on-Error-sender" class="xref">Section 8.4.3.1</a> is open to very different sequencing of operations.</p>
+<p id="rfc.section.C.p.2">This is an example only. Is is not normative.  The specification in <a href="#ACK-on-Error-sender" class="xref">Section 8.4.3.1</a> allows for sequences of operations different from the one shown here.</p>
 <pre>
                  +=======+        New frag RuleID received
                  |       |        ~~~~~~~~~~~~~
@@ -2590,12 +2587,6 @@ Recv_window==window &amp;    | |   |   all missing frags sent
                                  +===========+
 
 
-         ABORT --&gt;* Uplink Only &amp;
-                    Inact_Timer = expires
-                    || Attempts &gt; MAX_ACK_REQUESTS
-                    ~~~~~~~~~~~~~~~~~~~~~
-                    send Abort
-
 </pre>
 <p class="figure">Figure 40: Receiver State Machine for the ACK-on-Error Mode</p>
 <h1 id="rfc.appendix.D">
@@ -2615,6 +2606,7 @@ Recv_window==window &amp;    | |   |   all missing frags sent
 
 <ul>
 <li>Rule ID numbering scheme, fixed-sized or variable-sized Rule IDs, number of Rules, the way the Rule ID is transmitted</li>
+<li>define the maximum packet size that should ever be reconstructed by SCHC Decompression (MAX_PACKET_SIZE). See <a href="#SecConsiderations" class="xref">Section 12</a>.</li>
 <li>Padding: size of the L2 Word (for most LPWAN technologies, this would be a byte; for some technologies, a bit)</li>
 <li>Decision to use SCHC fragmentation mechanism or not. If yes:  <ul>
 <li>reliability mode(s) used, in which cases (e.g. based on link channel condition)</li>
@@ -2633,11 +2625,11 @@ Recv_window==window &amp;    | |   |   all missing frags sent
 </li>
 <li>if L2 Word is wider than a bit and SCHC fragmentation is used, value of the padding bits (0 or 1). This is needed because the padding bits of the last fragment are included in the MIC computation.</li>
 </ul>
-<p id="rfc.section.D.p.5">A Profile MAY define a delay to be added between each SCHC message transmission to respect local regulations or other constraints imposed by the applications.</p>
+<p id="rfc.section.D.p.5">A Profile MAY define a delay to be added after each SCHC message transmission for compliance with local regulations or other constraints imposed by the applications.</p>
 <p></p>
 
 <ul>
-<li>Note on soliciting downlink transmissions: In some LPWAN technologies, as part of energy-saving techniques, downlink transmission is only possible immediately after an uplink transmission.  In order to avoid potentially high delay in the downlink transmission of a fragmented SCHC Packet, the SCHC Fragment receiver may want to perform an uplink transmission as soon as possible after reception of a SCHC Fragment that is not the last one.  Such uplink transmission may be triggered by the L2 (e.g. an L2 ACK sent in response to a SCHC Fragment encapsulated in a L2 PDU that requires an L2 ACK) or it may be triggered from an upper layer.</li>
+<li>In some LPWAN technologies, as part of energy-saving techniques, downlink transmission is only possible immediately after an uplink transmission.  In order to avoid potentially high delay in the downlink transmission of a fragmented SCHC Packet, the SCHC Fragment receiver may perform an uplink transmission as soon as possible after reception of a SCHC Fragment that is not the last one.  Such uplink transmission may be triggered by the L2 (e.g. an L2 ACK sent in response to a SCHC Fragment encapsulated in a L2 PDU that requires an L2 ACK) or it may be triggered from an upper layer.</li>
 <li>the following parameters need to be addressed in documents other than this one but not necessarily in the LPWAN technology-specific documents:  <ul>
 <li>The way the Contexts are provisioned</li>
 <li>The way the Rules are generated</li>
@@ -2647,7 +2639,7 @@ Recv_window==window &amp;    | |   |   all missing frags sent
 <h1 id="rfc.appendix.E">
 <a href="#rfc.appendix.E">Appendix E.</a> <a href="#supporting-multiple-window-sizes-for-fragmentation" id="supporting-multiple-window-sizes-for-fragmentation">Supporting multiple window sizes for fragmentation</a>
 </h1>
-<p id="rfc.section.E.p.1">For ACK-Always or ACK-on-Error, implementers MAY opt to support a single window size or multiple window sizes.  The latter, when feasible, may provide performance optimizations.  For example, a large window size SHOULD be used for packets that need to be split into a large number of tiles. However, when the number of tiles required to carry a packet is low, a smaller window size, and thus a shorter Bitmap, MAY be sufficient to provide reception status on all tiles. If multiple window sizes are supported, the Rule ID MAY be used to signal the window size in use for a specific packet transmission.</p>
+<p id="rfc.section.E.p.1">For ACK-Always or ACK-on-Error, implementers MAY opt to support a single window size or multiple window sizes.  The latter, when feasible, may provide performance optimizations.  For example, a large window size SHOULD be used for packets that need to be split into a large number of tiles. However, when the number of tiles required to carry a packet is low, a smaller window size, and thus a shorter Bitmap, MAY be sufficient to provide reception status on all tiles. If multiple window sizes are supported, the Rule ID MAY signal the window size in use for a specific packet transmission.</p>
 <p id="rfc.section.E.p.2">The same window size MUST be used for the transmission of all tiles that belong to the same SCHC Packet.</p>
 <h1 id="rfc.appendix.F">
 <a href="#rfc.appendix.F">Appendix F.</a> <a href="#downlink-schc-fragment-transmission" id="downlink-schc-fragment-transmission">Downlink SCHC Fragment transmission</a>
@@ -2655,11 +2647,7 @@ Recv_window==window &amp;    | |   |   all missing frags sent
 <p id="rfc.section.F.p.1">For downlink transmission of a fragmented SCHC Packet in ACK-Always mode, the SCHC Fragment receiver MAY support timer-based SCHC ACK retransmission. In this mechanism, the SCHC Fragment receiver initializes and starts a timer (the Inactivity Timer is used) after the transmission of a SCHC ACK, except when the SCHC ACK is sent in response to the last SCHC Fragment of a packet (All-1 fragment). In the latter case, the SCHC Fragment receiver does not start a timer after transmission of the SCHC ACK.</p>
 <p id="rfc.section.F.p.2">If, after transmission of a SCHC ACK that is not an All-1 fragment, and before expiration of the corresponding Inactivity timer, the SCHC Fragment receiver receives a SCHC Fragment that belongs to the current window (e.g. a missing SCHC Fragment from the current window) or to the next window, the Inactivity timer for the SCHC ACK is stopped. However, if the Inactivity timer expires, the SCHC ACK is resent and the Inactivity timer is reinitialized and restarted.</p>
 <p id="rfc.section.F.p.3">The default initial value for the Inactivity timer, as well as the maximum number of retries for a specific SCHC ACK, denoted MAX_ACK_RETRIES, are not defined in this document, and need to be defined in a Profile. The initial value of the Inactivity timer is expected to be greater than that of the Retransmission timer, in order to make sure that a (buffered) SCHC Fragment to be retransmitted can find an opportunity for that transmission.</p>
-<p id="rfc.section.F.p.4">When the SCHC Fragment sender transmits the All-1 fragment, it starts its Retransmission Timer with a large timeout value (e.g. several times that of the initial Inactivity timer). If a SCHC ACK is received before expiration of this timer, the SCHC Fragment sender retransmits any lost SCHC Fragments reported by the SCHC ACK, or if the SCHC ACK confirms successful reception of all SCHC Fragments of the last window, the transmission of the fragmented SCHC Packet is considered complete. If the timer expires, and no SCHC ACK has been received since the start of the timer, the SCHC Fragment sender assumes that the All-1 fragment has been successfully received (and possibly, the last SCHC ACK has been lost: this mechanism assumes that the retransmission timer for the All-1 fragment is long enough to allow several SCHC ACK retries if the All-1 fragment has not;been received by the SCHC Fragment receiver, and it also assumes that it is unlikely that several ACKs become all lost).</p>
-<h1 id="rfc.appendix.G">
-<a href="#rfc.appendix.G">Appendix G.</a> <a href="#note" id="note">Note</a>
-</h1>
-<p id="rfc.section.G.p.1">Carles Gomez has been funded in part by the Spanish Government (Ministerio de Educacion, Cultura y Deporte) through the Jose Castillejo grant CAS15/00336, and by the ERDF and the Spanish Government through project TEC2016-79988-P.  Part of his contribution to this work has been carried out during his stay as a visiting scholar at the Computer Laboratory of the University of Cambridge.</p>
+<p id="rfc.section.F.p.4">When the SCHC Fragment sender transmits the All-1 fragment, it starts its Retransmission Timer with a large timeout value (e.g. several times that of the initial Inactivity timer). If a SCHC ACK is received before expiration of this timer, the SCHC Fragment sender retransmits any lost SCHC Fragments reported by the SCHC ACK, or if the SCHC ACK confirms successful reception of all SCHC Fragments of the last window, the transmission of the fragmented SCHC Packet is considered complete. If the timer expires, and no SCHC ACK has been received since the start of the timer, the SCHC Fragment sender assumes that the All-1 fragment has been successfully received (and possibly, the last SCHC ACK has been lost: this mechanism assumes that the retransmission timer for the All-1 fragment is long enough to allow several SCHC ACK retries if the All-1 fragment has not been received by the SCHC Fragment receiver, and it also assumes that it is unlikely that several ACKs become all lost).</p>
 <h1 id="rfc.authors"><a href="#rfc.authors">Authors' Addresses</a></h1>
 <div class="avoidbreak">
   <address class="vcard">
