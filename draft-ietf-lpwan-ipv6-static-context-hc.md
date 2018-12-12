@@ -131,7 +131,7 @@ we can identify different types of entities in a typical LPWAN network, see {{Fi
  ()   ()   ()       |                      |LPWAN-|
   ()  () () ()     / \       +---------+   | AAA  |
 () () () () () () /   \======|    ^    |===|Server|  +-----------+
- ()  ()   ()     |           | <--|--> |   +------+  |APPLICATION|
+ ()  ()   ()     |           | <--|--> |   +------+  |Application|
 ()  ()  ()  ()  / \==========|    v    |=============|   (App)   |
   ()  ()  ()   /   \         +---------+             +-----------+
  Dev        Radio Gateways         NGW
@@ -150,7 +150,7 @@ The SCHC acronym is pronounced like "sheek" in English (or "chic" in French). Th
 
 * AppIID: Application Interface Identifier. The IID that identifies the application server interface.
 
-* Bi: Bidirectional. Characterises a Field Descriptor that applies to headers of packets travelling in either direction (Up and Dw, see this glossary).
+* Bi: Bidirectional. Characterizes a Field Descriptor that applies to headers of packets traveling in either direction (Up and Dw, see this glossary).
 
 * CDA: Compression/Decompression Action. Describes the pair of inverse actions that are performed at the compressor to compress a header field and at the decompressor to recover the original header field value.
 
@@ -162,7 +162,7 @@ The SCHC acronym is pronounced like "sheek" in English (or "chic" in French). Th
 
 * DevIID: Device Interface Identifier. The IID that identifies the Dev interface.
 
-* DI: Direction Indicator. This field tells which direction of packet travel (Up, Dw or Bi) a Rule applies to. This allows for assymmetric processing.
+* DI: Direction Indicator. This field tells which direction of packet travel (Up, Dw or Bi) a Rule applies to. This allows for asymmetric processing.
 
 * Dw: Downlink direction for compression/decompression, from SCHC C/D in the network to SCHC C/D in the Dev.
 
@@ -284,7 +284,7 @@ The Compression Residue may be empty. Both the Rule ID and the Compression Resid
 ~~~~
         Dev                                               App
 +----------------+                                +----+ +----+ +----+
-| APP1 APP2 APP3 |                                |APP1| |APP2| |APP3|
+| App1 App2 App3 |                                |App1| |App2| |App3|
 |                |                                |    | |    | |    |
 |       UDP      |                                |UDP | |UDP | |UDP |
 |      IPv6      |                                |IPv6| |IPv6| |IPv6|   
@@ -390,7 +390,7 @@ The Field Descriptions describe the header fields with the following entries:
 
 * Field Length (FL) represents the length of the field. It can be either a fixed value (in bits) if the length is known when the Rule is created or a type if the length is variable. The length of a header field is defined by its own protocol specification (e.g. IPv6 or UDP). If the length is variable, the type defines the process to compute the length, its unit (bits, bytes,...) and the value to be sent before the Compression Residue.
 
-* Field Position (FP): most often, a field only occurs once in a packet header. Some fields may occur multiple times in a header. FP indicates which occurrence  this Field Description applies to. The default value is 1 (first occurence).
+* Field Position (FP): most often, a field only occurs once in a packet header. Some fields may occur multiple times in a header. FP indicates which occurrence  this Field Description applies to. The default value is 1 (first occurrence).
 
 * A Direction Indicator (DI) indicates the packet direction(s) this Field Description applies to. Three values are possible:
 
@@ -398,9 +398,9 @@ The Field Descriptions describe the header fields with the following entries:
 
   * DOWNLINK (Dw): this Field Description is only applicable to packets sent from the App to the Dev,
 
-  * BIDIRECTIONAL (Bi): this Field Description is applicable to packets travelling both Up and Dw.
+  * BIDIRECTIONAL (Bi): this Field Description is applicable to packets traveling both Up and Dw.
 
-* Target Value (TV) is the value used to match against the packet header field. The Target Value can be a scalar value of any type (integer, strings, etc.) or a more complex structure (array, list, etc.). The types and representations are out of scope for this documemt.
+* Target Value (TV) is the value used to match against the packet header field. The Target Value can be a scalar value of any type (integer, strings, etc.) or a more complex structure (array, list, etc.). The types and representations are out of scope for this document.
 
 * Matching Operator (MO) is the operator used to match the Field Value and the Target Value. The Matching Operator may require some parameters. MO is only used during the compression phase. The set of MOs defined in this document can be found in {{chap-MO}}.
 
@@ -658,7 +658,7 @@ Consecutive bits, going right, correspond to sequentially decreasing tile number
 In Bitmaps for windows that are not the last one of a SCHC Packet,
 the bit at the right-most position corresponds to the tile numbered 0.
 In the Bitmap for the last window,
-the bit at the right-most position corresponds either to the tile numbered 0 or to a tile that is sent/received as "the last one of the SCHC Packet" without explicitely stating its number (see {{LastFrag}}).
+the bit at the right-most position corresponds either to the tile numbered 0 or to a tile that is sent/received as "the last one of the SCHC Packet" without explicitly stating its number (see {{LastFrag}}).
 
 At the receiver
 
@@ -987,7 +987,7 @@ The SCHC Sender-Abort MUST NOT be acknowledged.
 
 When a SCHC Fragment receiver needs to abort an on-going fragmented SCHC Packet transmission, it transmits a SCHC Receiver-Abort message to the SCHC Fragment sender.
 
-The SCHC Receiver-Abort format is shwon in {{Fig-ReceiverAbort}}.
+The SCHC Receiver-Abort format is shown in {{Fig-ReceiverAbort}}.
 The DTag field and the W field are optional.
 
 ~~~~
@@ -1031,7 +1031,7 @@ The No-ACK mode has been designed under the assumption that data unit out-of-seq
 This mode supports LPWAN technologies that have a variable MTU.
 
 In No-ACK mode, there is no communication from the fragment receiver to the fragment sender.
-The sender transmits all the SCHC Fragments without expecting ackowledgement.
+The sender transmits all the SCHC Fragments without expecting acknowledgement.
 
 In No-ACK mode, only the All-1 SCHC Fragment is padded as needed. The other SCHC Fragments are intrinsically aligned to L2 Words.
 
@@ -1228,14 +1228,14 @@ On receiving a SCHC Fragment with a Rule ID and DTag pair not being processed at
 - the receiver MUST start a process to assemble a new SCHC Packet with that Rule ID and DTag value pair.
   That process MUST only examine received SCHC F/R messages with that Rule ID and DTag value pair
   and MUST only transmit SCHC F/R messages with that Rule ID and DTag value pair.
-- the receiver MUST start an Inactivity Timer. It MUST initialise an Attempts counter to 0.
-  It MUST initialise a window counter to 0.
+- the receiver MUST start an Inactivity Timer. It MUST initialize an Attempts counter to 0.
+  It MUST initialize a window counter to 0.
 
 In the rest of this section, "local W bit" means the least significant bit of the window counter of the receiver.
 
 On reception of any SCHC F/R message, the receiver MUST reset the Inactivity Timer.
 
-Entering an "acceptance phase", the receiver MUST first initialise an empty Bitmap for this window, then
+Entering an "acceptance phase", the receiver MUST first initialize an empty Bitmap for this window, then
 
 - on receiving a SCHC Fragment or SCHC ACK REQ with the W bit different from the local W bit,
   the receiver MUST silently ignore and discard that message.
@@ -1432,7 +1432,8 @@ The last tile of a SCHC Packet can be sent in different ways, depending on Profi
 - in a Regular SCHC Fragment, either alone or as part of multiple tiles Payload
 - in an All-1 SCHC Fragment
 
-However, the last tile MUST NOT have ever been sent both in a Regular SCHC Fragment and in a All-1 SCHC Fragment.
+However, if the last tile has been sent in a Regular SCHC Fragment, it MUST NOT been sent again in an All-1 SCHC Fragment.
+If it has been sent in an All-1 SCHC Fragment, it MUST not be sent again in a Regular SCHC Fragment.
 
 The fragment sender MUST listen for SCHC ACK messages after having sent
 
@@ -1492,7 +1493,7 @@ On receiving a SCHC Fragment with a Rule ID and DTag pair not being processed at
 - the receiver MUST start a process to assemble a new SCHC Packet with that Rule ID and DTag value pair.
   That process MUST only examine received SCHC F/R messages with that Rule ID and DTag value pair
   and MUST only transmit SCHC F/R messages with that Rule ID and DTag value pair.
-- the receiver MUST start an Inactivity Timer. It MUST initialise an Attempts counter to 0.
+- the receiver MUST start an Inactivity Timer. It MUST initialize an Attempts counter to 0.
 
 On receiving any SCHC F/R message, the receiver MUST reset the Inactivity Timer.
 
@@ -1605,7 +1606,7 @@ A Profile MAY define the value of the padding bits. The RECOMMENDED value is 0.
 
 # SCHC Compression for IPv6 and UDP headers
 
-This section lists the different IPv6 and UDP header fields and how they can be compressed.
+This section lists the IPv6 and UDP header fields and describes how they can be compressed.
 
 ## IPv6 version field
 
@@ -1648,7 +1649,10 @@ Otherwise, TV is not set in the Field Descriptor, MO is set to "ignore" and CDA 
 
 ## Hop Limit field
 
-The field behavior for this field is different for Uplink and Downlink. In Uplink, since there is no IP forwarding between the Dev and the SCHC C/D, the value is relatively constant. On the other hand, the Downlink value depends of Internet routing and MAY change more frequently. One neat way of processing this field is to use the Direction Indicator (DI) to distinguish both directions:
+The field behavior for this field is different for Uplink and Downlink.
+In Uplink, since there is no IP forwarding between the Dev and the SCHC C/D, the value is relatively constant.
+On the other hand, the Downlink value depends on Internet routing and can change more frequently.
+The Direction Indicator (DI) can be used to distinguish both directions:
 
 * in the Uplink, elide the field: the TV in the Field Descriptor is set to the known constant value, the MO is set to "equal" and the CDA is set to "not-sent".
 
@@ -1656,11 +1660,11 @@ The field behavior for this field is different for Uplink and Downlink. In Uplin
 
 ## IPv6 addresses fields
 
-As in 6LoWPAN {{RFC4944}}, IPv6 addresses are split into two 64-bit long fields; one for the prefix and one for the Interface Identifier (IID). These fields SHOULD be compressed. To allow for a single Rule being used for both directions, these values are identified by their role (Dev or APP) and not by their position in the header (source or destination).
+As in 6LoWPAN {{RFC4944}}, IPv6 addresses are split into two 64-bit long fields; one for the prefix and one for the Interface Identifier (IID). These fields SHOULD be compressed. To allow for a single Rule being used for both directions, these values are identified by their role (Dev or App) and not by their position in the header (source or destination).
 
 ### IPv6 source and destination prefixes
 
-Both ends MUST be synchronized with the appropriate prefixes. For a specific flow, the source and destination prefixes can be unique and stored in the Context. It can be either a link-local prefix or a global prefix. In that case, the TV for the
+Both ends MUST be configured with the appropriate prefixes. For a specific flow, the source and destination prefixes can be unique and stored in the Context. It can be either a link-local prefix or a global prefix. In that case, the TV for the
 source and destination prefixes contain the values, the MO is set to "equal" and the CDA is set to "not-sent".
 
 If the Rule is intended to compress packets with different prefix values, match-mapping SHOULD be used. The different prefixes are listed in the TV, the MO is set to "match-mapping" and the CDA is set to "mapping-sent". See {{Fig-fields}}
@@ -1669,7 +1673,7 @@ Otherwise, the TV contains the prefix, the MO is set to "equal" and the CDA is s
 
 ### IPv6 source and destination IID
 
-If the Dev or APP IID are based on an LPWAN address, then the IID can be reconstructed with information coming from the LPWAN header. In that case, the TV is not set, the MO is set to "ignore" and the CDA is set to "DevIID" or "AppIID". The
+If the Dev or App IID are based on an LPWAN address, then the IID can be reconstructed with information coming from the LPWAN header. In that case, the TV is not set, the MO is set to "ignore" and the CDA is set to "DevIID" or "AppIID". The
 LPWAN technology generally carries a single identifier corresponding to the Dev. AppIID cannot be used.
 
 For privacy reasons or if the Dev address is changing over time, a static value that is not equal to the Dev address SHOULD be used. In that case, the TV contains the static value, the MO operator is set to "equal" and the CDA is set to "not-sent".
@@ -1679,15 +1683,15 @@ If several IIDs are possible, then the TV contains the list of possible IIDs, th
 
 It MAY also happen that the IID variability only expresses itself on a few bytes. In that case, the TV is set to the stable part of the IID, the MO is set to "MSB" and the CDA is set to "LSB".
 
-Finally, the IID can be sent in extenso on the LPWAN. In that case, the TV is not set, the MO is set to "ignore" and the CDA is set to "value-sent".
+Finally, the IID can be sent in its entirety on the LPWAN. In that case, the TV is not set, the MO is set to "ignore" and the CDA is set to "value-sent".
 
 ## IPv6 extensions
 
-No Rule is currently defined that processes IPv6 extensions. If such extensions are needed, their compression/decompression Rules can be based on the MOs and CDAs described above.
+No Rule is currently defined that processes IPv6 extensions.
 
 ## UDP source and destination port
 
-To allow for a single Rule being used for both directions, the UDP port values are identified by their role (Dev or APP) and not by their position in the header (source or destination). The SCHC C/D MUST be aware of the traffic direction (Uplink, Downlink) to select the appropriate field. The following Rules apply for Dev and APP port numbers.
+To allow for a single Rule being used for both directions, the UDP port values are identified by their role (Dev or App) and not by their position in the header (source or destination). The SCHC C/D MUST be aware of the traffic direction (Uplink, Downlink) to select the appropriate field. The following Rules apply for Dev and App port numbers.
 
 If both ends know the port number, it can be elided. The TV contains the port number, the MO is set to "equal" and the CDA is set to "not-sent".
 
@@ -1707,29 +1711,30 @@ In other cases, the length SHOULD be sent and the CDA is replaced by "value-sent
 
 ## UDP Checksum field {#UDPchecksum}
 
-The UDP checksum operation is mandatory with IPv6 [RFC8200] for most
-packets but [RFC8200] recognizes that there are exceptions to that default
-behavior.
+The UDP checksum operation is mandatory with IPv6 for most
+packets but there are exceptions [RFC8200].
 
 For instance, protocols that use UDP as a tunnel encapsulation may
 enable zero-checksum mode for a specific port (or set of ports) for
-sending and/or receiving. [RFC8200] also stipulates that any node
-implementing zero-checksum mode must follow the requirements specified
+sending and/or receiving. [RFC8200] requires any node
+implementing zero-checksum mode to follow the requirements specified
 in "Applicability Statement for the Use of IPv6 UDP Datagrams with
 Zero Checksums" [RFC6936].
 
-6LoWPAN Header Compression [RFC6282] also authorizes to send UDP
-datagram that are deprived of the checksum protection when an upper
-layer guarantees the integrity of the UDP payload and pseudo-header
+6LoWPAN Header Compression [RFC6282] also specifies that a UDP
+datagram can be sent without a checksum when an upper
+layer guarantees the integrity of the UDP payload and pseudo-header.
 all the way between the compressor that elides the UDP checksum and
 the decompressor that computes it again. A specific example of this is
 when a Message Integrity Check (MIC) protects the compressed message
-all along that path with a strength that is identical or better to
+between the compressor that elides the UDP checksum and the decompressor
+that computes it,
+with a strength that is identical or better to
 the UDP checksum.
 
-In a similar fashion, this specification allows a SCHC compressor to
-elide the UDP checks when another layer guarantees an identical or
-better integrity protection for the UDP payload and the pseudo-header.
+Similarly, a SCHC compressor MAY
+elide the UDP checksum when another layer guarantees at least equal
+integrity protection for the UDP payload and the pseudo-header.
 In this case, the TV is not set, the MO is set to "ignore" and the CDA is set to "compute-checksum".
 
 In particular, when SCHC fragmentation is used, a fragmentation MIC
@@ -1754,10 +1759,10 @@ In other cases, the checksum SHOULD be explicitly sent. The TV is not set, the M
 
 This document has no request to IANA.
 
-# Security considerations
+# Security considerations {#SecConsiderations}
 
 ## Security considerations for SCHC Compression/Decompression
-A malicious header compression could cause the reconstruction of a wrong packet that does not match with the original one. Such a corruption MAY be detected with end-to-end authentication and integrity mechanisms. Header Compression does not add more security problem than what is already needed in a transmission. For instance, to avoid an attack, never re-construct a packet bigger than some configured size (with 1500 bytes as generic default).
+A malicious header compression could cause the reconstruction of a wrong packet that does not match with the original one. Such a corruption MAY be detected with end-to-end authentication and integrity mechanisms. Header Compression does not add more security problem than what is already needed in a transmission. For instance, to avoid an attack, never re-construct a packet bigger than MAX_PACKET_SIZE (with 1500 bytes as generic default).
 
 ## Security considerations for SCHC Fragmentation/Reassembly
 This subsection describes potential attacks to LPWAN SCHC F/R and suggests possible countermeasures.
@@ -1767,7 +1772,7 @@ The (low) cost to mount this attack is linear with the number of buffers at the 
 
 In another type of attack, the malicious node is required to have overhearing capabilities.  If an attacker can overhear a SCHC Fragment, it can send a spoofed duplicate (e.g. with random payload) to the destination. If the LPWAN technology does not support suitable protection (e.g. source authentication and frame counters to prevent replay attacks), a receiver cannot distinguish legitimate from spoofed SCHC Fragments.  The original IPv6 packet will be considered corrupt and will be dropped. To protect resource-constrained nodes from this attack, it has been proposed to establish a binding among the SCHC Fragments to be transmitted by a node, by applying content-chaining to the different SCHC Fragments, based on cryptographic hash functionality.  The aim of this technique is to allow a receiver to identify illegitimate SCHC Fragments.
 
-Further attacks MAY involve sending overlapped fragments (i.e. comprising some overlapping parts of the original IPv6 datagram). Implementers SHOULD make sure that the correct operation is not affected by such event.
+Further attacks can involve sending overlapped fragments (i.e. comprising some overlapping parts of the original IPv6 datagram). Implementers MUST ensure that the correct operation is not affected by such event.
 
 In ACK-on-Error, a malicious node MAY force a SCHC Fragment sender to resend a SCHC Fragment a number of times, with the aim to increase consumption of the SCHC Fragment sender’s resources. To this end, the malicious node MAY repeatedly send a fake ACK to the SCHC Fragment sender, with a Bitmap that reports that one or more SCHC Fragments have been lost. In order to mitigate this possible attack, MAX_ACK_RETRIES MAY be set to a safe value which allows to limit the maximum damage of the attack to an acceptable extent. However, note that a high setting for MAX_ACK_RETRIES benefits SCHC Fragment reliability modes, therefore the trade-off needs to be carefully considered.
 
@@ -1789,6 +1794,9 @@ Shoichi Sakane,
 and Pascal Thubert
 for useful design consideration and comments.
 
+Carles Gomez has been funded in part by the Spanish Government (Ministerio de Educacion, Cultura y Deporte) through the Jose
+Castillejo grant CAS15/00336, and by the ERDF and the Spanish Government through project TEC2016-79988-P.  Part of his contribution to this work has been carried out during his stay as a visiting scholar at the Computer Laboratory of the University of Cambridge.
+
 --- back
 
 # SCHC Compression Examples {#compressIPv6}
@@ -1796,7 +1804,7 @@ for useful design consideration and comments.
 
 This section gives some scenarios of the compression mechanism for IPv6/UDP. The goal is to illustrate the behavior of SCHC.
 
-The most common case using the mechanisms defined in this document will be a LPWAN Dev that embeds some applications running over CoAP. In this example, three flows are considered. The first flow is for the device management based
+The mechanisms defined in this document can be applied to an LPWAN Dev that embeds some applications running over CoAP. In this example, three flows are considered. The first flow is for the device management based
 on CoAP using Link Local IPv6 addresses and UDP ports 123 and 124 for Dev and App, respectively.
 The second flow will be a CoAP server for measurements done by the Dev (using ports 5683) and Global IPv6 Address prefixes alpha::IID/64 to beta::1/64.
 The last flow is for legacy applications using different ports numbers, the destination IPv6 address prefix is gamma::1/64.
@@ -1839,13 +1847,13 @@ Rule 0
  |IPv6 Length     |16|1 |Bi|         | ignore | comp-length||      |
  |IPv6 Next Header|8 |1 |Bi|17       | equal  | not-sent   ||      |
  |IPv6 Hop Limit  |8 |1 |Bi|255      | ignore | not-sent   ||      |
- |IPv6 DEVprefix  |64|1 |Bi|FE80::/64| equal  | not-sent   ||      |
+ |IPv6 DevPrefix  |64|1 |Bi|FE80::/64| equal  | not-sent   ||      |
  |IPv6 DevIID     |64|1 |Bi|         | ignore | DevIID     ||      |
- |IPv6 APPprefix  |64|1 |Bi|FE80::/64| equal  | not-sent   ||      |
+ |IPv6 AppPrefix  |64|1 |Bi|FE80::/64| equal  | not-sent   ||      |
  |IPv6 AppIID     |64|1 |Bi|::1      | equal  | not-sent   ||      |
  +================+==+==+==+=========+========+============++======+
- |UDP DEVport     |16|1 |Bi|123      | equal  | not-sent   ||      |
- |UDP APPport     |16|1 |Bi|124      | equal  | not-sent   ||      |
+ |UDP DevPort     |16|1 |Bi|123      | equal  | not-sent   ||      |
+ |UDP AppPort     |16|1 |Bi|124      | equal  | not-sent   ||      |
  |UDP Length      |16|1 |Bi|         | ignore | comp-length||      |
  |UDP checksum    |16|1 |Bi|         | ignore | comp-chk   ||      |
  +================+==+==+==+=========+========+============++======+
@@ -1861,16 +1869,16 @@ Rule 0
  |IPv6 Length     |16|1 |Bi|         | ignore | comp-length||      |
  |IPv6 Next Header|8 |1 |Bi|17       | equal  | not-sent   ||      |
  |IPv6 Hop Limit  |8 |1 |Bi|255      | ignore | not-sent   ||      |
- |IPv6 DEVprefix  |64|1 |Bi|[alpha/64, match- |mapping-sent||   1  |
+ |IPv6 DevPrefix  |64|1 |Bi|[alpha/64, match- |mapping-sent||   1  |
  |                |  |  |  |fe80::/64] mapping|            ||      |
  |IPv6 DevIID     |64|1 |Bi|         | ignore | DevIID     ||      |
- |IPv6 APPprefix  |64|1 |Bi|[beta/64,| match- |mapping-sent||   2  |
+ |IPv6 AppPrefix  |64|1 |Bi|[beta/64,| match- |mapping-sent||   2  |
  |                |  |  |  |alpha/64,| mapping|            ||      |
  |                |  |  |  |fe80::64]|        |            ||      |
  |IPv6 AppIID     |64|1 |Bi|::1000   | equal  | not-sent   ||      |
  +================+==+==+==+=========+========+============++======+
- |UDP DEVport     |16|1 |Bi|5683     | equal  | not-sent   ||      |
- |UDP APPport     |16|1 |Bi|5683     | equal  | not-sent   ||      |
+ |UDP DevPort     |16|1 |Bi|5683     | equal  | not-sent   ||      |
+ |UDP AppPort     |16|1 |Bi|5683     | equal  | not-sent   ||      |
  |UDP Length      |16|1 |Bi|         | ignore | comp-length||      |
  |UDP checksum    |16|1 |Bi|         | ignore | comp-chk   ||      |
  +================+==+==+==+=========+========+============++======+
@@ -1887,13 +1895,13 @@ Rule 0
  |IPv6 Next Header|8 |1 |Bi|17       | equal  | not-sent   ||      |
  |IPv6 Hop Limit  |8 |1 |Up|255      | ignore | not-sent   ||      |
  |IPv6 Hop Limit  |8 |1 |Dw|         | ignore | value-sent ||   8  |
- |IPv6 DEVprefix  |64|1 |Bi|alpha/64 | equal  | not-sent   ||      |
+ |IPv6 DevPrefix  |64|1 |Bi|alpha/64 | equal  | not-sent   ||      |
  |IPv6 DevIID     |64|1 |Bi|         | ignore | DevIID     ||      |
- |IPv6 APPprefix  |64|1 |Bi|gamma/64 | equal  | not-sent   ||      |
+ |IPv6 AppPrefix  |64|1 |Bi|gamma/64 | equal  | not-sent   ||      |
  |IPv6 AppIID     |64|1 |Bi|::1000   | equal  | not-sent   ||      |
  +================+==+==+==+=========+========+============++======+
- |UDP DEVport     |16|1 |Bi|8720     | MSB(12)| LSB        ||   4  |
- |UDP APPport     |16|1 |Bi|8720     | MSB(12)| LSB        ||   4  |
+ |UDP DevPort     |16|1 |Bi|8720     | MSB(12)| LSB        ||   4  |
+ |UDP AppPort     |16|1 |Bi|8720     | MSB(12)| LSB        ||   4  |
  |UDP Length      |16|1 |Bi|         | ignore | comp-length||      |
  |UDP checksum    |16|1 |Bi|         | ignore | comp-chk   ||      |
  +================+==+==+==+=========+========+============++======+
@@ -1906,12 +1914,14 @@ All the fields described in the three Rules depicted on {{Fig-fields}} are prese
 
 The second and third Rules use global addresses. The way the Dev learns the prefix is not in the scope of the document.
 
-The third Rule compresses port numbers to 4 bits.
+The third Rule compresses each port number to 4 bits.
 
 
 # Fragmentation Examples
 
-This section provides examples for the different fragment reliability modes specified in this document.
+This section provides examples for the various fragment reliability modes specified in this document.
+In the drawings, Bitmaps are shown in their uncompressed form.
+
 
 {{Fig-Example-Unreliable}} illustrates the transmission in No-ACK mode of a SCHC Packet that needs 11 SCHC Fragments. FCN is 1 bit wide.
 
@@ -1930,7 +1940,7 @@ This section provides examples for the different fragment reliability modes spec
           |-----FCN=1 + MIC --->| Integrity check: success
         (End)      
 ~~~~
-{: #Fig-Example-Unreliable title='Transmission in No-ACK mode of a SCHC Packet carried by 11 SCHC Fragments'}
+{: #Fig-Example-Unreliable title='No-ACK mode, 11 SCHC Fragments'}
 
 In the following examples, N (the size of the FCN field) is 3 bits. The All-1 FCN value is 7.
 
@@ -1953,7 +1963,7 @@ In the following examples, N (the size of the FCN field) is 3 bits. The All-1 FC
           |<-- ACK, W=1, C=1 ---| C=1
         (End)
 ~~~~
-{: #Fig-Example-Win-NoLoss-NACK title='Transmission in ACK-on-Error mode of a SCHC Packet fragmented in 11 tiles, with one tile per SCHC Fragment, MAX_WIND_FCN=6 and no lost SCHC Fragment.'}
+{: #Fig-Example-Win-NoLoss-NACK title='ACK-on-Error mode, 11 tiles, one tile per SCHC Fragment, no lost SCHC Fragment.'}
 
 {{Fig-Example-Rel-Window-NACK-Loss}} illustrates the transmission in ACK-on-Error mode of a SCHC Packet fragmented in 11 tiles, with one tile per SCHC Fragment, MAX_WIND_FCN=6 and three lost SCHC Fragments.
 
@@ -1979,7 +1989,7 @@ In the following examples, N (the size of the FCN field) is 3 bits. The All-1 FC
           |<-- ACK, W=1, C=1 ---| C=1
         (End)
 ~~~~
-{: #Fig-Example-Rel-Window-NACK-Loss title='Transmission in ACK-on-Error mode of a SCHC Packet fragmented in 11 tiles, with one tile per SCHC Fragment, MAX_WIND_FCN=6 and three lost SCHC Fragments.'}
+{: #Fig-Example-Rel-Window-NACK-Loss title='ACK-on-Error mode, 11 tiles, one tile per SCHC Fragment, lost SCHC Fragments.'}
 
 
 {{Figure-Example-ACK-on-Error-VarMTU}} shows an example of a transmission in ACK-on-Error mode of a SCHC Packet fragmented in
@@ -2027,14 +2037,12 @@ In the following examples, N (the size of the FCN field) is 3 bits. The All-1 FC
    V   |<--- ACK, W=2, C=1 ---| C=1
      (End)
 ~~~~
-{: #Figure-Example-ACK-on-Error-VarMTU title='ACK-on-Error mode with variable MTU.'}
+{: #Figure-Example-ACK-on-Error-VarMTU title='ACK-on-Error mode, variable MTU.'}
 
 In this example, the L2 MTU becomes reduced just before sending the "W=2, FCN=19" fragment, leaving space for only 1 tile in each forthcoming SCHC Fragment.
 Before retransmissions, the 73 tiles are carried by a total of 25 SCHC Fragments, the last 9 being of smaller size.
 
-Note 1: Bitmaps are shown prior to compression for transmission
-
-Note 2: other sequences of events (e.g. regarding when ACKs are sent by the Receiver) are also allowed by this specification. Profiles may restrict this flexibility.
+Note: other sequences of events (e.g. regarding when ACKs are sent by the Receiver) are also allowed by this specification. Profiles may restrict this flexibility.
 
 
 {{Fig-Example-Rel-Window-ACK-NoLoss}} illustrates the transmission in ACK-Always mode of a SCHC Packet fragmented in 11 tiles, with one tile per SCHC Fragment, with N=3, MAX_WIND_FCN=6 and no loss.
@@ -2056,7 +2064,7 @@ Note 2: other sequences of events (e.g. regarding when ACKs are sent by the Rece
           |<-- ACK, W=1, C=1 ---| C=1
         (End)    
 ~~~~
-{: #Fig-Example-Rel-Window-ACK-NoLoss title='Transmission in ACK-Always mode of a SCHC Packet fragmented in 11 tiles, with one tile per SCHC Fragment, with N=3, MAX_WIND_FCN=6 and no loss.'}
+{: #Fig-Example-Rel-Window-ACK-NoLoss title='ACK-Always mode, 11 tiles, one tile per SCHC Fragment, no loss.'}
 
 {{Fig-Example-Rel-Window-ACK-Loss}} illustrates the transmission in ACK-Always mode of a SCHC Packet fragmented in 11 tiles, with one tile per SCHC Fragment, N=3, MAX_WIND_FCN=6 and three lost SCHC Fragments.
 
@@ -2082,7 +2090,7 @@ Note 2: other sequences of events (e.g. regarding when ACKs are sent by the Rece
           |<-- ACK, W=1, C=1 ---| C=1
         (End)
 ~~~~
-{: #Fig-Example-Rel-Window-ACK-Loss title='Transmission in ACK-Always mode of a SCHC Packet fragmented in 11 tiles, with one tile per SCHC Fragment, N=3, MAX_WIND_FCN=6 and three lost SCHC Fragments.'}
+{: #Fig-Example-Rel-Window-ACK-Loss title='ACK-Always mode, 11 tiles, one tile per SCHC Fragment, three lost SCHC Fragments.'}
 
 {{Fig-Example-Rel-Window-ACK-Loss-Last-A}} illustrates the transmission in ACK-Always mode of a SCHC Packet fragmented in 6 tiles,
 with one tile per SCHC Fragment, N=3, MAX_WIND_FCN=6, three lost SCHC Fragments and only one retry needed to recover each lost SCHC Fragment.
@@ -2102,8 +2110,8 @@ with one tile per SCHC Fragment, N=3, MAX_WIND_FCN=6, three lost SCHC Fragments 
              |<-- ACK, W=0, C=1 ---| C=1
            (End)
 ~~~~
-{: #Fig-Example-Rel-Window-ACK-Loss-Last-A title='Transmission in ACK-Always mode of a SCHC Packet fragmented in 6 tiles,
-with one tile per SCHC Fragment, N=3, MAX_WIND_FCN=6, three lost SCHC Fragments.'}
+{: #Fig-Example-Rel-Window-ACK-Loss-Last-A title='ACK-Always mode, 6 tiles,
+one tile per SCHC Fragment, three lost SCHC Fragments.'}
 
 {{Fig-Example-Rel-Window-ACK-Loss-Last-B}} illustrates the transmission in ACK-Always mode of a SCHC Packet fragmented in 6 tiles,
 with one tile per SCHC Fragment, N=3, MAX_WIND_FCN=6, three lost SCHC Fragments, and the second SCHC ACK lost.
@@ -2126,8 +2134,8 @@ with one tile per SCHC Fragment, N=3, MAX_WIND_FCN=6, three lost SCHC Fragments,
              |<-- ACK, W=0, C=1 ---| C=1
            (End)
 ~~~~
-{: #Fig-Example-Rel-Window-ACK-Loss-Last-B title='Transmission in ACK-Always mode of a SCHC Packet fragmented in 6 tiles,
-with one tile per SCHC Fragment, N=3, MAX_WIND_FCN=6, three lost SCHC Fragments, and the second SCHC ACK lost.'}
+{: #Fig-Example-Rel-Window-ACK-Loss-Last-B title='ACK-Always mode, 6 tiles,
+one tile per SCHC Fragment, SCHC ACK loss.'}
 
 {{Fig-Example-Rel-Window-ACK-Loss-Last-C}} illustrates the transmission in ACK-Always mode of a SCHC Packet fragmented in 6 tiles,
 with N=3, MAX_WIND_FCN=6, with three lost SCHC Fragments, and one retransmitted SCHC Fragment lost again.
@@ -2151,8 +2159,8 @@ with N=3, MAX_WIND_FCN=6, with three lost SCHC Fragments, and one retransmitted 
              |<-- ACK, W=0, C=1 ---| C=1
            (End)
 ~~~~
-{: #Fig-Example-Rel-Window-ACK-Loss-Last-C title='Transmission in ACK-Always mode of a SCHC Packet fragmented in 6 tiles,
-with N=3, MAX_WIND_FCN=6, with three lost SCHC Fragments, and one retransmitted SCHC Fragment lost again.'}
+{: #Fig-Example-Rel-Window-ACK-Loss-Last-C title='ACK-Always mode, 6 tiles,
+retransmitted SCHC Fragment lost again.'}
 
 
 {{Fig-Example-MaxWindFCN}} illustrates the transmission in ACK-Always mode of a SCHC Packet fragmented in 28 tiles,
@@ -2196,8 +2204,8 @@ with one tile per SCHC Fragment, N=5, MAX_WIND_FCN=23 and two lost SCHC Fragment
         |<--- ACK, W=1, C=1 ---| C=1
       (End)
 ~~~~
-{: #Fig-Example-MaxWindFCN title='Transmission in ACK-Always mode of a SCHC Packet fragmented in 28 tiles,
-with one tile per SCHC Fragment, N=5, MAX_WIND_FCN=23 and two lost SCHC Fragments.'}
+{: #Fig-Example-MaxWindFCN title='ACK-Always mode, 28 tiles,
+one tile per SCHC Fragment, lost SCHC Fragments.'}
 
 
 # Fragmentation State Machines {#FSM}
@@ -2266,10 +2274,10 @@ The fragmentation state machines of the sender and the receiver, one for each of
 |       set Retrans_Timer  |   | set Retrans_Timer
 |                          |   |
 |Recv_wnd == wnd &         |   |  
-|lcl_bm==recv_bm &         |   |  +-----------------------+
-|more frag                 |   |  | lcl_bm!=rcv-bm        |
-|~~~~~~~~~~~~~~~~~~~~~~    |   |  | ~~~~~~~~~             |
-|Stop Retrans_Timer        |   |  | Attempt++             v
+|lcl_bm==recv_bm &         |   |  +----------------------+
+|more frag                 |   |  | lcl_bm!=rcv-bm       |
+|~~~~~~~~~~~~~~~~~~~~~~    |   |  | ~~~~~~~~~            |
+|Stop Retrans_Timer        |   |  | Attempt++            v
 |clear lcl_bm              v   v  |                +=====+=+
 |window=next_window   +====+===+==+===+            |Resend |
 +---------------------+               |            |Missing|
@@ -2416,7 +2424,8 @@ Recv_window==window &    | |   |   all missing frags sent
 ~~~~
 {: #Fig-ACKonerrorSnd title='Sender State Machine for the ACK-on-Error Mode'}
 
-This is an example only. The specification in {{ACK-on-Error-sender}} is open to very different sequencing of operations.
+This is an example only. Is is not normative.
+The specification in {{ACK-on-Error-sender}} allows for sequences of operations different from the one shown here.
 
 
 ~~~~
@@ -2490,12 +2499,6 @@ This is an example only. The specification in {{ACK-on-Error-sender}} is open to
                                  +===========+
 
 
-         ABORT -->* Uplink Only &
-                    Inact_Timer = expires
-                    || Attempts > MAX_ACK_REQUESTS
-                    ~~~~~~~~~~~~~~~~~~~~~
-                    send Abort
-
 ~~~~
 {: #Fig-ACKonerrorRcv title='Receiver State Machine for the ACK-on-Error Mode'}
 
@@ -2515,6 +2518,8 @@ This section lists the information that need to be provided in the LPWAN technol
 This section lists the parameters that need to be defined in the Profile.
 
 * Rule ID numbering scheme, fixed-sized or variable-sized Rule IDs, number of Rules, the way the Rule ID is transmitted
+
+* define the maximum packet size that should ever be reconstructed by SCHC Decompression (MAX_PACKET_SIZE). See {{SecConsiderations}}.
 
 * Padding: size of the L2 Word (for most LPWAN technologies, this would be a byte; for some technologies, a bit)
 
@@ -2547,12 +2552,12 @@ This section lists the parameters that need to be defined in the Profile.
 * if L2 Word is wider than a bit and SCHC fragmentation is used, value of the padding bits (0 or 1). This is needed
 because the padding bits of the last fragment are included in the MIC computation.
 
-A Profile MAY define a delay to be added between each SCHC message transmission to respect local regulations or other constraints imposed by the applications.
+A Profile MAY define a delay to be added after each SCHC message transmission for compliance with local regulations or other constraints imposed by the applications.
 
-* Note on soliciting downlink transmissions: In some LPWAN technologies, as part of energy-saving techniques,
+* In some LPWAN technologies, as part of energy-saving techniques,
 downlink transmission is only possible immediately after an uplink transmission.
 In order to avoid potentially high delay in the downlink transmission of a fragmented SCHC Packet,
-the SCHC Fragment receiver may want to perform an uplink transmission as soon as possible after reception of a SCHC
+the SCHC Fragment receiver may perform an uplink transmission as soon as possible after reception of a SCHC
 Fragment that is not the last one.
 Such uplink transmission may be triggered by the L2 (e.g. an L2 ACK sent in response to a SCHC Fragment encapsulated
 in a L2 PDU that requires an L2 ACK) or it may be triggered from an upper layer.
@@ -2566,7 +2571,7 @@ the LPWAN technology-specific documents:
 
 # Supporting multiple window sizes for fragmentation
 
-For ACK-Always or ACK-on-Error, implementers MAY opt to support a single window size or multiple window sizes.  The latter, when feasible, may provide performance optimizations.  For example, a large window size SHOULD be used for packets that need to be split into a large number of tiles. However, when the number of tiles required to carry a packet is low, a smaller window size, and thus a shorter Bitmap, MAY be sufficient to provide reception status on all tiles. If multiple window sizes are supported, the Rule ID MAY be used to signal the window size in use for a specific packet transmission.
+For ACK-Always or ACK-on-Error, implementers MAY opt to support a single window size or multiple window sizes.  The latter, when feasible, may provide performance optimizations.  For example, a large window size SHOULD be used for packets that need to be split into a large number of tiles. However, when the number of tiles required to carry a packet is low, a smaller window size, and thus a shorter Bitmap, MAY be sufficient to provide reception status on all tiles. If multiple window sizes are supported, the Rule ID MAY signal the window size in use for a specific packet transmission.
 
 The same window size MUST be used for the transmission of all tiles that belong to the same SCHC Packet.
 
@@ -2578,8 +2583,5 @@ If, after transmission of a SCHC ACK that is not an All-1 fragment, and before e
 
 The default initial value for the Inactivity timer, as well as the maximum number of retries for a specific SCHC ACK, denoted MAX_ACK_RETRIES, are not defined in this document, and need to be defined in a Profile. The initial value of the Inactivity timer is expected to be greater than that of the Retransmission timer, in order to make sure that a (buffered) SCHC Fragment to be retransmitted can find an opportunity for that transmission.
 
-When the SCHC Fragment sender transmits the All-1 fragment, it starts its Retransmission Timer with a large timeout value (e.g. several times that of the initial Inactivity timer). If a SCHC ACK is received before expiration of this timer, the SCHC Fragment sender retransmits any lost SCHC Fragments reported by the SCHC ACK, or if the SCHC ACK confirms successful reception of all SCHC Fragments of the last window, the transmission of the fragmented SCHC Packet is considered complete. If the timer expires, and no SCHC ACK has been received since the start of the timer, the SCHC Fragment sender assumes that the All-1 fragment has been successfully received (and possibly, the last SCHC ACK has been lost: this mechanism assumes that the retransmission timer for the All-1 fragment is long enough to allow several SCHC ACK retries if the All-1 fragment has not;been received by the SCHC Fragment receiver, and it also assumes that it is unlikely that several ACKs become all lost).
+When the SCHC Fragment sender transmits the All-1 fragment, it starts its Retransmission Timer with a large timeout value (e.g. several times that of the initial Inactivity timer). If a SCHC ACK is received before expiration of this timer, the SCHC Fragment sender retransmits any lost SCHC Fragments reported by the SCHC ACK, or if the SCHC ACK confirms successful reception of all SCHC Fragments of the last window, the transmission of the fragmented SCHC Packet is considered complete. If the timer expires, and no SCHC ACK has been received since the start of the timer, the SCHC Fragment sender assumes that the All-1 fragment has been successfully received (and possibly, the last SCHC ACK has been lost: this mechanism assumes that the retransmission timer for the All-1 fragment is long enough to allow several SCHC ACK retries if the All-1 fragment has not been received by the SCHC Fragment receiver, and it also assumes that it is unlikely that several ACKs become all lost).
 
-# Note
-Carles Gomez has been funded in part by the Spanish Government (Ministerio de Educacion, Cultura y Deporte) through the Jose
-Castillejo grant CAS15/00336, and by the ERDF and the Spanish Government through project TEC2016-79988-P.  Part of his contribution to this work has been carried out during his stay as a visiting scholar at the Computer Laboratory of the University of Cambridge.
