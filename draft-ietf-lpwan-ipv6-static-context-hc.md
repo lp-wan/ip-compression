@@ -818,6 +818,7 @@ This condition is also met if the SCHC Fragment Header is a multiple of L2 Words
 The All-1 SCHC Fragment format is shown in {{Fig-LastFrag}}.
 The sender generally uses the All-1 SCHC Fragment format for the message that completes the emission of a fragmented SCHC Packet.
 The DTag field, the W field, the MIC field and the Payload are optional. At least one of MIC field or Payload MUST be present.
+The FCN field is all ones.
 
 ~~~~
 |-------- SCHC Fragment Header -------|
@@ -827,7 +828,7 @@ The DTag field, the W field, the MIC field and the Payload are optional. At leas
 +-- ... --+- ... -+---+- ... -+- ... -+------...-----+~~~~~~~~~~~~~~~~~~
                         (FCN)
 ~~~~
-{: #Fig-LastFrag title='Detailed format for the All-1 SCHC Fragment'}
+{: #Fig-LastFrag title='Detailed Header Format for the All-1 SCHC Fragment'}
 
 The All-1 SCHC Fragment message MUST be distinguishable by size from a SCHC Sender-Abort message (see {{SenderAbort}}) that has the same T, M and N values, even in the presence of padding.
 This condition is met if the MIC is present and at least the size of an L2 Word,
@@ -842,15 +843,15 @@ The Compressed Bitmap field can only be present in SCHC F/R modes that use windo
 
 ~~~~
 |---- SCHC ACK Header ----|
-            |-- T --|-M-|1|
-+---- ... --+- ... -+---+-+~~~~~~~~~~~~~~~~~~
-|  Rule ID  |  DTag | W |1| padding as needed                (success)
-+---- ... --+- ... -+---+-+~~~~~~~~~~~~~~~~~~
+          |-- T --|-M-| 1 |
++--- ... -+- ... -+---+---+~~~~~~~~~~~~~~~~~~
+| Rule ID |  DTag | W |C=1| padding as needed                (success)
++--- ... -+- ... -+---+---+~~~~~~~~~~~~~~~~~~
 
-+---- ... --+- ... -+---+-+------ ... ------+~~~~~~~~~~~~~~~
-|  Rule ID  |  DTag | W |0|Compressed Bitmap| pad. as needed (failure)
-+---- ... --+- ... -+---+-+------ ... ------+~~~~~~~~~~~~~~~
-                         C
++--- ... -+- ... -+---+---+------ ... ------+~~~~~~~~~~~~~~~
+| Rule ID |  DTag | W |C=0|Compressed Bitmap| pad. as needed (failure)
++--- ... -+- ... -+---+---+------ ... ------+~~~~~~~~~~~~~~~
+
 ~~~~
 {: #Fig-ACK-Format title='Format of the SCHC ACK message'}
 
@@ -882,43 +883,39 @@ Because the SCHC Fragment sender knows the size of the original Bitmap, it can r
 
 ~~~~                                                  
 |---- SCHC ACK Header ----|--------      Bitmap     --------|
-            |-- T --|-M-|1|
-+---- ... --+- ... -+---+-+---------------------------------+
-|  Rule ID  |  DTag | W |0|1 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1|
-+---- ... --+- ... -+---+-+---------------------------------+
-                         C      |
+          |-- T --|-M-| 1 |
++--- ... -+- ... -+---+---+---------------------------------+
+| Rule ID |  DTag | W |C=0|1 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1|
++--- ... -+- ... -+---+---+---------------------------------+
         next L2 Word boundary ->|
 ~~~~
-{: #Fig-Localbitmap title='Tentative SCHC ACK message with Bitmap before compression'}
+{: #Fig-Localbitmap title='SCHC ACK Header plus uncompressed Bitmap'}
 
 {{Fig-transmittedbitmap}} shows that the last 14 bits are not sent.
 
 ~~~~   
 |---- SCHC ACK Header ----|CpBmp|
-            |-- T --|-M-|1|
-+---- ... --+- ... -+---+-+-----+
-|  Rule ID  |  DTag | W |0|1 0 1|
-+---- ... --+- ... -+---+-+-----+
-                         C      |
+          |-- T --|-M-| 1 |
++--- ... -+- ... -+---+---+-----+
+| Rule ID |  DTag | W |C=0|1 0 1|
++--- ... -+- ... -+---+---+-----+
         next L2 Word boundary ->|
 ~~~~
-{: #Fig-transmittedbitmap title='Actual SCHC ACK message with Compressed Bitmap'}
+{: #Fig-transmittedbitmap title='Resulting SCHC ACK message with Compressed Bitmap'}
 
 {{Fig-Bitmap-Win}} shows an example of a SCHC ACK with tile numbers ranging from 6 down to 0, where the Bitmap indicates that the second and the fourth tile of the window have not been correctly received.
 
 ~~~~                                                  
 |---- SCHC ACK Header ----|--- Bitmap --|
-            |-- T --|-M-|1|6 5 4 3 2 1 0| (tile #)
-+-----------+-------+---+-+-------------+
-|  Rule ID  |  DTag | W |0|1 0 1 0 1 1 1|      with Original Bitmap
-+-----------+-------+---+-+-------------+
-                         C
+          |-- T --|-M-| 1 |6 5 4 3 2 1 0| (tile #)
++---------+-------+---+---+-------------+
+| Rule ID |  DTag | W |C=0|1 0 1 0 1 1 1|      uncompressed Bitmap
++---------+-------+---+---+-------------+
     next L2 Word boundary ->|<-- L2 Word -->|
 
-+-----------+-------+---+-+-------------+~~~+
-|  Rule ID  |  DTag | W |0|1 0 1 0 1 1 1|Pad|  transmitted SCHC ACK
-+-----------+-------+---+-+-------------+~~~+
-                         C
++---------+-------+---+---+-------------+~~~+
+| Rule ID |  DTag | W |C=0|1 0 1 0 1 1 1|Pad|  transmitted SCHC ACK
++---------+-------+---+---+-------------+~~~+
     next L2 Word boundary ->|<-- L2 Word -->|
 ~~~~
 {: #Fig-Bitmap-Win title='Example of a SCHC ACK message, missing tiles'}
@@ -927,17 +924,15 @@ Because the SCHC Fragment sender knows the size of the original Bitmap, it can r
 
 ~~~~                                                  
 |---- SCHC ACK Header ----|--- Bitmap --|
-            |-- T --|-M-|1|6 5 4 3 2 1 0| (tile #)
-+-----------+-------+---+-+-------------+
-|  Rule ID  |  DTag | W |0|1 1 1 1 1 1 1|      with Original Bitmap
-+-----------+-------+---+-+-------------+
-                         C
+          |-- T --|-M-| 1 |6 5 4 3 2 1 0| (tile #)
++---------+-------+---+---+-------------+
+| Rule ID |  DTag | W |C=0|1 1 1 1 1 1 1|  with uncompressed Bitmap
++---------+-------+---+---+-------------+
     next L2 Word boundary ->|
 
-+---- ... --+- ... -+---+-+-+
-|  Rule ID  |  DTag | W |0|1|                  transmitted SCHC ACK
-+---- ... --+- ... -+---+-+-+
-                         C
++--- ... -+- ... -+---+---+-+
+| Rule ID |  DTag | W |C=0|1|                  transmitted SCHC ACK
++--- ... -+- ... -+---+---+-+
     next L2 Word boundary ->|
 ~~~~
 {: #Fig-Bitmap-lastWin title='Example of a SCHC ACK message, no missing tile'}
@@ -997,11 +992,10 @@ The DTag field and the W field are optional.
 
 ~~~~
 |--- Receiver-Abort Header ---|
-              |--- T ---|-M-|1|
-+---- ... ----+-- ... --+---+-+-+-+-+-+-+-+-+-+-+-+-+
-|   Rule ID   |   DTag  | W |1| 1..1|      1..1     |
-+---- ... ----+-- ... --+---+-+-+-+-+-+-+-+-+-+-+-+-+
-                             C
+            |--- T ---|-M-| 1 |
++--- ... ---+-- ... --+---+---+-+-+-+-+-+-+-+-+-+-+-+
+|  Rule ID  |   DTag  | W |C=1| 1..1|      1..1     |
++--- ... ---+-- ... --+---+---+-+-+-+-+-+-+-+-+-+-+-+
             next L2 Word boundary ->|<-- L2 Word -->|
 ~~~~
 {: #Fig-ReceiverAbort title='SCHC Receiver-Abort format'}
