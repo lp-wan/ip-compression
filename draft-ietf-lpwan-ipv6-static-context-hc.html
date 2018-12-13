@@ -352,7 +352,7 @@ address {
 
   <meta name="dct.creator" content="Minaburo, A., Toutain, L., Gomez, C., Barthel, D., and JC. Zuniga" />
   <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-lpwan-ipv6-static-context-hc-17" />
-  <meta name="dct.issued" scheme="ISO8601" content="2018-12-12" />
+  <meta name="dct.issued" scheme="ISO8601" content="2018-12-13" />
   <meta name="dct.abstract" content="This document defines the Static Context Header Compression (SCHC) framework, which provides both header compression and fragmentation functionalities. SCHC has been designed for Low Power Wide Area Networks (LPWAN).SCHC compression is based on a common static context stored in both the LPWAN device and the network side. This document defines a header compression mechanism and its application to compress IPv6/UDP headers.This document also specifies a fragmentation and reassembly mechanism that is used to support the IPv6 MTU requirement over the LPWAN technologies. Fragmentation is needed for IPv6 datagrams that, after SCHC compression or when such compression was not possible, still exceed the layer-2 maximum payload size.The SCHC header compression and fragmentation mechanisms are independent of the specific LPWAN technology over which they are used. This document defines generic functionalities and offers flexibility with regard to parameter settings and mechanism choices.  Data models for the context and profiles are out of scope; this document standardizes the exchange over the LPWAN between two SCHC entities.  Settings and choices specific to a technology or a product are expected to be grouped into Profiles, which are specified in other documents." />
   <meta name="description" content="This document defines the Static Context Header Compression (SCHC) framework, which provides both header compression and fragmentation functionalities. SCHC has been designed for Low Power Wide Area Networks (LPWAN).SCHC compression is based on a common static context stored in both the LPWAN device and the network side. This document defines a header compression mechanism and its application to compress IPv6/UDP headers.This document also specifies a fragmentation and reassembly mechanism that is used to support the IPv6 MTU requirement over the LPWAN technologies. Fragmentation is needed for IPv6 datagrams that, after SCHC compression or when such compression was not possible, still exceed the layer-2 maximum payload size.The SCHC header compression and fragmentation mechanisms are independent of the specific LPWAN technology over which they are used. This document defines generic functionalities and offers flexibility with regard to parameter settings and mechanism choices.  Data models for the context and profiles are out of scope; this document standardizes the exchange over the LPWAN between two SCHC entities.  Settings and choices specific to a technology or a product are expected to be grouped into Profiles, which are specified in other documents." />
 
@@ -376,7 +376,7 @@ address {
 <td class="right">L. Toutain</td>
 </tr>
 <tr>
-<td class="left">Expires: June 15, 2019</td>
+<td class="left">Expires: June 16, 2019</td>
 <td class="right">IMT-Atlantique</td>
 </tr>
 <tr>
@@ -405,7 +405,7 @@ address {
 </tr>
 <tr>
 <td class="left"></td>
-<td class="right">December 12, 2018</td>
+<td class="right">December 13, 2018</td>
 </tr>
 
     	
@@ -424,7 +424,7 @@ address {
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at https://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on June 15, 2019.</p>
+<p>This Internet-Draft will expire on June 16, 2019.</p>
 <h1 id="rfc.copyrightnotice"><a href="#rfc.copyrightnotice">Copyright Notice</a></h1>
 <p>Copyright (c) 2018 IETF Trust and the persons identified as the document authors.  All rights reserved.</p>
 <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (https://trustee.ietf.org/license-info) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.</p>
@@ -983,8 +983,8 @@ Tiles  |    |  |     |   |    | |   |   |     |        |    |   |      |
 <li>their numbers MUST increase from 0 upward, from the start of the SCHC Packet to its end.</li>
 <li>the last window MUST contain WINDOW_SIZE tiles or less.</li>
 <li>tiles are numbered within each window.</li>
-<li>the tile numbers MUST decrement from WINDOW_SIZE - 1 downward, looking from the start of the SCHC Packet toward its end.</li>
-<li>each tile of a SCHC Packet is therefore uniquely identified by a window number and a tile number within this window.</li>
+<li>the tile indices MUST decrement from WINDOW_SIZE - 1 downward, looking from the start of the SCHC Packet toward its end.</li>
+<li>each tile of a SCHC Packet is therefore uniquely identified by a window number and a tile index within this window.</li>
 </ul>
 <p id="rfc.section.8.2.2.2.p.4">See <a href="#Fig-WindowsExample" class="xref">Figure 9</a> for an example.</p>
 <div id="rfc.figure.9"></div>
@@ -1009,7 +1009,7 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 <h1 id="rfc.section.8.2.2.3">
 <a href="#rfc.section.8.2.2.3">8.2.2.3.</a> <a href="#Bitmap" id="Bitmap">Bitmaps</a>
 </h1>
-<p id="rfc.section.8.2.2.3.p.1">Each bit in the Bitmap for a window corresponds to a tile in the window.  Each Bitmap has therefore WINDOW_SIZE bits.  The bit at the left-most position corresponds to the tile numbered WINDOW_SIZE - 1.  Consecutive bits, going right, correspond to sequentially decreasing tile numbers.  In Bitmaps for windows that are not the last one of a SCHC Packet, the bit at the right-most position corresponds to the tile numbered 0.  In the Bitmap for the last window, the bit at the right-most position corresponds either to the tile numbered 0 or to a tile that is sent/received as &#8220;the last one of the SCHC Packet&#8221; without explicitly stating its number (see <a href="#LastFrag" class="xref">Section 8.3.1.2</a>).</p>
+<p id="rfc.section.8.2.2.3.p.1">Each bit in the Bitmap for a window corresponds to a tile in the window.  Each Bitmap has therefore WINDOW_SIZE bits.  The bit at the left-most position corresponds to the tile numbered WINDOW_SIZE - 1.  Consecutive bits, going right, correspond to sequentially decreasing tile indices.  In Bitmaps for windows that are not the last one of a SCHC Packet, the bit at the right-most position corresponds to the tile numbered 0.  In the Bitmap for the last window, the bit at the right-most position corresponds either to the tile numbered 0 or to a tile that is sent/received as &#8220;the last one of the SCHC Packet&#8221; without explicitly stating its number (see <a href="#LastFrag" class="xref">Section 8.3.1.2</a>).</p>
 <p id="rfc.section.8.2.2.3.p.2">At the receiver</p>
 <p></p>
 
@@ -1017,7 +1017,6 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 <li>a bit set to 1 in the Bitmap indicates that a tile associated with that bit position has been correctly received for that window.</li>
 <li>a bit set to 0 in the Bitmap indicates that no tile associated with that bit position has been correctly received for that window.</li>
 </ul>
-<p id="rfc.section.8.2.2.3.p.4">WINDOW_SIZE determines the size of the Bitmap sent in the SCHC ACK message.</p>
 <h1 id="rfc.section.8.2.2.4">
 <a href="#rfc.section.8.2.2.4">8.2.2.4.</a> <a href="#MiscTools" id="MiscTools">Timers and counters</a>
 </h1>
@@ -1062,11 +1061,10 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 <p> A sequence counter that is incremented for each new fragmented SCHC Packet, counting from 0 to up to (2^T)-1 and wrapping back to 0 is RECOMMENDED for maximum traceability and avoidance of ambiguity.</p>
 </li>
 <li>W: The W field is optional. It is only present if windows are used.  Its presence and size (called M, in bits) is defined by each SCHC F/R mode and each Profile for each Rule ID.  <br><br> This field carries information pertaining to the window a SCHC F/R message relates to.  If present, W MUST carry the same value for all the SCHC F/R messages related to the same window.  Depending on the mode and Profile, W may carry the full window number, or just the least significant bit or any other partial representation of the window number.</li>
-<li>Fragment Compressed Number (FCN). The FCN field is present in the SCHC Fragment Header.  Its size (called N, in bits) is defined by each Profile for each Rule ID.  <br><br> This field conveys information about the progress in the sequence of tiles being transmitted by SCHC Fragment messages.  For example, it can contain a partial, efficient representation of a larger-sized tile number.  The description of the exact use of the FCN field is left to each SCHC F/R mode.  However, two values are reserved for special purposes. They help control the SCHC F/R process:  <ul>
+<li>Fragment Compressed Number (FCN). The FCN field is present in the SCHC Fragment Header.  Its size (called N, in bits) is defined by each Profile for each Rule ID.  <br><br> This field conveys information about the progress in the sequence of tiles being transmitted by SCHC Fragment messages.  For example, it can contain a partial, efficient representation of a larger-sized tile index.  The description of the exact use of the FCN field is left to each SCHC F/R mode.  However, two values are reserved for special purposes. They help control the SCHC F/R process:  <ul>
 <li>The FCN value with all the bits equal to 1 (called All-1) signals the very last tile of a SCHC Packet.  By extension, if windows are used, the last window of a packet is called the All-1 window.</li>
 <li>If windows are used, the FCN value with all the bits equal to 0 (called All-0) signals the last tile of a window that is not the last one of the SCHC packet.  By extension, such a window is called an All-0 window.</li>
 </ul>
-<p> The highest value of FCN (an unsigned integer) is called MAX_WIND_FCN.  Since All-1 is reserved, MAX_WIND_FCN MUST be strictly less that (2^N)-1.</p>
 </li>
 <li>Message Integrity Check (MIC).  This field only appears in the All-1 SCHC Fragments.  Its size (called U, in bits) is defined by each Profile for each Rule ID.  <br><br> See <a href="#IntegrityChecking" class="xref">Section 8.2.3</a> for the MIC default size, default polynomial and details on MIC computation.</li>
 <li>C (integrity Check): C is a 1-bit field.  This field is used in the SCHC ACK message to report on the reassembled SCHC Packet integrity check (see <a href="#IntegrityChecking" class="xref">Section 8.2.3</a>).  <br><br> A value of 1 tells that the integrity check was performed and is successful.  A value of 0 tells that the integrity check was not performed, or that is was a failure.</li>
@@ -1181,7 +1179,7 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
         next L2 Word boundary -&gt;|
 </pre>
 <p class="figure">Figure 15: Resulting SCHC ACK message with Compressed Bitmap</p>
-<p><a href="#Fig-Bitmap-Win" class="xref">Figure 16</a> shows an example of a SCHC ACK with tile numbers ranging from 6 down to 0, where the Bitmap indicates that the second and the fourth tile of the window have not been correctly received.</p>
+<p><a href="#Fig-Bitmap-Win" class="xref">Figure 16</a> shows an example of a SCHC ACK with tile indices ranging from 6 down to 0, where the Bitmap indicates that the second and the fourth tile of the window have not been correctly received.</p>
 <div id="rfc.figure.16"></div>
 <div id="Fig-Bitmap-Win"></div>
 <pre>
@@ -1364,13 +1362,13 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 <p id="rfc.section.8.4.2.p.4">The tiles are not required to be of uniform size. In ACK-Always mode, only the All-1 SCHC Fragment is padded as needed. The other SCHC Fragments are intrinsically aligned to L2 Words.</p>
 <p id="rfc.section.8.4.2.p.5">Briefly, the algorithm is as follows: after a first blind transmission of all the tiles of a window, the fragment sender iterates retransmitting the tiles that are reported missing until the fragment receiver reports that all the tiles belonging to the window have been correctly received, or until too many attempts were made.  The fragment sender only advances to the next window of tiles when it has ascertained that all the tiles belonging to the current window have been fully and correctly received. This results in a per-window lock-step behavior between the sender and the receiver.</p>
 <p id="rfc.section.8.4.2.p.6">Each Profile MUST specify which Rule ID value(s) is (are) allocated to this mode.  For brevity, the rest of <a href="#No-ACK-subsection" class="xref">Section 8.4.1</a> only refers to Rule ID values that are allocated to this mode.</p>
-<p id="rfc.section.8.4.2.p.7">The W field MUST be present and its size M MUST be 1 bit. WINDOW_SIZE MUST be equal to MAX_WIND_FCN + 1.</p>
+<p id="rfc.section.8.4.2.p.7">The W field MUST be present and its size M MUST be 1 bit.</p>
 <p id="rfc.section.8.4.2.p.8">Each Profile, for each Rule ID value, MUST define</p>
 <p></p>
 
 <ul>
 <li>the value of N (size of the FCN field),</li>
-<li>the value of MAX_WIND_FCN</li>
+<li>the value of WINDOW_SIZE, which MUST be strictly less than 2^N,</li>
 <li>the size and algorithm for the MIC field,</li>
 <li>the size of the DTag field,</li>
 <li>the value of MAX_ACK_REQUESTS,</li>
@@ -1397,12 +1395,12 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 <ul>
 <li>the Fragment MUST be of the Regular type specified in <a href="#NotLastFrag" class="xref">Section 8.3.1.1</a>
 </li>
-<li>the FCN field MUST contain the tile number</li>
+<li>the FCN field MUST contain the tile index</li>
 <li>each tile MUST be of a size that complements the SCHC Fragment Header so that the SCHC Fragment is a multiple of L2 Words without the need for padding bits.</li>
 </ul>
 <p id="rfc.section.8.4.2.1.p.6">The SCHC Fragment that carries the last tile MUST be an All-1 SCHC Fragment, described in <a href="#LastFrag" class="xref">Section 8.3.1.2</a>.</p>
 <p id="rfc.section.8.4.2.1.p.7">The fragment sender MUST start by transmitting the window numbered 0.</p>
-<p id="rfc.section.8.4.2.1.p.8">The sender starts by a &#8220;blind transmission&#8221; phase, in which it MUST transmit all the tiles composing the window, in decreasing tile number.</p>
+<p id="rfc.section.8.4.2.1.p.8">The sender starts by a &#8220;blind transmission&#8221; phase, in which it MUST transmit all the tiles composing the window, in decreasing tile index order.</p>
 <p id="rfc.section.8.4.2.1.p.9">Then, it enters a &#8220;retransmission phase&#8221; in which it MUST initialize an Attempts counter to 0, it MUST start a Retransmission Timer and it MUST await a SCHC ACK. Then,</p>
 <p></p>
 
@@ -1511,7 +1509,7 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 <a href="#rfc.section.8.4.3">8.4.3.</a> <a href="#ACK-on-Error-subsection" id="ACK-on-Error-subsection">ACK-on-Error mode</a>
 </h1>
 <p id="rfc.section.8.4.3.p.1">The ACK-on-Error mode supports LPWAN technologies that have variable MTU and out-of-order delivery.</p>
-<p id="rfc.section.8.4.3.p.2">In ACK-on-Error mode, windows are used.  All tiles MUST be of equal size, except for the last one, which MUST be of the same size or smaller than the preceding ones.  WINDOW_SIZE MUST be equal to MAX_WIND_FCN + 1.</p>
+<p id="rfc.section.8.4.3.p.2">In ACK-on-Error mode, windows are used.  All tiles MUST be of equal size, except for the last one, which MUST be of the same size or smaller than the preceding ones.</p>
 <p id="rfc.section.8.4.3.p.3">A SCHC Fragment message carries one or more tiles, which may span multiple windows.  A SCHC ACK reports on the reception of exactly one window of tiles.</p>
 <p id="rfc.section.8.4.3.p.4">See <a href="#Fig-TilesACKonError" class="xref">Figure 21</a> for an example.</p>
 <div id="rfc.figure.21"></div>
@@ -1546,7 +1544,7 @@ SCHC Fragment msg    |-----------|
 <li>the tile size (a tile does not need to be multiple of an L2 Word, but it MUST be at least the size of an L2 Word)</li>
 <li>the value of M (size of the W field),</li>
 <li>the value of N (size of the FCN field),</li>
-<li>the value of MAX_WIND_FCN</li>
+<li>the value of WINDOW_SIZE, which MUST be strictly less than 2^N,</li>
 <li>the size and algorithm for the MIC field,</li>
 <li>the size of the DTag field,</li>
 <li>the value of MAX_ACK_REQUESTS,</li>
@@ -1568,7 +1566,7 @@ SCHC Fragment msg    |-----------|
 <p></p>
 
 <ul>
-<li>the fragment sender MUST select a Rule ID and DTag value pair for this SCHC Packet.  A Rule MUST NOT be selected if the values of M and MAX_WIND_FCN for that Rule are such that the SCHC Packet cannot be fragmented in (2^M) * (MAX_WIND_FCN+1) tiles or less.</li>
+<li>the fragment sender MUST select a Rule ID and DTag value pair for this SCHC Packet.  A Rule MUST NOT be selected if the values of M and WINDOW_SIZE for that Rule are such that the SCHC Packet cannot be fragmented in (2^M) * WINDOW_SIZE tiles or less.</li>
 <li>the fragment sender MUST initialize the Attempts counter to 0 for that Rule ID and DTag value pair.</li>
 </ul>
 <p id="rfc.section.8.4.3.1.p.3">For brevity, the rest of <a href="#ACK-on-Error-subsection" class="xref">Section 8.4.3</a> only refers to SCHC F/R messages bearing the Rule ID and DTag values hereby selected.</p>
@@ -1586,7 +1584,7 @@ SCHC Fragment msg    |-----------|
 <ul>
 <li>it MUST be of the Regular type specified in <a href="#NotLastFrag" class="xref">Section 8.3.1.1</a>
 </li>
-<li>the FCN field MUST contain the tile number of the first tile sent in that SCHC Fragment</li>
+<li>the FCN field MUST contain the tile index of the first tile sent in that SCHC Fragment</li>
 </ul>
 <p id="rfc.section.8.4.3.1.p.9">The fragment sender MAY send the last tile as the Payload of an All-1 SCHC Fragment.</p>
 <p id="rfc.section.8.4.3.1.p.10">The fragment sender MUST send SCHC Fragments such that, all together, they contain all the tiles of the fragmented SCHC Packet.</p>
@@ -2053,7 +2051,7 @@ Rule 0
 </pre>
 <p class="figure">Figure 25: No-ACK mode, 11 SCHC Fragments</p>
 <p id="rfc.section.B.p.3">In the following examples, N (the size of the FCN field) is 3 bits. The All-1 FCN value is 7.</p>
-<p><a href="#Fig-Example-Win-NoLoss-NACK" class="xref">Figure 26</a> illustrates the transmission in ACK-on-Error mode of a SCHC Packet fragmented in 11 tiles, with one tile per SCHC Fragment, MAX_WIND_FCN=6 and no lost SCHC Fragment.</p>
+<p><a href="#Fig-Example-Win-NoLoss-NACK" class="xref">Figure 26</a> illustrates the transmission in ACK-on-Error mode of a SCHC Packet fragmented in 11 tiles, with one tile per SCHC Fragment, WINDOW_SIZE=7 and no lost SCHC Fragment.</p>
 <div id="rfc.figure.26"></div>
 <div id="Fig-Example-Win-NoLoss-NACK"></div>
 <pre>
@@ -2074,7 +2072,7 @@ Rule 0
         (End)
 </pre>
 <p class="figure">Figure 26: ACK-on-Error mode, 11 tiles, one tile per SCHC Fragment, no lost SCHC Fragment.</p>
-<p><a href="#Fig-Example-Rel-Window-NACK-Loss" class="xref">Figure 27</a> illustrates the transmission in ACK-on-Error mode of a SCHC Packet fragmented in 11 tiles, with one tile per SCHC Fragment, MAX_WIND_FCN=6 and three lost SCHC Fragments.</p>
+<p><a href="#Fig-Example-Rel-Window-NACK-Loss" class="xref">Figure 27</a> illustrates the transmission in ACK-on-Error mode of a SCHC Packet fragmented in 11 tiles, with one tile per SCHC Fragment, WINDOW_SIZE=7 and three lost SCHC Fragments.</p>
 <div id="rfc.figure.27"></div>
 <div id="Fig-Example-Rel-Window-NACK-Loss"></div>
 <pre>
@@ -2100,7 +2098,7 @@ Rule 0
         (End)
 </pre>
 <p class="figure">Figure 27: ACK-on-Error mode, 11 tiles, one tile per SCHC Fragment, lost SCHC Fragments.</p>
-<p><a href="#Figure-Example-ACK-on-Error-VarMTU" class="xref">Figure 28</a> shows an example of a transmission in ACK-on-Error mode of a SCHC Packet fragmented in 73 tiles, with N=5, MAX_WIND_FCN=27, M=2 and 3 lost SCHC Fragments.</p>
+<p><a href="#Figure-Example-ACK-on-Error-VarMTU" class="xref">Figure 28</a> shows an example of a transmission in ACK-on-Error mode of a SCHC Packet fragmented in 73 tiles, with N=5, WINDOW_SIZE=28, M=2 and 3 lost SCHC Fragments.</p>
 <div id="rfc.figure.28"></div>
 <div id="Figure-Example-ACK-on-Error-VarMTU"></div>
 <pre>
@@ -2148,7 +2146,7 @@ Rule 0
 <p class="figure">Figure 28: ACK-on-Error mode, variable MTU.</p>
 <p id="rfc.section.B.p.7">In this example, the L2 MTU becomes reduced just before sending the &#8220;W=2, FCN=19&#8221; fragment, leaving space for only 1 tile in each forthcoming SCHC Fragment.  Before retransmissions, the 73 tiles are carried by a total of 25 SCHC Fragments, the last 9 being of smaller size.</p>
 <p id="rfc.section.B.p.8">Note: other sequences of events (e.g. regarding when ACKs are sent by the Receiver) are also allowed by this specification. Profiles may restrict this flexibility.</p>
-<p><a href="#Fig-Example-Rel-Window-ACK-NoLoss" class="xref">Figure 29</a> illustrates the transmission in ACK-Always mode of a SCHC Packet fragmented in 11 tiles, with one tile per SCHC Fragment, with N=3, MAX_WIND_FCN=6 and no loss.</p>
+<p><a href="#Fig-Example-Rel-Window-ACK-NoLoss" class="xref">Figure 29</a> illustrates the transmission in ACK-Always mode of a SCHC Packet fragmented in 11 tiles, with one tile per SCHC Fragment, with N=3, WINDOW_SIZE=7 and no loss.</p>
 <div id="rfc.figure.29"></div>
 <div id="Fig-Example-Rel-Window-ACK-NoLoss"></div>
 <pre>
@@ -2169,7 +2167,7 @@ Rule 0
         (End)    
 </pre>
 <p class="figure">Figure 29: ACK-Always mode, 11 tiles, one tile per SCHC Fragment, no loss.</p>
-<p><a href="#Fig-Example-Rel-Window-ACK-Loss" class="xref">Figure 30</a> illustrates the transmission in ACK-Always mode of a SCHC Packet fragmented in 11 tiles, with one tile per SCHC Fragment, N=3, MAX_WIND_FCN=6 and three lost SCHC Fragments.</p>
+<p><a href="#Fig-Example-Rel-Window-ACK-Loss" class="xref">Figure 30</a> illustrates the transmission in ACK-Always mode of a SCHC Packet fragmented in 11 tiles, with one tile per SCHC Fragment, N=3, WINDOW_SIZE=7 and three lost SCHC Fragments.</p>
 <div id="rfc.figure.30"></div>
 <div id="Fig-Example-Rel-Window-ACK-Loss"></div>
 <pre>
@@ -2195,7 +2193,7 @@ Rule 0
         (End)
 </pre>
 <p class="figure">Figure 30: ACK-Always mode, 11 tiles, one tile per SCHC Fragment, three lost SCHC Fragments.</p>
-<p><a href="#Fig-Example-Rel-Window-ACK-Loss-Last-A" class="xref">Figure 31</a> illustrates the transmission in ACK-Always mode of a SCHC Packet fragmented in 6 tiles, with one tile per SCHC Fragment, N=3, MAX_WIND_FCN=6, three lost SCHC Fragments and only one retry needed to recover each lost SCHC Fragment.</p>
+<p><a href="#Fig-Example-Rel-Window-ACK-Loss-Last-A" class="xref">Figure 31</a> illustrates the transmission in ACK-Always mode of a SCHC Packet fragmented in 6 tiles, with one tile per SCHC Fragment, N=3, WINDOW_SIZE=7, three lost SCHC Fragments and only one retry needed to recover each lost SCHC Fragment.</p>
 <div id="rfc.figure.31"></div>
 <div id="Fig-Example-Rel-Window-ACK-Loss-Last-A"></div>
 <pre>
@@ -2214,7 +2212,7 @@ Rule 0
            (End)
 </pre>
 <p class="figure">Figure 31: ACK-Always mode, 6 tiles, one tile per SCHC Fragment, three lost SCHC Fragments.</p>
-<p><a href="#Fig-Example-Rel-Window-ACK-Loss-Last-B" class="xref">Figure 32</a> illustrates the transmission in ACK-Always mode of a SCHC Packet fragmented in 6 tiles, with one tile per SCHC Fragment, N=3, MAX_WIND_FCN=6, three lost SCHC Fragments, and the second SCHC ACK lost.</p>
+<p><a href="#Fig-Example-Rel-Window-ACK-Loss-Last-B" class="xref">Figure 32</a> illustrates the transmission in ACK-Always mode of a SCHC Packet fragmented in 6 tiles, with one tile per SCHC Fragment, N=3, WINDOW_SIZE=7, three lost SCHC Fragments, and the second SCHC ACK lost.</p>
 <div id="rfc.figure.32"></div>
 <div id="Fig-Example-Rel-Window-ACK-Loss-Last-B"></div>
 <pre>
@@ -2236,7 +2234,7 @@ Rule 0
            (End)
 </pre>
 <p class="figure">Figure 32: ACK-Always mode, 6 tiles, one tile per SCHC Fragment, SCHC ACK loss.</p>
-<p><a href="#Fig-Example-Rel-Window-ACK-Loss-Last-C" class="xref">Figure 33</a> illustrates the transmission in ACK-Always mode of a SCHC Packet fragmented in 6 tiles, with N=3, MAX_WIND_FCN=6, with three lost SCHC Fragments, and one retransmitted SCHC Fragment lost again.</p>
+<p><a href="#Fig-Example-Rel-Window-ACK-Loss-Last-C" class="xref">Figure 33</a> illustrates the transmission in ACK-Always mode of a SCHC Packet fragmented in 6 tiles, with N=3, WINDOW_SIZE=7, with three lost SCHC Fragments, and one retransmitted SCHC Fragment lost again.</p>
 <div id="rfc.figure.33"></div>
 <div id="Fig-Example-Rel-Window-ACK-Loss-Last-C"></div>
 <pre>
@@ -2259,7 +2257,7 @@ Rule 0
            (End)
 </pre>
 <p class="figure">Figure 33: ACK-Always mode, 6 tiles, retransmitted SCHC Fragment lost again.</p>
-<p><a href="#Fig-Example-MaxWindFCN" class="xref">Figure 34</a> illustrates the transmission in ACK-Always mode of a SCHC Packet fragmented in 28 tiles, with one tile per SCHC Fragment, N=5, MAX_WIND_FCN=23 and two lost SCHC Fragments.</p>
+<p><a href="#Fig-Example-MaxWindFCN" class="xref">Figure 34</a> illustrates the transmission in ACK-Always mode of a SCHC Packet fragmented in 28 tiles, with one tile per SCHC Fragment, N=5, WINDOW_SIZE=24 and two lost SCHC Fragments.</p>
 <div id="rfc.figure.34"></div>
 <div id="Fig-Example-MaxWindFCN"></div>
 <pre>
@@ -2616,7 +2614,6 @@ Recv_window==window &amp;    | |   |   all missing frags sent
 <li>WINDOW_SIZE, for modes that use windows</li>
 <li>number of bits for W (M) for each Rule ID value, for modes that use windows</li>
 <li>number of bits for FCN (N) for each Rule ID value</li>
-<li>value of MAX_WIND_FCN and use of FCN values, if applicable to the SCHC F/R mode.</li>
 <li>size of MIC and algorithm for its computation, for each Rule ID, if different from the default CRC32. Byte fill-up with zeroes or other mechanism, to be specified.</li>
 <li>Retransmission Timer duration for each Rule ID value, if applicable to the SCHC F/R mode</li>
 <li>Inactivity Timer duration for each Rule ID value, if applicable to the SCHC F/R mode</li>
