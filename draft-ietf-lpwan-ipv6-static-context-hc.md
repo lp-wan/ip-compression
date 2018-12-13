@@ -755,6 +755,8 @@ The SCHC F/R messages contain the following fields (see the formats in {{Fragfor
 
   A sequence counter that is incremented for each new fragmented SCHC Packet, counting from 0 to up to (2^T)-1 and wrapping back to 0 is RECOMMENDED for maximum traceability and avoidance of ambiguity.
 
+  A flow of SCHC F/R messages with a given Rule ID and DTag value pair MUST NOT interfere with the operation of a SCHC F/R instance that uses another Rule ID and DTag value pair.
+
 * W: The W field is optional. It is only present if windows are used.
   Its presence and size (called M, in bits) is defined by each SCHC F/R mode and each Profile for each Rule ID.
 
@@ -1061,8 +1063,7 @@ Windows are not used.
 The Retransmission Timer is not used.
 The Attempts counter is not used.
 
-Each Profile MUST specify which Rule ID value(s) is (are) allocated to this mode.
-For brevity, the rest of {{No-ACK-subsection}} only refers to Rule ID values that are allocated to this mode.
+Each Profile MUST specify which Rule ID value(s) correspond to SCHC F/R messages operating in this mode.
 
 The W field MUST NOT be present in the SCHC F/R messages.
 SCHC ACK MUST NOT be sent.
@@ -1089,7 +1090,6 @@ For each active pair of Rule ID and DTag values, the receiver MUST maintain an I
 #### Sender behavior
 
 At the beginning of the fragmentation of a new SCHC Packet, the fragment sender MUST select a Rule ID and DTag value pair for this SCHC Packet.
-For brevity, the rest of {{No-ACK-subsection}} only refers to SCHC F/R messages bearing the Rule ID and DTag values hereby selected.
 
 Each SCHC Fragment MUST contain exactly one tile in its Payload.
 The tile MUST be at least the size of an L2 Word.
@@ -1144,8 +1144,7 @@ The tiles are not required to be of uniform size. In ACK-Always mode, only the A
 Briefly, the algorithm is as follows: after a first blind transmission of all the tiles of a window, the fragment sender iterates retransmitting the tiles that are reported missing until the fragment receiver reports that all the tiles belonging to the window have been correctly received, or until too many attempts were made.
 The fragment sender only advances to the next window of tiles when it has ascertained that all the tiles belonging to the current window have been fully and correctly received. This results in a per-window lock-step behavior between the sender and the receiver.
 
-Each Profile MUST specify which Rule ID value(s) is (are) allocated to this mode.
-For brevity, the rest of {{No-ACK-subsection}} only refers to Rule ID values that are allocated to this mode.
+Each Profile MUST specify which Rule ID value(s) correspond to SCHC F/R messages operating in this mode.
 
 The W field MUST be present and its size M MUST be 1 bit.
 
@@ -1170,7 +1169,6 @@ For each active pair of Rule ID and DTag values, the receiver MUST maintain an I
 #### Sender behavior
 
 At the beginning of the fragmentation of a new SCHC Packet, the fragment sender MUST select a Rule ID and DTag value pair for this SCHC Packet.
-For brevity, the rest of {{ACK-Always-subsection}} only refers to SCHC F/R messages bearing the Rule ID and DTag values hereby selected.
 
 Each SCHC Fragment MUST contain exactly one tile in its Payload.
 All tiles with the index 0, as well as the last tile, MUST be at least the size of an L2 Word.
@@ -1238,12 +1236,10 @@ At any time,
 
 On receiving a SCHC Fragment with a Rule ID and DTag pair not being processed at that time
 
-- the receiver MAY check if the DTag value has not recently been used for that Rule ID value,
+- the receiver SHOULD check if the DTag value has not recently been used for that Rule ID value,
   thereby ensuring that the received SCHC Fragment is not a remnant of a prior fragmented SCHC Packet transmission.
   If the SCHC Fragment is determined to be such a remnant, the receiver MAY silently ignore it and discard it.
 - the receiver MUST start a process to assemble a new SCHC Packet with that Rule ID and DTag value pair.
-  That process MUST only examine received SCHC F/R messages with that Rule ID and DTag value pair
-  and MUST only transmit SCHC F/R messages with that Rule ID and DTag value pair.
 - the receiver MUST start an Inactivity Timer. It MUST initialize an Attempts counter to 0.
   It MUST initialize a window counter to 0.
 
@@ -1386,8 +1382,7 @@ The fragmented SCHC Packet transmission concludes when
 - or too many retransmission attempts were made,
 - or the receiver determines that the transmission of this fragmented SCHC Packet has been inactive for too long.
 
-Each Profile MUST specify which Rule ID value(s) is (are) allocated to this ACK-on-Error mode.
-For brevity, the rest of {{ACK-on-Error-subsection}} only refers to SCHC F/R messages with Rule ID values that are allocated to this mode.
+Each Profile MUST specify which Rule ID value(s) correspond to SCHC F/R messages operating in this mode.
 
 The W field MUST be present in the SCHC F/R messages.
 
@@ -1418,8 +1413,6 @@ At the beginning of the fragmentation of a new SCHC Packet,
 - the fragment sender MUST select a Rule ID and DTag value pair for this SCHC Packet.
   A Rule MUST NOT be selected if the values of M and WINDOW_SIZE for that Rule are such that the SCHC Packet cannot be fragmented in (2^M) * WINDOW_SIZE tiles or less.
 - the fragment sender MUST initialize the Attempts counter to 0 for that Rule ID and DTag value pair.
-
-For brevity, the rest of {{ACK-on-Error-subsection}} only refers to SCHC F/R messages bearing the Rule ID and DTag values hereby selected.
 
 A SCHC Fragment message carries in its payload one or more tiles.
 If more than one tile is carried in one SCHC Fragment
@@ -1503,8 +1496,6 @@ On receiving a SCHC Fragment with a Rule ID and DTag pair not being processed at
   thereby ensuring that the received SCHC Fragment is not a remnant of a prior fragmented SCHC Packet transmission.
   If the SCHC Fragment is determined to be such a remnant, the receiver MAY silently ignore it and discard it.
 - the receiver MUST start a process to assemble a new SCHC Packet with that Rule ID and DTag value pair.
-  That process MUST only examine received SCHC F/R messages with that Rule ID and DTag value pair
-  and MUST only transmit SCHC F/R messages with that Rule ID and DTag value pair.
 - the receiver MUST start an Inactivity Timer. It MUST initialize an Attempts counter to 0.
 
 On receiving any SCHC F/R message, the receiver MUST reset the Inactivity Timer.
