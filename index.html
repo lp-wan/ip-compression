@@ -1342,11 +1342,11 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 <ul>
 <li>the receiver MUST append the All-1 SCHC Fragment Payload and the padding bits to the previously received SCHC Fragment Payloads for this SCHC Packet</li>
 <li>the receiver MUST perform the integrity check</li>
-<li>if integrity checking fails, the receiver MUST drop the reassembled SCHC Packet and it MUST release all resources associated with this Rule ID and DTag value pair.</li>
+<li>if integrity checking fails, the receiver MUST drop the reassembled SCHC Packet</li>
 <li>the reassembly operation concludes.</li>
 </ul>
-<p id="rfc.section.8.4.1.2.p.5">On expiration of the Inactivity Timer, the receiver MUST drop the SCHC Packet being reassembled and it MUST release all resources associated with this Rule ID and DTag value pair.</p>
-<p id="rfc.section.8.4.1.2.p.6">On receiving a SCHC Sender-Abort, the receiver MAY release all resources associated with this Rule ID and DTag value pair.</p>
+<p id="rfc.section.8.4.1.2.p.5">On expiration of the Inactivity Timer, the receiver MUST drop the SCHC Packet being reassembled.</p>
+<p id="rfc.section.8.4.1.2.p.6">On receiving a SCHC Sender-Abort, the receiver MAY drop the SCHC Packet being reassembled.</p>
 <p><a href="#Fig-NoACKModeRcv" class="xref">Figure 36</a> shows an example of a corresponding state machine.</p>
 <h1 id="rfc.section.8.4.2">
 <a href="#rfc.section.8.4.2">8.4.2.</a> <a href="#ACK-Always-subsection" id="ACK-Always-subsection">ACK-Always mode</a>
@@ -1408,14 +1408,14 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 <li>upon receiving a SCHC ACK,  <ul>
 <li>if the SCHC ACK indicates that some tiles are missing at the receiver, then the sender MUST transmit all the tiles that have been reported missing, it MUST increment Attempts, it MUST reset the Retransmission Timer and MUST await the next SCHC ACK.</li>
 <li>if the current window is not the last one and the SCHC ACK indicates that all tiles were correctly received, the sender MUST stop the Retransmission Timer, it MUST advance to the next fragmentation window and it MUST start a blind transmission phase as described above.</li>
-<li>if the current window is the last one and the SCHC ACK indicates that more tiles were received than the sender sent, the fragment sender MUST send a SCHC Sender-Abort, it MUST release all resource associated with this SCHC Packet and it MAY exit with an error condition.</li>
-<li>if the current window is the last one and the SCHC ACK indicates that all tiles were correctly received yet integrity check was a failure, the fragment sender MUST send a SCHC Sender-Abort, it MUST release all resource associated with this SCHC Packet and it MAY exit with an error condition.</li>
+<li>if the current window is the last one and the SCHC ACK indicates that more tiles were received than the sender sent, the fragment sender MUST send a SCHC Sender-Abort, and it MAY exit with an error condition.</li>
+<li>if the current window is the last one and the SCHC ACK indicates that all tiles were correctly received yet integrity check was a failure, the fragment sender MUST send a SCHC Sender-Abort, and it MAY exit with an error condition.</li>
 <li>if the current window is the last one and the SCHC ACK indicates that integrity checking was successful, the sender exits successfully.</li>
 </ul>
 </li>
 <li>on Retransmission Timer expiration,  <ul>
 <li>if Attempts is strictly less that MAX_ACK_REQUESTS, the fragment sender MUST send a SCHC ACK REQ and MUST increment the Attempts counter.</li>
-<li>otherwise the fragment sender MUST send a SCHC Sender-Abort, it MUST release all resource associated with this SCHC Packet and it MAY exit with an error condition.</li>
+<li>otherwise the fragment sender MUST send a SCHC Sender-Abort, and it MAY exit with an error condition.</li>
 </ul>
 </li>
 </ul>
@@ -1423,7 +1423,7 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 <p></p>
 
 <ul>
-<li>on receiving a SCHC Receiver-Abort, the fragment sender MUST release all resource associated with this SCHC Packet and it MAY exit with an error condition.</li>
+<li>on receiving a SCHC Receiver-Abort, the fragment sender MAY exit with an error condition.</li>
 <li>on receiving a SCHC ACK that bears a W value different from the W value that it currently uses, the fragment sender MUST silently discard and ignore that SCHC ACK.</li>
 </ul>
 <p><a href="#Fig-ACKAlwaysSnd" class="xref">Figure 37</a> shows an example of a corresponding state machine.</p>
@@ -1501,9 +1501,8 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 <li>Any received SCHC F/R message with a W bit different from the local W bit MUST be silently ignored and discarded.</li>
 <li>Any received SCHC F/R message different from an All-1 SCHC Fragment or a SCHC ACK REQ MUST be silently ignored and discarded.</li>
 <li>On receiving an All-1 SCHC Fragment or a SCHC ACK REQ, the receiver MUST send a SCHC ACK.</li>
-<li>On expiration of the Inactivity Timer, the receive process for that SCHC Packet MAY exit</li>
 </ul>
-<p id="rfc.section.8.4.2.2.p.11">At any time, on expiration of the Inactivity Timer, on receiving a SCHC Sender-Abort or when Attempts reaches MAX_ACK_REQUESTS, the receiver MUST send a SCHC Receiver-Abort, it MUST release all resource associated with this SCHC Packet and it MAY exit the receive process for that SCHC Packet.</p>
+<p id="rfc.section.8.4.2.2.p.11">At any time, on expiration of the Inactivity Timer, on receiving a SCHC Sender-Abort or when Attempts reaches MAX_ACK_REQUESTS, the receiver MUST send a SCHC Receiver-Abort and it MAY exit the receive process for that SCHC Packet.</p>
 <p><a href="#Fig-ACKAlwaysRcv" class="xref">Figure 38</a> shows an example of a corresponding state machine.</p>
 <h1 id="rfc.section.8.4.3">
 <a href="#rfc.section.8.4.3">8.4.3.</a> <a href="#ACK-on-Error-subsection" id="ACK-on-Error-subsection">ACK-on-Error mode</a>
@@ -1617,18 +1616,17 @@ SCHC Fragment msg    |-----------|
 
 <ul>
 <li>if Attempts is strictly less than MAX_ACK_REQUESTS, the fragment sender MUST send a SCHC ACK REQ with the W field corresponding to the last window and it MUST increment the Attempts counter</li>
-<li>otherwise the fragment sender MUST send a SCHC Sender-Abort and it MUST release all resource associated with this SCHC Packet.</li>
+<li>otherwise the fragment sender MUST send a SCHC Sender-Abort and it MAY exit with an error condition.</li>
 </ul>
 <p id="rfc.section.8.4.3.1.p.22">On receiving a SCHC ACK,</p>
 <p></p>
 
 <ul>
 <li>if the W field in the SCHC ACK corresponds to the last window of the SCHC Packet,  <ul>
-<li>if the C bit is set, the sender MAY release all resource associated with this SCHC Packet and MAY exit successfully</li>
+<li>if the C bit is set, the sender MAY exit successfully</li>
 <li>otherwise,      <ul>
 <li>if the SCHC ACK shows no missing tile at the receiver, the sender          <ul>
 <li>MUST send a SCHC Sender-Abort</li>
-<li>MUST release all resource associated with this SCHC Packet</li>
 <li>MAY exit with an error condition</li>
 </ul>
 </li>
@@ -1686,9 +1684,9 @@ SCHC Fragment msg    |-----------|
 <p id="rfc.section.8.4.3.2.p.8">A Profile MAY specify other times and circumstances at which a receiver sends a SCHC ACK, and which window the SCHC ACK reports about in these circumstances.</p>
 <p id="rfc.section.8.4.3.2.p.9">Upon sending a SCHC ACK, the receiver MUST increase the Attempts counter.</p>
 <p id="rfc.section.8.4.3.2.p.10">After receiving an All-1 SCHC Fragment, a receiver MUST check the integrity of the reassembled SCHC Packet at least every time it prepares for sending a SCHC ACK for the last window.</p>
-<p id="rfc.section.8.4.3.2.p.11">Upon receiving a SCHC Sender-Abort, the receiver MUST release all resource associated with this SCHC Packet.</p>
-<p id="rfc.section.8.4.3.2.p.12">Upon expiration of the Inactivity Timer, the receiver MUST send a SCHC Receiver-Abort and it MUST release all resource associated with this SCHC Packet.</p>
-<p id="rfc.section.8.4.3.2.p.13">On the Attempts counter exceeding MAX_ACK_REQUESTS, the receiver MUST send a SCHC Receiver-Abort and it MUST release all resource associated with this SCHC Packet.</p>
+<p id="rfc.section.8.4.3.2.p.11">Upon receiving a SCHC Sender-Abort, the receiver MAY exit with an error condition.</p>
+<p id="rfc.section.8.4.3.2.p.12">Upon expiration of the Inactivity Timer, the receiver MUST send a SCHC Receiver-Abort and it MAY exit with an error condition.</p>
+<p id="rfc.section.8.4.3.2.p.13">On the Attempts counter exceeding MAX_ACK_REQUESTS, the receiver MUST send a SCHC Receiver-Abort and it MAY exit with an error condition.</p>
 <p id="rfc.section.8.4.3.2.p.14">Reassembly of the SCHC Packet concludes when</p>
 <p></p>
 
