@@ -91,7 +91,7 @@ Header compression is needed for efficient Internet connectivity to the node wit
 
 * Because devices embed built-in applications, the traffic flows to be compressed are known in advance. Indeed, new applications are less frequently installed in an LPWAN device, as they are in a computer or smartphone.
 
-SCHC compression uses a Context (a list of Rules) in which information about header fields is stored. This Context is static: the values of the header fields and the actions to do compression/decompression do not change over time. This avoids complex resynchronization mechanisms. Indeed,
+SCHC compression uses a Context (a set of Rules) in which information about header fields is stored. This Context is static: the values of the header fields and the actions to do compression/decompression do not change over time. This avoids complex resynchronization mechanisms. Indeed,
 downlink is often more restricted/expensive, perhaps completely unavailable {{RFC8376}}.
 A compression protocol that relies on feedback is not compatible with the characteristics of such LPWANs.
 
@@ -156,13 +156,13 @@ The SCHC acronym is pronounced like "sheek" in English (or "chic" in French). Th
 
 * Compression Residue. The bits that remain to be sent (beyond the Rule ID itself) after applying the SCHC compression.
 
-* Context: A list of Rules used to compress/decompress headers.
+* Context: A set of Rules used to compress/decompress headers.
 
 * Dev: Device, as defined by {{RFC8376}}.
 
 * DevIID: Device Interface Identifier. The IID that identifies the Dev interface.
 
-* DI: Direction Indicator. This field tells which direction of packet travel (Up, Dw or Bi) a Rule applies to. This allows for asymmetric processing.
+* DI: Direction Indicator. This field tells which direction of packet travel (Up, Dw or Bi) a Field Description applies to. This allows for asymmetric processing, using the same Rule.
 
 * Dw: Downlink direction for compression/decompression, from SCHC C/D in the network to SCHC C/D in the Dev.
 
@@ -262,14 +262,14 @@ A packet (e.g. an IPv6 packet)
 ## SCHC Packet format
 
 The SCHC Packet is composed of the Compressed Header followed by the payload from the original packet (see {{Fig-SCHCpckt}}).
-The Compressed Header itself is composed of the Rule ID and a Compression Residue, which is the output of the compression actions of the Rule that was applied (see {{SCHComp}}).
+The Compressed Header itself is composed of the Rule ID and a Compression Residue, which is the output of compressing the packet header with that Rule (see {{SCHComp}}).
 The Compression Residue may be empty. Both the Rule ID and the Compression Residue potentially have a variable size, and are not necessarily a multiple of bytes in size.
   
 ~~~~
 
-|  Rule ID +  Compression Residue |
+|------- Compressed Header -------|
 +---------------------------------+--------------------+ 
-|      Compressed Header          |      Payload       |
+|  Rule ID |  Compression Residue |      Payload       |
 +---------------------------------+--------------------+
 
 ~~~~ 
@@ -339,14 +339,14 @@ The Rule IDs are used:
 # Compression/Decompression {#SCHComp}
 
 Compression with SCHC
-is based on using a list of Rules, called the Context, to compress or decompress headers. SCHC avoids Context synchronization, which consumes considerable bandwidth in other header compression mechanisms such as RoHC {{RFC5795}}. Since the content of packets is highly predictable in LPWAN networks, static Contexts MAY be stored beforehand to omit transmitting some information over the air. The Contexts MUST be stored at both ends, and they can be learned by a provisioning protocol or by out of band means, or they can be pre-provisioned. The way the Contexts are provisioned is out of the scope of this document.
+is based on using a set of Rules, called the Context, to compress or decompress headers. SCHC avoids Context synchronization, which consumes considerable bandwidth in other header compression mechanisms such as RoHC {{RFC5795}}. Since the content of packets is highly predictable in LPWAN networks, static Contexts MAY be stored beforehand to omit transmitting some information over the air. The Contexts MUST be stored at both ends, and they can be learned by a provisioning protocol or by out of band means, or they can be pre-provisioned. The way the Contexts are provisioned is out of the scope of this document.
 
 ## SCHC C/D Rules
 
 The main idea of the SCHC compression scheme is to transmit the Rule ID to the other end instead of sending known field values. This Rule ID identifies a Rule that matches the original packet values. Hence, when a value is known by both ends, it is only necessary to send the corresponding Rule ID over the LPWAN network.
 The manner by which Rules are generated is out of the scope of this document. The Rules MAY be changed at run-time but the mechanism is out of scope of this document.
 
-The Context is a list of Rules.
+The Context is a set of Rules.
 See {{Fig-ctxt}} for a high level, abstract representation of the Context.
 The formal specification of the representation of the Rules is outside the scope of this document.
 
@@ -378,17 +378,14 @@ Each Rule itself contains a list of Field Descriptions composed of a Field Ident
 
 A Rule does not describe how the compressor parses a packet header to find and identify each field (e.g. the IPv6 Source Address, the UDP Destination Port or a CoAP URI path option).
 This MUST be known from the compressor/decompressor. Rules only describe the compression/decompression behavior for each header field.
-The header fields need to be identified by the compressor prior to testing for a Rule match.
+The header fields must have been identified by the compressor prior to testing for a Rule match.
 
 In a Rule, the Field Descriptions are listed in the order in which the fields appear in the packet header.
-
-A Rule also describes what is sent in the Compression Residue. The Compression Residue is assembled by concatenating the residues for each field, in the order the Field Descriptions appear in the Rule.
-
 The Field Descriptions describe the header fields with the following entries:
 
 * Field ID (FID) designates a protocol and field (e.g. UDP Destination Port), unambiguously among all protocols that a SCHC compressor processes.
 
-* Field Length (FL) represents the length of the field. It can be either a fixed value (in bits) if the length is known when the Rule is created or a type if the length is variable. The length of a header field is defined by its own protocol specification (e.g. IPv6 or UDP). If the length is variable, the type defines the process to compute the length, its unit (bits, bytes,...) and the value to be sent before the Compression Residue.
+* Field Length (FL) represents the length of the field. It can be either a fixed value (in bits) if the length is known when the Rule is created or a type if the length is variable. The length of a header field is defined by its own protocol specification (e.g. IPv6 or UDP). If the length is variable, the type defines the process to compute the length, its unit (bits, bytes,...).
 
 * Field Position (FP): most often, a field only occurs once in a packet header. Some fields may occur multiple times in a header. FP indicates which occurrence  this Field Description applies to. The default value is 1 (first occurrence).
 
@@ -423,23 +420,34 @@ The Rule will be selected by matching the Fields Descriptions to the packet head
 The detailed steps are the following:
 
   * The first step is to check the Field Identifiers (FID).
-    If any header field of the packet being examined cannot be matched with a Field Description with the correct FID, the Rule MUST be discarded and SCHC C/D proceeds to consider the next Rule.
-    If any Field Description in the Rule has a FID that cannot be matched to one of the header fields of the packet being examined, the Rule MUST be discarded and SCHC C/D proceeds to consider the next Rule.
+    If any header field of the packet being examined cannot be matched with a Field Description with the correct FID, the Rule MUST be disregarded.
+    If any Field Description in the Rule has a FID that cannot be matched to one of the header fields of the packet being examined, the Rule MUST be disregarded.
 
-  * The next step is to match the Field Descriptions by their direction, using the Direction Indicator (DI). If any field of the packet header cannot be matched with a Field Description with the correct FID and DI, the Rule MUST be discarded and SCHC C/D proceeds to consider the next Rule.
+  * The next step is to match the Field Descriptions by their direction, using the Direction Indicator (DI). If any field of the packet header cannot be matched with a Field Description with the correct FID and DI, the Rule MUST be disregarded.
 
-  * Then the Field Descriptions are further selected according to Field Position (FP). If any field of the packet header cannot be matched with a Field Description with the correct FID, DI and FP, the Rule MUST be discarded and the SCHC C/D proceeds to consider the next Rule.
+  * Then the Field Descriptions are further selected according to Field Position (FP). If any field of the packet header cannot be matched with a Field Description with the correct FID, DI and FP, the Rule MUST be disregarded.
 
   * Once each header field has been associated with a Field Description with matching FID, DI and FP, each packet field's value is then compared to the corresponding Target Value (TV) stored in the Rule for that specific field, using the matching operator (MO).
-    If all the fields in the packet header satisfy all the matching operators (MO) of a Rule (i.e. all MO results are True), the Rule is used for compression.
-    Otherwise, the next Rule is tested.
+    If every field in the packet header satisfies the corresponding matching operators (MO) of a Rule (i.e. all MO results are True), that Rule is used for compressing the header.
+    Otherwise, the Rule MUST be disregarded.
 
-  * If no eligible compression Rule is found, then the header MUST be sent 
+  * If no eligible compression Rule is found, then the header MUST be sent in its entirety
     using a Rule ID dedicated to this purpose. Sending an uncompressed header may require SCHC F/R.
 
 * Compression: each field of the header is compressed according to the Compression/Decompression Actions (CDAs).
-  The compression of each field results in a Compression Residue, which may be empty.
-  The Compression Residue for the packet header is the concatenation of the Compression Residues for each field of the header, in the order the Field Descriptions appear in the Rule.
+  The fields are compressed in the order that the Field Descriptions appear in the Rule.
+  The compression of each field results in a residue, which may be empty.
+  The Compression Residue for the packet header is the concatenation of the residues for each field of the header, in the order the Field Descriptions appear in the Rule.
+
+~~~~
+
+    |------------------- Compression Residue -------------------|
+    +-----------------+-----------------+-----+-----------------+
+    | field 1 residue | field 2 residue | ... | field N residue |
+    +-----------------+-----------------+-----+-----------------+
+
+~~~~
+{: #Fig-CompRes title='Compression Residue structure'}
 
 * Sending: The Rule ID is sent to the other end followed by the Compression Residue (which could be empty) or the uncompressed header, and directly followed by the payload (see {{Fig-SCHCpckt}}).
   The way the Rule ID is sent will be specified in the Profile and is out of the scope of the present document.
@@ -447,7 +455,7 @@ The detailed steps are the following:
 
 * Decompression: when decompressing, on the network side the SCHC C/D needs to find the correct Rule based on the L2 address; in this way, it can use the DevIID and the Rule ID. On the Dev side, only the Rule ID is needed to identify the correct Rule since the Dev typically only holds Rules that apply to itself.
 
-  The receiver identifies the sender through its device-id or source identifier (e.g. MAC address, if it exists) and selects the Rule using the Rule ID. This Rule describes the compressed header format and associates the received Compression Residue to each of the header fields.
+  The receiver identifies the sender through its device-id or source identifier (e.g. MAC address, if it exists) and selects the Rule using the Rule ID. This Rule describes the compressed header format and associates the received residues to each of the header fields.
   For each field in the header, the receiver applies the CDA action associated to that field in order to reconstruct the original header field value. The CDA application order can be different from the order in which the fields are listed in the Rule. In particular, Compute-\* MUST be applied after the application of the CDAs of all the fields it computes on.
 
 
@@ -488,11 +496,23 @@ The Compression Decompression Action (CDA) describes the actions taken during th
 
 {{Fig-function}} summarizes the basic actions that can be used to compress and decompress a field. The first column shows the action's name. The second and third columns show the compression and decompression behaviors for each action.
 
-Compression is done in the order that the Field Descriptions appear in a Rule. The result of each Compression/Decompression Action is appended to the accumulated Compression Residue in that same order. The receiver knows the size of each compressed field, which can be given by the Rule or MAY be sent with the compressed header.
 
 ### processing variable-length fields {#var-length-field}
 
-If the field is identified in the Field Description as being of variable size, then the size of the Compression Residue value (using the unit defined in the FL) MUST first be sent as follows:
+If the field is identified in the Field Description as being of variable length, then aplying the CDA to compress this field may result in a residue of variable length (e.g. value-sent or LSB CDAs).
+In this case, the size and the value that result from applying the CDA are sent together as the residue for that field.
+
+~~~~
+
+|--- field residue ---|
++-------+-------------+
+|  size |    value    |
++-------+-------------+
+
+~~~~
+{: #Fig-FieldRes title='field residue structure'}
+
+The size (using the unit defined in the FL) is encoded as follows:
 
 * If the size is between 0 and 14, it is sent as a 4-bits unsigned integer.
 
@@ -500,25 +520,29 @@ If the field is identified in the Field Description as being of variable size, t
 
 * For larger values of the size, 0xfff is transmitted and then the next two bytes contain the size value as a 16 bits unsigned integer.
 
-If a field is not present in the packet but exists in the Rule and its FL is specified as being variable, size 0 MUST be sent to denote its absence.
+If the field is identified in the Field Description as being of variable length and this field is not present in the packet header being compressed, size 0 MUST be sent to denote its absence.
 
 ### not-sent CDA
 
 The not-sent action can be used when the field value is specified in a Rule and therefore known by both the Compressor and the Decompressor. This action SHOULD be used with the "equal" MO. If MO is "ignore", there is a risk to have a decompressed field value different from the original field that was compressed.
 
-The compressor does not send any Compression Residue for a field on which not-sent compression is applied.
+The compressor does not send any residue for a field on which not-sent compression is applied.
 
 The decompressor restores the field value with the Target Value stored in the matched Rule identified by the received Rule ID.
 
 ### value-sent CDA
 
-The value-sent action can be used when the field value is not known by both the Compressor and the Decompressor. The value is sent as a residue in the compressed message header. Both Compressor and Decompressor MUST know the size of the field, either implicitly (the size is known by both sides) or by explicitly indicating the length in the Compression Residue, as defined in {{var-length-field}}. This action is generally used with the "ignore" MO.
+The value-sent action can be used when the field value is not known by both the Compressor and the Decompressor. The value is sent in its entirety.
+
+If this action is performed on a variable length field, the size of the residue value (using the units defined in FL) MUST be sent as described in {{var-length-field}}.
+
+This action is generally used with the "ignore" MO.
 
 ### mapping-sent CDA
 
 The mapping-sent action is used to send an index (the index into the Target Value list of values) instead of the original value. This action is used together with the "match-mapping" MO.
 
-On the compressor side, the match-mapping Matching Operator searches the TV for a match with the header field value and the mapping-sent CDA appends the corresponding index to the Compression Residue to be sent.
+On the compressor side, the match-mapping Matching Operator searches the TV for a match with the header field value and the mapping-sent CDA sends the corresponding index as the field residue.
 On the decompressor side, the CDA uses the received index to restore the field value by looking up the list in the TV.
 
 The number of bits sent is the minimal size for coding all the possible indices.
@@ -526,11 +550,13 @@ The number of bits sent is the minimal size for coding all the possible indices.
 ### LSB CDA
 
 The LSB action is used together with the "MSB(x)" MO to avoid sending the most significant part of the packet field if that part is already known by the receiving end.
+
+The compressor sends the Least Significant Bits as the field residue value.
 The number of bits sent is the original header field length minus the length specified in the MSB(x) MO.
 
-The compressor sends the Least Significant Bits (e.g. LSB of the length field). The decompressor concatenates the x most significant bits of Target Value and the received residue.
+The decompressor concatenates the x most significant bits of Target Value and the received residue value.
 
-If this action needs to be done on a variable length field, the size of the Compression Residue (using the units defined in FL) MUST be sent as described in {{var-length-field}}.
+If this action is performed on a variable length field, the size of the residue value (using the units defined in FL) MUST be sent as described in {{var-length-field}}.
 
 
 ### DevIID, AppIID CDA
@@ -1784,7 +1810,7 @@ Castillejo grant CAS15/00336, and by the ERDF and the Spanish Government through
 
 --- back
 
-# SCHC Compression Examples {#compressIPv6}
+# Compression Examples {#compressIPv6}
 
 
 This section gives some scenarios of the compression mechanism for IPv6/UDP. The goal is to illustrate the behavior of SCHC.
