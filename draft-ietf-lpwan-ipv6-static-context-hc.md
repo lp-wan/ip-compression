@@ -1092,15 +1092,13 @@ previously received SCHC Fragment Payloads for this SCHC Packet
 - the receiver MUST perform the integrity check
 - if integrity checking fails,
     the receiver MUST drop the reassembled SCHC Packet
-    and it MUST release all resources associated with this Rule ID and DTag value pair.
 - the reassembly operation concludes.
 
 On expiration of the Inactivity Timer,
-the receiver MUST drop the SCHC Packet being reassembled
-and it MUST release all resources associated with this Rule ID and DTag value pair.
+the receiver MUST drop the SCHC Packet being reassembled.
 
 On receiving a SCHC Sender-Abort,
-the receiver MAY release all resources associated with this Rule ID and DTag value pair.
+the receiver MAY drop the SCHC Packet being reassembled.
 
 {{Fig-NoACKModeRcv}} shows an example of a corresponding state machine.
 
@@ -1185,11 +1183,9 @@ and it MUST await a SCHC ACK. Then,
     and it MUST start a blind transmission phase as described above.
   * if the current window is the last one and the SCHC ACK indicates that more tiles were received than the sender sent,
     the fragment sender MUST send a SCHC Sender-Abort,
-    it MUST release all resource associated with this SCHC Packet
     and it MAY exit with an error condition.
   * if the current window is the last one and the SCHC ACK indicates that all tiles were correctly received yet integrity check was a failure,
     the fragment sender MUST send a SCHC Sender-Abort,
-    it MUST release all resource associated with this SCHC Packet
     and it MAY exit with an error condition.
   * if the current window is the last one and the SCHC ACK indicates that integrity checking was successful,
     the sender exits successfully.
@@ -1201,12 +1197,11 @@ and it MUST await a SCHC ACK. Then,
     and MUST increment the Attempts counter.
   * otherwise
     the fragment sender MUST send a SCHC Sender-Abort,
-    it MUST release all resource associated with this SCHC Packet
     and it MAY exit with an error condition.
 
 At any time,
 
-- on receiving a SCHC Receiver-Abort, the fragment sender MUST release all resource associated with this SCHC Packet and it MAY exit with an error condition.
+- on receiving a SCHC Receiver-Abort, the fragment sender MAY exit with an error condition.
 - on receiving a SCHC ACK that bears a W value different from the W value that it currently uses, the fragment sender MUST silently discard and ignore that SCHC ACK.
 
 
@@ -1312,14 +1307,12 @@ In the "clean-up phase":
 - Any received SCHC F/R message with a W bit different from the local W bit MUST be silently ignored and discarded.
 - Any received SCHC F/R message different from an All-1 SCHC Fragment or a SCHC ACK REQ MUST be silently ignored and discarded.
 - On receiving an All-1 SCHC Fragment or a SCHC ACK REQ, the receiver MUST send a SCHC ACK.
-- On expiration of the Inactivity Timer, the receive process for that SCHC Packet MAY exit
 
 At any time,
 on expiration of the Inactivity Timer,
 on receiving a SCHC Sender-Abort or
 when Attempts reaches MAX_ACK_REQUESTS,
-the receiver MUST send a SCHC Receiver-Abort,
-it MUST release all resource associated with this SCHC Packet
+the receiver MUST send a SCHC Receiver-Abort
 and it MAY exit the receive process for that SCHC Packet.
 
 {{Fig-ACKAlwaysRcv}} shows an example of a corresponding state machine.
@@ -1448,19 +1441,18 @@ On Retransmission Timer expiration
   the fragment sender MUST send a SCHC ACK REQ with the W field corresponding to the last window
   and it MUST increment the Attempts counter
 - otherwise the fragment sender MUST send a SCHC Sender-Abort and
-  it MUST release all resource associated with this SCHC Packet.
+  it MAY exit with an error condition.
 
 On receiving a SCHC ACK,
 
 - if the W field in the SCHC ACK corresponds to the last window of the SCHC Packet,
 
-  * if the C bit is set, the sender MAY release all resource associated with this SCHC Packet and MAY exit successfully
+  * if the C bit is set, the sender MAY exit successfully
   * otherwise,
 
     - if the SCHC ACK shows no missing tile at the receiver, the sender
 
       * MUST send a SCHC Sender-Abort
-      * MUST release all resource associated with this SCHC Packet
       * MAY exit with an error condition
 
     - otherwise
@@ -1528,15 +1520,15 @@ a receiver MUST check the integrity of the reassembled SCHC Packet at least ever
 it prepares for sending a SCHC ACK for the last window.
 
 Upon receiving a SCHC Sender-Abort,
-the receiver MUST release all resource associated with this SCHC Packet.
+the receiver MAY exit with an error condition.
 
 Upon expiration of the Inactivity Timer,
 the receiver MUST send a SCHC Receiver-Abort
-and it MUST release all resource associated with this SCHC Packet.
+and it MAY exit with an error condition.
 
 On the Attempts counter exceeding MAX_ACK_REQUESTS,
 the receiver MUST send a SCHC Receiver-Abort
-and it MUST release all resource associated with this SCHC Packet.
+and it MAY exit with an error condition.
 
 Reassembly of the SCHC Packet concludes when
 
