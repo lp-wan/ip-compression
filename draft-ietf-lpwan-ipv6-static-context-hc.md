@@ -1710,8 +1710,7 @@ Zero Checksums" [RFC6936].
 6LoWPAN Header Compression [RFC6282] also specifies that a UDP
 datagram can be sent without a checksum when an upper
 layer guarantees the integrity of the UDP payload and pseudo-header.
-all the way between the compressor that elides the UDP checksum and
-the decompressor that computes it again. A specific example of this is
+A specific example of this is
 when a Message Integrity Check (MIC) protects the compressed message
 between the compressor that elides the UDP checksum and the decompressor
 that computes it,
