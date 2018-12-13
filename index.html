@@ -1083,8 +1083,8 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 <li>MUST be set to the same value for all the SCHC F/R messages related to the same fragmented SCHC Packet,</li>
 <li>MUST be set to different values for SCHC F/R messages related to different SCHC Packets that are being fragmented under the same Rule ID and the transmission of which may overlap.</li>
 </ul>
-<p> A sequence counter that is incremented for each new fragmented SCHC Packet, counting from 0 to up to (2^T)-1 and wrapping back to 0 is RECOMMENDED for maximum traceability and avoidance of ambiguity.</p>
-</li>
+<p> A sequence counter that is incremented for each new fragmented SCHC Packet, counting from 0 to up to (2^T)-1 and wrapping back to 0 is RECOMMENDED for maximum traceability and avoidance of ambiguity.  </p>
+<br><br> A flow of SCHC F/R messages with a given Rule ID and DTag value pair MUST NOT interfere with the operation of a SCHC F/R instance that uses another Rule ID and DTag value pair.</li>
 <li>W: The W field is optional. It is only present if windows are used.  Its presence and size (called M, in bits) is defined by each SCHC F/R mode and each Profile for each Rule ID.  <br><br> This field carries information pertaining to the window a SCHC F/R message relates to.  If present, W MUST carry the same value for all the SCHC F/R messages related to the same window.  Depending on the mode and Profile, W may carry the full window number, or just the least significant bit or any other partial representation of the window number.</li>
 <li>Fragment Compressed Number (FCN). The FCN field is present in the SCHC Fragment Header.  Its size (called N, in bits) is defined by each Profile for each Rule ID.  <br><br> This field conveys information about the progress in the sequence of tiles being transmitted by SCHC Fragment messages.  For example, it can contain a partial, efficient representation of a larger-sized tile index.  The description of the exact use of the FCN field is left to each SCHC F/R mode.  However, two values are reserved for special purposes. They help control the SCHC F/R process:  <ul>
 <li>The FCN value with all the bits equal to 1 (called All-1) signals the very last tile of a SCHC Packet.  By extension, if windows are used, the last window of a packet is called the All-1 window.</li>
@@ -1325,7 +1325,7 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 <p id="rfc.section.8.4.1.p.2">In No-ACK mode, there is no communication from the fragment receiver to the fragment sender.  The sender transmits all the SCHC Fragments without expecting acknowledgement.</p>
 <p id="rfc.section.8.4.1.p.3">In No-ACK mode, only the All-1 SCHC Fragment is padded as needed. The other SCHC Fragments are intrinsically aligned to L2 Words.</p>
 <p id="rfc.section.8.4.1.p.4">The tile sizes are not required to be uniform.  Windows are not used.  The Retransmission Timer is not used.  The Attempts counter is not used.</p>
-<p id="rfc.section.8.4.1.p.5">Each Profile MUST specify which Rule ID value(s) is (are) allocated to this mode.  For brevity, the rest of <a href="#No-ACK-subsection" class="xref">Section 8.4.1</a> only refers to Rule ID values that are allocated to this mode.</p>
+<p id="rfc.section.8.4.1.p.5">Each Profile MUST specify which Rule ID value(s) correspond to SCHC F/R messages operating in this mode.</p>
 <p id="rfc.section.8.4.1.p.6">The W field MUST NOT be present in the SCHC F/R messages.  SCHC ACK MUST NOT be sent.  SCHC ACK REQ MUST NOT be sent.  SCHC Sender-Abort MAY be sent.  SCHC Receiver-Abort MUST NOT be sent.</p>
 <p id="rfc.section.8.4.1.p.7">The value of N (size of the FCN field) is RECOMMENDED to be 1.</p>
 <p id="rfc.section.8.4.1.p.8">Each Profile, for each Rule ID value, MUST define</p>
@@ -1347,7 +1347,7 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 <h1 id="rfc.section.8.4.1.1">
 <a href="#rfc.section.8.4.1.1">8.4.1.1.</a> <a href="#sender-behavior" id="sender-behavior">Sender behavior</a>
 </h1>
-<p id="rfc.section.8.4.1.1.p.1">At the beginning of the fragmentation of a new SCHC Packet, the fragment sender MUST select a Rule ID and DTag value pair for this SCHC Packet.  For brevity, the rest of <a href="#No-ACK-subsection" class="xref">Section 8.4.1</a> only refers to SCHC F/R messages bearing the Rule ID and DTag values hereby selected.</p>
+<p id="rfc.section.8.4.1.1.p.1">At the beginning of the fragmentation of a new SCHC Packet, the fragment sender MUST select a Rule ID and DTag value pair for this SCHC Packet.</p>
 <p id="rfc.section.8.4.1.1.p.2">Each SCHC Fragment MUST contain exactly one tile in its Payload.  The tile MUST be at least the size of an L2 Word.  The sender MUST transmit the SCHC Fragments messages in the order that the tiles appear in the SCHC Packet.  Except for the last tile of a SCHC Packet, each tile MUST be of a size that complements the SCHC Fragment Header so that the SCHC Fragment is a multiple of L2 Words without the need for padding bits.  Except for the last one, the SCHC Fragments MUST use the Regular SCHC Fragment format specified in <a href="#NotLastFrag" class="xref">Section 8.3.1.1</a>.  The last SCHC Fragment MUST use the All-1 format specified in <a href="#LastFrag" class="xref">Section 8.3.1.2</a>.</p>
 <p id="rfc.section.8.4.1.1.p.3">The sender MAY transmit a SCHC Sender-Abort.</p>
 <p><a href="#Fig-NoACKModeSnd" class="xref">Figure 37</a> shows an example of a corresponding state machine.</p>
@@ -1386,7 +1386,7 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 <p id="rfc.section.8.4.2.p.3">In ACK-Always mode, windows are used.  An acknowledgement, positive or negative, is transmitted by the fragment receiver to the fragment sender at the end of the transmission of each window of SCHC Fragments.</p>
 <p id="rfc.section.8.4.2.p.4">The tiles are not required to be of uniform size. In ACK-Always mode, only the All-1 SCHC Fragment is padded as needed. The other SCHC Fragments are intrinsically aligned to L2 Words.</p>
 <p id="rfc.section.8.4.2.p.5">Briefly, the algorithm is as follows: after a first blind transmission of all the tiles of a window, the fragment sender iterates retransmitting the tiles that are reported missing until the fragment receiver reports that all the tiles belonging to the window have been correctly received, or until too many attempts were made.  The fragment sender only advances to the next window of tiles when it has ascertained that all the tiles belonging to the current window have been fully and correctly received. This results in a per-window lock-step behavior between the sender and the receiver.</p>
-<p id="rfc.section.8.4.2.p.6">Each Profile MUST specify which Rule ID value(s) is (are) allocated to this mode.  For brevity, the rest of <a href="#No-ACK-subsection" class="xref">Section 8.4.1</a> only refers to Rule ID values that are allocated to this mode.</p>
+<p id="rfc.section.8.4.2.p.6">Each Profile MUST specify which Rule ID value(s) correspond to SCHC F/R messages operating in this mode.</p>
 <p id="rfc.section.8.4.2.p.7">The W field MUST be present and its size M MUST be 1 bit.</p>
 <p id="rfc.section.8.4.2.p.8">Each Profile, for each Rule ID value, MUST define</p>
 <p></p>
@@ -1411,7 +1411,7 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 <h1 id="rfc.section.8.4.2.1">
 <a href="#rfc.section.8.4.2.1">8.4.2.1.</a> <a href="#sender-behavior-1" id="sender-behavior-1">Sender behavior</a>
 </h1>
-<p id="rfc.section.8.4.2.1.p.1">At the beginning of the fragmentation of a new SCHC Packet, the fragment sender MUST select a Rule ID and DTag value pair for this SCHC Packet.  For brevity, the rest of <a href="#ACK-Always-subsection" class="xref">Section 8.4.2</a> only refers to SCHC F/R messages bearing the Rule ID and DTag values hereby selected.</p>
+<p id="rfc.section.8.4.2.1.p.1">At the beginning of the fragmentation of a new SCHC Packet, the fragment sender MUST select a Rule ID and DTag value pair for this SCHC Packet.</p>
 <p id="rfc.section.8.4.2.1.p.2">Each SCHC Fragment MUST contain exactly one tile in its Payload.  All tiles with the index 0, as well as the last tile, MUST be at least the size of an L2 Word.</p>
 <p id="rfc.section.8.4.2.1.p.3">In all SCHC Fragment messages, the W field MUST be filled with the least significant bit of the window number that the sender is currently processing.</p>
 <p id="rfc.section.8.4.2.1.p.4">For a SCHC Fragment that carries a tile other than the last one of the SCHC Packet,</p>
@@ -1459,8 +1459,8 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 <p></p>
 
 <ul>
-<li>the receiver MAY check if the DTag value has not recently been used for that Rule ID value, thereby ensuring that the received SCHC Fragment is not a remnant of a prior fragmented SCHC Packet transmission.  If the SCHC Fragment is determined to be such a remnant, the receiver MAY silently ignore it and discard it.</li>
-<li>the receiver MUST start a process to assemble a new SCHC Packet with that Rule ID and DTag value pair.  That process MUST only examine received SCHC F/R messages with that Rule ID and DTag value pair and MUST only transmit SCHC F/R messages with that Rule ID and DTag value pair.</li>
+<li>the receiver SHOULD check if the DTag value has not recently been used for that Rule ID value, thereby ensuring that the received SCHC Fragment is not a remnant of a prior fragmented SCHC Packet transmission.  If the SCHC Fragment is determined to be such a remnant, the receiver MAY silently ignore it and discard it.</li>
+<li>the receiver MUST start a process to assemble a new SCHC Packet with that Rule ID and DTag value pair.</li>
 <li>the receiver MUST start an Inactivity Timer. It MUST initialize an Attempts counter to 0.  It MUST initialize a window counter to 0.</li>
 </ul>
 <p id="rfc.section.8.4.2.2.p.3">In the rest of this section, &#8220;local W bit&#8221; means the least significant bit of the window counter of the receiver.</p>
@@ -1559,7 +1559,7 @@ SCHC Fragment msg    |-----------|
 <li>or too many retransmission attempts were made,</li>
 <li>or the receiver determines that the transmission of this fragmented SCHC Packet has been inactive for too long.</li>
 </ul>
-<p id="rfc.section.8.4.3.p.8">Each Profile MUST specify which Rule ID value(s) is (are) allocated to this ACK-on-Error mode.  For brevity, the rest of <a href="#ACK-on-Error-subsection" class="xref">Section 8.4.3</a> only refers to SCHC F/R messages with Rule ID values that are allocated to this mode.</p>
+<p id="rfc.section.8.4.3.p.8">Each Profile MUST specify which Rule ID value(s) correspond to SCHC F/R messages operating in this mode.</p>
 <p id="rfc.section.8.4.3.p.9">The W field MUST be present in the SCHC F/R messages.</p>
 <p id="rfc.section.8.4.3.p.10">Each Profile, for each Rule ID value, MUST define</p>
 <p></p>
@@ -1593,16 +1593,15 @@ SCHC Fragment msg    |-----------|
 <li>the fragment sender MUST select a Rule ID and DTag value pair for this SCHC Packet.  A Rule MUST NOT be selected if the values of M and WINDOW_SIZE for that Rule are such that the SCHC Packet cannot be fragmented in (2^M) * WINDOW_SIZE tiles or less.</li>
 <li>the fragment sender MUST initialize the Attempts counter to 0 for that Rule ID and DTag value pair.</li>
 </ul>
-<p id="rfc.section.8.4.3.1.p.3">For brevity, the rest of <a href="#ACK-on-Error-subsection" class="xref">Section 8.4.3</a> only refers to SCHC F/R messages bearing the Rule ID and DTag values hereby selected.</p>
-<p id="rfc.section.8.4.3.1.p.4">A SCHC Fragment message carries in its payload one or more tiles.  If more than one tile is carried in one SCHC Fragment</p>
+<p id="rfc.section.8.4.3.1.p.3">A SCHC Fragment message carries in its payload one or more tiles.  If more than one tile is carried in one SCHC Fragment</p>
 <p></p>
 
 <ul>
 <li>the selected tiles MUST be consecutive in the original SCHC Packet</li>
 <li>they MUST be placed in the SCHC Fragment Payload adjacent to one another, in the order they appear in the SCHC Packet, from the start of the SCHC Packet toward its end.</li>
 </ul>
-<p id="rfc.section.8.4.3.1.p.6">In a SCHC Fragment message, the sender MUST fill the W field with the window number of the first tile sent in that SCHC Fragment.</p>
-<p id="rfc.section.8.4.3.1.p.7">If a SCHC Fragment carries more than one tile, or carries one tile that is not the last one of the SCHC Packet,</p>
+<p id="rfc.section.8.4.3.1.p.5">In a SCHC Fragment message, the sender MUST fill the W field with the window number of the first tile sent in that SCHC Fragment.</p>
+<p id="rfc.section.8.4.3.1.p.6">If a SCHC Fragment carries more than one tile, or carries one tile that is not the last one of the SCHC Packet,</p>
 <p></p>
 
 <ul>
@@ -1610,40 +1609,40 @@ SCHC Fragment msg    |-----------|
 </li>
 <li>the FCN field MUST contain the tile index of the first tile sent in that SCHC Fragment</li>
 </ul>
-<p id="rfc.section.8.4.3.1.p.9">The fragment sender MAY send the last tile as the Payload of an All-1 SCHC Fragment.</p>
-<p id="rfc.section.8.4.3.1.p.10">The fragment sender MUST send SCHC Fragments such that, all together, they contain all the tiles of the fragmented SCHC Packet.</p>
-<p id="rfc.section.8.4.3.1.p.11">The fragment sender MUST send at least one All-1 SCHC Fragment.</p>
-<p id="rfc.section.8.4.3.1.p.12">The last tile of a SCHC Packet can be sent in different ways, depending on Profiles and implementations</p>
+<p id="rfc.section.8.4.3.1.p.8">The fragment sender MAY send the last tile as the Payload of an All-1 SCHC Fragment.</p>
+<p id="rfc.section.8.4.3.1.p.9">The fragment sender MUST send SCHC Fragments such that, all together, they contain all the tiles of the fragmented SCHC Packet.</p>
+<p id="rfc.section.8.4.3.1.p.10">The fragment sender MUST send at least one All-1 SCHC Fragment.</p>
+<p id="rfc.section.8.4.3.1.p.11">The last tile of a SCHC Packet can be sent in different ways, depending on Profiles and implementations</p>
 <p></p>
 
 <ul>
 <li>in a Regular SCHC Fragment, either alone or as part of multiple tiles Payload</li>
 <li>in an All-1 SCHC Fragment</li>
 </ul>
-<p id="rfc.section.8.4.3.1.p.14">However, if the last tile has been sent in a Regular SCHC Fragment, it MUST NOT been sent again in an All-1 SCHC Fragment.  If it has been sent in an All-1 SCHC Fragment, it MUST not be sent again in a Regular SCHC Fragment.</p>
-<p id="rfc.section.8.4.3.1.p.15">The fragment sender MUST listen for SCHC ACK messages after having sent</p>
+<p id="rfc.section.8.4.3.1.p.13">However, if the last tile has been sent in a Regular SCHC Fragment, it MUST NOT been sent again in an All-1 SCHC Fragment.  If it has been sent in an All-1 SCHC Fragment, it MUST not be sent again in a Regular SCHC Fragment.</p>
+<p id="rfc.section.8.4.3.1.p.14">The fragment sender MUST listen for SCHC ACK messages after having sent</p>
 <p></p>
 
 <ul>
 <li>an All-1 SCHC Fragment</li>
 <li>or a SCHC ACK REQ with the W field corresponding to the last window.</li>
 </ul>
-<p id="rfc.section.8.4.3.1.p.17">A Profile MAY specify other times at which the fragment sender MUST listen for SCHC ACK messages.  For example, this could be after sending a complete window of tiles.</p>
-<p id="rfc.section.8.4.3.1.p.18">Each time a fragment sender sends an All-1 SCHC Fragment or a SCHC ACK REQ,</p>
+<p id="rfc.section.8.4.3.1.p.16">A Profile MAY specify other times at which the fragment sender MUST listen for SCHC ACK messages.  For example, this could be after sending a complete window of tiles.</p>
+<p id="rfc.section.8.4.3.1.p.17">Each time a fragment sender sends an All-1 SCHC Fragment or a SCHC ACK REQ,</p>
 <p></p>
 
 <ul>
 <li>it MUST increment the Attempts counter</li>
 <li>it MUST reset the Retransmission Timer</li>
 </ul>
-<p id="rfc.section.8.4.3.1.p.20">On Retransmission Timer expiration</p>
+<p id="rfc.section.8.4.3.1.p.19">On Retransmission Timer expiration</p>
 <p></p>
 
 <ul>
 <li>if Attempts is strictly less than MAX_ACK_REQUESTS, the fragment sender MUST send a SCHC ACK REQ with the W field corresponding to the last window and it MUST increment the Attempts counter</li>
 <li>otherwise the fragment sender MUST send a SCHC Sender-Abort and it MAY exit with an error condition.</li>
 </ul>
-<p id="rfc.section.8.4.3.1.p.22">On receiving a SCHC ACK,</p>
+<p id="rfc.section.8.4.3.1.p.21">On receiving a SCHC ACK,</p>
 <p></p>
 
 <ul>
@@ -1670,7 +1669,7 @@ SCHC Fragment msg    |-----------|
 </ul>
 </li>
 </ul>
-<p id="rfc.section.8.4.3.1.p.24">See <a href="#Fig-ACKonerrorSnd" class="xref">Figure 41</a> for one among several possible examples of a Finite State Machine implementing a sender behavior obeying this specification.</p>
+<p id="rfc.section.8.4.3.1.p.23">See <a href="#Fig-ACKonerrorSnd" class="xref">Figure 41</a> for one among several possible examples of a Finite State Machine implementing a sender behavior obeying this specification.</p>
 <h1 id="rfc.section.8.4.3.2">
 <a href="#rfc.section.8.4.3.2">8.4.3.2.</a> <a href="#ACK-on-Error-receiver" id="ACK-on-Error-receiver">Receiver behavior</a>
 </h1>
@@ -1679,7 +1678,7 @@ SCHC Fragment msg    |-----------|
 
 <ul>
 <li>the receiver SHOULD check if the DTag value has not recently been used for that Rule ID value, thereby ensuring that the received SCHC Fragment is not a remnant of a prior fragmented SCHC Packet transmission.  If the SCHC Fragment is determined to be such a remnant, the receiver MAY silently ignore it and discard it.</li>
-<li>the receiver MUST start a process to assemble a new SCHC Packet with that Rule ID and DTag value pair.  That process MUST only examine received SCHC F/R messages with that Rule ID and DTag value pair and MUST only transmit SCHC F/R messages with that Rule ID and DTag value pair.</li>
+<li>the receiver MUST start a process to assemble a new SCHC Packet with that Rule ID and DTag value pair.</li>
 <li>the receiver MUST start an Inactivity Timer. It MUST initialize an Attempts counter to 0.</li>
 </ul>
 <p id="rfc.section.8.4.3.2.p.3">On receiving any SCHC F/R message, the receiver MUST reset the Inactivity Timer.</p>
@@ -2666,8 +2665,8 @@ Recv_window==window &amp;    | |   |   all missing frags sent
 </h1>
 <p id="rfc.section.F.p.1">For downlink transmission of a fragmented SCHC Packet in ACK-Always mode, the SCHC Fragment receiver MAY support timer-based SCHC ACK retransmission. In this mechanism, the SCHC Fragment receiver initializes and starts a timer (the Inactivity Timer is used) after the transmission of a SCHC ACK, except when the SCHC ACK is sent in response to the last SCHC Fragment of a packet (All-1 fragment). In the latter case, the SCHC Fragment receiver does not start a timer after transmission of the SCHC ACK.</p>
 <p id="rfc.section.F.p.2">If, after transmission of a SCHC ACK that is not an All-1 fragment, and before expiration of the corresponding Inactivity timer, the SCHC Fragment receiver receives a SCHC Fragment that belongs to the current window (e.g. a missing SCHC Fragment from the current window) or to the next window, the Inactivity timer for the SCHC ACK is stopped. However, if the Inactivity timer expires, the SCHC ACK is resent and the Inactivity timer is reinitialized and restarted.</p>
-<p id="rfc.section.F.p.3">The default initial value for the Inactivity timer, as well as the maximum number of retries for a specific SCHC ACK, denoted MAX_ACK_RETRIES, are not defined in this document, and need to be defined in a Profile. The initial value of the Inactivity timer is expected to be greater than that of the Retransmission timer, in order to make sure that a (buffered) SCHC Fragment to be retransmitted can find an opportunity for that transmission.</p>
-<p id="rfc.section.F.p.4">When the SCHC Fragment sender transmits the All-1 fragment, it starts its Retransmission Timer with a large timeout value (e.g. several times that of the initial Inactivity timer). If a SCHC ACK is received before expiration of this timer, the SCHC Fragment sender retransmits any lost SCHC Fragments reported by the SCHC ACK, or if the SCHC ACK confirms successful reception of all SCHC Fragments of the last window, the transmission of the fragmented SCHC Packet is considered complete. If the timer expires, and no SCHC ACK has been received since the start of the timer, the SCHC Fragment sender assumes that the All-1 fragment has been successfully received (and possibly, the last SCHC ACK has been lost: this mechanism assumes that the retransmission timer for the All-1 fragment is long enough to allow several SCHC ACK retries if the All-1 fragment has not been received by the SCHC Fragment receiver, and it also assumes that it is unlikely that several ACKs become all lost).</p>
+<p id="rfc.section.F.p.3">The default initial value for the Inactivity Timer, as well as the maximum number of retries for a specific SCHC ACK, denoted MAX_ACK_RETRIES, are not defined in this document, and need to be defined in a Profile. The initial value of the Inactivity timer is expected to be greater than that of the Retransmission timer, in order to make sure that a (buffered) SCHC Fragment to be retransmitted can find an opportunity for that transmission.  One exception to this recommendation is the special case of the All-1 SCHC Fragment transmission.</p>
+<p id="rfc.section.F.p.4">When the SCHC Fragment sender transmits the All-1 SCHC Fragment, it starts its Retransmission Timer with a large timeout value (e.g. several times that of the initial Inactivity Timer). If a SCHC ACK is received before expiration of this timer, the SCHC Fragment sender retransmits any lost SCHC Fragments reported by the SCHC ACK, or if the SCHC ACK confirms successful reception of all SCHC Fragments of the last window, the transmission of the fragmented SCHC Packet is considered complete. If the timer expires, and no SCHC ACK has been received since the start of the timer, the SCHC Fragment sender assumes that the All-1 SCHC Fragment has been successfully received (and possibly, the last SCHC ACK has been lost: this mechanism assumes that the Retransmission Timer for the All-1 SCHC Fragment is long enough to allow several SCHC ACK retries if the All-1 SCHC Fragment has not been received by the SCHC Fragment receiver, and it also assumes that it is unlikely that several ACKs become all lost).</p>
 <h1 id="rfc.authors"><a href="#rfc.authors">Authors' Addresses</a></h1>
 <div class="avoidbreak">
   <address class="vcard">
