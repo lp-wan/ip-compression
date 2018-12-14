@@ -496,11 +496,30 @@ The Compression Decompression Action (CDA) describes the actions taken during th
 
 {{Fig-function}} summarizes the basic actions that can be used to compress and decompress a field. The first column shows the action's name. The second and third columns show the compression and decompression behaviors for each action.
 
+### processing fixed-length fields {#fixed-length-field}
+
+If the field is identified in the Field Description as being of fixed length, then aplying the CDA to compress this field results in a fixed amount of bits.
+The residue for that field is simply the bits resulting from applying the CDA to the field.
+
+~~~~
+
+|- field residue -|
++-----------------+
+|      value      |
++-----------------+
+
+~~~~
+{: #Fig-FieldResFixLength title='fixed sized field residue structure'}
+
+
 
 ### processing variable-length fields {#var-length-field}
 
-If the field is identified in the Field Description as being of variable length, then aplying the CDA to compress this field may result in a residue of variable length (e.g. value-sent or LSB CDAs).
-In this case, the size and the value that result from applying the CDA are sent together as the residue for that field.
+If the field is identified in the Field Description as being of variable length,
+then aplying the CDA to compress this field may result in a value of fixed size
+(e.g. not-sent or mapping-sent)
+or of variable size (e.g. value-sent or LSB).
+In the latter case, the residue for that field is the bits that result from applying the CDA to the field, preceded with the size of the value.
 
 ~~~~
 
@@ -510,7 +529,7 @@ In this case, the size and the value that result from applying the CDA are sent 
 +-------+-------------+
 
 ~~~~
-{: #Fig-FieldRes title='field residue structure'}
+{: #Fig-FieldResVarLength title='variable sized field residue structure'}
 
 The size (using the unit defined in the FL) is encoded as follows:
 
