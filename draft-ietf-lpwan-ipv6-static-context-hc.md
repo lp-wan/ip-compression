@@ -416,8 +416,8 @@ Similarly, the SCHC Compressor on the network side first identifies the destinat
 
 The compression/decompression process follows several steps:
 
-* Compression Rule selection: the goal is to identify which Rule(s) will be used to compress the packet header.
-The Rule will be selected by matching the Fields Descriptions to the packet header.
+* Compression Rule selection: the set of Rules is browsed to identify which Rule will be used to compress the packet header.
+The Rule is selected by matching the Fields Descriptions to the packet header.
 The detailed steps are the following:
 
   * The first step is to check the Field Identifiers (FID).
@@ -438,7 +438,7 @@ The detailed steps are the following:
 * Compression: each field of the header is compressed according to the Compression/Decompression Actions (CDAs).
   The fields are compressed in the order that the Field Descriptions appear in the Rule.
   The compression of each field results in a residue, which may be empty.
-  The Compression Residue for the packet header is the concatenation of the residues for each field of the header, in the order the Field Descriptions appear in the Rule.
+  The Compression Residue for the packet header is the concatenation of the non-empty residues for each field of the header, in the order the Field Descriptions appear in the Rule.
 
 ~~~~
 
@@ -501,6 +501,7 @@ The Compression Decompression Action (CDA) describes the actions taken during th
 
 If the field is identified in the Field Description as being of fixed length, then aplying the CDA to compress this field results in a fixed amount of bits.
 The residue for that field is simply the bits resulting from applying the CDA to the field.
+This value may be empty (e.g. not-sent CDA), in which case the field residue is absent from the Compression Residue.
 
 ~~~~
 
