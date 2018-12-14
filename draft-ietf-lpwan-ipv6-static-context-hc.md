@@ -1416,6 +1416,7 @@ Each Profile, for each Rule ID value, MUST define
 - the value of MAX_ACK_REQUESTS,
 - the expiration time of the Retransmission Timer
 - the expiration time of the Inactivity Timer
+- if the last tile is carried in a Regular SCHC Fragment or an All-1 SCHC Fragment (see {{ACK-on-Error-sender}})
 
 For each active pair of Rule ID and DTag values, the sender MUST maintain
 
@@ -1439,26 +1440,21 @@ If more than one tile is carried in one SCHC Fragment
 - the selected tiles MUST be consecutive in the original SCHC Packet
 - they MUST be placed in the SCHC Fragment Payload adjacent to one another, in the order they appear in the SCHC Packet, from the start of the SCHC Packet toward its end.
 
-In a SCHC Fragment message, the sender MUST fill the W field with the window number of the first tile sent in that SCHC Fragment.
+Tiles that are not the last one MUST be sent in Regular SCHC Fragments specified in {{NotLastFrag}}.
+The FCN field MUST contain the tile index of the first tile sent in that SCHC Fragment.
 
-If a SCHC Fragment carries more than one tile, or carries one tile that is not the last one of the SCHC Packet,
+In a Regular SCHC Fragment message, the sender MUST fill the W field with the window number of the first tile sent in that SCHC Fragment.
 
-- it MUST be of the Regular type specified in {{NotLastFrag}}
-- the FCN field MUST contain the tile index of the first tile sent in that SCHC Fragment
+Depending on the Profile, the last tile of a SCHC Packet MUST be sent either
 
-The fragment sender MAY send the last tile as the Payload of an All-1 SCHC Fragment.
+- in a Regular SCHC Fragment, alone or as part of a multi-tiles Payload
+- alone in an All-1 SCHC Fragment
+
+In an All-1 SCHC Fragment message, the sender MUST fill the W field with the window number of the last tile of the SCHC Packet.
 
 The fragment sender MUST send SCHC Fragments such that, all together, they contain all the tiles of the fragmented SCHC Packet.
 
 The fragment sender MUST send at least one All-1 SCHC Fragment.
-
-The last tile of a SCHC Packet can be sent in different ways, depending on Profiles and implementations
-
-- in a Regular SCHC Fragment, either alone or as part of multiple tiles Payload
-- in an All-1 SCHC Fragment
-
-However, if the last tile has been sent in a Regular SCHC Fragment, it MUST NOT been sent again in an All-1 SCHC Fragment.
-If it has been sent in an All-1 SCHC Fragment, it MUST not be sent again in a Regular SCHC Fragment.
 
 The fragment sender MUST listen for SCHC ACK messages after having sent
 
@@ -1520,7 +1516,7 @@ On receiving a SCHC Fragment with a Rule ID and DTag pair not being processed at
 On receiving any SCHC F/R message, the receiver MUST reset the Inactivity Timer.
 
 On receiving a SCHC Fragment message,
-the receiver MUST assemble the received tiles based on the W and FCN fields of the SCHC Fragment.
+the receiver determines what tiles were received, based on the payload length and on the W and FCN fields of the SCHC Fragment.
 
 - if the FCN is All-1, if a Payload is present, the full SCHC Fragment Payload MUST be assembled including the padding bits.
   This is because the size of the last tile is not known by the receiver,
@@ -1528,13 +1524,14 @@ the receiver MUST assemble the received tiles based on the W and FCN fields of t
   They will be removed by the SCHC C/D sublayer.
   If the size of the SCHC Fragment Payload exceeds or equals
   the size of one regular tile plus the size of an L2 Word, this SHOULD raise an error flag.
-- otherwise, tiles MUST be assembled based on the a priori known size
-  and padding bits MUST be discarded.
-  The latter is possible because
+- otherwise, tiles MUST be assembled based on the a priori known tile size.
+  * If allowed by the Profile, the end of the payload MAY contain the last tile, which may be shorter. Padding bits are indistinguishable from the tile data bits, at his stage.
+  * Otherwise, padding bits MUST be discarded.
+    The latter is possible because
 
-  * the size of the tiles is known a priori,
-  * tiles are larger than an L2 Word
-  * padding bits are always strictly less than an L2 Word
+    * the size of the tiles is known a priori,
+    * tiles are larger than an L2 Word
+    * padding bits are always strictly less than an L2 Word
 
 On receiving a SCHC ACK REQ or an All-1 SCHC Fragment,
 
