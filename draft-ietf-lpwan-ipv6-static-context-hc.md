@@ -1366,7 +1366,8 @@ The ACK-on-Error mode supports LPWAN technologies that have variable MTU and out
 
 In ACK-on-Error mode, windows are used.
 All tiles MUST be of equal size, except for the last one,
-which MUST be of the same size or smaller than the preceding ones.
+which MUST be of the same size or smaller than the regular ones.
+If allowed in a Profile, the penultimate tile MAY be exactly one L2 Word smaller than the regular tile size.
 
 A SCHC Fragment message carries one or more tiles, which may span multiple windows.
 A SCHC ACK reports on the reception of exactly one window of tiles.
@@ -1418,6 +1419,7 @@ Each Profile, for each Rule ID value, MUST define
 - the expiration time of the Retransmission Timer
 - the expiration time of the Inactivity Timer
 - if the last tile is carried in a Regular SCHC Fragment or an All-1 SCHC Fragment (see {{ACK-on-Error-sender}})
+- if the penultimate tile MAY be one L2 Word smaller than the regular tile size. In this case, the regular tile size MUST be at least twice the L2 Word size.
 
 For each active pair of Rule ID and DTag values, the sender MUST maintain
 
@@ -1526,7 +1528,8 @@ the receiver determines what tiles were received, based on the payload length an
   If the size of the SCHC Fragment Payload exceeds or equals
   the size of one regular tile plus the size of an L2 Word, this SHOULD raise an error flag.
 - otherwise, tiles MUST be assembled based on the a priori known tile size.
-  * If allowed by the Profile, the end of the payload MAY contain the last tile, which may be shorter. Padding bits are indistinguishable from the tile data bits, at his stage.
+  * If allowed by the Profile, the end of the payload MAY contain the last tile, which may be shorter. Padding bits are indistinguishable from the tile data bits, at this stage.
+  * the payload may contain the penultimate tile that, if allowed by the Profile, MAY be exactly one L2 Word shorter than the regular tile size.
   * Otherwise, padding bits MUST be discarded.
     The latter is possible because
 
