@@ -55,11 +55,11 @@ author:
   email: JuanCarlos.Zuniga@sigfox.com
 normative:
   RFC2119:
-  RFC3385:
   RFC6936:
   RFC8174:
   RFC8200:
 informative:  
+  RFC3385:
   RFC4944:
   RFC5795:
   RFC6282:
