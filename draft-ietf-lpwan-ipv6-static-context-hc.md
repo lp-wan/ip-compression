@@ -76,8 +76,9 @@ SCHC compression is based on a common static context stored in both the LPWAN de
 This document also specifies a fragmentation and reassembly mechanism that is used to support the IPv6 MTU requirement over the LPWAN technologies. Fragmentation is needed for IPv6 datagrams that, after SCHC compression or when such compression was not possible, still exceed the layer-2 maximum payload size.
 
 The SCHC header compression and fragmentation mechanisms are independent of the specific LPWAN technology over which they are used. This document defines generic functionalities and offers flexibility with regard to parameter settings and mechanism choices.
-Data models for the context and profiles are out of scope; this document standardizes the exchange over the LPWAN between two SCHC entities.
-Settings and choices specific to a technology or a product are expected to be grouped into Profiles, which are specified in other documents.
+This document standardizes the exchange over the LPWAN between two SCHC entities.
+Settings and choices specific to a technology or a product are expected to be grouped into profiles, which are specified in other documents.
+Data models for the context and profiles are out of scope.
 
 --- middle
 
@@ -99,7 +100,7 @@ In most cases, a small Rule identifier is enough to represent the full IPv6/UDP 
 
 LPWAN technologies impose some strict limitations on traffic. For instance, devices are sleeping most of the time and may receive data during short periods of time after transmission to preserve battery. LPWAN technologies are also characterized
 by a greatly reduced data unit and/or payload size (see {{RFC8376}}).  However, some LPWAN technologies do not provide fragmentation functionality; to support the IPv6 MTU requirement of 1280 bytes {{RFC8200}}, they require a fragmentation protocol at the adaptation layer below IPv6.
-Accordingly, this document defines an optional fragmentation/reassembly mechanism for LPWAN technologies to support the IPv6 MTU.
+Accordingly, this document defines an optional fragmentation/reassembly mechanism for LPWAN technologies to support the IPv6 MTU requirement.
 
 This document defines generic functionality and offers flexibility with regard to parameters settings
 and mechanism choices. Technology-specific settings and product-specific choices are expected to be grouped into Profiles specified in other documents.
@@ -166,7 +167,7 @@ The SCHC acronym is pronounced like "sheek" in English (or "chic" in French). Th
 
 * Dw: Downlink direction for compression/decompression, from SCHC C/D in the network to SCHC C/D in the Dev.
 
-* Field Description. A line in the Rule table.
+* Field Description. A tuple containing identifier, value, matching operator and actions to be applied to a field.
 
 * FID: Field Identifier. This identifies the protocol and field a Field Description applies to.
 
@@ -192,9 +193,9 @@ The SCHC acronym is pronounced like "sheek" in English (or "chic" in French). Th
   Both ends of a SCHC communication must be provisioned with the same Profile information and with the same set of Rules before the communication starts,
   so that there is no ambiguity in how they expect to communicate.
 
-* Rule: A set of header field values, matching operator and actions to be applied.
+* Rule: A set of Field Descriptions.
 
-* Rule ID: An identifier for a Rule. SCHC C/D on both sides share the same Rule ID for a given packet. A set of Rule IDs are used to support SCHC F/R functionality.
+* Rule ID (Rule Identifier): An identifier for a Rule. SCHC C/D on both sides share the same Rule ID for a given packet. A set of Rule IDs are used to support SCHC F/R functionality.
   
 * SCHC C/D: Static Context Header Compression Compressor/Decompressor. A mechanism used on both sides, at the Dev and at the network, to achieve Compression/Decompression of headers.
 
@@ -385,7 +386,7 @@ The Field Descriptions describe the header fields with the following entries:
 
 * Field ID (FID) designates a protocol and field (e.g. UDP Destination Port), unambiguously among all protocols that a SCHC compressor processes.
 
-* Field Length (FL) represents the length of the field. It can be either a fixed value (in bits) if the length is known when the Rule is created or a type if the length is variable. The length of a header field is defined by its own protocol specification (e.g. IPv6 or UDP). If the length is variable, the type defines the process to compute the length, its unit (bits, bytes,...).
+* Field Length (FL) represents the length of the field. It can be either a fixed value (in bits) if the length is known when the Rule is created or a type if the length is variable. The length of a header field is defined by its own protocol specification (e.g. IPv6 or UDP). If the length is variable, the type defines the process to compute the length and its unit (bits, bytes...).
 
 * Field Position (FP): most often, a field only occurs once in a packet header. Some fields may occur multiple times in a header. FP indicates which occurrence  this Field Description applies to. The default value is 1 (first occurrence).
 
@@ -733,8 +734,8 @@ of the polynomial used e.g. in the Ethernet standard {{RFC3385}}) is RECOMMENDED
 MIC. Nevertheless, other MIC lengths or other algorithms MAY be required by the Profile.
 
 The MIC MUST be computed on the full SCHC Packet concatenated with the padding bits, if any, of the SCHC Fragment carrying the last tile.
-The rationale is that the SCHC Reassembler has no way of knowing the boundary between the last tile and the padding bits.
-Indeed, this requires decompressing the SCHC Packet, which is out of the scope of the SCHC Reassembler.
+The rationale is that the SCHC reassembler has no way of knowing the boundary between the last tile and the padding bits.
+Indeed, this requires decompressing the SCHC Packet, which is out of the scope of the SCHC reassembler.
 
 Note that the concatenation of the complete SCHC Packet and the potential padding bits of the last SCHC Fragment does not
 generally constitute an integer number of bytes.
@@ -873,7 +874,7 @@ The FCN field is all ones.
 {: #Fig-LastFrag title='Detailed Header Format for the All-1 SCHC Fragment'}
 
 The All-1 SCHC Fragment message MUST be distinguishable by size from a SCHC Sender-Abort message (see {{SenderAbort}}) that has the same T, M and N values, even in the presence of padding.
-This condition is met if the MIC is present and at least the size of an L2 Word,
+This condition is met if the MIC is present and is at least the size of an L2 Word,
 or if the Payload is present and at least the size an L2 Word.
 This condition is also met if the SCHC Sender-Abort Header is a multiple of L2 Words.
 
@@ -1668,14 +1669,14 @@ Otherwise, TV is not set in the Field Descriptor, MO is set to "ignore" and CDA 
 
 ## Hop Limit field
 
-The field behavior for this field is different for Uplink and Downlink.
-In Uplink, since there is no IP forwarding between the Dev and the SCHC C/D, the value is relatively constant.
-On the other hand, the Downlink value depends on Internet routing and can change more frequently.
+The field behavior for this field is different for uplink (Up) and downlink (Dw).
+In Up, since there is no IP forwarding between the Dev and the SCHC C/D, the value is relatively constant.
+On the other hand, the Dw value depends on Internet routing and can change more frequently.
 The Direction Indicator (DI) can be used to distinguish both directions:
 
-* in the Uplink, elide the field: the TV in the Field Descriptor is set to the known constant value, the MO is set to "equal" and the CDA is set to "not-sent".
+* in the Up, elide the field: the TV in the Field Descriptor is set to the known constant value, the MO is set to "equal" and the CDA is set to "not-sent".
 
-* in the Downlink, send the value: TV is not set, MO is set to "ignore" and CDA is set to "value-sent".
+* in the Dw, send the value: TV is not set, MO is set to "ignore" and CDA is set to "value-sent".
 
 ## IPv6 addresses fields
 
@@ -1822,7 +1823,7 @@ Castillejo grant CAS15/00336, and by the ERDF and the Spanish Government through
 
 This section gives some scenarios of the compression mechanism for IPv6/UDP. The goal is to illustrate the behavior of SCHC.
 
-The mechanisms defined in this document can be applied to an LPWAN Dev that embeds some applications running over CoAP. In this example, three flows are considered. The first flow is for the device management based
+The mechanisms defined in this document can be applied to a Dev that embeds some applications running over CoAP. In this example, three flows are considered. The first flow is for the device management based
 on CoAP using Link Local IPv6 addresses and UDP ports 123 and 124 for Dev and App, respectively.
 The second flow will be a CoAP server for measurements done by the Dev (using ports 5683) and Global IPv6 Address prefixes alpha::IID/64 to beta::1/64.
 The last flow is for legacy applications using different ports numbers, the destination IPv6 address prefix is gamma::1/64.
@@ -2442,7 +2443,7 @@ Recv_window==window &    | |   |   all missing frags sent
 ~~~~
 {: #Fig-ACKonerrorSnd title='Sender State Machine for the ACK-on-Error Mode'}
 
-This is an example only. Is is not normative.
+This is an example only. It is not normative.
 The specification in {{ACK-on-Error-sender}} allows for sequences of operations different from the one shown here.
 
 
