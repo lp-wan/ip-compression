@@ -1506,7 +1506,13 @@ On receiving a SCHC ACK,
 
       - if the SCHC ACK shows no missing tile at the receiver, the sender
         MUST send the All-1 SCHC Fragment
-        and it MUST increment the Attempts counter.
+
+      - otherwise
+
+        * the fragment sender MUST send SCHC Fragment messages containing all the tiles that are reported missing in the SCHC ACK.
+        * the fragment sender MUST then send
+        either the All-1 SCHC Fragment or
+        a SCHC ACK REQ with the W field corresponding to the last window.
 
 - otherwise, the fragment sender
 
