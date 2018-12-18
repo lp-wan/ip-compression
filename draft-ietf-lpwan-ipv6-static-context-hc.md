@@ -1438,8 +1438,8 @@ At the beginning of the fragmentation of a new SCHC Packet,
   A Rule MUST NOT be selected if the values of M and WINDOW_SIZE for that Rule are such that the SCHC Packet cannot be fragmented in (2^M) * WINDOW_SIZE tiles or less.
 - the fragment sender MUST initialize the Attempts counter to 0 for that Rule ID and DTag value pair.
 
-A SCHC Fragment message carries in its payload one or more tiles.
-If more than one tile is carried in one SCHC Fragment
+A Regular SCHC Fragment message carries in its payload one or more tiles.
+If more than one tile is carried in one Regular SCHC Fragment
 
 - the selected tiles MUST be consecutive in the original SCHC Packet
 - they MUST be placed in the SCHC Fragment Payload adjacent to one another, in the order they appear in the SCHC Packet, from the start of the SCHC Packet toward its end.
@@ -1463,7 +1463,7 @@ The fragment sender MUST send at least one All-1 SCHC Fragment.
 The fragment sender MUST listen for SCHC ACK messages after having sent
 
 - an All-1 SCHC Fragment
-- or a SCHC ACK REQ with the W field corresponding to the last window.
+- or a SCHC ACK REQ.
 
 A Profile MAY specify other times at which the fragment sender MUST listen for SCHC ACK messages.
 For example, this could be after sending a complete window of tiles.
@@ -1476,8 +1476,9 @@ Each time a fragment sender sends an All-1 SCHC Fragment or a SCHC ACK REQ,
 On Retransmission Timer expiration
 
 - if Attempts is strictly less than MAX_ACK_REQUESTS,
-  the fragment sender MUST send a SCHC ACK REQ with the W field corresponding to the last window
-  and it MUST increment the Attempts counter
+  the fragment sender MUST send
+  either the All-1 SCHC Fragment or
+  a SCHC ACK REQ with the W field corresponding to the last window,
 - otherwise the fragment sender MUST send a SCHC Sender-Abort and
   it MAY exit with an error condition.
 
@@ -1488,16 +1489,24 @@ On receiving a SCHC ACK,
   * if the C bit is set, the sender MAY exit successfully
   * otherwise,
 
-    - if the SCHC ACK shows no missing tile at the receiver, the sender
+    - if the Profile mandates that the last tile be sent in an All-1 SCHC Fragment,
 
-      * MUST send a SCHC Sender-Abort
-      * MAY exit with an error condition
+      - if the SCHC ACK shows no missing tile at the receiver, the sender
 
-    - otherwise
+        * MUST send a SCHC Sender-Abort
+        * MAY exit with an error condition
 
-      * the fragment sender MUST send SCHC Fragment messages containing all the tiles that are reported missing in the SCHC ACK.
-      * if the last message in this sequence of SCHC Fragment messages is not an All-1 SCHC Fragment,
-        then the fragment sender MUST send a SCHC ACK REQ with the W field corresponding to the last window after the sequence.
+      - otherwise
+
+        * the fragment sender MUST send SCHC Fragment messages containing all the tiles that are reported missing in the SCHC ACK.
+        * if the last message in this sequence of SCHC Fragment messages is not an All-1 SCHC Fragment,
+          then the fragment sender MUST in addition send a SCHC ACK REQ with the W field corresponding to the last window, after the sequence.
+
+    - otherwise,
+
+      - if the SCHC ACK shows no missing tile at the receiver, the sender
+        MUST send the All-1 SCHC Fragment
+        and it MUST increment the Attempts counter.
 
 - otherwise, the fragment sender
 
