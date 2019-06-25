@@ -1817,6 +1817,7 @@ In ACK-on-Error, a malicious node MAY force a SCHC Fragment sender to resend a S
 # Acknowledgements
 
 Thanks to
+Sergio Aguilar Romero,
 Carsten Bormann,
 Philippe Clavier,
 Diego Dujovne,
