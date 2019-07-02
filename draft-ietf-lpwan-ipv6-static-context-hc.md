@@ -156,7 +156,7 @@ The SCHC acronym is pronounced like "sheek" in English (or "chic" in French). Th
 
 * Bi: Bidirectional. Characterizes a Field Descriptor that applies to headers of packets traveling in either direction (Up and Dw, see this glossary).
 
-* CDA: Compression/Decompression Action. Describes the pair of inverse actions that are performed at the compressor to compress a header field and at the decompressor to recover the original header field value.
+* CDA: Compression/Decompression Action. Describes the pair of inverse actions that are performed at the compressor to compress a header field and at the decompressor to recover the original value of the header field.
 
 * Compression Residue. The bits that remain to be sent (beyond the Rule ID itself) after applying the SCHC compression.
 
@@ -484,7 +484,7 @@ Matching Operators (MOs) are functions used by both SCHC C/D endpoints. They are
 
 ## Compression Decompression Actions (CDA) {#chap-CDA}
 
-The Compression Decompression Action (CDA) describes the actions taken during the compression of headers fields and the inverse action taken by the decompressor to restore the original value.
+The Compression Decompression Action (CDA) describes the actions taken during the compression of header fields and the inverse action taken by the decompressor to restore the original value.
 
 ~~~~
 /--------------------+-------------+----------------------------\
@@ -1164,7 +1164,7 @@ The ACK-Always mode has been designed under the following assumptions
 
 * Data unit out-of-sequence delivery does not occur between the entity performing fragmentation and the entity performing reassembly
 
-* The L2 MTU value does not change while the fragments of a SCHC Packet are being being transmitted.
+* The L2 MTU value does not change while the fragments of a SCHC Packet are being transmitted.
 
 In ACK-Always mode, windows are used.
 An acknowledgement, positive or negative, is transmitted by the fragment receiver to the fragment sender at the end of the transmission of each window of SCHC Fragments.
@@ -2597,7 +2597,7 @@ This section lists the parameters that need to be defined in the Profile.
 * if L2 Word is wider than a bit and SCHC fragmentation is used, value of the padding bits (0 or 1). This is needed
 because the padding bits of the last fragment are included in the MIC computation.
 
-A Profile MAY define a delay to be added after each SCHC message transmission for compliance with local regulations or other constraints imposed by the applications.
+A Profile may define a delay to be added after each SCHC message transmission for compliance with local regulations or other constraints imposed by the applications.
 
 * In some LPWAN technologies, as part of energy-saving techniques,
 downlink transmission is only possible immediately after an uplink transmission.
@@ -2616,13 +2616,13 @@ the LPWAN technology-specific documents:
 
 # Supporting multiple window sizes for fragmentation
 
-For ACK-Always or ACK-on-Error, implementers MAY opt to support a single window size or multiple window sizes.  The latter, when feasible, may provide performance optimizations.  For example, a large window size SHOULD be used for packets that need to be split into a large number of tiles. However, when the number of tiles required to carry a packet is low, a smaller window size, and thus a shorter Bitmap, MAY be sufficient to provide reception status on all tiles. If multiple window sizes are supported, the Rule ID MAY signal the window size in use for a specific packet transmission.
+For ACK-Always or ACK-on-Error, implementers may opt to support a single window size or multiple window sizes.  The latter, when feasible, may provide performance optimizations.  For example, a large window size should be used for packets that need to be split into a large number of tiles. However, when the number of tiles required to carry a packet is low, a smaller window size, and thus a shorter Bitmap, may be sufficient to provide reception status on all tiles. If multiple window sizes are supported, the Rule ID may signal the window size in use for a specific packet transmission.
 
 The same window size MUST be used for the transmission of all tiles that belong to the same SCHC Packet.
 
 # Downlink SCHC Fragment transmission
 
-For downlink transmission of a fragmented SCHC Packet in ACK-Always mode, the SCHC Fragment receiver MAY support timer-based SCHC ACK retransmission. In this mechanism, the SCHC Fragment receiver initializes and starts a timer (the Inactivity Timer is used) after the transmission of a SCHC ACK, except when the SCHC ACK is sent in response to the last SCHC Fragment of a packet (All-1 fragment). In the latter case, the SCHC Fragment receiver does not start a timer after transmission of the SCHC ACK.
+For downlink transmission of a fragmented SCHC Packet in ACK-Always mode, the SCHC Fragment receiver may support timer-based SCHC ACK retransmission. In this mechanism, the SCHC Fragment receiver initializes and starts a timer (the Inactivity Timer is used) after the transmission of a SCHC ACK, except when the SCHC ACK is sent in response to the last SCHC Fragment of a packet (All-1 fragment). In the latter case, the SCHC Fragment receiver does not start a timer after transmission of the SCHC ACK.
 
 If, after transmission of a SCHC ACK that is not an All-1 fragment, and before expiration of the corresponding Inactivity timer, the SCHC Fragment receiver receives a SCHC Fragment that belongs to the current window (e.g. a missing SCHC Fragment from the current window) or to the next window, the Inactivity timer for the SCHC ACK is stopped. However, if the Inactivity timer expires, the SCHC ACK is resent and the Inactivity timer is reinitialized and restarted.
 
