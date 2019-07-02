@@ -2552,7 +2552,7 @@ The specification in {{ACK-on-Error-sender}} allows for sequences of operations 
 
 # SCHC Parameters {#SCHCParams}
 
-This section lists the information that need to be provided in the LPWAN technology-specific documents.
+This section lists the information that needs to be provided in the LPWAN technology-specific documents.
 
 * Most common uses cases, deployment scenarios
 
@@ -2566,7 +2566,7 @@ This section lists the parameters that need to be defined in the Profile.
 
 * Rule ID numbering scheme, fixed-sized or variable-sized Rule IDs, number of Rules, the way the Rule ID is transmitted
 
-* define the maximum packet size that should ever be reconstructed by SCHC Decompression (MAX_PACKET_SIZE). See {{SecConsiderations}}.
+* maximum packet size that should ever be reconstructed by SCHC Decompression (MAX_PACKET_SIZE). See {{SecConsiderations}}.
 
 * Padding: size of the L2 Word (for most LPWAN technologies, this would be a byte; for some technologies, a bit)
 
