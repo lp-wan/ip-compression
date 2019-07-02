@@ -297,9 +297,9 @@ The Compression Residue may be empty. Both the Rule ID and the Compression Resid
 |                |                                |    | |    | |    |  
 |SCHC C/D and F/R|                                |    | |    | |    |
 +--------+-------+                                +----+ +----+ +----+
-         |  +--+     +----+    +----+    +----+     .      .      .
-         +~ |RG| === |NGW | == |SCHC| == |SCHC|...... Internet ....
-            +--+     +----+    |F/R |    |C/D |
+         |  +---+     +---+    +----+    +----+     .      .      .
+         +~ |RGW| === |NGW| == |SCHC| == |SCHC|...... Internet ....
+            +---+     +---+    |F/R |    |C/D |
                                +----+    +----+
 ~~~~
 {: #Fig-archi title='Architecture'}
@@ -309,7 +309,7 @@ SCHC C/D and SCHC F/R are located on both sides of the LPWAN transmission, i.e. 
 
 The operation in the Uplink direction is as follows. The Device application uses IPv6 or IPv6/UDP protocols. Before sending the packets, the Dev compresses their headers using SCHC C/D and,
 if the SCHC Packet resulting from the compression needs to be fragmented by SCHC, SCHC F/R is performed (see {{Frag}}).
-The resulting SCHC Fragments are sent to an LPWAN Radio Gateway (RG) which forwards them to a Network Gateway (NGW).
+The resulting SCHC Fragments are sent to an LPWAN Radio Gateway (RGW) which forwards them to a Network Gateway (NGW).
 The NGW sends the data to a SCHC F/R for re-assembly (if needed) and then to the SCHC C/D for decompression.
 After decompression, the packet can be sent over the Internet
 to one or several LPWAN Application Servers (App).
@@ -1640,7 +1640,7 @@ A packet (e.g. an IPv6 packet)
      |                                                   |
      +------- SCHC Fragments + padding as needed---------+
 
-        SENDER                                    RECEIVER
+        Sender                                    Receiver
 
 
 ~~~~
@@ -1826,9 +1826,11 @@ Thanks to
 Sergio Aguilar Romero,
 Carsten Bormann,
 Philippe Clavier,
+Daniel Ducuara Beltran
 Diego Dujovne,
 Eduardo Ingles Sanchez,
 Arunprabhu Kandasamy,
+Suresh Krishnan,
 Rahul Jadhav,
 Sergio Lopez Bernal,
 Antony Markovski,
