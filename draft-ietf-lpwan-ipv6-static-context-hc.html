@@ -353,7 +353,7 @@ address {
 
   <meta name="dct.creator" content="Minaburo, A., Toutain, L., Gomez, C., Barthel, D., and JC. Zuniga" />
   <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-lpwan-ipv6-static-context-hc-18" />
-  <meta name="dct.issued" scheme="ISO8601" content="2019-06-28" />
+  <meta name="dct.issued" scheme="ISO8601" content="2019-07-02" />
   <meta name="dct.abstract" content="This document defines the Static Context Header Compression (SCHC) framework, which provides both header compression and fragmentation functionalities. SCHC has been designed for Low Power Wide Area Networks (LPWAN).SCHC compression is based on a common static context stored in both the LPWAN device and the network side. This document defines a header compression mechanism and its application to compress IPv6/UDP headers.This document also specifies a fragmentation and reassembly mechanism that is used to support the IPv6 MTU requirement over the LPWAN technologies. Fragmentation is needed for IPv6 datagrams that, after SCHC compression or when such compression was not possible, still exceed the layer-2 maximum payload size.The SCHC header compression and fragmentation mechanisms are independent of the specific LPWAN technology over which they are used. This document defines generic functionalities and offers flexibility with regard to parameter settings and mechanism choices.  This document standardizes the exchange over the LPWAN between two SCHC entities.  Settings and choices specific to a technology or a product are expected to be grouped into profiles, which are specified in other documents.  Data models for the context and profiles are out of scope." />
   <meta name="description" content="This document defines the Static Context Header Compression (SCHC) framework, which provides both header compression and fragmentation functionalities. SCHC has been designed for Low Power Wide Area Networks (LPWAN).SCHC compression is based on a common static context stored in both the LPWAN device and the network side. This document defines a header compression mechanism and its application to compress IPv6/UDP headers.This document also specifies a fragmentation and reassembly mechanism that is used to support the IPv6 MTU requirement over the LPWAN technologies. Fragmentation is needed for IPv6 datagrams that, after SCHC compression or when such compression was not possible, still exceed the layer-2 maximum payload size.The SCHC header compression and fragmentation mechanisms are independent of the specific LPWAN technology over which they are used. This document defines generic functionalities and offers flexibility with regard to parameter settings and mechanism choices.  This document standardizes the exchange over the LPWAN between two SCHC entities.  Settings and choices specific to a technology or a product are expected to be grouped into profiles, which are specified in other documents.  Data models for the context and profiles are out of scope." />
 
@@ -377,7 +377,7 @@ address {
 <td class="right">L. Toutain</td>
 </tr>
 <tr>
-<td class="left">Expires: December 30, 2019</td>
+<td class="left">Expires: January 3, 2020</td>
 <td class="right">IMT-Atlantique</td>
 </tr>
 <tr>
@@ -406,7 +406,7 @@ address {
 </tr>
 <tr>
 <td class="left"></td>
-<td class="right">June 28, 2019</td>
+<td class="right">July 02, 2019</td>
 </tr>
 
     	
@@ -425,7 +425,7 @@ address {
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at https://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on December 30, 2019.</p>
+<p>This Internet-Draft will expire on January 3, 2020.</p>
 <h1 id="rfc.copyrightnotice"><a href="#rfc.copyrightnotice">Copyright Notice</a></h1>
 <p>Copyright (c) 2019 IETF Trust and the persons identified as the document authors.  All rights reserved.</p>
 <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (https://trustee.ietf.org/license-info) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.</p>
@@ -737,14 +737,14 @@ A packet (e.g. an IPv6 packet)
 |                |                                |    | |    | |    |  
 |SCHC C/D and F/R|                                |    | |    | |    |
 +--------+-------+                                +----+ +----+ +----+
-         |  +--+     +----+    +----+    +----+     .      .      .
-         +~ |RG| === |NGW | == |SCHC| == |SCHC|...... Internet ....
-            +--+     +----+    |F/R |    |C/D |
+         |  +---+     +---+    +----+    +----+     .      .      .
+         +~ |RGW| === |NGW| == |SCHC| == |SCHC|...... Internet ....
+            +---+     +---+    |F/R |    |C/D |
                                +----+    +----+
 </pre>
 <p class="figure">Figure 5: Architecture</p>
 <p id="rfc.section.5.2.p.2">SCHC C/D and SCHC F/R are located on both sides of the LPWAN transmission, i.e. on the Dev side and on the Network side.</p>
-<p id="rfc.section.5.2.p.3">The operation in the Uplink direction is as follows. The Device application uses IPv6 or IPv6/UDP protocols. Before sending the packets, the Dev compresses their headers using SCHC C/D and, if the SCHC Packet resulting from the compression needs to be fragmented by SCHC, SCHC F/R is performed (see <a href="#Frag" class="xref">Section 8</a>).  The resulting SCHC Fragments are sent to an LPWAN Radio Gateway (RG) which forwards them to a Network Gateway (NGW).  The NGW sends the data to a SCHC F/R for re-assembly (if needed) and then to the SCHC C/D for decompression.  After decompression, the packet can be sent over the Internet to one or several LPWAN Application Servers (App).</p>
+<p id="rfc.section.5.2.p.3">The operation in the Uplink direction is as follows. The Device application uses IPv6 or IPv6/UDP protocols. Before sending the packets, the Dev compresses their headers using SCHC C/D and, if the SCHC Packet resulting from the compression needs to be fragmented by SCHC, SCHC F/R is performed (see <a href="#Frag" class="xref">Section 8</a>).  The resulting SCHC Fragments are sent to an LPWAN Radio Gateway (RGW) which forwards them to a Network Gateway (NGW).  The NGW sends the data to a SCHC F/R for re-assembly (if needed) and then to the SCHC C/D for decompression.  After decompression, the packet can be sent over the Internet to one or several LPWAN Application Servers (App).</p>
 <p id="rfc.section.5.2.p.4">The SCHC F/R and C/D on the Network side can be located in the NGW, or somewhere else as long as a tunnel is established between them and the NGW.  For some LPWAN technologies, it may be suitable to locate the SCHC F/R functionality nearer the NGW, in order to better deal with time constraints of such technologies.</p>
 <p id="rfc.section.5.2.p.5">The SCHC C/Ds on both sides MUST share the same set of Rules.  So do the SCHC F/Rs on both sides.</p>
 <p id="rfc.section.5.2.p.6">The SCHC C/D and F/R process is symmetrical, therefore the description of the operation in the Downlink direction is symmetrical to the one above. The rules themselves may be asymmetrical.</p>
@@ -1781,7 +1781,7 @@ A packet (e.g. an IPv6 packet)
      |                                                   |
      +------- SCHC Fragments + padding as needed---------+
 
-        SENDER                                    RECEIVER
+        Sender                                    Receiver
 
 
 </pre>
@@ -1903,7 +1903,7 @@ A packet (e.g. an IPv6 packet)
 <h1 id="rfc.section.13">
 <a href="#rfc.section.13">13.</a> <a href="#acknowledgements" id="acknowledgements">Acknowledgements</a>
 </h1>
-<p id="rfc.section.13.p.1">Thanks to Sergio Aguilar Romero, Carsten Bormann, Philippe Clavier, Diego Dujovne, Eduardo Ingles Sanchez, Arunprabhu Kandasamy, Rahul Jadhav, Sergio Lopez Bernal, Antony Markovski, Alexander Pelov, Charles Perkins, Edgar Ramos, Shoichi Sakane, and Pascal Thubert for useful design consideration and comments.</p>
+<p id="rfc.section.13.p.1">Thanks to Sergio Aguilar Romero, Carsten Bormann, Philippe Clavier, Daniel Ducuara Beltran Diego Dujovne, Eduardo Ingles Sanchez, Arunprabhu Kandasamy, Suresh Krishnan, Rahul Jadhav, Sergio Lopez Bernal, Antony Markovski, Alexander Pelov, Charles Perkins, Edgar Ramos, Shoichi Sakane, and Pascal Thubert for useful design consideration and comments.</p>
 <p id="rfc.section.13.p.2">Carles Gomez has been funded in part by the Spanish Government (Ministerio de Educacion, Cultura y Deporte) through the Jose Castillejo grant CAS15/00336, and by the ERDF and the Spanish Government through project TEC2016-79988-P.  Part of his contribution to this work has been carried out during his stay as a visiting scholar at the Computer Laboratory of the University of Cambridge.</p>
 <h1 id="rfc.references">
 <a href="#rfc.references">14.</a> References</h1>
