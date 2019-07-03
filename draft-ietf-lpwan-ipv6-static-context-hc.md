@@ -487,21 +487,18 @@ Matching Operators (MOs) are functions used by both SCHC C/D endpoints. They are
 
 The Compression Decompression Action (CDA) describes the actions taken during the compression of header fields and the inverse action taken by the decompressor to restore the original value.
 
-~~~~
-/--------------------+-------------+-----------------------------\
+|--------------------|-------------|-----------------------------|
 |  Action            | Compression | Decompression               |
 |                    |             |                             |
-+--------------------+-------------+-----------------------------+
+|--------------------|-------------|-----------------------------|
 |not-sent            |elided       |use TV stored in Rule        |
 |value-sent          |send         |use received value           |
-|mapping-sent        |send index   |value retrieved from TV list |
+|mapping-sent        |send index   |retrieve value from TV list  |
 |LSB                 |send LSB     |concat. TV and received value|
 |compute-*           |elided       |recompute at decompressor    |
 |DevIID              |elided       |build IID from L2 Dev addr   |
 |AppIID              |elided       |build IID from L2 App addr   |
-\--------------------+-------------+-----------------------------/
-
-~~~~
+|--------------------|-------------|-----------------------------|
 {: #Fig-function title='Compression and Decompression Actions'}
 
 {{Fig-function}} summarizes the basic actions that can be used to compress and decompress a field. The first column shows the action's name. The second and third columns show the compression and decompression behaviors for each action.
@@ -733,16 +730,18 @@ Some SCHC F/R modes can use the following timers and counters
 
 ### Integrity Checking {#IntegrityChecking}
 
-The reassembled SCHC Packet MUST be checked for integrity at the receive end.
-By default, integrity checking is performed by computing a MIC at the sender side and transmitting it to the receiver for comparison with the locally computed MIC.
+The integrity of the fragmentation-reassembly process of a SCHC Packet MUST be checked at the receive end.
+By default, integrity checking is performed by computing a Reassembly Check Sequence (RCS)
+of the SCHC Packet at the sender side before fragmentation
+and transmitting it to the receiver for comparison with the RCS locally computed after reassembly.
 
-The MIC supports UDP checksum elision by SCHC C/D (see {{UDPchecksum}}).
+The RCS supports UDP checksum elision by SCHC C/D (see {{UDPchecksum}}).
 
 The CRC32 polynomial 0xEDB88320 (i.e. the reverse representation
 of the polynomial used e.g. in the Ethernet standard {{RFC3385}}) is RECOMMENDED as the default algorithm for computing the
-MIC. Nevertheless, other MIC lengths or other algorithms MAY be required by the Profile.
+RCS. Nevertheless, other RCS lengths or other algorithms MAY be required by the Profile.
 
-The MIC MUST be computed on the full SCHC Packet concatenated with the padding bits, if any, of the SCHC Fragment carrying the last tile.
+The RCS MUST be computed on the full SCHC Packet concatenated with the padding bits, if any, of the SCHC Fragment carrying the last tile.
 The rationale is that the SCHC reassembler has no way of knowing the boundary between the last tile and the padding bits.
 Indeed, this requires decompressing the SCHC Packet, which is out of the scope of the SCHC reassembler.
 
@@ -750,7 +749,7 @@ Note that the concatenation of the complete SCHC Packet and the potential paddin
 generally constitute an integer number of bytes.
 For implementers to be able to use byte-oriented CRC libraries, it is RECOMMENDED that the concatenation of the
 complete SCHC Packet and the last fragment potential padding bits be zero-extended to the next byte boundary and
-that the MIC be computed on that byte array.
+that the RCS be computed on that byte array.
 A Profile MAY specify another behavior.
 
 ### Header Fields {#HeaderFields}
@@ -808,11 +807,11 @@ The SCHC F/R messages contain the following fields (see the formats in {{Fragfor
   the last tile of a window that is not the last one of the SCHC packet.
   By extension, such a window is called an All-0 window.
 
-* Message Integrity Check (MIC).
+* Reassembly Check Sequence (RCS).
   This field only appears in the All-1 SCHC Fragments.
   Its size (called U, in bits) is defined by each Profile for each Rule ID.
 
-  See {{IntegrityChecking}} for the MIC default size, default polynomial and details on MIC computation.
+  See {{IntegrityChecking}} for the RCS default size, default polynomial and details on RCS computation.
 
 * C (integrity Check): C is a 1-bit field.
   This field is used in the SCHC ACK message to report on the reassembled SCHC Packet integrity check (see {{IntegrityChecking}}).
@@ -869,21 +868,21 @@ This condition is also met if the SCHC Fragment Header is a multiple of L2 Words
 
 The All-1 SCHC Fragment format is shown in {{Fig-LastFrag}}.
 The sender generally uses the All-1 SCHC Fragment format for the message that completes the emission of a fragmented SCHC Packet.
-The DTag field, the W field, the MIC field and the Payload are optional. At least one of MIC field or Payload MUST be present.
+The DTag field, the W field, the RCS field and the Payload are optional. At least one of RCS field or Payload MUST be present.
 The FCN field is all ones.
 
 ~~~~
 |-------- SCHC Fragment Header -------|
           |-- T --|-M-|-- N --|-- U --|
 +-- ... --+- ... -+---+- ... -+- ... -+------...-----+~~~~~~~~~~~~~~~~~~
-| Rule ID | DTag  | W | 11..1 |  MIC  | Frag Payload | pad. (as needed)
+| Rule ID | DTag  | W | 11..1 |  RCS  | Frag Payload | pad. (as needed)
 +-- ... --+- ... -+---+- ... -+- ... -+------...-----+~~~~~~~~~~~~~~~~~~
                         (FCN)
 ~~~~
 {: #Fig-LastFrag title='Detailed Header Format for the All-1 SCHC Fragment'}
 
 The All-1 SCHC Fragment message MUST be distinguishable by size from a SCHC Sender-Abort message (see {{SenderAbort}}) that has the same T, M and N values, even in the presence of padding.
-This condition is met if the MIC is present and is at least the size of an L2 Word,
+This condition is met if the RCS is present and is at least the size of an L2 Word,
 or if the Payload is present and at least the size an L2 Word.
 This condition is also met if the SCHC Sender-Abort Header is a multiple of L2 Words.
 
@@ -1105,7 +1104,7 @@ The value of N (size of the FCN field) is RECOMMENDED to be 1.
 Each Profile, for each Rule ID value, MUST define
 
 - the size of the DTag field,
-- the size and algorithm for the MIC field,
+- the size and algorithm for the RCS field,
 - the expiration time of the Inactivity Timer
 
 Each Profile, for each Rule ID value, MAY define
@@ -1181,7 +1180,7 @@ Each Profile, for each Rule ID value, MUST define
 
 - the value of N (size of the FCN field),
 - the value of WINDOW_SIZE, which MUST be strictly less than 2^N,
-- the size and algorithm for the MIC field,
+- the size and algorithm for the RCS field,
 - the size of the DTag field,
 - the value of MAX_ACK_REQUESTS,
 - the expiration time of the Retransmission Timer
@@ -1422,7 +1421,7 @@ Each Profile, for each Rule ID value, MUST define
 - the value of M (size of the W field),
 - the value of N (size of the FCN field),
 - the value of WINDOW_SIZE, which MUST be strictly less than 2^N,
-- the size and algorithm for the MIC field,
+- the size and algorithm for the RCS field,
 - the size of the DTag field,
 - the value of MAX_ACK_REQUESTS,
 - the expiration time of the Retransmission Timer
@@ -1769,7 +1768,7 @@ Zero Checksums" [RFC6936].
 checksum can be elided by the compressor and re-computed by the decompressor when an upper
 layer guarantees the integrity of the UDP payload and pseudo-header.
 A specific example of this is
-when a Message Integrity Check (MIC) protects the compressed message
+when a Message Integrity Check protects the compressed message
 between the compressor that elides the UDP checksum and the decompressor
 that computes it,
 with a strength that is identical or better to
@@ -1780,7 +1779,7 @@ elide the UDP checksum when another layer guarantees at least equal
 integrity protection for the UDP payload and the pseudo-header.
 In this case, the TV is not set, the MO is set to "ignore" and the CDA is set to "compute-\*".
 
-In particular, when SCHC fragmentation is used, a fragmentation MIC
+In particular, when SCHC fragmentation is used, a fragmentation RCS
 of 2 bytes or more provides equal or better protection than the UDP
 checksum; in that case, if the compressor is collocated with the
 fragmentation point and the decompressor is collocated with the
@@ -1983,7 +1982,7 @@ In the drawings, Bitmaps are shown in their uncompressed form.
           |-------FCN=0-------->|
           |-------FCN=0-------->|
           |-------FCN=0-------->|
-          |-----FCN=1 + MIC --->| Integrity check: success
+          |-----FCN=1 + RCS --->| Integrity check: success
         (End)      
 ~~~~
 {: #Fig-Example-Unreliable title='No-ACK mode, 11 SCHC Fragments'}
@@ -2005,7 +2004,7 @@ In the following examples, N (the size of the FCN field) is 3 bits. The All-1 FC
           |-----W=1, FCN=6----->|
           |-----W=1, FCN=5----->|
           |-----W=1, FCN=4----->|
-          |--W=1, FCN=7 + MIC-->| Integrity check: success
+          |--W=1, FCN=7 + RCS-->| Integrity check: success
           |<-- ACK, W=1, C=1 ---| C=1
         (End)
 ~~~~
@@ -2029,7 +2028,7 @@ In the following examples, N (the size of the FCN field) is 3 bits. The All-1 FC
           |-----W=1, FCN=6----->|
           |-----W=1, FCN=5----->|
           |-----W=1, FCN=4--X-->|
-          |- W=1, FCN=7 + MIC ->| Integrity check: failure
+          |- W=1, FCN=7 + RCS ->| Integrity check: failure
           |<-- ACK, W=1, C=0 ---| C=0, Bitmap:1100001
           |-----W=1, FCN=4----->| Integrity check: success
           |<-- ACK, W=1, C=1 ---| C=1
@@ -2067,7 +2066,7 @@ In the following examples, N (the size of the FCN field) is 3 bits. The All-1 FC
    m   |-----W=2, FCN=14----->| 1 tile sent
    a   |-----W=2, FCN=13--X-->| 1 tile sent (not received)
    l   |-----W=2, FCN=12----->| 1 tile sent
-   l   |---W=2, FCN=31 + MIC->| Integrity check: failure
+   l   |---W=2, FCN=31 + RCS->| Integrity check: failure
    e   |<--- ACK, W=0, C=0 ---| C=0, Bitmap:1111111111110000111111111111
    r   |-----W=0, FCN=15----->| 1 tile sent
        |-----W=0, FCN=14----->| 1 tile sent
@@ -2106,7 +2105,7 @@ Note: other sequences of events (e.g. regarding when ACKs are sent by the Receiv
           |-----W=1, FCN=6----->|
           |-----W=1, FCN=5----->|   
           |-----W=1, FCN=4----->|
-          |--W=1, FCN=7 + MIC-->| Integrity check: success
+          |--W=1, FCN=7 + RCS-->| Integrity check: success
           |<-- ACK, W=1, C=1 ---| C=1
         (End)    
 ~~~~
@@ -2130,7 +2129,7 @@ Note: other sequences of events (e.g. regarding when ACKs are sent by the Receiv
           |-----W=1, FCN=6----->|
           |-----W=1, FCN=5----->|
           |-----W=1, FCN=4--X-->|
-          |--W=1, FCN=7 + MIC-->| Integrity check: failure
+          |--W=1, FCN=7 + RCS-->| Integrity check: failure
           |<-- ACK, W=1, C=0 ---| C=0, Bitmap:11000001
           |-----W=1, FCN=4----->| Integrity check: success
           |<-- ACK, W=1, C=1 ---| C=1
@@ -2148,7 +2147,7 @@ with one tile per SCHC Fragment, N=3, WINDOW_SIZE=7, three lost SCHC Fragments a
              |-----W=0, FCN=4--X-->|
              |-----W=0, FCN=3--X-->|
              |-----W=0, FCN=2--X-->|
-             |--W=0, FCN=7 + MIC-->| Integrity check: failure
+             |--W=0, FCN=7 + RCS-->| Integrity check: failure
              |<-- ACK, W=0, C=0 ---| C=0, Bitmap:1100001
              |-----W=0, FCN=4----->| Integrity check: failure
              |-----W=0, FCN=3----->| Integrity check: failure
@@ -2169,7 +2168,7 @@ with one tile per SCHC Fragment, N=3, WINDOW_SIZE=7, three lost SCHC Fragments, 
              |-----W=0, FCN=4--X-->|
              |-----W=0, FCN=3--X-->|
              |-----W=0, FCN=2--X-->|
-             |--W=0, FCN=7 + MIC-->| Integrity check: failure
+             |--W=0, FCN=7 + RCS-->| Integrity check: failure
              |<-- ACK, W=0, C=0 ---| C=0, Bitmap:1100001
              |-----W=0, FCN=4----->| Integrity check: failure
              |-----W=0, FCN=3----->| Integrity check: failure
@@ -2193,7 +2192,7 @@ with N=3, WINDOW_SIZE=7, with three lost SCHC Fragments, and one retransmitted S
              |-----W=0, FCN=4--X-->|
              |-----W=0, FCN=3--X-->|
              |-----W=0, FCN=2--X-->|
-             |--W=0, FCN=7 + MIC-->| Integrity check: failure
+             |--W=0, FCN=7 + RCS-->| Integrity check: failure
              |<-- ACK, W=0, C=0 ---| C=0, Bitmap:1100001
              |-----W=0, FCN=4----->| Integrity check: failure
              |-----W=0, FCN=3----->| Integrity check: failure
@@ -2246,7 +2245,7 @@ with one tile per SCHC Fragment, N=5, WINDOW_SIZE=24 and two lost SCHC Fragments
         |-----W=1, FCN=23----->|
         |-----W=1, FCN=22----->|
         |-----W=1, FCN=21----->|
-        |--W=1, FCN=31 + MIC-->| Integrity check: success
+        |--W=1, FCN=31 + RCS-->| Integrity check: success
         |<--- ACK, W=1, C=1 ---| C=1
       (End)
 ~~~~
@@ -2273,7 +2272,7 @@ The fragmentation state machines of the sender and the receiver, one for each of
                |  last fragment
                |  ~~~~~~~~~~~~                               
                |  FCN = 1                               
-               v  send fragment+MIC
+               v  send fragment+RCS
            +============+                                             
            |    END     |                                             
            +============+                       
@@ -2288,8 +2287,8 @@ The fragmentation state machines of the sender and the receiver, one for each of
            |            + <--+ set Inactivity Timer
            |  RCV Frag  +-------+
            +=+===+======+       |All-1 &
-   All-1 &   |   |              |MIC correct
- MIC wrong   |   |Inactivity    |
+   All-1 &   |   |              |RCS correct
+ RCS wrong   |   |Inactivity    |
              |   |Timer Exp.    |
              v   |              |
   +==========++  |              v
@@ -2316,7 +2315,7 @@ The fragmentation state machines of the sender and the receiver, one for each of
 |      FCN==0 & more frags |   | last frag
 |    ~~~~~~~~~~~~~~~~~~~~~ |   | ~~~~~~~~~~~~~~~
 |               set lcl_bm |   | set lcl_bm
-|   send wnd + frag(all-0) |   | send wnd+frag(all-1)+MIC
+|   send wnd + frag(all-0) |   | send wnd+frag(all-1)+RCS
 |       set Retrans_Timer  |   | set Retrans_Timer
 |                          |   |
 |Recv_wnd == wnd &         |   |  
@@ -2334,7 +2333,7 @@ not expected wnd |    |    Bitmap     |            +=======+
                          | |   | ^  ^  |reSend(empty)All-* |   
                          | |   | |  |  |Set Retrans_Timer  |
                          | |   | |  +--+Attempt++          |
-MIC_bit==1 &             | |   | +-------------------------+
+  C_bit==1 &             | |   | +-------------------------+
 Recv_window==window &    | |   |   all missing frags sent
              no more frag| |   |   ~~~~~~~~~~~~~~~~~~~~~~
  ~~~~~~~~~~~~~~~~~~~~~~~~| |   |   Set Retrans_Timer                
@@ -2343,7 +2342,7 @@ Recv_window==window &    | |   |   all missing frags sent
  |     END     +<--------+ |   |
  +=============+           |   | Attempt > MAX_ACK_REQUESTS
             All-1 Window & |   | ~~~~~~~~~~~~~~~~~~
-             MIC_bit ==0 & |   v Send Abort
+               C_bit ==0 & |   v Send Abort
           lcl_bm==recv_bm  | +=+===========+
               ~~~~~~~~~~~~ +>|    ERROR    |
                 Send Abort   +=============+
@@ -2379,25 +2378,25 @@ Recv_window==window &    | |   |   all missing frags sent
 |  | All-0  +---------+  Window   +--->* ABORT  
 |  | ~~~~~  +-------->+========+=++        
 |  | snd lcl_bm  All-1 & w=next| |  All-1 & w=nxt
-|  |                & MIC wrong| |  & MIC right      
+|  |                & RCS wrong| |  & RCS right
 |  |          ~~~~~~~~~~~~~~~~~| | ~~~~~~~~~~~~~~~~~~
 |  |            set lcl_bm(FCN)| |set lcl_bm(FCN)
 |  |                send lcl_bm| |send lcl_bm
 |  |                           | +----------------------+
 |  |All-1 & w=expected         |                        |
-|  |& MIC wrong                v   +---+ w=expected &   |
-|  |~~~~~~~~~~~~~~~~~~~~  +====+=====+ | MIC wrong      |
+|  |& RCS wrong                v   +---+ w=expected &   |
+|  |~~~~~~~~~~~~~~~~~~~~  +====+=====+ | RCS wrong      |
 |  |set lcl_bm(FCN)       |          +<+ ~~~~~~~~~~~~~~ |
 |  |send lcl_bm           | Wait End |   set lcl_bm(FCN)|
 |  +--------------------->+          +--->* ABORT       |
-|                         +===+====+=+-+ All-1&MIC wrong|
+|                         +===+====+=+-+ All-1&RCS wrong|
 |                             |    ^   | ~~~~~~~~~~~~~~~|
-|      w=expected & MIC right |    +---+   send lcl_bm  |
+|      w=expected & RCS right |    +---+   send lcl_bm  |
 |      ~~~~~~~~~~~~~~~~~~~~~~ |                         |
 |       set lcl_bm(FCN)       | +-+ Not All-1           |
 |        send lcl_bm          | | | ~~~~~~~~~           |
 |                             | | |  discard            |
-|All-1&w=expected & MIC right | | |                     |
+|All-1&w=expected & RCS right | | |                     |
 |~~~~~~~~~~~~~~~~~~~~~~~~~~~~ v | v +----+All-1         |
 |set lcl_bm(FCN)            +=+=+=+=+==+ |~~~~~~~~~     |
 |send lcl_bm                |          +<+Send lcl_bm   |
@@ -2436,7 +2435,7 @@ Recv_window==window &    | |   |   all missing frags sent
 |  |      FCN==0 & more frags|   |last frag      clear [cur_W, Bmp_n]
 |  |  ~~~~~~~~~~~~~~~~~~~~~~~|   |~~~~~~~~~
 |  |        set cur_Bmp;     |   |set [cur_W, Bmp_n];
-|  |send cur_W + frag(All-0);|   |send cur_W + frag(All-1)+MIC;
+|  |send cur_W + frag(All-0);|   |send cur_W + frag(All-1)+RCS;
 |  |        set Retrans_Timer|   |set Retrans_Timer
 |  |                         |   | +-----------------------------------+
 |  |Retrans_Timer expires &  |   | |cur_W==rcv_W&[cur_W,Bmp_n]!=rcv_Bmp|
@@ -2458,11 +2457,11 @@ Recv_window==window &    | |   |   all missing frags sent
 |            No more Frags|   |   |
 |           ~~~~~~~~~~~~~~|   |   |
 |      stop Retrans_Timer;|   |   |
-|(re)send frag(All-1)+MIC |   |   |
+|(re)send frag(All-1)+RCS |   |   |
 +-------------------------+   |   |
                  cur_W==rcv_W&|   |
        [cur_W,Bmp_n]==rcv_Bmp&|   | Attempts > MAX_ACK_REQUESTS
-  No more Frags & MIC flag==OK|   | ~~~~~~~~~~
+  No more Frags & RCS flag==OK|   | ~~~~~~~~~~
             ~~~~~~~~~~~~~~~~~~|   | send Abort
  +=========+stop Retrans_Timer|   |  +===========+
  |   END   +<-----------------+   +->+   ERROR   |
@@ -2526,21 +2525,21 @@ The specification in {{ACK-on-Error-sender}} allows for sequences of operations 
 ~~~~
   (A)(B)
    |  |
-   |  | All-1 & rcv_W==cur_W & MIC!=OK        All-0 empty(Wn)
+   |  | All-1 & rcv_W==cur_W & RCS!=OK        All-0 empty(Wn)
    |  | ~~~~~~~~~~~~~~~~~~~~~~~~~~~~     +-+  ~~~~~~~~~~
-   |  | sendACK([cur_W,Bmp_n],MIC=0)     | v  sendACK([Wn,Bmp_n])
+   |  | sendACK([cur_W,Bmp_n],C=0)       | v  sendACK([Wn,Bmp_n])
    |  |                      +===========+=++
    |  +--------------------->+   Wait End   +-+
    |                         +=====+=+====+=+ | All-1
-   |     rcv_W==cur_W & MIC==OK    | |    ^   | & rcv_W==cur_W
-   |     ~~~~~~~~~~~~~~~~~~~~~~    | |    +---+ & MIC!=OK
-   |  sendACK([cur_W,Bmp_n],MIC=1) | |          ~~~~~~~~~~~~~~~~~~~
-   |                               | | sendACK([cur_W,Bmp_n],MIC=0);
+   |     rcv_W==cur_W & RCS==OK    | |    ^   | & rcv_W==cur_W
+   |     ~~~~~~~~~~~~~~~~~~~~~~    | |    +---+ & RCS!=OK
+   |  sendACK([cur_W,Bmp_n],C=1)   | |          ~~~~~~~~~~~~~~~~~~~
+   |                               | | sendACK([cur_W,Bmp_n],C=0);
    |                               | |          Attempts++
    |All-1 & Full([cur_W,Bmp_n])    | |
-   |& MIC==OK & sync==0            | +-->* ABORT
+   |& RCS==OK & sync==0            | +-->* ABORT
    |~~~~~~~~~~~~~~~~~~~            v
-   |sendACK([cur_W,Bmp_n],MIC=1) +=+=========+
+   |sendACK([cur_W,Bmp_n],C=1)   +=+=========+
    +---------------------------->+    END    |
                                  +===========+
 
@@ -2585,7 +2584,7 @@ This section lists the parameters that need to be defined in the Profile.
 
     * number of bits for FCN (N) for each Rule ID value
 
-    * size of MIC and algorithm for its computation, for each Rule ID, if different from the default CRC32. Byte fill-up with zeroes or other mechanism, to be specified.
+    * size of RCS and algorithm for its computation, for each Rule ID, if different from the default CRC32. Byte fill-up with zeroes or other mechanism, to be specified.
 
     * Retransmission Timer duration for each Rule ID value, if applicable to the SCHC F/R mode
 
@@ -2594,7 +2593,7 @@ This section lists the parameters that need to be defined in the Profile.
     * MAX_ACK_REQUEST value for each Rule ID value, if applicable to the SCHC F/R mode
 
 * if L2 Word is wider than a bit and SCHC fragmentation is used, value of the padding bits (0 or 1). This is needed
-because the padding bits of the last fragment are included in the MIC computation.
+because the padding bits of the last fragment are included in the RCS computation.
 
 A Profile may define a delay to be added after each SCHC message transmission for compliance with local regulations or other constraints imposed by the applications.
 
