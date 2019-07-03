@@ -1767,7 +1767,7 @@ in "Applicability Statement for the Use of IPv6 UDP Datagrams with
 Zero Checksums" [RFC6936].
 
 6LoWPAN Header Compression [RFC6282] also specifies that a UDP
-datagram can be sent without a checksum when an upper
+checksum can be elided by the compressor and re-computed by the decompressor when an upper
 layer guarantees the integrity of the UDP payload and pseudo-header.
 A specific example of this is
 when a Message Integrity Check (MIC) protects the compressed message
