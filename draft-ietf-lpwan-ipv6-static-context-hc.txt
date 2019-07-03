@@ -699,11 +699,10 @@ Internet-Draft                 LPWAN SCHC                      July 2019
    find and identify each field (e.g. the IPv6 Source Address, the UDP
    Destination Port or a CoAP URI path option).  It is assumed that
    there is a protocol parser somewhere alongside SCHC that is able to
-   identify and label with a Field ID all fields encountered in the
-   headers to be compressed, even in the presence of nested protocols.
-   Rules only describe the compression/decompression behavior for each
-   header field.  The header fields must have been identified by the
-   compressor prior to testing for a Rule match.
+   identify all the fields encountered in the headers to be compressed,
+   and to label them with a Field ID.  Rules only describe the
+   compression/decompression behavior for each header field, after it
+   has been identified.
 
    In a Rule, the Field Descriptions are listed in the order in which
    the fields appear in the packet header.  The Field Descriptions
@@ -711,7 +710,8 @@ Internet-Draft                 LPWAN SCHC                      July 2019
 
    o  Field ID (FID) designates a protocol and field (e.g.  UDP
       Destination Port), unambiguously among all protocols that a SCHC
-      compressor processes.
+      compressor processes.  In the presence of protocol nesting, the
+      Field ID also identifies the nesting.
 
    o  Field Length (FL) represents the length of the field.  It can be
       either a fixed value (in bits) if the length is known when the
@@ -903,11 +903,10 @@ Internet-Draft                 LPWAN SCHC                      July 2019
       of 8 if the unit of the variable length is in bytes.
 
    o  match-mapping: With match-mapping, the Target Value is a list of
-      values.  Each value of the list is identified by a short ID (or
-      index).  Compression is achieved by sending the index instead of
-      the original header field value.  This operator matches if the
-      header field value is equal to one of the values in the target
-      list.
+      values.  Each value of the list is identified by an index.
+      Compression is achieved by sending the index instead of the
+      original header field value.  This operator matches if the header
+      field value is equal to one of the values in the target list.
 
 7.5.  Compression Decompression Actions (CDA)
 
@@ -915,19 +914,18 @@ Internet-Draft                 LPWAN SCHC                      July 2019
    taken during the compression of header fields and the inverse action
    taken by the decompressor to restore the original value.
 
-   /--------------------+-------------+----------------------------\
-   |  Action            | Compression | Decompression              |
-   |                    |             |                            |
-   +--------------------+-------------+----------------------------+
-   |not-sent            |elided       |use value stored in Context |
-   |value-sent          |send         |build from received value   |
-   |mapping-sent        |send index   |value from index on a table |
-   |LSB                 |send LSB     |TV, received value          |
-   |compute-length      |elided       |compute length              |
-   |compute-checksum    |elided       |compute UDP checksum        |
-   |DevIID              |elided       |build IID from L2 Dev addr  |
-   |AppIID              |elided       |build IID from L2 App addr  |
-   \--------------------+-------------+----------------------------/
+   /--------------------+-------------+-----------------------------\
+   |  Action            | Compression | Decompression               |
+   |                    |             |                             |
+   +--------------------+-------------+-----------------------------+
+   |not-sent            |elided       |use TV stored in Rule        |
+   |value-sent          |send         |use received value           |
+   |mapping-sent        |send index   |value retrieved from TV list |
+   |LSB                 |send LSB     |concat. TV and received value|
+   |compute-*           |elided       |recompute at decompressor    |
+   |DevIID              |elided       |build IID from L2 Dev addr   |
+   |AppIID              |elided       |build IID from L2 App addr   |
+   \--------------------+-------------+-----------------------------/
 
 
               Figure 8: Compression and Decompression Actions
@@ -945,6 +943,8 @@ Internet-Draft                 LPWAN SCHC                      July 2019
    resulting from applying the CDA to the field.  This value may be
    empty (e.g. not-sent CDA), in which case the field residue is absent
    from the Compression Residue.
+
+
 
 
 
@@ -1035,8 +1035,8 @@ Internet-Draft                 LPWAN SCHC                      July 2019
    action is used together with the "match-mapping" MO.
 
    On the compressor side, the match-mapping Matching Operator searches
-   the TV for a match with the header field value and the mapping-sent
-   CDA sends the corresponding index as the field residue.  On the
+   the TV for a match with the header field value.  The mapping-sent CDA
+   then sends the corresponding index as the field residue.  On the
    decompressor side, the CDA uses the received index to restore the
    field value by looking up the list in the TV.
 
@@ -1087,15 +1087,15 @@ Internet-Draft                 LPWAN SCHC                      July 2019
 
 7.5.8.  Compute-*
 
-   Some fields may be elided during compression and reconstructed during
-   decompression.  This is the case for length and checksum, so:
+   Some fields can be elided at the compressor and recomputed locally at
+   the decompressor.
 
-   o  compute-length: computes the length assigned to this field.  This
-      CDA MAY be used to compute IPv6 length or UDP length.
+   Because the field is uniquely identified by its Field ID (e.g.  UDP
+   length), the relevant protocol specification unambiguously defines
+   the algorithm for such computation.
 
-   o  compute-checksum: computes a checksum from the information already
-      received by the SCHC C/D.  This field MAY be used to compute UDP
-      checksum.
+   Examples of fields that know how to recompute themselves are UDP
+   length, IPv6 length and UDP checksum.
 
 8.  Fragmentation/Reassembly
 
@@ -2751,7 +2751,7 @@ Internet-Draft                 LPWAN SCHC                      July 2019
    This field can be elided for the transmission on the LPWAN network.
    The SCHC C/D recomputes the original payload length value.  In the
    Field Descriptor, TV is not set, MO is set to "ignore" and CDA is
-   "compute-IPv6-length".
+   "compute-*".
 
 10.5.  Next Header field
 
@@ -2879,9 +2879,8 @@ Internet-Draft                 LPWAN SCHC                      July 2019
 
 10.10.  UDP length field
 
-   The UDP length can be computed from the received data.  In that case,
-   the TV is not set, the MO is set to "ignore" and the CDA is set to
-   "compute-length".
+   The UDP length can be computed from the received data.  The TV is not
+   set, the MO is set to "ignore" and the CDA is set to "compute-*".
 
 10.11.  UDP Checksum field
 
@@ -2909,13 +2908,14 @@ Internet-Draft                 LPWAN SCHC                      July 2019
 
 
 
+
 Minaburo, et al.         Expires January 4, 2020               [Page 52]
 
 Internet-Draft                 LPWAN SCHC                      July 2019
 
 
    payload and the pseudo-header.  In this case, the TV is not set, the
-   MO is set to "ignore" and the CDA is set to "compute-checksum".
+   MO is set to "ignore" and the CDA is set to "compute-*".
 
    In particular, when SCHC fragmentation is used, a fragmentation MIC
    of 2 bytes or more provides equal or better protection than the UDP
