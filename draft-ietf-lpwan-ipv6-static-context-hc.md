@@ -9,7 +9,7 @@ pi:
   strict: 'yes'
   compact: 'yes'
   toc: 'yes'
-title: LPWAN Static Context Header Compression (SCHC) and fragmentation for IPv6 and UDP
+title: Static Context Header Compression (SCHC) and fragmentation for LPWAN, application to UDP/IPv6
 abbrev: LPWAN SCHC
 wg: lpwan Working Group
 author:
