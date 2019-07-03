@@ -386,14 +386,15 @@ Each Rule itself contains a list of Field Descriptions composed of a Field Ident
 
 
 A Rule does not describe how the compressor parses a packet header to find and identify each field (e.g. the IPv6 Source Address, the UDP Destination Port or a CoAP URI path option).
-It is assumed that there is a protocol parser somewhere alongside SCHC that is able to identify and label with a Field ID all fields encountered in the headers to be compressed, even in the presence of nested protocols.
-Rules only describe the compression/decompression behavior for each header field.
-The header fields must have been identified by the compressor prior to testing for a Rule match.
+It is assumed that there is a protocol parser somewhere alongside SCHC that is able to identify
+all the fields encountered in the headers to be compressed,
+and to label them with a Field ID.
+Rules only describe the compression/decompression behavior for each header field, after it has been identified.
 
 In a Rule, the Field Descriptions are listed in the order in which the fields appear in the packet header.
 The Field Descriptions describe the header fields with the following entries:
 
-* Field ID (FID) designates a protocol and field (e.g. UDP Destination Port), unambiguously among all protocols that a SCHC compressor processes.
+* Field ID (FID) designates a protocol and field (e.g. UDP Destination Port), unambiguously among all protocols that a SCHC compressor processes. In the presence of protocol nesting, the Field ID also identifies the nesting.
 
 * Field Length (FL) represents the length of the field. It can be either a fixed value (in bits) if the length is known when the Rule is created or a type if the length is variable. The length of a header field is defined by its own protocol specification (e.g. IPv6 or UDP). If the length is variable, the type defines the process to compute the length and its unit (bits, bytes...).
 
@@ -479,7 +480,7 @@ Matching Operators (MOs) are functions used by both SCHC C/D endpoints. They are
 
 * MSB(x): A match is obtained if the most significant x bits of the packet header field value are equal to the TV in the Rule. The x parameter of the MSB MO indicates how many bits are involved in the comparison. If the FL is described as variable, the length must be a multiple of the unit. For example, x must be multiple of 8 if the unit of the variable length is in bytes.
 
-* match-mapping: With match-mapping, the Target Value is a list of values. Each value of the list is identified by a short ID (or index). Compression is achieved by sending the index instead of the original header field value. This operator matches if the header field value is equal to one of the values in the target list.
+* match-mapping: With match-mapping, the Target Value is a list of values. Each value of the list is identified by an index. Compression is achieved by sending the index instead of the original header field value. This operator matches if the header field value is equal to one of the values in the target list.
 
 
 ## Compression Decompression Actions (CDA) {#chap-CDA}
@@ -487,19 +488,18 @@ Matching Operators (MOs) are functions used by both SCHC C/D endpoints. They are
 The Compression Decompression Action (CDA) describes the actions taken during the compression of header fields and the inverse action taken by the decompressor to restore the original value.
 
 ~~~~
-/--------------------+-------------+----------------------------\
-|  Action            | Compression | Decompression              |
-|                    |             |                            |
-+--------------------+-------------+----------------------------+
-|not-sent            |elided       |use value stored in Context |
-|value-sent          |send         |build from received value   |
-|mapping-sent        |send index   |value from index on a table |
-|LSB                 |send LSB     |TV, received value          |
-|compute-length      |elided       |compute length              |
-|compute-checksum    |elided       |compute UDP checksum        |
-|DevIID              |elided       |build IID from L2 Dev addr  |
-|AppIID              |elided       |build IID from L2 App addr  |
-\--------------------+-------------+----------------------------/
+/--------------------+-------------+-----------------------------\
+|  Action            | Compression | Decompression               |
+|                    |             |                             |
++--------------------+-------------+-----------------------------+
+|not-sent            |elided       |use TV stored in Rule        |
+|value-sent          |send         |use received value           |
+|mapping-sent        |send index   |value retrieved from TV list |
+|LSB                 |send LSB     |concat. TV and received value|
+|compute-*           |elided       |recompute at decompressor    |
+|DevIID              |elided       |build IID from L2 Dev addr   |
+|AppIID              |elided       |build IID from L2 App addr   |
+\--------------------+-------------+-----------------------------/
 
 ~~~~
 {: #Fig-function title='Compression and Decompression Actions'}
@@ -572,7 +572,7 @@ This action is generally used with the "ignore" MO.
 
 The mapping-sent action is used to send an index (the index into the Target Value list of values) instead of the original value. This action is used together with the "match-mapping" MO.
 
-On the compressor side, the match-mapping Matching Operator searches the TV for a match with the header field value and the mapping-sent CDA sends the corresponding index as the field residue.
+On the compressor side, the match-mapping Matching Operator searches the TV for a match with the header field value. The mapping-sent CDA then sends the corresponding index as the field residue.
 On the decompressor side, the CDA uses the received index to restore the field value by looking up the list in the TV.
 
 The number of bits sent is the minimal size for coding all the possible indices.
@@ -599,12 +599,11 @@ In the downlink direction (Dw), at the compressor, the DevIID CDA may be used to
 
 ### Compute-\*
 
-Some fields may be elided during compression and reconstructed during decompression. This is the case for length and checksum, so:
+Some fields can be elided at the compressor and recomputed locally at the decompressor.
 
-* compute-length: computes the length assigned to this field. This CDA MAY be used to compute IPv6 length or UDP length.
+Because the field is uniquely identified by its Field ID (e.g. UDP length), the relevant protocol specification unambiguously defines the algorithm for such computation.
 
-* compute-checksum: computes a checksum from the information already received by the SCHC C/D. This field MAY be used to compute UDP checksum.
-
+Examples of fields that know how to recompute themselves are UDP length, IPv6 length and UDP checksum.
 
 # Fragmentation/Reassembly {#Frag}
 
@@ -1684,7 +1683,7 @@ Otherwise, two possibilities can be considered:
 
 ## Payload Length field
 
-This field can be elided for the transmission on the LPWAN network. The SCHC C/D recomputes the original payload length value. In the Field Descriptor, TV is not set, MO is set to "ignore" and CDA is "compute-IPv6-length".
+This field can be elided for the transmission on the LPWAN network. The SCHC C/D recomputes the original payload length value. In the Field Descriptor, TV is not set, MO is set to "ignore" and CDA is "compute-\*".
 
 
 ## Next Header field
@@ -1752,7 +1751,7 @@ Otherwise the port numbers are sent over the LPWAN. The TV is not set, the MO is
 
 ## UDP length field
 
-The UDP length can be computed from the received data. In that case, the TV is not set, the MO is set to "ignore" and the CDA is set to "compute-length".
+The UDP length can be computed from the received data. The TV is not set, the MO is set to "ignore" and the CDA is set to "compute-\*".
 
 ## UDP Checksum field {#UDPchecksum}
 
@@ -1779,7 +1778,7 @@ the UDP checksum.
 Similarly, a SCHC compressor MAY
 elide the UDP checksum when another layer guarantees at least equal
 integrity protection for the UDP payload and the pseudo-header.
-In this case, the TV is not set, the MO is set to "ignore" and the CDA is set to "compute-checksum".
+In this case, the TV is not set, the MO is set to "ignore" and the CDA is set to "compute-\*".
 
 In particular, when SCHC fragmentation is used, a fragmentation MIC
 of 2 bytes or more provides equal or better protection than the UDP
