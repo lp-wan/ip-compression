@@ -1701,7 +1701,7 @@ The Direction Indicator (DI) can be used to distinguish both directions:
 
 * in the Up, elide the field: the TV in the Field Descriptor is set to the known constant value, the MO is set to "equal" and the CDA is set to "not-sent".
 
-* in the Dw, send the value: TV is not set, MO is set to "ignore" and CDA is set to "value-sent".
+* in the Dw, the Hop Limit is elided for transmission and forced to 1 at the receiver, by setting TV to 1, MO to "ignore" and CDA to "not-sent". This prevents any further forwarding.
 
 ## IPv6 addresses fields
 
