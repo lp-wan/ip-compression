@@ -358,11 +358,11 @@ Internet-Draft                 LPWAN SCHC                      July 2019
       field is defined in the corresponding protocol specification (such
       as IPv6 or UDP).
 
-   o  FP: when a Field is expected to appears multiple times in a
-      header, Field Position specifies the occurence this Field
-      Description applies to (for example, first uri-path option, second
-      uri-path, etc. in a CoAP header).  The value 1 designates the
-      first occurence.  The default value is 1.
+   o  FP: when a Field is expected to appear multiple times in a header,
+      Field Position specifies the occurence this Field Description
+      applies to (for example, first uri-path option, second uri-path,
+      etc. in a CoAP header).  The value 1 designates the first
+      occurence.  The default value is 1.
 
    o  IID: Interface Identifier.  See the IPv6 addressing architecture
       [RFC7136]
@@ -573,12 +573,12 @@ Internet-Draft                 LPWAN SCHC                      July 2019
    the SCHC F/R functionality nearer the NGW, in order to better deal
    with time constraints of such technologies.
 
-   The SCHC C/Ds on both sides MUST share the same set of Rules.  So do
-   the SCHC F/Rs on both sides.
+   The SCHC C/Ds on both sides MUST share the same set of Rules.  So
+   MUST the SCHC F/Rs on both sides.
 
-   The SCHC C/D and F/R process is symmetrical, therefore the
-   description of the operation in the Downlink direction is symmetrical
-   to the one above.  The rules themselves may be asymmetrical.
+   The operation in the Downlink direction is similar to that in the
+   Uplink direction, only reverting the order in which the architecture
+   elements are traversed.
 
 6.  Rule ID
 
@@ -698,11 +698,11 @@ Internet-Draft                 LPWAN SCHC                      July 2019
    A Rule does not describe how the compressor parses a packet header to
    find and identify each field (e.g. the IPv6 Source Address, the UDP
    Destination Port or a CoAP URI path option).  It is assumed that
-   there is a protocol parser somewhere alongside SCHC that is able to
-   identify all the fields encountered in the headers to be compressed,
-   and to label them with a Field ID.  Rules only describe the
-   compression/decompression behavior for each header field, after it
-   has been identified.
+   there is a protocol parser alongside SCHC that is able to identify
+   all the fields encountered in the headers to be compressed, and to
+   label them with a Field ID.  Rules only describe the compression/
+   decompression behavior for each header field, after it has been
+   identified.
 
    In a Rule, the Field Descriptions are listed in the order in which
    the fields appear in the packet header.  The Field Descriptions
@@ -2948,20 +2948,20 @@ Internet-Draft                 LPWAN SCHC                      July 2019
 
    Wireless networks are subjects to various sorts of attacks, which are
    not specific to SCHC.  In this section, we'll assume that an attacker
-   was able to break in the network and send packets to a target node,
-   despite the security measures.  Our analysis equally applies to
-   legitimate nodes "going crazy".  What is specific to SCHC is the
-   amplification of the effects that it could allow.
+   was able to break into the network despite the latter's security
+   measures and that it can now send packets to a target node.  What is
+   specific to SCHC is the amplification of the effects that this break-
+   in could allow.  Our analysis equally applies to legitimate nodes
+   "going crazy".
 
 12.1.  Security considerations for SCHC Compression/Decompression
 
-   Let's assume that an attacker is able to send to a forged SCHC Packet
-   to a SCHC Decompressor.
+   Let's assume that an attacker is able to send a forged SCHC Packet to
+   a SCHC Decompressor.
 
    Let's first consider the case where the Rule ID contained in that
    forged SCHC Packet does not correspond to a Rule allocated in the
-   Rule table.  An implementation should silently drop the offending
-   SCHC Packet.
+
 
 
 
@@ -2970,12 +2970,17 @@ Minaburo, et al.         Expires January 5, 2020               [Page 53]
 Internet-Draft                 LPWAN SCHC                      July 2019
 
 
+   Rule table.  An implementation should detect that the Rule ID is
+   invalid and should silently drop the offending SCHC Packet.
+
    Let's now consider that the Rule ID corresponds to a Rule in the
    table.  With the CDAs defined in this document, the reconstructed
-   packet is a most a constant number of bits bigger that the SCHC
+   packet is at most a constant number of bits bigger than the SCHC
    Packet that was received.  This assumes that the compute-*
    decompression actions produce a bounded number of bits, irrespective
-   of the incoming SCHC Packet.
+   of the incoming SCHC Packet.  This property is true for IPv6 Length,
+   UDP Length and UDP Checksum, for which the compute-* CDA is
+   recommended by this document.
 
    As a consequence, SCHC Decompression does not amplify attacks, beyond
    adding a bounded number of bits to the SCHC Packet received.  This
@@ -2992,7 +2997,7 @@ Internet-Draft                 LPWAN SCHC                      July 2019
 
    A node can perform a buffer reservation attack: the receiver will
    reserve buffer space for the SCHC Packet.  If the implementation has
-   on;y one buffer, other incoming fragmented SCHC Packets will be
+   only one buffer, other incoming fragmented SCHC Packets will be
    dropped while the reassembly buffer is occupied during the reassembly
    timeout.  Once that timeout expires, the attacker can repeat the same
    procedure, and iterate, thus creating a denial of service attack.  An
@@ -3002,7 +3007,7 @@ Internet-Draft                 LPWAN SCHC                      July 2019
    individual fragments of multiple SCHC Packets can be stored in the
    reassembly buffer.  The finer grained the reassembly buffer (downto
    the smallest tile size), the higher the cost of the attack.  If
-   buffer overload does occurs, a smart receiver could selectively
+   buffer overload does occur, a smart receiver could selectively
    discard SCHC Packets being reassembled based on the sender behavior,
    which may help identify which SCHC Fragments have been sent by the
    attacker.  Another mild counter-measure is for the target to abort
@@ -3011,13 +3016,8 @@ Internet-Draft                 LPWAN SCHC                      July 2019
    corrupt SCHC Packet, so as to save the sender the hassle of sending
    the rest of the fragments for this SCHC Packet.
 
-   In another type of attack, the malicious node is additionnaly assumed
+   In another type of attack, the malicious node is additionally assumed
    to be able to hear an incoming communication destined to the target
-   node.  It can then send a forged SCHC Fragment that looks like it
-   belongs to a SCHC Packet already being reassembled at the target
-   node.  This can cause the SCHC Packet to be considered corrupt and be
-   dropped by the receiver.  The amplification happens here by a single
-   spoofed SCHC Fragment rendering a full sequence of legit SCHC
 
 
 
@@ -3026,6 +3026,11 @@ Minaburo, et al.         Expires January 5, 2020               [Page 54]
 Internet-Draft                 LPWAN SCHC                      July 2019
 
 
+   node.  It can then send a forged SCHC Fragment that looks like it
+   belongs to a SCHC Packet already being reassembled at the target
+   node.  This can cause the SCHC Packet to be considered corrupt and be
+   dropped by the receiver.  The amplification happens here by a single
+   spoofed SCHC Fragment rendering a full sequence of legit SCHC
    Fragments useless.  If the target uses ACK-Always or ACK-on-Error
    mode, such a malicious node can also interfere with the
    acknowledgement and repetition algorithm of SCHC F/R.  A single
@@ -3067,11 +3072,6 @@ Internet-Draft                 LPWAN SCHC                      July 2019
               RFC 6936, DOI 10.17487/RFC6936, April 2013,
               <https://www.rfc-editor.org/info/rfc6936>.
 
-   [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
-              2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
-              May 2017, <https://www.rfc-editor.org/info/rfc8174>.
-
-
 
 
 
@@ -3081,6 +3081,10 @@ Minaburo, et al.         Expires January 5, 2020               [Page 55]
 
 Internet-Draft                 LPWAN SCHC                      July 2019
 
+
+   [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
+              2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
+              May 2017, <https://www.rfc-editor.org/info/rfc8174>.
 
    [RFC8200]  Deering, S. and R. Hinden, "Internet Protocol, Version 6
               (IPv6) Specification", STD 86, RFC 8200,
@@ -3124,10 +3128,6 @@ Internet-Draft                 LPWAN SCHC                      July 2019
               Layer Mechanisms", RFC 8065, DOI 10.17487/RFC8065,
               February 2017, <https://www.rfc-editor.org/info/rfc8065>.
 
-   [RFC8376]  Farrell, S., Ed., "Low-Power Wide Area Network (LPWAN)
-              Overview", RFC 8376, DOI 10.17487/RFC8376, May 2018,
-              <https://www.rfc-editor.org/info/rfc8376>.
-
 
 
 
@@ -3137,6 +3137,10 @@ Minaburo, et al.         Expires January 5, 2020               [Page 56]
 
 Internet-Draft                 LPWAN SCHC                      July 2019
 
+
+   [RFC8376]  Farrell, S., Ed., "Low-Power Wide Area Network (LPWAN)
+              Overview", RFC 8376, DOI 10.17487/RFC8376, May 2018,
+              <https://www.rfc-editor.org/info/rfc8376>.
 
 Appendix A.  Compression Examples
 
@@ -3182,10 +3186,6 @@ Appendix A.  Compression Examples
    Rule 0
     +----------------+--+--+--+---------+--------+------------++------+
     | Field          |FL|FP|DI| Value   | Match  | Comp Decomp|| Sent |
-    |                |  |  |  |         | Opera. | Action     ||[bits]|
-    +----------------+--+--+--+---------+---------------------++------+
-    |IPv6 version    |4 |1 |Bi|6        | equal  | not-sent   ||      |
-    |IPv6 DiffServ   |8 |1 |Bi|0        | equal  | not-sent   ||      |
 
 
 
@@ -3194,6 +3194,10 @@ Minaburo, et al.         Expires January 5, 2020               [Page 57]
 Internet-Draft                 LPWAN SCHC                      July 2019
 
 
+    |                |  |  |  |         | Opera. | Action     ||[bits]|
+    +----------------+--+--+--+---------+---------------------++------+
+    |IPv6 version    |4 |1 |Bi|6        | equal  | not-sent   ||      |
+    |IPv6 DiffServ   |8 |1 |Bi|0        | equal  | not-sent   ||      |
     |IPv6 Flow Label |20|1 |Bi|0        | equal  | not-sent   ||      |
     |IPv6 Length     |16|1 |Bi|         | ignore | comp-length||      |
     |IPv6 Next Header|8 |1 |Bi|17       | equal  | not-sent   ||      |
@@ -3238,10 +3242,6 @@ Internet-Draft                 LPWAN SCHC                      July 2019
     +----------------+--+--+--+---------+--------+------------++------+
     | Field          |FL|FP|DI| Value   | Match  | Action     || Sent |
     |                |  |  |  |         | Opera. | Action     ||[bits]|
-    +----------------+--+--+--+---------+--------+------------++------+
-    |IPv6 version    |4 |1 |Bi|6        | equal  | not-sent   ||      |
-    |IPv6 DiffServ   |8 |1 |Bi|0        | equal  | not-sent   ||      |
-    |IPv6 Flow Label |20|1 |Bi|0        | equal  | not-sent   ||      |
 
 
 
@@ -3250,6 +3250,10 @@ Minaburo, et al.         Expires January 5, 2020               [Page 58]
 Internet-Draft                 LPWAN SCHC                      July 2019
 
 
+    +----------------+--+--+--+---------+--------+------------++------+
+    |IPv6 version    |4 |1 |Bi|6        | equal  | not-sent   ||      |
+    |IPv6 DiffServ   |8 |1 |Bi|0        | equal  | not-sent   ||      |
+    |IPv6 Flow Label |20|1 |Bi|0        | equal  | not-sent   ||      |
     |IPv6 Length     |16|1 |Bi|         | ignore | comp-length||      |
     |IPv6 Next Header|8 |1 |Bi|17       | equal  | not-sent   ||      |
     |IPv6 Hop Limit  |8 |1 |Up|255      | ignore | not-sent   ||      |
@@ -3286,10 +3290,6 @@ Appendix B.  Fragmentation Examples
 
    Figure 27 illustrates the transmission in No-ACK mode of a SCHC
    Packet that needs 11 SCHC Fragments.  FCN is 1 bit wide.
-
-
-
-
 
 
 
