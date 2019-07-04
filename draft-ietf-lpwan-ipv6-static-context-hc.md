@@ -176,7 +176,7 @@ The SCHC acronym is pronounced like "sheek" in English (or "chic" in French). Th
 
 * FL: Field Length is the length of the packet header field. It is expressed in bits for header fields of fixed lengths or as a type (e.g. variable, token length, ...) for field lengths that are unknown at the time of Rule creation. The length of a header field is defined in the corresponding protocol specification (such as IPv6 or UDP).
 
-* FP: when a Field is expected to appears multiple times in a header, Field Position specifies the occurence this Field Description applies to
+* FP: when a Field is expected to appear multiple times in a header, Field Position specifies the occurence this Field Description applies to
   (for example, first uri-path option, second uri-path, etc. in a CoAP header).
   The value 1 designates the first occurence. The default value is 1.
 
@@ -319,10 +319,9 @@ For some LPWAN technologies, it may be suitable to locate the SCHC F/R
 functionality nearer the NGW, in order to better deal with time constraints of such technologies.
 
 The SCHC C/Ds on both sides MUST share the same set of Rules.
-So do the SCHC F/Rs on both sides.
+So MUST the SCHC F/Rs on both sides.
 
-The SCHC C/D and F/R process is symmetrical, therefore the description of the operation in the Downlink direction is symmetrical to the one above. The rules themselves may be asymmetrical.
-
+The operation in the Downlink direction is similar to that in the Uplink direction, only reverting the order in which the architecture elements are traversed.
 
 # Rule ID
 
@@ -386,7 +385,7 @@ Each Rule itself contains a list of Field Descriptions composed of a Field Ident
 
 
 A Rule does not describe how the compressor parses a packet header to find and identify each field (e.g. the IPv6 Source Address, the UDP Destination Port or a CoAP URI path option).
-It is assumed that there is a protocol parser somewhere alongside SCHC that is able to identify
+It is assumed that there is a protocol parser alongside SCHC that is able to identify
 all the fields encountered in the headers to be compressed,
 and to label them with a Field ID.
 Rules only describe the compression/decompression behavior for each header field, after it has been identified.
@@ -1804,18 +1803,20 @@ This document has no request to IANA.
 # Security considerations {#SecConsiderations}
 
 Wireless networks are subjects to various sorts of attacks, which are not specific to SCHC.
-In this section, we'll assume that an attacker was able to break in the network and send packets to a target node, despite the security measures.
+In this section, we'll assume that an attacker was able to break into the network despite the latter's security measures
+and that it can now send packets to a target node.
+What is specific to SCHC is the amplification of the effects that this break-in could allow.
 Our analysis equally applies to legitimate nodes "going crazy".
-What is specific to SCHC is the amplification of the effects that it could allow.
 
 ## Security considerations for SCHC Compression/Decompression
 
-Let's assume that an attacker is able to send to a forged SCHC Packet to a SCHC Decompressor.
+Let's assume that an attacker is able to send a forged SCHC Packet to a SCHC Decompressor.
 
 Let's first consider the case where the Rule ID contained in that forged SCHC Packet does not correspond to a Rule allocated in the Rule table.
-An implementation should silently drop the offending SCHC Packet.
+An implementation should detect that the Rule ID is invalid and should silently drop the offending SCHC Packet.
 
-Let's now consider that the Rule ID corresponds to a Rule in the table. With the CDAs defined in this document, the reconstructed packet is a most a constant number of bits bigger that the SCHC Packet that was received. This assumes that the compute-\* decompression actions produce a bounded number of bits, irrespective of the incoming SCHC Packet.
+Let's now consider that the Rule ID corresponds to a Rule in the table. With the CDAs defined in this document, the reconstructed packet is at most a constant number of bits bigger than the SCHC Packet that was received.
+This assumes that the compute-\* decompression actions produce a bounded number of bits, irrespective of the incoming SCHC Packet. This property is true for IPv6 Length, UDP Length and UDP Checksum, for which the compute-\* CDA is recommended by this document.
 
 As a consequence, SCHC Decompression does not amplify attacks, beyond adding a bounded number of bits to the SCHC Packet received. This bound is determined by the Rule stored in the receiving device.
 
@@ -1824,13 +1825,13 @@ As a general safety measure, a SCHC Decompressor should never re-construct a pac
 ## Security considerations for SCHC Fragmentation/Reassembly
 Let's assume that an attacker is able to send to a forged SCHC Fragment to a SCHC Reassembler.
 
-A node can perform a buffer reservation attack: the receiver will reserve buffer space for the SCHC Packet. If the implementation has on;y one buffer, other incoming fragmented SCHC Packets will be dropped while the reassembly buffer is occupied during the reassembly timeout. Once that timeout expires, the attacker can repeat the same procedure, and iterate, thus creating a denial of service attack.
+A node can perform a buffer reservation attack: the receiver will reserve buffer space for the SCHC Packet. If the implementation has only one buffer, other incoming fragmented SCHC Packets will be dropped while the reassembly buffer is occupied during the reassembly timeout. Once that timeout expires, the attacker can repeat the same procedure, and iterate, thus creating a denial of service attack.
 An implementation may have multiple reassembly buffers. The cost to mount this attack is linear with the number of buffers at the target node.
 Better, the cost for an attacker can be increased if individual fragments of multiple SCHC Packets can be stored in the reassembly buffer. The finer grained the reassembly buffer (downto the smallest tile size), the higher the cost of the attack.
-If buffer overload does occurs, a smart receiver could selectively discard SCHC Packets being reassembled based on the sender behavior, which may help identify which SCHC Fragments have been sent by the attacker.
+If buffer overload does occur, a smart receiver could selectively discard SCHC Packets being reassembled based on the sender behavior, which may help identify which SCHC Fragments have been sent by the attacker.
 Another mild counter-measure is for the target to abort the fragmentation/reassembly session as early as it detects a non-identical SCHC Fragment duplicate, anticipating for an eventual corrupt SCHC Packet, so as to save the sender the hassle of sending the rest of the fragments for this SCHC Packet.
 
-In another type of attack, the malicious node is additionnaly assumed to be able to hear an incoming communication destined to the target node.
+In another type of attack, the malicious node is additionally assumed to be able to hear an incoming communication destined to the target node.
 It can then send a forged SCHC Fragment that looks like it belongs to a SCHC Packet already being reassembled at the target node.
 This can cause the SCHC Packet to be considered corrupt and be dropped by the receiver.
 The amplification happens here by a single spoofed SCHC Fragment rendering a full sequence of legit SCHC Fragments useless.
