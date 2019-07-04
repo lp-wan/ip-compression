@@ -1804,6 +1804,8 @@ This document has no request to IANA.
 # Security considerations {#SecConsiderations}
 
 Wireless networks are subjects to various sorts of attacks, which are not specific to SCHC.
+In this section, we'll assume that an attacker was able to break in the network and send packets to a target node, despite the security measures.
+Our analysis equally applies to legitimate nodes "going crazy".
 What is specific to SCHC is the amplification of the effects that it could allow.
 
 ## Security considerations for SCHC Compression/Decompression
