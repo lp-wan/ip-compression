@@ -527,6 +527,7 @@ then aplying the CDA to compress this field may result in a value of fixed size
 (e.g. not-sent or mapping-sent)
 or of variable size (e.g. value-sent or LSB).
 In the latter case, the residue for that field is the bits that result from applying the CDA to the field, preceded with the size of the value.
+The most significant bit of the size is stored first (left of the residue bit field).
 
 ~~~~
 
@@ -569,6 +570,8 @@ This action is generally used with the "ignore" MO.
 The mapping-sent action is used to send an index (the index into the Target Value list of values) instead of the original value. This action is used together with the "match-mapping" MO.
 
 On the compressor side, the match-mapping Matching Operator searches the TV for a match with the header field value. The mapping-sent CDA then sends the corresponding index as the field residue.
+The most significant bit of the index is stored first (left of the residue bit field).
+
 On the decompressor side, the CDA uses the received index to restore the field value by looking up the list in the TV.
 
 The number of bits sent is the minimal size for coding all the possible indices.
