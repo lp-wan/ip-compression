@@ -1717,7 +1717,7 @@ source and destination prefixes contain the values, the MO is set to "equal" and
 
 If the Rule is intended to compress packets with different prefix values, match-mapping SHOULD be used. The different prefixes are listed in the TV, the MO is set to "match-mapping" and the CDA is set to "mapping-sent". See {{Fig-fields}}.
 
-Otherwise, the TV contains the prefix, the MO is set to "equal" and the CDA is set to "value-sent".
+Otherwise, the TV is not set, the MO is set to "ignore" and the CDA is set to "value-sent".
 
 ### IPv6 source and destination IID
 
