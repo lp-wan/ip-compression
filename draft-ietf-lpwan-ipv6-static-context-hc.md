@@ -1658,7 +1658,9 @@ This section lists the IPv6 and UDP header fields and describes how they can be 
 
 ## IPv6 version field
 
-This field always holds the same value. In the Rule, TV is set to 6, MO to "equal"
+The IPv6 version field is labeled by the protocol parser as being the "version" field of the IPv6 protocol.
+Therefore, it only exists for IPv6 packets.
+In the Rule, TV is set to 6, MO to "ignore"
 and CDA to "not-sent".
 
 ## IPv6 Traffic class field
