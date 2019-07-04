@@ -1803,20 +1803,41 @@ This document has no request to IANA.
 
 # Security considerations {#SecConsiderations}
 
+Wireless networks are subjects to various sorts of attacks, which are not specific to SCHC.
+What is specific to SCHC is the amplification of the effects that it could allow.
+
 ## Security considerations for SCHC Compression/Decompression
-A malicious header compression could cause the reconstruction of a wrong packet that does not match with the original one. Such a corruption MAY be detected with end-to-end authentication and integrity mechanisms. Header Compression does not add more security problem than what is already needed in a transmission. For instance, to avoid an attack, never re-construct a packet bigger than MAX_PACKET_SIZE (with 1500 bytes as generic default).
+
+Let's assume that an attacker is able to send to a forged SCHC Packet to a SCHC Decompressor.
+
+Let's first consider the case where the Rule ID contained in that forged SCHC Packet does not correspond to a Rule allocated in the Rule table.
+An implementation should silently drop the offending SCHC Packet.
+
+Let's now consider that the Rule ID corresponds to a Rule in the table. With the CDAs defined in this document, the reconstructed packet is a most a constant number of bits bigger that the SCHC Packet that was received. This assumes that the compute-\* decompression actions produce a bounded number of bits, irrespective of the incoming SCHC Packet.
+
+As a consequence, SCHC Decompression does not amplify attacks, beyond adding a bounded number of bits to the SCHC Packet received. This bound is determined by the Rule stored in the receiving device.
+
+As a general safety measure, a SCHC Decompressor should never re-construct a packet larger than MAX_PACKET_SIZE (defined in a Profile, with 1500 bytes as generic default).
 
 ## Security considerations for SCHC Fragmentation/Reassembly
-This subsection describes potential attacks to LPWAN SCHC F/R and suggests possible countermeasures.
+Let's assume that an attacker is able to send to a forged SCHC Fragment to a SCHC Reassembler.
 
-A node can perform a buffer reservation attack by sending a first SCHC Fragment to a target.  Then, the receiver will reserve buffer space for the IPv6 packet.  Other incoming fragmented SCHC Packets will be dropped while the reassembly buffer is occupied during the reassembly timeout.  Once that timeout expires, the attacker can repeat the same procedure, and iterate, thus creating a denial of service attack.
-The (low) cost to mount this attack is linear with the number of buffers at the target node.  However, the cost for an attacker can be increased if individual SCHC Fragments of multiple packets can be stored in the reassembly buffer.  To further increase the attack cost, the reassembly buffer can be split into SCHC Fragment-sized buffer slots. Once a packet is complete, it is processed normally.  If buffer overload occurs, a receiver can discard packets based on the sender behavior, which MAY help identify which SCHC Fragments have been sent by an attacker.
+A node can perform a buffer reservation attack: the receiver will reserve buffer space for the SCHC Packet. If the implementation has on;y one buffer, other incoming fragmented SCHC Packets will be dropped while the reassembly buffer is occupied during the reassembly timeout. Once that timeout expires, the attacker can repeat the same procedure, and iterate, thus creating a denial of service attack.
+An implementation may have multiple reassembly buffers. The cost to mount this attack is linear with the number of buffers at the target node.
+Better, the cost for an attacker can be increased if individual fragments of multiple SCHC Packets can be stored in the reassembly buffer. The finer grained the reassembly buffer (downto the smallest tile size), the higher the cost of the attack.
+If buffer overload does occurs, a smart receiver could selectively discard SCHC Packets being reassembled based on the sender behavior, which may help identify which SCHC Fragments have been sent by the attacker.
+Another mild counter-measure is for the target to abort the fragmentation/reassembly session as early as it detects a non-identical SCHC Fragment duplicate, anticipating for an eventual corrupt SCHC Packet, so as to save the sender the hassle of sending the rest of the fragments for this SCHC Packet.
 
-In another type of attack, the malicious node is required to have overhearing capabilities.  If an attacker can overhear a SCHC Fragment, it can send a spoofed duplicate (e.g. with random payload) to the destination. If the LPWAN technology does not support suitable protection (e.g. source authentication and frame counters to prevent replay attacks), a receiver cannot distinguish legitimate from spoofed SCHC Fragments.  The original IPv6 packet will be considered corrupt and will be dropped. To protect resource-constrained nodes from this attack, it has been proposed to establish a binding among the SCHC Fragments to be transmitted by a node, by applying content-chaining to the different SCHC Fragments, based on cryptographic hash functionality.  The aim of this technique is to allow a receiver to identify illegitimate SCHC Fragments.
-
-Further attacks can involve sending overlapped fragments (i.e. comprising some overlapping parts of the original IPv6 datagram). Implementers MUST ensure that the correct operation is not affected by such event.
-
-In ACK-on-Error, a malicious node MAY force a SCHC Fragment sender to resend a SCHC Fragment a number of times, with the aim to increase consumption of the SCHC Fragment sender’s resources. To this end, the malicious node MAY repeatedly send a fake ACK to the SCHC Fragment sender, with a Bitmap that reports that one or more SCHC Fragments have been lost. In order to mitigate this possible attack, MAX_ACK_RETRIES MAY be set to a safe value which allows to limit the maximum damage of the attack to an acceptable extent. However, note that a high setting for MAX_ACK_RETRIES benefits SCHC Fragment reliability modes, therefore the trade-off needs to be carefully considered.
+In another type of attack, the malicious node is additionnaly assumed to be able to hear an incoming communication destined to the target node.
+It can then send a forged SCHC Fragment that looks like it belongs to a SCHC Packet already being reassembled at the target node.
+This can cause the SCHC Packet to be considered corrupt and be dropped by the receiver.
+The amplification happens here by a single spoofed SCHC Fragment rendering a full sequence of legit SCHC Fragments useless.
+If the target uses ACK-Always or ACK-on-Error mode, such a malicious node can also interfere with
+the acknowledgement and repetition algorithm of SCHC F/R.
+A single spoofed ACK, with all bitmap bits set to 0, will trigger the repetition of WINDOW_SIZE tiles. This protocol loop amplification depletes the energy source of the target node and consumes the channel bandwidth.
+Similarly, a spoofed ACK REQ will trigger the sending of a SCHC ACK,
+which may be much larger than the ACK REQ if WINDOW_SIZE is large.
+These consequences should be borne in mind when defining profiles for SCHC over specific LPWAN technologies.
 
 # Acknowledgements
 
