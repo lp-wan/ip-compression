@@ -126,7 +126,7 @@ Internet-Draft                 LPWAN SCHC                      July 2019
      8.1.  Overview  . . . . . . . . . . . . . . . . . . . . . . . .  20
      8.2.  SCHC F/R Protocol Elements  . . . . . . . . . . . . . . .  21
        8.2.1.  Messages  . . . . . . . . . . . . . . . . . . . . . .  21
-       8.2.2.  Tiles, Windows, Bitmaps, Timers, Counters . . . . . .  21
+       8.2.2.  Tiles, Windows, Bitmaps, Timers, Counters . . . . . .  22
        8.2.3.  Integrity Checking  . . . . . . . . . . . . . . . . .  24
        8.2.4.  Header Fields . . . . . . . . . . . . . . . . . . . .  24
      8.3.  SCHC F/R Message Formats  . . . . . . . . . . . . . . . .  27
@@ -969,7 +969,9 @@ Internet-Draft                 LPWAN SCHC                      July 2019
    result in a value of fixed size (e.g. not-sent or mapping-sent) or of
    variable size (e.g. value-sent or LSB).  In the latter case, the
    residue for that field is the bits that result from applying the CDA
-   to the field, preceded with the size of the value.
+   to the field, preceded with the size of the value.  The most
+   significant bit of the size is stored first (left of the residue bit
+   field).
 
    |--- field residue ---|
    +-------+-------------+
@@ -1000,8 +1002,6 @@ Internet-Draft                 LPWAN SCHC                      July 2019
    The not-sent action can be used when the field value is specified in
    a Rule and therefore known by both the Compressor and the
    Decompressor.  This action SHOULD be used with the "equal" MO.  If MO
-   is "ignore", there is a risk to have a decompressed field value
-   different from the original field that was compressed.
 
 
 
@@ -1009,6 +1009,9 @@ Minaburo, et al.         Expires January 5, 2020               [Page 18]
 
 Internet-Draft                 LPWAN SCHC                      July 2019
 
+
+   is "ignore", there is a risk to have a decompressed field value
+   different from the original field that was compressed.
 
    The compressor does not send any residue for a field on which not-
    sent compression is applied.
@@ -1036,9 +1039,12 @@ Internet-Draft                 LPWAN SCHC                      July 2019
 
    On the compressor side, the match-mapping Matching Operator searches
    the TV for a match with the header field value.  The mapping-sent CDA
-   then sends the corresponding index as the field residue.  On the
-   decompressor side, the CDA uses the received index to restore the
-   field value by looking up the list in the TV.
+   then sends the corresponding index as the field residue.  The most
+   significant bit of the index is stored first (left of the residue bit
+   field).
+
+   On the decompressor side, the CDA uses the received index to restore
+   the field value by looking up the list in the TV.
 
    The number of bits sent is the minimal size for coding all the
    possible indices.
@@ -1053,18 +1059,15 @@ Internet-Draft                 LPWAN SCHC                      July 2019
    value.  The number of bits sent is the original header field length
    minus the length specified in the MSB(x) MO.
 
-   The decompressor concatenates the x most significant bits of Target
-   Value and the received residue value.
-
-
-
-
 
 
 Minaburo, et al.         Expires January 5, 2020               [Page 19]
 
 Internet-Draft                 LPWAN SCHC                      July 2019
 
+
+   The decompressor concatenates the x most significant bits of Target
+   Value and the received residue value.
 
    If this action is performed on a variable length field, the size of
    the residue value (using the units defined in FL) MUST be sent as
@@ -1110,9 +1113,6 @@ Internet-Draft                 LPWAN SCHC                      July 2019
    requirement of 1280 bytes [RFC8200].  It is optional to implement.
    If it is not needed, its description can be safely ignored.
 
-   This specification includes several SCHC F/R modes, which allow for a
-   range of reliability options such as optional SCHC Fragment
-   retransmission.  More modes may be defined in the future.
 
 
 
@@ -1121,6 +1121,10 @@ Minaburo, et al.         Expires January 5, 2020               [Page 20]
 
 Internet-Draft                 LPWAN SCHC                      July 2019
 
+
+   This specification includes several SCHC F/R modes, which allow for a
+   range of reliability options such as optional SCHC Fragment
+   retransmission.  More modes may be defined in the future.
 
    The same SCHC F/R mode MUST be used for all SCHC Fragments of a SCHC
    Packet.  This document does not specify which mode(s) are to be used
@@ -1162,13 +1166,9 @@ Internet-Draft                 LPWAN SCHC                      July 2019
    o  SCHC Receiver-Abort: A message by the receiver to tell the sender
       to abort the transmission of a fragmented SCHC Packet.
 
-8.2.2.  Tiles, Windows, Bitmaps, Timers, Counters
 
-8.2.2.1.  Tiles
 
-   The SCHC Packet is fragmented into pieces, hereafter called tiles.
-   The tiles MUST be non-empty and pairwise disjoint.  Their union MUST
-   be equal to the SCHC Packet.
+
 
 
 
@@ -1177,6 +1177,14 @@ Minaburo, et al.         Expires January 5, 2020               [Page 21]
 
 Internet-Draft                 LPWAN SCHC                      July 2019
 
+
+8.2.2.  Tiles, Windows, Bitmaps, Timers, Counters
+
+8.2.2.1.  Tiles
+
+   The SCHC Packet is fragmented into pieces, hereafter called tiles.
+   The tiles MUST be non-empty and pairwise disjoint.  Their union MUST
+   be equal to the SCHC Packet.
 
    See Figure 10 for an example.
 
@@ -1218,14 +1226,6 @@ Tiles  |    |  |     |   |    | |   |   |     |        |    |   |      |
    o  each tile of a SCHC Packet is therefore uniquely identified by a
       window number and a tile index within this window.
 
-   See Figure 11 for an example.
-
-
-
-
-
-
-
 
 
 
@@ -1233,6 +1233,8 @@ Minaburo, et al.         Expires January 5, 2020               [Page 22]
 
 Internet-Draft                 LPWAN SCHC                      July 2019
 
+
+   See Figure 11 for an example.
 
          +---------------------------------------------...-------------+
          |                         SCHC Packet                         |
@@ -1280,8 +1282,6 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 
    o  Inactivity Timer: a SCHC Fragment receiver uses this timer to
       abort waiting for a SCHC F/R message.
-
-
 
 
 

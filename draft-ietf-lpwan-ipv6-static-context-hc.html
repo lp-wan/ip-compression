@@ -937,7 +937,7 @@ A packet (e.g. an IPv6 packet)
 <h1 id="rfc.section.7.5.2">
 <a href="#rfc.section.7.5.2">7.5.2.</a> <a href="#var-length-field" id="var-length-field">processing variable-length fields</a>
 </h1>
-<p id="rfc.section.7.5.2.p.1">If the field is identified in the Field Description as being of variable length, then aplying the CDA to compress this field may result in a value of fixed size (e.g. not-sent or mapping-sent) or of variable size (e.g. value-sent or LSB).  In the latter case, the residue for that field is the bits that result from applying the CDA to the field, preceded with the size of the value.</p>
+<p id="rfc.section.7.5.2.p.1">If the field is identified in the Field Description as being of variable length, then aplying the CDA to compress this field may result in a value of fixed size (e.g. not-sent or mapping-sent) or of variable size (e.g. value-sent or LSB).  In the latter case, the residue for that field is the bits that result from applying the CDA to the field, preceded with the size of the value.  The most significant bit of the size is stored first (left of the residue bit field).</p>
 <div id="rfc.figure.9"></div>
 <div id="Fig-FieldResVarLength"></div>
 <pre>
@@ -973,8 +973,9 @@ A packet (e.g. an IPv6 packet)
 <a href="#rfc.section.7.5.5">7.5.5.</a> <a href="#mapping-sent-cda" id="mapping-sent-cda">mapping-sent CDA</a>
 </h1>
 <p id="rfc.section.7.5.5.p.1">The mapping-sent action is used to send an index (the index into the Target Value list of values) instead of the original value. This action is used together with the &#8220;match-mapping&#8221; MO.</p>
-<p id="rfc.section.7.5.5.p.2">On the compressor side, the match-mapping Matching Operator searches the TV for a match with the header field value. The mapping-sent CDA then sends the corresponding index as the field residue.  On the decompressor side, the CDA uses the received index to restore the field value by looking up the list in the TV.</p>
-<p id="rfc.section.7.5.5.p.3">The number of bits sent is the minimal size for coding all the possible indices.</p>
+<p id="rfc.section.7.5.5.p.2">On the compressor side, the match-mapping Matching Operator searches the TV for a match with the header field value. The mapping-sent CDA then sends the corresponding index as the field residue.  The most significant bit of the index is stored first (left of the residue bit field).</p>
+<p id="rfc.section.7.5.5.p.3">On the decompressor side, the CDA uses the received index to restore the field value by looking up the list in the TV.</p>
+<p id="rfc.section.7.5.5.p.4">The number of bits sent is the minimal size for coding all the possible indices.</p>
 <h1 id="rfc.section.7.5.6">
 <a href="#rfc.section.7.5.6">7.5.6.</a> <a href="#lsb-cda" id="lsb-cda">LSB CDA</a>
 </h1>
