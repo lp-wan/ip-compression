@@ -1,7 +1,7 @@
 ---
 stand_alone: true
 ipr: trust200902
-docname: draft-ietf-lpwan-ipv6-static-context-hc-19
+docname: draft-ietf-lpwan-ipv6-static-context-hc-20
 cat: std
 pi:
   symrefs: 'yes'
@@ -178,7 +178,6 @@ The SCHC acronym is pronounced like "sheek" in English (or "chic" in French). Th
 
 * FP: when a Field is expected to appear multiple times in a header, Field Position specifies the occurence this Field Description applies to
   (for example, first uri-path option, second uri-path, etc. in a CoAP header).
-  The value 1 designates the first occurence. The default value is 1.
 
 * IID: Interface Identifier. See the IPv6 addressing architecture {{RFC7136}}
 
@@ -397,7 +396,12 @@ The Field Descriptions describe the header fields with the following entries:
 
 * Field Length (FL) represents the length of the field. It can be either a fixed value (in bits) if the length is known when the Rule is created or a type if the length is variable. The length of a header field is defined by its own protocol specification (e.g. IPv6 or UDP). If the length is variable, the type defines the process to compute the length and its unit (bits, bytes...).
 
-* Field Position (FP): most often, a field only occurs once in a packet header. Some fields may occur multiple times in a header. FP indicates which occurrence  this Field Description applies to. The default value is 1 (first occurrence).
+* Field Position (FP): most often, a field only occurs once in a packet header.
+However, some fields may occur multiple times. An example is the uri-path of CoAP.
+FP indicates which occurrence this Field Description applies to.
+If FP is not specified in the Field Description, it takes the default value of 1.
+The value 1 designates the first occurence.
+The value 0 is special. It means "don't care", see {{PProcessing}}.
 
 * A Direction Indicator (DI) indicates the packet direction(s) this Field Description applies to. Three values are possible:
 
@@ -421,7 +425,7 @@ On the network side, in order to identify the correct Rule to be applied, the SC
 Similarly, the SCHC Compressor on the network side first identifies the destination Dev before looking for the appropriate compression Rule (and associated Rule ID) in the Context of that Dev.
 
 
-## Packet processing
+## Packet processing {#PProcessing}
 
 The compression/decompression process follows several steps:
 
@@ -436,6 +440,13 @@ The detailed steps are the following:
   * The next step is to match the Field Descriptions by their direction, using the Direction Indicator (DI). If any field of the packet header cannot be matched with a Field Description with the correct FID and DI, the Rule MUST be disregarded.
 
   * Then the Field Descriptions are further selected according to Field Position (FP). If any field of the packet header cannot be matched with a Field Description with the correct FID, DI and FP, the Rule MUST be disregarded.
+
+    The value 0 for FP means "don't care", i.e. the comparison of this Field Description's FP with
+    the position of the field of the packet header being compressed returns True, whatever that position.
+    FP=0 can be useful to build compression Rules for protocols headers in which
+    some fields order is irrelevant. An example could be uri-queries in CoAP.
+    Care needs to be exercised when writing Rules containing FP=0 values.
+    Inded, it may result in decompressed packets having fields ordered differently compared to the original packet.
 
   * Once each header field has been associated with a Field Description with matching FID, DI and FP, each packet field's value is then compared to the corresponding Target Value (TV) stored in the Rule for that specific field, using the matching operator (MO).
     If every field in the packet header satisfies the corresponding matching operators (MO) of a Rule (i.e. all MO results are True), that Rule is used for compressing the header.
