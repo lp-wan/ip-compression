@@ -1931,10 +1931,10 @@ Rule 0
  | Field          |FL|FP|DI| Value   | Match  | Comp Decomp|| Sent |
  |                |  |  |  |         | Opera. | Action     ||[bits]|
  +----------------+--+--+--+---------+---------------------++------+
- |IPv6 version    |4 |1 |Bi|6        | equal  | not-sent   ||      |
+ |IPv6 Version    |4 |1 |Bi|6        | ignore | not-sent   ||      |
  |IPv6 DiffServ   |8 |1 |Bi|0        | equal  | not-sent   ||      |
  |IPv6 Flow Label |20|1 |Bi|0        | equal  | not-sent   ||      |
- |IPv6 Length     |16|1 |Bi|         | ignore | comp-length||      |
+ |IPv6 Length     |16|1 |Bi|         | ignore | compute-*  ||      |
  |IPv6 Next Header|8 |1 |Bi|17       | equal  | not-sent   ||      |
  |IPv6 Hop Limit  |8 |1 |Bi|255      | ignore | not-sent   ||      |
  |IPv6 DevPrefix  |64|1 |Bi|FE80::/64| equal  | not-sent   ||      |
@@ -1944,8 +1944,8 @@ Rule 0
  +================+==+==+==+=========+========+============++======+
  |UDP DevPort     |16|1 |Bi|123      | equal  | not-sent   ||      |
  |UDP AppPort     |16|1 |Bi|124      | equal  | not-sent   ||      |
- |UDP Length      |16|1 |Bi|         | ignore | comp-length||      |
- |UDP checksum    |16|1 |Bi|         | ignore | comp-chk   ||      |
+ |UDP Length      |16|1 |Bi|         | ignore | compute-*  ||      |
+ |UDP checksum    |16|1 |Bi|         | ignore | compute-*  ||      |
  +================+==+==+==+=========+========+============++======+
 
  Rule 1
@@ -1953,10 +1953,10 @@ Rule 0
  | Field          |FL|FP|DI| Value   | Match  | Action     || Sent |
  |                |  |  |  |         | Opera. | Action     ||[bits]|
  +----------------+--+--+--+---------+--------+------------++------+
- |IPv6 version    |4 |1 |Bi|6        | equal  | not-sent   ||      |
+ |IPv6 Version    |4 |1 |Bi|6        | ignore | not-sent   ||      |
  |IPv6 DiffServ   |8 |1 |Bi|0        | equal  | not-sent   ||      |
  |IPv6 Flow Label |20|1 |Bi|0        | equal  | not-sent   ||      |
- |IPv6 Length     |16|1 |Bi|         | ignore | comp-length||      |
+ |IPv6 Length     |16|1 |Bi|         | ignore | compute-*  ||      |
  |IPv6 Next Header|8 |1 |Bi|17       | equal  | not-sent   ||      |
  |IPv6 Hop Limit  |8 |1 |Bi|255      | ignore | not-sent   ||      |
  |IPv6 DevPrefix  |64|1 |Bi|[alpha/64, match- |mapping-sent||   1  |
@@ -1969,8 +1969,8 @@ Rule 0
  +================+==+==+==+=========+========+============++======+
  |UDP DevPort     |16|1 |Bi|5683     | equal  | not-sent   ||      |
  |UDP AppPort     |16|1 |Bi|5683     | equal  | not-sent   ||      |
- |UDP Length      |16|1 |Bi|         | ignore | comp-length||      |
- |UDP checksum    |16|1 |Bi|         | ignore | comp-chk   ||      |
+ |UDP Length      |16|1 |Bi|         | ignore | compute-*  ||      |
+ |UDP checksum    |16|1 |Bi|         | ignore | compute-*  ||      |
  +================+==+==+==+=========+========+============++======+
 
  Rule 2
@@ -1978,10 +1978,10 @@ Rule 0
  | Field          |FL|FP|DI| Value   | Match  | Action     || Sent |
  |                |  |  |  |         | Opera. | Action     ||[bits]|
  +----------------+--+--+--+---------+--------+------------++------+
- |IPv6 version    |4 |1 |Bi|6        | equal  | not-sent   ||      |
+ |IPv6 Version    |4 |1 |Bi|6        | ignore | not-sent   ||      |
  |IPv6 DiffServ   |8 |1 |Bi|0        | equal  | not-sent   ||      |
  |IPv6 Flow Label |20|1 |Bi|0        | equal  | not-sent   ||      |
- |IPv6 Length     |16|1 |Bi|         | ignore | comp-length||      |
+ |IPv6 Length     |16|1 |Bi|         | ignore | compute-*  ||      |
  |IPv6 Next Header|8 |1 |Bi|17       | equal  | not-sent   ||      |
  |IPv6 Hop Limit  |8 |1 |Up|255      | ignore | not-sent   ||      |
  |IPv6 Hop Limit  |8 |1 |Dw|         | ignore | value-sent ||   8  |
@@ -1992,8 +1992,8 @@ Rule 0
  +================+==+==+==+=========+========+============++======+
  |UDP DevPort     |16|1 |Bi|8720     | MSB(12)| LSB        ||   4  |
  |UDP AppPort     |16|1 |Bi|8720     | MSB(12)| LSB        ||   4  |
- |UDP Length      |16|1 |Bi|         | ignore | comp-length||      |
- |UDP checksum    |16|1 |Bi|         | ignore | comp-chk   ||      |
+ |UDP Length      |16|1 |Bi|         | ignore | compute-*  ||      |
+ |UDP checksum    |16|1 |Bi|         | ignore | compute-*  ||      |
  +================+==+==+==+=========+========+============++======+
 
 
