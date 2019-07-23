@@ -1,7 +1,7 @@
 ---
 stand_alone: true
 ipr: trust200902
-docname: draft-ietf-lpwan-ipv6-static-context-hc-20
+docname: draft-ietf-lpwan-ipv6-static-context-hc-21
 cat: std
 pi:
   symrefs: 'yes'
@@ -1695,6 +1695,10 @@ Otherwise, two possibilities can be considered:
 
 * If some upper bits in the field are constant and known, a better option is to only send the LSBs. In the Rule, TV is set to a value with the stable known upper part, MO is set to MSB(x) and CDA to LSB.
 
+  ECN functionality depends on both bits of the ECN field, which
+  are the 2 LSBs of this field, hence sending only a single
+  LSB of this field is NOT RECOMMENDED.
+
 ## Payload Length field
 
 This field can be elided for the transmission on the LPWAN network. The SCHC C/D recomputes the original payload length value. In the Field Descriptor, TV is not set, MO is set to "ignore" and CDA is "compute-\*".
@@ -1863,6 +1867,7 @@ These consequences should be borne in mind when defining profiles for SCHC over 
 Thanks to
 Sergio Aguilar Romero,
 Carsten Bormann,
+David Black,
 Philippe Clavier,
 Daniel Ducuara Beltran
 Diego Dujovne,
