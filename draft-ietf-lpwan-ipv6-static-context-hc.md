@@ -1685,6 +1685,10 @@ Otherwise (e.g. ECN bits are to be transmitted), two possibilities can be consid
 
 * If some upper bits in the field are constant and known, a better option is to only send the LSBs. In the Rule, TV is set to a value with the stable known upper part, MO is set to MSB(x) and CDA to LSB.
 
+  ECN functionality depends on both bits of the ECN field, which
+  are the 2 LSBs of this field, hence sending only a single
+  LSB of this field is NOT RECOMMENDED.
+
 ## Flow label field
 
 If the Flow Label field does not vary and is known by both sides, the Field Descriptor in the Rule SHOULD contain a TV with this well-known value, an "equal" MO and a "not-sent" CDA.
@@ -1694,10 +1698,6 @@ Otherwise, two possibilities can be considered:
 * One possibility is to not compress the field and send the original value. In the Rule, TV is not set to any particular value, MO is set to "ignore" and CDA is set to "value-sent".
 
 * If some upper bits in the field are constant and known, a better option is to only send the LSBs. In the Rule, TV is set to a value with the stable known upper part, MO is set to MSB(x) and CDA to LSB.
-
-  ECN functionality depends on both bits of the ECN field, which
-  are the 2 LSBs of this field, hence sending only a single
-  LSB of this field is NOT RECOMMENDED.
 
 ## Payload Length field
 
@@ -1751,11 +1751,11 @@ It may also happen that the IID variability only expresses itself on a few bytes
 
 Finally, the IID can be sent in its entirety on the LPWAN. In that case, the TV is not set, the MO is set to "ignore" and the CDA is set to "value-sent".
 
-## IPv6 extensions
+## IPv6 extension headers
 
-This document does not provide recommendations on how to compress IPv6 extensions.
+This document does not provide recommendations on how to compress IPv6 extension headers.
 
-## UDP source and destination port
+## UDP source and destination ports
 
 To allow for a single Rule being used for both directions, the UDP port values are identified by their role (Dev or App) and not by their position in the header (source or destination). The SCHC C/D MUST be aware of the traffic direction (Uplink, Downlink) to select the appropriate field. The following Rules apply for Dev and App port numbers.
 
@@ -1869,7 +1869,7 @@ Sergio Aguilar Romero,
 Carsten Bormann,
 David Black,
 Philippe Clavier,
-Daniel Ducuara Beltran
+Daniel Ducuara Beltran,
 Diego Dujovne,
 Eduardo Ingles Sanchez,
 Arunprabhu Kandasamy,
