@@ -628,8 +628,12 @@ It is optional to implement. If it is not needed, its description can be safely 
 This specification includes several SCHC F/R modes, which allow for a range of reliability options such as optional SCHC Fragment retransmission.
 More modes may be defined in the future.
 
-The same SCHC F/R mode MUST be used for all SCHC Fragments of a SCHC Packet.
-This document does not specify which mode(s) are to be used over a specific LPWAN technology. That information will be given in Profiles.
+The same SCHC F/R mode MUST be used for all SCHC Fragments of a given SCHC Packet.
+This document does not specify which mode(s) must be implemented and used over a specific LPWAN technology. That information will be given in Profiles.
+
+This specification provides protocol elements that make it possible to interleave the transmission of non-fragmented SCHC Packets and fragmented SCHC Packets,
+as well as interleave the transmission of fragmented SCHC Packets.
+A Profile MAY restrict this behaviour.
 
 The L2 Word size (see {{Term}}) determines the encoding of some messages.
 SCHC F/R usually generates SCHC Fragments and SCHC ACKs that are multiples of L2 Words.
@@ -1743,7 +1747,6 @@ On LPWAN technologies where the frames carry a single identifier (corresponding 
 
 As described in {{RFC8065}}, it may be undesirable to build the Dev IPv6 IID out of the Dev address. Another static value is used instead.
 In that case, the TV contains the static value, the MO operator is set to "equal" and the CDA is set to "not-sent".
-{{RFC7217}} provides some methods to derive this static identifier.
 
 If several IIDs are possible, then the TV contains the list of possible IIDs, the MO is set to "match-mapping" and the CDA is set to "mapping-sent".
 
