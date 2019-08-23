@@ -96,7 +96,7 @@ Header compression is needed for efficient Internet connectivity to a node withi
 
 * The network topology is star-oriented, which means that all packets between the same source-destination pair follow the same path. For the needs of this document, the architecture can simply be described as Devices (Dev) exchanging information with LPWAN Application Servers (App) through a Network Gateway (NGW).
 
-* Because devices embed built-in applications, the traffic flows to be compressed are known in advance. Indeed, new applications are less frequently installed in an LPWAN device, than they are in a computer or smartphone.
+* Because devices embed built-in applications, the traffic flows to be compressed are known in advance. Indeed, new applications are less frequently installed in an LPWAN device, than they are in a general-purpose computer or smartphone.
 
 SCHC compression uses a Context (a set of Rules) in which information about header fields is stored. This Context is static: the values of the header fields and the actions to do compression/decompression do not change over time. This avoids the need for complex resynchronization mechanisms.
 Indeed, a return path may be more restricted/expensive, sometimes completely unavailable {{RFC8376}}.
@@ -178,7 +178,7 @@ The SCHC acronym is pronounced like "sheek" in English (or "chic" in French). Th
 
 * FL: Field Length is the length of the packet header field. It is expressed in bits for header fields of fixed lengths or as a type (e.g. variable, token length, ...) for field lengths that are unknown at the time of Rule creation. The length of a header field is defined in the corresponding protocol specification (such as IPv6 or UDP).
 
-* FP: when a Field is expected to appear multiple times in a header, Field Position specifies the occurence this Field Description applies to
+* FP: when a Field is expected to appear multiple times in a header, Field Position specifies the occurrence this Field Description applies to
   (for example, first uri-path option, second uri-path, etc. in a CoAP header).
 
 * IID: Interface Identifier. See the IPv6 addressing architecture {{RFC7136}}
@@ -256,7 +256,7 @@ A packet (e.g. an IPv6 packet)
 +--------------------+                       +-----------------+
       |     ^                                     |     ^
       |     |                                     |     |
-      |     +-------------- SCHC ACK -------------+     |
+      |     +---------- SCHC ACK (+) -------------+     |
       |                                                 |
       +-------------- SCHC Fragments -------------------+
 
@@ -264,6 +264,8 @@ A packet (e.g. an IPv6 packet)
 
 
 *: the decision to not use SCHC Fragmentation is left to each Profile.
++: optional
+
 ~~~~
 {: #Fig-Operations title='SCHC operations at the Sender and the Receiver'}
 
@@ -405,7 +407,7 @@ The Field Descriptions describe the header fields with the following entries:
 However, some fields may occur multiple times. An example is the uri-path of CoAP.
 FP indicates which occurrence this Field Description applies to.
 If FP is not specified in the Field Description, it takes the default value of 1.
-The value 1 designates the first occurence.
+The value 1 designates the first occurrence.
 The value 0 is special. It means "don't care", see {{PProcessing}}.
 
 * A Direction Indicator (DI) indicates the packet direction(s) this Field Description applies to. Three values are possible:
@@ -451,7 +453,7 @@ The detailed algorithm is the following:
     FP=0 can be useful to build compression Rules for protocols headers in which
     some fields order is irrelevant. An example could be uri-queries in CoAP.
     Care needs to be exercised when writing Rules containing FP=0 values.
-    Inded, it may result in decompressed packets having fields ordered differently compared to the original packet.
+    Indeed, it may result in decompressed packets having fields ordered differently compared to the original packet.
 
   * Once each header field has been associated with a Field Description with matching FID, DI and FP, each packet field's value is then compared to the corresponding Target Value (TV) stored in the Rule for that specific field, using the matching operator (MO).
     If every field in the packet header satisfies the corresponding matching operators (MO) of a Rule (i.e. all MO results are True), that Rule is valid for use to compress the header.
@@ -532,7 +534,7 @@ The Compression Decompression Action (CDA) describes the actions taken during th
 
 ### processing fixed-length fields {#fixed-length-field}
 
-If the field is identified in the Field Description as being of fixed length, then aplying the CDA to compress this field results in a fixed amount of bits.
+If the field is identified in the Field Description as being of fixed length, then applying the CDA to compress this field results in a fixed amount of bits.
 The residue for that field is simply the bits resulting from applying the CDA to the field.
 This value may be empty (e.g. not-sent CDA), in which case the field residue is absent from the Compression Residue.
 
@@ -551,7 +553,7 @@ This value may be empty (e.g. not-sent CDA), in which case the field residue is 
 ### processing variable-length fields {#var-length-field}
 
 If the field is identified in the Field Description as being of variable length,
-then aplying the CDA to compress this field may result in a value of fixed size
+then applying the CDA to compress this field may result in a value of fixed size
 (e.g. not-sent or mapping-sent)
 or of variable size (e.g. value-sent or LSB).
 In the latter case, the residue for that field is the bits that result from applying the CDA to the field, preceded with the size of the value.
@@ -1713,7 +1715,7 @@ A packet (e.g. an IPv6 packet)
 +--------------------+                       +-----------------+
      |       ^                                   |       ^
      |       |                                   |       |
-     |       +------------- SCHC ACK ------------+       |
+     |       +--- SCHC ACK + padding as needed --+       |
      |                                                   |
      +------- SCHC Fragments + padding as needed---------+
 
