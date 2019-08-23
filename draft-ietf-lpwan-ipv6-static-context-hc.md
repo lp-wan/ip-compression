@@ -118,9 +118,9 @@ as shown here.
 
 # LPWAN Architecture {#LPWAN-Archi}
 
-LPWAN technologies have similar network architectures but different terminologies.
-Using the terminology defined in {{RFC8376}},
-we can identify different types of entities in a typical LPWAN network, see {{Fig-LPWANarchi}}:
+LPWAN network architectures are similar among them, but each LPWAN technology names architecture elements differently.
+In this document, we use terminology from {{RFC8376}},
+which identifies the following entities in a typical LPWAN network (see {{Fig-LPWANarchi}}):
 
    o  Devices (Dev) are the end-devices or hosts (e.g. sensors, actuators, etc.). There can be a very high density of devices per radio gateway.
 
@@ -693,10 +693,10 @@ If windows are used
   This number is WINDOW_SIZE.
 - WINDOW_SIZE MUST be specified in a Profile.
 - the windows are numbered.
-- their numbers MUST increase from 0 upward, from the start of the SCHC Packet to its end.
+- their numbers MUST increment by 1 from 0 upward, from the start of the SCHC Packet to its end.
 - the last window MUST contain WINDOW_SIZE tiles or less.
 - tiles are numbered within each window.
-- the tile indices MUST decrement from WINDOW_SIZE - 1 downward, looking from the start of the SCHC Packet toward its end.
+- the tile indices MUST decrement by 1 from WINDOW_SIZE - 1 downward, looking from the start of the SCHC Packet toward its end.
 - each tile of a SCHC Packet is therefore uniquely identified by a window number and a tile index within this window.
 
 See {{Fig-WindowsExample}} for an example.
@@ -711,7 +711,7 @@ Tile #   | 4 | 3 | 2 | 1 | 0 | 4 | 3 | 2 | 1 | 0 | 4 |     | 0 | 4 | 3 |
 Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 
 ~~~~
-{: #Fig-WindowsExample title='a SCHC Packet fragmented in tiles grouped in 28 windows, with WINDOW_SIZE = 5'}
+{: #Fig-WindowsExample title='a SCHC Packet fragmented in tiles grouped in 29 windows, with WINDOW_SIZE = 5'}
 
 When windows are used
 
