@@ -633,7 +633,7 @@ This document does not specify which mode(s) must be implemented and used over a
 
 This specification provides protocol elements that make it possible to interleave the transmission of non-fragmented SCHC Packets and fragmented SCHC Packets,
 as well as interleave the transmission of fragmented SCHC Packets.
-A Profile MAY restrict this behaviour.
+A Profile MAY restrict this behavior.
 
 The L2 Word size (see {{Term}}) determines the encoding of some messages.
 SCHC F/R usually generates SCHC Fragments and SCHC ACKs that are multiples of L2 Words.
@@ -713,6 +713,8 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 ~~~~
 {: #Fig-WindowsExample title='a SCHC Packet fragmented in tiles grouped in 29 windows, with WINDOW_SIZE = 5'}
 
+{{MultWinSizes}} discusses the benefits of selecting one among multiple window sizes depending on the size of the SCHC Packet to be fragmented.
+
 When windows are used
 
 - Bitmaps (see {{Bitmap}}) MAY be sent back by the receiver to the sender in a SCHC ACK message.
@@ -786,6 +788,8 @@ The SCHC F/R messages contain the following fields (see the formats in {{Fragfor
      * what other optional fields are present and what the field sizes are.
 
   The Rule ID allows SCHC F/R interleaving non-fragmented SCHC Packets and SCHC Fragments that carry other SCHC Packets, or interleaving SCHC Fragments that use different SCHC F/R modes or different parameters.
+
+  All SCHC F/R messages pertaining to the same SCHC Packet MUST bear the same Rule ID.
 
 * Datagram Tag (DTag).
   Its size (called T, in bits) is defined by each Profile for each Rule ID.
@@ -1093,6 +1097,10 @@ This specification includes several SCHC F/R modes, which
 
 More modes may be defined in the future.
 
+{{FragExamples}} provides examples of fragmentation sessions based on the modes described hereafter.
+
+{{FSM}} provides examples of Finite Sate Machines implementing the SCHC F/R modes decribed hereafter.
+
 ### No-ACK mode {#No-ACK-subsection}
 
 The No-ACK mode has been designed under the assumption that data unit out-of-sequence delivery does not occur between the entity performing fragmentation and the entity performing reassembly.
@@ -1384,6 +1392,8 @@ and it MAY exit the receive process for that SCHC Packet.
 
 {{Fig-ACKAlwaysRcv}} shows an example of a corresponding state machine.
 
+{{DwFragTimer}} provides a discussion on the receiver behavior for downlink fragment transmission in LPWANs with asymmetric links.
+
 
 ### ACK-on-Error mode {#ACK-on-Error-subsection}
 
@@ -1670,6 +1680,7 @@ A Profile MAY define the value of the padding bits. The RECOMMENDED value is 0.
 # SCHC Compression for IPv6 and UDP headers
 
 This section lists the IPv6 and UDP header fields and describes how they can be compressed.
+An example of a set of Rules for UDP/IPv6 header compression is provided in {{compressIPv6}}.
 
 ## IPv6 version field
 
@@ -2010,7 +2021,7 @@ The second and third Rules use global addresses. The way the Dev learns the pref
 The third Rule compresses each port number to 4 bits.
 
 
-# Fragmentation Examples
+# Fragmentation Examples {#FragExamples}
 
 This section provides examples for the various fragment reliability modes specified in this document.
 In the drawings, Bitmaps are shown in their uncompressed form.
@@ -2660,13 +2671,11 @@ the LPWAN technology-specific documents:
 
     * The way the Rules are generated
 
-# Supporting multiple window sizes for fragmentation
+# Supporting multiple window sizes for fragmentation {#MultWinSizes}
 
-For ACK-Always or ACK-on-Error, implementers may opt to support a single window size or multiple window sizes.  The latter, when feasible, may provide performance optimizations.  For example, a large window size should be used for packets that need to be split into a large number of tiles. However, when the number of tiles required to carry a packet is low, a smaller window size, and thus a shorter Bitmap, may be sufficient to provide reception status on all tiles. If multiple window sizes are supported, the Rule ID may signal the window size in use for a specific packet transmission.
+For ACK-Always or ACK-on-Error, implementers may opt to support a single window size or multiple window sizes.  The latter, when feasible, may provide performance optimizations.  For example, a large window size should be used for packets that need to be split into a large number of tiles. However, when the number of tiles required to carry a packet is low, a smaller window size, and thus a shorter Bitmap, may be sufficient to provide reception status on all tiles. If multiple window sizes are supported, the Rule ID signals the window size in use for a specific packet transmission.
 
-The same window size MUST be used for the transmission of all tiles that belong to the same SCHC Packet.
-
-# Downlink SCHC Fragment transmission
+# Downlink SCHC Fragment transmission (#DwFragTimer)
 
 For downlink transmission of a fragmented SCHC Packet in ACK-Always mode, the SCHC Fragment receiver may support timer-based SCHC ACK retransmission. In this mechanism, the SCHC Fragment receiver initializes and starts a timer (the Inactivity Timer is used) after the transmission of a SCHC ACK, except when the SCHC ACK is sent in response to the last SCHC Fragment of a packet (All-1 fragment). In the latter case, the SCHC Fragment receiver does not start a timer after transmission of the SCHC ACK.
 
