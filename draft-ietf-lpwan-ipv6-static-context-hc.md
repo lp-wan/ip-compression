@@ -661,6 +661,8 @@ SCHC F/R defines the following messages:
 
 * SCHC Receiver-Abort: A message by the receiver to tell the sender to abort the transmission of a fragmented SCHC Packet.
 
+The format of these messages is provided in {{Fragfor}}.
+
 ### Tiles, Windows, Bitmaps, Timers, Counters {#OtherTools}
 
 #### Tiles
@@ -2675,7 +2677,7 @@ the LPWAN technology-specific documents:
 
 For ACK-Always or ACK-on-Error, implementers may opt to support a single window size or multiple window sizes.  The latter, when feasible, may provide performance optimizations.  For example, a large window size should be used for packets that need to be split into a large number of tiles. However, when the number of tiles required to carry a packet is low, a smaller window size, and thus a shorter Bitmap, may be sufficient to provide reception status on all tiles. If multiple window sizes are supported, the Rule ID signals the window size in use for a specific packet transmission.
 
-# Downlink SCHC Fragment transmission (#DwFragTimer)
+# Downlink SCHC Fragment transmission {#DwFragTimer}
 
 For downlink transmission of a fragmented SCHC Packet in ACK-Always mode, the SCHC Fragment receiver may support timer-based SCHC ACK retransmission. In this mechanism, the SCHC Fragment receiver initializes and starts a timer (the Inactivity Timer is used) after the transmission of a SCHC ACK, except when the SCHC ACK is sent in response to the last SCHC Fragment of a packet (All-1 fragment). In the latter case, the SCHC Fragment receiver does not start a timer after transmission of the SCHC ACK.
 
