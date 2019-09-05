@@ -556,13 +556,32 @@ The most significant bit of the size is stored first (left of the residue bit fi
 ~~~~
 {: #Fig-FieldResVarLength title='variable sized field residue structure'}
 
-The size (using the unit defined in the FL) is encoded on 4, 12 or 28 bits as follows:
+The size (using the unit defined in the FL) is encoded on 4, 12 or 24 bits as follows:
 
 * If the size is between 0 and 14, it is encoded as a 4 bits unsigned integer.
 
-* Sizes between 15 and 254 are encoded as 0b1111 followed by the 8 bits unsigned integer.
+* Sizes between 15 and 254 are encoded as 0b1111 followed by the 8 bits unsigned integer representing the number size-15.
 
-* Larger sizes are encoded as 0xfff followed by the 16 bits unsigned integer.
+* Larger sizes are encoded as 0xff followed by the 16 bits unsigned integer representing the number size-255.
+
+Examples of this encoding are shown in {{TableSizeEncoding}}.
+
+|-------------------------------|----------------|
+| Encoding (binary)             | Size (decimal) |
+|-------------------------------|----------------|
+| 0000                          | 0              |
+|  ...                          | .              |
+| 1110                          | 14             |
+|-------------------------------|----------------|
+| 1111 0000 0000                | 15             |
+|       ...                     | ...            |
+| 1111 1110 1111                | 254            |
+|-------------------------------|----------------|
+| 1111 1111 0000 0000 0000 0000 | 255            |
+|               ...             | ...            |
+| 1111 1111 1111 1111 1111 1111 | 65790          |
+|-------------------------------|----------------|
+{: #TableSizeEncoding title='Encoding of size'}
 
 If the field is identified in the Field Description as being of variable length and this field is not present in the packet header being compressed, size 0 MUST be sent to denote its absence.
 
