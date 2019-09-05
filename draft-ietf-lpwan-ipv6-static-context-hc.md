@@ -215,7 +215,8 @@ Additional terminology for the optional SCHC Fragmentation / Reassembly mechanis
 
 # SCHC overview
 
-SCHC can be characterized as an adaptation layer between IPv6 and the underlying LPWAN technology. SCHC comprises two sublayers (i.e. the Compression sublayer and the Fragmentation sublayer), as shown in {{Fig-IntroLayers}}.
+SCHC can be characterized as an adaptation layer between an upper layer (typically, IPv6) and an underlying layer (typically, an LPWAN technology).
+SCHC comprises two sublayers (i.e. the Compression sublayer and the Fragmentation sublayer), as shown in {{Fig-IntroLayers}}.
 
 ~~~~
 
@@ -232,8 +233,9 @@ SCHC can be characterized as an adaptation layer between IPv6 and the underlying
 ~~~~
 {: #Fig-IntroLayers title='Protocol stack comprising IPv6, SCHC and an LPWAN technology'}
 
-Before a packet (e.g. an IPv6 packet) is transmitted, header compression is first applied. The resulting packet is called a SCHC Packet, whether or not any compression is performed.
-If the SCHC Packet is to be fragmented, the optional SCHC Fragmentation MAY be applied to the SCHC Packet. The inverse operations take place at the receiver. This process is illustrated in {{Fig-Operations}}.
+Before an upper layer packet (e.g. an IPv6 packet) is transmitted to the underlying layer, header compression is first attempted. The resulting packet is called a SCHC Packet, whether or not any compression is performed.
+If needed by the underlying layer, the optional SCHC Fragmentation MAY be applied to the SCHC Packet.
+The inverse operations take place at the receiver. This process is illustrated in {{Fig-Operations}}.
 
 ~~~~
 A packet (e.g. an IPv6 packet) 
@@ -259,10 +261,9 @@ A packet (e.g. an IPv6 packet)
         Sender                                    Receiver
 
 
-*: the decision to use Fragmentation or not is left to each Profile.
-
+*: the decision to not use SCHC Fragmentation is left to each Profile.
 ~~~~
-{: #Fig-Operations title='SCHC operations at the SENDER and the RECEIVER'}
+{: #Fig-Operations title='SCHC operations at the Sender and the Receiver'}
 
 ## SCHC Packet format
 
@@ -427,11 +428,11 @@ Similarly, the SCHC Compressor on the network side first identifies the destinat
 
 ## Packet processing {#PProcessing}
 
-The compression/decompression process follows several steps:
+The compression/decompression process follows several phases:
 
-* Compression Rule selection: the set of Rules is browsed to identify which Rule will be used to compress the packet header.
-The Rule is selected by matching the Fields Descriptions to the packet header.
-The detailed steps are the following:
+* Compression Rule selection: the general idea is to browse the Rule set to find a Rule that has a matching
+Field Descriptor (given the DI and FP) for all and only those header fields that appear in the packet being compressed.
+The detailed algorithm is the following:
 
   * The first step is to check the Field Identifiers (FID).
     If any header field of the packet being examined cannot be matched with a Field Description with the correct FID, the Rule MUST be disregarded.
@@ -449,13 +450,18 @@ The detailed steps are the following:
     Inded, it may result in decompressed packets having fields ordered differently compared to the original packet.
 
   * Once each header field has been associated with a Field Description with matching FID, DI and FP, each packet field's value is then compared to the corresponding Target Value (TV) stored in the Rule for that specific field, using the matching operator (MO).
-    If every field in the packet header satisfies the corresponding matching operators (MO) of a Rule (i.e. all MO results are True), that Rule is used for compressing the header.
+    If every field in the packet header satisfies the corresponding matching operators (MO) of a Rule (i.e. all MO results are True), that Rule is valid for use to compress the header.
     Otherwise, the Rule MUST be disregarded.
 
-  * If no eligible compression Rule is found, then the header MUST be sent in its entirety
-    using the Rule ID of the "default" Rule dedicated to this purpose. Sending an uncompressed header may require SCHC F/R.
+    This specification does not prevent multiple Rules from matching the above steps and therefore being valid for use.
+    Whether multiple valid Rules is allowed or not, and what to do in the case of multiple valid Rules, is left to the implementation.
+    A long as the same Rule set is installed at both ends, this degree of freedom does not constitute an interoperability issue.
 
-* Compression: each field of the header is compressed according to the Compression/Decompression Actions (CDAs).
+
+  * If no valid compression Rule is found, then the header MUST be sent in its entirety
+    using the Rule ID of the "default" Rule dedicated to this purpose. Sending an uncompressed header is likely to require SCHC F/R.
+
+* Compression: if a valid Rule was found, each field of the header is compressed according to the Compression/Decompression Actions (CDAs) of the Rule.
   The fields are compressed in the order that the Field Descriptions appear in the Rule.
   The compression of each field results in a residue, which may be empty.
   The Compression Residue for the packet header is the concatenation of the non-empty residues for each field of the header, in the order the Field Descriptions appear in the Rule.
@@ -623,7 +629,7 @@ In LPWAN technologies, the L2 MTU typically ranges from tens to hundreds of byte
 Some of these technologies do not have an internal fragmentation/reassembly mechanism.
 
 The optional SCHC Fragmentation/Reassembly (SCHC F/R) functionality enables such LPWAN technologies to comply with the IPv6 MTU requirement of 1280 bytes {{RFC8200}}.
-It is optional to implement. If it is not needed, its description can be safely ignored.
+It is OPTIONAL to implement per this specification, but Profiles may specify that it is REQUIRED.
 
 This specification includes several SCHC F/R modes, which allow for a range of reliability options such as optional SCHC Fragment retransmission.
 More modes may be defined in the future.
@@ -869,7 +875,7 @@ The SCHC Fragment Payload carries one or several tile(s).
 
 The Regular SCHC Fragment format is shown in {{Fig-NotLastFrag}}.
 Regular SCHC Fragments are generally used to carry tiles that are not the last one of a SCHC Packet.
-The DTag field and the W field are optional.
+The DTag field and the W field are OPTIONAL, their presence is specified by each mode and Profile.
 
 
 ~~~~
@@ -891,7 +897,8 @@ This condition is also met if the SCHC Fragment Header is a multiple of L2 Words
 
 The All-1 SCHC Fragment format is shown in {{Fig-LastFrag}}.
 The sender generally uses the All-1 SCHC Fragment format for the message that completes the emission of a fragmented SCHC Packet.
-The DTag field, the W field, the RCS field and the Payload are optional. At least one of RCS field or Payload MUST be present.
+The DTag field, the W field, the RCS field and the Payload are OPTIONAL, their presence is specified by each mode and Profile.
+At least one of RCS field or Payload MUST be present.
 The FCN field is all ones.
 
 ~~~~
@@ -912,8 +919,8 @@ This condition is also met if the SCHC Sender-Abort Header is a multiple of L2 W
 ### SCHC ACK format {#ACK}
 
 The SCHC ACK message is shown in {{Fig-ACK-Format}}.
-The DTag field, the W field and the Compressed Bitmap field are optional.
-The Compressed Bitmap field can only be present in SCHC F/R modes that use windows.
+The DTag field and the W field are OPTIONAL, their presence is specified by each mode and Profile.
+The Compressed Bitmap field MUST be present in SCHC F/R modes that use windows, and MUST NOT be present in other modes.
 
 ~~~~
 |---- SCHC ACK Header ----|
@@ -1017,7 +1024,7 @@ Because the SCHC Fragment sender knows the size of the original Bitmap, it can r
 
 The SCHC ACK REQ is used by a sender to request a SCHC ACK from the receiver.
 Its format is shown in {{Fig-ACKREQ}}.
-The DTag field and the W field are optional.
+The DTag field and the W field are OPTIONAL, their presence is specified by each mode and Profile.
 The FCN field is all zero.
 
 ~~~~
@@ -1035,7 +1042,7 @@ The FCN field is all zero.
 When a SCHC Fragment sender needs to abort an on-going fragmented SCHC Packet transmission, it sends a SCHC Sender-Abort message to the SCHC Fragment receiver.
 
 The SCHC Sender-Abort format is shown in {{Fig-SenderAbort}}.
-The DTag field and the W field are optional.
+The DTag field and the W field are OPTIONAL, their presence is specified by each mode and Profile.
 The FCN field is all ones.
 
 ~~~~
@@ -1062,7 +1069,7 @@ The SCHC Sender-Abort MUST NOT be acknowledged.
 When a SCHC Fragment receiver needs to abort an on-going fragmented SCHC Packet transmission, it transmits a SCHC Receiver-Abort message to the SCHC Fragment sender.
 
 The SCHC Receiver-Abort format is shown in {{Fig-ReceiverAbort}}.
-The DTag field and the W field are optional.
+The DTag field and the W field are OPTIONAL, their presence is specified by each mode and Profile.
 
 ~~~~
 |--- Receiver-Abort Header ---|
