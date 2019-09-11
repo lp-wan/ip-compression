@@ -1895,6 +1895,7 @@ which are expected to implement security measures.
 In this section, we analyze the potential security threats that could be introduced
 into an LPWAN by adding the SCHC functionalities.
 
+
 ## Security considerations for SCHC Compression/Decompression
 
 Let's assume that an attacker is able to send a forged SCHC Packet to a SCHC Decompressor.
