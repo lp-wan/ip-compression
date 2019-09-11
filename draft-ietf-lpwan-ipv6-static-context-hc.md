@@ -74,7 +74,7 @@ informative:
 
 This document defines the Static Context Header Compression (SCHC) framework, which provides both header compression and fragmentation functionalities. SCHC has been designed for Low Power Wide Area Networks (LPWAN).
 
-SCHC compression is based on a common static context stored in both the LPWAN device and the network side. This document defines a header compression mechanism and its application to compress IPv6/UDP headers.
+SCHC compression is based on a common static context stored in both the LPWAN device and in the network infrastructure side. This document defines a header compression mechanism and its application to compress IPv6/UDP headers.
 
 This document also specifies a fragmentation and reassembly mechanism that is used to support the IPv6 MTU requirement over the LPWAN technologies. Fragmentation is needed for IPv6 datagrams that, after SCHC compression or when such compression was not possible, still exceed the layer-2 maximum payload size.
 
@@ -126,24 +126,24 @@ which identifies the following entities in a typical LPWAN network (see {{Fig-LP
 
    o  Devices (Dev) are the end-devices or hosts (e.g. sensors, actuators, etc.). There can be a very high density of devices per radio gateway.
 
-   o  The Radio Gateway (RGW), which is the end point of the constrained link.
+   o  The Radio Gateway (RGW) is the end point of the constrained link.
 
    o  The Network Gateway (NGW) is the interconnection node between the Radio Gateway and the Internet.  
 
-   o  Application Server (App)
+   o  Application Server (App) is the end point of the application level protocol on the Internet side.
 
 ~~~~
-                                           +------+
- ()   ()   ()       |                      |LPWAN-|
-  ()  () () ()     / \       +---------+   | AAA  |
-() () () () () () /   \======|    ^    |===|Server|  +-----------+
- ()  ()   ()     |           | <--|--> |   +------+  |Application|
+
+ ()   ()   ()       |
+  ()  () () ()     / \       +---------+
+() () () () () () /   \======|    ^    |             +-----------+
+ ()  ()   ()     |           | <--|--> |             |Application|
 ()  ()  ()  ()  / \==========|    v    |=============|   (App)   |
   ()  ()  ()   /   \         +---------+             +-----------+
  Dev        Radio Gateways         NGW
 
 ~~~~
-{: #Fig-LPWANarchi title='LPWAN Architecture as shown in RFC8376'}                      
+{: #Fig-LPWANarchi title='LPWAN Architecture, simplified from that shown in RFC8376'}
 
 
 # Terminology {#Term}
@@ -264,7 +264,7 @@ A packet (e.g. an IPv6 packet)
 
 
 *: the decision to not use SCHC Fragmentation is left to each Profile.
-+: optional
++: optional, depends on Fragmentation mode.
 
 ~~~~
 {: #Fig-Operations title='SCHC operations at the Sender and the Receiver'}
@@ -309,7 +309,7 @@ The Compression Residue may be empty. Both the Rule ID and the Compression Resid
 {: #Fig-archi title='Architecture'}
 
 
-SCHC C/D and SCHC F/R are located on both sides of the LPWAN transmission, i.e. on the Dev side and on the Network side.
+SCHC C/D and SCHC F/R are located on both sides of the LPWAN transmission, hereafter called "the Dev side" and "the Network infrastructure side".
 
 The operation in the Uplink direction is as follows. The Device application uses IPv6 or IPv6/UDP protocols. Before sending the packets, the Dev compresses their headers using SCHC C/D and,
 if the SCHC Packet resulting from the compression needs to be fragmented by SCHC, SCHC F/R is performed (see {{Frag}}).
@@ -318,7 +318,7 @@ The NGW sends the data to a SCHC F/R for re-assembly (if needed) and then to the
 After decompression, the packet can be sent over the Internet
 to one or several LPWAN Application Servers (App).
 
-The SCHC F/R and C/D on the Network side can be located in the NGW, or somewhere else as long as a tunnel is established between them and the NGW.
+The SCHC F/R and C/D on the Network infrastructure side can be located in the NGW, or somewhere else as long as a tunnel is established between them and the NGW.
 For some LPWAN technologies, it may be suitable to locate the SCHC F/R
 functionality nearer the NGW, in order to better deal with time constraints of such technologies.
 
@@ -428,8 +428,8 @@ The value 0 is special. It means "don't care", see {{PProcessing}}.
 
 Rule IDs are sent by the compression function in one side and are received for the decompression function in the other side.
 In SCHC C/D, the Rule IDs are specific to the Context related to one Dev. Hence, multiple Dev instances, which refer to different header compression Contexts, MAY reuse the same Rule ID for different Rules.
-On the network side, in order to identify the correct Rule to be applied, the SCHC Decompressor needs to associate the Rule ID with the Dev identifier.
-Similarly, the SCHC Compressor on the network side first identifies the destination Dev before looking for the appropriate compression Rule (and associated Rule ID) in the Context of that Dev.
+On the Network infrastructure side, in order to identify the correct Rule to be applied, the SCHC Decompressor needs to associate the Rule ID with the Dev identifier.
+Similarly, the SCHC Compressor on the Network infrastructure side first identifies the destination Dev before looking for the appropriate compression Rule (and associated Rule ID) in the Context of that Dev.
 
 
 ## Packet processing {#PProcessing}
@@ -487,7 +487,7 @@ The detailed algorithm is the following:
   The way the Rule ID is sent will be specified in the Profile and is out of the scope of the present document.
   For example, it could be included in an L2 header or sent as part of the L2 payload.
 
-* Decompression: when decompressing, on the network side the SCHC C/D needs to find the correct Rule based on the L2 address of the Dev; in this way, it can use the DevIID and the Rule ID. On the Dev side, only the Rule ID is needed to identify the correct Rule since the Dev typically only holds Rules that apply to itself.
+* Decompression: when decompressing, on the Network infrastructure side the SCHC C/D needs to find the correct Rule based on the L2 address of the Dev; in this way, it can use the DevIID and the Rule ID. On the Dev side, only the Rule ID is needed to identify the correct Rule since the Dev typically only holds Rules that apply to itself.
 
   The receiver identifies the sender through its device-id or source identifier (e.g. MAC address, if it exists) and selects the Rule using the Rule ID.
 
