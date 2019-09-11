@@ -288,7 +288,7 @@ The Compression Residue may be empty. Both the Rule ID and the Compression Resid
 
 ## Functional mapping
 
-{{Fig-archi}} below maps the functional elements of {{Fig-Operations}} onto the LPWAN architecture elements of {{Fig-LPWANarchi}}.
+{{Fig-archi}} maps the functional elements of {{Fig-Operations}} onto the LPWAN architecture elements of {{Fig-LPWANarchi}}.
 
 
 ~~~~
@@ -318,7 +318,7 @@ The NGW sends the data to a SCHC F/R for re-assembly (if needed) and then to the
 After decompression, the packet can be sent over the Internet
 to one or several LPWAN Application Servers (App).
 
-The SCHC F/R and C/D on the Network infrastructure side can be located in the NGW, or somewhere else as long as a tunnel is established between them and the NGW.
+The SCHC F/R and C/D on the Network infrastructure side can be part of the NGW, or located in the Internet as long as a tunnel is established between them and the NGW.
 For some LPWAN technologies, it may be suitable to locate the SCHC F/R
 functionality nearer the NGW, in order to better deal with time constraints of such technologies.
 
@@ -807,11 +807,9 @@ The SCHC F/R messages contain the following fields (see the formats in {{Fragfor
 
   * which SCHC F/R mode is used
 
-  * and for this mode
+  * in case this mode uses windows, what the value of WINDOW_SIZE is,
 
-     * if windows are used and what the value of WINDOW_SIZE is,
-
-     * what other optional fields are present and what the field sizes are.
+  * what other optional fields are present and what the field sizes are.
 
   The Rule ID tells apart a non-fragmented SCHC Packet from SCHC Fragments.
   It will also tell part SCHC Fragments of fragmented SCHC Packets that use different SCHC F/R modes or different parameters.
@@ -1442,9 +1440,11 @@ and it MAY exit the receive process for that SCHC Packet.
 The ACK-on-Error mode supports LPWAN technologies that have variable MTU and out-of-order delivery.
 
 In ACK-on-Error mode, windows are used.
-All tiles MUST be of equal size, except for the last one,
-which MUST be of the same size or smaller than the regular ones.
-If allowed in a Profile, the penultimate tile MAY be exactly one L2 Word smaller than the regular tile size.
+
+All tiles MUST be of equal size, except
+
+- for the last one, which MUST be of the same size or smaller than the regular ones,
+- and for the penultimate one which, if allowed in a Profile, MAY be exactly one L2 Word smaller than the regular tile size.
 
 A SCHC Fragment message carries one or more tiles, which may span multiple windows.
 A SCHC ACK reports on the reception of exactly one window of tiles.
