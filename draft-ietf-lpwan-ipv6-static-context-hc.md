@@ -1112,7 +1112,7 @@ The bits that follow the SCHC Receiver-Abort Header MUST be as follows
 - if the Header does not end at an L2 Word boundary, append bits set to 1 as needed to reach the next L2 Word boundary
 - append exactly one more L2 Word with bits all set to ones
 
-Such a bit pattern never occurs in a regular SCHC ACK. This is how the fragment sender recognizes a SCHC Receiver-Abort.
+Such a bit pattern never occurs in a legit SCHC ACK. This is how the fragment sender recognizes a SCHC Receiver-Abort.
 
 The SCHC Receiver-Abort MUST NOT be acknowledged.
 
@@ -1441,10 +1441,13 @@ The ACK-on-Error mode supports LPWAN technologies that have variable MTU and out
 
 In ACK-on-Error mode, windows are used.
 
-All tiles MUST be of equal size, except
+All tiles, but the last one and the penultimate one, MUST be of equal size, hereafter called "regular".
+The size of the last tile MUST be smaller than or equal to the regular tile size.
+Regarding the penultimate tile, a Profile MUST pick one of the following two options:
 
-- for the last one, which MUST be of the same size or smaller than the regular ones,
-- and for the penultimate one which, if allowed in a Profile, MAY be exactly one L2 Word smaller than the regular tile size.
+- The penultimate tile size MUST be the regular tile size
+- or the penultimate tile size MUST be either the regular tile size or the regular tile size minus one L2 Word.
+
 
 A SCHC Fragment message carries one or more tiles, which may span multiple windows.
 A SCHC ACK reports on the reception of exactly one window of tiles.
