@@ -859,7 +859,7 @@ A packet (e.g. an IPv6 packet)
 <ul>
 <li>equal: The match result is True if the field value in the packet matches the TV.</li>
 <li>ignore: No matching is attempted between the field value in the packet and the TV in the Rule. The result is always true.</li>
-<li>MSB(x): A match is obtained if the most significant x bits of the packet header field value are equal to the TV in the Rule. The x parameter of the MSB MO indicates how many bits are involved in the comparison. If the FL is described as variable, the length must be a multiple of the unit. For example, x must be multiple of 8 if the unit of the variable length is in bytes.</li>
+<li>MSB(x): A match is obtained if the most significant (leftmost) x bits of the packet header field value are equal to the TV in the Rule. The x parameter of the MSB MO indicates how many bits are involved in the comparison. If the FL is described as variable, the x parameter must be a multiple of the FL unit. For example, x must be multiple of 8 if the unit of the variable length is bytes.</li>
 <li>match-mapping: With match-mapping, the Target Value is a list of values. Each value of the list is identified by an index. Compression is achieved by sending the index instead of the original header field value. This operator matches if the header field value is equal to one of the values in the target list.</li>
 </ul>
 <h1 id="rfc.section.7.5">
@@ -936,7 +936,7 @@ A packet (e.g. an IPv6 packet)
 <h1 id="rfc.section.7.5.2">
 <a href="#rfc.section.7.5.2">7.5.2.</a> <a href="#var-length-field" id="var-length-field">processing variable-length fields</a>
 </h1>
-<p id="rfc.section.7.5.2.p.1">If the field is identified in the Field Description as being of variable length, then aplying the CDA to compress this field may result in a value of fixed size (e.g. not-sent or mapping-sent) or of variable size (e.g. value-sent or LSB).  In the latter case, the residue for that field is the bits that result from applying the CDA to the field, preceded with the size of the value.  The most significant bit of the size is stored first (left of the residue bit field).</p>
+<p id="rfc.section.7.5.2.p.1">If the field is identified in the Field Description as being of variable length, then aplying the CDA to compress this field may result in a value of fixed size (e.g. not-sent or mapping-sent) or of variable size (e.g. value-sent or LSB).  In the latter case, the residue for that field is the bits that result from applying the CDA to the field, preceded with the size of the value.  The most significant bit of the size is stored to the left (leftmost bit of the residue field).</p>
 <div id="rfc.figure.9"></div>
 <div id="Fig-FieldResVarLength"></div>
 <pre>
@@ -965,14 +965,14 @@ A packet (e.g. an IPv6 packet)
 <h1 id="rfc.section.7.5.4">
 <a href="#rfc.section.7.5.4">7.5.4.</a> <a href="#value-sent-cda" id="value-sent-cda">value-sent CDA</a>
 </h1>
-<p id="rfc.section.7.5.4.p.1">The value-sent action can be used when the field value is not known by both the Compressor and the Decompressor. The value is sent in its entirety.</p>
+<p id="rfc.section.7.5.4.p.1">The value-sent action can be used when the field value is not known by both the Compressor and the Decompressor. The field is sent in its entirety, using the same bit order as in the original packet header.</p>
 <p id="rfc.section.7.5.4.p.2">If this action is performed on a variable length field, the size of the residue value (using the units defined in FL) MUST be sent as described in <a href="#var-length-field" class="xref">Section 7.5.2</a>.</p>
 <p id="rfc.section.7.5.4.p.3">This action is generally used with the &#8220;ignore&#8221; MO.</p>
 <h1 id="rfc.section.7.5.5">
 <a href="#rfc.section.7.5.5">7.5.5.</a> <a href="#mapping-sent-cda" id="mapping-sent-cda">mapping-sent CDA</a>
 </h1>
 <p id="rfc.section.7.5.5.p.1">The mapping-sent action is used to send an index (the index into the Target Value list of values) instead of the original value. This action is used together with the &#8220;match-mapping&#8221; MO.</p>
-<p id="rfc.section.7.5.5.p.2">On the compressor side, the match-mapping Matching Operator searches the TV for a match with the header field value. The mapping-sent CDA then sends the corresponding index as the field residue.  The most significant bit of the index is stored first (left of the residue bit field).</p>
+<p id="rfc.section.7.5.5.p.2">On the compressor side, the match-mapping Matching Operator searches the TV for a match with the header field value. The mapping-sent CDA then sends the corresponding index as the field residue.  The most significant bit of the index is stored to the left (leftmost bit of the residue field).</p>
 <p id="rfc.section.7.5.5.p.3">On the decompressor side, the CDA uses the received index to restore the field value by looking up the list in the TV.</p>
 <p id="rfc.section.7.5.5.p.4">The number of bits sent is the minimal size for coding all the possible indices.</p>
 <p id="rfc.section.7.5.5.p.5">The first element in the list MUST be represented by index value 0, and successive elements in the list MUST have indices incremented by 1.</p>
@@ -980,7 +980,7 @@ A packet (e.g. an IPv6 packet)
 <a href="#rfc.section.7.5.6">7.5.6.</a> <a href="#lsb-cda" id="lsb-cda">LSB CDA</a>
 </h1>
 <p id="rfc.section.7.5.6.p.1">The LSB action is used together with the &#8220;MSB(x)&#8221; MO to avoid sending the most significant part of the packet field if that part is already known by the receiving end.</p>
-<p id="rfc.section.7.5.6.p.2">The compressor sends the Least Significant Bits as the field residue value.  The number of bits sent is the original header field length minus the length specified in the MSB(x) MO.</p>
+<p id="rfc.section.7.5.6.p.2">The compressor sends the Least Significant Bits as the field residue value.  The number of bits sent is the original header field length minus the length specified in the MSB(x) MO.  The bits appear in the residue in the same bit order as in the original packet header.</p>
 <p id="rfc.section.7.5.6.p.3">The decompressor concatenates the x most significant bits of Target Value and the received residue value.</p>
 <p id="rfc.section.7.5.6.p.4">If this action is performed on a variable length field, the size of the residue value (using the units defined in FL) MUST be sent as described in <a href="#var-length-field" class="xref">Section 7.5.2</a>.</p>
 <h1 id="rfc.section.7.5.7">
