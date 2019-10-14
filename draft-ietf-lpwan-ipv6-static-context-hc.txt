@@ -193,8 +193,8 @@ Internet-Draft                 LPWAN SCHC                   October 2019
    battery.  LPWAN technologies are also characterized by a greatly
    reduced data unit and/or payload size (see [RFC8376]).
 
-   Header compression is needed for efficient Internet connectivity to
-   the node within an LPWAN network.  The following properties of LPWAN
+   Header compression is needed for efficient Internet connectivity to a
+   node within an LPWAN network.  The following properties of LPWAN
    networks can be exploited to get an efficient header compression:
 
    o  The network topology is star-oriented, which means that all
@@ -577,7 +577,7 @@ Internet-Draft                 LPWAN SCHC                   October 2019
    MUST the SCHC F/Rs on both sides.
 
    The operation in the Downlink direction is similar to that in the
-   Uplink direction, only reverting the order in which the architecture
+   Uplink direction, only reversing the order in which the architecture
    elements are traversed.
 
 6.  Rule ID
@@ -585,9 +585,11 @@ Internet-Draft                 LPWAN SCHC                   October 2019
    Rule IDs identify the Rules used for Compression/Decompression or for
    Fragmentation/Reassembly.
 
-   The scope of a Rule ID is the link between the SCHC Compressor and
-   the SCHC Decompressor, or between the SCHC Fragmenter and the SCHC
-   Reassembler.
+   The scope of a Rule ID is the undirected link instance (i.e. per Dev,
+   regardless of direction) between a SCHC Compressor and its
+   corresponding SCHC Decompressor, or between a SCHC Fragmenter and its
+   corresponding SCHC Reassembler.  Within this scope, Rule IDs for
+   Compression and Rule IDs for Fragmentation share the same space.
 
    The size of the Rule IDs is not specified in this document, as it is
    implementation-specific and can vary according to the LPWAN
@@ -600,16 +602,14 @@ Internet-Draft                 LPWAN SCHC                   October 2019
       Descriptions) that is used to compress a packet header.
 
       *  At least one Rule ID MUST be allocated to tagging packets for
-         which SCHC compression was not possible (no matching Rule was
-         found).
+         which SCHC compression was not possible (no matching
+         compression Rule was found).
 
    o  In SCHC F/R, to identify the specific mode and settings of F/R for
       one direction of traffic (Up or Dw).
 
       *  When F/R is used for both communication directions, at least
          two Rule ID values are needed for F/R, one per direction of
-         traffic.
-
 
 
 
@@ -617,6 +617,9 @@ Minaburo, et al.         Expires April 16, 2020                [Page 11]
 
 Internet-Draft                 LPWAN SCHC                   October 2019
 
+
+         traffic.  This is because F/R may entail control messages
+         flowing in the reverse direction compared to data traffic.
 
 7.  Compression/Decompression
 
@@ -651,9 +654,6 @@ Internet-Draft                 LPWAN SCHC                   October 2019
    Field Identifier (FID), a Field Length (FL), a Field Position (FP), a
    Direction Indicator (DI), a Target Value (TV), a Matching Operator
    (MO) and a Compression/Decompression Action (CDA).
-
-
-
 
 
 
@@ -862,7 +862,9 @@ Internet-Draft                 LPWAN SCHC                   October 2019
       each field results in a residue, which may be empty.  The
       Compression Residue for the packet header is the concatenation of
       the non-empty residues for each field of the header, in the order
-      the Field Descriptions appear in the Rule.
+      the Field Descriptions appear in the Rule.  The order in which the
+      Field Descriptions appear in the Rule is therefore semantically
+      important.
 
        |------------------- Compression Residue -------------------|
        +-----------------+-----------------+-----+-----------------+
@@ -880,16 +882,14 @@ Internet-Draft                 LPWAN SCHC                   October 2019
       be included in an L2 header or sent as part of the L2 payload.
 
    o  Decompression: when decompressing, on the network side the SCHC C/
-      D needs to find the correct Rule based on the L2 address; in this
-      way, it can use the DevIID and the Rule ID.  On the Dev side, only
-      the Rule ID is needed to identify the correct Rule since the Dev
-      typically only holds Rules that apply to itself.
+      D needs to find the correct Rule based on the L2 address of the
+      Dev; in this way, it can use the DevIID and the Rule ID.  On the
+      Dev side, only the Rule ID is needed to identify the correct Rule
+      since the Dev typically only holds Rules that apply to itself.
 
       The receiver identifies the sender through its device-id or source
       identifier (e.g.  MAC address, if it exists) and selects the Rule
-      using the Rule ID.  This Rule describes the compressed header
-      format and associates the received residues to each of the header
-      fields.  For each field in the header, the receiver applies the
+      using the Rule ID.
 
 
 
@@ -898,11 +898,21 @@ Minaburo, et al.         Expires April 16, 2020                [Page 16]
 Internet-Draft                 LPWAN SCHC                   October 2019
 
 
-      CDA action associated to that field in order to reconstruct the
-      original header field value.  The CDA application order can be
-      different from the order in which the fields are listed in the
-      Rule.  In particular, Compute-* MUST be applied after the
-      application of the CDAs of all the fields it computes on.
+      This Rule describes the compressed header format.  From this, the
+      decompressor determines the order of the residues, the fixed-sized
+      or variable-sized nature of each residue (see Section 7.5.2), and
+      the size of the fixed-sized residues.
+
+      From the received compressed header, it can therefore retrieve all
+      the residue values and associate them to the corresponding header
+      fields.
+
+      For each field in the header, the receiver applies the CDA action
+      associated to that field in order to reconstruct the original
+      header field value.  The CDA application order can be different
+      from the order in which the fields are listed in the Rule.  In
+      particular, Compute-* MUST be applied after the application of the
+      CDAs of all the fields it computes on.
 
 7.4.  Matching operators
 
@@ -935,16 +945,6 @@ Internet-Draft                 LPWAN SCHC                   October 2019
    The Compression Decompression Action (CDA) describes the actions
    taken during the compression of header fields and the inverse action
    taken by the decompressor to restore the original value.
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -1086,6 +1086,10 @@ Internet-Draft                 LPWAN SCHC                   October 2019
    The number of bits sent is the minimal size for coding all the
    possible indices.
 
+   The first element in the list MUST be represented by index value 0,
+   and successive elements in the list MUST have indices incremented by
+   1.
+
 7.5.6.  LSB CDA
 
    The LSB action is used together with the "MSB(x)" MO to avoid sending
@@ -1110,10 +1114,6 @@ Internet-Draft                 LPWAN SCHC                   October 2019
    AppIID CDA is less common since most current LPWAN technologies
    frames contain a single L2 address, which is the Dev's address.
 
-   The IID value MAY be computed from the Device ID present in the L2
-   header, or from some other stable identifier.  The computation is
-   specific to each Profile and MAY depend on the Device ID size.
-
 
 
 
@@ -1121,6 +1121,10 @@ Minaburo, et al.         Expires April 16, 2020                [Page 20]
 
 Internet-Draft                 LPWAN SCHC                   October 2019
 
+
+   The IID value MAY be computed from the Device ID present in the L2
+   header, or from some other stable identifier.  The computation is
+   specific to each Profile and MAY depend on the Device ID size.
 
    In the downlink direction (Dw), at the compressor, the DevIID CDA may
    be used to generate the L2 addresses on the LPWAN, based on the
@@ -1165,10 +1169,6 @@ Internet-Draft                 LPWAN SCHC                   October 2019
    fragmented SCHC Packets, as well as interleave the transmission of
    fragmented SCHC Packets.  A Profile MAY restrict this behavior.
 
-   The L2 Word size (see Section 4) determines the encoding of some
-   messages.  SCHC F/R usually generates SCHC Fragments and SCHC ACKs
-   that are multiples of L2 Words.
-
 
 
 
@@ -1177,6 +1177,10 @@ Minaburo, et al.         Expires April 16, 2020                [Page 21]
 
 Internet-Draft                 LPWAN SCHC                   October 2019
 
+
+   The L2 Word size (see Section 4) determines the encoding of some
+   messages.  SCHC F/R usually generates SCHC Fragments and SCHC ACKs
+   that are multiples of L2 Words.
 
 8.2.  SCHC F/R Protocol Elements
 
@@ -1225,10 +1229,6 @@ Internet-Draft                 LPWAN SCHC                   October 2019
 
 
 
-
-
-
-
 Minaburo, et al.         Expires April 16, 2020                [Page 22]
 
 Internet-Draft                 LPWAN SCHC                   October 2019
@@ -1241,6 +1241,9 @@ Tiles  |    |  |     |   |    | |   |   |     |        |    |   |      |
 
 
                Figure 10: a SCHC Packet fragmented in tiles
+
+   Modes (see Section 8.4) MAY place additional constraints on tile
+   sizes.
 
    Each SCHC Fragment message carries at least one tile in its Payload,
    if the Payload field is present.
@@ -1274,9 +1277,6 @@ Tiles  |    |  |     |   |    | |   |   |     |        |    |   |      |
       window number and a tile index within this window.
 
    See Figure 11 for an example.
-
-
-
 
 
 
@@ -1384,14 +1384,14 @@ Internet-Draft                 LPWAN SCHC                   October 2019
    Indeed, this requires decompressing the SCHC Packet, which is out of
    the scope of the SCHC reassembler.
 
-   Note that the concatenation of the complete SCHC Packet and the
-   potential padding bits of the last SCHC Fragment does not generally
-   constitute an integer number of bytes.  For implementers to be able
-   to use byte-oriented CRC libraries, it is RECOMMENDED that the
-   concatenation of the complete SCHC Packet and the last fragment
-   potential padding bits be zero-extended to the next byte boundary and
-   that the RCS be computed on that byte array.  A Profile MAY specify
-   another behavior.
+   Note that the concatenation of the complete SCHC Packet and any
+   padding bits, if present, of the last SCHC Fragment does not
+   generally constitute an integer number of bytes.  For implementers to
+   be able to use byte-oriented CRC libraries, it is RECOMMENDED that
+   the concatenation of the complete SCHC Packet and any last fragment
+   padding bits be zero-extended to the next byte boundary and that the
+   RCS be computed on that byte array.  A Profile MAY specify another
+   behavior.
 
 
 

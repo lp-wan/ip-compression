@@ -582,7 +582,7 @@ address {
 </h1>
 <p id="rfc.section.1.p.1">This document defines the Static Context Header Compression (SCHC) framework, which provides both header compression and fragmentation functionalities. SCHC has been designed for Low Power Wide Area Networks (LPWAN).</p>
 <p id="rfc.section.1.p.2">LPWAN technologies impose some strict limitations on traffic. For instance, devices sleep most of the time and may only receive data during short periods of time after transmission, in order to preserve battery.  LPWAN technologies are also characterized by a greatly reduced data unit and/or payload size (see <a href="#RFC8376" class="xref">[RFC8376]</a>).</p>
-<p id="rfc.section.1.p.3">Header compression is needed for efficient Internet connectivity to the node within an LPWAN network. The following properties of LPWAN networks can be exploited to get an efficient header compression:</p>
+<p id="rfc.section.1.p.3">Header compression is needed for efficient Internet connectivity to a node within an LPWAN network. The following properties of LPWAN networks can be exploited to get an efficient header compression:</p>
 <p></p>
 
 <ul>
@@ -746,20 +746,20 @@ A packet (e.g. an IPv6 packet)
 <p id="rfc.section.5.2.p.3">The operation in the Uplink direction is as follows. The Device application uses IPv6 or IPv6/UDP protocols. Before sending the packets, the Dev compresses their headers using SCHC C/D and, if the SCHC Packet resulting from the compression needs to be fragmented by SCHC, SCHC F/R is performed (see <a href="#Frag" class="xref">Section 8</a>).  The resulting SCHC Fragments are sent to an LPWAN Radio Gateway (RGW) which forwards them to a Network Gateway (NGW).  The NGW sends the data to a SCHC F/R for re-assembly (if needed) and then to the SCHC C/D for decompression.  After decompression, the packet can be sent over the Internet to one or several LPWAN Application Servers (App).</p>
 <p id="rfc.section.5.2.p.4">The SCHC F/R and C/D on the Network side can be located in the NGW, or somewhere else as long as a tunnel is established between them and the NGW.  For some LPWAN technologies, it may be suitable to locate the SCHC F/R functionality nearer the NGW, in order to better deal with time constraints of such technologies.</p>
 <p id="rfc.section.5.2.p.5">The SCHC C/Ds on both sides MUST share the same set of Rules.  So MUST the SCHC F/Rs on both sides.</p>
-<p id="rfc.section.5.2.p.6">The operation in the Downlink direction is similar to that in the Uplink direction, only reverting the order in which the architecture elements are traversed.</p>
+<p id="rfc.section.5.2.p.6">The operation in the Downlink direction is similar to that in the Uplink direction, only reversing the order in which the architecture elements are traversed.</p>
 <h1 id="rfc.section.6">
 <a href="#rfc.section.6">6.</a> <a href="#rule-id" id="rule-id">Rule ID</a>
 </h1>
 <p id="rfc.section.6.p.1">Rule IDs identify the Rules used for Compression/Decompression or for Fragmentation/Reassembly.</p>
-<p id="rfc.section.6.p.2">The scope of a Rule ID is the link between the SCHC Compressor and the SCHC Decompressor, or between the SCHC Fragmenter and the SCHC Reassembler.</p>
+<p id="rfc.section.6.p.2">The scope of a Rule ID is the undirected link instance (i.e. per Dev, regardless of direction) between a SCHC Compressor and its corresponding SCHC Decompressor, or between a SCHC Fragmenter and its corresponding SCHC Reassembler.  Within this scope, Rule IDs for Compression and Rule IDs for Fragmentation share the same space.</p>
 <p id="rfc.section.6.p.3">The size of the Rule IDs is not specified in this document, as it is implementation-specific and can vary according to the LPWAN technology and the number of Rules, among others. It is defined in Profiles.</p>
 <p id="rfc.section.6.p.4">The Rule IDs are used:</p>
 <p></p>
 
 <ul>
-<li>For SCHC C/D, to identify the Rule (i.e., the set of Field Descriptions) that is used to compress a packet header.  <ul><li>At least one Rule ID MUST be allocated to tagging packets for which SCHC compression was not possible (no matching Rule was found).</li></ul>
+<li>For SCHC C/D, to identify the Rule (i.e., the set of Field Descriptions) that is used to compress a packet header.  <ul><li>At least one Rule ID MUST be allocated to tagging packets for which SCHC compression was not possible (no matching compression Rule was found).</li></ul>
 </li>
-<li>In SCHC F/R, to identify the specific mode and settings of F/R for one direction of traffic (Up or Dw).  <ul><li>When F/R is used for both communication directions, at least two Rule ID values are needed for F/R, one per direction of traffic.</li></ul>
+<li>In SCHC F/R, to identify the specific mode and settings of F/R for one direction of traffic (Up or Dw).  <ul><li>When F/R is used for both communication directions, at least two Rule ID values are needed for F/R, one per direction of traffic.  This is because F/R may entail control messages flowing in the reverse direction compared to data traffic.</li></ul>
 </li>
 </ul>
 <h1 id="rfc.section.7">
@@ -832,7 +832,7 @@ A packet (e.g. an IPv6 packet)
 <li>If no valid compression Rule is found, then the header MUST be sent in its entirety using the Rule ID of the &#8220;default&#8221; Rule dedicated to this purpose. Sending an uncompressed header is likely to require SCHC F/R.</li>
 </ul>
 </li>
-<li>Compression: if a valid Rule was found, each field of the header is compressed according to the Compression/Decompression Actions (CDAs) of the Rule.  The fields are compressed in the order that the Field Descriptions appear in the Rule.  The compression of each field results in a residue, which may be empty.  The Compression Residue for the packet header is the concatenation of the non-empty residues for each field of the header, in the order the Field Descriptions appear in the Rule.</li>
+<li>Compression: if a valid Rule was found, each field of the header is compressed according to the Compression/Decompression Actions (CDAs) of the Rule.  The fields are compressed in the order that the Field Descriptions appear in the Rule.  The compression of each field results in a residue, which may be empty.  The Compression Residue for the packet header is the concatenation of the non-empty residues for each field of the header, in the order the Field Descriptions appear in the Rule.  The order in which the Field Descriptions appear in the Rule is therefore semantically important.</li>
 </ul>
 <div id="rfc.figure.7"></div>
 <div id="Fig-CompRes"></div>
@@ -848,7 +848,7 @@ A packet (e.g. an IPv6 packet)
 
 <ul>
 <li>Sending: The Rule ID is sent to the other end followed by the Compression Residue (which could be empty) or the uncompressed header, and directly followed by the payload (see <a href="#Fig-SCHCpckt" class="xref">Figure 4</a>).  The way the Rule ID is sent will be specified in the Profile and is out of the scope of the present document.  For example, it could be included in an L2 header or sent as part of the L2 payload.</li>
-<li>Decompression: when decompressing, on the network side the SCHC C/D needs to find the correct Rule based on the L2 address; in this way, it can use the DevIID and the Rule ID. On the Dev side, only the Rule ID is needed to identify the correct Rule since the Dev typically only holds Rules that apply to itself.  <br><br> The receiver identifies the sender through its device-id or source identifier (e.g. MAC address, if it exists) and selects the Rule using the Rule ID. This Rule describes the compressed header format and associates the received residues to each of the header fields.  For each field in the header, the receiver applies the CDA action associated to that field in order to reconstruct the original header field value. The CDA application order can be different from the order in which the fields are listed in the Rule. In particular, Compute-* MUST be applied after the application of the CDAs of all the fields it computes on.</li>
+<li>Decompression: when decompressing, on the network side the SCHC C/D needs to find the correct Rule based on the L2 address of the Dev; in this way, it can use the DevIID and the Rule ID. On the Dev side, only the Rule ID is needed to identify the correct Rule since the Dev typically only holds Rules that apply to itself.  <br><br> The receiver identifies the sender through its device-id or source identifier (e.g. MAC address, if it exists) and selects the Rule using the Rule ID.  <br><br> This Rule describes the compressed header format. From this, the decompressor determines the order of the residues, the fixed-sized or variable-sized nature of each residue (see <a href="#var-length-field" class="xref">Section 7.5.2</a>), and the size of the fixed-sized residues.  <br><br> From the received compressed header, it can therefore retrieve all the residue values and associate them to the corresponding header fields.  <br><br> For each field in the header, the receiver applies the CDA action associated to that field in order to reconstruct the original header field value. The CDA application order can be different from the order in which the fields are listed in the Rule. In particular, Compute-* MUST be applied after the application of the CDAs of all the fields it computes on.</li>
 </ul>
 <h1 id="rfc.section.7.4">
 <a href="#rfc.section.7.4">7.4.</a> <a href="#chap-MO" id="chap-MO">Matching operators</a>
@@ -975,6 +975,7 @@ A packet (e.g. an IPv6 packet)
 <p id="rfc.section.7.5.5.p.2">On the compressor side, the match-mapping Matching Operator searches the TV for a match with the header field value. The mapping-sent CDA then sends the corresponding index as the field residue.  The most significant bit of the index is stored first (left of the residue bit field).</p>
 <p id="rfc.section.7.5.5.p.3">On the decompressor side, the CDA uses the received index to restore the field value by looking up the list in the TV.</p>
 <p id="rfc.section.7.5.5.p.4">The number of bits sent is the minimal size for coding all the possible indices.</p>
+<p id="rfc.section.7.5.5.p.5">The first element in the list MUST be represented by index value 0, and successive elements in the list MUST have indices incremented by 1.</p>
 <h1 id="rfc.section.7.5.6">
 <a href="#rfc.section.7.5.6">7.5.6.</a> <a href="#lsb-cda" id="lsb-cda">LSB CDA</a>
 </h1>
@@ -1043,7 +1044,8 @@ Tiles  |    |  |     |   |    | |   |   |     |        |    |   |      |
 
 </pre>
 <p class="figure">Figure 10: a SCHC Packet fragmented in tiles</p>
-<p id="rfc.section.8.2.2.1.p.3">Each SCHC Fragment message carries at least one tile in its Payload, if the Payload field is present.</p>
+<p id="rfc.section.8.2.2.1.p.3">Modes (see <a href="#FragModes" class="xref">Section 8.4</a>) MAY place additional constraints on tile sizes.</p>
+<p id="rfc.section.8.2.2.1.p.4">Each SCHC Fragment message carries at least one tile in its Payload, if the Payload field is present.</p>
 <h1 id="rfc.section.8.2.2.2">
 <a href="#rfc.section.8.2.2.2">8.2.2.2.</a> <a href="#Windows" id="Windows">Windows</a>
 </h1>
@@ -1111,7 +1113,7 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 <p id="rfc.section.8.2.3.p.2">The RCS supports UDP checksum elision by SCHC C/D (see <a href="#UDPchecksum" class="xref">Section 10.11</a>).</p>
 <p id="rfc.section.8.2.3.p.3">The CRC32 polynomial 0xEDB88320 (i.e. the reverse representation of the polynomial used e.g. in the Ethernet standard <a href="#RFC3385" class="xref">[RFC3385]</a>) is RECOMMENDED as the default algorithm for computing the RCS. Nevertheless, other RCS lengths or other algorithms MAY be required by the Profile.</p>
 <p id="rfc.section.8.2.3.p.4">The RCS MUST be computed on the full SCHC Packet concatenated with the padding bits, if any, of the SCHC Fragment carrying the last tile.  The rationale is that the SCHC reassembler has no way of knowing the boundary between the last tile and the padding bits.  Indeed, this requires decompressing the SCHC Packet, which is out of the scope of the SCHC reassembler.</p>
-<p id="rfc.section.8.2.3.p.5">Note that the concatenation of the complete SCHC Packet and the potential padding bits of the last SCHC Fragment does not generally constitute an integer number of bytes.  For implementers to be able to use byte-oriented CRC libraries, it is RECOMMENDED that the concatenation of the complete SCHC Packet and the last fragment potential padding bits be zero-extended to the next byte boundary and that the RCS be computed on that byte array.  A Profile MAY specify another behavior.</p>
+<p id="rfc.section.8.2.3.p.5">Note that the concatenation of the complete SCHC Packet and any padding bits, if present, of the last SCHC Fragment does not generally constitute an integer number of bytes.  For implementers to be able to use byte-oriented CRC libraries, it is RECOMMENDED that the concatenation of the complete SCHC Packet and any last fragment padding bits be zero-extended to the next byte boundary and that the RCS be computed on that byte array.  A Profile MAY specify another behavior.</p>
 <h1 id="rfc.section.8.2.4">
 <a href="#rfc.section.8.2.4">8.2.4.</a> <a href="#HeaderFields" id="HeaderFields">Header Fields</a>
 </h1>
