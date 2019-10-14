@@ -503,7 +503,7 @@ Matching Operators (MOs) are functions used by both SCHC C/D endpoints. They are
 
 * ignore: No matching is attempted between the field value in the packet and the TV in the Rule. The result is always true.
 
-* MSB(x): A match is obtained if the most significant x bits of the packet header field value are equal to the TV in the Rule. The x parameter of the MSB MO indicates how many bits are involved in the comparison. If the FL is described as variable, the length must be a multiple of the unit. For example, x must be multiple of 8 if the unit of the variable length is in bytes.
+* MSB(x): A match is obtained if the most significant (leftmost) x bits of the packet header field value are equal to the TV in the Rule. The x parameter of the MSB MO indicates how many bits are involved in the comparison. If the FL is described as variable, the x parameter must be a multiple of the FL unit. For example, x must be multiple of 8 if the unit of the variable length is bytes.
 
 * match-mapping: With match-mapping, the Target Value is a list of values. Each value of the list is identified by an index. Compression is achieved by sending the index instead of the original header field value. This operator matches if the header field value is equal to one of the values in the target list.
 
@@ -553,7 +553,7 @@ then aplying the CDA to compress this field may result in a value of fixed size
 (e.g. not-sent or mapping-sent)
 or of variable size (e.g. value-sent or LSB).
 In the latter case, the residue for that field is the bits that result from applying the CDA to the field, preceded with the size of the value.
-The most significant bit of the size is stored first (left of the residue bit field).
+The most significant bit of the size is stored to the left (leftmost bit of the residue field).
 
 ~~~~
 
@@ -585,7 +585,7 @@ The decompressor restores the field value with the Target Value stored in the ma
 
 ### value-sent CDA
 
-The value-sent action can be used when the field value is not known by both the Compressor and the Decompressor. The value is sent in its entirety.
+The value-sent action can be used when the field value is not known by both the Compressor and the Decompressor. The field is sent in its entirety, using the same bit order as in the original packet header.
 
 If this action is performed on a variable length field, the size of the residue value (using the units defined in FL) MUST be sent as described in {{var-length-field}}.
 
@@ -596,7 +596,7 @@ This action is generally used with the "ignore" MO.
 The mapping-sent action is used to send an index (the index into the Target Value list of values) instead of the original value. This action is used together with the "match-mapping" MO.
 
 On the compressor side, the match-mapping Matching Operator searches the TV for a match with the header field value. The mapping-sent CDA then sends the corresponding index as the field residue.
-The most significant bit of the index is stored first (left of the residue bit field).
+The most significant bit of the index is stored to the left (leftmost bit of the residue field).
 
 On the decompressor side, the CDA uses the received index to restore the field value by looking up the list in the TV.
 
@@ -610,6 +610,7 @@ The LSB action is used together with the "MSB(x)" MO to avoid sending the most s
 
 The compressor sends the Least Significant Bits as the field residue value.
 The number of bits sent is the original header field length minus the length specified in the MSB(x) MO.
+The bits appear in the residue in the same bit order as in the original packet header.
 
 The decompressor concatenates the x most significant bits of Target Value and the received residue value.
 
