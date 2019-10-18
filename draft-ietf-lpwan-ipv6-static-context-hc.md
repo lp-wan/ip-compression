@@ -814,19 +814,20 @@ The SCHC F/R messages contain the following fields (see the formats in {{Fragfor
   All SCHC F/R messages pertaining to the same SCHC Packet MUST bear the same Rule ID.
 
 * Datagram Tag (DTag).
-  Its size (called T, in bits) is defined by each Profile for each Rule ID.
+  This field allows differentiating SCHC F/R messages belonging to different SCHC Packets
+  that may be using the same Rule ID simultaneously.
+  Hence, it allows interleaving fragments of a new SCHC Packet with fragments of a previous SCHC Packet under the same Rule ID.
+
+  The size of the DTag field (called T, in bits) is defined by each Profile for each Rule ID.
   When T is 0, the DTag field does not appear in the SCHC F/R messages and the DTag value is defined as 0.
 
-  When T is 0, there can be only one fragmented SCHC Packet in transit for a given Rule ID.
+  When T is 0, there can be no more than one fragmented SCHC Packet in transit for each fragmentation Rule ID.
 
   If T is not 0, DTag
 
   * MUST be set to the same value for all the SCHC F/R messages related to the same fragmented SCHC Packet,
-  * MUST be set to different values for SCHC F/R messages related to different SCHC Packets that are being fragmented under the same Rule ID and the transmission of which may overlap.
+  * MUST be set to different values for SCHC F/R messages related to different SCHC Packets that are being fragmented under the same Rule ID, and whose transmission may overlap.
 
-  A sequence counter that is incremented for each new fragmented SCHC Packet, counting from 0 to up to (2^T)-1 and wrapping back to 0 is RECOMMENDED for maximum traceability and avoidance of ambiguity.
-
-  A flow of SCHC F/R messages with a given Rule ID and DTag value pair MUST NOT interfere with the operation of a SCHC F/R instance that uses another Rule ID and DTag value pair.
 
 * W: The W field is optional. It is only present if windows are used.
   Its presence and size (called M, in bits) is defined by each SCHC F/R mode and each Profile for each Rule ID.
