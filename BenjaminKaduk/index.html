@@ -658,7 +658,7 @@ address {
 </ul>
 <p id="rfc.section.4.p.4">Additional terminology for the optional SCHC Fragmentation / Reassembly mechanism (SCHC F/R) is found in <a href="#FragTools" class="xref">Section 8.2</a>.</p>
 <h1 id="rfc.section.5">
-<a href="#rfc.section.5">5.</a> <a href="#schc-overview" id="schc-overview">SCHC overview</a>
+<a href="#rfc.section.5">5.</a> <a href="#Overview" id="Overview">SCHC overview</a>
 </h1>
 <p id="rfc.section.5.p.1">SCHC can be characterized as an adaptation layer between an upper layer (typically, IPv6) and an underlying layer (typically, an LPWAN technology).  SCHC comprises two sublayers (i.e. the Compression sublayer and the Fragmentation sublayer), as shown in <a href="#Fig-IntroLayers" class="xref">Figure 2</a>.</p>
 <div id="rfc.figure.2"></div>
@@ -1111,7 +1111,7 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 </h1>
 <p id="rfc.section.8.2.3.p.1">The integrity of the fragmentation-reassembly process of a SCHC Packet MUST be checked at the receive end.  By default, integrity checking is performed by computing a Reassembly Check Sequence (RCS) of the SCHC Packet at the sender side before fragmentation and transmitting it to the receiver for comparison with the RCS locally computed after reassembly.</p>
 <p id="rfc.section.8.2.3.p.2">The RCS supports UDP checksum elision by SCHC C/D (see <a href="#UDPchecksum" class="xref">Section 10.11</a>).</p>
-<p id="rfc.section.8.2.3.p.3">The CRC32 polynomial 0xEDB88320 (i.e. the reverse representation of the polynomial used e.g. in the Ethernet standard <a href="#RFC3385" class="xref">[RFC3385]</a>) is RECOMMENDED as the default algorithm for computing the RCS. Nevertheless, other RCS lengths or other algorithms MAY be required by the Profile.</p>
+<p id="rfc.section.8.2.3.p.3">The CRC32 polynomial 0xEDB88320 (i.e. the reverse representation of the polynomial used e.g. in the Ethernet standard <a href="#ETHERNET" class="xref">[ETHERNET]</a>) is RECOMMENDED as the default algorithm for computing the RCS. Nevertheless, other RCS lengths or other algorithms MAY be required by the Profile.</p>
 <p id="rfc.section.8.2.3.p.4">The RCS MUST be computed on the full SCHC Packet concatenated with the padding bits, if any, of the SCHC Fragment carrying the last tile.  The rationale is that the SCHC reassembler has no way of knowing the boundary between the last tile and the padding bits.  Indeed, this requires decompressing the SCHC Packet, which is out of the scope of the SCHC reassembler.</p>
 <p id="rfc.section.8.2.3.p.5">Note that the concatenation of the complete SCHC Packet and any padding bits, if present, of the last SCHC Fragment does not generally constitute an integer number of bytes.  For implementers to be able to use byte-oriented CRC libraries, it is RECOMMENDED that the concatenation of the complete SCHC Packet and any last fragment padding bits be zero-extended to the next byte boundary and that the RCS be computed on that byte array.  A Profile MAY specify another behavior.</p>
 <h1 id="rfc.section.8.2.4">
@@ -1132,12 +1132,11 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 </ul>
 <p> The Rule ID allows SCHC F/R interleaving non-fragmented SCHC Packets and SCHC Fragments that carry other SCHC Packets, or interleaving SCHC Fragments that use different SCHC F/R modes or different parameters.  </p>
 <br><br> All SCHC F/R messages pertaining to the same SCHC Packet MUST bear the same Rule ID.</li>
-<li>Datagram Tag (DTag).  Its size (called T, in bits) is defined by each Profile for each Rule ID.  When T is 0, the DTag field does not appear in the SCHC F/R messages and the DTag value is defined as 0.  <br><br> When T is 0, there can be only one fragmented SCHC Packet in transit for a given Rule ID.  <br><br> If T is not 0, DTag  <ul>
+<li>Datagram Tag (DTag).  This field allows differentiating SCHC F/R messages belonging to different SCHC Packets that may be using the same Rule ID simultaneously.  Hence, it allows interleaving fragments of a new SCHC Packet with fragments of a previous SCHC Packet under the same Rule ID.  <br><br> The size of the DTag field (called T, in bits) is defined by each Profile for each Rule ID.  When T is 0, the DTag field does not appear in the SCHC F/R messages and the DTag value is defined as 0.  <br><br> When T is 0, there can be no more than one fragmented SCHC Packet in transit for each fragmentation Rule ID.  <br><br> If T is not 0, DTag  <ul>
 <li>MUST be set to the same value for all the SCHC F/R messages related to the same fragmented SCHC Packet,</li>
-<li>MUST be set to different values for SCHC F/R messages related to different SCHC Packets that are being fragmented under the same Rule ID and the transmission of which may overlap.</li>
+<li>MUST be set to different values for SCHC F/R messages related to different SCHC Packets that are being fragmented under the same Rule ID, and whose transmission may overlap.</li>
 </ul>
-<p> A sequence counter that is incremented for each new fragmented SCHC Packet, counting from 0 to up to (2^T)-1 and wrapping back to 0 is RECOMMENDED for maximum traceability and avoidance of ambiguity.  </p>
-<br><br> A flow of SCHC F/R messages with a given Rule ID and DTag value pair MUST NOT interfere with the operation of a SCHC F/R instance that uses another Rule ID and DTag value pair.</li>
+</li>
 <li>W: The W field is optional. It is only present if windows are used.  Its presence and size (called M, in bits) is defined by each SCHC F/R mode and each Profile for each Rule ID.  <br><br> This field carries information pertaining to the window a SCHC F/R message relates to.  If present, W MUST carry the same value for all the SCHC F/R messages related to the same window.  Depending on the mode and Profile, W may carry the full window number, or just the least significant bit or any other partial representation of the window number.</li>
 <li>Fragment Compressed Number (FCN). The FCN field is present in the SCHC Fragment Header.  Its size (called N, in bits) is defined by each Profile for each Rule ID.  <br><br> This field conveys information about the progress in the sequence of tiles being transmitted by SCHC Fragment messages.  For example, it can contain a partial, efficient representation of a larger-sized tile index.  The description of the exact use of the FCN field is left to each SCHC F/R mode.  However, two values are reserved for special purposes. They help control the SCHC F/R process:  <ul>
 <li>The FCN value with all the bits equal to 1 (called All-1) signals the very last tile of a SCHC Packet.  By extension, if windows are used, the last window of a packet is called the All-1 window.</li>
@@ -1925,7 +1924,8 @@ A packet (e.g. an IPv6 packet)
 <h1 id="rfc.section.12">
 <a href="#rfc.section.12">12.</a> <a href="#SecConsiderations" id="SecConsiderations">Security considerations</a>
 </h1>
-<p id="rfc.section.12.p.1">Wireless networks are subjects to various sorts of attacks, which are not specific to SCHC.  In this section, we&#8217;ll assume that an attacker was able to break into the network despite the latter&#8217;s security measures and that it can now send packets to a target node.  What is specific to SCHC is the amplification of the effects that this break-in could allow.  Our analysis equally applies to legitimate nodes &#8220;going crazy&#8221;.</p>
+<p id="rfc.section.12.p.1">As explained in <a href="#Overview" class="xref">Section 5</a>, SCHC is expected to be implemented on top of LPWAN technologies, which are expected to implement security measures.</p>
+<p id="rfc.section.12.p.2">In this section, we analyze the potential security threats that could be introduced into an LPWAN by adding the SCHC functionalities.</p>
 <h1 id="rfc.section.12.1">
 <a href="#rfc.section.12.1">12.1.</a> <a href="#security-considerations-for-schc-compressiondecompression" id="security-considerations-for-schc-compressiondecompression">Security considerations for SCHC Compression/Decompression</a>
 </h1>
@@ -1979,6 +1979,10 @@ A packet (e.g. an IPv6 packet)
 <h1 id="rfc.references.2">
 <a href="#rfc.references.2">14.2.</a> Informative References</h1>
 <table><tbody>
+<tr>
+<td class="reference"><b id="ETHERNET">[ETHERNET]</b></td>
+<td class="top">"<a>IEEE Standard for Ethernet</a>", IEEE standard, DOI 10.1109/ieeestd.2018.8457469, n.d..</td>
+</tr>
 <tr>
 <td class="reference"><b id="RFC3385">[RFC3385]</b></td>
 <td class="top">
