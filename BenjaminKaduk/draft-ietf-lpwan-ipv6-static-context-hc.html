@@ -348,12 +348,12 @@ address {
 <link href="#rfc.authors" rel="Chapter">
 
 
-  <meta name="generator" content="xml2rfc version 2.32.0 - https://tools.ietf.org/tools/xml2rfc" />
+  <meta name="generator" content="xml2rfc version 2.33.0 - https://tools.ietf.org/tools/xml2rfc" />
   <link rel="schema.dct" href="http://purl.org/dc/terms/" />
 
   <meta name="dct.creator" content="Minaburo, A., Toutain, L., Gomez, C., Barthel, D., and JC. Zuniga" />
   <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-lpwan-ipv6-static-context-hc-21" />
-  <meta name="dct.issued" scheme="ISO8601" content="2019-10-14" />
+  <meta name="dct.issued" scheme="ISO8601" content="2019-10-18" />
   <meta name="dct.abstract" content="This document defines the Static Context Header Compression (SCHC) framework, which provides both header compression and fragmentation functionalities. SCHC has been designed for Low Power Wide Area Networks (LPWAN).SCHC compression is based on a common static context stored in both the LPWAN device and the network side. This document defines a header compression mechanism and its application to compress IPv6/UDP headers.This document also specifies a fragmentation and reassembly mechanism that is used to support the IPv6 MTU requirement over the LPWAN technologies. Fragmentation is needed for IPv6 datagrams that, after SCHC compression or when such compression was not possible, still exceed the layer-2 maximum payload size.The SCHC header compression and fragmentation mechanisms are independent of the specific LPWAN technology over which they are used. This document defines generic functionalities and offers flexibility with regard to parameter settings and mechanism choices.  This document standardizes the exchange over the LPWAN between two SCHC entities.  Settings and choices specific to a technology or a product are expected to be grouped into profiles, which are specified in other documents.  Data models for the context and profiles are out of scope." />
   <meta name="description" content="This document defines the Static Context Header Compression (SCHC) framework, which provides both header compression and fragmentation functionalities. SCHC has been designed for Low Power Wide Area Networks (LPWAN).SCHC compression is based on a common static context stored in both the LPWAN device and the network side. This document defines a header compression mechanism and its application to compress IPv6/UDP headers.This document also specifies a fragmentation and reassembly mechanism that is used to support the IPv6 MTU requirement over the LPWAN technologies. Fragmentation is needed for IPv6 datagrams that, after SCHC compression or when such compression was not possible, still exceed the layer-2 maximum payload size.The SCHC header compression and fragmentation mechanisms are independent of the specific LPWAN technology over which they are used. This document defines generic functionalities and offers flexibility with regard to parameter settings and mechanism choices.  This document standardizes the exchange over the LPWAN between two SCHC entities.  Settings and choices specific to a technology or a product are expected to be grouped into profiles, which are specified in other documents.  Data models for the context and profiles are out of scope." />
 
@@ -377,7 +377,7 @@ address {
 <td class="right">L. Toutain</td>
 </tr>
 <tr>
-<td class="left">Expires: April 16, 2020</td>
+<td class="left">Expires: April 20, 2020</td>
 <td class="right">IMT-Atlantique</td>
 </tr>
 <tr>
@@ -406,7 +406,7 @@ address {
 </tr>
 <tr>
 <td class="left"></td>
-<td class="right">October 14, 2019</td>
+<td class="right">October 18, 2019</td>
 </tr>
 
     	
@@ -425,7 +425,7 @@ address {
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at https://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on April 16, 2020.</p>
+<p>This Internet-Draft will expire on April 20, 2020.</p>
 <h1 id="rfc.copyrightnotice"><a href="#rfc.copyrightnotice">Copyright Notice</a></h1>
 <p>Copyright (c) 2019 IETF Trust and the persons identified as the document authors.  All rights reserved.</p>
 <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (https://trustee.ietf.org/license-info) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.</p>
@@ -859,7 +859,7 @@ A packet (e.g. an IPv6 packet)
 <ul>
 <li>equal: The match result is True if the field value in the packet matches the TV.</li>
 <li>ignore: No matching is attempted between the field value in the packet and the TV in the Rule. The result is always true.</li>
-<li>MSB(x): A match is obtained if the most significant x bits of the packet header field value are equal to the TV in the Rule. The x parameter of the MSB MO indicates how many bits are involved in the comparison. If the FL is described as variable, the length must be a multiple of the unit. For example, x must be multiple of 8 if the unit of the variable length is in bytes.</li>
+<li>MSB(x): A match is obtained if the most significant (leftmost) x bits of the packet header field value are equal to the TV in the Rule. The x parameter of the MSB MO indicates how many bits are involved in the comparison. If the FL is described as variable, the x parameter must be a multiple of the FL unit. For example, x must be multiple of 8 if the unit of the variable length is bytes.</li>
 <li>match-mapping: With match-mapping, the Target Value is a list of values. Each value of the list is identified by an index. Compression is achieved by sending the index instead of the original header field value. This operator matches if the header field value is equal to one of the values in the target list.</li>
 </ul>
 <h1 id="rfc.section.7.5">
@@ -936,7 +936,7 @@ A packet (e.g. an IPv6 packet)
 <h1 id="rfc.section.7.5.2">
 <a href="#rfc.section.7.5.2">7.5.2.</a> <a href="#var-length-field" id="var-length-field">processing variable-length fields</a>
 </h1>
-<p id="rfc.section.7.5.2.p.1">If the field is identified in the Field Description as being of variable length, then aplying the CDA to compress this field may result in a value of fixed size (e.g. not-sent or mapping-sent) or of variable size (e.g. value-sent or LSB).  In the latter case, the residue for that field is the bits that result from applying the CDA to the field, preceded with the size of the value.  The most significant bit of the size is stored first (left of the residue bit field).</p>
+<p id="rfc.section.7.5.2.p.1">If the field is identified in the Field Description as being of variable length, then aplying the CDA to compress this field may result in a value of fixed size (e.g. not-sent or mapping-sent) or of variable size (e.g. value-sent or LSB).  In the latter case, the residue for that field is the bits that result from applying the CDA to the field, preceded with the size of the value.  The most significant bit of the size is stored to the left (leftmost bit of the residue field).</p>
 <div id="rfc.figure.9"></div>
 <div id="Fig-FieldResVarLength"></div>
 <pre>
@@ -965,14 +965,14 @@ A packet (e.g. an IPv6 packet)
 <h1 id="rfc.section.7.5.4">
 <a href="#rfc.section.7.5.4">7.5.4.</a> <a href="#value-sent-cda" id="value-sent-cda">value-sent CDA</a>
 </h1>
-<p id="rfc.section.7.5.4.p.1">The value-sent action can be used when the field value is not known by both the Compressor and the Decompressor. The value is sent in its entirety.</p>
+<p id="rfc.section.7.5.4.p.1">The value-sent action can be used when the field value is not known by both the Compressor and the Decompressor. The field is sent in its entirety, using the same bit order as in the original packet header.</p>
 <p id="rfc.section.7.5.4.p.2">If this action is performed on a variable length field, the size of the residue value (using the units defined in FL) MUST be sent as described in <a href="#var-length-field" class="xref">Section 7.5.2</a>.</p>
 <p id="rfc.section.7.5.4.p.3">This action is generally used with the &#8220;ignore&#8221; MO.</p>
 <h1 id="rfc.section.7.5.5">
 <a href="#rfc.section.7.5.5">7.5.5.</a> <a href="#mapping-sent-cda" id="mapping-sent-cda">mapping-sent CDA</a>
 </h1>
 <p id="rfc.section.7.5.5.p.1">The mapping-sent action is used to send an index (the index into the Target Value list of values) instead of the original value. This action is used together with the &#8220;match-mapping&#8221; MO.</p>
-<p id="rfc.section.7.5.5.p.2">On the compressor side, the match-mapping Matching Operator searches the TV for a match with the header field value. The mapping-sent CDA then sends the corresponding index as the field residue.  The most significant bit of the index is stored first (left of the residue bit field).</p>
+<p id="rfc.section.7.5.5.p.2">On the compressor side, the match-mapping Matching Operator searches the TV for a match with the header field value. The mapping-sent CDA then sends the corresponding index as the field residue.  The most significant bit of the index is stored to the left (leftmost bit of the residue field).</p>
 <p id="rfc.section.7.5.5.p.3">On the decompressor side, the CDA uses the received index to restore the field value by looking up the list in the TV.</p>
 <p id="rfc.section.7.5.5.p.4">The number of bits sent is the minimal size for coding all the possible indices.</p>
 <p id="rfc.section.7.5.5.p.5">The first element in the list MUST be represented by index value 0, and successive elements in the list MUST have indices incremented by 1.</p>
@@ -980,7 +980,7 @@ A packet (e.g. an IPv6 packet)
 <a href="#rfc.section.7.5.6">7.5.6.</a> <a href="#lsb-cda" id="lsb-cda">LSB CDA</a>
 </h1>
 <p id="rfc.section.7.5.6.p.1">The LSB action is used together with the &#8220;MSB(x)&#8221; MO to avoid sending the most significant part of the packet field if that part is already known by the receiving end.</p>
-<p id="rfc.section.7.5.6.p.2">The compressor sends the Least Significant Bits as the field residue value.  The number of bits sent is the original header field length minus the length specified in the MSB(x) MO.</p>
+<p id="rfc.section.7.5.6.p.2">The compressor sends the Least Significant Bits as the field residue value.  The number of bits sent is the original header field length minus the length specified in the MSB(x) MO.  The bits appear in the residue in the same bit order as in the original packet header.</p>
 <p id="rfc.section.7.5.6.p.3">The decompressor concatenates the x most significant bits of Target Value and the received residue value.</p>
 <p id="rfc.section.7.5.6.p.4">If this action is performed on a variable length field, the size of the residue value (using the units defined in FL) MUST be sent as described in <a href="#var-length-field" class="xref">Section 7.5.2</a>.</p>
 <h1 id="rfc.section.7.5.7">
