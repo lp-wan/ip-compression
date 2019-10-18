@@ -1449,7 +1449,7 @@ Regarding the penultimate tile, a Profile MUST pick one of the following two opt
 - or the penultimate tile size MUST be either the regular tile size or the regular tile size minus one L2 Word.
 
 
-A SCHC Fragment message carries one or more tiles, which may span multiple windows.
+A SCHC Fragment message carries one or several contiguous tiles, which may span multiple windows.
 A SCHC ACK reports on the reception of exactly one window of tiles.
 
 See {{Fig-TilesACKonError}} for an example.
@@ -1523,7 +1523,7 @@ At the beginning of the fragmentation of a new SCHC Packet,
 A Regular SCHC Fragment message carries in its payload one or more tiles.
 If more than one tile is carried in one Regular SCHC Fragment
 
-- the selected tiles MUST be consecutive in the original SCHC Packet
+- the selected tiles MUST be contiguous in the original SCHC Packet
 - they MUST be placed in the SCHC Fragment Payload adjacent to one another, in the order they appear in the SCHC Packet, from the start of the SCHC Packet toward its end.
 
 Tiles that are not the last one MUST be sent in Regular SCHC Fragments specified in {{NotLastFrag}}.
