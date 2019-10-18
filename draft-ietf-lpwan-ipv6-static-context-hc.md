@@ -213,7 +213,7 @@ The SCHC acronym is pronounced like "sheek" in English (or "chic" in French). Th
 
 Additional terminology for the optional SCHC Fragmentation / Reassembly mechanism (SCHC F/R) is found in {{FragTools}}.
 
-# SCHC overview
+# SCHC overview {#Overview}
 
 SCHC can be characterized as an adaptation layer between an upper layer (typically, IPv6) and an underlying layer (typically, an LPWAN technology).
 SCHC comprises two sublayers (i.e. the Compression sublayer and the Fragmentation sublayer), as shown in {{Fig-IntroLayers}}.
@@ -1860,11 +1860,11 @@ This document has no request to IANA.
 
 # Security considerations {#SecConsiderations}
 
-Wireless networks are subjects to various sorts of attacks, which are not specific to SCHC.
-In this section, we'll assume that an attacker was able to break into the network despite the latter's security measures
-and that it can now send packets to a target node.
-What is specific to SCHC is the amplification of the effects that this break-in could allow.
-Our analysis equally applies to legitimate nodes "going crazy".
+As explained in {{Overview}}, SCHC is expected to be implemented on top of LPWAN technologies,
+which are expected to implement security measures.
+
+In this section, we analyze the potential security threats that could be introduced
+into an LPWAN by adding the SCHC functionalities.
 
 ## Security considerations for SCHC Compression/Decompression
 
