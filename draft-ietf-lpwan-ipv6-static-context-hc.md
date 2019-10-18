@@ -64,6 +64,7 @@ informative:
   RFC4944:
   RFC5795:
   RFC6282:
+  RFC6437:
   RFC7136:
   RFC7217:
   RFC8065:
@@ -1757,13 +1758,12 @@ Otherwise (e.g. ECN bits are to be transmitted), two possibilities can be consid
 
 ## Flow label field
 
-If the Flow Label field does not vary and is known by both sides, the Field Descriptor in the Rule SHOULD contain a TV with this well-known value, an "equal" MO and a "not-sent" CDA.
+If the flow label is not set, i.e. its value is zero, the Field Descriptor in the Rule SHOULD contain a TV set to zero, an "equal" MO and a "not-sent" CDA.
 
-Otherwise, two possibilities can be considered:
+If the flow label is set to a pseudo-random value according to {{RFC6437}}, in the Rule, TV is not set to any particular value, MO is set to "ignore" and CDA is set to "value-sent".
 
-* One possibility is to not compress the field and send the original value. In the Rule, TV is not set to any particular value, MO is set to "ignore" and CDA is set to "value-sent".
-
-* If some upper bits in the field are constant and known, a better option is to only send the LSBs. In the Rule, TV is set to a value with the stable known upper part, MO is set to MSB(x) and CDA to LSB.
+If the flow label is set according to some prior agreement, i.e. by a flow state establishment method as allowed by {{RFC6437}},
+the Field Descriptor in the Rule SHOULD contain a TV with this agreed-upon value, an "equal" MO and a "not-sent" CDA.
 
 ## Payload Length field
 
