@@ -774,13 +774,13 @@ Some SCHC F/R modes can use the following timers and counters
 
 The integrity of the fragmentation-reassembly process of a SCHC Packet MUST be checked at the receive end.
 By default, integrity checking is performed by computing a Reassembly Check Sequence (RCS)
-of the SCHC Packet at the sender side before fragmentation
+based on the SCHC Packet at the sender side
 and transmitting it to the receiver for comparison with the RCS locally computed after reassembly.
 
 The RCS supports UDP checksum elision by SCHC C/D (see {{UDPchecksum}}).
 
-The CRC32 polynomial 0xEDB88320 (i.e. the reverse representation
-of the polynomial used e.g. in the Ethernet standard {{ETHERNET}}) is RECOMMENDED as the default algorithm for computing the
+The CRC32 polynomial 0xEDB88320 (i.e. the reversed polynomial representation, which is
+used e.g. in the Ethernet standard {{ETHERNET}}) is RECOMMENDED as the default algorithm for computing the
 RCS. Nevertheless, other RCS lengths or other algorithms MAY be required by the Profile.
 
 The RCS MUST be computed on the full SCHC Packet concatenated with the padding bits, if any, of the SCHC Fragment carrying the last tile.
