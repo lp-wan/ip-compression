@@ -107,7 +107,7 @@ Furthermore, some LPWAN technologies do not provide a fragmentation functionalit
 Accordingly, this document defines an optional fragmentation/reassembly mechanism for LPWAN technologies to support the IPv6 MTU requirement.
 
 This document defines generic functionality and offers flexibility with regard to parameters settings
-and mechanism choices. Technology-specific settings and product-specific choices are expected to be grouped into Profiles specified in other documents.
+and mechanism choices. Technology-specific settings are expected to be grouped into Profiles specified in other documents.
 
 # Requirements Notation
 
@@ -810,7 +810,9 @@ The SCHC F/R messages contain the following fields (see the formats in {{Fragfor
 
      * what other optional fields are present and what the field sizes are.
 
-  The Rule ID allows SCHC F/R interleaving non-fragmented SCHC Packets and SCHC Fragments that carry other SCHC Packets, or interleaving SCHC Fragments that use different SCHC F/R modes or different parameters.
+  The Rule ID tells apart a non-fragmented SCHC Packet from SCHC Fragments.
+  It will also tell part SCHC Fragments of fragmented SCHC Packets that use different SCHC F/R modes or different parameters.
+  Interleaved transmission of these is therefore possible.
 
   All SCHC F/R messages pertaining to the same SCHC Packet MUST bear the same Rule ID.
 
@@ -912,7 +914,7 @@ This condition is also met if the SCHC Fragment Header is a multiple of L2 Words
 #### All-1 SCHC Fragment {#LastFrag}
 
 The All-1 SCHC Fragment format is shown in {{Fig-LastFrag}}.
-The sender generally uses the All-1 SCHC Fragment format for the message that completes the emission of a fragmented SCHC Packet.
+The sender uses the All-1 SCHC Fragment format for the message that completes the emission of a fragmented SCHC Packet.
 The DTag field, the W field, the RCS field and the Payload are OPTIONAL, their presence is specified by each mode and Profile.
 At least one of RCS field or Payload MUST be present.
 The FCN field is all ones.
@@ -1163,6 +1165,7 @@ Each Profile, for each Rule ID value, MAY define
 - the meaning of values sent in the FCN field, for values different from the All-1 value.
 
 For each active pair of Rule ID and DTag values, the receiver MUST maintain an Inactivity Timer.
+If the receiver is under-resourced to do this, it MUST silently drop the related messages.
 
 
 #### Sender behavior
@@ -1241,7 +1244,10 @@ For each active pair of Rule ID and DTag values, the sender MUST maintain
 - one Attempts counter
 - one Retransmission Timer
 
-For each active pair of Rule ID and DTag values, the receiver MUST maintain an Inactivity Timer.
+For each active pair of Rule ID and DTag values, the receiver MUST maintain
+
+- one Inactivity Timer
+- one Attempts counter
 
 
 #### Sender behavior
@@ -1266,6 +1272,9 @@ The SCHC Fragment that carries the last tile MUST be an All-1 SCHC Fragment, des
 The fragment sender MUST start by transmitting the window numbered 0.
 
 The sender starts by a "blind transmission" phase, in which it MUST transmit all the tiles composing the window, in decreasing tile index order.
+
+All message receptions being discussed in the rest of this section have the implicit
+"matching the RuleID and DTag pair being processed" characteristic added to them.
 
 Then, it enters a "retransmission phase" in which
 it MUST initialize an Attempts counter to 0,
@@ -1318,12 +1327,17 @@ On receiving a SCHC Fragment with a Rule ID and DTag pair not being processed at
   thereby ensuring that the received SCHC Fragment is not a remnant of a prior fragmented SCHC Packet transmission.
   If the SCHC Fragment is determined to be such a remnant, the receiver MAY silently ignore it and discard it.
 - the receiver MUST start a process to assemble a new SCHC Packet with that Rule ID and DTag value pair.
-- the receiver MUST start an Inactivity Timer. It MUST initialize an Attempts counter to 0.
+- the receiver MUST start an Inactivity Timer for that RuleID and DTag pair.
+  It MUST initialize an Attempts counter to 0 for that RuleID and DTag pair.
   It MUST initialize a window counter to 0.
+  If the receiver is under-resourced to do this, it MUST respond to the sender with a SCHC Receiver Abort.
 
 In the rest of this section, "local W bit" means the least significant bit of the window counter of the receiver.
 
-On reception of any SCHC F/R message, the receiver MUST reset the Inactivity Timer.
+On reception of any SCHC F/R message for the RuleID and DTag pair being processed, the receiver MUST reset the Inactivity Timer pertaining to that RuleID and DTag pair.
+
+All message receptions being discussed in the rest of this section have the implicit
+"matching the RuleID and DTag pair being processed" characteristic added to them.
 
 Entering an "acceptance phase", the receiver MUST first initialize an empty Bitmap for this window, then
 
@@ -1486,7 +1500,10 @@ For each active pair of Rule ID and DTag values, the sender MUST maintain
 - one Attempts counter
 - one Retransmission Timer
 
-For each active pair of Rule ID and DTag values, the receiver MUST maintain an Inactivity Timer.
+For each active pair of Rule ID and DTag values, the receiver MUST maintain
+
+- one Inactivity Timer
+- one Attempts counter
 
 
 #### Sender behavior {#ACK-on-Error-sender}
@@ -1541,6 +1558,9 @@ On Retransmission Timer expiration
 - otherwise the fragment sender MUST send a SCHC Sender-Abort and
   it MAY exit with an error condition.
 
+All message receptions being discussed in the rest of this section have the implicit
+"matching the RuleID and DTag pair being processed" characteristic added to them.
+
 On receiving a SCHC ACK,
 
 - if the W field in the SCHC ACK corresponds to the last window of the SCHC Packet,
@@ -1589,9 +1609,15 @@ On receiving a SCHC Fragment with a Rule ID and DTag pair not being processed at
   thereby ensuring that the received SCHC Fragment is not a remnant of a prior fragmented SCHC Packet transmission.
   If the SCHC Fragment is determined to be such a remnant, the receiver MAY silently ignore it and discard it.
 - the receiver MUST start a process to assemble a new SCHC Packet with that Rule ID and DTag value pair.
-- the receiver MUST start an Inactivity Timer. It MUST initialize an Attempts counter to 0.
+  The receiver MUST start an Inactivity Timer for that Rule ID and DTag value pair.
+  It MUST initialize an Attempts counter to 0 for that Rule ID and DTag value pair.
+  If the receiver is under-resourced to do this, it MUST respond to the sender with a SCHC Receiver Abort.
 
-On receiving any SCHC F/R message, the receiver MUST reset the Inactivity Timer.
+
+On reception of any SCHC F/R message for the RuleID and DTag pair being processed, the receiver MUST reset the Inactivity Timer pertaining to that RuleID and DTag pair.
+
+All message receptions being discussed in the rest of this section have the implicit
+"matching the RuleID and DTag pair being processed" characteristic added to them.
 
 On receiving a SCHC Fragment message,
 the receiver determines what tiles were received, based on the payload length and on the W and FCN fields of the SCHC Fragment.
