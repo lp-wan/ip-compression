@@ -172,7 +172,7 @@ Internet-Draft                 LPWAN SCHC                   October 2019
 
      14.1.  Normative References . . . . . . . . . . . . . . . . . .  58
      14.2.  Informative References . . . . . . . . . . . . . . . . .  59
-   Appendix A.  Compression Examples . . . . . . . . . . . . . . . .  59
+   Appendix A.  Compression Examples . . . . . . . . . . . . . . . .  60
    Appendix B.  Fragmentation Examples . . . . . . . . . . . . . . .  62
    Appendix C.  Fragmentation State Machines . . . . . . . . . . . .  70
    Appendix D.  SCHC Parameters  . . . . . . . . . . . . . . . . . .  76
@@ -2882,20 +2882,18 @@ Internet-Draft                 LPWAN SCHC                   October 2019
 
 10.3.  Flow label field
 
-   If the Flow Label field does not vary and is known by both sides, the
-   Field Descriptor in the Rule SHOULD contain a TV with this well-known
+   If the flow label is not set, i.e. its value is zero, the Field
+   Descriptor in the Rule SHOULD contain a TV set to zero, an "equal" MO
+   and a "not-sent" CDA.
+
+   If the flow label is set to a pseudo-random value according to
+   [RFC6437], in the Rule, TV is not set to any particular value, MO is
+   set to "ignore" and CDA is set to "value-sent".
+
+   If the flow label is set according to some prior agreement, i.e. by a
+   flow state establishment method as allowed by [RFC6437], the Field
+   Descriptor in the Rule SHOULD contain a TV with this agreed-upon
    value, an "equal" MO and a "not-sent" CDA.
-
-   Otherwise, two possibilities can be considered:
-
-   o  One possibility is to not compress the field and send the original
-      value.  In the Rule, TV is not set to any particular value, MO is
-      set to "ignore" and CDA is set to "value-sent".
-
-   o  If some upper bits in the field are constant and known, a better
-      option is to only send the LSBs.  In the Rule, TV is set to a
-      value with the stable known upper part, MO is set to MSB(x) and
-      CDA to LSB.
 
 10.4.  Payload Length field
 
@@ -2903,6 +2901,8 @@ Internet-Draft                 LPWAN SCHC                   October 2019
    The SCHC C/D recomputes the original payload length value.  In the
    Field Descriptor, TV is not set, MO is set to "ignore" and CDA is
    "compute-*".
+
+
 
 
 
@@ -3277,6 +3277,11 @@ Internet-Draft                 LPWAN SCHC                   October 2019
               DOI 10.17487/RFC6282, September 2011,
               <https://www.rfc-editor.org/info/rfc6282>.
 
+   [RFC6437]  Amante, S., Carpenter, B., Jiang, S., and J. Rajahalme,
+              "IPv6 Flow Label Specification", RFC 6437,
+              DOI 10.17487/RFC6437, November 2011,
+              <https://www.rfc-editor.org/info/rfc6437>.
+
    [RFC7136]  Carpenter, B. and S. Jiang, "Significance of IPv6
               Interface Identifiers", RFC 7136, DOI 10.17487/RFC7136,
               February 2014, <https://www.rfc-editor.org/info/rfc7136>.
@@ -3291,13 +3296,8 @@ Internet-Draft                 LPWAN SCHC                   October 2019
               Layer Mechanisms", RFC 8065, DOI 10.17487/RFC8065,
               February 2017, <https://www.rfc-editor.org/info/rfc8065>.
 
-Appendix A.  Compression Examples
 
-   This section gives some scenarios of the compression mechanism for
-   IPv6/UDP.  The goal is to illustrate the behavior of SCHC.
 
-   The mechanisms defined in this document can be applied to a Dev that
-   embeds some applications running over CoAP.  In this example, three
 
 
 
@@ -3306,6 +3306,13 @@ Minaburo, et al.         Expires April 26, 2020                [Page 59]
 Internet-Draft                 LPWAN SCHC                   October 2019
 
 
+Appendix A.  Compression Examples
+
+   This section gives some scenarios of the compression mechanism for
+   IPv6/UDP.  The goal is to illustrate the behavior of SCHC.
+
+   The mechanisms defined in this document can be applied to a Dev that
+   embeds some applications running over CoAP.  In this example, three
    flows are considered.  The first flow is for the device management
    based on CoAP using Link Local IPv6 addresses and UDP ports 123 and
    124 for Dev and App, respectively.  The second flow will be a CoAP
@@ -3347,13 +3354,6 @@ Internet-Draft                 LPWAN SCHC                   October 2019
     +----------------+--+--+--+---------+---------------------++------+
     |IPv6 Version    |4 |1 |Bi|6        | ignore | not-sent   ||      |
     |IPv6 DiffServ   |8 |1 |Bi|0        | equal  | not-sent   ||      |
-    |IPv6 Flow Label |20|1 |Bi|0        | equal  | not-sent   ||      |
-    |IPv6 Length     |16|1 |Bi|         | ignore | compute-*  ||      |
-    |IPv6 Next Header|8 |1 |Bi|17       | equal  | not-sent   ||      |
-    |IPv6 Hop Limit  |8 |1 |Bi|255      | ignore | not-sent   ||      |
-    |IPv6 DevPrefix  |64|1 |Bi|FE80::/64| equal  | not-sent   ||      |
-    |IPv6 DevIID     |64|1 |Bi|         | ignore | DevIID     ||      |
-    |IPv6 AppPrefix  |64|1 |Bi|FE80::/64| equal  | not-sent   ||      |
 
 
 
@@ -3362,6 +3362,13 @@ Minaburo, et al.         Expires April 26, 2020                [Page 60]
 Internet-Draft                 LPWAN SCHC                   October 2019
 
 
+    |IPv6 Flow Label |20|1 |Bi|0        | equal  | not-sent   ||      |
+    |IPv6 Length     |16|1 |Bi|         | ignore | compute-*  ||      |
+    |IPv6 Next Header|8 |1 |Bi|17       | equal  | not-sent   ||      |
+    |IPv6 Hop Limit  |8 |1 |Bi|255      | ignore | not-sent   ||      |
+    |IPv6 DevPrefix  |64|1 |Bi|FE80::/64| equal  | not-sent   ||      |
+    |IPv6 DevIID     |64|1 |Bi|         | ignore | DevIID     ||      |
+    |IPv6 AppPrefix  |64|1 |Bi|FE80::/64| equal  | not-sent   ||      |
     |IPv6 AppIID     |64|1 |Bi|::1      | equal  | not-sent   ||      |
     +================+==+==+==+=========+========+============++======+
     |UDP DevPort     |16|1 |Bi|123      | equal  | not-sent   ||      |
@@ -3403,13 +3410,6 @@ Internet-Draft                 LPWAN SCHC                   October 2019
     |IPv6 Version    |4 |1 |Bi|6        | ignore | not-sent   ||      |
     |IPv6 DiffServ   |8 |1 |Bi|0        | equal  | not-sent   ||      |
     |IPv6 Flow Label |20|1 |Bi|0        | equal  | not-sent   ||      |
-    |IPv6 Length     |16|1 |Bi|         | ignore | compute-*  ||      |
-    |IPv6 Next Header|8 |1 |Bi|17       | equal  | not-sent   ||      |
-    |IPv6 Hop Limit  |8 |1 |Up|255      | ignore | not-sent   ||      |
-    |IPv6 Hop Limit  |8 |1 |Dw|         | ignore | value-sent ||   8  |
-    |IPv6 DevPrefix  |64|1 |Bi|alpha/64 | equal  | not-sent   ||      |
-    |IPv6 DevIID     |64|1 |Bi|         | ignore | DevIID     ||      |
-    |IPv6 AppPrefix  |64|1 |Bi|gamma/64 | equal  | not-sent   ||      |
 
 
 
@@ -3418,6 +3418,13 @@ Minaburo, et al.         Expires April 26, 2020                [Page 61]
 Internet-Draft                 LPWAN SCHC                   October 2019
 
 
+    |IPv6 Length     |16|1 |Bi|         | ignore | compute-*  ||      |
+    |IPv6 Next Header|8 |1 |Bi|17       | equal  | not-sent   ||      |
+    |IPv6 Hop Limit  |8 |1 |Up|255      | ignore | not-sent   ||      |
+    |IPv6 Hop Limit  |8 |1 |Dw|         | ignore | value-sent ||   8  |
+    |IPv6 DevPrefix  |64|1 |Bi|alpha/64 | equal  | not-sent   ||      |
+    |IPv6 DevIID     |64|1 |Bi|         | ignore | DevIID     ||      |
+    |IPv6 AppPrefix  |64|1 |Bi|gamma/64 | equal  | not-sent   ||      |
     |IPv6 AppIID     |64|1 |Bi|::1000   | equal  | not-sent   ||      |
     +================+==+==+==+=========+========+============++======+
     |UDP DevPort     |16|1 |Bi|8720     | MSB(12)| LSB        ||   4  |
@@ -3448,6 +3455,25 @@ Appendix B.  Fragmentation Examples
    Figure 27 illustrates the transmission in No-ACK mode of a SCHC
    Packet that needs 11 SCHC Fragments.  FCN is 1 bit wide.
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Minaburo, et al.         Expires April 26, 2020                [Page 62]
+
+Internet-Draft                 LPWAN SCHC                   October 2019
+
+
            Sender               Receiver
              |-------FCN=0-------->|
              |-------FCN=0-------->|
@@ -3466,13 +3492,6 @@ Appendix B.  Fragmentation Examples
 
    In the following examples, N (the size of the FCN field) is 3 bits.
    The All-1 FCN value is 7.
-
-
-
-Minaburo, et al.         Expires April 26, 2020                [Page 62]
-
-Internet-Draft                 LPWAN SCHC                   October 2019
-
 
    Figure 28 illustrates the transmission in ACK-on-Error mode of a SCHC
    Packet fragmented in 11 tiles, with one tile per SCHC Fragment,
@@ -3500,25 +3519,6 @@ Internet-Draft                 LPWAN SCHC                   October 2019
    Figure 29 illustrates the transmission in ACK-on-Error mode of a SCHC
    Packet fragmented in 11 tiles, with one tile per SCHC Fragment,
    WINDOW_SIZE=7 and three lost SCHC Fragments.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
