@@ -1272,10 +1272,10 @@ The SCHC Fragment that carries the last tile MUST be an All-1 SCHC Fragment, des
 
 The fragment sender MUST start by transmitting the window numbered 0.
 
-The sender starts by a "blind transmission" phase, in which it MUST transmit all the tiles composing the window, in decreasing tile index order.
+All message receptions being discussed in the rest of this section are to be understood as
+"matching the RuleID and DTag pair being processed", even if not spelled out, for brevity.
 
-All message receptions being discussed in the rest of this section have the implicit
-"matching the RuleID and DTag pair being processed" characteristic added to them.
+The sender starts by a "blind transmission" phase, in which it MUST transmit all the tiles composing the window, in decreasing tile index order.
 
 Then, it enters a "retransmission phase" in which
 it MUST initialize an Attempts counter to 0,
@@ -1337,8 +1337,8 @@ In the rest of this section, "local W bit" means the least significant bit of th
 
 On reception of any SCHC F/R message for the RuleID and DTag pair being processed, the receiver MUST reset the Inactivity Timer pertaining to that RuleID and DTag pair.
 
-All message receptions being discussed in the rest of this section have the implicit
-"matching the RuleID and DTag pair being processed" characteristic added to them.
+All message receptions being discussed in the rest of this section are to be understood as
+"matching the RuleID and DTag pair being processed", even if not spelled out, for brevity.
 
 Entering an "acceptance phase", the receiver MUST first initialize an empty Bitmap for this window, then
 
@@ -1564,8 +1564,8 @@ On Retransmission Timer expiration
 - otherwise the fragment sender MUST send a SCHC Sender-Abort and
   it MAY exit with an error condition.
 
-All message receptions being discussed in the rest of this section have the implicit
-"matching the RuleID and DTag pair being processed" characteristic added to them.
+All message receptions being discussed in the rest of this section are to be understood as
+"matching the RuleID and DTag pair being processed", even if not spelled out, for brevity.
 
 On receiving a SCHC ACK,
 
@@ -1622,8 +1622,8 @@ On receiving a SCHC Fragment with a Rule ID and DTag pair not being processed at
 
 On reception of any SCHC F/R message for the RuleID and DTag pair being processed, the receiver MUST reset the Inactivity Timer pertaining to that RuleID and DTag pair.
 
-All message receptions being discussed in the rest of this section have the implicit
-"matching the RuleID and DTag pair being processed" characteristic added to them.
+All message receptions being discussed in the rest of this section are to be understood as
+"matching the RuleID and DTag pair being processed", even if not spelled out, for brevity.
 
 On receiving a SCHC Fragment message,
 the receiver determines what tiles were received, based on the payload length and on the W and FCN fields of the SCHC Fragment.
