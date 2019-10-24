@@ -74,7 +74,7 @@ informative:
 
 This document defines the Static Context Header Compression (SCHC) framework, which provides both header compression and fragmentation functionalities. SCHC has been designed for Low Power Wide Area Networks (LPWAN).
 
-SCHC compression is based on a common static context stored in both the LPWAN device and in the network infrastructure side. This document defines a header compression mechanism and its application to compress IPv6/UDP headers.
+SCHC compression is based on a common static context stored both in the LPWAN device and in the network infrastructure side. This document defines a header compression mechanism and its application to compress IPv6/UDP headers.
 
 This document also specifies a fragmentation and reassembly mechanism that is used to support the IPv6 MTU requirement over the LPWAN technologies. Fragmentation is needed for IPv6 datagrams that, after SCHC compression or when such compression was not possible, still exceed the layer-2 maximum payload size.
 
@@ -1897,7 +1897,6 @@ which are expected to implement security measures.
 
 In this section, we analyze the potential security threats that could be introduced
 into an LPWAN by adding the SCHC functionalities.
-
 
 ## Security considerations for SCHC Compression/Decompression
 
