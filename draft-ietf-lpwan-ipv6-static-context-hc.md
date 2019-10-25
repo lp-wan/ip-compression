@@ -286,7 +286,7 @@ The Compression Residue may be empty. Both the Rule ID and the Compression Resid
 {: #Fig-SCHCpckt title='SCHC Packet'}
 
 
-## Functional mapping
+## Functional mapping {#FunctionalMapping}
 
 {{Fig-archi}} maps the functional elements of {{Fig-Operations}} onto the LPWAN architecture elements of {{Fig-LPWANarchi}}.
 
@@ -1904,6 +1904,7 @@ into an LPWAN by adding the SCHC functionalities.
 
 ## Security considerations for SCHC Compression/Decompression
 
+### Forged SCHC Packet
 Let's assume that an attacker is able to send a forged SCHC Packet to a SCHC Decompressor.
 
 Let's first consider the case where the Rule ID contained in that forged SCHC Packet does not correspond to a Rule allocated in the Rule table.
@@ -1916,8 +1917,24 @@ As a consequence, SCHC Decompression does not amplify attacks, beyond adding a b
 
 As a general safety measure, a SCHC Decompressor should never re-construct a packet larger than MAX_PACKET_SIZE (defined in a Profile, with 1500 bytes as generic default).
 
+### Compressed packet size as a side channel to guess a secret token
+Some packet compression methods are known to be victims of attacks, such as BREACH and CRIME.
+The attack involves injecting arbitrary data into the packet and observing the resulting compresssed packet size. The observed size potentially reflects correlation between the arbitrary data and some content that was meant to remain secret, such as a security token, thereby allowing the attacker to get at the secret.
+
+By contrast, SCHC Compression takes place header field by header field,
+with the SCHC Packet being a mere concatenation of the compression residues of each of the individual field.
+Any correlation between header fields does not result in a change in the SCHC Packet size compressed under the same Rule.
+
+If SCHC C/D is used to compress packets that include a secret information field, such as a token,
+the Rule set should be designed so that the size of the compression residue for the field to remain secret
+is the same irrespective of the value of the secret information.
+This is achieved by e.g. sending this field in extenso with the "ignore" MO and the "value-sent" CDA.
+This recommendation is disputable if it is ascertained that the Rule set itself will remain secret.
+
 ## Security considerations for SCHC Fragmentation/Reassembly
-Let's assume that an attacker is able to send to a forged SCHC Fragment to a SCHC Reassembler.
+
+### Buffer reservation attack
+Let's assume that an attacker is able to send a forged SCHC Fragment to a SCHC Reassembler.
 
 A node can perform a buffer reservation attack: the receiver will reserve buffer space for the SCHC Packet. If the implementation has only one buffer, other incoming fragmented SCHC Packets will be dropped while the reassembly buffer is occupied during the reassembly timeout. Once that timeout expires, the attacker can repeat the same procedure, and iterate, thus creating a denial of service attack.
 An implementation may have multiple reassembly buffers. The cost to mount this attack is linear with the number of buffers at the target node.
@@ -1925,7 +1942,10 @@ Better, the cost for an attacker can be increased if individual fragments of mul
 If buffer overload does occur, a smart receiver could selectively discard SCHC Packets being reassembled based on the sender behavior, which may help identify which SCHC Fragments have been sent by the attacker.
 Another mild counter-measure is for the target to abort the fragmentation/reassembly session as early as it detects a non-identical SCHC Fragment duplicate, anticipating for an eventual corrupt SCHC Packet, so as to save the sender the hassle of sending the rest of the fragments for this SCHC Packet.
 
-In another type of attack, the malicious node is additionally assumed to be able to hear an incoming communication destined to the target node.
+## Corrupt Fragment attack
+Let's assume that an attacker is able to send a forged SCHC Fragment to a SCHC Reassembler.
+The malicious node is additionally assumed to be able to hear an incoming communication destined to the target node.
+
 It can then send a forged SCHC Fragment that looks like it belongs to a SCHC Packet already being reassembled at the target node.
 This can cause the SCHC Packet to be considered corrupt and be dropped by the receiver.
 The amplification happens here by a single spoofed SCHC Fragment rendering a full sequence of legit SCHC Fragments useless.
@@ -1935,6 +1955,16 @@ A single spoofed ACK, with all bitmap bits set to 0, will trigger the repetition
 Similarly, a spoofed ACK REQ will trigger the sending of a SCHC ACK,
 which may be much larger than the ACK REQ if WINDOW_SIZE is large.
 These consequences should be borne in mind when defining profiles for SCHC over specific LPWAN technologies.
+
+### Fragmentation as a way to bypass Network Inspection
+Fragmentation is known for potentially allowing to force through a Network Inspection device (e.g. firewall) packets that would be rejected if unfragmented.
+This involves sending overlapping fragments to rewrite fields whose initial value let the Network Inspection device to let the flow go through.
+
+SCHC F/R is expected to be used over one LPWAN link, where no Network Inspection device is expected to sit.
+As described in {{FunctionalMapping}}, even if the SCHC F/R on the Network infrastructure side is located
+in the Internet, a tunnel is to be established between it and the NGW.
+
+
 
 # Acknowledgements
 
@@ -1956,7 +1986,7 @@ Charles Perkins,
 Edgar Ramos,
 Shoichi Sakane,
 and Pascal Thubert
-for useful design consideration and comments.
+for useful design considerations, reviews and comments.
 
 Carles Gomez has been funded in part by the Spanish Government (Ministerio de Educacion, Cultura y Deporte) through the Jose
 Castillejo grant CAS15/00336, and by the ERDF and the Spanish Government through project TEC2016-79988-P.  Part of his contribution to this work has been carried out during his stay as a visiting scholar at the Computer Laboratory of the University of Cambridge.
