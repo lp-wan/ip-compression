@@ -1970,22 +1970,34 @@ in the Internet, a tunnel is to be established between it and the NGW.
 
 Thanks to
 Sergio Aguilar Romero,
+Brian Carpenter,
 Carsten Bormann,
 David Black,
+Deborah Brungard,
 Philippe Clavier,
+Alissa Cooper,
+Roman Danyliw,
 Daniel Ducuara Beltran,
 Diego Dujovne,
 Eduardo Ingles Sanchez,
+Benjamin Kaduk,
 Arunprabhu Kandasamy,
 Suresh Krishnan,
+Mirja Kuehlewind,
 Rahul Jadhav,
+Barry Leiba,
 Sergio Lopez Bernal,
 Antony Markovski,
+Alexey Melnikov,
 Alexander Pelov,
 Charles Perkins,
 Edgar Ramos,
+Alvaro Retana,
+Adam Roach,
 Shoichi Sakane,
-and Pascal Thubert
+Joseph Salowey,
+Pascal Thubert,
+and Eric Vyncke
 for useful design considerations, reviews and comments.
 
 Carles Gomez has been funded in part by the Spanish Government (Ministerio de Educacion, Cultura y Deporte) through the Jose
