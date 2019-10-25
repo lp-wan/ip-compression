@@ -1121,7 +1121,7 @@ The SCHC Receiver-Abort MUST NOT be acknowledged.
 This specification includes several SCHC F/R modes, which
 
 - allow for a range of reliability options, such as optional SCHC Fragment retransmission
-- support various LPWAN characteristics, including variable MTU.
+- support various LPWAN characteristics, such as links with variable MTU or unidirectional links.
 
 More modes may be defined in the future.
 
@@ -1135,7 +1135,8 @@ The No-ACK mode has been designed under the assumption that data unit out-of-seq
 This mode supports LPWAN technologies that have a variable MTU.
 
 In No-ACK mode, there is no communication from the fragment receiver to the fragment sender.
-The sender transmits all the SCHC Fragments without expecting acknowledgement.
+It is therefore suited to unidirectional links.
+The sender transmits all the SCHC Fragments without expecting any acknowledgement.
 
 In No-ACK mode, only the All-1 SCHC Fragment is padded as needed. The other SCHC Fragments are intrinsically aligned to L2 Words.
 
@@ -1217,6 +1218,9 @@ The ACK-Always mode has been designed under the following assumptions
 * Data unit out-of-sequence delivery does not occur between the entity performing fragmentation and the entity performing reassembly
 
 * The L2 MTU value does not change while the fragments of a SCHC Packet are being transmitted.
+
+* There is a feedback path from the reassembler to the fragmenter.
+  See {{AsymLinks}} for a discussion on using ACK-Always mode on quasi-bidirectional links.
 
 In ACK-Always mode, windows are used.
 An acknowledgement, positive or negative, is transmitted by the fragment receiver to the fragment sender at the end of the transmission of each window of SCHC Fragments.
@@ -1432,12 +1436,12 @@ and it MAY exit the receive process for that SCHC Packet.
 
 {{Fig-ACKAlwaysRcv}} shows an example of a corresponding state machine.
 
-{{DwFragTimer}} provides a discussion on the receiver behavior for downlink fragment transmission in LPWANs with asymmetric links.
-
 
 ### ACK-on-Error mode {#ACK-on-Error-subsection}
 
 The ACK-on-Error mode supports LPWAN technologies that have variable MTU and out-of-order delivery.
+It operates with links that provide a feedback path from the reassembler to the fragmenter.
+See {{AsymLinks}} for a discussion on using ACK-on-Error mode on quasi-bidirectional links.
 
 In ACK-on-Error mode, windows are used.
 
@@ -1466,7 +1470,7 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|- 28-|
 
 SCHC Fragment msg    |-----------|
 ~~~~
-{: #Fig-TilesACKonError title='a SCHC Packet fragmented in tiles, Ack-on-Error mode'}
+{: #Fig-TilesACKonError title='a SCHC Packet fragmented in tiles, ACK-on-Error mode'}
 
 The W field is wide enough that it unambiguously represents an absolute window number.
 The fragment receiver sends SCHC ACKs to the fragment sender about windows for which tiles are missing.
@@ -2731,14 +2735,46 @@ the LPWAN technology-specific documents:
 
 For ACK-Always or ACK-on-Error, implementers may opt to support a single window size or multiple window sizes.  The latter, when feasible, may provide performance optimizations.  For example, a large window size should be used for packets that need to be split into a large number of tiles. However, when the number of tiles required to carry a packet is low, a smaller window size, and thus a shorter Bitmap, may be sufficient to provide reception status on all tiles. If multiple window sizes are supported, the Rule ID signals the window size in use for a specific packet transmission.
 
-# Downlink SCHC Fragment transmission {#DwFragTimer}
+# ACK-Always and ACK-on-Error on quasi-bidirectional links {#AsymLinks}
 
-For downlink transmission of a fragmented SCHC Packet in ACK-Always mode, the SCHC Fragment receiver may support timer-based SCHC ACK retransmission. In this mechanism, the SCHC Fragment receiver initializes and starts a timer (the Inactivity Timer is used) after the transmission of a SCHC ACK, except when the SCHC ACK is sent in response to the last SCHC Fragment of a packet (All-1 fragment). In the latter case, the SCHC Fragment receiver does not start a timer after transmission of the SCHC ACK.
+The ACK-Always and ACK-on-Error modes of SCHC F/R are bidirectional protocols:
+they require a feedback path from the reassembler to the fragmenter.
 
-If, after transmission of a SCHC ACK that is not an All-1 fragment, and before expiration of the corresponding Inactivity timer, the SCHC Fragment receiver receives a SCHC Fragment that belongs to the current window (e.g. a missing SCHC Fragment from the current window) or to the next window, the Inactivity timer for the SCHC ACK is stopped. However, if the Inactivity timer expires, the SCHC ACK is resent and the Inactivity timer is reinitialized and restarted.
+Some LPWAN technologies provide quasi-bidirectional connectivity,
+whereby a downlink transmission from the Network Infrastructure can only take place
+right after an uplink transmission by the Dev.
 
-The default initial value for the Inactivity Timer, as well as the maximum number of retries for a specific SCHC ACK, denoted MAX_ACK_REQUESTS, are not defined in this document, and need to be defined in a Profile. The initial value of the Inactivity timer is expected to be greater than that of the Retransmission timer, in order to make sure that a (buffered) SCHC Fragment to be retransmitted can find an opportunity for that transmission.
+When using SCHC F/R to send fragmented SCHC Packets downlink over these quasi-bidirectional links,
+the following situation may arise: if an uplink SCHC ACK is lost,
+the SCHC ACK REQ message by the sender could be stuck indefinitely in the downlink queue
+at the Network Infrastructure, waiting for a transmission opportunity.
+
+There are many ways by which this deadlock can be avoided.
+The Dev application might be sending recurring uplink messages such as keep-alive,
+or the Dev application stack might be sending other recurring uplink messages as part of its operation.
+However, these are out of the control of this generic SCHC specification.
+
+In order to cope with quasi-bidirectional links, a SCHC-over-foo specification may want to amend
+the SCHC F/R specification to add a timer-based retransmission of the SCHC ACK.
+Below is an example of the suggested behavior for ACK-Always mode.
+Because it is an example, {{RFC2119}} language is deliberately not used here.
+
+For downlink transmission of a fragmented SCHC Packet in ACK-Always mode, the SCHC Fragment receiver may support timer-based SCHC ACK retransmission. In this mechanism, the SCHC Fragment receiver initializes and starts a timer (the UplinkACK Timer) after the transmission of a SCHC ACK, except when the SCHC ACK is sent in response to the last SCHC Fragment of a packet (All-1 fragment). In the latter case, the SCHC Fragment receiver does not start a timer after transmission of the SCHC ACK.
+
+If, after transmission of a SCHC ACK that is not an All-1 fragment, and before expiration of the corresponding UplinkACK timer, the SCHC Fragment receiver receives a SCHC Fragment that belongs to the current window (e.g. a missing SCHC Fragment from the current window) or to the next window, the UplinkACK timer for the SCHC ACK is stopped. However, if the UplinkACK timer expires, the SCHC ACK is resent and the UplinkACK timer is reinitialized and restarted.
+
+The default initial value for the UplinkACK Timer, as well as the maximum number of retries for a specific SCHC ACK, denoted MAX_ACK_REQUESTS, is to be defined in a Profile.
+The initial value of the UplinkACK timer is expected to be greater than that of the Retransmission timer,
+in order to make sure that a (buffered) SCHC Fragment to be retransmitted finds an opportunity for that transmission.
 One exception to this recommendation is the special case of the All-1 SCHC Fragment transmission.
 
-When the SCHC Fragment sender transmits the All-1 SCHC Fragment, it starts its Retransmission Timer with a large timeout value (e.g. several times that of the initial Inactivity Timer). If a SCHC ACK is received before expiration of this timer, the SCHC Fragment sender retransmits any lost SCHC Fragments reported by the SCHC ACK, or if the SCHC ACK confirms successful reception of all SCHC Fragments of the last window, the transmission of the fragmented SCHC Packet is considered complete. If the timer expires, and no SCHC ACK has been received since the start of the timer, the SCHC Fragment sender assumes that the All-1 SCHC Fragment has been successfully received (and possibly, the last SCHC ACK has been lost: this mechanism assumes that the Retransmission Timer for the All-1 SCHC Fragment is long enough to allow several SCHC ACK retries if the All-1 SCHC Fragment has not been received by the SCHC Fragment receiver, and it also assumes that it is unlikely that several ACKs become all lost).
+When the SCHC Fragment sender transmits the All-1 SCHC Fragment,
+it starts its Retransmission Timer with a large timeout value (e.g. several times that of the initial UplinkACK Timer).
+If a SCHC ACK is received before expiration of this timer,
+the SCHC Fragment sender retransmits any lost SCHC Fragments as reported by the SCHC ACK,
+or if the SCHC ACK confirms successful reception of all SCHC Fragments of the last window,
+the transmission of the fragmented SCHC Packet is considered complete.
+If the timer expires, and no SCHC ACK has been received since the start of the timer,
+the SCHC Fragment sender assumes that the All-1 SCHC Fragment has been successfully received
+(and possibly, the last SCHC ACK has been lost: this mechanism assumes that the Retransmission Timer for the All-1 SCHC Fragment is long enough to allow several SCHC ACK retries if the All-1 SCHC Fragment has not been received by the SCHC Fragment receiver, and it also assumes that it is unlikely that several ACKs become all lost).
 
