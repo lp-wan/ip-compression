@@ -579,7 +579,7 @@ The size (using the unit defined in the FL) is encoded on 4, 12 or 28 bits as fo
 
 If the field is identified in the Field Description as being of variable length and this field is not present in the packet header being compressed, size 0 MUST be sent to denote its absence.
 
-### not-sent CDA
+### not-sent CDA {#NotSentCDA}
 
 The not-sent action can be used when the field value is specified in a Rule and therefore known by both the Compressor and the Decompressor. This action SHOULD be used with the "equal" MO. If MO is "ignore", there is a risk to have a decompressed field value different from the original field that was compressed.
 
@@ -1931,6 +1931,19 @@ is the same irrespective of the value of the secret information.
 This is achieved by e.g. sending this field in extenso with the "ignore" MO and the "value-sent" CDA.
 This recommendation is disputable if it is ascertained that the Rule set itself will remain secret.
 
+### decompressed packet different from the original packet
+The attention of Rule designers is drawn to situation
+As explained in {{PProcessing}}, using FPs with value 0 in Field Descriptors in a Rule may result in header fields
+appearing in the decompressed packet in an order different from that in the original packet.
+Likewise, as stated in {{NotSentCDA}}, using an "ignore" MO together with a "not-sent" CDA will
+result in the header field taking the TV value, which is likely to be different from the original value.
+
+Depending on the protocol, the order of header fields in the packet may be functionally significant or not.
+
+Furthermore, if the packet is protected by a checksum or a similar integrity protection mechanism,
+and if the checksum is transmitted instead of being recomputed as part of the decompression,
+these situations may result in the packet being considered corrupt and dropped.
+
 ## Security considerations for SCHC Fragmentation/Reassembly
 
 ### Buffer reservation attack
@@ -1942,7 +1955,7 @@ Better, the cost for an attacker can be increased if individual fragments of mul
 If buffer overload does occur, a smart receiver could selectively discard SCHC Packets being reassembled based on the sender behavior, which may help identify which SCHC Fragments have been sent by the attacker.
 Another mild counter-measure is for the target to abort the fragmentation/reassembly session as early as it detects a non-identical SCHC Fragment duplicate, anticipating for an eventual corrupt SCHC Packet, so as to save the sender the hassle of sending the rest of the fragments for this SCHC Packet.
 
-## Corrupt Fragment attack
+### Corrupt Fragment attack
 Let's assume that an attacker is able to send a forged SCHC Fragment to a SCHC Reassembler.
 The malicious node is additionally assumed to be able to hear an incoming communication destined to the target node.
 
@@ -1965,6 +1978,15 @@ As described in {{FunctionalMapping}}, even if the SCHC F/R on the Network infra
 in the Internet, a tunnel is to be established between it and the NGW.
 
 
+### Privacy issues associated with SCHC header fields
+SCHC F/R allocates a DTag value to fragments belonging to the same SCHC Packet.
+Concerns were raised that, if DTag is a wide counter that is incremented in a predictible fashion for each new fragmented SCHC Packet,
+it might lead to a privacy issue, such as enabling tracking of a device across LPWANs.
+
+However, SCHC F/R is expected to be used over exactly one LPWAN link.
+As described in {{FunctionalMapping}}, even if the SCHC F/R on the Network infrastructure side is located
+in the Internet, a tunnel is to be established between it and the NGW.
+Therefore, neither the DTag field nor any other SCHC-introduced field is visible over the Internet.
 
 # Acknowledgements
 
