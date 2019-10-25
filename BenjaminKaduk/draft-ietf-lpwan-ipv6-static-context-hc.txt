@@ -114,7 +114,7 @@ Minaburo, et al.         Expires April 27, 2020                 [Page 2]
 Internet-Draft                 LPWAN SCHC                   October 2019
 
 
-       7.5.1.  processing fixed-length fields  . . . . . . . . . . .  19
+       7.5.1.  processing fixed-length fields  . . . . . . . . . . .  18
        7.5.2.  processing variable-length fields . . . . . . . . . .  19
        7.5.3.  not-sent CDA  . . . . . . . . . . . . . . . . . . . .  20
        7.5.4.  value-sent CDA  . . . . . . . . . . . . . . . . . . .  20
@@ -920,10 +920,6 @@ Internet-Draft                 LPWAN SCHC                   October 2019
       the correct Rule since the Dev typically only holds Rules that
       apply to itself.
 
-      The receiver identifies the sender through its device-id or source
-      identifier (e.g.  MAC address, if it exists) and selects the Rule
-      using the Rule ID.
-
       This Rule describes the compressed header format.  From this, the
       decompressor determines the order of the residues, the fixed-sized
       or variable-sized nature of each residue (see Section 7.5.2), and
@@ -947,15 +943,16 @@ Internet-Draft                 LPWAN SCHC                   October 2019
    or any other data type.  The result of the operation can either be
    True or False.  MOs are defined as follows:
 
+   o  equal: The match result is True if the field value in the packet
+      matches the TV.
+
+
 
 
 Minaburo, et al.         Expires April 27, 2020                [Page 17]
 
 Internet-Draft                 LPWAN SCHC                   October 2019
 
-
-   o  equal: The match result is True if the field value in the packet
-      matches the TV.
 
    o  ignore: No matching is attempted between the field value in the
       packet and the TV in the Rule.  The result is always true.
@@ -999,9 +996,12 @@ Internet-Draft                 LPWAN SCHC                   October 2019
    second and third columns show the compression and decompression
    behaviors for each action.
 
+7.5.1.  processing fixed-length fields
 
-
-
+   If the field is identified in the Field Description as being of fixed
+   length, then applying the CDA to compress this field results in a
+   fixed amount of bits.  The residue for that field is simply the bits
+   resulting from applying the CDA to the field.  This value may be
 
 
 
@@ -1010,12 +1010,6 @@ Minaburo, et al.         Expires April 27, 2020                [Page 18]
 Internet-Draft                 LPWAN SCHC                   October 2019
 
 
-7.5.1.  processing fixed-length fields
-
-   If the field is identified in the Field Description as being of fixed
-   length, then applying the CDA to compress this field results in a
-   fixed amount of bits.  The residue for that field is simply the bits
-   resulting from applying the CDA to the field.  This value may be
    empty (e.g. not-sent CDA), in which case the field residue is absent
    from the Compression Residue.
 
@@ -1058,6 +1052,12 @@ Internet-Draft                 LPWAN SCHC                   October 2019
    o  Larger sizes are encoded as 0xfff followed by the 16 bits unsigned
       integer.
 
+   If the field is identified in the Field Description as being of
+   variable length and this field is not present in the packet header
+   being compressed, size 0 MUST be sent to denote its absence.
+
+
+
 
 
 
@@ -1065,10 +1065,6 @@ Minaburo, et al.         Expires April 27, 2020                [Page 19]
 
 Internet-Draft                 LPWAN SCHC                   October 2019
 
-
-   If the field is identified in the Field Description as being of
-   variable length and this field is not present in the packet header
-   being compressed, size 0 MUST be sent to denote its absence.
 
 7.5.3.  not-sent CDA
 
@@ -1115,16 +1111,16 @@ Internet-Draft                 LPWAN SCHC                   October 2019
    The number of bits sent is the minimal size for coding all the
    possible indices.
 
+   The first element in the list MUST be represented by index value 0,
+   and successive elements in the list MUST have indices incremented by
+   1.
+
 
 
 Minaburo, et al.         Expires April 27, 2020                [Page 20]
 
 Internet-Draft                 LPWAN SCHC                   October 2019
 
-
-   The first element in the list MUST be represented by index value 0,
-   and successive elements in the list MUST have indices incremented by
-   1.
 
 7.5.6.  LSB CDA
 
@@ -1170,6 +1166,10 @@ Internet-Draft                 LPWAN SCHC                   October 2019
 
    Examples of fields that know how to recompute themselves are UDP
    length, IPv6 length and UDP checksum.
+
+
+
+
 
 
 
