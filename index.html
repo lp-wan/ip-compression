@@ -334,7 +334,12 @@ address {
 <link href="#rfc.section.11" rel="Chapter" title="11 IANA Considerations">
 <link href="#rfc.section.12" rel="Chapter" title="12 Security considerations">
 <link href="#rfc.section.12.1" rel="Chapter" title="12.1 Security considerations for SCHC Compression/Decompression">
+<link href="#rfc.section.12.1.1" rel="Chapter" title="12.1.1 Forged SCHC Packet">
+<link href="#rfc.section.12.1.2" rel="Chapter" title="12.1.2 Compressed packet size as a side channel to guess a secret token">
 <link href="#rfc.section.12.2" rel="Chapter" title="12.2 Security considerations for SCHC Fragmentation/Reassembly">
+<link href="#rfc.section.12.2.1" rel="Chapter" title="12.2.1 Buffer reservation attack">
+<link href="#rfc.section.12.3" rel="Chapter" title="12.3 Corrupt Fragment attack">
+<link href="#rfc.section.12.3.1" rel="Chapter" title="12.3.1 Fragmentation as a way to bypass Network Inspection">
 <link href="#rfc.section.13" rel="Chapter" title="13 Acknowledgements">
 <link href="#rfc.references" rel="Chapter" title="14 References">
 <link href="#rfc.references.1" rel="Chapter" title="14.1 Normative References">
@@ -549,9 +554,19 @@ address {
 </li>
 <ul><li>12.1.   <a href="#rfc.section.12.1">Security considerations for SCHC Compression/Decompression</a>
 </li>
-<li>12.2.   <a href="#rfc.section.12.2">Security considerations for SCHC Fragmentation/Reassembly</a>
+<ul><li>12.1.1.   <a href="#rfc.section.12.1.1">Forged SCHC Packet</a>
 </li>
-</ul><li>13.   <a href="#rfc.section.13">Acknowledgements</a>
+<li>12.1.2.   <a href="#rfc.section.12.1.2">Compressed packet size as a side channel to guess a secret token</a>
+</li>
+</ul><li>12.2.   <a href="#rfc.section.12.2">Security considerations for SCHC Fragmentation/Reassembly</a>
+</li>
+<ul><li>12.2.1.   <a href="#rfc.section.12.2.1">Buffer reservation attack</a>
+</li>
+</ul><li>12.3.   <a href="#rfc.section.12.3">Corrupt Fragment attack</a>
+</li>
+<ul><li>12.3.1.   <a href="#rfc.section.12.3.1">Fragmentation as a way to bypass Network Inspection</a>
+</li>
+</ul></ul><li>13.   <a href="#rfc.section.13">Acknowledgements</a>
 </li>
 <li>14.   <a href="#rfc.references">References</a>
 </li>
@@ -722,7 +737,7 @@ A packet (e.g. an IPv6 packet)
 </pre>
 <p class="figure">Figure 4: SCHC Packet</p>
 <h1 id="rfc.section.5.2">
-<a href="#rfc.section.5.2">5.2.</a> <a href="#functional-mapping" id="functional-mapping">Functional mapping</a>
+<a href="#rfc.section.5.2">5.2.</a> <a href="#FunctionalMapping" id="FunctionalMapping">Functional mapping</a>
 </h1>
 <p><a href="#Fig-archi" class="xref">Figure 5</a> maps the functional elements of <a href="#Fig-Operations" class="xref">Figure 3</a> onto the LPWAN architecture elements of <a href="#Fig-LPWANarchi" class="xref">Figure 1</a>.</p>
 <div id="rfc.figure.5"></div>
@@ -1944,21 +1959,42 @@ A packet (e.g. an IPv6 packet)
 <h1 id="rfc.section.12.1">
 <a href="#rfc.section.12.1">12.1.</a> <a href="#security-considerations-for-schc-compressiondecompression" id="security-considerations-for-schc-compressiondecompression">Security considerations for SCHC Compression/Decompression</a>
 </h1>
-<p id="rfc.section.12.1.p.1">Let&#8217;s assume that an attacker is able to send a forged SCHC Packet to a SCHC Decompressor.</p>
-<p id="rfc.section.12.1.p.2">Let&#8217;s first consider the case where the Rule ID contained in that forged SCHC Packet does not correspond to a Rule allocated in the Rule table.  An implementation should detect that the Rule ID is invalid and should silently drop the offending SCHC Packet.</p>
-<p id="rfc.section.12.1.p.3">Let&#8217;s now consider that the Rule ID corresponds to a Rule in the table. With the CDAs defined in this document, the reconstructed packet is at most a constant number of bits bigger than the SCHC Packet that was received.  This assumes that the compute-* decompression actions produce a bounded number of bits, irrespective of the incoming SCHC Packet. This property is true for IPv6 Length, UDP Length and UDP Checksum, for which the compute-* CDA is recommended by this document.</p>
-<p id="rfc.section.12.1.p.4">As a consequence, SCHC Decompression does not amplify attacks, beyond adding a bounded number of bits to the SCHC Packet received. This bound is determined by the Rule stored in the receiving device.</p>
-<p id="rfc.section.12.1.p.5">As a general safety measure, a SCHC Decompressor should never re-construct a packet larger than MAX_PACKET_SIZE (defined in a Profile, with 1500 bytes as generic default).</p>
+<h1 id="rfc.section.12.1.1">
+<a href="#rfc.section.12.1.1">12.1.1.</a> <a href="#forged-schc-packet" id="forged-schc-packet">Forged SCHC Packet</a>
+</h1>
+<p id="rfc.section.12.1.1.p.1">Let&#8217;s assume that an attacker is able to send a forged SCHC Packet to a SCHC Decompressor.</p>
+<p id="rfc.section.12.1.1.p.2">Let&#8217;s first consider the case where the Rule ID contained in that forged SCHC Packet does not correspond to a Rule allocated in the Rule table.  An implementation should detect that the Rule ID is invalid and should silently drop the offending SCHC Packet.</p>
+<p id="rfc.section.12.1.1.p.3">Let&#8217;s now consider that the Rule ID corresponds to a Rule in the table. With the CDAs defined in this document, the reconstructed packet is at most a constant number of bits bigger than the SCHC Packet that was received.  This assumes that the compute-* decompression actions produce a bounded number of bits, irrespective of the incoming SCHC Packet. This property is true for IPv6 Length, UDP Length and UDP Checksum, for which the compute-* CDA is recommended by this document.</p>
+<p id="rfc.section.12.1.1.p.4">As a consequence, SCHC Decompression does not amplify attacks, beyond adding a bounded number of bits to the SCHC Packet received. This bound is determined by the Rule stored in the receiving device.</p>
+<p id="rfc.section.12.1.1.p.5">As a general safety measure, a SCHC Decompressor should never re-construct a packet larger than MAX_PACKET_SIZE (defined in a Profile, with 1500 bytes as generic default).</p>
+<h1 id="rfc.section.12.1.2">
+<a href="#rfc.section.12.1.2">12.1.2.</a> <a href="#compressed-packet-size-as-a-side-channel-to-guess-a-secret-token" id="compressed-packet-size-as-a-side-channel-to-guess-a-secret-token">Compressed packet size as a side channel to guess a secret token</a>
+</h1>
+<p id="rfc.section.12.1.2.p.1">Some packet compression methods are known to be victims of attacks, such as BREACH and CRIME.  The attack involves injecting arbitrary data into the packet and observing the resulting compresssed packet size. The observed size potentially reflects correlation between the arbitrary data and some content that was meant to remain secret, such as a security token, thereby allowing the attacker to get at the secret.</p>
+<p id="rfc.section.12.1.2.p.2">By contrast, SCHC Compression takes place header field by header field, with the SCHC Packet being a mere concatenation of the compression residues of each of the individual field.  Any correlation between header fields does not result in a change in the SCHC Packet size compressed under the same Rule.</p>
+<p id="rfc.section.12.1.2.p.3">If SCHC C/D is used to compress packets that include a secret information field, such as a token, the Rule set should be designed so that the size of the compression residue for the field to remain secret is the same irrespective of the value of the secret information.  This is achieved by e.g. sending this field in extenso with the &#8220;ignore&#8221; MO and the &#8220;value-sent&#8221; CDA.  This recommendation is disputable if it is ascertained that the Rule set itself will remain secret.</p>
 <h1 id="rfc.section.12.2">
 <a href="#rfc.section.12.2">12.2.</a> <a href="#security-considerations-for-schc-fragmentationreassembly" id="security-considerations-for-schc-fragmentationreassembly">Security considerations for SCHC Fragmentation/Reassembly</a>
 </h1>
-<p id="rfc.section.12.2.p.1">Let&#8217;s assume that an attacker is able to send to a forged SCHC Fragment to a SCHC Reassembler.</p>
-<p id="rfc.section.12.2.p.2">A node can perform a buffer reservation attack: the receiver will reserve buffer space for the SCHC Packet. If the implementation has only one buffer, other incoming fragmented SCHC Packets will be dropped while the reassembly buffer is occupied during the reassembly timeout. Once that timeout expires, the attacker can repeat the same procedure, and iterate, thus creating a denial of service attack.  An implementation may have multiple reassembly buffers. The cost to mount this attack is linear with the number of buffers at the target node.  Better, the cost for an attacker can be increased if individual fragments of multiple SCHC Packets can be stored in the reassembly buffer. The finer grained the reassembly buffer (downto the smallest tile size), the higher the cost of the attack.  If buffer overload does occur, a smart receiver could selectively discard SCHC Packets being reassembled based on the sender behavior, which may help identify which SCHC Fragments have been sent by the attacker.  Another mild counter-measure is for the target to abort the fragmentation/reassembly session as early as it detects a non-identical SCHC Fragment duplicate, anticipating for an eventual corrupt SCHC Packet, so as to save the sender the hassle of sending the rest of the fragments for this SCHC Packet.</p>
-<p id="rfc.section.12.2.p.3">In another type of attack, the malicious node is additionally assumed to be able to hear an incoming communication destined to the target node.  It can then send a forged SCHC Fragment that looks like it belongs to a SCHC Packet already being reassembled at the target node.  This can cause the SCHC Packet to be considered corrupt and be dropped by the receiver.  The amplification happens here by a single spoofed SCHC Fragment rendering a full sequence of legit SCHC Fragments useless.  If the target uses ACK-Always or ACK-on-Error mode, such a malicious node can also interfere with the acknowledgement and repetition algorithm of SCHC F/R.  A single spoofed ACK, with all bitmap bits set to 0, will trigger the repetition of WINDOW_SIZE tiles. This protocol loop amplification depletes the energy source of the target node and consumes the channel bandwidth.  Similarly, a spoofed ACK REQ will trigger the sending of a SCHC ACK, which may be much larger than the ACK REQ if WINDOW_SIZE is large.  These consequences should be borne in mind when defining profiles for SCHC over specific LPWAN technologies.</p>
+<h1 id="rfc.section.12.2.1">
+<a href="#rfc.section.12.2.1">12.2.1.</a> <a href="#buffer-reservation-attack" id="buffer-reservation-attack">Buffer reservation attack</a>
+</h1>
+<p id="rfc.section.12.2.1.p.1">Let&#8217;s assume that an attacker is able to send a forged SCHC Fragment to a SCHC Reassembler.</p>
+<p id="rfc.section.12.2.1.p.2">A node can perform a buffer reservation attack: the receiver will reserve buffer space for the SCHC Packet. If the implementation has only one buffer, other incoming fragmented SCHC Packets will be dropped while the reassembly buffer is occupied during the reassembly timeout. Once that timeout expires, the attacker can repeat the same procedure, and iterate, thus creating a denial of service attack.  An implementation may have multiple reassembly buffers. The cost to mount this attack is linear with the number of buffers at the target node.  Better, the cost for an attacker can be increased if individual fragments of multiple SCHC Packets can be stored in the reassembly buffer. The finer grained the reassembly buffer (downto the smallest tile size), the higher the cost of the attack.  If buffer overload does occur, a smart receiver could selectively discard SCHC Packets being reassembled based on the sender behavior, which may help identify which SCHC Fragments have been sent by the attacker.  Another mild counter-measure is for the target to abort the fragmentation/reassembly session as early as it detects a non-identical SCHC Fragment duplicate, anticipating for an eventual corrupt SCHC Packet, so as to save the sender the hassle of sending the rest of the fragments for this SCHC Packet.</p>
+<h1 id="rfc.section.12.3">
+<a href="#rfc.section.12.3">12.3.</a> <a href="#corrupt-fragment-attack" id="corrupt-fragment-attack">Corrupt Fragment attack</a>
+</h1>
+<p id="rfc.section.12.3.p.1">Let&#8217;s assume that an attacker is able to send a forged SCHC Fragment to a SCHC Reassembler.  The malicious node is additionally assumed to be able to hear an incoming communication destined to the target node.</p>
+<p id="rfc.section.12.3.p.2">It can then send a forged SCHC Fragment that looks like it belongs to a SCHC Packet already being reassembled at the target node.  This can cause the SCHC Packet to be considered corrupt and be dropped by the receiver.  The amplification happens here by a single spoofed SCHC Fragment rendering a full sequence of legit SCHC Fragments useless.  If the target uses ACK-Always or ACK-on-Error mode, such a malicious node can also interfere with the acknowledgement and repetition algorithm of SCHC F/R.  A single spoofed ACK, with all bitmap bits set to 0, will trigger the repetition of WINDOW_SIZE tiles. This protocol loop amplification depletes the energy source of the target node and consumes the channel bandwidth.  Similarly, a spoofed ACK REQ will trigger the sending of a SCHC ACK, which may be much larger than the ACK REQ if WINDOW_SIZE is large.  These consequences should be borne in mind when defining profiles for SCHC over specific LPWAN technologies.</p>
+<h1 id="rfc.section.12.3.1">
+<a href="#rfc.section.12.3.1">12.3.1.</a> <a href="#fragmentation-as-a-way-to-bypass-network-inspection" id="fragmentation-as-a-way-to-bypass-network-inspection">Fragmentation as a way to bypass Network Inspection</a>
+</h1>
+<p id="rfc.section.12.3.1.p.1">Fragmentation is known for potentially allowing to force through a Network Inspection device (e.g. firewall) packets that would be rejected if unfragmented.  This involves sending overlapping fragments to rewrite fields whose initial value let the Network Inspection device to let the flow go through.</p>
+<p id="rfc.section.12.3.1.p.2">SCHC F/R is expected to be used over one LPWAN link, where no Network Inspection device is expected to sit.  As described in <a href="#FunctionalMapping" class="xref">Section 5.2</a>, even if the SCHC F/R on the Network infrastructure side is located in the Internet, a tunnel is to be established between it and the NGW.</p>
 <h1 id="rfc.section.13">
 <a href="#rfc.section.13">13.</a> <a href="#acknowledgements" id="acknowledgements">Acknowledgements</a>
 </h1>
-<p id="rfc.section.13.p.1">Thanks to Sergio Aguilar Romero, Carsten Bormann, David Black, Philippe Clavier, Daniel Ducuara Beltran, Diego Dujovne, Eduardo Ingles Sanchez, Arunprabhu Kandasamy, Suresh Krishnan, Rahul Jadhav, Sergio Lopez Bernal, Antony Markovski, Alexander Pelov, Charles Perkins, Edgar Ramos, Shoichi Sakane, and Pascal Thubert for useful design consideration and comments.</p>
+<p id="rfc.section.13.p.1">Thanks to Sergio Aguilar Romero, Carsten Bormann, David Black, Philippe Clavier, Daniel Ducuara Beltran, Diego Dujovne, Eduardo Ingles Sanchez, Arunprabhu Kandasamy, Suresh Krishnan, Rahul Jadhav, Sergio Lopez Bernal, Antony Markovski, Alexander Pelov, Charles Perkins, Edgar Ramos, Shoichi Sakane, and Pascal Thubert for useful design considerations, reviews and comments.</p>
 <p id="rfc.section.13.p.2">Carles Gomez has been funded in part by the Spanish Government (Ministerio de Educacion, Cultura y Deporte) through the Jose Castillejo grant CAS15/00336, and by the ERDF and the Spanish Government through project TEC2016-79988-P.  Part of his contribution to this work has been carried out during his stay as a visiting scholar at the Computer Laboratory of the University of Cambridge.</p>
 <h1 id="rfc.references">
 <a href="#rfc.references">14.</a> References</h1>

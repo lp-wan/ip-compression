@@ -158,10 +158,10 @@ Internet-Draft                 LPWAN SCHC                   October 2019
    12. Security considerations . . . . . . . . . . . . . . . . . . .  56
      12.1.  Security considerations for SCHC
             Compression/Decompression  . . . . . . . . . . . . . . .  56
+       12.1.1.  Forged SCHC Packet . . . . . . . . . . . . . . . . .  56
+       12.1.2.  Compressed packet size as a side channel to guess a
+                secret token . . . . . . . . . . . . . . . . . . . .  57
      12.2.  Security considerations for SCHC
-            Fragmentation/Reassembly . . . . . . . . . . . . . . . .  57
-   13. Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .  58
-   14. References  . . . . . . . . . . . . . . . . . . . . . . . . .  58
 
 
 
@@ -170,16 +170,22 @@ Minaburo, et al.         Expires April 27, 2020                 [Page 3]
 Internet-Draft                 LPWAN SCHC                   October 2019
 
 
-     14.1.  Normative References . . . . . . . . . . . . . . . . . .  58
-     14.2.  Informative References . . . . . . . . . . . . . . . . .  59
-   Appendix A.  Compression Examples . . . . . . . . . . . . . . . .  60
-   Appendix B.  Fragmentation Examples . . . . . . . . . . . . . . .  62
-   Appendix C.  Fragmentation State Machines . . . . . . . . . . . .  70
-   Appendix D.  SCHC Parameters  . . . . . . . . . . . . . . . . . .  76
-   Appendix E.  Supporting multiple window sizes for fragmentation .  78
+            Fragmentation/Reassembly . . . . . . . . . . . . . . . .  58
+       12.2.1.  Buffer reservation attack  . . . . . . . . . . . . .  58
+     12.3.  Corrupt Fragment attack  . . . . . . . . . . . . . . . .  58
+       12.3.1.  Fragmentation as a way to bypass Network Inspection   59
+   13. Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .  59
+   14. References  . . . . . . . . . . . . . . . . . . . . . . . . .  59
+     14.1.  Normative References . . . . . . . . . . . . . . . . . .  59
+     14.2.  Informative References . . . . . . . . . . . . . . . . .  60
+   Appendix A.  Compression Examples . . . . . . . . . . . . . . . .  61
+   Appendix B.  Fragmentation Examples . . . . . . . . . . . . . . .  63
+   Appendix C.  Fragmentation State Machines . . . . . . . . . . . .  71
+   Appendix D.  SCHC Parameters  . . . . . . . . . . . . . . . . . .  77
+   Appendix E.  Supporting multiple window sizes for fragmentation .  79
    Appendix F.  ACK-Always and ACK-on-Error on quasi-bidirectional
-                links  . . . . . . . . . . . . . . . . . . . . . . .  78
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  80
+                links  . . . . . . . . . . . . . . . . . . . . . . .  79
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  81
 
 1.  Introduction
 
@@ -212,12 +218,6 @@ Internet-Draft                 LPWAN SCHC                   October 2019
    SCHC compression uses a Context (a set of Rules) in which information
    about header fields is stored.  This Context is static: the values of
    the header fields and the actions to do compression/decompression do
-   not change over time.  This avoids the need for complex
-   resynchronization mechanisms.  Indeed, a return path may be more
-   restricted/expensive, sometimes completely unavailable [RFC8376].  A
-   compression protocol that relies on feedback is not compatible with
-   the characteristics of such LPWANs.
-
 
 
 
@@ -225,6 +225,12 @@ Minaburo, et al.         Expires April 27, 2020                 [Page 4]
 
 Internet-Draft                 LPWAN SCHC                   October 2019
 
+
+   not change over time.  This avoids the need for complex
+   resynchronization mechanisms.  Indeed, a return path may be more
+   restricted/expensive, sometimes completely unavailable [RFC8376].  A
+   compression protocol that relies on feedback is not compatible with
+   the characteristics of such LPWANs.
 
    In most cases, a small Rule identifier is enough to represent the
    full IPv6/UDP headers.  The SCHC header compression mechanism is
@@ -268,12 +274,6 @@ Internet-Draft                 LPWAN SCHC                   October 2019
 
    o Application Server (App) is the end point of the application level
    protocol on the Internet side.
-
-
-
-
-
-
 
 
 
@@ -3123,13 +3123,13 @@ Internet-Draft                 LPWAN SCHC                   October 2019
 
 12.1.  Security considerations for SCHC Compression/Decompression
 
+12.1.1.  Forged SCHC Packet
+
    Let's assume that an attacker is able to send a forged SCHC Packet to
    a SCHC Decompressor.
 
    Let's first consider the case where the Rule ID contained in that
    forged SCHC Packet does not correspond to a Rule allocated in the
-   Rule table.  An implementation should detect that the Rule ID is
-   invalid and should silently drop the offending SCHC Packet.
 
 
 
@@ -3137,6 +3137,9 @@ Minaburo, et al.         Expires April 27, 2020                [Page 56]
 
 Internet-Draft                 LPWAN SCHC                   October 2019
 
+
+   Rule table.  An implementation should detect that the Rule ID is
+   invalid and should silently drop the offending SCHC Packet.
 
    Let's now consider that the Rule ID corresponds to a Rule in the
    table.  With the CDAs defined in this document, the reconstructed
@@ -3155,10 +3158,48 @@ Internet-Draft                 LPWAN SCHC                   October 2019
    construct a packet larger than MAX_PACKET_SIZE (defined in a Profile,
    with 1500 bytes as generic default).
 
+12.1.2.  Compressed packet size as a side channel to guess a secret
+         token
+
+   Some packet compression methods are known to be victims of attacks,
+   such as BREACH and CRIME.  The attack involves injecting arbitrary
+   data into the packet and observing the resulting compresssed packet
+   size.  The observed size potentially reflects correlation between the
+   arbitrary data and some content that was meant to remain secret, such
+   as a security token, thereby allowing the attacker to get at the
+   secret.
+
+   By contrast, SCHC Compression takes place header field by header
+   field, with the SCHC Packet being a mere concatenation of the
+   compression residues of each of the individual field.  Any
+   correlation between header fields does not result in a change in the
+   SCHC Packet size compressed under the same Rule.
+
+   If SCHC C/D is used to compress packets that include a secret
+   information field, such as a token, the Rule set should be designed
+   so that the size of the compression residue for the field to remain
+   secret is the same irrespective of the value of the secret
+   information.  This is achieved by e.g. sending this field in extenso
+   with the "ignore" MO and the "value-sent" CDA.  This recommendation
+   is disputable if it is ascertained that the Rule set itself will
+   remain secret.
+
+
+
+
+
+
+Minaburo, et al.         Expires April 27, 2020                [Page 57]
+
+Internet-Draft                 LPWAN SCHC                   October 2019
+
+
 12.2.  Security considerations for SCHC Fragmentation/Reassembly
 
-   Let's assume that an attacker is able to send to a forged SCHC
-   Fragment to a SCHC Reassembler.
+12.2.1.  Buffer reservation attack
+
+   Let's assume that an attacker is able to send a forged SCHC Fragment
+   to a SCHC Reassembler.
 
    A node can perform a buffer reservation attack: the receiver will
    reserve buffer space for the SCHC Packet.  If the implementation has
@@ -3181,31 +3222,49 @@ Internet-Draft                 LPWAN SCHC                   October 2019
    corrupt SCHC Packet, so as to save the sender the hassle of sending
    the rest of the fragments for this SCHC Packet.
 
-   In another type of attack, the malicious node is additionally assumed
-   to be able to hear an incoming communication destined to the target
-   node.  It can then send a forged SCHC Fragment that looks like it
-   belongs to a SCHC Packet already being reassembled at the target
-   node.  This can cause the SCHC Packet to be considered corrupt and be
+12.3.  Corrupt Fragment attack
+
+   Let's assume that an attacker is able to send a forged SCHC Fragment
+   to a SCHC Reassembler.  The malicious node is additionally assumed to
+   be able to hear an incoming communication destined to the target
+   node.
+
+   It can then send a forged SCHC Fragment that looks like it belongs to
+   a SCHC Packet already being reassembled at the target node.  This can
+   cause the SCHC Packet to be considered corrupt and be dropped by the
+   receiver.  The amplification happens here by a single spoofed SCHC
+   Fragment rendering a full sequence of legit SCHC Fragments useless.
+   If the target uses ACK-Always or ACK-on-Error mode, such a malicious
+   node can also interfere with the acknowledgement and repetition
+   algorithm of SCHC F/R.  A single spoofed ACK, with all bitmap bits
+   set to 0, will trigger the repetition of WINDOW_SIZE tiles.  This
+   protocol loop amplification depletes the energy source of the target
+   node and consumes the channel bandwidth.  Similarly, a spoofed ACK
+   REQ will trigger the sending of a SCHC ACK, which may be much larger
+   than the ACK REQ if WINDOW_SIZE is large.  These consequences should
 
 
 
-Minaburo, et al.         Expires April 27, 2020                [Page 57]
+Minaburo, et al.         Expires April 27, 2020                [Page 58]
 
 Internet-Draft                 LPWAN SCHC                   October 2019
 
 
-   dropped by the receiver.  The amplification happens here by a single
-   spoofed SCHC Fragment rendering a full sequence of legit SCHC
-   Fragments useless.  If the target uses ACK-Always or ACK-on-Error
-   mode, such a malicious node can also interfere with the
-   acknowledgement and repetition algorithm of SCHC F/R.  A single
-   spoofed ACK, with all bitmap bits set to 0, will trigger the
-   repetition of WINDOW_SIZE tiles.  This protocol loop amplification
-   depletes the energy source of the target node and consumes the
-   channel bandwidth.  Similarly, a spoofed ACK REQ will trigger the
-   sending of a SCHC ACK, which may be much larger than the ACK REQ if
-   WINDOW_SIZE is large.  These consequences should be borne in mind
-   when defining profiles for SCHC over specific LPWAN technologies.
+   be borne in mind when defining profiles for SCHC over specific LPWAN
+   technologies.
+
+12.3.1.  Fragmentation as a way to bypass Network Inspection
+
+   Fragmentation is known for potentially allowing to force through a
+   Network Inspection device (e.g. firewall) packets that would be
+   rejected if unfragmented.  This involves sending overlapping
+   fragments to rewrite fields whose initial value let the Network
+   Inspection device to let the flow go through.
+
+   SCHC F/R is expected to be used over one LPWAN link, where no Network
+   Inspection device is expected to sit.  As described in Section 5.2,
+   even if the SCHC F/R on the Network infrastructure side is located in
+   the Internet, a tunnel is to be established between it and the NGW.
 
 13.  Acknowledgements
 
@@ -3214,7 +3273,7 @@ Internet-Draft                 LPWAN SCHC                   October 2019
    Ingles Sanchez, Arunprabhu Kandasamy, Suresh Krishnan, Rahul Jadhav,
    Sergio Lopez Bernal, Antony Markovski, Alexander Pelov, Charles
    Perkins, Edgar Ramos, Shoichi Sakane, and Pascal Thubert for useful
-   design consideration and comments.
+   design considerations, reviews and comments.
 
    Carles Gomez has been funded in part by the Spanish Government
    (Ministerio de Educacion, Cultura y Deporte) through the Jose
@@ -3237,18 +3296,19 @@ Internet-Draft                 LPWAN SCHC                   October 2019
               RFC 6936, DOI 10.17487/RFC6936, April 2013,
               <https://www.rfc-editor.org/info/rfc6936>.
 
-   [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
-              2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
-              May 2017, <https://www.rfc-editor.org/info/rfc8174>.
 
 
 
 
 
-Minaburo, et al.         Expires April 27, 2020                [Page 58]
+Minaburo, et al.         Expires April 27, 2020                [Page 59]
 
 Internet-Draft                 LPWAN SCHC                   October 2019
 
+
+   [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
+              2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
+              May 2017, <https://www.rfc-editor.org/info/rfc8174>.
 
    [RFC8200]  Deering, S. and R. Hinden, "Internet Protocol, Version 6
               (IPv6) Specification", STD 86, RFC 8200,
@@ -3297,11 +3357,7 @@ Internet-Draft                 LPWAN SCHC                   October 2019
 
 
 
-
-
-
-
-Minaburo, et al.         Expires April 27, 2020                [Page 59]
+Minaburo, et al.         Expires April 27, 2020                [Page 60]
 
 Internet-Draft                 LPWAN SCHC                   October 2019
 
@@ -3357,7 +3413,7 @@ Appendix A.  Compression Examples
 
 
 
-Minaburo, et al.         Expires April 27, 2020                [Page 60]
+Minaburo, et al.         Expires April 27, 2020                [Page 61]
 
 Internet-Draft                 LPWAN SCHC                   October 2019
 
@@ -3413,7 +3469,7 @@ Internet-Draft                 LPWAN SCHC                   October 2019
 
 
 
-Minaburo, et al.         Expires April 27, 2020                [Page 61]
+Minaburo, et al.         Expires April 27, 2020                [Page 62]
 
 Internet-Draft                 LPWAN SCHC                   October 2019
 
@@ -3469,7 +3525,7 @@ Appendix B.  Fragmentation Examples
 
 
 
-Minaburo, et al.         Expires April 27, 2020                [Page 62]
+Minaburo, et al.         Expires April 27, 2020                [Page 63]
 
 Internet-Draft                 LPWAN SCHC                   October 2019
 
@@ -3525,7 +3581,7 @@ Internet-Draft                 LPWAN SCHC                   October 2019
 
 
 
-Minaburo, et al.         Expires April 27, 2020                [Page 63]
+Minaburo, et al.         Expires April 27, 2020                [Page 64]
 
 Internet-Draft                 LPWAN SCHC                   October 2019
 
@@ -3581,7 +3637,7 @@ Internet-Draft                 LPWAN SCHC                   October 2019
 
 
 
-Minaburo, et al.         Expires April 27, 2020                [Page 64]
+Minaburo, et al.         Expires April 27, 2020                [Page 65]
 
 Internet-Draft                 LPWAN SCHC                   October 2019
 
@@ -3637,7 +3693,7 @@ Internet-Draft                 LPWAN SCHC                   October 2019
 
 
 
-Minaburo, et al.         Expires April 27, 2020                [Page 65]
+Minaburo, et al.         Expires April 27, 2020                [Page 66]
 
 Internet-Draft                 LPWAN SCHC                   October 2019
 
@@ -3693,7 +3749,7 @@ Internet-Draft                 LPWAN SCHC                   October 2019
 
 
 
-Minaburo, et al.         Expires April 27, 2020                [Page 66]
+Minaburo, et al.         Expires April 27, 2020                [Page 67]
 
 Internet-Draft                 LPWAN SCHC                   October 2019
 
@@ -3749,7 +3805,7 @@ Internet-Draft                 LPWAN SCHC                   October 2019
 
 
 
-Minaburo, et al.         Expires April 27, 2020                [Page 67]
+Minaburo, et al.         Expires April 27, 2020                [Page 68]
 
 Internet-Draft                 LPWAN SCHC                   October 2019
 
@@ -3805,7 +3861,7 @@ Internet-Draft                 LPWAN SCHC                   October 2019
 
 
 
-Minaburo, et al.         Expires April 27, 2020                [Page 68]
+Minaburo, et al.         Expires April 27, 2020                [Page 69]
 
 Internet-Draft                 LPWAN SCHC                   October 2019
 
@@ -3861,7 +3917,7 @@ Internet-Draft                 LPWAN SCHC                   October 2019
 
 
 
-Minaburo, et al.         Expires April 27, 2020                [Page 69]
+Minaburo, et al.         Expires April 27, 2020                [Page 70]
 
 Internet-Draft                 LPWAN SCHC                   October 2019
 
@@ -3917,7 +3973,7 @@ Appendix C.  Fragmentation State Machines
 
 
 
-Minaburo, et al.         Expires April 27, 2020                [Page 70]
+Minaburo, et al.         Expires April 27, 2020                [Page 71]
 
 Internet-Draft                 LPWAN SCHC                   October 2019
 
@@ -3973,7 +4029,7 @@ Internet-Draft                 LPWAN SCHC                   October 2019
 
 
 
-Minaburo, et al.         Expires April 27, 2020                [Page 71]
+Minaburo, et al.         Expires April 27, 2020                [Page 72]
 
 Internet-Draft                 LPWAN SCHC                   October 2019
 
@@ -4029,7 +4085,7 @@ Internet-Draft                 LPWAN SCHC                   October 2019
 
 
 
-Minaburo, et al.         Expires April 27, 2020                [Page 72]
+Minaburo, et al.         Expires April 27, 2020                [Page 73]
 
 Internet-Draft                 LPWAN SCHC                   October 2019
 
@@ -4085,7 +4141,7 @@ Internet-Draft                 LPWAN SCHC                   October 2019
 
 
 
-Minaburo, et al.         Expires April 27, 2020                [Page 73]
+Minaburo, et al.         Expires April 27, 2020                [Page 74]
 
 Internet-Draft                 LPWAN SCHC                   October 2019
 
@@ -4141,7 +4197,7 @@ Internet-Draft                 LPWAN SCHC                   October 2019
 
 
 
-Minaburo, et al.         Expires April 27, 2020                [Page 74]
+Minaburo, et al.         Expires April 27, 2020                [Page 75]
 
 Internet-Draft                 LPWAN SCHC                   October 2019
 
@@ -4197,7 +4253,7 @@ Internet-Draft                 LPWAN SCHC                   October 2019
 
 
 
-Minaburo, et al.         Expires April 27, 2020                [Page 75]
+Minaburo, et al.         Expires April 27, 2020                [Page 76]
 
 Internet-Draft                 LPWAN SCHC                   October 2019
 
@@ -4253,7 +4309,7 @@ Appendix D.  SCHC Parameters
 
 
 
-Minaburo, et al.         Expires April 27, 2020                [Page 76]
+Minaburo, et al.         Expires April 27, 2020                [Page 77]
 
 Internet-Draft                 LPWAN SCHC                   October 2019
 
@@ -4309,7 +4365,7 @@ Internet-Draft                 LPWAN SCHC                   October 2019
 
 
 
-Minaburo, et al.         Expires April 27, 2020                [Page 77]
+Minaburo, et al.         Expires April 27, 2020                [Page 78]
 
 Internet-Draft                 LPWAN SCHC                   October 2019
 
@@ -4365,7 +4421,7 @@ Appendix F.  ACK-Always and ACK-on-Error on quasi-bidirectional links
 
 
 
-Minaburo, et al.         Expires April 27, 2020                [Page 78]
+Minaburo, et al.         Expires April 27, 2020                [Page 79]
 
 Internet-Draft                 LPWAN SCHC                   October 2019
 
@@ -4421,7 +4477,7 @@ Internet-Draft                 LPWAN SCHC                   October 2019
 
 
 
-Minaburo, et al.         Expires April 27, 2020                [Page 79]
+Minaburo, et al.         Expires April 27, 2020                [Page 80]
 
 Internet-Draft                 LPWAN SCHC                   October 2019
 
@@ -4477,4 +4533,4 @@ Authors' Addresses
 
 
 
-Minaburo, et al.         Expires April 27, 2020                [Page 80]
+Minaburo, et al.         Expires April 27, 2020                [Page 81]
