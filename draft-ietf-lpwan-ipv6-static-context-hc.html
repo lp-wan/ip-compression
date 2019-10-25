@@ -344,7 +344,7 @@ address {
 <link href="#rfc.appendix.C" rel="Chapter" title="C Fragmentation State Machines">
 <link href="#rfc.appendix.D" rel="Chapter" title="D SCHC Parameters">
 <link href="#rfc.appendix.E" rel="Chapter" title="E Supporting multiple window sizes for fragmentation">
-<link href="#rfc.appendix.F" rel="Chapter" title="F Downlink SCHC Fragment transmission">
+<link href="#rfc.appendix.F" rel="Chapter" title="F ACK-Always and ACK-on-Error on quasi-bidirectional links">
 <link href="#rfc.authors" rel="Chapter">
 
 
@@ -353,7 +353,7 @@ address {
 
   <meta name="dct.creator" content="Minaburo, A., Toutain, L., Gomez, C., Barthel, D., and JC. Zuniga" />
   <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-lpwan-ipv6-static-context-hc-21" />
-  <meta name="dct.issued" scheme="ISO8601" content="2019-10-24" />
+  <meta name="dct.issued" scheme="ISO8601" content="2019-10-25" />
   <meta name="dct.abstract" content="This document defines the Static Context Header Compression (SCHC) framework, which provides both header compression and fragmentation functionalities. SCHC has been designed for Low Power Wide Area Networks (LPWAN).SCHC compression is based on a common static context stored both in the LPWAN device and in the network infrastructure side. This document defines a header compression mechanism and its application to compress IPv6/UDP headers.This document also specifies a fragmentation and reassembly mechanism that is used to support the IPv6 MTU requirement over the LPWAN technologies. Fragmentation is needed for IPv6 datagrams that, after SCHC compression or when such compression was not possible, still exceed the layer-2 maximum payload size.The SCHC header compression and fragmentation mechanisms are independent of the specific LPWAN technology over which they are used. This document defines generic functionalities and offers flexibility with regard to parameter settings and mechanism choices.  This document standardizes the exchange over the LPWAN between two SCHC entities.  Settings and choices specific to a technology or a product are expected to be grouped into profiles, which are specified in other documents.  Data models for the context and profiles are out of scope." />
   <meta name="description" content="This document defines the Static Context Header Compression (SCHC) framework, which provides both header compression and fragmentation functionalities. SCHC has been designed for Low Power Wide Area Networks (LPWAN).SCHC compression is based on a common static context stored both in the LPWAN device and in the network infrastructure side. This document defines a header compression mechanism and its application to compress IPv6/UDP headers.This document also specifies a fragmentation and reassembly mechanism that is used to support the IPv6 MTU requirement over the LPWAN technologies. Fragmentation is needed for IPv6 datagrams that, after SCHC compression or when such compression was not possible, still exceed the layer-2 maximum payload size.The SCHC header compression and fragmentation mechanisms are independent of the specific LPWAN technology over which they are used. This document defines generic functionalities and offers flexibility with regard to parameter settings and mechanism choices.  This document standardizes the exchange over the LPWAN between two SCHC entities.  Settings and choices specific to a technology or a product are expected to be grouped into profiles, which are specified in other documents.  Data models for the context and profiles are out of scope." />
 
@@ -377,7 +377,7 @@ address {
 <td class="right">L. Toutain</td>
 </tr>
 <tr>
-<td class="left">Expires: April 26, 2020</td>
+<td class="left">Expires: April 27, 2020</td>
 <td class="right">IMT-Atlantique</td>
 </tr>
 <tr>
@@ -406,7 +406,7 @@ address {
 </tr>
 <tr>
 <td class="left"></td>
-<td class="right">October 24, 2019</td>
+<td class="right">October 25, 2019</td>
 </tr>
 
     	
@@ -425,7 +425,7 @@ address {
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at https://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on April 26, 2020.</p>
+<p>This Internet-Draft will expire on April 27, 2020.</p>
 <h1 id="rfc.copyrightnotice"><a href="#rfc.copyrightnotice">Copyright Notice</a></h1>
 <p>Copyright (c) 2019 IETF Trust and the persons identified as the document authors.  All rights reserved.</p>
 <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (https://trustee.ietf.org/license-info) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.</p>
@@ -569,7 +569,7 @@ address {
 </li>
 <li>Appendix E.   <a href="#rfc.appendix.E">Supporting multiple window sizes for fragmentation</a>
 </li>
-<li>Appendix F.   <a href="#rfc.appendix.F">Downlink SCHC Fragment transmission</a>
+<li>Appendix F.   <a href="#rfc.appendix.F">ACK-Always and ACK-on-Error on quasi-bidirectional links</a>
 </li>
 <li><a href="#rfc.authors">Authors' Addresses</a>
 </li>
@@ -1365,7 +1365,7 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 
 <ul>
 <li>allow for a range of reliability options, such as optional SCHC Fragment retransmission</li>
-<li>support various LPWAN characteristics, including variable MTU.</li>
+<li>support various LPWAN characteristics, such as links with variable MTU or unidirectional links.</li>
 </ul>
 <p id="rfc.section.8.4.p.3">More modes may be defined in the future.</p>
 <p><a href="#FragExamples" class="xref">Appendix B</a> provides examples of fragmentation sessions based on the modes described hereafter.</p>
@@ -1374,7 +1374,7 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 <a href="#rfc.section.8.4.1">8.4.1.</a> <a href="#No-ACK-subsection" id="No-ACK-subsection">No-ACK mode</a>
 </h1>
 <p id="rfc.section.8.4.1.p.1">The No-ACK mode has been designed under the assumption that data unit out-of-sequence delivery does not occur between the entity performing fragmentation and the entity performing reassembly.  This mode supports LPWAN technologies that have a variable MTU.</p>
-<p id="rfc.section.8.4.1.p.2">In No-ACK mode, there is no communication from the fragment receiver to the fragment sender.  The sender transmits all the SCHC Fragments without expecting acknowledgement.</p>
+<p id="rfc.section.8.4.1.p.2">In No-ACK mode, there is no communication from the fragment receiver to the fragment sender.  It is therefore suited to unidirectional links.  The sender transmits all the SCHC Fragments without expecting any acknowledgement.</p>
 <p id="rfc.section.8.4.1.p.3">In No-ACK mode, only the All-1 SCHC Fragment is padded as needed. The other SCHC Fragments are intrinsically aligned to L2 Words.</p>
 <p id="rfc.section.8.4.1.p.4">The tile sizes are not required to be uniform.  Windows are not used.  The Retransmission Timer is not used.  The Attempts counter is not used.</p>
 <p id="rfc.section.8.4.1.p.5">Each Profile MUST specify which Rule ID value(s) correspond to SCHC F/R messages operating in this mode.</p>
@@ -1434,6 +1434,7 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 <ul>
 <li>Data unit out-of-sequence delivery does not occur between the entity performing fragmentation and the entity performing reassembly</li>
 <li>The L2 MTU value does not change while the fragments of a SCHC Packet are being transmitted.</li>
+<li>There is a feedback path from the reassembler to the fragmenter.  See <a href="#AsymLinks" class="xref">Appendix F</a> for a discussion on using ACK-Always mode on quasi-bidirectional links.</li>
 </ul>
 <p id="rfc.section.8.4.2.p.3">In ACK-Always mode, windows are used.  An acknowledgement, positive or negative, is transmitted by the fragment receiver to the fragment sender at the end of the transmission of each window of SCHC Fragments.</p>
 <p id="rfc.section.8.4.2.p.4">The tiles are not required to be of uniform size. In ACK-Always mode, only the All-1 SCHC Fragment is padded as needed. The other SCHC Fragments are intrinsically aligned to L2 Words.</p>
@@ -1589,11 +1590,10 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 </ul>
 <p id="rfc.section.8.4.2.2.p.12">At any time, on expiration of the Inactivity Timer, on receiving a SCHC Sender-Abort or when Attempts reaches MAX_ACK_REQUESTS, the receiver MUST send a SCHC Receiver-Abort and it MAY exit the receive process for that SCHC Packet.</p>
 <p><a href="#Fig-ACKAlwaysRcv" class="xref">Figure 40</a> shows an example of a corresponding state machine.</p>
-<p><a href="#DwFragTimer" class="xref">Appendix F</a> provides a discussion on the receiver behavior for downlink fragment transmission in LPWANs with asymmetric links.</p>
 <h1 id="rfc.section.8.4.3">
 <a href="#rfc.section.8.4.3">8.4.3.</a> <a href="#ACK-on-Error-subsection" id="ACK-on-Error-subsection">ACK-on-Error mode</a>
 </h1>
-<p id="rfc.section.8.4.3.p.1">The ACK-on-Error mode supports LPWAN technologies that have variable MTU and out-of-order delivery.</p>
+<p id="rfc.section.8.4.3.p.1">The ACK-on-Error mode supports LPWAN technologies that have variable MTU and out-of-order delivery.  It operates with links that provide a feedback path from the reassembler to the fragmenter.  See <a href="#AsymLinks" class="xref">Appendix F</a> for a discussion on using ACK-on-Error mode on quasi-bidirectional links.</p>
 <p id="rfc.section.8.4.3.p.2">In ACK-on-Error mode, windows are used.</p>
 <p id="rfc.section.8.4.3.p.3">All tiles, but the last one and the penultimate one, MUST be of equal size, hereafter called &#8220;regular&#8221;.  The size of the last tile MUST be smaller than or equal to the regular tile size.  Regarding the penultimate tile, a Profile MUST pick one of the following two options:</p>
 <p></p>
@@ -1617,7 +1617,7 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|- 28-|
 
 SCHC Fragment msg    |-----------|
 </pre>
-<p class="figure">Figure 23: a SCHC Packet fragmented in tiles, Ack-on-Error mode</p>
+<p class="figure">Figure 23: a SCHC Packet fragmented in tiles, ACK-on-Error mode</p>
 <p id="rfc.section.8.4.3.p.7">The W field is wide enough that it unambiguously represents an absolute window number.  The fragment receiver sends SCHC ACKs to the fragment sender about windows for which tiles are missing.  No SCHC ACK is sent by the fragment receiver for windows that it knows have been fully received.</p>
 <p id="rfc.section.8.4.3.p.8">The fragment sender retransmits SCHC Fragments for tiles that are reported missing.  It can advance to next windows even before it has ascertained that all tiles belonging to previous windows have been correctly received, and can still later retransmit SCHC Fragments with tiles belonging to previous windows.  Therefore, the sender and the receiver may operate in a decoupled fashion.  The fragmented SCHC Packet transmission concludes when</p>
 <p></p>
@@ -2756,12 +2756,17 @@ Recv_window==window &amp;    | |   |   all missing frags sent
 </h1>
 <p id="rfc.section.E.p.1">For ACK-Always or ACK-on-Error, implementers may opt to support a single window size or multiple window sizes.  The latter, when feasible, may provide performance optimizations.  For example, a large window size should be used for packets that need to be split into a large number of tiles. However, when the number of tiles required to carry a packet is low, a smaller window size, and thus a shorter Bitmap, may be sufficient to provide reception status on all tiles. If multiple window sizes are supported, the Rule ID signals the window size in use for a specific packet transmission.</p>
 <h1 id="rfc.appendix.F">
-<a href="#rfc.appendix.F">Appendix F.</a> <a href="#DwFragTimer" id="DwFragTimer">Downlink SCHC Fragment transmission</a>
+<a href="#rfc.appendix.F">Appendix F.</a> <a href="#AsymLinks" id="AsymLinks">ACK-Always and ACK-on-Error on quasi-bidirectional links</a>
 </h1>
-<p id="rfc.section.F.p.1">For downlink transmission of a fragmented SCHC Packet in ACK-Always mode, the SCHC Fragment receiver may support timer-based SCHC ACK retransmission. In this mechanism, the SCHC Fragment receiver initializes and starts a timer (the Inactivity Timer is used) after the transmission of a SCHC ACK, except when the SCHC ACK is sent in response to the last SCHC Fragment of a packet (All-1 fragment). In the latter case, the SCHC Fragment receiver does not start a timer after transmission of the SCHC ACK.</p>
-<p id="rfc.section.F.p.2">If, after transmission of a SCHC ACK that is not an All-1 fragment, and before expiration of the corresponding Inactivity timer, the SCHC Fragment receiver receives a SCHC Fragment that belongs to the current window (e.g. a missing SCHC Fragment from the current window) or to the next window, the Inactivity timer for the SCHC ACK is stopped. However, if the Inactivity timer expires, the SCHC ACK is resent and the Inactivity timer is reinitialized and restarted.</p>
-<p id="rfc.section.F.p.3">The default initial value for the Inactivity Timer, as well as the maximum number of retries for a specific SCHC ACK, denoted MAX_ACK_REQUESTS, are not defined in this document, and need to be defined in a Profile. The initial value of the Inactivity timer is expected to be greater than that of the Retransmission timer, in order to make sure that a (buffered) SCHC Fragment to be retransmitted can find an opportunity for that transmission.  One exception to this recommendation is the special case of the All-1 SCHC Fragment transmission.</p>
-<p id="rfc.section.F.p.4">When the SCHC Fragment sender transmits the All-1 SCHC Fragment, it starts its Retransmission Timer with a large timeout value (e.g. several times that of the initial Inactivity Timer). If a SCHC ACK is received before expiration of this timer, the SCHC Fragment sender retransmits any lost SCHC Fragments reported by the SCHC ACK, or if the SCHC ACK confirms successful reception of all SCHC Fragments of the last window, the transmission of the fragmented SCHC Packet is considered complete. If the timer expires, and no SCHC ACK has been received since the start of the timer, the SCHC Fragment sender assumes that the All-1 SCHC Fragment has been successfully received (and possibly, the last SCHC ACK has been lost: this mechanism assumes that the Retransmission Timer for the All-1 SCHC Fragment is long enough to allow several SCHC ACK retries if the All-1 SCHC Fragment has not been received by the SCHC Fragment receiver, and it also assumes that it is unlikely that several ACKs become all lost).</p>
+<p id="rfc.section.F.p.1">The ACK-Always and ACK-on-Error modes of SCHC F/R are bidirectional protocols: they require a feedback path from the reassembler to the fragmenter.</p>
+<p id="rfc.section.F.p.2">Some LPWAN technologies provide quasi-bidirectional connectivity, whereby a downlink transmission from the Network Infrastructure can only take place right after an uplink transmission by the Dev.</p>
+<p id="rfc.section.F.p.3">When using SCHC F/R to send fragmented SCHC Packets downlink over these quasi-bidirectional links, the following situation may arise: if an uplink SCHC ACK is lost, the SCHC ACK REQ message by the sender could be stuck indefinitely in the downlink queue at the Network Infrastructure, waiting for a transmission opportunity.</p>
+<p id="rfc.section.F.p.4">There are many ways by which this deadlock can be avoided.  The Dev application might be sending recurring uplink messages such as keep-alive, or the Dev application stack might be sending other recurring uplink messages as part of its operation.  However, these are out of the control of this generic SCHC specification.</p>
+<p id="rfc.section.F.p.5">In order to cope with quasi-bidirectional links, a SCHC-over-foo specification may want to amend the SCHC F/R specification to add a timer-based retransmission of the SCHC ACK.  Below is an example of the suggested behavior for ACK-Always mode.  Because it is an example, <a href="#RFC2119" class="xref">[RFC2119]</a> language is deliberately not used here.</p>
+<p id="rfc.section.F.p.6">For downlink transmission of a fragmented SCHC Packet in ACK-Always mode, the SCHC Fragment receiver may support timer-based SCHC ACK retransmission. In this mechanism, the SCHC Fragment receiver initializes and starts a timer (the UplinkACK Timer) after the transmission of a SCHC ACK, except when the SCHC ACK is sent in response to the last SCHC Fragment of a packet (All-1 fragment). In the latter case, the SCHC Fragment receiver does not start a timer after transmission of the SCHC ACK.</p>
+<p id="rfc.section.F.p.7">If, after transmission of a SCHC ACK that is not an All-1 fragment, and before expiration of the corresponding UplinkACK timer, the SCHC Fragment receiver receives a SCHC Fragment that belongs to the current window (e.g. a missing SCHC Fragment from the current window) or to the next window, the UplinkACK timer for the SCHC ACK is stopped. However, if the UplinkACK timer expires, the SCHC ACK is resent and the UplinkACK timer is reinitialized and restarted.</p>
+<p id="rfc.section.F.p.8">The default initial value for the UplinkACK Timer, as well as the maximum number of retries for a specific SCHC ACK, denoted MAX_ACK_REQUESTS, is to be defined in a Profile.  The initial value of the UplinkACK timer is expected to be greater than that of the Retransmission timer, in order to make sure that a (buffered) SCHC Fragment to be retransmitted finds an opportunity for that transmission.  One exception to this recommendation is the special case of the All-1 SCHC Fragment transmission.</p>
+<p id="rfc.section.F.p.9">When the SCHC Fragment sender transmits the All-1 SCHC Fragment, it starts its Retransmission Timer with a large timeout value (e.g. several times that of the initial UplinkACK Timer).  If a SCHC ACK is received before expiration of this timer, the SCHC Fragment sender retransmits any lost SCHC Fragments as reported by the SCHC ACK, or if the SCHC ACK confirms successful reception of all SCHC Fragments of the last window, the transmission of the fragmented SCHC Packet is considered complete.  If the timer expires, and no SCHC ACK has been received since the start of the timer, the SCHC Fragment sender assumes that the All-1 SCHC Fragment has been successfully received (and possibly, the last SCHC ACK has been lost: this mechanism assumes that the Retransmission Timer for the All-1 SCHC Fragment is long enough to allow several SCHC ACK retries if the All-1 SCHC Fragment has not been received by the SCHC Fragment receiver, and it also assumes that it is unlikely that several ACKs become all lost).</p>
 <h1 id="rfc.authors"><a href="#rfc.authors">Authors' Addresses</a></h1>
 <div class="avoidbreak">
   <address class="vcard">
