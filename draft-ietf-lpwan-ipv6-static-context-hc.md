@@ -810,7 +810,7 @@ The SCHC F/R messages contain the following fields (see the formats in {{Fragfor
   * what other optional fields are present and what the field sizes are.
 
   The Rule ID tells apart a non-fragmented SCHC Packet from SCHC Fragments.
-  It will also tell part SCHC Fragments of fragmented SCHC Packets that use different SCHC F/R modes or different parameters.
+  It will also tell apart SCHC Fragments of fragmented SCHC Packets that use different SCHC F/R modes or different parameters.
   Interleaved transmission of these is therefore possible.
 
   All SCHC F/R messages pertaining to the same SCHC Packet MUST bear the same Rule ID.
@@ -1969,7 +1969,7 @@ These consequences should be borne in mind when defining profiles for SCHC over 
 
 ### Fragmentation as a way to bypass Network Inspection
 Fragmentation is known for potentially allowing to force through a Network Inspection device (e.g. firewall) packets that would be rejected if unfragmented.
-This involves sending overlapping fragments to rewrite fields whose initial value let the Network Inspection device to let the flow go through.
+This involves sending overlapping fragments to rewrite fields whose initial value led the Network Inspection device to allow the flow go through.
 
 SCHC F/R is expected to be used over one LPWAN link, where no Network Inspection device is expected to sit.
 As described in {{FunctionalMapping}}, even if the SCHC F/R on the Network infrastructure side is located
