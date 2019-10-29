@@ -332,9 +332,11 @@ The operation in the Downlink direction is similar to that in the Uplink directi
 Rule IDs identify the Rules used for Compression/Decompression or
 for Fragmentation/Reassembly.
 
-The scope of a Rule ID is the undirected link instance (i.e. per Dev, regardless of direction) between a SCHC Compressor and its corresponding SCHC Decompressor,
-or between a SCHC Fragmenter and its corresponding SCHC Reassembler.
-Within this scope, Rule IDs for Compression and Rule IDs for Fragmentation share the same space.
+The scope of the Rule ID of a Compression/Decompression Rule is the link between the SCHC C/D in a given Dev and the corresponding SCHC C/D in the Network insfractructure side.
+The scope of the Rule ID of a Fragmentation/Reassembly Rule is the link between the SCHC F/R in a given Dev and the corresponding SCHC F/R in the Network insfractructure side.
+If such a link is bidirectional, the scope includes both directions.
+
+Inside their scopes, Rules for Compression/Decompression and Rules for Fragmentation/Reassembly share the same Rule ID space.
 
 The size of the Rule IDs is not specified in this document, as it is implementation-specific and can vary according to the LPWAN technology and the number of Rules, among others. It is defined in Profiles.
 
@@ -460,8 +462,8 @@ The detailed algorithm is the following:
     Otherwise, the Rule MUST be disregarded.
 
     This specification does not prevent multiple Rules from matching the above steps and therefore being valid for use.
-    Whether multiple valid Rules is allowed or not, and what to do in the case of multiple valid Rules, is left to the implementation.
-    A long as the same Rule set is installed at both ends, this degree of freedom does not constitute an interoperability issue.
+    Whether multiple valid Rules are allowed or not and what to do in the case of multiple valid Rules are left to the implementation.
+    As long as the same Rule set is installed at both ends, this degree of freedom does not constitute an interoperability issue.
 
 
   * If no valid compression Rule is found, then the header MUST be sent in its entirety
@@ -651,9 +653,9 @@ More modes may be defined in the future.
 The same SCHC F/R mode MUST be used for all SCHC Fragments of a given SCHC Packet.
 This document does not specify which mode(s) must be implemented and used over a specific LPWAN technology. That information will be given in Profiles.
 
-This specification provides protocol elements that make it possible to interleave the transmission of non-fragmented SCHC Packets and fragmented SCHC Packets,
-as well as interleave the transmission of fragmented SCHC Packets.
-A Profile MAY restrict this behavior.
+SCHC allows transmitting non-fragmented SCHC Packet concurrently with fragmented SCHC Packets.
+In addition, SCHC F/R provides protocol elements that allow transmitting several fragmented SCHC Packets concurrently, i.e. interleaving the transmission of fragments from different fragmented SCHC Packets.
+A Profile MAY restrict the latter behavior.
 
 The L2 Word size (see {{Term}}) determines the encoding of some messages.
 SCHC F/R usually generates SCHC Fragments and SCHC ACKs that are multiples of L2 Words.
@@ -758,7 +760,8 @@ the bit at the right-most position corresponds either to the tile numbered 0 or 
 At the receiver
 
 - a bit set to 1 in the Bitmap indicates that a tile associated with that bit position has been correctly received for that window.
-- a bit set to 0 in the Bitmap indicates that no tile associated with that bit position has been correctly received for that window.
+- a bit set to 0 in the Bitmap indicates that there has been no tile correctly received, associated with that bit position, for that window.
+Possible reasons include that the tile was not sent at all, not received, or received with errors.
 
 
 #### Timers and counters {#MiscTools}
@@ -1133,8 +1136,8 @@ The No-ACK mode has been designed under the assumption that data unit out-of-seq
 This mode supports LPWAN technologies that have a variable MTU.
 
 In No-ACK mode, there is no communication from the fragment receiver to the fragment sender.
-It is therefore suited to unidirectional links.
 The sender transmits all the SCHC Fragments without expecting any acknowledgement.
+Therefore, No-ACK does not require bidirectional links: unidirectional links are just fine.
 
 In No-ACK mode, only the All-1 SCHC Fragment is padded as needed. The other SCHC Fragments are intrinsically aligned to L2 Words.
 
