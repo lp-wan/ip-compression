@@ -1345,24 +1345,18 @@ On reception of any SCHC F/R message for the RuleID and DTag pair being processe
 All message receptions being discussed in the rest of this section are to be understood as
 "matching the RuleID and DTag pair being processed", even if not spelled out, for brevity.
 
-Entering an "acceptance phase", the receiver MUST first initialize an empty Bitmap for this window, then
+The receiver MUST first initialize an empty Bitmap for the first window, then
+enter an "acceptance phase", in which
 
-- on receiving a SCHC Fragment or SCHC ACK REQ with the W bit different from the local W bit,
+- on receiving a SCHC Fragment with the W bit different from the local W bit,
   the receiver MUST silently ignore and discard that message.
 - on receiving a SCHC Fragment with the W bit equal to the local W bit,
   the receiver MUST assemble the received tile based on the window counter and on the FCN field in the SCHC Fragment
   and it MUST update the Bitmap.
   * if the SCHC Fragment received is an All-0 SCHC Fragment,
     the current window is determined to be a not-last window,
-    and the receiver MUST send a SCHC ACK for this window.
-    Then,
-
-    - If the Bitmap indicates that all the tiles of the current window have been correctly received,
-      the receiver MUST increment its window counter
-      and it enters the "acceptance phase" for that new window.
-    - If the Bitmap indicates that at least one tile is missing in the current window,
-      the receiver enters the "retransmission phase" for this window.
-
+    the receiver MUST send a SCHC ACK for this window
+    and it MUST enter the "retransmission phase" for this window.
   * if the SCHC Fragment received is an All-1 SCHC Fragment,
     the padding bits of the All-1 SCHC Fragment MUST be assembled after the received tile,
     the current window is determined to be the last window,
@@ -1370,41 +1364,50 @@ Entering an "acceptance phase", the receiver MUST first initialize an empty Bitm
     and it MUST send a SCHC ACK for this window. Then,
 
     - If the integrity check indicates that the full SCHC Packet has been correctly reassembled,
-      the receiver MUST enter the "clean-up phase".
+      the receiver MUST enter the "clean-up phase" for this window.
     - If the integrity check indicates that the full SCHC Packet has not been correctly reassembled,
       the receiver enters the "retransmission phase" for this window.
 
-- on receiving a SCHC ACK REQ with the W bit equal to the local W bit,
-  the receiver has not yet determined if the current window is a not-last one or the last one,
-  the receiver MUST send a SCHC ACK for this window,
-  and it keeps accepting incoming messages.
 
 In the "retransmission phase":
 
 - if the window is a not-last window
 
-  * on receiving a SCHC Fragment or SCHC ACK REQ with a W bit different from the local W bit
-    the receiver MUST silently ignore and discard that message.
-  * on receiving a SCHC ACK REQ with a W bit equal to the local W bit,
-    the receiver MUST send a SCHC ACK for this window.
+  * on receiving a SCHC Fragment that is not All-0 or All-1 and that has a W bit different from the local W bit,
+    the receiver MUST increment its window counter and allocate a fresh Bitmap,
+    it MUST assemble the tile received and update the Bitmap
+    and it MUST enter the "acceptance phase" for that new window.
+  * on receiving a SCHC All-0 Fragment with a W bit different from the local W bit,
+    the receiver MUST increment its window counter and allocate a fresh Bitmap,
+    it MUST assemble the tile received and update the Bitmap,
+    it MUST send a SCHC ACK for the new window
+    and it MUST stay in the "retransmission phase" for that new window.
+  * on receiving a SCHC All-1 Fragment with a W bit different from the local W bit,
+    the receiver MUST increment its window counter and allocate a fresh Bitmap,
+    it MUST assemble the tile received,
+    including the padding bits,
+    it MUST update the Bitmap and perform the integrity check,
+    it MUST send a SCHC ACK for the new window,
+    which is determined to be the last window. Then,
+
+    - If the integrity check indicates that the full SCHC Packet has been correctly reassembled,
+      the receiver MUST enter the "clean-up phase".
+    - If the integrity check indicates that the full SCHC Packet has not been correctly reassembled,
+      the receiver enters the "retransmission phase" for the new window.
+
   * on receiving a SCHC Fragment with a W bit equal to the local W bit,
 
     - if the SCHC Fragment received is an All-1 SCHC Fragment,
       the receiver MUST silently ignore it and discard it.
     - otherwise,
-      the receiver MUST update the Bitmap and it MUST assemble the tile received.
-
-  * on the Bitmap becoming fully populated with 1's,
-    the receiver MUST send a SCHC ACK for this window,
-    it MUST increment its window counter
-    and it enters the "acceptance phase" for the new window.
+      the receiver MUST assemble the tile received and update the Bitmap.
+      If the Bitmap becomes fully populated with 1's or if the SCHC Fragment is an All-0,
+      the receiver MUST send a SCHC ACK for this window.
 
 - if the window is the last window
 
-  * on receiving a SCHC Fragment or SCHC ACK REQ with a W bit different from the local W bit
+  * on receiving a SCHC Fragment with a W bit different from the local W bit
     the receiver MUST silently ignore and discard that message.
-  * on receiving a SCHC ACK REQ with a W bit equal to the local W bit,
-    the receiver MUST send a SCHC ACK for this window.
   * on receiving a SCHC Fragment with a W bit equal to the local W bit,
 
     - if the SCHC Fragment received is an All-0 SCHC Fragment,
@@ -1412,21 +1415,23 @@ In the "retransmission phase":
     - otherwise, the receiver MUST update the Bitmap
       and it MUST assemble the tile received.
       If the SCHC Fragment received is an All-1 SCHC Fragment,
-        the receiver MUST assemble the padding bits of the All-1 SCHC Fragment after the received tile.
-      It MUST perform the integrity check. Then
+      the receiver MUST assemble the padding bits of the All-1 SCHC Fragment after the received tile,
+      it MUST perform the integrity check and
 
       * if the integrity check indicates that the full SCHC Packet has been correctly reassembled,
         the receiver MUST send a SCHC ACK
         and it enters the "clean-up phase".
       * if the integrity check indicates that the full SCHC Packet has not been correctly reassembled,
-        - if the SCHC Fragment received was an All-1 SCHC Fragment, the receiver MUST send a SCHC ACK for this window
-        - it keeps accepting incoming messages.
+        - if the SCHC Fragment received was an All-1 SCHC Fragment, the receiver MUST send a SCHC ACK for this window.
 
 In the "clean-up phase":
 
-- Any received SCHC F/R message with a W bit different from the local W bit MUST be silently ignored and discarded.
-- Any received SCHC F/R message different from an All-1 SCHC Fragment or a SCHC ACK REQ MUST be silently ignored and discarded.
-- On receiving an All-1 SCHC Fragment or a SCHC ACK REQ, the receiver MUST send a SCHC ACK.
+- On receiving an All-1 SCHC Fragment with the correct W bit, the receiver MUST send a SCHC ACK.
+- Any other SCHC Fragment received MUST be silently ignored and discarded.
+
+In any phase, on receiving a SCHC ACK REQ, irrespective of its W bit,
+the receiver MUST send a SCHC ACK corresponding to the window currently being assembled
+and MUST remain in the same phase.
 
 At any time,
 on expiration of the Inactivity Timer,
@@ -2588,12 +2593,10 @@ Recv_window==window &    | |   |   all missing frags sent
                             +==========+<---------------+
 
        --->* ABORT
-            ~~~~~~~
-            Inactivity_Timer = expires
-        When DWL
-          IF Inactivity_Timer expires
-             Send DWL Request
-             Attempt++
+
+       In any state
+          on receiving a SCHC ACK REQ
+             Send a SCHC ACK for the current window
                             
 ~~~~
 {: #Fig-ACKAlwaysRcv title='Receiver State Machine for the ACK-Always Mode'}
