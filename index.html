@@ -360,7 +360,7 @@ address {
 
   <meta name="dct.creator" content="Minaburo, A., Toutain, L., Gomez, C., Barthel, D., and JC. Zuniga" />
   <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-lpwan-ipv6-static-context-hc-22" />
-  <meta name="dct.issued" scheme="ISO8601" content="2019-10-29" />
+  <meta name="dct.issued" scheme="ISO8601" content="2019-10-31" />
   <meta name="dct.abstract" content="This document defines the Static Context Header Compression (SCHC) framework, which provides both header compression and fragmentation functionalities. SCHC has been designed for Low Power Wide Area Networks (LPWAN).SCHC compression is based on a common static context stored both in the LPWAN device and in the network infrastructure side. This document defines a header compression mechanism and its application to compress IPv6/UDP headers.This document also specifies a fragmentation and reassembly mechanism that is used to support the IPv6 MTU requirement over the LPWAN technologies. Fragmentation is needed for IPv6 datagrams that, after SCHC compression or when such compression was not possible, still exceed the layer-2 maximum payload size.The SCHC header compression and fragmentation mechanisms are independent of the specific LPWAN technology over which they are used. This document defines generic functionalities and offers flexibility with regard to parameter settings and mechanism choices.  This document standardizes the exchange over the LPWAN between two SCHC entities.  Settings and choices specific to a technology or a product are expected to be grouped into profiles, which are specified in other documents.  Data models for the context and profiles are out of scope." />
   <meta name="description" content="This document defines the Static Context Header Compression (SCHC) framework, which provides both header compression and fragmentation functionalities. SCHC has been designed for Low Power Wide Area Networks (LPWAN).SCHC compression is based on a common static context stored both in the LPWAN device and in the network infrastructure side. This document defines a header compression mechanism and its application to compress IPv6/UDP headers.This document also specifies a fragmentation and reassembly mechanism that is used to support the IPv6 MTU requirement over the LPWAN technologies. Fragmentation is needed for IPv6 datagrams that, after SCHC compression or when such compression was not possible, still exceed the layer-2 maximum payload size.The SCHC header compression and fragmentation mechanisms are independent of the specific LPWAN technology over which they are used. This document defines generic functionalities and offers flexibility with regard to parameter settings and mechanism choices.  This document standardizes the exchange over the LPWAN between two SCHC entities.  Settings and choices specific to a technology or a product are expected to be grouped into profiles, which are specified in other documents.  Data models for the context and profiles are out of scope." />
 
@@ -384,7 +384,7 @@ address {
 <td class="right">L. Toutain</td>
 </tr>
 <tr>
-<td class="left">Expires: May 1, 2020</td>
+<td class="left">Expires: May 3, 2020</td>
 <td class="right">IMT-Atlantique</td>
 </tr>
 <tr>
@@ -413,7 +413,7 @@ address {
 </tr>
 <tr>
 <td class="left"></td>
-<td class="right">October 29, 2019</td>
+<td class="right">October 31, 2019</td>
 </tr>
 
     	
@@ -432,7 +432,7 @@ address {
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at https://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on May 1, 2020.</p>
+<p>This Internet-Draft will expire on May 3, 2020.</p>
 <h1 id="rfc.copyrightnotice"><a href="#rfc.copyrightnotice">Copyright Notice</a></h1>
 <p>Copyright (c) 2019 IETF Trust and the persons identified as the document authors.  All rights reserved.</p>
 <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (https://trustee.ietf.org/license-info) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.</p>
@@ -1552,7 +1552,8 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 <p></p>
 
 <ul>
-<li>on receiving a SCHC Fragment with the W bit different from the local W bit, the receiver MUST silently ignore and discard that message.</li>
+<li>on receiving a SCHC Fragment or a SCHC ACK REQ with the W bit different from the local W bit, the receiver MUST silently ignore and discard that message.</li>
+<li>on receiving a SCHC ACK REQ with the W bit equal to the local W bit, the receiver MUST send a SCHC ACK for this window.</li>
 <li>on receiving a SCHC Fragment with the W bit equal to the local W bit, the receiver MUST assemble the received tile based on the window counter and on the FCN field in the SCHC Fragment and it MUST update the Bitmap.  <ul>
 <li>if the SCHC Fragment received is an All-0 SCHC Fragment, the current window is determined to be a not-last window, the receiver MUST send a SCHC ACK for this window and it MUST enter the &#8220;retransmission phase&#8221; for this window.</li>
 <li>if the SCHC Fragment received is an All-1 SCHC Fragment, the padding bits of the All-1 SCHC Fragment MUST be assembled after the received tile, the current window is determined to be the last window, the receiver MUST perform the integrity check and it MUST send a SCHC ACK for this window. Then,      <ul>
@@ -1569,6 +1570,7 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 <ul>
 <li>if the window is a not-last window  <ul>
 <li>on receiving a SCHC Fragment that is not All-0 or All-1 and that has a W bit different from the local W bit, the receiver MUST increment its window counter and allocate a fresh Bitmap, it MUST assemble the tile received and update the Bitmap and it MUST enter the &#8220;acceptance phase&#8221; for that new window.</li>
+<li>on receiving a SCHC ACK REQ with a W bit different from the local W bit, the receiver MUST increment its window counter and allocate a fresh Bitmap, it MUST send a SCHC ACK for that new window and it MUST enter the &#8220;acceptance phase&#8221; for that new window.</li>
 <li>on receiving a SCHC All-0 Fragment with a W bit different from the local W bit, the receiver MUST increment its window counter and allocate a fresh Bitmap, it MUST assemble the tile received and update the Bitmap, it MUST send a SCHC ACK for the new window and it MUST stay in the &#8220;retransmission phase&#8221; for that new window.</li>
 <li>on receiving a SCHC All-1 Fragment with a W bit different from the local W bit, the receiver MUST increment its window counter and allocate a fresh Bitmap, it MUST assemble the tile received, including the padding bits, it MUST update the Bitmap and perform the integrity check, it MUST send a SCHC ACK for the new window, which is determined to be the last window. Then,      <ul>
 <li>If the integrity check indicates that the full SCHC Packet has been correctly reassembled, the receiver MUST enter the &#8220;clean-up phase&#8221;.</li>
@@ -1580,10 +1582,12 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 <li>otherwise, the receiver MUST assemble the tile received and update the Bitmap.  If the Bitmap becomes fully populated with 1&#8217;s or if the SCHC Fragment is an All-0, the receiver MUST send a SCHC ACK for this window.</li>
 </ul>
 </li>
+<li>on receiving a SCHC ACK REQ with the W bit equal to the local W bit, the receiver MUST send a SCHC ACK for this window.</li>
 </ul>
 </li>
 <li>if the window is the last window  <ul>
-<li>on receiving a SCHC Fragment with a W bit different from the local W bit the receiver MUST silently ignore and discard that message.</li>
+<li>on receiving a SCHC Fragment or a SCHC ACK with a W bit different from the local W bit the receiver MUST silently ignore and discard that message.</li>
+<li>on receiving a SCHC ACK REQ with the W bit equal to the local W bit, the receiver MUST send a SCHC ACK for this window.</li>
 <li>on receiving a SCHC Fragment with a W bit equal to the local W bit,      <ul>
 <li>if the SCHC Fragment received is an All-0 SCHC Fragment, the receiver MUST silently ignore it and discard it.</li>
 <li>otherwise, the receiver MUST update the Bitmap and it MUST assemble the tile received.  If the SCHC Fragment received is an All-1 SCHC Fragment, the receiver MUST assemble the padding bits of the All-1 SCHC Fragment after the received tile, it MUST perform the integrity check and          <ul>
@@ -1601,11 +1605,10 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 <p></p>
 
 <ul>
-<li>On receiving an All-1 SCHC Fragment with the correct W bit, the receiver MUST send a SCHC ACK.</li>
+<li>On receiving an All-1 SCHC Fragment or a SCHC ACK REQ with the W bit equal to the local W bit, the receiver MUST send a SCHC ACK.</li>
 <li>Any other SCHC Fragment received MUST be silently ignored and discarded.</li>
 </ul>
-<p id="rfc.section.8.4.2.2.p.12">In any phase, on receiving a SCHC ACK REQ, irrespective of its W bit, the receiver MUST send a SCHC ACK corresponding to the window currently being assembled and MUST remain in the same phase.</p>
-<p id="rfc.section.8.4.2.2.p.13">At any time, on expiration of the Inactivity Timer, on receiving a SCHC Sender-Abort or when Attempts reaches MAX_ACK_REQUESTS, the receiver MUST send a SCHC Receiver-Abort and it MAY exit the receive process for that SCHC Packet.</p>
+<p id="rfc.section.8.4.2.2.p.12">At any time, on expiration of the Inactivity Timer, on receiving a SCHC Sender-Abort or when Attempts reaches MAX_ACK_REQUESTS, the receiver MUST send a SCHC Receiver-Abort and it MAY exit the receive process for that SCHC Packet.</p>
 <p><a href="#Fig-ACKAlwaysRcv" class="xref">Figure 40</a> shows an example of a corresponding state machine.</p>
 <h1 id="rfc.section.8.4.3">
 <a href="#rfc.section.8.4.3">8.4.3.</a> <a href="#ACK-on-Error-subsection" id="ACK-on-Error-subsection">ACK-on-Error mode</a>
