@@ -2229,9 +2229,9 @@ Internet-Draft                 LPWAN SCHC                   October 2019
    The receiver MUST first initialize an empty Bitmap for the first
    window, then enter an "acceptance phase", in which
 
-   o  on receiving a SCHC Fragment or a SCHC ACK REQ with the W bit
-      different from the local W bit, the receiver MUST silently ignore
-      and discard that message.
+   o  on receiving a SCHC Fragment or a SCHC ACK REQ, either one having
+      the W bit different from the local W bit, the receiver MUST
+      silently ignore and discard that message.
 
 
 
@@ -2288,7 +2288,7 @@ Internet-Draft                 LPWAN SCHC                   October 2019
       *  on receiving a SCHC All-0 Fragment with a W bit different from
          the local W bit, the receiver MUST increment its window counter
          and allocate a fresh Bitmap, it MUST assemble the tile received
-         and update the Bitmap, it MUST send a SCHC ACK for the new
+         and update the Bitmap, it MUST send a SCHC ACK for that new
 
 
 
@@ -2311,11 +2311,11 @@ Internet-Draft                 LPWAN SCHC                   October 2019
 
          +  If the integrity check indicates that the full SCHC Packet
             has been correctly reassembled, the receiver MUST enter the
-            "clean-up phase".
+            "clean-up phase" for that new window.
 
          +  If the integrity check indicates that the full SCHC Packet
             has not been correctly reassembled, the receiver enters the
-            "retransmission phase" for the new window.
+            "retransmission phase" for that new window.
 
       *  on receiving a SCHC Fragment with a W bit equal to the local W
          bit,
@@ -2333,9 +2333,9 @@ Internet-Draft                 LPWAN SCHC                   October 2019
 
    o  if the window is the last window
 
-      *  on receiving a SCHC Fragment or a SCHC ACK with a W bit
-         different from the local W bit the receiver MUST silently
-         ignore and discard that message.
+      *  on receiving a SCHC Fragment or a SCHC ACK, either one having a
+         W bit different from the local W bit, the receiver MUST
+         silently ignore and discard that message.
 
       *  on receiving a SCHC ACK REQ with the W bit equal to the local W
          bit, the receiver MUST send a SCHC ACK for this window.
@@ -2373,8 +2373,9 @@ Internet-Draft                 LPWAN SCHC                   October 2019
 
    In the "clean-up phase":
 
-   o  On receiving an All-1 SCHC Fragment or a SCHC ACK REQ with the W
-      bit equal to the local W bit, the receiver MUST send a SCHC ACK.
+   o  On receiving an All-1 SCHC Fragment or a SCHC ACK REQ, either one
+      having the W bit equal to the local W bit, the receiver MUST send
+      a SCHC ACK.
 
    o  Any other SCHC Fragment received MUST be silently ignored and
       discarded.
@@ -2401,7 +2402,6 @@ Internet-Draft                 LPWAN SCHC                   October 2019
    smaller than or equal to the regular tile size.  Regarding the
    penultimate tile, a Profile MUST pick one of the following two
    options:
-
 
 
 

@@ -1552,7 +1552,7 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 <p></p>
 
 <ul>
-<li>on receiving a SCHC Fragment or a SCHC ACK REQ with the W bit different from the local W bit, the receiver MUST silently ignore and discard that message.</li>
+<li>on receiving a SCHC Fragment or a SCHC ACK REQ, either one having the W bit different from the local W bit, the receiver MUST silently ignore and discard that message.</li>
 <li>on receiving a SCHC ACK REQ with the W bit equal to the local W bit, the receiver MUST send a SCHC ACK for this window.</li>
 <li>on receiving a SCHC Fragment with the W bit equal to the local W bit, the receiver MUST assemble the received tile based on the window counter and on the FCN field in the SCHC Fragment and it MUST update the Bitmap.  <ul>
 <li>if the SCHC Fragment received is an All-0 SCHC Fragment, the current window is determined to be a not-last window, the receiver MUST send a SCHC ACK for this window and it MUST enter the &#8220;retransmission phase&#8221; for this window.</li>
@@ -1571,10 +1571,10 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 <li>if the window is a not-last window  <ul>
 <li>on receiving a SCHC Fragment that is not All-0 or All-1 and that has a W bit different from the local W bit, the receiver MUST increment its window counter and allocate a fresh Bitmap, it MUST assemble the tile received and update the Bitmap and it MUST enter the &#8220;acceptance phase&#8221; for that new window.</li>
 <li>on receiving a SCHC ACK REQ with a W bit different from the local W bit, the receiver MUST increment its window counter and allocate a fresh Bitmap, it MUST send a SCHC ACK for that new window and it MUST enter the &#8220;acceptance phase&#8221; for that new window.</li>
-<li>on receiving a SCHC All-0 Fragment with a W bit different from the local W bit, the receiver MUST increment its window counter and allocate a fresh Bitmap, it MUST assemble the tile received and update the Bitmap, it MUST send a SCHC ACK for the new window and it MUST stay in the &#8220;retransmission phase&#8221; for that new window.</li>
+<li>on receiving a SCHC All-0 Fragment with a W bit different from the local W bit, the receiver MUST increment its window counter and allocate a fresh Bitmap, it MUST assemble the tile received and update the Bitmap, it MUST send a SCHC ACK for that new window and it MUST stay in the &#8220;retransmission phase&#8221; for that new window.</li>
 <li>on receiving a SCHC All-1 Fragment with a W bit different from the local W bit, the receiver MUST increment its window counter and allocate a fresh Bitmap, it MUST assemble the tile received, including the padding bits, it MUST update the Bitmap and perform the integrity check, it MUST send a SCHC ACK for the new window, which is determined to be the last window. Then,      <ul>
-<li>If the integrity check indicates that the full SCHC Packet has been correctly reassembled, the receiver MUST enter the &#8220;clean-up phase&#8221;.</li>
-<li>If the integrity check indicates that the full SCHC Packet has not been correctly reassembled, the receiver enters the &#8220;retransmission phase&#8221; for the new window.</li>
+<li>If the integrity check indicates that the full SCHC Packet has been correctly reassembled, the receiver MUST enter the &#8220;clean-up phase&#8221; for that new window.</li>
+<li>If the integrity check indicates that the full SCHC Packet has not been correctly reassembled, the receiver enters the &#8220;retransmission phase&#8221; for that new window.</li>
 </ul>
 </li>
 <li>on receiving a SCHC Fragment with a W bit equal to the local W bit,      <ul>
@@ -1586,7 +1586,7 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 </ul>
 </li>
 <li>if the window is the last window  <ul>
-<li>on receiving a SCHC Fragment or a SCHC ACK with a W bit different from the local W bit the receiver MUST silently ignore and discard that message.</li>
+<li>on receiving a SCHC Fragment or a SCHC ACK, either one having a W bit different from the local W bit, the receiver MUST silently ignore and discard that message.</li>
 <li>on receiving a SCHC ACK REQ with the W bit equal to the local W bit, the receiver MUST send a SCHC ACK for this window.</li>
 <li>on receiving a SCHC Fragment with a W bit equal to the local W bit,      <ul>
 <li>if the SCHC Fragment received is an All-0 SCHC Fragment, the receiver MUST silently ignore it and discard it.</li>
@@ -1605,7 +1605,7 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 <p></p>
 
 <ul>
-<li>On receiving an All-1 SCHC Fragment or a SCHC ACK REQ with the W bit equal to the local W bit, the receiver MUST send a SCHC ACK.</li>
+<li>On receiving an All-1 SCHC Fragment or a SCHC ACK REQ, either one having the W bit equal to the local W bit, the receiver MUST send a SCHC ACK.</li>
 <li>Any other SCHC Fragment received MUST be silently ignored and discarded.</li>
 </ul>
 <p id="rfc.section.8.4.2.2.p.12">At any time, on expiration of the Inactivity Timer, on receiving a SCHC Sender-Abort or when Attempts reaches MAX_ACK_REQUESTS, the receiver MUST send a SCHC Receiver-Abort and it MAY exit the receive process for that SCHC Packet.</p>
