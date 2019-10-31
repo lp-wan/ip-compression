@@ -181,14 +181,14 @@ Internet-Draft                 LPWAN SCHC                   October 2019
    14. References  . . . . . . . . . . . . . . . . . . . . . . . . .  60
      14.1.  Normative References . . . . . . . . . . . . . . . . . .  60
      14.2.  Informative References . . . . . . . . . . . . . . . . .  61
-   Appendix A.  Compression Examples . . . . . . . . . . . . . . . .  62
+   Appendix A.  Compression Examples . . . . . . . . . . . . . . . .  61
    Appendix B.  Fragmentation Examples . . . . . . . . . . . . . . .  64
-   Appendix C.  Fragmentation State Machines . . . . . . . . . . . .  72
-   Appendix D.  SCHC Parameters  . . . . . . . . . . . . . . . . . .  78
-   Appendix E.  Supporting multiple window sizes for fragmentation .  80
+   Appendix C.  Fragmentation State Machines . . . . . . . . . . . .  71
+   Appendix D.  SCHC Parameters  . . . . . . . . . . . . . . . . . .  77
+   Appendix E.  Supporting multiple window sizes for fragmentation .  79
    Appendix F.  ACK-Always and ACK-on-Error on quasi-bidirectional
-                links  . . . . . . . . . . . . . . . . . . . . . . .  80
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  82
+                links  . . . . . . . . . . . . . . . . . . . . . . .  79
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  81
 
 1.  Introduction
 
@@ -3368,12 +3368,6 @@ Internet-Draft                 LPWAN SCHC                   October 2019
               "IEEE Standard for Ethernet", IEEE standard,
               DOI 10.1109/ieeestd.2018.8457469, n.d..
 
-   [RFC3385]  Sheinwald, D., Satran, J., Thaler, P., and V. Cavanna,
-              "Internet Protocol Small Computer System Interface (iSCSI)
-              Cyclic Redundancy Check (CRC)/Checksum Considerations",
-              RFC 3385, DOI 10.17487/RFC3385, September 2002,
-              <https://www.rfc-editor.org/info/rfc3385>.
-
    [RFC4944]  Montenegro, G., Kushalnagar, N., Hui, J., and D. Culler,
               "Transmission of IPv6 Packets over IEEE 802.15.4
               Networks", RFC 4944, DOI 10.17487/RFC4944, September 2007,
@@ -3398,25 +3392,9 @@ Internet-Draft                 LPWAN SCHC                   October 2019
               Interface Identifiers", RFC 7136, DOI 10.17487/RFC7136,
               February 2014, <https://www.rfc-editor.org/info/rfc7136>.
 
-   [RFC7217]  Gont, F., "A Method for Generating Semantically Opaque
-              Interface Identifiers with IPv6 Stateless Address
-              Autoconfiguration (SLAAC)", RFC 7217,
-              DOI 10.17487/RFC7217, April 2014,
-              <https://www.rfc-editor.org/info/rfc7217>.
-
    [RFC8065]  Thaler, D., "Privacy Considerations for IPv6 Adaptation-
               Layer Mechanisms", RFC 8065, DOI 10.17487/RFC8065,
               February 2017, <https://www.rfc-editor.org/info/rfc8065>.
-
-
-
-
-
-
-Minaburo, et al.           Expires May 3, 2020                 [Page 61]
-
-Internet-Draft                 LPWAN SCHC                   October 2019
-
 
 Appendix A.  Compression Examples
 
@@ -3432,6 +3410,13 @@ Appendix A.  Compression Examples
    IPv6 Address prefixes alpha::IID/64 to beta::1/64.  The last flow is
    for legacy applications using different ports numbers, the
    destination IPv6 address prefix is gamma::1/64.
+
+
+
+Minaburo, et al.           Expires May 3, 2020                 [Page 61]
+
+Internet-Draft                 LPWAN SCHC                   October 2019
+
 
    Figure 25 presents the protocol stack.  IPv6 and UDP are represented
    with dotted lines since these protocols are compressed on the radio
@@ -3466,14 +3451,6 @@ Appendix A.  Compression Examples
     +----------------+--+--+--+---------+---------------------++------+
     |IPv6 Version    |4 |1 |Bi|6        | ignore | not-sent   ||      |
     |IPv6 DiffServ   |8 |1 |Bi|0        | equal  | not-sent   ||      |
-
-
-
-Minaburo, et al.           Expires May 3, 2020                 [Page 62]
-
-Internet-Draft                 LPWAN SCHC                   October 2019
-
-
     |IPv6 Flow Label |20|1 |Bi|0        | equal  | not-sent   ||      |
     |IPv6 Length     |16|1 |Bi|         | ignore | compute-*  ||      |
     |IPv6 Next Header|8 |1 |Bi|17       | equal  | not-sent   ||      |
@@ -3488,6 +3465,14 @@ Internet-Draft                 LPWAN SCHC                   October 2019
     |UDP Length      |16|1 |Bi|         | ignore | compute-*  ||      |
     |UDP checksum    |16|1 |Bi|         | ignore | compute-*  ||      |
     +================+==+==+==+=========+========+============++======+
+
+
+
+
+Minaburo, et al.           Expires May 3, 2020                 [Page 62]
+
+Internet-Draft                 LPWAN SCHC                   October 2019
+
 
     Rule 1
     +----------------+--+--+--+---------+--------+------------++------+
@@ -3522,14 +3507,6 @@ Internet-Draft                 LPWAN SCHC                   October 2019
     |IPv6 Version    |4 |1 |Bi|6        | ignore | not-sent   ||      |
     |IPv6 DiffServ   |8 |1 |Bi|0        | equal  | not-sent   ||      |
     |IPv6 Flow Label |20|1 |Bi|0        | equal  | not-sent   ||      |
-
-
-
-Minaburo, et al.           Expires May 3, 2020                 [Page 63]
-
-Internet-Draft                 LPWAN SCHC                   October 2019
-
-
     |IPv6 Length     |16|1 |Bi|         | ignore | compute-*  ||      |
     |IPv6 Next Header|8 |1 |Bi|17       | equal  | not-sent   ||      |
     |IPv6 Hop Limit  |8 |1 |Up|255      | ignore | not-sent   ||      |
@@ -3545,6 +3522,12 @@ Internet-Draft                 LPWAN SCHC                   October 2019
     |UDP checksum    |16|1 |Bi|         | ignore | compute-*  ||      |
     +================+==+==+==+=========+========+============++======+
 
+
+
+
+Minaburo, et al.           Expires May 3, 2020                 [Page 63]
+
+Internet-Draft                 LPWAN SCHC                   October 2019
 
 
                          Figure 26: Context Rules
@@ -3566,25 +3549,6 @@ Appendix B.  Fragmentation Examples
 
    Figure 27 illustrates the transmission in No-ACK mode of a SCHC
    Packet that needs 11 SCHC Fragments.  FCN is 1 bit wide.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Minaburo, et al.           Expires May 3, 2020                 [Page 64]
-
-Internet-Draft                 LPWAN SCHC                   October 2019
-
 
            Sender               Receiver
              |-------FCN=0-------->|
@@ -3609,6 +3573,19 @@ Internet-Draft                 LPWAN SCHC                   October 2019
    Packet fragmented in 11 tiles, with one tile per SCHC Fragment,
    WINDOW_SIZE=7 and no lost SCHC Fragment.
 
+
+
+
+
+
+
+
+
+Minaburo, et al.           Expires May 3, 2020                 [Page 64]
+
+Internet-Draft                 LPWAN SCHC                   October 2019
+
+
            Sender               Receiver
              |-----W=0, FCN=6----->|
              |-----W=0, FCN=5----->|
@@ -3631,16 +3608,6 @@ Internet-Draft                 LPWAN SCHC                   October 2019
    Figure 29 illustrates the transmission in ACK-on-Error mode of a SCHC
    Packet fragmented in 11 tiles, with one tile per SCHC Fragment,
    WINDOW_SIZE=7 and three lost SCHC Fragments.
-
-
-
-
-
-
-Minaburo, et al.           Expires May 3, 2020                 [Page 65]
-
-Internet-Draft                 LPWAN SCHC                   October 2019
-
 
             Sender             Receiver
              |-----W=0, FCN=6----->|
@@ -3666,37 +3633,18 @@ Internet-Draft                 LPWAN SCHC                   October 2019
     Figure 29: ACK-on-Error mode, 11 tiles, one tile per SCHC Fragment,
                            lost SCHC Fragments.
 
-   Figure 30 shows an example of a transmission in ACK-on-Error mode of
-   a SCHC Packet fragmented in 73 tiles, with N=5, WINDOW_SIZE=28, M=2
-   and 3 lost SCHC Fragments.
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Minaburo, et al.           Expires May 3, 2020                 [Page 66]
+Minaburo, et al.           Expires May 3, 2020                 [Page 65]
 
 Internet-Draft                 LPWAN SCHC                   October 2019
 
+
+   Figure 30 shows an example of a transmission in ACK-on-Error mode of
+   a SCHC Packet fragmented in 73 tiles, with N=5, WINDOW_SIZE=28, M=2
+   and 3 lost SCHC Fragments.
 
       Sender               Receiver
        |-----W=0, FCN=27----->| 4 tiles sent
@@ -3741,18 +3689,20 @@ Internet-Draft                 LPWAN SCHC                   October 2019
 
                 Figure 30: ACK-on-Error mode, variable MTU.
 
+
+
+
+
+Minaburo, et al.           Expires May 3, 2020                 [Page 66]
+
+Internet-Draft                 LPWAN SCHC                   October 2019
+
+
    In this example, the L2 MTU becomes reduced just before sending the
    "W=2, FCN=19" fragment, leaving space for only 1 tile in each
    forthcoming SCHC Fragment.  Before retransmissions, the 73 tiles are
    carried by a total of 25 SCHC Fragments, the last 9 being of smaller
    size.
-
-
-
-Minaburo, et al.           Expires May 3, 2020                 [Page 67]
-
-Internet-Draft                 LPWAN SCHC                   October 2019
-
 
    Note: other sequences of events (e.g. regarding when ACKs are sent by
    the Receiver) are also allowed by this specification.  Profiles may
@@ -3799,13 +3749,7 @@ Internet-Draft                 LPWAN SCHC                   October 2019
 
 
 
-
-
-
-
-
-
-Minaburo, et al.           Expires May 3, 2020                 [Page 68]
+Minaburo, et al.           Expires May 3, 2020                 [Page 67]
 
 Internet-Draft                 LPWAN SCHC                   October 2019
 
@@ -3861,7 +3805,7 @@ Internet-Draft                 LPWAN SCHC                   October 2019
 
 
 
-Minaburo, et al.           Expires May 3, 2020                 [Page 69]
+Minaburo, et al.           Expires May 3, 2020                 [Page 68]
 
 Internet-Draft                 LPWAN SCHC                   October 2019
 
@@ -3917,7 +3861,7 @@ Internet-Draft                 LPWAN SCHC                   October 2019
 
 
 
-Minaburo, et al.           Expires May 3, 2020                 [Page 70]
+Minaburo, et al.           Expires May 3, 2020                 [Page 69]
 
 Internet-Draft                 LPWAN SCHC                   October 2019
 
@@ -3973,7 +3917,7 @@ Internet-Draft                 LPWAN SCHC                   October 2019
 
 
 
-Minaburo, et al.           Expires May 3, 2020                 [Page 71]
+Minaburo, et al.           Expires May 3, 2020                 [Page 70]
 
 Internet-Draft                 LPWAN SCHC                   October 2019
 
@@ -4029,7 +3973,7 @@ Appendix C.  Fragmentation State Machines
 
 
 
-Minaburo, et al.           Expires May 3, 2020                 [Page 72]
+Minaburo, et al.           Expires May 3, 2020                 [Page 71]
 
 Internet-Draft                 LPWAN SCHC                   October 2019
 
@@ -4085,7 +4029,7 @@ Internet-Draft                 LPWAN SCHC                   October 2019
 
 
 
-Minaburo, et al.           Expires May 3, 2020                 [Page 73]
+Minaburo, et al.           Expires May 3, 2020                 [Page 72]
 
 Internet-Draft                 LPWAN SCHC                   October 2019
 
@@ -4141,7 +4085,7 @@ Internet-Draft                 LPWAN SCHC                   October 2019
 
 
 
-Minaburo, et al.           Expires May 3, 2020                 [Page 74]
+Minaburo, et al.           Expires May 3, 2020                 [Page 73]
 
 Internet-Draft                 LPWAN SCHC                   October 2019
 
@@ -4197,7 +4141,7 @@ Internet-Draft                 LPWAN SCHC                   October 2019
 
 
 
-Minaburo, et al.           Expires May 3, 2020                 [Page 75]
+Minaburo, et al.           Expires May 3, 2020                 [Page 74]
 
 Internet-Draft                 LPWAN SCHC                   October 2019
 
@@ -4253,7 +4197,7 @@ Internet-Draft                 LPWAN SCHC                   October 2019
 
 
 
-Minaburo, et al.           Expires May 3, 2020                 [Page 76]
+Minaburo, et al.           Expires May 3, 2020                 [Page 75]
 
 Internet-Draft                 LPWAN SCHC                   October 2019
 
@@ -4309,7 +4253,7 @@ Internet-Draft                 LPWAN SCHC                   October 2019
 
 
 
-Minaburo, et al.           Expires May 3, 2020                 [Page 77]
+Minaburo, et al.           Expires May 3, 2020                 [Page 76]
 
 Internet-Draft                 LPWAN SCHC                   October 2019
 
@@ -4365,7 +4309,7 @@ Appendix D.  SCHC Parameters
 
 
 
-Minaburo, et al.           Expires May 3, 2020                 [Page 78]
+Minaburo, et al.           Expires May 3, 2020                 [Page 77]
 
 Internet-Draft                 LPWAN SCHC                   October 2019
 
@@ -4421,7 +4365,7 @@ Internet-Draft                 LPWAN SCHC                   October 2019
 
 
 
-Minaburo, et al.           Expires May 3, 2020                 [Page 79]
+Minaburo, et al.           Expires May 3, 2020                 [Page 78]
 
 Internet-Draft                 LPWAN SCHC                   October 2019
 
@@ -4477,7 +4421,7 @@ Appendix F.  ACK-Always and ACK-on-Error on quasi-bidirectional links
 
 
 
-Minaburo, et al.           Expires May 3, 2020                 [Page 80]
+Minaburo, et al.           Expires May 3, 2020                 [Page 79]
 
 Internet-Draft                 LPWAN SCHC                   October 2019
 
@@ -4533,7 +4477,7 @@ Internet-Draft                 LPWAN SCHC                   October 2019
 
 
 
-Minaburo, et al.           Expires May 3, 2020                 [Page 81]
+Minaburo, et al.           Expires May 3, 2020                 [Page 80]
 
 Internet-Draft                 LPWAN SCHC                   October 2019
 
@@ -4589,4 +4533,4 @@ Authors' Addresses
 
 
 
-Minaburo, et al.           Expires May 3, 2020                 [Page 82]
+Minaburo, et al.           Expires May 3, 2020                 [Page 81]
