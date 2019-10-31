@@ -59,14 +59,12 @@ normative:
   RFC8174:
   RFC8200:
   RFC8376:
-informative:  
-  RFC3385:
+informative:
   RFC4944:
   RFC5795:
   RFC6282:
   RFC6437:
   RFC7136:
-  RFC7217:
   RFC8065:
   ETHERNET: DOI.10.1109/IEEESTD.2018.8457469
 
