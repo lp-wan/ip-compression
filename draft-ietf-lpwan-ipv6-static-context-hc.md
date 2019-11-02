@@ -2077,6 +2077,9 @@ When such technologies are used, it is necessary to statically define an IID for
 ~~~~
 
 Rule 0
+  Special Rule ID used to tag an uncompressed UDP/IPV6 packet.
+
+Rule 1
  +----------------+--+--+--+---------+--------+------------++------+
  | Field          |FL|FP|DI| Value   | Match  | Comp Decomp|| Sent |
  |                |  |  |  |         | Opera. | Action     ||[bits]|
@@ -2098,7 +2101,7 @@ Rule 0
  |UDP checksum    |16|1 |Bi|         | ignore | compute-*  ||      |
  +================+==+==+==+=========+========+============++======+
 
- Rule 1
+ Rule 2
  +----------------+--+--+--+---------+--------+------------++------+
  | Field          |FL|FP|DI| Value   | Match  | Action     || Sent |
  |                |  |  |  |         | Opera. | Action     ||[bits]|
@@ -2123,7 +2126,7 @@ Rule 0
  |UDP checksum    |16|1 |Bi|         | ignore | compute-*  ||      |
  +================+==+==+==+=========+========+============++======+
 
- Rule 2
+ Rule 3
  +----------------+--+--+--+---------+--------+------------++------+
  | Field          |FL|FP|DI| Value   | Match  | Action     || Sent |
  |                |  |  |  |         | Opera. | Action     ||[bits]|
@@ -2150,11 +2153,15 @@ Rule 0
 ~~~~
 {: #Fig-fields title='Context Rules'}
 
-All the fields described in the three Rules depicted on {{Fig-fields}} are present in the IPv6 and UDP headers.  The DevIID-DID value is found in the L2 header.
+{{Fig-fields}} describes a example of a Rule set.
 
-The second and third Rules use global addresses. The way the Dev learns the prefix is not in the scope of the document.
+In this example, 0 was chosen as the special Rule ID that tags packets that cannot be compressed with any compression Rule.
 
-The third Rule compresses each port number to 4 bits.
+All the fields described in Rules 1-3 are present in the IPv6 and UDP headers. The DevIID-DID value is found in the L2 header.
+
+Rules 2-3 use global addresses. The way the Dev learns the prefix is not in the scope of the document.
+
+Rule 3 compresses each port number to 4 bits.
 
 
 # Fragmentation Examples {#FragExamples}
