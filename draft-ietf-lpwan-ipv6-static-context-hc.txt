@@ -3311,15 +3311,16 @@ Internet-Draft                 LPWAN SCHC                  November 2019
 
 13.  Acknowledgements
 
-   Thanks to Sergio Aguilar Romero, Brian Carpenter, Carsten Bormann,
-   David Black, Deborah Brungard, Philippe Clavier, Alissa Cooper, Roman
-   Danyliw, Daniel Ducuara Beltran, Diego Dujovne, Eduardo Ingles
-   Sanchez, Benjamin Kaduk, Arunprabhu Kandasamy, Suresh Krishnan, Mirja
-   Kuehlewind, Rahul Jadhav, Barry Leiba, Sergio Lopez Bernal, Antony
-   Markovski, Alexey Melnikov, Georgios Papadopoulos, Alexander Pelov,
-   Charles Perkins, Edgar Ramos, Alvaro Retana, Adam Roach, Shoichi
-   Sakane, Joseph Salowey, Pascal Thubert, and Eric Vyncke for useful
-   design considerations, reviews and comments.
+   Thanks to (in alphabetical order) Sergio Aguilar Romero, David Black,
+   Carsten Bormann, Deborah Brungard, Brian Carpenter, Philippe Clavier,
+   Alissa Cooper, Roman Danyliw, Daniel Ducuara Beltran, Diego Dujovne,
+   Eduardo Ingles Sanchez, Rahul Jadhav, Benjamin Kaduk,
+   Arunprabhu Kandasamy, Suresh Krishnan, Mirja Kuehlewind, Barry Leiba,
+   Sergio Lopez Bernal, Antoni Markovski, Alexey Melnikov,
+   Georgios Papadopoulos, Alexander Pelov, Charles Perkins, Edgar Ramos,
+   Alvaro Retana, Adam Roach, Shoichi Sakane, Joseph Salowey,
+   Pascal Thubert, and Eric Vyncke for useful design considerations,
+   reviews and comments.
 
    Carles Gomez has been funded in part by the Spanish Government
    (Ministerio de Educacion, Cultura y Deporte) through the Jose
@@ -3351,9 +3352,8 @@ Internet-Draft                 LPWAN SCHC                  November 2019
               DOI 10.17487/RFC8200, July 2017,
               <https://www.rfc-editor.org/info/rfc8200>.
 
-   [RFC8376]  Farrell, S., Ed., "Low-Power Wide Area Network (LPWAN)
-              Overview", RFC 8376, DOI 10.17487/RFC8376, May 2018,
-              <https://www.rfc-editor.org/info/rfc8376>.
+
+
 
 
 
@@ -3361,6 +3361,10 @@ Minaburo, et al.          Expires May 24, 2020                 [Page 60]
 
 Internet-Draft                 LPWAN SCHC                  November 2019
 
+
+   [RFC8376]  Farrell, S., Ed., "Low-Power Wide Area Network (LPWAN)
+              Overview", RFC 8376, DOI 10.17487/RFC8376, May 2018,
+              <https://www.rfc-editor.org/info/rfc8376>.
 
 14.2.  Informative References
 
@@ -3406,10 +3410,6 @@ Appendix A.  Compression Examples
    flows are considered.  The first flow is for the device management
    based on CoAP using Link Local IPv6 addresses and UDP ports 123 and
    124 for Dev and App, respectively.  The second flow will be a CoAP
-   server for measurements done by the Dev (using ports 5683) and Global
-   IPv6 Address prefixes alpha::IID/64 to beta::1/64.  The last flow is
-   for legacy applications using different ports numbers, the
-   destination IPv6 address prefix is gamma::1/64.
 
 
 
@@ -3417,6 +3417,11 @@ Minaburo, et al.          Expires May 24, 2020                 [Page 61]
 
 Internet-Draft                 LPWAN SCHC                  November 2019
 
+
+   server for measurements done by the Dev (using ports 5683) and Global
+   IPv6 Address prefixes alpha::IID/64 to beta::1/64.  The last flow is
+   for legacy applications using different ports numbers, the
+   destination IPv6 address prefix is gamma::1/64.
 
    Figure 25 presents the protocol stack.  IPv6 and UDP are represented
    with dotted lines since these protocols are compressed on the radio
@@ -3461,11 +3466,6 @@ Internet-Draft                 LPWAN SCHC                  November 2019
     |IPv6 DevPrefix  |64|1 |Bi|FE80::/64| equal  | not-sent   ||      |
     |IPv6 DevIID     |64|1 |Bi|         | ignore | DevIID     ||      |
     |IPv6 AppPrefix  |64|1 |Bi|FE80::/64| equal  | not-sent   ||      |
-    |IPv6 AppIID     |64|1 |Bi|::1      | equal  | not-sent   ||      |
-    +================+==+==+==+=========+========+============++======+
-    |UDP DevPort     |16|1 |Bi|123      | equal  | not-sent   ||      |
-    |UDP AppPort     |16|1 |Bi|124      | equal  | not-sent   ||      |
-    |UDP Length      |16|1 |Bi|         | ignore | compute-*  ||      |
 
 
 
@@ -3474,6 +3474,11 @@ Minaburo, et al.          Expires May 24, 2020                 [Page 62]
 Internet-Draft                 LPWAN SCHC                  November 2019
 
 
+    |IPv6 AppIID     |64|1 |Bi|::1      | equal  | not-sent   ||      |
+    +================+==+==+==+=========+========+============++======+
+    |UDP DevPort     |16|1 |Bi|123      | equal  | not-sent   ||      |
+    |UDP AppPort     |16|1 |Bi|124      | equal  | not-sent   ||      |
+    |UDP Length      |16|1 |Bi|         | ignore | compute-*  ||      |
     |UDP checksum    |16|1 |Bi|         | ignore | compute-*  ||      |
     +================+==+==+==+=========+========+============++======+
 
@@ -3517,11 +3522,6 @@ Internet-Draft                 LPWAN SCHC                  November 2019
     |IPv6 DevPrefix  |64|1 |Bi|alpha/64 | equal  | not-sent   ||      |
     |IPv6 DevIID     |64|1 |Bi|         | ignore | DevIID     ||      |
     |IPv6 AppPrefix  |64|1 |Bi|gamma/64 | equal  | not-sent   ||      |
-    |IPv6 AppIID     |64|1 |Bi|::1000   | equal  | not-sent   ||      |
-    +================+==+==+==+=========+========+============++======+
-    |UDP DevPort     |16|1 |Bi|8720     | MSB(12)| LSB        ||   4  |
-    |UDP AppPort     |16|1 |Bi|8720     | MSB(12)| LSB        ||   4  |
-    |UDP Length      |16|1 |Bi|         | ignore | compute-*  ||      |
 
 
 
@@ -3530,6 +3530,11 @@ Minaburo, et al.          Expires May 24, 2020                 [Page 63]
 Internet-Draft                 LPWAN SCHC                  November 2019
 
 
+    |IPv6 AppIID     |64|1 |Bi|::1000   | equal  | not-sent   ||      |
+    +================+==+==+==+=========+========+============++======+
+    |UDP DevPort     |16|1 |Bi|8720     | MSB(12)| LSB        ||   4  |
+    |UDP AppPort     |16|1 |Bi|8720     | MSB(12)| LSB        ||   4  |
+    |UDP Length      |16|1 |Bi|         | ignore | compute-*  ||      |
     |UDP checksum    |16|1 |Bi|         | ignore | compute-*  ||      |
     +================+==+==+==+=========+========+============++======+
 
@@ -3559,6 +3564,28 @@ Appendix B.  Fragmentation Examples
    Figure 27 illustrates the transmission in No-ACK mode of a SCHC
    Packet that needs 11 SCHC Fragments.  FCN is 1 bit wide.
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Minaburo, et al.          Expires May 24, 2020                 [Page 64]
+
+Internet-Draft                 LPWAN SCHC                  November 2019
+
+
            Sender               Receiver
              |-------FCN=0-------->|
              |-------FCN=0-------->|
@@ -3577,14 +3604,6 @@ Appendix B.  Fragmentation Examples
 
    In the following examples, N (the size of the FCN field) is 3 bits.
    The All-1 FCN value is 7.
-
-
-
-
-Minaburo, et al.          Expires May 24, 2020                 [Page 64]
-
-Internet-Draft                 LPWAN SCHC                  November 2019
-
 
    Figure 28 illustrates the transmission in ACK-on-Error mode of a SCHC
    Packet fragmented in 11 tiles, with one tile per SCHC Fragment,
@@ -3612,25 +3631,6 @@ Internet-Draft                 LPWAN SCHC                  November 2019
    Figure 29 illustrates the transmission in ACK-on-Error mode of a SCHC
    Packet fragmented in 11 tiles, with one tile per SCHC Fragment,
    WINDOW_SIZE=7 and three lost SCHC Fragments.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
