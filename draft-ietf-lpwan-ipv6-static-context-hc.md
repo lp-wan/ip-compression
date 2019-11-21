@@ -1873,7 +1873,7 @@ Zero Checksums" [RFC6936].
 checksum can be elided by the compressor and re-computed by the decompressor when an upper
 layer guarantees the integrity of the UDP payload and pseudo-header.
 A specific example of this is
-when a Message Integrity Check protects the compressed message
+when a message integrity check protects the compressed message
 between the compressor that elides the UDP checksum and the decompressor
 that computes it,
 with a strength that is identical or better to
@@ -2023,6 +2023,7 @@ Barry Leiba,
 Sergio Lopez Bernal,
 Antony Markovski,
 Alexey Melnikov,
+Georgios Papadopoulos,
 Alexander Pelov,
 Charles Perkins,
 Edgar Ramos,
