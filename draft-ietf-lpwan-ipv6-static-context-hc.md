@@ -847,7 +847,7 @@ The SCHC F/R messages contain the following fields (see the formats in {{Fragfor
   The description of the exact use of the FCN field is left to each SCHC F/R mode.
   However, two values are reserved for special purposes. They help control the SCHC F/R process:
 
-  * The FCN value with all the bits equal to 1 (called All-1) signals the very last tile of a SCHC Packet.
+  * The FCN value with all the bits equal to 1 (called All-1) signals that the very last tile of a SCHC Packet has been transmitted.
   By extension, if windows are used, the last window of a packet is called the All-1 window.
 
   * If windows are used, the FCN value with all the bits equal to 0 (called All-0) signals
@@ -1180,7 +1180,7 @@ Except for the last tile of a SCHC Packet, each tile MUST be of a size
 that complements the SCHC Fragment Header so
 that the SCHC Fragment is a multiple of L2 Words without the need for padding bits.
 Except for the last one, the SCHC Fragments MUST use the Regular SCHC Fragment format specified in {{NotLastFrag}}.
-The last SCHC Fragment MUST use the All-1 format specified in {{LastFrag}}.
+The SCHC Fragment that carries the last tile MUST be an All-1 SCHC Fragment, described in {{LastFrag}}.
 
 The sender MAY transmit a SCHC Sender-Abort.
 
