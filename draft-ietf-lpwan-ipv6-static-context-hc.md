@@ -1,7 +1,7 @@
 ---
 stand_alone: true
 ipr: trust200902
-docname: draft-ietf-lpwan-ipv6-static-context-hc-23
+docname: draft-ietf-lpwan-ipv6-static-context-hc-24
 cat: std
 pi:
   symrefs: 'yes'
@@ -460,7 +460,7 @@ The detailed algorithm is the following:
     Otherwise, the Rule MUST be disregarded.
 
     This specification does not prevent multiple Rules from matching the above steps and therefore being valid for use.
-    What to do in the case of multiple valid Rules is left to the implementation.
+    Which Rule to use among multiple valid Rules is left to the implementation.
     As long as the same Rule set is installed at both ends, this degree of freedom does not constitute an interoperability issue.
 
 
@@ -777,7 +777,7 @@ Some SCHC F/R modes can use the following timers and counters
 ### Integrity Checking {#IntegrityChecking}
 
 The integrity of the fragmentation-reassembly process of a SCHC Packet MUST be checked at the receive end.
-A Profle MUST specify how integrity checking is performed.
+A Profile MUST specify how integrity checking is performed.
 
 It is RECOMMENDED that integrity checking be performed by computing a Reassembly Check Sequence (RCS)
 based on the SCHC Packet at the sender side
@@ -2788,13 +2788,13 @@ This section lists the parameters that need to be defined in the Profile.
 
 * Padding: size of the L2 Word (for most LPWAN technologies, this would be a byte; for some technologies, a bit)
 
-* Decision to use SCHC fragmentation mechanism or not. If yes:
+* Decision to use SCHC fragmentation mechanism or not. If yes, the document must describe:
 
     * reliability mode(s) used, in which cases (e.g., based on link channel condition)
 
     * Rule ID values assigned to each mode in use
 
-    * presence and number of bits for DTag (T) for each Rule ID value
+    * presence and number of bits for DTag (T) for each Rule ID value, lifetime of DTag at the receiver
 
     * support for interleaved packet transmission, to what extent
 
@@ -2803,6 +2803,10 @@ This section lists the parameters that need to be defined in the Profile.
     * number of bits for W (M) for each Rule ID value, for modes that use windows
 
     * number of bits for FCN (N) for each Rule ID value
+
+    * what makes an All-0 SCHC Fragment and a SCHC ACK REQ distinguishable (see {{NotLastFrag}}).
+
+    * what makes an All-1 SCHC Fragment and a SCHC Sender-Abort distinguishable (see {{LastFrag}}).
 
     * size of RCS and algorithm for its computation, for each Rule ID, if different from the default CRC32. Byte fill-up with zeroes or other mechanism, to be specified.
 
@@ -2823,7 +2827,7 @@ In order to avoid potentially high delay in the downlink transmission of a fragm
 the SCHC Fragment receiver may perform an uplink transmission as soon as possible after reception of a SCHC
 Fragment that is not the last one.
 Such uplink transmission may be triggered by the L2 (e.g., an L2 ACK sent in response to a SCHC Fragment encapsulated
-in a L2 PDU that requires an L2 ACK) or it may be triggered from an upper layer.
+in a L2 PDU that requires an L2 ACK) or it may be triggered from an upper layer. See {{AsymLinks}}.
 
 * the following parameters need to be addressed in documents other than this one but not necessarily in
 the LPWAN technology-specific documents:
