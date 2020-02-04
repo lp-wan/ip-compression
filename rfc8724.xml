@@ -330,16 +330,16 @@ The Compression Residue may be empty. Both the Rule ID and the Compression Resid
           <name>Architecture</name>
           <artwork name="" type="" align="left" alt=""><![CDATA[
         Dev                                               App
-+----------------+                                +----+ +----+ +----+
-| App1 App2 App3 |                                |App1| |App2| |App3|
-|                |                                |    | |    | |    |
-|       UDP      |                                |UDP | |UDP | |UDP |
-|      IPv6      |                                |IPv6| |IPv6| |IPv6|   
-|                |                                |    | |    | |    |  
-|SCHC C/D and F/R|                                |    | |    | |    |
-+--------+-------+                                +----+ +----+ +----+
-         |  +---+     +---+    +----+    +----+     .      .      .
-         +~ |RGW| === |NGW| == |SCHC| == |SCHC|...... Internet ....
++----------------+                               +----+ +----+ +----+
+| App1 App2 App3 |                               |App1| |App2| |App3|
+|                |                               |    | |    | |    |
+|       UDP      |                               |UDP | |UDP | |UDP |
+|      IPv6      |                               |IPv6| |IPv6| |IPv6|
+|                |                               |    | |    | |    |
+|SCHC C/D and F/R|                               |    | |    | |    |
++--------+-------+                               +----+ +----+ +----+
+         |  +---+     +---+    +----+    +----+    .      .      .
+         +~ |RGW| === |NGW| == |SCHC| == |SCHC|..... Internet ....
             +---+     +---+    |F/R |    |C/D |
                                +----+    +----+]]></artwork>
         </figure>
@@ -766,10 +766,10 @@ Their union <bcp14>MUST</bcp14> be equal to the SCHC Packet.</t>
             <figure anchor="Fig-TilesExample">
               <name>SCHC Packet Fragmented in Tiles</name>
               <artwork name="" type="" align="left" alt=""><![CDATA[
-                                  SCHC Packet
-       +----+--+-----+---+----+-+---+---+-----+...-----+----+---+------+
-Tiles  |    |  |     |   |    | |   |   |     |        |    |   |      |
-       +----+--+-----+---+----+-+---+---+-----+...-----+----+---+------+]]></artwork>
+                                SCHC Packet
+        +----+--+-----+---+----+-+---+-----+...-----+----+---+------+
+Tiles   |    |  |     |   |    | |   |     |        |    |   |      |
+        +----+--+-----+---+----+-+---+-----+...-----+----+---+------+]]></artwork>
             </figure>
             <t>Modes (see <xref target="FragModes" format="default"/>) <bcp14>MAY</bcp14> place additional constraints on tile sizes.</t>
             <t>Each SCHC Fragment message carries at least one tile in its Payload, if the Payload field is present.</t>
@@ -793,12 +793,12 @@ This number is WINDOW_SIZE.</li>
             <figure anchor="Fig-WindowsExample">
               <name>SCHC Packet Fragmented in Tiles Grouped in 29 Windows, with WINDOW_SIZE = 5</name>
               <artwork name="" type="" align="left" alt=""><![CDATA[
-         +---------------------------------------------...-------------+
-         |                         SCHC Packet                         |
-         +---------------------------------------------...-------------+
+        +---------------------------------------------...-----------+
+        |                       SCHC Packet                         |
+        +---------------------------------------------...-----------+
 
-Tile #   | 4 | 3 | 2 | 1 | 0 | 4 | 3 | 2 | 1 | 0 | 4 |     | 0 | 4 | 3 |
-Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|]]></artwork>
+Tile#   | 4 | 3 | 2 | 1 | 0 | 4 | 3 | 2 | 1 | 0 | 4 |     | 0 | 4 |3|
+Window# |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|- 28-|]]></artwork>
             </figure>
             <t><xref target="MultWinSizes" format="default"/> discusses the benefits of selecting one among multiple window sizes depending on the size of the SCHC Packet to be fragmented.</t>
             <t>When windows are used:</t>
@@ -993,11 +993,11 @@ The DTag field and the W field are <bcp14>OPTIONAL</bcp14>, their presence is sp
             <figure anchor="Fig-NotLastFrag">
               <name>Detailed Header Format for Regular SCHC Fragments</name>
               <artwork name="" type="" align="left" alt=""><![CDATA[
-|--- SCHC Fragment Header ----|
-          |-- T --|-M-|-- N --|
-+-- ... --+- ... -+---+- ... -+--------...-------+~~~~~~~~~~~~~~~~~~~~~
-| Rule ID | DTag  | W |  FCN  | Fragment Payload | padding (as needed)
-+-- ... --+- ... -+---+- ... -+--------...-------+~~~~~~~~~~~~~~~~~~~~~]]></artwork>
+|-- SCHC Fragment Header ----|
+         |-- T --|-M-|-- N --|
++-- ... -+- ... -+---+- ... -+--------...-------+~~~~~~~~~~~~~~~~~~~~
+| RuleID | DTag  | W |  FCN  | Fragment Payload | padding (as needed)
++-- ... -+- ... -+---+- ... -+--------...-------+~~~~~~~~~~~~~~~~~~~~]]></artwork>
             </figure>
             <t>The FCN field <bcp14>MUST NOT</bcp14> contain all bits set to 1.</t>
             <t>Profiles <bcp14>MUST</bcp14> ensure that
@@ -1017,11 +1017,11 @@ The FCN field is all ones.</t>
             <figure anchor="Fig-LastFrag">
               <name>Detailed Header Format for the All-1 SCHC Fragment</name>
               <artwork name="" type="" align="left" alt=""><![CDATA[
-|-------- SCHC Fragment Header -------|
-          |-- T --|-M-|-- N --|-- U --|
-+-- ... --+- ... -+---+- ... -+- ... -+------...-----+~~~~~~~~~~~~~~~~~~
-| Rule ID | DTag  | W | 11..1 |  RCS  | Frag Payload | pad. (as needed)
-+-- ... --+- ... -+---+- ... -+- ... -+------...-----+~~~~~~~~~~~~~~~~~~
+|------- SCHC Fragment Header -------|
+         |-- T --|-M-|-- N --|-- U --|
++-- ... -+- ... -+---+- ... -+- ... -+-----...-----+~~~~~~~~~~~~~~~~~
+| RuleID | DTag  | W | 11..1 |  RCS  | FragPayload | pad. (as needed)
++-- ... -+- ... -+---+- ... -+- ... -+-----...-----+~~~~~~~~~~~~~~~~~
                         (FCN)]]></artwork>
             </figure>
             <t>Profiles <bcp14>MUST</bcp14> ensure that
@@ -1041,15 +1041,15 @@ The Compressed Bitmap field <bcp14>MUST</bcp14> be present in SCHC F/R modes tha
           <figure anchor="Fig-ACK-Format">
             <name>Format of the SCHC ACK Message</name>
             <artwork name="" type="" align="left" alt=""><![CDATA[
-|---- SCHC ACK Header ----|
-          |-- T --|-M-| 1 |
-+--- ... -+- ... -+---+---+~~~~~~~~~~~~~~~~~~
-| Rule ID |  DTag | W |C=1| padding as needed                (success)
-+--- ... -+- ... -+---+---+~~~~~~~~~~~~~~~~~~
+|--- SCHC ACK Header ----|
+         |-- T --|-M-| 1 |
++-- ... -+- ... -+---+---+~~~~~~~~~~~~~~~~~~
+| RuleID |  DTag | W |C=1| padding as needed                (success)
++-- ... -+- ... -+---+---+~~~~~~~~~~~~~~~~~~
 
-+--- ... -+- ... -+---+---+------ ... ------+~~~~~~~~~~~~~~~
-| Rule ID |  DTag | W |C=0|Compressed Bitmap| pad. as needed (failure)
-+--- ... -+- ... -+---+---+------ ... ------+~~~~~~~~~~~~~~~]]></artwork>
++-- ... -+- ... -+---+---+------ ... ------+~~~~~~~~~~~~~~~
+| RuleID |  DTag | W |C=0|Compressed Bitmap| pad. as needed (failure)
++-- ... -+- ... -+---+---+------ ... ------+~~~~~~~~~~~~~~~]]></artwork>
           </figure>
           <t>The SCHC ACK Header contains a C bit (see <xref target="HeaderFields" format="default"/>).</t>
           <t>If the C bit is set to 1 (integrity check successful),
@@ -1086,55 +1086,55 @@ Original:
             <figure anchor="Fig-Localbitmap">
               <name>SCHC ACK Header Plus Uncompressed Bitmap</name>
               <artwork name="" type="" align="left" alt=""><![CDATA[
-|---- SCHC ACK Header ----|--------      Bitmap     --------|
-          |-- T --|-M-| 1 |
-+--- ... -+- ... -+---+---+---------------------------------+
-| Rule ID |  DTag | W |C=0|1 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1|
-+--- ... -+- ... -+---+---+---------------------------------+
+|--- SCHC ACK Header ----|--------      Bitmap     --------|
+         |-- T --|-M-| 1 |
++-- ... -+- ... -+---+---+---------------------------------+
+| RuleID |  DTag | W |C=0|1 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1|
++-- ... -+- ... -+---+---+---------------------------------+
         next L2 Word boundary ->|]]></artwork>
             </figure>
             <t><xref target="Fig-transmittedbitmap" format="default"/> shows that the last 14 bits are not sent.</t>
             <figure anchor="Fig-transmittedbitmap">
               <name>Resulting SCHC ACK Message with Compressed Bitmap</name>
               <artwork name="" type="" align="left" alt=""><![CDATA[
-|---- SCHC ACK Header ----|CpBmp|
-          |-- T --|-M-| 1 |
-+--- ... -+- ... -+---+---+-----+
-| Rule ID |  DTag | W |C=0|1 0 1|
-+--- ... -+- ... -+---+---+-----+
+|--- SCHC ACK Header ----|CpBmp|
+         |-- T --|-M-| 1 |
++-- ... -+- ... -+---+---+-----+
+| RuleID |  DTag | W |C=0|1 0 1|
++-- ... -+- ... -+---+---+-----+
         next L2 Word boundary ->|]]></artwork>
             </figure>
             <t><xref target="Fig-Bitmap-Win" format="default"/> shows an example of a SCHC ACK with tile indices ranging from 6 down to 0, where the Bitmap indicates that the second and the fourth tile of the window have not been correctly received.</t>
             <figure anchor="Fig-Bitmap-Win">
               <name>Example of a SCHC ACK Message, Missing Tiles</name>
               <artwork name="" type="" align="left" alt=""><![CDATA[
-|---- SCHC ACK Header ----|--- Bitmap --|
-          |-- T --|-M-| 1 |6 5 4 3 2 1 0| (tile #)
-+---------+-------+---+---+-------------+
-| Rule ID |  DTag | W |C=0|1 0 1 0 1 1 1|      uncompressed Bitmap
-+---------+-------+---+---+-------------+
-    next L2 Word boundary ->|<-- L2 Word -->|
+|--- SCHC ACK Header ----|--- Bitmap --|
+         |-- T --|-M-| 1 |6 5 4 3 2 1 0| (tile #)
++--------+-------+---+---+-------------+
+| RuleID |  DTag | W |C=0|1 0 1 0 1 1 1|      uncompressed Bitmap
++--------+-------+---+---+-------------+
+   next L2 Word boundary ->|<-- L2 Word -->|
 
-+---------+-------+---+---+-------------+~~~+
-| Rule ID |  DTag | W |C=0|1 0 1 0 1 1 1|pad|  transmitted SCHC ACK
-+---------+-------+---+---+-------------+~~~+
-    next L2 Word boundary ->|<-- L2 Word -->|]]></artwork>
++--------+-------+---+---+-------------+~~~+
+| RuleID |  DTag | W |C=0|1 0 1 0 1 1 1|pad|  transmitted SCHC ACK
++--------+-------+---+---+-------------+~~~+
+   next L2 Word boundary ->|<-- L2 Word -->|]]></artwork>
             </figure>
             <t><xref target="Fig-Bitmap-lastWin" format="default"/> shows an example of a SCHC ACK with FCN ranging from 6 down to 0, where integrity check has not been performed or has failed and the Bitmap indicates that there is no missing tile in that window.</t>
             <figure anchor="Fig-Bitmap-lastWin">
               <name>Example of a SCHC ACK Message, No Missing Tile</name>
               <artwork name="" type="" align="left" alt=""><![CDATA[
-|---- SCHC ACK Header ----|--- Bitmap --|
-          |-- T --|-M-| 1 |6 5 4 3 2 1 0| (tile #)
-+---------+-------+---+---+-------------+
-| Rule ID |  DTag | W |C=0|1 1 1 1 1 1 1|  with uncompressed Bitmap
-+---------+-------+---+---+-------------+
-    next L2 Word boundary ->|
+|--- SCHC ACK Header ----|--- Bitmap --|
+         |-- T --|-M-| 1 |6 5 4 3 2 1 0| (tile #)
++--------+-------+---+---+-------------+
+| RuleID |  DTag | W |C=0|1 1 1 1 1 1 1|  with uncompressed Bitmap
++--------+-------+---+---+-------------+
+   next L2 Word boundary ->|
 
-+--- ... -+- ... -+---+---+-+
-| Rule ID |  DTag | W |C=0|1|                  transmitted SCHC ACK
-+--- ... -+- ... -+---+---+-+
-    next L2 Word boundary ->|]]></artwork>
++-- ... -+- ... -+---+---+-+
+| RuleID |  DTag | W |C=0|1|                  transmitted SCHC ACK
++-- ... -+- ... -+---+---+-+
+   next L2 Word boundary ->|]]></artwork>
             </figure>
           </section>
         </section>
@@ -1147,11 +1147,11 @@ The FCN field is all zero.</t>
           <figure anchor="Fig-ACKREQ">
             <name>SCHC ACK REQ Format</name>
             <artwork name="" type="" align="left" alt=""><![CDATA[
-|---- SCHC ACK REQ Header ----|
-          |-- T --|-M-|-- N --|
-+-- ... --+- ... -+---+- ... -+~~~~~~~~~~~~~~~~~~~~~
-| Rule ID | DTag  | W |  0..0 | padding (as needed)      (no payload)
-+-- ... --+- ... -+---+- ... -+~~~~~~~~~~~~~~~~~~~~~]]></artwork>
+|--- SCHC ACK REQ Header ----|
+         |-- T --|-M-|-- N --|
++-- ... -+- ... -+---+- ... -+~~~~~~~~~~~~~~~~~~~~~
+| RuleID | DTag  | W |  0..0 | padding (as needed)      (no payload)
++-- ... -+- ... -+---+- ... -+~~~~~~~~~~~~~~~~~~~~~]]></artwork>
           </figure>
         </section>
         <section anchor="SenderAbort" numbered="true" toc="default">
@@ -1163,11 +1163,11 @@ The FCN field is all ones.</t>
           <figure anchor="Fig-SenderAbort">
             <name>SCHC Sender-Abort Format</name>
             <artwork name="" type="" align="left" alt=""><![CDATA[
-|---- Sender-Abort Header ----|
-          |-- T --|-M-|-- N --|
-+-- ... --+- ... -+---+- ... -+~~~~~~~~~~~~~~~~~~~~~
-| Rule ID | DTag  | W | 11..1 | padding (as needed)
-+-- ... --+- ... -+---+- ... -+~~~~~~~~~~~~~~~~~~~~~]]></artwork>
+|--- Sender-Abort Header ----|
+         |-- T --|-M-|-- N --|
++-- ... -+- ... -+---+- ... -+~~~~~~~~~~~~~~~~~~~~~
+| RuleID | DTag  | W | 11..1 | padding (as needed)
++-- ... -+- ... -+---+- ... -+~~~~~~~~~~~~~~~~~~~~~]]></artwork>
           </figure>
           <t>If the W field is present:</t>
           <ul spacing="normal">
@@ -1186,12 +1186,12 @@ The DTag field and the W field are <bcp14>OPTIONAL</bcp14>, their presence is sp
           <figure anchor="Fig-ReceiverAbort">
             <name>SCHC Receiver-Abort Format</name>
             <artwork name="" type="" align="left" alt=""><![CDATA[
-|--- Receiver-Abort Header ---|
-            |--- T ---|-M-| 1 |
-+--- ... ---+-- ... --+---+---+-+-+-+-+-+-+-+-+-+-+-+
-|  Rule ID  |   DTag  | W |C=1| 1..1|      1..1     |
-+--- ... ---+-- ... --+---+---+-+-+-+-+-+-+-+-+-+-+-+
-            next L2 Word boundary ->|<-- L2 Word -->|]]></artwork>
+|-- Receiver-Abort Header ---|
+           |--- T ---|-M-| 1 |
++--- ... --+-- ... --+---+---+-+-+-+-+-+-+-+-+-+-+-+
+|  RuleID  |   DTag  | W |C=1| 1..1|      1..1     |
++--- ... --+-- ... --+---+---+-+-+-+-+-+-+-+-+-+-+-+
+           next L2 Word boundary ->|<-- L2 Word -->|]]></artwork>
           </figure>
           <t>If the W field is present:</t>
           <ul spacing="normal">
@@ -1585,12 +1585,12 @@ A SCHC ACK reports on the reception of exactly one window of tiles.</t>
           <figure anchor="Fig-TilesACKonError">
             <name>SCHC Packet Fragmented in Tiles, ACK-on-Error Mode</name>
             <artwork name="" type="" align="left" alt=""><![CDATA[
-         +---------------------------------------------...-----------+
-         |                       SCHC Packet                         |
-         +---------------------------------------------...-----------+
+        +---------------------------------------------...-----------+
+        |                       SCHC Packet                         |
+        +---------------------------------------------...-----------+
 
-Tile #   | 4 | 3 | 2 | 1 | 0 | 4 | 3 | 2 | 1 | 0 | 4 |     | 0 | 4 |3|
-Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|- 28-|
+Tile#   | 4 | 3 | 2 | 1 | 0 | 4 | 3 | 2 | 1 | 0 | 4 |     | 0 | 4 |3|
+Window# |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|- 28-|
 
 
 SCHC Fragment msg    |-----------|]]></artwork>
@@ -2715,31 +2715,32 @@ Recv_window==window &    | |   |   all missing frags sent
      ~~~~~~~~~~~~~~~~~~~ |   |  | FCN--;
   cur_W=0; FCN=max_value;|   |  | set [cur_W, cur_Bmp]
     clear [cur_W, Bmp_n];|   |  v
-          clear rcv_Bmp  |  ++==+==========+         **BACK_TO_SEND
-                         +->+              |     cur_W==rcv_W &
-      **BACK_TO_SEND        |     SEND     |     [cur_W,Bmp_n]==rcv_Bmp
-+-------------------------->+              |     & more frags
-|  +----------------------->+              |     ~~~~~~~~~~~~
-|  |                        ++===+=========+     cur_W++;
-|  |      FCN==0 & more frags|   |last frag      clear [cur_W, Bmp_n]
-|  |  ~~~~~~~~~~~~~~~~~~~~~~~|   |~~~~~~~~~
-|  |        set cur_Bmp;     |   |set [cur_W, Bmp_n];
-|  |send cur_W + frag(All-0);|   |send cur_W + frag(All-1)+RCS;
-|  |        set Retrans_Timer|   |set Retrans_Timer
-|  |                         |   | +-----------------------------------+
-|  |Retrans_Timer expires &  |   | |cur_W==rcv_W&[cur_W,Bmp_n]!=rcv_Bmp|
-|  |more Frags               |   | |  ~~~~~~~~~~~~~~~~~~~              |
-|  |~~~~~~~~~~~~~~~~~~~~     |   | |  Attempts++; W=cur_W              |
-|  |stop Retrans_Timer;      |   | | +--------+             rcv_W==Wn &|
-|  |[cur_W,Bmp_n]==cur_Bmp;  v   v | |        v     [Wn,Bmp_n]!=rcv_Bmp|
-|  |cur_W++            +=====+===+=+=+==+   +=+=========+   ~~~~~~~~~~~|
-|  +-------------------+                |   | Resend    |   Attempts++;|
-+----------------------+   Wait x ACK   |   | Missing   |         W=Wn |
-+--------------------->+                |   | Frags(W)  +<-------------+
-|         rcv_W==Wn &+-+                |   +======+====+
-| [Wn,Bmp_n]!=rcv_Bmp| ++=+===+===+==+==+          |
-|      ~~~~~~~~~~~~~~|  ^ |   |   |  ^             |
-|        send (cur_W,+--+ |   |   |  +-------------+
+          clear rcv_Bmp  |  ++==+==========+       **BACK_TO_SEND
+                         +->+              |   cur_W==rcv_W &
+      **BACK_TO_SEND        |     SEND     |   [cur_W,Bmp_n]==rcv_Bmp
++-------------------------->+              |   & more frags
+|  +----------------------->+              |   ~~~~~~~~~~~~
+|  |                        ++==+==========+   cur_W++;
+|  |      FCN==0 & more frags|  |last frag     clear [cur_W, Bmp_n]
+|  |  ~~~~~~~~~~~~~~~~~~~~~~~|  |~~~~~~~~~
+|  |        set cur_Bmp;     |  |set [cur_W, Bmp_n];
+|  |send cur_W + frag(All-0);|  |send cur_W + frag(All-1)+RCS;
+|  |        set Retrans_Timer|  |set Retrans_Timer
+|  |                         |  | +---------------------------------+
+|  |                         |  | |cur_W ==                         |
+|  |Retrans_Timer expires &  |  | |   rcv_W & [cur_W,Bmp_n]!=rcv_Bmp|
+|  |more Frags               |  | |  ~~~~~~~~~~~~~~~~~~~            |
+|  |~~~~~~~~~~~~~~~~~~~~     |  | |  Attempts++; W=cur_W            |
+|  |stop Retrans_Timer;      |  | | +--------+           rcv_W==Wn &|
+|  |[cur_W,Bmp_n]==cur_Bmp;  v  v | |        v   [Wn,Bmp_n]!=rcv_Bmp|
+|  |cur_W++            +=====+==+=+=+==+   +=+=========+ ~~~~~~~~~~~|
+|  +-------------------+               |   | Resend    | Attempts++;|
++----------------------+   Wait x ACK  |   | Missing   |       W=Wn |
++--------------------->+               |   | Frags(W)  +<-----------+
+|         rcv_W==Wn &+-+               |   +======+====+
+| [Wn,Bmp_n]!=rcv_Bmp| ++=+===+===+==+=+          |
+|      ~~~~~~~~~~~~~~|  ^ |   |   |  ^            |
+|        send (cur_W,+--+ |   |   |  +------------+
 |        ALL-0-empty)     |   |   |     all missing frag sent(W)
 |                         |   |   |     ~~~~~~~~~~~~~~~~~
 |  Retrans_Timer expires &|   |   |     set Retrans_Timer
@@ -2764,14 +2765,14 @@ The specification in <xref target="ACK-on-Error-sender" format="default"/> allow
                  | INIT  +-------+cur_W=0;clear([cur_W,Bmp_n]);
                  +=======+       |sync=0
                                  |
-    Not All* & rcv_W==cur_W+---+ | +---+
-      ~~~~~~~~~~~~~~~~~~~~ |   | | |  (E)
-      set[cur_W,Bmp_n(FCN)]|   v v v   |
-                          ++===+=+=+===+=+
-   +----------------------+              +--+ All-0&Full[cur_W,Bmp_n]
-   |           ABORT *<---+  Rcv Window  |  | ~~~~~~~~~~
-   |  +-------------------+              +<-+ cur_W++;set Inact_timer;
-   |  |                +->+=+=+=+=+=+====+    clear [cur_W,Bmp_n]
+    Not All* & rcv_W==cur_W+---+ | +--+
+      ~~~~~~~~~~~~~~~~~~~~ |   | | | (E)
+      set[cur_W,Bmp_n(FCN)]|   v v v  |
+                          ++===+=+=+==+=+
+   +----------------------+             +--+ All-0&Full[cur_W,Bmp_n]
+   |           ABORT *<---+  Rcv Window |  | ~~~~~~~~~~
+   |  +-------------------+             +<-+ cur_W++;set Inact_timer;
+   |  |                +->+=+=+=+=+=+===+    clear [cur_W,Bmp_n]
    |  | All-0 empty(Wn)|    | | | ^ ^
    |  | ~~~~~~~~~~~~~~ +----+ | | | |rcv_W==cur_W & sync==0;
    |  | sendACK([Wn,Bmp_n])   | | | |& Full([cur_W,Bmp_n])
@@ -2792,18 +2793,18 @@ The specification in <xref target="ACK-on-Error-sender" format="default"/> allow
    |  |                                       *ABORT
    v  v
   (A)(B)
-                                    (D) All* || last_miss_frag
-    (C) All* & sync>0                   & rcv_W!=cur_W & sync>0
-        ~~~~~~~~~~~~                    & Full([rcv_W,Bmp_n])
-        Wn=oldest[not full(W)];         ~~~~~~~~~~~~~~~~~~~~
-        sendACK([Wn,Bmp_n])             Wn=oldest[not full(W)];
-                                        sendACK([Wn,Bmp_n]);sync--
+                                   (D) All* || last_miss_frag
+    (C) All* & sync>0                  & rcv_W!=cur_W & sync>0
+        ~~~~~~~~~~~~                   & Full([rcv_W,Bmp_n])
+        Wn=oldest[not full(W)];        ~~~~~~~~~~~~~~~~~~~~
+        sendACK([Wn,Bmp_n])            Wn=oldest[not full(W)];
+                                       sendACK([Wn,Bmp_n]);sync--
 
-                              ABORT-->* Uplink Only &
-                                        Inact_Timer expires
-    (E) Not All* & rcv_W!=cur_W         || Attempts > MAX_ACK_REQUESTS
-        ~~~~~~~~~~~~~~~~~~~~            ~~~~~~~~~~~~~~~~~~~~~
-        sync++; cur_W=rcv_W;            send Abort
+                             ABORT-->* Uplink Only &
+                                       Inact_Timer expires
+    (E) Not All* & rcv_W!=cur_W        || Attempts > MAX_ACK_REQUESTS
+        ~~~~~~~~~~~~~~~~~~~~           ~~~~~~~~~~~~~~~~~~~~~
+        sync++; cur_W=rcv_W;           send Abort
         set[cur_W,Bmp_n(FCN)]]]></artwork>
       <figure anchor="Fig-ACKonerrorRcv">
         <name>Receiver State Machine for the ACK-on-Error Mode</name>
