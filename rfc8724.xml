@@ -116,7 +116,7 @@ Data models for the context and profiles are out of scope.</t>
       <t>This document defines the Static Context Header Compression (SCHC) framework, which provides both a header compression mechanism and an optional fragmentation mechanism. SCHC has been designed for Low-Power Wide Area Networks (LPWANs).</t>
       <t>LPWAN technologies impose some strict limitations on traffic. For instance, devices sleep most of the time and may only receive data during short periods of time after transmission, in order to preserve battery.
 LPWAN technologies are also characterized by a greatly reduced data unit and/or payload size (see <xref target="RFC8376" format="default"/>).</t>
-      <t>Header compression is needed for efficient Internet connectivity to a node within an LPWAN network. The following properties of LPWANs can be exploited to get an efficient header compression:</t>
+      <t>Header compression is needed for efficient Internet connectivity to a node within an LPWAN. The following properties of LPWANs can be exploited to get an efficient header compression:</t>
       <ul spacing="normal">
         <li>The network topology is star-oriented, which means that all packets between the same source-destination pair follow the same path. For the needs of this document, the architecture can simply be described as Devices (Dev) exchanging information with LPWAN Application Servers (App) through a Network Gateway (NGW).</li>
         <li>Because devices embed built-in applications, the traffic flows to be compressed are known in advance. Indeed, new applications are less frequently installed in an LPWAN device than they are in a general-purpose computer or smartphone.</li>
@@ -144,9 +144,9 @@ and mechanism choices. Technology-specific settings are expected to be grouped i
     </section>
     <section anchor="LPWAN-Archi" numbered="true" toc="default">
       <name>LPWAN Architecture</name>
-      <t>LPWAN network architectures are similar among them, but each LPWAN technology names architecture elements differently.
+      <t>LPWAN architectures are similar among them, but each LPWAN technology names architecture elements differently.
 In this document, we use terminology from <xref target="RFC8376" format="default"/>,
-which identifies the following entities in a typical LPWAN network
+which identifies the following entities in a typical LPWAN
       (see <xref target="Fig-LPWANarchi" format="default"/>):</t>
 
       <ul spacing="normal">
@@ -234,10 +234,10 @@ so that there is no ambiguity in how they expect to communicate.</dd>
     </section>
     <section anchor="Overview" numbered="true" toc="default">
       <name>SCHC Overview</name>
-      <t>SCHC can be characterized as an adaptation layer between an upper layer (typically, IPv6) and an underlying layer (typically, an LPWAN technology).
+      <t>SCHC can be characterized as an adaptation layer between an upper layer (for example, IPv6) and an underlying layer (for example, an LPWAN technology).
 SCHC comprises two sublayers (i.e., the Compression sublayer and the Fragmentation sublayer), as shown in <xref target="Fig-IntroLayers" format="default"/>.</t>
       <figure anchor="Fig-IntroLayers">
-        <name>Protocol Stack Comprising IPv6, SCHC, and an LPWAN Technology</name>
+        <name>Example of Protocol Stack Comprising IPv6, SCHC, and an LPWAN Technology</name>
         <artwork name="" type="" align="left" alt=""><![CDATA[
              +----------------+
              |      IPv6      |
@@ -376,13 +376,13 @@ is based on using a set of Rules, called the "Context", to compress or
       which consumes considerable bandwidth in other header
       compression mechanisms such as RObust Header Compression (RoHC)
       <xref target="RFC5795" format="default"/>. Since the content of
-      packets is highly predictable in LPWAN networks, static Contexts
+      packets is highly predictable in LPWANs, static Contexts
       can be stored beforehand. The Contexts <bcp14>MUST</bcp14> be
       stored at both ends, and they can be learned by a provisioning
       protocol, by out-of-band means, or by pre-provisioning. The way the Contexts are provisioned is out of the scope of this document.</t>
       <section anchor="schc-cd-rules" numbered="true" toc="default">
         <name>SCHC C/D Rules</name>
-        <t>The main idea of the SCHC compression scheme is to transmit the Rule ID to the other end instead of sending known field values. This Rule ID identifies a Rule that matches the original packet values. Hence, when a value is known by both ends, it is only necessary to send the corresponding Rule ID over the LPWAN network.
+        <t>The main idea of the SCHC compression scheme is to transmit the Rule ID to the other end instead of sending known field values. This Rule ID identifies a Rule that matches the original packet values. Hence, when a value is known by both ends, it is only necessary to send the corresponding Rule ID over the LPWAN.
 The manner by which Rules are generated is out of the scope of this document. The Rules <bcp14>MAY</bcp14> be changed at run-time, but the mechanism is out of scope of this document.</t>
         <t>The Context is a set of Rules.
 See <xref target="Fig-ctxt" format="default"/> for a high-level, abstract representation of the Context.
@@ -1892,7 +1892,7 @@ the Field Descriptor in the Rule <bcp14>SHOULD</bcp14> contain a TV with this ag
       </section>
       <section anchor="payload-length-field" numbered="true" toc="default">
         <name>Payload Length Field</name>
-        <t>This field can be elided for the transmission on the LPWAN network. The SCHC C/D recomputes the original payload length value. In the Field Descriptor, TV is not set, MO is set to "ignore", and CDA is "compute-*".</t>
+        <t>This field can be elided for the transmission on the LPWAN. The SCHC C/D recomputes the original payload length value. In the Field Descriptor, TV is not set, MO is set to "ignore", and CDA is "compute-*".</t>
       </section>
       <section anchor="next-header-field" numbered="true" toc="default">
         <name>Next Header Field</name>
