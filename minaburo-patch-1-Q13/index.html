@@ -360,7 +360,7 @@ address {
 
   <meta name="dct.creator" content="Minaburo, A., Toutain, L., Gomez, C., Barthel, D., and JC. Zuniga" />
   <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-lpwan-ipv6-static-context-hc-24" />
-  <meta name="dct.issued" scheme="ISO8601" content="2020-02-09" />
+  <meta name="dct.issued" scheme="ISO8601" content="2020-02-11" />
   <meta name="dct.abstract" content="This document defines the Static Context Header Compression (SCHC) framework, which provides both a header compression mechanism and an optional fragmentation mechanism. SCHC has been designed for Low Power Wide Area Networks (LPWAN). SCHC compression is based on a common static context stored both in the LPWAN device and in the network infrastructure side. This document defines a generic header compression mechanism and its application to compress IPv6/UDP headers. This document also specifies an optional fragmentation and reassembly mechanism. It can be used to support the IPv6 MTU requirement over the LPWAN technologies. Fragmentation is needed for IPv6 datagrams that, after SCHC compression or when such compression was not possible, still exceed the layer-2 maximum payload size. The SCHC header compression and fragmentation mechanisms are independent of the specific LPWAN technology over which they are used. This document defines generic functionalities and offers flexibility with regard to parameter settings and mechanism choices.  This document standardizes the exchange over the LPWAN between two SCHC entities.  Settings and choices specific to a technology or a product are expected to be grouped into profiles, which are specified in other documents.  Data models for the context and profiles are out of scope. " />
   <meta name="description" content="This document defines the Static Context Header Compression (SCHC) framework, which provides both a header compression mechanism and an optional fragmentation mechanism. SCHC has been designed for Low Power Wide Area Networks (LPWAN). SCHC compression is based on a common static context stored both in the LPWAN device and in the network infrastructure side. This document defines a generic header compression mechanism and its application to compress IPv6/UDP headers. This document also specifies an optional fragmentation and reassembly mechanism. It can be used to support the IPv6 MTU requirement over the LPWAN technologies. Fragmentation is needed for IPv6 datagrams that, after SCHC compression or when such compression was not possible, still exceed the layer-2 maximum payload size. The SCHC header compression and fragmentation mechanisms are independent of the specific LPWAN technology over which they are used. This document defines generic functionalities and offers flexibility with regard to parameter settings and mechanism choices.  This document standardizes the exchange over the LPWAN between two SCHC entities.  Settings and choices specific to a technology or a product are expected to be grouped into profiles, which are specified in other documents.  Data models for the context and profiles are out of scope. " />
 
@@ -384,7 +384,7 @@ address {
 <td class="right">L. Toutain</td>
 </tr>
 <tr>
-<td class="left">Expires: August 12, 2020</td>
+<td class="left">Expires: August 14, 2020</td>
 <td class="right">IMT-Atlantique</td>
 </tr>
 <tr>
@@ -413,7 +413,7 @@ address {
 </tr>
 <tr>
 <td class="left"></td>
-<td class="right">February 09, 2020</td>
+<td class="right">February 11, 2020</td>
 </tr>
 
     	
@@ -432,7 +432,7 @@ address {
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at https://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on August 12, 2020.</p>
+<p>This Internet-Draft will expire on August 14, 2020.</p>
 <h1 id="rfc.copyrightnotice"><a href="#rfc.copyrightnotice">Copyright Notice</a></h1>
 <p>Copyright (c) 2020 IETF Trust and the persons identified as the document authors.  All rights reserved.</p>
 <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (https://trustee.ietf.org/license-info) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.</p>
@@ -1424,7 +1424,7 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 <p id="rfc.section.8.4.1.1.p.1">At the beginning of the fragmentation of a new SCHC Packet, the fragment sender MUST select a Rule ID and DTag value pair for this SCHC Packet.</p>
 <p id="rfc.section.8.4.1.1.p.2">Each SCHC Fragment MUST contain exactly one tile in its Payload.  The tile MUST be at least the size of an L2 Word.  The sender MUST transmit the SCHC Fragments messages in the order that the tiles appear in the SCHC Packet.  Except for the last tile of a SCHC Packet, each tile MUST be of a size that complements the SCHC Fragment Header so that the SCHC Fragment is a multiple of L2 Words without the need for padding bits.  Except for the last one, the SCHC Fragments MUST use the Regular SCHC Fragment format specified in <a href="#NotLastFrag" class="xref">Section 8.3.1.1</a>.  The SCHC Fragment that carries the last tile MUST be an All-1 SCHC Fragment, described in <a href="#LastFrag" class="xref">Section 8.3.1.2</a>.</p>
 <p id="rfc.section.8.4.1.1.p.3">The sender MAY transmit a SCHC Sender-Abort.</p>
-<p><a href="#Fig-NoACKModeSnd" class="xref">Figure 37</a> shows an example of a corresponding state machine.</p>
+<p><a href="#Fig-NoACKModeSnd" class="xref">Figure 39</a> shows an example of a corresponding state machine.</p>
 <h1 id="rfc.section.8.4.1.2">
 <a href="#rfc.section.8.4.1.2">8.4.1.2.</a> <a href="#receiver-behavior" id="receiver-behavior">Receiver behavior</a>
 </h1>
@@ -1446,7 +1446,7 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 </ul>
 <p id="rfc.section.8.4.1.2.p.5">On expiration of the Inactivity Timer, the receiver MUST drop the SCHC Packet being reassembled.</p>
 <p id="rfc.section.8.4.1.2.p.6">On receiving a SCHC Sender-Abort, the receiver MAY drop the SCHC Packet being reassembled.</p>
-<p><a href="#Fig-NoACKModeRcv" class="xref">Figure 38</a> shows an example of a corresponding state machine.</p>
+<p><a href="#Fig-NoACKModeRcv" class="xref">Figure 40</a> shows an example of a corresponding state machine.</p>
 <h1 id="rfc.section.8.4.2">
 <a href="#rfc.section.8.4.2">8.4.2.</a> <a href="#ACK-Always-subsection" id="ACK-Always-subsection">ACK-Always mode</a>
 </h1>
@@ -1533,7 +1533,7 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 <li>on receiving a SCHC Receiver-Abort, the fragment sender MAY exit with an error condition.</li>
 <li>on receiving a SCHC ACK that bears a W value different from the W value that it currently uses, the fragment sender MUST silently discard and ignore that SCHC ACK.</li>
 </ul>
-<p><a href="#Fig-ACKAlwaysSnd" class="xref">Figure 39</a> shows an example of a corresponding state machine.</p>
+<p><a href="#Fig-ACKAlwaysSnd" class="xref">Figure 41</a> shows an example of a corresponding state machine.</p>
 <h1 id="rfc.section.8.4.2.2">
 <a href="#rfc.section.8.4.2.2">8.4.2.2.</a> <a href="#receiver-behavior-1" id="receiver-behavior-1">Receiver behavior</a>
 </h1>
@@ -1611,7 +1611,7 @@ Window # |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|-- 28 -|
 <p id="rfc.section.8.4.2.2.p.12">At any time, on sending a SCHC ACK, the receiver MUST increment the Attempts counter.</p>
 <p id="rfc.section.8.4.2.2.p.13">At any time, on incrementing its window counter, the receiver MUST reset the Attempts counter.</p>
 <p id="rfc.section.8.4.2.2.p.14">At any time, on expiration of the Inactivity Timer, on receiving a SCHC Sender-Abort or when Attempts reaches MAX_ACK_REQUESTS, the receiver MUST send a SCHC Receiver-Abort and it MAY exit the receive process for that SCHC Packet.</p>
-<p><a href="#Fig-ACKAlwaysRcv" class="xref">Figure 40</a> shows an example of a corresponding state machine.</p>
+<p><a href="#Fig-ACKAlwaysRcv" class="xref">Figure 42</a> shows an example of a corresponding state machine.</p>
 <h1 id="rfc.section.8.4.3">
 <a href="#rfc.section.8.4.3">8.4.3.</a> <a href="#ACK-on-Error-subsection" id="ACK-on-Error-subsection">ACK-on-Error mode</a>
 </h1>
@@ -1772,7 +1772,7 @@ SCHC Fragment msg    |-----------|
 </ul>
 </li>
 </ul>
-<p id="rfc.section.8.4.3.1.p.22">See <a href="#Fig-ACKonerrorSnd" class="xref">Figure 41</a> for one among several possible examples of a Finite State Machine implementing a sender behavior obeying this specification.</p>
+<p id="rfc.section.8.4.3.1.p.22">See <a href="#Fig-ACKonerrorSnd" class="xref">Figure 43</a> for one among several possible examples of a Finite State Machine implementing a sender behavior obeying this specification.</p>
 <h1 id="rfc.section.8.4.3.2">
 <a href="#rfc.section.8.4.3.2">8.4.3.2.</a> <a href="#ACK-on-Error-receiver" id="ACK-on-Error-receiver">Receiver behavior</a>
 </h1>
@@ -1828,7 +1828,7 @@ SCHC Fragment msg    |-----------|
 <li>or the Attempts counter has exceeded MAX_ACK_REQUESTS</li>
 <li>or when at least an All-1 SCHC Fragment has been received and integrity checking of the reassembled SCHC Packet is successful.</li>
 </ul>
-<p id="rfc.section.8.4.3.2.p.17">See <a href="#Fig-ACKonerrorRcv" class="xref">Figure 42</a> for one among several possible examples of a Finite State Machine implementing a receiver behavior obeying this specification, and that is meant to match the sender Finite State Machine of <a href="#Fig-ACKonerrorSnd" class="xref">Figure 41</a>.</p>
+<p id="rfc.section.8.4.3.2.p.17">See <a href="#Fig-ACKonerrorRcv" class="xref">Figure 44</a> for one among several possible examples of a Finite State Machine implementing a receiver behavior obeying this specification, and that is meant to match the sender Finite State Machine of <a href="#Fig-ACKonerrorSnd" class="xref">Figure 43</a>.</p>
 <h1 id="rfc.section.9">
 <a href="#rfc.section.9">9.</a> <a href="#Padding" id="Padding">Padding management</a>
 </h1>
@@ -2137,7 +2137,11 @@ Rule 1
  |UDP Length      |16|1 |Bi|         | ignore | compute-*  ||      |
  |UDP checksum    |16|1 |Bi|         | ignore | compute-*  ||      |
  +================+==+==+==+=========+========+============++======+
-
+</pre>
+<p class="figure">Figure 26: Context Rules 0 and 1</p>
+<div id="rfc.figure.27"></div>
+<div id="Fig-fields1"></div>
+<pre>
  Rule 2
  +----------------+--+--+--+---------+--------+------------++------+
  | Field          |FL|FP|DI| Value   | Match  | Action     || Sent |
@@ -2162,7 +2166,11 @@ Rule 1
  |UDP Length      |16|1 |Bi|         | ignore | compute-*  ||      |
  |UDP checksum    |16|1 |Bi|         | ignore | compute-*  ||      |
  +================+==+==+==+=========+========+============++======+
-
+</pre>
+<p class="figure">Figure 27: Context Rule 2</p>
+<div id="rfc.figure.28"></div>
+<div id="Fig-fields2"></div>
+<pre>
  Rule 3
  +----------------+--+--+--+---------+--------+------------++------+
  | Field          |FL|FP|DI| Value   | Match  | Action     || Sent |
@@ -2188,8 +2196,8 @@ Rule 1
 
 
 </pre>
-<p class="figure">Figure 26: Context Rules</p>
-<p><a href="#Fig-fields" class="xref">Figure 26</a> describes a example of a Rule set.</p>
+<p class="figure">Figure 28: Context Rule 3</p>
+<p id="rfc.section.A.p.5">The <a href="#Fig-fields" class="xref">Figure 26</a>, <a href="#Fig-fields1" class="xref">Figure 27</a>, <a href="#Fig-fields2" class="xref">Figure 28</a> describe a example of a Rule set.</p>
 <p id="rfc.section.A.p.6">In this example, 0 was chosen as the special Rule ID that tags packets that cannot be compressed with any compression Rule.</p>
 <p id="rfc.section.A.p.7">All the fields described in Rules 1-3 are present in the IPv6 and UDP headers. The DevIID-DID value is found in the L2 header.</p>
 <p id="rfc.section.A.p.8">Rules 2-3 use global addresses. The way the Dev learns the prefix is not in the scope of the document.</p>
@@ -2198,8 +2206,8 @@ Rule 1
 <a href="#rfc.appendix.B">Appendix B.</a> <a href="#FragExamples" id="FragExamples">Fragmentation Examples</a>
 </h1>
 <p id="rfc.section.B.p.1">This section provides examples for the various fragment reliability modes specified in this document.  In the drawings, Bitmaps are shown in their uncompressed form.</p>
-<p><a href="#Fig-Example-Unreliable" class="xref">Figure 27</a> illustrates the transmission in No-ACK mode of a SCHC Packet that needs 11 SCHC Fragments. FCN is 1 bit wide.</p>
-<div id="rfc.figure.27"></div>
+<p><a href="#Fig-Example-Unreliable" class="xref">Figure 29</a> illustrates the transmission in No-ACK mode of a SCHC Packet that needs 11 SCHC Fragments. FCN is 1 bit wide.</p>
+<div id="rfc.figure.29"></div>
 <div id="Fig-Example-Unreliable"></div>
 <pre>
  &#160; &#160; &#160; &#160;Sender &#160; &#160; &#160; &#160; &#160; &#160; &#160; Receiver
@@ -2216,10 +2224,10 @@ Rule 1
           |-----FCN=1 + RCS ---&gt;| Integrity check: success
         (End) &#160; &#160; &#160;
 </pre>
-<p class="figure">Figure 27: No-ACK mode, 11 SCHC Fragments</p>
+<p class="figure">Figure 29: No-ACK mode, 11 SCHC Fragments</p>
 <p id="rfc.section.B.p.3">In the following examples, N (the size of the FCN field) is 3 bits. The All-1 FCN value is 7.</p>
-<p><a href="#Fig-Example-Win-NoLoss-NACK" class="xref">Figure 28</a> illustrates the transmission in ACK-on-Error mode of a SCHC Packet fragmented in 11 tiles, with one tile per SCHC Fragment, WINDOW_SIZE=7 and no lost SCHC Fragment.</p>
-<div id="rfc.figure.28"></div>
+<p><a href="#Fig-Example-Win-NoLoss-NACK" class="xref">Figure 30</a> illustrates the transmission in ACK-on-Error mode of a SCHC Packet fragmented in 11 tiles, with one tile per SCHC Fragment, WINDOW_SIZE=7 and no lost SCHC Fragment.</p>
+<div id="rfc.figure.30"></div>
 <div id="Fig-Example-Win-NoLoss-NACK"></div>
 <pre>
  &#160; &#160; &#160; &#160;Sender &#160; &#160; &#160; &#160; &#160; &#160; &#160; Receiver
@@ -2238,9 +2246,9 @@ Rule 1
           |&lt;-- ACK, W=1, C=1 ---| C=1
         (End)
 </pre>
-<p class="figure">Figure 28: ACK-on-Error mode, 11 tiles, one tile per SCHC Fragment, no lost SCHC Fragment.</p>
-<p><a href="#Fig-Example-Rel-Window-NACK-Loss" class="xref">Figure 29</a> illustrates the transmission in ACK-on-Error mode of a SCHC Packet fragmented in 11 tiles, with one tile per SCHC Fragment, WINDOW_SIZE=7 and three lost SCHC Fragments.</p>
-<div id="rfc.figure.29"></div>
+<p class="figure">Figure 30: ACK-on-Error mode, 11 tiles, one tile per SCHC Fragment, no lost SCHC Fragment.</p>
+<p><a href="#Fig-Example-Rel-Window-NACK-Loss" class="xref">Figure 31</a> illustrates the transmission in ACK-on-Error mode of a SCHC Packet fragmented in 11 tiles, with one tile per SCHC Fragment, WINDOW_SIZE=7 and three lost SCHC Fragments.</p>
+<div id="rfc.figure.31"></div>
 <div id="Fig-Example-Rel-Window-NACK-Loss"></div>
 <pre>
  &#160; &#160; &#160; &#160; Sender &#160; &#160; &#160; &#160; &#160; &#160; Receiver
@@ -2264,9 +2272,9 @@ Rule 1
           |&lt;-- ACK, W=1, C=1 ---| C=1
         (End)
 </pre>
-<p class="figure">Figure 29: ACK-on-Error mode, 11 tiles, one tile per SCHC Fragment, lost SCHC Fragments.</p>
-<p><a href="#Figure-Example-ACK-on-Error-VarMTU" class="xref">Figure 30</a> shows an example of a transmission in ACK-on-Error mode of a SCHC Packet fragmented in 73 tiles, with N=5, WINDOW_SIZE=28, M=2 and 3 lost SCHC Fragments.</p>
-<div id="rfc.figure.30"></div>
+<p class="figure">Figure 31: ACK-on-Error mode, 11 tiles, one tile per SCHC Fragment, lost SCHC Fragments.</p>
+<p><a href="#Figure-Example-ACK-on-Error-VarMTU" class="xref">Figure 32</a> shows an example of a transmission in ACK-on-Error mode of a SCHC Packet fragmented in 73 tiles, with N=5, WINDOW_SIZE=28, M=2 and 3 lost SCHC Fragments.</p>
+<div id="rfc.figure.32"></div>
 <div id="Figure-Example-ACK-on-Error-VarMTU"></div>
 <pre>
       Sender               Receiver
@@ -2310,11 +2318,11 @@ Rule 1
    V   |&lt;--- ACK, W=2, C=1 ---| C=1
      (End)
 </pre>
-<p class="figure">Figure 30: ACK-on-Error mode, variable MTU.</p>
+<p class="figure">Figure 32: ACK-on-Error mode, variable MTU.</p>
 <p id="rfc.section.B.p.7">In this example, the L2 MTU becomes reduced just before sending the &#8220;W=2, FCN=19&#8221; fragment, leaving space for only 1 tile in each forthcoming SCHC Fragment.  Before retransmissions, the 73 tiles are carried by a total of 25 SCHC Fragments, the last 9 being of smaller size.</p>
 <p id="rfc.section.B.p.8">Note: other sequences of events (e.g., regarding when ACKs are sent by the Receiver) are also allowed by this specification. Profiles may restrict this flexibility.</p>
-<p><a href="#Fig-Example-Rel-Window-ACK-NoLoss" class="xref">Figure 31</a> illustrates the transmission in ACK-Always mode of a SCHC Packet fragmented in 11 tiles, with one tile per SCHC Fragment, with N=3, WINDOW_SIZE=7 and no loss.</p>
-<div id="rfc.figure.31"></div>
+<p><a href="#Fig-Example-Rel-Window-ACK-NoLoss" class="xref">Figure 33</a> illustrates the transmission in ACK-Always mode of a SCHC Packet fragmented in 11 tiles, with one tile per SCHC Fragment, with N=3, WINDOW_SIZE=7 and no loss.</p>
+<div id="rfc.figure.33"></div>
 <div id="Fig-Example-Rel-Window-ACK-NoLoss"></div>
 <pre>
  &#160; &#160; &#160; &#160;Sender &#160; &#160; &#160; &#160; &#160; &#160; &#160; Receiver
@@ -2333,9 +2341,9 @@ Rule 1
           |&lt;-- ACK, W=1, C=1 ---| C=1
         (End)    
 </pre>
-<p class="figure">Figure 31: ACK-Always mode, 11 tiles, one tile per SCHC Fragment, no loss.</p>
-<p><a href="#Fig-Example-Rel-Window-ACK-Loss" class="xref">Figure 32</a> illustrates the transmission in ACK-Always mode of a SCHC Packet fragmented in 11 tiles, with one tile per SCHC Fragment, N=3, WINDOW_SIZE=7 and three lost SCHC Fragments.</p>
-<div id="rfc.figure.32"></div>
+<p class="figure">Figure 33: ACK-Always mode, 11 tiles, one tile per SCHC Fragment, no loss.</p>
+<p><a href="#Fig-Example-Rel-Window-ACK-Loss" class="xref">Figure 34</a> illustrates the transmission in ACK-Always mode of a SCHC Packet fragmented in 11 tiles, with one tile per SCHC Fragment, N=3, WINDOW_SIZE=7 and three lost SCHC Fragments.</p>
+<div id="rfc.figure.34"></div>
 <div id="Fig-Example-Rel-Window-ACK-Loss"></div>
 <pre>
  &#160; &#160; &#160; &#160;Sender &#160; &#160; &#160; &#160; &#160; &#160; &#160; Receiver
@@ -2359,9 +2367,9 @@ Rule 1
           |&lt;-- ACK, W=1, C=1 ---| C=1
         (End)
 </pre>
-<p class="figure">Figure 32: ACK-Always mode, 11 tiles, one tile per SCHC Fragment, three lost SCHC Fragments.</p>
-<p><a href="#Fig-Example-Rel-Window-ACK-Loss-Last-A" class="xref">Figure 33</a> illustrates the transmission in ACK-Always mode of a SCHC Packet fragmented in 6 tiles, with one tile per SCHC Fragment, N=3, WINDOW_SIZE=7, three lost SCHC Fragments and only one retry needed to recover each lost SCHC Fragment.</p>
-<div id="rfc.figure.33"></div>
+<p class="figure">Figure 34: ACK-Always mode, 11 tiles, one tile per SCHC Fragment, three lost SCHC Fragments.</p>
+<p><a href="#Fig-Example-Rel-Window-ACK-Loss-Last-A" class="xref">Figure 35</a> illustrates the transmission in ACK-Always mode of a SCHC Packet fragmented in 6 tiles, with one tile per SCHC Fragment, N=3, WINDOW_SIZE=7, three lost SCHC Fragments and only one retry needed to recover each lost SCHC Fragment.</p>
+<div id="rfc.figure.35"></div>
 <div id="Fig-Example-Rel-Window-ACK-Loss-Last-A"></div>
 <pre>
           Sender                Receiver
@@ -2378,9 +2386,9 @@ Rule 1
              |&lt;-- ACK, W=0, C=1 ---| C=1
            (End)
 </pre>
-<p class="figure">Figure 33: ACK-Always mode, 6 tiles, one tile per SCHC Fragment, three lost SCHC Fragments.</p>
-<p><a href="#Fig-Example-Rel-Window-ACK-Loss-Last-B" class="xref">Figure 34</a> illustrates the transmission in ACK-Always mode of a SCHC Packet fragmented in 6 tiles, with one tile per SCHC Fragment, N=3, WINDOW_SIZE=7, three lost SCHC Fragments, and the second SCHC ACK lost.</p>
-<div id="rfc.figure.34"></div>
+<p class="figure">Figure 35: ACK-Always mode, 6 tiles, one tile per SCHC Fragment, three lost SCHC Fragments.</p>
+<p><a href="#Fig-Example-Rel-Window-ACK-Loss-Last-B" class="xref">Figure 36</a> illustrates the transmission in ACK-Always mode of a SCHC Packet fragmented in 6 tiles, with one tile per SCHC Fragment, N=3, WINDOW_SIZE=7, three lost SCHC Fragments, and the second SCHC ACK lost.</p>
+<div id="rfc.figure.36"></div>
 <div id="Fig-Example-Rel-Window-ACK-Loss-Last-B"></div>
 <pre>
           Sender                Receiver
@@ -2400,9 +2408,9 @@ Rule 1
              |&lt;-- ACK, W=0, C=1 ---| C=1
            (End)
 </pre>
-<p class="figure">Figure 34: ACK-Always mode, 6 tiles, one tile per SCHC Fragment, SCHC ACK loss.</p>
-<p><a href="#Fig-Example-Rel-Window-ACK-Loss-Last-C" class="xref">Figure 35</a> illustrates the transmission in ACK-Always mode of a SCHC Packet fragmented in 6 tiles, with N=3, WINDOW_SIZE=7, with three lost SCHC Fragments, and one retransmitted SCHC Fragment lost again.</p>
-<div id="rfc.figure.35"></div>
+<p class="figure">Figure 36: ACK-Always mode, 6 tiles, one tile per SCHC Fragment, SCHC ACK loss.</p>
+<p><a href="#Fig-Example-Rel-Window-ACK-Loss-Last-C" class="xref">Figure 37</a> illustrates the transmission in ACK-Always mode of a SCHC Packet fragmented in 6 tiles, with N=3, WINDOW_SIZE=7, with three lost SCHC Fragments, and one retransmitted SCHC Fragment lost again.</p>
+<div id="rfc.figure.37"></div>
 <div id="Fig-Example-Rel-Window-ACK-Loss-Last-C"></div>
 <pre>
            Sender                Receiver
@@ -2423,9 +2431,9 @@ Rule 1
              |&lt;-- ACK, W=0, C=1 ---| C=1
            (End)
 </pre>
-<p class="figure">Figure 35: ACK-Always mode, 6 tiles, retransmitted SCHC Fragment lost again.</p>
-<p><a href="#Fig-Example-MaxWindFCN" class="xref">Figure 36</a> illustrates the transmission in ACK-Always mode of a SCHC Packet fragmented in 28 tiles, with one tile per SCHC Fragment, N=5, WINDOW_SIZE=24 and two lost SCHC Fragments.</p>
-<div id="rfc.figure.36"></div>
+<p class="figure">Figure 37: ACK-Always mode, 6 tiles, retransmitted SCHC Fragment lost again.</p>
+<p><a href="#Fig-Example-MaxWindFCN" class="xref">Figure 38</a> illustrates the transmission in ACK-Always mode of a SCHC Packet fragmented in 28 tiles, with one tile per SCHC Fragment, N=5, WINDOW_SIZE=24 and two lost SCHC Fragments.</p>
+<div id="rfc.figure.38"></div>
 <div id="Fig-Example-MaxWindFCN"></div>
 <pre>
       Sender               Receiver
@@ -2465,12 +2473,12 @@ Rule 1
         |&lt;--- ACK, W=1, C=1 ---| C=1
       (End)
 </pre>
-<p class="figure">Figure 36: ACK-Always mode, 28 tiles, one tile per SCHC Fragment, lost SCHC Fragments.</p>
+<p class="figure">Figure 38: ACK-Always mode, 28 tiles, one tile per SCHC Fragment, lost SCHC Fragments.</p>
 <h1 id="rfc.appendix.C">
 <a href="#rfc.appendix.C">Appendix C.</a> <a href="#FSM" id="FSM">Fragmentation State Machines</a>
 </h1>
 <p id="rfc.section.C.p.1">The fragmentation state machines of the sender and the receiver, one for each of the different reliability modes, are described in the following figures:</p>
-<div id="rfc.figure.37"></div>
+<div id="rfc.figure.39"></div>
 <div id="Fig-NoACKModeSnd"></div>
 <pre>
              +===========+
@@ -2491,8 +2499,8 @@ Rule 1
            |    END     |                                             
            +============+                       
 </pre>
-<p class="figure">Figure 37: Sender State Machine for the No-ACK Mode</p>
-<div id="rfc.figure.38"></div>
+<p class="figure">Figure 39: Sender State Machine for the No-ACK Mode</p>
+<div id="rfc.figure.40"></div>
 <div id="Fig-NoACKModeRcv"></div>
 <pre>
                       +------+ Not All-1
@@ -2510,8 +2518,8 @@ Rule 1
                        +===========+
 
 </pre>
-<p class="figure">Figure 38: Receiver State Machine for the No-ACK Mode</p>
-<div id="rfc.figure.39"></div>
+<p class="figure">Figure 40: Receiver State Machine for the No-ACK Mode</p>
+<div id="rfc.figure.41"></div>
 <div id="Fig-ACKAlwaysSnd"></div>
 <pre>
               +=======+  
@@ -2561,8 +2569,8 @@ Recv_window==window &amp;    | |   |   all missing frags sent
 
 
 </pre>
-<p class="figure">Figure 39: Sender State Machine for the ACK-Always Mode</p>
-<div id="rfc.figure.40"></div>
+<p class="figure">Figure 41: Sender State Machine for the ACK-Always Mode</p>
+<div id="rfc.figure.42"></div>
 <div id="Fig-ACKAlwaysRcv"></div>
 <pre>
  Not All- &amp; w=expected +---+   +---+w = Not expected
@@ -2621,8 +2629,8 @@ Recv_window==window &amp;    | |   |   all missing frags sent
              Send a SCHC ACK for the current window
  &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160; &#160;
 </pre>
-<p class="figure">Figure 40: Receiver State Machine for the ACK-Always Mode</p>
-<div id="rfc.figure.41"></div>
+<p class="figure">Figure 42: Receiver State Machine for the ACK-Always Mode</p>
+<div id="rfc.figure.43"></div>
 <div id="Fig-ACKonerrorSnd"></div>
 <pre>
                   +=======+
@@ -2675,7 +2683,7 @@ Recv_window==window &amp;    | |   |   all missing frags sent
  |   END   +&lt;-----------------+   +-&gt;+   ERROR   |
  +=========+                         +===========+
 </pre>
-<p class="figure">Figure 41: Sender State Machine for the ACK-on-Error Mode</p>
+<p class="figure">Figure 43: Sender State Machine for the ACK-on-Error Mode</p>
 <p id="rfc.section.C.p.2">This is an example only. It is not normative.  The specification in <a href="#ACK-on-Error-sender" class="xref">Section 8.4.3.1</a> allows for sequences of operations different from the one shown here.</p>
 <pre>
                  +=======+        New frag RuleID received
@@ -2726,7 +2734,7 @@ Recv_window==window &amp;    | |   |   all missing frags sent
         set[cur_W,Bmp_n(FCN)]
 
 </pre>
-<div id="rfc.figure.42"></div>
+<div id="rfc.figure.44"></div>
 <div id="Fig-ACKonerrorRcv"></div>
 <pre>
   (A)(B)
@@ -2751,7 +2759,7 @@ Recv_window==window &amp;    | |   |   all missing frags sent
 
 
 </pre>
-<p class="figure">Figure 42: Receiver State Machine for the ACK-on-Error Mode</p>
+<p class="figure">Figure 44: Receiver State Machine for the ACK-on-Error Mode</p>
 <h1 id="rfc.appendix.D">
 <a href="#rfc.appendix.D">Appendix D.</a> <a href="#SCHCParams" id="SCHCParams">SCHC Parameters</a>
 </h1>
