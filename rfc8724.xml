@@ -226,15 +226,15 @@ Original:
         <dt>Dev:</dt><dd>Device, as defined by <xref target="RFC8376" format="default"/>.</dd>
         <dt>DevIID:</dt><dd>Device Interface Identifier. The IID that identifies the Dev interface.</dd>
         <dt>DI:</dt><dd>Direction Indicator. This field tells which direction
-	of packet travel (Up, Dw, or Bi) a Field Description applies
+	of packet travel (Up, Dw, or Bi) a Field Descriptor applies
 	to. This allows for asymmetric processing, using the same
 	Rule.</dd>
 	
         <dt>Dw:</dt><dd>Downlink direction for compression/decompression, from SCHC C/D in the network to SCHC C/D in the Dev.</dd>
-        <dt>Field Description:</dt><dd>A tuple containing identifier, value, matching operator, and actions to be applied to a field.</dd>
-        <dt>FID:</dt><dd>Field Identifier. This identifies the protocol and field a Field Description applies to.</dd>
+        <dt>Field Descriptor:</dt><dd>A tuple containing identifier, value, matching operator, and actions to be applied to a field.</dd>
+        <dt>FID:</dt><dd>Field Identifier. This identifies the protocol and field a Field Descriptor applies to.</dd>
         <dt>FL:</dt><dd>Field Length.  FL is the length of the original packet header field. It is expressed as a number of bits for header fields of fixed lengths or as a type (e.g., variable, token length, ...) for FLs that are unknown at the time of Rule creation. The length of a header field is defined in the corresponding protocol specification (such as IPv6 or UDP).</dd>
-        <dt>FP:</dt><dd>Field Position.  When a Field is expected to appear multiple times in a header, Field Position specifies the occurrence this Field Description applies to
+        <dt>FP:</dt><dd>Field Position.  When a Field is expected to appear multiple times in a header, Field Position specifies the occurrence this Field Descriptor applies to
 (for example, first uri-path option, second uri-path, etc. in a
 	Constrained Application Protocol (CoAP) header), counting from 1. The value 0 is special and means "don't care", see <xref target="PProcessing" format="default"/>.</dd>
         <dt>IID:</dt><dd>Interface Identifier. See the IPv6 addressing architecture <xref target="RFC7136" format="default"/>.</dd>
@@ -255,7 +255,7 @@ SCHC itself operates on bits, not bytes, and does not have any alignment prerequ
 A Profile indicates a particular setting of all these parameters.
 Both ends of a SCHC communication must be provisioned with the same Profile information and with the same set of Rules before the communication starts,
 so that there is no ambiguity in how they expect to communicate.</dd>
-        <dt>Rule:</dt><dd>A set of Field Descriptions.</dd>
+        <dt>Rule:</dt><dd>A set of Field Descriptors.</dd>
         <dt>Rule ID:</dt><dd>Rule Identifier.  An identifier for a Rule. SCHC C/D on both sides share the same Rule ID for a given packet. A set of Rule IDs are used to support SCHC F/R functionality.</dd>
         <dt>SCHC C/D:</dt><dd>SCHC Compressor/Decompressor. A mechanism used on both sides, at the Dev and at the network, to achieve Compression/Decompression of headers.</dd>
         <dt>SCHC F/R:</dt><dd>SCHC Fragmentation/Reassembly. A mechanism used on both sides, at the Dev and at the network to achieve Fragmentation/Reassembly of SCHC Packets.</dd>
@@ -387,7 +387,7 @@ If such a link is bidirectional, the scope includes both directions.</t>
       <t>The Rule IDs are used:</t>
       <ul spacing="normal">
         <li>
-          <t>For SCHC C/D, to identify the Rule (i.e., the set of Field Descriptions) that is used to compress a packet header.  </t>
+          <t>For SCHC C/D, to identify the Rule (i.e., the set of Field Descriptors) that is used to compress a packet header.  </t>
           <ul spacing="normal">
             <li>At least one Rule ID <bcp14>MUST</bcp14> be allocated to tagging packets for which SCHC compression was not possible (i.e., no matching compression Rule was found).</li>
           </ul>
@@ -420,7 +420,7 @@ The manner by which Rules are generated is out of the scope of this document. Th
         <t>The Context is a set of Rules.
 See <xref target="Fig-ctxt" format="default"/> for a high-level, abstract representation of the Context.
 The formal specification of the representation of the Rules is outside the scope of this document.</t>
-        <t>Each Rule itself contains a list of Field Descriptions composed of a Field Identifier (FID), a Field Length (FL), a Field Position (FP), a Direction Indicator (DI), a Target Value (TV), a Matching Operator (MO), and a Compression/Decompression Action (CDA).</t>
+        <t>Each Rule itself contains a list of Field Descriptors composed of a Field Identifier (FID), a Field Length (FL), a Field Position (FP), a Direction Indicator (DI), a Target Value (TV), a Matching Operator (MO), and a Compression/Decompression Action (CDA).</t>
         <figure anchor="Fig-ctxt">
           <name>A Compression/Decompression Context</name>
           <artwork name="" type="" align="left" alt=""><![CDATA[
@@ -447,23 +447,23 @@ It is assumed that there is a protocol parser alongside SCHC that is able to ide
 all the fields encountered in the headers to be compressed,
 and to label them with a Field ID.
 Rules only describe the compression/decompression behavior for each header field, after it has been identified.</t>
-        <t>In a Rule, the Field Descriptions are listed in the order in which the fields appear in the packet header.
-The Field Descriptions describe the header fields with the following entries:</t>
+        <t>In a Rule, the Field Descriptors are listed in the order in which the fields appear in the packet header.
+The Field Descriptors describe the header fields with the following entries:</t>
         <ul spacing="normal">
           <li>Field Identifier (FID) designates a protocol and field (e.g., UDP Destination Port), unambiguously among all protocols that a SCHC compressor processes. In the presence of protocol nesting, the Field ID also identifies the nesting.</li>
           <li>Field Length (FL) represents the length of the original field. It can be either a fixed value (in bits) if the length is known when the Rule is created or a type if the length is variable. The length of a header field is defined by its own protocol specification (e.g., IPv6 or UDP). If the length is variable, the type defines the process to compute the length and its unit (bits, bytes...).</li>
           <li>Field Position (FP): most often, a field only occurs once in a packet header.
 However, some fields may occur multiple times. An example is the uri-path of CoAP.
-FP indicates which occurrence this Field Description applies to.
-If FP is not specified in the Field Description, it takes the default value of 1.
+FP indicates which occurrence this Field Descriptor applies to.
+If FP is not specified in the Field Descriptor, it takes the default value of 1.
 The value 1 designates the first occurrence.
 The value 0 is special. It means "don't care", see <xref target="PProcessing" format="default"/>.</li>
           <li>
-            <t>A Direction Indicator (DI) indicates the packet direction(s) this Field Description applies to. Three values are possible:  </t>
+            <t>A Direction Indicator (DI) indicates the packet direction(s) this Field Descriptor applies to. Three values are possible:  </t>
             <dl spacing="normal" newline="true">  
-              <dt>UPLINK (Up):</dt><dd>this Field Description is only applicable to packets sent by the Dev to the App.</dd>
-              <dt>DOWNLINK (Dw):</dt><dd>this Field Description is only applicable to packets sent from the App to the Dev.</dd>
-              <dt>BIDIRECTIONAL (Bi):</dt><dd>this Field Description is applicable to packets traveling both Up and Dw.</dd>
+              <dt>UPLINK (Up):</dt><dd>this Field Descriptor is only applicable to packets sent by the Dev to the App.</dd>
+              <dt>DOWNLINK (Dw):</dt><dd>this Field Descriptor is only applicable to packets sent from the App to the Dev.</dd>
+              <dt>BIDIRECTIONAL (Bi):</dt><dd>this Field Descriptor is applicable to packets traveling both Up and Dw.</dd>
             </dl>
           </li>
           <li>Target Value (TV) is the value used to match against the packet header field. The Target Value can be a scalar value of any type (integer, strings, etc.) or a more complex structure (array, list, etc.). The types and representations are out of scope for this document.</li>
@@ -489,13 +489,13 @@ Field Descriptor (given the DI and FP) for all and only those header fields that
 The detailed algorithm is the following: </t>
             <ul spacing="normal">
               <li>The first step is to check the Field Identifiers (FIDs).
-If any header field of the packet being examined cannot be matched with a Field Description with the correct FID, the Rule <bcp14>MUST</bcp14> be disregarded.
-If any Field Description in the Rule has a FID that cannot be matched to one of the header fields of the packet being examined, the Rule <bcp14>MUST</bcp14> be disregarded.</li>
-              <li>The next step is to match the Field Descriptions by their direction, using the DI. If any field of the packet header cannot be matched with a Field Description with the correct FID and DI, the Rule <bcp14>MUST</bcp14> be disregarded.</li>
+If any header field of the packet being examined cannot be matched with a Field Descriptor with the correct FID, the Rule <bcp14>MUST</bcp14> be disregarded.
+If any Field Descriptor in the Rule has a FID that cannot be matched to one of the header fields of the packet being examined, the Rule <bcp14>MUST</bcp14> be disregarded.</li>
+              <li>The next step is to match the Field Descriptors by their direction, using the DI. If any field of the packet header cannot be matched with a Field Descriptor with the correct FID and DI, the Rule <bcp14>MUST</bcp14> be disregarded.</li>
               <li>
-                <t>Then, the Field Descriptions are further selected according to Field Position (FP). If any field of the packet header cannot be matched with a Field Description with the correct FID, DI and FP, the Rule <bcp14>MUST</bcp14> be disregarded.      </t>
+                <t>Then, the Field Descriptors are further selected according to Field Position (FP). If any field of the packet header cannot be matched with a Field Descriptor with the correct FID, DI and FP, the Rule <bcp14>MUST</bcp14> be disregarded.      </t>
                 <t>
-The value 0 for FP means "don't care", i.e., the comparison of this Field Description's FP with
+The value 0 for FP means "don't care", i.e., the comparison of this Field Descriptor's FP with
 the position of the field of the packet header being compressed
 returns True, whatever that position.
 <!--[rfced] How may we update the use of "protocols headers" for
@@ -522,7 +522,7 @@ Care needs to be exercised when writing Rules containing FP=0 values.
 Indeed, it may result in decompressed packets having fields ordered differently compared to the original packet.</t>
               </li>
               <li>
-                <t>Once each header field has been associated with a Field Description with matching FID, DI, and FP, each packet field's value is then compared to the corresponding Target Value (TV) stored in the Rule for that specific field, using the Matching Operator (MO).
+                <t>Once each header field has been associated with a Field Descriptor with matching FID, DI, and FP, each packet field's value is then compared to the corresponding Target Value (TV) stored in the Rule for that specific field, using the Matching Operator (MO).
 If every field in the packet header satisfies the corresponding MOs of a Rule (i.e., all MO results are True), that Rule is valid for use to compress the header.
 Otherwise, the Rule <bcp14>MUST</bcp14> be disregarded.      </t>
                 <t>
@@ -537,10 +537,10 @@ Sending an uncompressed header is likely to require SCHC F/R.</li>
             </ul></dd>
           
           <dt>Compression:</dt><dd>if a valid Rule were found, each field of the header is compressed according to the Compression/Decompression Actions (CDAs) of the Rule.
-The fields are compressed in the order that the Field Descriptions appear in the Rule.
+The fields are compressed in the order that the Field Descriptors appear in the Rule.
 The compression of each field results in a residue, which may be empty.
-The Compression Residue for the packet header is the concatenation of the non-empty residues for each field of the header, in the order the Field Descriptions appear in the Rule.
-The order in which the Field Descriptions appear in the Rule is therefore semantically important.</dd>
+The Compression Residue for the packet header is the concatenation of the non-empty residues for each field of the header, in the order the Field Descriptors appear in the Rule.
+The order in which the Field Descriptors appear in the Rule is therefore semantically important.</dd>
         </dl>
         <figure anchor="Fig-CompRes">
           <name>Compression Residue Structure</name>
@@ -643,7 +643,7 @@ Perhaps:
         <t><xref target="Fig-function" format="default"/> summarizes the basic actions that can be used to compress and decompress a field. The first column shows the action's name. The second and third columns show the compression and decompression behaviors for each action.</t>
         <section anchor="fixed-length-field" numbered="true" toc="default">
           <name>Processing Fixed-Length Fields</name>
-          <t>If the field is identified in the Field Description as being of fixed length, then applying the CDA to compress this field results in a fixed amount of bits.
+          <t>If the field is identified in the Field Descriptor as being of fixed length, then applying the CDA to compress this field results in a fixed amount of bits.
 The residue for that field is simply the bits resulting from applying the CDA to the field.
 This value may be empty (e.g., not-sent CDA), in which case the field residue is absent from the Compression Residue.</t>
           <figure anchor="Fig-FieldResFixLength">
@@ -657,7 +657,7 @@ This value may be empty (e.g., not-sent CDA), in which case the field residue is
         </section>
         <section anchor="var-length-field" numbered="true" toc="default">
           <name>Processing Variable-Length Fields</name>
-          <t>If the field is identified in the Field Description as being of variable length,
+          <t>If the field is identified in the Field Descriptor as being of variable length,
 then applying the CDA to compress this field may result in a value of fixed size
 (e.g., not-sent or mapping-sent)
 or of variable size (e.g., value-sent or LSB).
@@ -677,7 +677,7 @@ The most significant bit of the size is stored to the left (leftmost bit of the 
             <li>Sizes between 15 and 254 are encoded as 0b1111 followed by the 8-bit unsigned integer.</li>
             <li>Larger sizes are encoded as 0xfff followed by the 16-bit unsigned integer.</li>
           </ul>
-          <t>If the field is identified in the Field Description as being of variable length and this field is not present in the packet header being compressed, size 0 <bcp14>MUST</bcp14> be sent to denote its absence.</t>
+          <t>If the field is identified in the Field Descriptor as being of variable length and this field is not present in the packet header being compressed, size 0 <bcp14>MUST</bcp14> be sent to denote its absence.</t>
         </section>
         <section anchor="NotSentCDA" numbered="true" toc="default">
           <name>Not-Sent CDA</name>
