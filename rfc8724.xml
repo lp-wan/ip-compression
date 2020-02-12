@@ -221,7 +221,7 @@ Original:
 
         <dt>Bi:</dt><dd>Bidirectional. Characterizes a Field Descriptor that applies to headers of packets traveling in either direction (Up and Dw).</dd>
         <dt>CDA:</dt><dd>Compression/Decompression Action. Describes the pair of actions that are performed at the compressor to compress a header field and at the decompressor to recover the original value of the header field.</dd>
-        <dt>Compression Residue:</dt><dd>The bits that remain to be sent (beyond the Rule ID itself) after applying the SCHC compression.</dd>
+        <dt>Compression Residue:</dt><dd>The bits that remain to be sent (beyond the RuleID itself) after applying the SCHC compression.</dd>
         <dt>Context:</dt><dd>A set of Rules used to compress/decompress headers.</dd>
         <dt>Dev:</dt><dd>Device, as defined by <xref target="RFC8376" format="default"/>.</dd>
         <dt>DevIID:</dt><dd>Device Interface Identifier. The IID that identifies the Dev interface.</dd>
@@ -256,10 +256,10 @@ A Profile indicates a particular setting of all these parameters.
 Both ends of a SCHC communication must be provisioned with the same Profile information and with the same set of Rules before the communication starts,
 so that there is no ambiguity in how they expect to communicate.</dd>
         <dt>Rule:</dt><dd>A set of Field Descriptors.</dd>
-        <dt>Rule ID:</dt><dd>Rule Identifier.  An identifier for a Rule. SCHC C/D on both sides share the same Rule ID for a given packet. A set of Rule IDs are used to support SCHC F/R functionality.</dd>
+        <dt>RuleID:</dt><dd>Rule Identifier.  An identifier for a Rule. SCHC C/D on both sides share the same RuleID for a given packet. A set of RuleIDs are used to support SCHC F/R functionality.</dd>
         <dt>SCHC C/D:</dt><dd>SCHC Compressor/Decompressor. A mechanism used on both sides, at the Dev and at the network, to achieve Compression/Decompression of headers.</dd>
         <dt>SCHC F/R:</dt><dd>SCHC Fragmentation/Reassembly. A mechanism used on both sides, at the Dev and at the network to achieve Fragmentation/Reassembly of SCHC Packets.</dd>
-        <dt>SCHC Packet:</dt><dd>A packet (e.g., an IPv6 packet) whose header has been compressed as per the header compression mechanism defined in this document. If the header compression process is unable to actually compress the packet header, the packet with the uncompressed header is still called a SCHC Packet (in this case, a Rule ID is used to indicate that the packet header has not been compressed). See <xref target="SCHComp" format="default"/> for more details.</dd>
+        <dt>SCHC Packet:</dt><dd>A packet (e.g., an IPv6 packet) whose header has been compressed as per the header compression mechanism defined in this document. If the header compression process is unable to actually compress the packet header, the packet with the uncompressed header is still called a SCHC Packet (in this case, a RuleID is used to indicate that the packet header has not been compressed). See <xref target="SCHComp" format="default"/> for more details.</dd>
         <dt>TV:</dt><dd>Target Value. A value contained in a Rule that will be matched with the value of a header field.</dd>
         <dt>Up:</dt><dd>Uplink direction for compression/decompression, from the Dev SCHC C/D to the network SCHC C/D.</dd>
       </dl>
@@ -316,14 +316,14 @@ A packet (e.g., an IPv6 packet)
       <section anchor="schc-packet-format" numbered="true" toc="default">
         <name>SCHC Packet Format</name>
         <t>The SCHC Packet is composed of the Compressed Header followed by the payload from the original packet (see <xref target="Fig-SCHCpckt" format="default"/>).
-The Compressed Header itself is composed of the Rule ID and a Compression Residue, which is the output of compressing the packet header with that Rule (see <xref target="SCHComp" format="default"/>).
-The Compression Residue may be empty. Both the Rule ID and the Compression Residue potentially have a variable size, and are not necessarily a multiple of bytes in size.</t>
+The Compressed Header itself is composed of the RuleID and a Compression Residue, which is the output of compressing the packet header with that Rule (see <xref target="SCHComp" format="default"/>).
+The Compression Residue may be empty. Both the RuleID and the Compression Residue potentially have a variable size, and are not necessarily a multiple of bytes in size.</t>
         <figure anchor="Fig-SCHCpckt">
           <name>SCHC Packet</name>
           <artwork name="" type="" align="left" alt=""><![CDATA[
 |------- Compressed Header -------|
 +---------------------------------+--------------------+ 
-|  Rule ID |  Compression Residue |      Payload       |
+|  RuleID  |  Compression Residue |      Payload       |
 +---------------------------------+--------------------+]]></artwork>
         </figure>
       </section>
@@ -374,28 +374,28 @@ So <bcp14>MUST</bcp14> the SCHC F/Rs on both sides.</t>
       </section>
     </section>
     <section anchor="RuleID" numbered="true" toc="default">
-      <name>Rule ID</name>
-      <t>Rule IDs identify the Rules used for Compression/Decompression or
+      <name>RuleID</name>
+      <t>RuleIDs identify the Rules used for Compression/Decompression or
 for Fragmentation/Reassembly.</t>
-      <t>The scope of the Rule ID of a Compression/Decompression Rule is the link between the SCHC C/D in a given Dev and the corresponding SCHC C/D in the Network infrastructure side.
-The scope of the Rule ID of a Fragmentation/Reassembly Rule is the link between the SCHC F/R in a given Dev and the corresponding SCHC F/R in the Network infrastructure side.
+      <t>The scope of the RuleID of a Compression/Decompression Rule is the link between the SCHC C/D in a given Dev and the corresponding SCHC C/D in the Network infrastructure side.
+The scope of the RuleID of a Fragmentation/Reassembly Rule is the link between the SCHC F/R in a given Dev and the corresponding SCHC F/R in the Network infrastructure side.
 If such a link is bidirectional, the scope includes both directions.</t>
-      <t>Inside their scopes, Rules for Compression/Decompression and Rules for Fragmentation/Reassembly share the same Rule ID space.</t>
-      <t>The size of the Rule IDs is not specified in this document,
+      <t>Inside their scopes, Rules for Compression/Decompression and Rules for Fragmentation/Reassembly share the same RuleID space.</t>
+      <t>The size of the RuleIDs is not specified in this document,
       as it is implementation-specific and can vary according to the
       LPWAN technology and the number of Rules, among other things. It is defined in Profiles.</t>
-      <t>The Rule IDs are used:</t>
+      <t>The RuleIDs are used:</t>
       <ul spacing="normal">
         <li>
           <t>For SCHC C/D, to identify the Rule (i.e., the set of Field Descriptors) that is used to compress a packet header.  </t>
           <ul spacing="normal">
-            <li>At least one Rule ID <bcp14>MUST</bcp14> be allocated to tagging packets for which SCHC compression was not possible (i.e., no matching compression Rule was found).</li>
+            <li>At least one RuleID <bcp14>MUST</bcp14> be allocated to tagging packets for which SCHC compression was not possible (i.e., no matching compression Rule was found).</li>
           </ul>
         </li>
         <li>
           <t>In SCHC F/R, to identify the specific mode and settings of F/R for one direction of traffic (Up or Dw).  </t>
           <ul spacing="normal">
-            <li>When F/R is used for both communication directions, at least two Rule ID values are needed for F/R: one per direction of traffic.
+            <li>When F/R is used for both communication directions, at least two RuleID values are needed for F/R: one per direction of traffic.
 This is because F/R may entail control messages flowing in the reverse direction compared to data traffic.</li>
           </ul>
         </li>
@@ -415,7 +415,7 @@ is based on using a set of Rules, called the "Context", to compress or
       protocol, by out-of-band means, or by pre-provisioning. The way the Contexts are provisioned is out of the scope of this document.</t>
       <section anchor="schc-cd-rules" numbered="true" toc="default">
         <name>SCHC C/D Rules</name>
-        <t>The main idea of the SCHC compression scheme is to transmit the Rule ID to the other end instead of sending known field values. This Rule ID identifies a Rule that matches the original packet values. Hence, when a value is known by both ends, it is only necessary to send the corresponding Rule ID over the LPWAN.
+        <t>The main idea of the SCHC compression scheme is to transmit the RuleID to the other end instead of sending known field values. This RuleID identifies a Rule that matches the original packet values. Hence, when a value is known by both ends, it is only necessary to send the corresponding RuleID over the LPWAN.
 The manner by which Rules are generated is out of the scope of this document. The Rules <bcp14>MAY</bcp14> be changed at run-time, but the mechanism is out of scope of this document.</t>
         <t>The Context is a set of Rules.
 See <xref target="Fig-ctxt" format="default"/> for a high-level, abstract representation of the Context.
@@ -472,11 +472,11 @@ The value 0 is special. It means "don't care", see <xref target="PProcessing" fo
         </ul>
       </section>
       <section anchor="IDComp" numbered="true" toc="default">
-        <name>Rule ID for SCHC C/D</name>
-        <t>Rule IDs are sent by the compression function in one side and are received for the decompression function in the other side.
-In SCHC C/D, the Rule IDs are specific to the Context related to one Dev. Hence, multiple Dev instances, which refer to different header compression Contexts, <bcp14>MAY</bcp14> reuse the same Rule ID for different Rules.
-On the Network infrastructure side, in order to identify the correct Rule to be applied, the SCHC Decompressor needs to associate the Rule ID with the Dev identifier.
-Similarly, the SCHC Compressor on the Network infrastructure side first identifies the destination Dev before looking for the appropriate compression Rule (and associated Rule ID) in the Context of that Dev.</t>
+        <name>RuleID for SCHC C/D</name>
+        <t>RuleIDs are sent by the compression function in one side and are received for the decompression function in the other side.
+In SCHC C/D, the RuleIDs are specific to the Context related to one Dev. Hence, multiple Dev instances, which refer to different header compression Contexts, <bcp14>MAY</bcp14> reuse the same RuleID for different Rules.
+On the Network infrastructure side, in order to identify the correct Rule to be applied, the SCHC Decompressor needs to associate the RuleID with the Dev identifier.
+Similarly, the SCHC Compressor on the Network infrastructure side first identifies the destination Dev before looking for the appropriate compression Rule (and associated RuleID) in the Context of that Dev.</t>
       </section>
       <section anchor="PProcessing" numbered="true" toc="default">
         <name>Packet Processing</name>
@@ -531,7 +531,7 @@ Which Rule to use among multiple valid Rules is left to the implementation.
 As long as the same Rule set is installed at both ends, this degree of freedom does not constitute an interoperability issue.</t>
               </li>
               <li>If no valid compression Rule is found, then the packet <bcp14>MUST</bcp14> be sent uncompressed
-using the Rule ID dedicated to this purpose (see <xref target="RuleID" format="default"/>).
+using the RuleID dedicated to this purpose (see <xref target="RuleID" format="default"/>).
 The entire packet header is the Compression Residue (see <xref target="Fig-SCHCpckt" format="default"/>).
 Sending an uncompressed header is likely to require SCHC F/R.</li>
             </ul></dd>
@@ -551,11 +551,11 @@ The order in which the Field Descriptors appear in the Rule is therefore semanti
     +-----------------+-----------------+-----+-----------------+]]></artwork>
         </figure>
         <dl spacing="normal">
-          <dt>Sending:</dt><dd>The Rule ID is sent to the other end followed by the Compression Residue (which could be empty) or the uncompressed header, and directly followed by the payload (see <xref target="Fig-SCHCpckt" format="default"/>).
-The way the Rule ID is sent will be specified in the Profile and is out of the scope of the present document.
+          <dt>Sending:</dt><dd>The RuleID is sent to the other end followed by the Compression Residue (which could be empty) or the uncompressed header, and directly followed by the payload (see <xref target="Fig-SCHCpckt" format="default"/>).
+The way the RuleID is sent will be specified in the Profile and is out of the scope of the present document.
 For example, it could be included in an L2 header or sent as part of the L2 payload.</dd>
           
-            <dt>Decompression:</dt><dd><t>when decompressing, on the Network infrastructure side, the SCHC C/D needs to find the correct Rule based on the L2 address of the Dev; in this way, it can use the DevIID and the Rule ID. On the Dev side, only the Rule ID is needed to identify the correct Rule since the Dev typically only holds Rules that apply to itself.  </t>
+            <dt>Decompression:</dt><dd><t>when decompressing, on the Network infrastructure side, the SCHC C/D needs to find the correct Rule based on the L2 address of the Dev; in this way, it can use the DevIID and the RuleID. On the Dev side, only the RuleID is needed to identify the correct Rule since the Dev typically only holds Rules that apply to itself.  </t>
             <t>
 This Rule describes the compressed header format. From this, the decompressor determines the order of the residues, the fixed-size or variable-size nature of each residue (see <xref target="var-length-field" format="default"/>),
 and the size of the fixed-size residues.  </t>
@@ -688,7 +688,7 @@ The most significant bit of the size is stored to the left (leftmost bit of the 
 	  "ignore", there is a risk of having a decompressed field
 	  value that is different from the original field that was compressed.</t>
           <t>The compressor does not send any residue for a field on which not-sent compression is applied.</t>
-          <t>The decompressor restores the field value with the Target Value stored in the matched Rule identified by the received Rule ID.</t>
+          <t>The decompressor restores the field value with the Target Value stored in the matched Rule identified by the received RuleID.</t>
         </section>
         <section anchor="value-sent-cda" numbered="true" toc="default">
           <name>Value-Sent CDA</name>
@@ -871,7 +871,7 @@ that the RCS be computed on that byte array.</t>
           <t>The SCHC F/R messages contain the following fields (see the formats in <xref target="Fragfor" format="default"/>):</t>
           <dl spacing="normal">
             
-              <dt>Rule ID:</dt><dd><t>this field is present in all the SCHC F/R messages. The Rule identifies:</t>
+              <dt>RuleID:</dt><dd><t>this field is present in all the SCHC F/R messages. The Rule identifies:</t>
               <ul spacing="normal">
                 <li>that a SCHC F/R message is being carried, as opposed to an unfragmented SCHC Packet,</li>
                 <li>which SCHC F/R mode is used,</li>
@@ -884,17 +884,17 @@ The Rule tells apart a non-fragmented SCHC Packet from SCHC Fragments.
 It will also tell apart SCHC Fragments of fragmented SCHC Packets that use different SCHC F/R modes or different parameters.
 Therefore, interleaved transmission of these is possible.  </t>
               <t>
-All SCHC F/R messages pertaining to the same SCHC Packet <bcp14>MUST</bcp14> bear the same Rule ID.</t>
+All SCHC F/R messages pertaining to the same SCHC Packet <bcp14>MUST</bcp14> bear the same RuleID.</t>
             </dd>
             
               <dt>Datagram Tag (DTag):</dt><dd><t>This field allows differentiating SCHC F/R messages belonging to different SCHC Packets
-that may be using the same Rule ID simultaneously.
-Hence, it allows interleaving fragments of a new SCHC Packet with fragments of a previous SCHC Packet under the same Rule ID.  </t>
+that may be using the same RuleID simultaneously.
+Hence, it allows interleaving fragments of a new SCHC Packet with fragments of a previous SCHC Packet under the same RuleID.  </t>
               <t>
-The size of the DTag field (called "T", in bits) is defined by each Profile for each Rule ID.
+The size of the DTag field (called "T", in bits) is defined by each Profile for each RuleID.
 When T is 0, the DTag field does not appear in the SCHC F/R messages and the DTag value is defined as 0.  </t>
               <t>
-When T is 0, there can be no more than one fragmented SCHC Packet in transit for each fragmentation Rule ID.  </t>
+When T is 0, there can be no more than one fragmented SCHC Packet in transit for each fragmentation RuleID.  </t>
               <t>
 	      If T is not 0, DTag:  </t>
 <!--[rfced] Throughout the document, please review list items that end
@@ -929,12 +929,12 @@ Perhaps:
 	      
               <ul spacing="normal">
                 <li><bcp14>MUST</bcp14> be set to the same value for all the SCHC F/R messages related to the same fragmented SCHC Packet, and</li>
-                <li><bcp14>MUST</bcp14> be set to different values for SCHC F/R messages related to different SCHC Packets that are being fragmented under the same Rule ID and whose transmission may overlap.</li>
+                <li><bcp14>MUST</bcp14> be set to different values for SCHC F/R messages related to different SCHC Packets that are being fragmented under the same RuleID and whose transmission may overlap.</li>
               </ul>
             </dd>
             
               <dt>W:</dt><dd><t>The W field is optional. It is only present if windows are used.
-Its presence and size (called "M", in bits) is defined by each SCHC F/R mode and each Profile for each Rule ID.  </t>
+Its presence and size (called "M", in bits) is defined by each SCHC F/R mode and each Profile for each RuleID.  </t>
               <t>
 This field carries information pertaining to the window a SCHC F/R message relates to.
 If present, W <bcp14>MUST</bcp14> carry the same value for all the SCHC F/R messages related to the same window.
@@ -942,7 +942,7 @@ Depending on the mode and Profile, W may carry the full window number, or just t
             </dd>
             
               <dt>Fragment Compressed Number (FCN):</dt><dd><t>The FCN field is present in the SCHC Fragment Header.
-Its size (called "N", in bits) is defined by each Profile for each Rule ID.  </t>
+Its size (called "N", in bits) is defined by each Profile for each RuleID.  </t>
               <t>
 This field conveys information about the progress in the sequence of tiles being transmitted by SCHC Fragment messages.
 For example, it can contain a partial, efficient representation of a larger-sized tile index.
@@ -958,7 +958,7 @@ By extension, such a window is called an "All-0 window".</li>
             </dd>
             
               <dt>Reassembly Check Sequence (RCS):</dt><dd><t>This field only appears in the All-1 SCHC Fragments.
-Its size (called "U", in bits) is defined by each Profile for each Rule ID.  </t>
+Its size (called "U", in bits) is defined by each Profile for each RuleID.  </t>
               <t>
 See <xref target="IntegrityChecking" format="default"/> for the RCS default size, default polynomial and details on RCS computation.</t>
             </dd>
@@ -971,7 +971,7 @@ A value of 0 tells that the integrity check was not performed or that it was a f
             </dd>
             
               <dt>Compressed Bitmap:</dt><dd><t>The Compressed Bitmap is used together with windows and Bitmaps (see <xref target="Bitmap" format="default"/>).
-Its presence and size is defined for each F/R mode for each Rule ID.  </t>
+Its presence and size is defined for each F/R mode for each RuleID.  </t>
               <t>
 This field appears in the SCHC ACK message to report on the receiver Bitmap (see <xref target="BitmapTrunc" format="default"/>).</t>
             </dd>
@@ -1014,7 +1014,7 @@ The DTag field and the W field are <bcp14>OPTIONAL</bcp14>, their presence is sp
             <t>Profiles <bcp14>MUST</bcp14> ensure that
 a SCHC Fragment with FCN equal to 0 (called an "All-0 SCHC Fragment") is distinguishable by size,
 even in the presence of padding,
-from a SCHC ACK REQ message (see <xref target="ACKREQ" format="default"/>) with the same Rule ID value and with the same T, M, and N values.
+from a SCHC ACK REQ message (see <xref target="ACKREQ" format="default"/>) with the same RuleID value and with the same T, M, and N values.
 This condition is met if the Payload is at least the size of an L2 Word.
 This condition is also met if the SCHC Fragment Header is a multiple of L2 Words.</t>
           </section>
@@ -1038,7 +1038,7 @@ The FCN field is all ones.</t>
             <t>Profiles <bcp14>MUST</bcp14> ensure that
 an All-1 SCHC Fragment message is distinguishable by size,
 even in the presence of padding,
-from a SCHC Sender-Abort message (see <xref target="SenderAbort" format="default"/>) with the same Rule ID value and with the same T, M, and N values.
+from a SCHC Sender-Abort message (see <xref target="SenderAbort" format="default"/>) with the same RuleID value and with the same T, M, and N values.
 This condition is met if the RCS is present and is at least the size of an L2 Word
 or if the Payload is present and at least the size an L2 Word.
 This condition is also met if the SCHC Sender-Abort Header is a multiple of L2 Words.</t>
@@ -1242,29 +1242,29 @@ Therefore, No-ACK does not require bidirectional links: unidirectional links are
 Windows are not used.
 The Retransmission Timer is not used.
 The Attempts counter is not used.</t>
-          <t>Each Profile <bcp14>MUST</bcp14> specify which Rule ID value(s) corresponds to SCHC F/R messages operating in this mode.</t>
+          <t>Each Profile <bcp14>MUST</bcp14> specify which RuleID value(s) corresponds to SCHC F/R messages operating in this mode.</t>
           <t>The W field <bcp14>MUST NOT</bcp14> be present in the SCHC F/R messages.
 SCHC ACK <bcp14>MUST NOT</bcp14> be sent.
 SCHC ACK REQ <bcp14>MUST NOT</bcp14> be sent.
 SCHC Sender-Abort <bcp14>MAY</bcp14> be sent.
 SCHC Receiver-Abort <bcp14>MUST NOT</bcp14> be sent.</t>
           <t>The value of N (size of the FCN field) is <bcp14>RECOMMENDED</bcp14> to be 1.</t>
-          <t>Each Profile, for each Rule ID value, <bcp14>MUST</bcp14> define:</t>
+          <t>Each Profile, for each RuleID value, <bcp14>MUST</bcp14> define:</t>
           <ul spacing="normal">
             <li>the size of the DTag field,</li>
             <li>the size and algorithm for the RCS field, and</li>
             <li>the expiration time of the Inactivity Timer.</li>
           </ul>
-          <t>Each Profile, for each Rule ID value, <bcp14>MAY</bcp14> define</t>
+          <t>Each Profile, for each RuleID value, <bcp14>MAY</bcp14> define</t>
           <ul spacing="normal">
             <li>a value of N different from the recommended one, and</li>
             <li>the meaning of values sent in the FCN field, for values different from the All-1 value.</li>
           </ul>
-          <t>For each active pair of Rule ID and DTag values, the receiver <bcp14>MUST</bcp14> maintain an Inactivity Timer.
+          <t>For each active pair of RuleID and DTag values, the receiver <bcp14>MUST</bcp14> maintain an Inactivity Timer.
 If the receiver is under-resourced to do this, it <bcp14>MUST</bcp14> silently drop the related messages.</t>
           <section anchor="sender-behavior" numbered="true" toc="default">
             <name>Sender Behavior</name>
-            <t>At the beginning of the fragmentation of a new SCHC Packet, the fragment sender <bcp14>MUST</bcp14> select a Rule ID and DTag value pair for this SCHC Packet.</t>
+            <t>At the beginning of the fragmentation of a new SCHC Packet, the fragment sender <bcp14>MUST</bcp14> select a RuleID and DTag value pair for this SCHC Packet.</t>
             <t>Each SCHC Fragment <bcp14>MUST</bcp14> contain exactly one tile in its Payload.
 The tile <bcp14>MUST</bcp14> be at least the size of an L2 Word.
 The sender <bcp14>MUST</bcp14> transmit the SCHC Fragments messages in the order that the tiles appear in the SCHC Packet.
@@ -1313,9 +1313,9 @@ An acknowledgement, positive or negative, is transmitted by the fragment receive
           <t>The tiles are not required to be of uniform size. In ACK-Always mode, only the All-1 SCHC Fragment is padded as needed. The other SCHC Fragments are intrinsically aligned to L2 Words.</t>
           <t>Briefly, the algorithm is as follows: after a first blind transmission of all the tiles of a window, the fragment sender iterates retransmitting the tiles that are reported missing until the fragment receiver reports that all the tiles belonging to the window have been correctly received or until too many attempts were made.
 The fragment sender only advances to the next window of tiles when it has ascertained that all the tiles belonging to the current window have been fully and correctly received. This results in a per-window lock-step behavior between the sender and the receiver.</t>
-          <t>Each Profile <bcp14>MUST</bcp14> specify which Rule ID value(s) correspond to SCHC F/R messages operating in this mode.</t>
+          <t>Each Profile <bcp14>MUST</bcp14> specify which RuleID value(s) correspond to SCHC F/R messages operating in this mode.</t>
           <t>The W field <bcp14>MUST</bcp14> be present and its size M <bcp14>MUST</bcp14> be 1 bit.</t>
-          <t>Each Profile, for each Rule ID value, <bcp14>MUST</bcp14> define:</t>
+          <t>Each Profile, for each RuleID value, <bcp14>MUST</bcp14> define:</t>
           <ul spacing="normal">
             <li>the value of N (size of the FCN field),</li>
             <li>the value of WINDOW_SIZE, which <bcp14>MUST</bcp14> be strictly less than 2^N,</li>
@@ -1325,19 +1325,19 @@ The fragment sender only advances to the next window of tiles when it has ascert
             <li>the expiration time of the Retransmission Timer, and</li>
             <li>the expiration time of the Inactivity Timer.</li>
           </ul>
-          <t>For each active pair of Rule ID and DTag values, the sender <bcp14>MUST</bcp14> maintain:</t>
+          <t>For each active pair of RuleID and DTag values, the sender <bcp14>MUST</bcp14> maintain:</t>
           <ul spacing="normal">
             <li>one Attempts counter</li>
             <li>one Retransmission Timer</li>
           </ul>
-          <t>For each active pair of Rule ID and DTag values, the receiver <bcp14>MUST</bcp14> maintain</t>
+          <t>For each active pair of RuleID and DTag values, the receiver <bcp14>MUST</bcp14> maintain</t>
           <ul spacing="normal">
             <li>one Inactivity Timer, and</li>
             <li>one Attempts counter.</li>
           </ul>
           <section anchor="sender-behavior-1" numbered="true" toc="default">
             <name>Sender Behavior</name>
-            <t>At the beginning of the fragmentation of a new SCHC Packet, the fragment sender <bcp14>MUST</bcp14> select a Rule ID and DTag value pair for this SCHC Packet.</t>
+            <t>At the beginning of the fragmentation of a new SCHC Packet, the fragment sender <bcp14>MUST</bcp14> select a RuleID and DTag value pair for this SCHC Packet.</t>
             <t>Each SCHC Fragment <bcp14>MUST</bcp14> contain exactly one tile in its Payload.
 All tiles with the index 0, as well as the last tile, <bcp14>MUST</bcp14> be at least the size of an L2 Word.</t>
             <t>In all SCHC Fragment messages, the W field <bcp14>MUST</bcp14> be filled with the LSB of the window number that the sender is currently processing.</t>
@@ -1404,13 +1404,13 @@ and it <bcp14>MAY</bcp14> exit with an error condition.</li>
           </section>
           <section anchor="receiver-behavior-1" numbered="true" toc="default">
             <name>Receiver Behavior</name>
-            <t>On receiving a SCHC Fragment with a Rule ID and DTag pair not being processed at that time:</t>
+            <t>On receiving a SCHC Fragment with a RuleID and DTag pair not being processed at that time:</t>
             <ul spacing="normal">
-              <li>the receiver <bcp14>SHOULD</bcp14> check if the DTag value has not recently been used for that Rule ID value,
+              <li>the receiver <bcp14>SHOULD</bcp14> check if the DTag value has not recently been used for that RuleID value,
 thereby ensuring that the received SCHC Fragment is not a remnant of a prior fragmented SCHC Packet transmission.
 The initial value of the Inactivity Timer is the <bcp14>RECOMMENDED</bcp14> lifetime for the DTag value at the receiver.
 If the SCHC Fragment is determined to be such a remnant, the receiver <bcp14>MAY</bcp14> silently ignore it and discard it.</li>
-              <li>the receiver <bcp14>MUST</bcp14> start a process to assemble a new SCHC Packet with that Rule ID and DTag value pair.</li>
+              <li>the receiver <bcp14>MUST</bcp14> start a process to assemble a new SCHC Packet with that RuleID and DTag value pair.</li>
               <li>the receiver <bcp14>MUST</bcp14> start an Inactivity Timer for that RuleID and DTag pair.
 It <bcp14>MUST</bcp14> initialize an Attempts counter to 0 for that RuleID and DTag pair.
 It <bcp14>MUST</bcp14> initialize a window counter to 0.
@@ -1620,9 +1620,9 @@ and this information has been conveyed back to the sender, or</li>
             <li>too many retransmission attempts were made, or</li>
             <li>the receiver determines that the transmission of this fragmented SCHC Packet has been inactive for too long.</li>
           </ul>
-          <t>Each Profile <bcp14>MUST</bcp14> specify which Rule ID value(s) corresponds to SCHC F/R messages operating in this mode.</t>
+          <t>Each Profile <bcp14>MUST</bcp14> specify which RuleID value(s) corresponds to SCHC F/R messages operating in this mode.</t>
           <t>The W field <bcp14>MUST</bcp14> be present in the SCHC F/R messages.</t>
-          <t>Each Profile, for each Rule ID value, <bcp14>MUST</bcp14> define:</t>
+          <t>Each Profile, for each RuleID value, <bcp14>MUST</bcp14> define:</t>
           <ul spacing="normal">
             <li>the tile size (a tile does not need to be multiple of an L2 Word, but it <bcp14>MUST</bcp14> be at least the size of an L2 Word),</li>
             <li>the value of M (size of the W field),</li>
@@ -1636,12 +1636,12 @@ and this information has been conveyed back to the sender, or</li>
             <li>whether the last tile is carried in a Regular SCHC Fragment or an All-1 SCHC Fragment (see <xref target="ACK-on-Error-sender" format="default"/>), and</li>
             <li>if the penultimate tile <bcp14>MAY</bcp14> be one L2 Word smaller than the regular tile size. In this case, the regular tile size <bcp14>MUST</bcp14> be at least twice the L2 Word size.</li>
           </ul>
-          <t>For each active pair of Rule ID and DTag values, the sender <bcp14>MUST</bcp14> maintain:</t>
+          <t>For each active pair of RuleID and DTag values, the sender <bcp14>MUST</bcp14> maintain:</t>
           <ul spacing="normal">
             <li>one Attempts counter, and</li>
             <li>one Retransmission Timer.</li>
           </ul>
-          <t>For each active pair of Rule ID and DTag values, the receiver <bcp14>MUST</bcp14> maintain:</t>
+          <t>For each active pair of RuleID and DTag values, the receiver <bcp14>MUST</bcp14> maintain:</t>
           <ul spacing="normal">
             <li>one Inactivity Timer, and</li>
             <li>one Attempts counter.</li>
@@ -1650,9 +1650,9 @@ and this information has been conveyed back to the sender, or</li>
             <name>Sender Behavior</name>
             <t>At the beginning of the fragmentation of a new SCHC Packet:</t>
             <ul spacing="normal">
-              <li>the fragment sender <bcp14>MUST</bcp14> select a Rule ID and DTag value pair for this SCHC Packet.
+              <li>the fragment sender <bcp14>MUST</bcp14> select a RuleID and DTag value pair for this SCHC Packet.
 A Rule <bcp14>MUST NOT</bcp14> be selected if the values of M and WINDOW_SIZE for that Rule are such that the SCHC Packet cannot be fragmented in (2^M) * WINDOW_SIZE tiles or less.</li>
-              <li>the fragment sender <bcp14>MUST</bcp14> initialize the Attempts counter to 0 for that Rule ID and DTag value pair.</li>
+              <li>the fragment sender <bcp14>MUST</bcp14> initialize the Attempts counter to 0 for that RuleID and DTag value pair.</li>
             </ul>
             <t>A Regular SCHC Fragment message carries in its payload one or more tiles.
 If more than one tile is carried in one Regular SCHC Fragment:</t>
@@ -1755,15 +1755,15 @@ a SCHC ACK REQ with the W field corresponding to the last window.</li>
           </section>
           <section anchor="ACK-on-Error-receiver" numbered="true" toc="default">
             <name>Receiver Behavior</name>
-            <t>On receiving a SCHC Fragment with a Rule ID and DTag pair not being processed at that time:</t>
+            <t>On receiving a SCHC Fragment with a RuleID and DTag pair not being processed at that time:</t>
             <ul spacing="normal">
-              <li>the receiver <bcp14>SHOULD</bcp14> check if the DTag value has not recently been used for that Rule ID value,
+              <li>the receiver <bcp14>SHOULD</bcp14> check if the DTag value has not recently been used for that RuleID value,
 thereby ensuring that the received SCHC Fragment is not a remnant of a prior fragmented SCHC Packet transmission.
 The initial value of the Inactivity Timer is the <bcp14>RECOMMENDED</bcp14> lifetime for the DTag value at the receiver.
 If the SCHC Fragment is determined to be such a remnant, the receiver <bcp14>MAY</bcp14> silently ignore it and discard it.</li>
-              <li>the receiver <bcp14>MUST</bcp14> start a process to assemble a new SCHC Packet with that Rule ID and DTag value pair.
-The receiver <bcp14>MUST</bcp14> start an Inactivity Timer for that Rule ID and DTag value pair.
-It <bcp14>MUST</bcp14> initialize an Attempts counter to 0 for that Rule ID and DTag value pair.
+              <li>the receiver <bcp14>MUST</bcp14> start a process to assemble a new SCHC Packet with that RuleID and DTag value pair.
+The receiver <bcp14>MUST</bcp14> start an Inactivity Timer for that RuleID and DTag value pair.
+It <bcp14>MUST</bcp14> initialize an Attempts counter to 0 for that RuleID and DTag value pair.
 If the receiver is under-resourced to do this, it <bcp14>MUST</bcp14> respond to the sender with a SCHC Receiver-Abort.</li>
             </ul>
             <t>On reception of any SCHC F/R message for the RuleID and DTag pair being processed, the receiver <bcp14>MUST</bcp14> reset the Inactivity Timer pertaining to that RuleID and DTag pair.</t>
@@ -2038,9 +2038,9 @@ into an LPWAN by adding the SCHC functionalities.</t>
         <section anchor="forged-schc-packet" numbered="true" toc="default">
           <name>Forged SCHC Packet</name>
           <t>Let's assume that an attacker is able to send a forged SCHC Packet to a SCHC Decompressor.</t>
-          <t>Let's first consider the case where the Rule ID contained in that forged SCHC Packet does not correspond to a Rule allocated in the Rule table.
-An implementation should detect that the Rule ID is invalid and should silently drop the offending SCHC Packet.</t>
-          <t>Let's now consider that the Rule ID corresponds to a Rule in the table. With the CDAs defined in this document, the reconstructed packet is, at most, a constant number of bits bigger than the SCHC Packet that was received.
+          <t>Let's first consider the case where the RuleID contained in that forged SCHC Packet does not correspond to a Rule allocated in the Rule table.
+An implementation should detect that the RuleID is invalid and should silently drop the offending SCHC Packet.</t>
+          <t>Let's now consider that the RuleID corresponds to a Rule in the table. With the CDAs defined in this document, the reconstructed packet is, at most, a constant number of bits bigger than the SCHC Packet that was received.
 This assumes that the compute-* decompression actions produce a bounded number of bits, irrespective of the incoming SCHC Packet. This property is true for IPv6 Length, UDP Length, and UDP Checksum, for which the compute-* CDA is recommended by this document.</t>
           <t>As a consequence, SCHC Decompression does not amplify attacks, beyond adding a bounded number of bits to the SCHC Packet received. This bound is determined by the Rule stored in the receiving device.</t>
           <t>As a general safety measure, a SCHC Decompressor should never reconstruct a packet larger than MAX_PACKET_SIZE (defined in a Profile, with 1500 bytes as generic default).</t>
@@ -2212,7 +2212,7 @@ An example of a Rule set is given in Figures 26-30.
         <name>Context Rules - Rule 0 and Rule 1</name>
         <artwork name="" type="" align="left" alt=""><![CDATA[
 Rule 0
-  Special Rule ID used to tag an uncompressed UDP/IPV6 packet.
+  Special RuleID used to tag an uncompressed UDP/IPV6 packet.
 
 Rule 1
  +----------------+--+--+--+---------+--------+------------++------+
@@ -2293,7 +2293,7 @@ Rule 1
  +================+==+==+==+=========+========+============++======+]]></artwork>
       </figure>
       <t><xref target="Fig-fields" format="default"/> to <xref target="Fig-fields2" format="default"/> describe an example of a Rule set.</t>
-      <t>In this example, 0 was chosen as the special Rule ID that tags packets that cannot be compressed with any compression Rule.</t>
+      <t>In this example, 0 was chosen as the special RuleID that tags packets that cannot be compressed with any compression Rule.</t>
       <t>All the fields described in Rules 1-3 are present in the IPv6 and UDP headers. The DevIID-DID value is found in the L2 header.</t>
       <t>Rules 2-3 use global addresses. The way the Dev learns the prefix is not in the scope of the document.</t>
       <t>Rule 3 compresses each port number to 4 bits.</t>
@@ -2852,25 +2852,25 @@ The specification in <xref target="ACK-on-Error-sender" format="default"/> allow
       </ul>
       <t>This section lists the parameters that need to be defined in the Profile.</t>
       <ul spacing="normal">
-        <li>Rule ID numbering scheme, fixed-size or variable-size Rule IDs, number of Rules, the way the Rule ID is transmitted.</li>
+        <li>RuleID numbering scheme, fixed-size or variable-size RuleIDs, number of Rules, the way the RuleID is transmitted.</li>
         <li>maximum packet size that should ever be reconstructed by SCHC Decompression (MAX_PACKET_SIZE). See <xref target="SecConsiderations" format="default"/>.</li>
         <li>Padding: size of the L2 Word (for most LPWAN technologies, this would be a byte; for some technologies, a bit).</li>
         <li>
           <t>Decision to use SCHC fragmentation mechanism or not. If yes, the document must describe:  </t>
           <ul spacing="normal">
             <li>reliability mode(s) used, in which cases (e.g., based on link channel condition).</li>
-            <li>Rule ID values assigned to each mode in use.</li>
-            <li>presence and number of bits for DTag (T) for each Rule ID value, lifetime of DTag at the receiver.</li>
+            <li>RuleID values assigned to each mode in use.</li>
+            <li>presence and number of bits for DTag (T) for each RuleID value, lifetime of DTag at the receiver.</li>
             <li>support for interleaved packet transmission, to what extent.</li>
             <li>WINDOW_SIZE, for modes that use windows.</li>
-            <li>number of bits for W (M) for each Rule ID value, for modes that use windows.</li>
-            <li>number of bits for FCN (N) for each Rule ID value.</li>
+            <li>number of bits for W (M) for each RuleID value, for modes that use windows.</li>
+            <li>number of bits for FCN (N) for each RuleID value.</li>
             <li>what makes an All-0 SCHC Fragment and a SCHC ACK REQ distinguishable (see <xref target="NotLastFrag" format="default"/>).</li>
             <li>what makes an All-1 SCHC Fragment and a SCHC Sender-Abort distinguishable (see <xref target="LastFrag" format="default"/>).</li>
-            <li>size of RCS and algorithm for its computation, for each Rule ID, if different from the default CRC32. Byte fill-up with zeroes or other mechanism, to be specified.</li>
-            <li>Retransmission Timer duration for each Rule ID value, if applicable to the SCHC F/R mode.</li>
-            <li>Inactivity Timer duration for each Rule ID value, if applicable to the SCHC F/R mode.</li>
-            <li>MAX_ACK_REQUESTS value for each Rule ID value, if applicable to the SCHC F/R mode.</li>
+            <li>size of RCS and algorithm for its computation, for each RuleID, if different from the default CRC32. Byte fill-up with zeroes or other mechanism, to be specified.</li>
+            <li>Retransmission Timer duration for each RuleID value, if applicable to the SCHC F/R mode.</li>
+            <li>Inactivity Timer duration for each RuleID value, if applicable to the SCHC F/R mode.</li>
+            <li>MAX_ACK_REQUESTS value for each RuleID value, if applicable to the SCHC F/R mode.</li>
           </ul>
         </li>
         <li>if L2 Word is wider than a bit and SCHC fragmentation is used, value of the padding bits (0 or 1). This is needed
@@ -2897,7 +2897,7 @@ the LPWAN technology-specific documents:  </t>
     </section>
     <section anchor="MultWinSizes" numbered="true" toc="default">
       <name>Supporting Multiple Window Sizes for Fragmentation</name>
-      <t>For ACK-Always or ACK-on-Error, implementers may opt to support a single window size or multiple window sizes.  The latter, when feasible, may provide performance optimizations.  For example, a large window size should be used for packets that need to be split into a large number of tiles. However, when the number of tiles required to carry a packet is low, a smaller window size and, thus, a shorter Bitmap, may be sufficient to provide reception status on all tiles. If multiple window sizes are supported, the Rule ID signals the window size in use for a specific packet transmission.</t>
+      <t>For ACK-Always or ACK-on-Error, implementers may opt to support a single window size or multiple window sizes.  The latter, when feasible, may provide performance optimizations.  For example, a large window size should be used for packets that need to be split into a large number of tiles. However, when the number of tiles required to carry a packet is low, a smaller window size and, thus, a shorter Bitmap, may be sufficient to provide reception status on all tiles. If multiple window sizes are supported, the RuleID signals the window size in use for a specific packet transmission.</t>
     </section>
     <section anchor="AsymLinks" numbered="true" toc="default">
       <name>ACK-Always and ACK-on-Error on Quasi-Bidirectional Links</name>
