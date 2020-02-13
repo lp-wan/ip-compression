@@ -127,9 +127,9 @@ the title) for use on https://www.rfc-editor.org/search.
 
     <abstract>
       <t>This document defines the Static Context Header Compression
-      (SCHC) framework, which provides both a header compression
+      and fragmentation (SCHC) framework, which provides both a header compression
       mechanism and an optional fragmentation mechanism. SCHC has been
-      designed for Low-Power Wide Area Networks (LPWANs).</t>
+      designed with Low-Power Wide Area Networks (LPWANs) in mind.</t>
 
       <t>SCHC compression is based on a common static context stored both in the LPWAN device and in the network infrastructure side. This document defines a generic header compression mechanism and its application to compress IPv6/UDP headers.</t>
       <t>This document also specifies an optional fragmentation and
@@ -146,7 +146,7 @@ Data models for the context and profiles are out of scope.</t>
   <middle>
     <section anchor="Introduction" numbered="true" toc="default">
       <name>Introduction</name>
-      <t>This document defines the Static Context Header Compression (SCHC) framework, which provides both a header compression mechanism and an optional fragmentation mechanism. SCHC has been designed for Low-Power Wide Area Networks (LPWANs).</t>
+      <t>This document defines the Static Context Header Compression and fragmentation (SCHC) framework, which provides both a header compression mechanism and an optional fragmentation mechanism. SCHC has been designed with Low-Power Wide Area Networks (LPWANs) in mind.</t>
       <t>LPWAN technologies impose some strict limitations on traffic. For instance, devices sleep most of the time and may only receive data during short periods of time after transmission, in order to preserve battery.
 LPWAN technologies are also characterized by a greatly reduced data unit and/or payload size (see <xref target="RFC8376" format="default"/>).</t>
       <t>Header compression is needed for efficient Internet connectivity to a node within an LPWAN. The following properties of LPWANs can be exploited to get an efficient header compression:</t>
@@ -160,7 +160,7 @@ sometimes be completely unavailable <xref target="RFC8376" format="default"/>.
 A compression protocol that relies on feedback is not compatible with the characteristics of such LPWANs.</t>
       <t>In most cases, a small Rule identifier is enough to represent the full IPv6/UDP headers. The SCHC header compression mechanism is independent of the specific LPWAN technology over which it is used.</t>
       <t>Furthermore, some LPWAN technologies do not provide a fragmentation functionality; to support the IPv6 MTU requirement of 1280 bytes <xref target="RFC8200" format="default"/>, they require a fragmentation protocol at the adaptation layer below IPv6.
-Accordingly, this document defines an optional fragmentation/reassembly mechanism for LPWAN technologies to support the IPv6 MTU requirement.</t>
+Accordingly, this document defines an optional fragmentation/reassembly mechanism to help LPWAN technologies support the IPv6 MTU requirement.</t>
       <t>This document defines generic functionality and offers flexibility with regard to parameter settings
 and mechanism choices. Technology-specific settings are expected to be grouped into Profiles specified in other documents.</t>
     </section>
@@ -186,7 +186,7 @@ which identifies the following entities in a typical LPWAN
       <li>Devices (Dev) are the end-devices or hosts (e.g., sensors, actuators, etc.). There can be a very high density of devices per Radio Gateway.</li>
       <li>The Radio Gateway (RGW) is the endpoint of the constrained link.</li>
       <li>The Network Gateway (NGW) is the interconnection node between the Radio Gateway and the Internet.</li>
-      <li>Application Server (App) is the endpoint of the application-level protocol on the Internet side.</li></ul>
+      <li>The Application Server (App) is the endpoint of the application-level protocol on the Internet side.</li></ul>
       <figure anchor="Fig-LPWANarchi">
         <name>LPWAN Architecture (Simplified from That Shown in RFC 8376)</name>
         <artwork name="" type="" align="left" alt=""><![CDATA[
@@ -201,7 +201,7 @@ which identifies the following entities in a typical LPWAN
     </section>
     <section anchor="Term" numbered="true" toc="default">
       <name>Terminology</name>
-      <t>This section defines the terminology and abbreviations used in this document.
+      <t>This section defines terminology and abbreviations used in this document.
 It extends the terminology of <xref target="RFC8376" format="default"/>.</t>
       <t>The SCHC acronym is pronounced like "sheek" in English (or "chic" in French). Therefore, this document writes "a SCHC Packet" instead of "an SCHC Packet".</t>
       <dl spacing="normal" indent="9">
@@ -210,60 +210,36 @@ It extends the terminology of <xref target="RFC8376" format="default"/>.</t>
         <dt>App:</dt><dd>LPWAN Application Server, as defined by <xref target="RFC8376" format="default"/>. It runs an application sending/receiving packets to/from the Dev.</dd>
         <dt>AppIID:</dt><dd>Application Interface Identifier. The IID that
 	identifies the App interface.</dd>
-<!--[rfced] Could you clarify "this glossary"?  Where should the
-reader look?
-
-Original:
-   Characterizes a Field Descriptor that applies
-   to headers of packets traveling in either direction (Up and Dw,
-   see this glossary).
--->
-
-        <dt>Bi:</dt><dd>Bidirectional. Characterizes a Field Descriptor that applies to headers of packets traveling in either direction (Up and Dw).</dd>
-        <dt>CDA:</dt><dd>Compression/Decompression Action. Describes the pair of actions that are performed at the compressor to compress a header field and at the decompressor to recover the original value of the header field.</dd>
         <dt>Compression Residue:</dt><dd>The bits that remain to be sent (beyond the RuleID itself) after applying the SCHC compression.</dd>
-        <dt>Context:</dt><dd>A set of Rules used to compress/decompress headers.</dd>
+        <dt>Context:</dt><dd>A set of Rules used to compress/decompress headers, or to fragment/reassemble a packet.</dd>
         <dt>Dev:</dt><dd>Device, as defined by <xref target="RFC8376" format="default"/>.</dd>
         <dt>DevIID:</dt><dd>Device Interface Identifier. The IID that identifies the Dev interface.</dd>
-        <dt>DI:</dt><dd>Direction Indicator. This field tells which direction
-	of packet travel (Up, Dw, or Bi) a Field Descriptor applies
-	to. This allows for asymmetric processing, using the same
-	Rule.</dd>
-	
-        <dt>Dw:</dt><dd>Downlink direction for compression/decompression, from SCHC C/D in the network to SCHC C/D in the Dev.</dd>
-        <dt>Field Descriptor:</dt><dd>A tuple containing identifier, value, matching operator, and actions to be applied to a field.</dd>
-        <dt>FID:</dt><dd>Field Identifier. This identifies the protocol and field a Field Descriptor applies to.</dd>
-        <dt>FL:</dt><dd>Field Length.  FL is the length of the original packet header field. It is expressed as a number of bits for header fields of fixed lengths or as a type (e.g., variable, token length, ...) for FLs that are unknown at the time of Rule creation. The length of a header field is defined in the corresponding protocol specification (such as IPv6 or UDP).</dd>
-        <dt>FP:</dt><dd>Field Position.  When a Field is expected to appear multiple times in a header, Field Position specifies the occurrence this Field Descriptor applies to
-(for example, first uri-path option, second uri-path, etc. in a
-	Constrained Application Protocol (CoAP) header), counting from 1. The value 0 is special and means "don't care", see <xref target="PProcessing" format="default"/>.</dd>
+        <dt>Downlink:</dt><dd>From the App to the Dev.</dd>
         <dt>IID:</dt><dd>Interface Identifier. See the IPv6 addressing architecture <xref target="RFC7136" format="default"/>.</dd>
-        <dt>L2:</dt><dd>Layer 2. The immediate lower layer that SCHC interfaces with. It is provided by an underlying LPWAN technology. It does not necessarily correspond to the OSI model definition of Layer 2.</dd>
+        <dt>L2:</dt><dd>Layer 2. The immediate lower layer that SCHC interfaces with, for example an underlying LPWAN technology. It does not necessarily correspond to the OSI model definition of Layer 2.</dd>
         <dt>L2 Word:</dt><dd>This is the minimum subdivision of payload data that the L2 will carry. In most L2 technologies, the L2 Word is an octet.
 In bit-oriented radio technologies, the L2 Word might be a single bit.
 The L2 Word size is assumed to be constant over time for each device.</dd>
-        <dt>MO:</dt><dd>Matching Operator. An operator used to match a value
-	contained in a header field with a value contained in a
-	Rule.</dd>
 <!--[rfced] Is there a reason "Padding (P)" does not appear as "P:
 Padding" in the Terminology section to match the other entries?
 May we update for consistency?  -->
 <!--[db] the abbreviation P is actually not used anywhere in the document -->	
-        <dt>Padding:</dt><dd>Extra bits that may be appended by SCHC to a data unit that it passes to the underlying Layer 2 for transmission.
+        <dt>Padding:</dt><dd>Extra bits that may be appended by SCHC to a data unit that it passes down to L2 for transmission.
 SCHC itself operates on bits, not bytes, and does not have any alignment prerequisite. See <xref target="Padding" format="default"/>.</dd>
         <dt>Profile:</dt><dd>SCHC offers variations in the way it is operated, with a number of parameters listed in <xref target="SCHCParams" format="default"/>.
 A Profile indicates a particular setting of all these parameters.
 Both ends of a SCHC communication must be provisioned with the same Profile information and with the same set of Rules before the communication starts,
 so that there is no ambiguity in how they expect to communicate.</dd>
-        <dt>Rule:</dt><dd>A set of Field Descriptors.</dd>
-        <dt>RuleID:</dt><dd>Rule Identifier.  An identifier for a Rule. SCHC C/D on both sides share the same RuleID for a given packet. A set of RuleIDs are used to support SCHC F/R functionality.</dd>
-        <dt>SCHC C/D:</dt><dd>SCHC Compressor/Decompressor. A mechanism used on both sides, at the Dev and at the network, to achieve Compression/Decompression of headers.</dd>
-        <dt>SCHC F/R:</dt><dd>SCHC Fragmentation/Reassembly. A mechanism used on both sides, at the Dev and at the network to achieve Fragmentation/Reassembly of SCHC Packets.</dd>
+        <dt>Rule:</dt><dd>Part of the Context that describes how a packet is compressed/decompressed or fragmented/reassembled.</dd>
+        <dt>RuleID:</dt><dd>Rule Identifier.  An identifier for a Rule.</dd>
+        <dt>SCHC:</dt><dd>Static Context Header Compression and fragmentation (SCHC), a generic framework.</dd>
+        <dt>SCHC C/D:</dt><dd>SCHC Compressor/Decompressor, or SCHC Compression/Decompression. The SCHC entity or mechanism used on both sides, at the Dev and at the network, to achieve compression/decompression of headers.</dd>
+        <dt>SCHC F/R:</dt><dd>SCHC Fragmenter/Reassembler or SCHC Fragmentation/Reassembly. The SCHC entity or mechanism used on both sides, at the Dev and at the network, to achieve fragmentation/reassembly of SCHC Packets.</dd>
         <dt>SCHC Packet:</dt><dd>A packet (e.g., an IPv6 packet) whose header has been compressed as per the header compression mechanism defined in this document. If the header compression process is unable to actually compress the packet header, the packet with the uncompressed header is still called a SCHC Packet (in this case, a RuleID is used to indicate that the packet header has not been compressed). See <xref target="SCHComp" format="default"/> for more details.</dd>
-        <dt>TV:</dt><dd>Target Value. A value contained in a Rule that will be matched with the value of a header field.</dd>
-        <dt>Up:</dt><dd>Uplink direction for compression/decompression, from the Dev SCHC C/D to the network SCHC C/D.</dd>
+        <dt>Uplink:</dt><dd>From the Dev to the App.</dd>
       </dl>
-      <t>Additional terminology for the optional SCHC Fragmentation/Reassembly mechanism (SCHC F/R) is found in <xref target="FragTools" format="default"/>.</t>
+      <t>Additional terminology for the optional SCHC F/R is found in <xref target="FragTools" format="default"/>.</t>
+      <t>Additional terminology for SCHC C/D is found in <xref target="schc-cd-rules" format="default"/>.</t>
     </section>
     <section anchor="Overview" numbered="true" toc="default">
       <name>SCHC Overview</name>
@@ -316,7 +292,7 @@ A packet (e.g., an IPv6 packet)
       <section anchor="schc-packet-format" numbered="true" toc="default">
         <name>SCHC Packet Format</name>
         <t>The SCHC Packet is composed of the Compressed Header followed by the payload from the original packet (see <xref target="Fig-SCHCpckt" format="default"/>).
-The Compressed Header itself is composed of the RuleID and a Compression Residue, which is the output of compressing the packet header with that Rule (see <xref target="SCHComp" format="default"/>).
+The Compressed Header itself is composed of the RuleID and a Compression Residue, which is the output of compressing the packet header with the Rule identified by that RuleID (see <xref target="SCHComp" format="default"/>).
 The Compression Residue may be empty. Both the RuleID and the Compression Residue potentially have a variable size, and are not necessarily a multiple of bytes in size.</t>
         <figure anchor="Fig-SCHCpckt">
           <name>SCHC Packet</name>
@@ -338,7 +314,7 @@ The Compression Residue may be empty. Both the RuleID and the Compression Residu
 --> 
 	
         <figure anchor="Fig-archi">
-          <name>Architecture</name>
+          <name>Architectural mapping</name>
           <artwork name="" type="" align="left" alt=""><![CDATA[
         Dev                                               App
 +----------------+                               +----+ +----+ +----+
@@ -354,14 +330,14 @@ The Compression Residue may be empty. Both the RuleID and the Compression Residu
             +---+     +---+    |F/R |    |C/D |
                                +----+    +----+]]></artwork>
         </figure>
-        <t>SCHC C/D and SCHC F/R are located on both sides of the LPWAN transmission, hereafter called the "Dev side" and the "Network infrastructure side".</t>
+        <t>SCHC C/D and SCHC F/R are located on both sides of the LPWAN transmission, hereafter called the "Dev side" and the "Network Infrastructure side".</t>
         <t>The operation in the Uplink direction is as follows. The Device application uses IPv6 or IPv6/UDP protocols. Before sending the packets, the Dev compresses their headers using SCHC C/D;
 if the SCHC Packet resulting from the compression needs to be fragmented by SCHC, SCHC F/R is performed (see <xref target="Frag" format="default"/>).
 The resulting SCHC Fragments are sent to an LPWAN Radio Gateway (RGW), which forwards them to a Network Gateway (NGW).
 The NGW sends the data to a SCHC F/R for reassembly (if needed) and then to the SCHC C/D for decompression.
 After decompression, the packet can be sent over the Internet
 to one or several App.</t>
-        <t>The SCHC F/R and C/D on the Network infrastructure side can
+        <t>The SCHC F/R and SCHC C/D on the Network Infrastructure side can
 	be part of the NGW or located in the Internet as long as a
 	tunnel is established between them and the NGW.
 
@@ -375,28 +351,31 @@ So <bcp14>MUST</bcp14> the SCHC F/Rs on both sides.</t>
     </section>
     <section anchor="RuleID" numbered="true" toc="default">
       <name>RuleID</name>
-      <t>RuleIDs identify the Rules used for Compression/Decompression or
-for Fragmentation/Reassembly.</t>
-      <t>The scope of the RuleID of a Compression/Decompression Rule is the link between the SCHC C/D in a given Dev and the corresponding SCHC C/D in the Network infrastructure side.
-The scope of the RuleID of a Fragmentation/Reassembly Rule is the link between the SCHC F/R in a given Dev and the corresponding SCHC F/R in the Network infrastructure side.
+      <t>RuleIDs identify the Rules used for compression/decompression or
+for fragmentation/reassembly.</t>
+      <t>The scope of the RuleID of a compression/decompression Rule is the link between the SCHC C/D in a given Dev and the corresponding SCHC C/D in the Network Infrastructure side.
+The scope of the RuleID of a fragmentation/reassembly Rule is the link between the SCHC F/R in a given Dev and the corresponding SCHC F/R in the Network Infrastructure side.
 If such a link is bidirectional, the scope includes both directions.</t>
-      <t>Inside their scopes, Rules for Compression/Decompression and Rules for Fragmentation/Reassembly share the same RuleID space.</t>
+      <t>The RuleIDs are therefore specific to the Context related to one Dev. Hence, multiple Dev instances, which refer to different Contexts, <bcp14>MAY</bcp14> reuse the same RuleID for different Rules.
+      On the Network Infrastructure side, in order to identify the correct Rule to be applied to Uplink traffic, the SCHC C/D or SCHC F/R needs to associate the RuleID with the Dev identifier.
+      Similarly, for Downlink traffic, the SCHC C/D or SCHC F/R on the Network Infrastructure side first needs to identify the destination Dev before looking for the appropriate Rule (and associated RuleID) in the Context of that Dev.</t>
+      <t>Inside their scopes, Rules for compression/decompression and Rules for fragmentation/reassembly share the same RuleID space.</t>
       <t>The size of the RuleIDs is not specified in this document,
       as it is implementation-specific and can vary according to the
       LPWAN technology and the number of Rules, among other things. It is defined in Profiles.</t>
       <t>The RuleIDs are used:</t>
       <ul spacing="normal">
         <li>
-          <t>For SCHC C/D, to identify the Rule (i.e., the set of Field Descriptors) that is used to compress a packet header.  </t>
+          <t>For SCHC C/D, to identify the Rule that is used to compress a packet header.  </t>
           <ul spacing="normal">
             <li>At least one RuleID <bcp14>MUST</bcp14> be allocated to tagging packets for which SCHC compression was not possible (i.e., no matching compression Rule was found).</li>
           </ul>
         </li>
         <li>
-          <t>In SCHC F/R, to identify the specific mode and settings of F/R for one direction of traffic (Up or Dw).  </t>
+          <t>In SCHC F/R, to identify the specific mode and settings of fragmentation/reassembly for one direction of data traffic (Uplink or Downlink).  </t>
           <ul spacing="normal">
-            <li>When F/R is used for both communication directions, at least two RuleID values are needed for F/R: one per direction of traffic.
-This is because F/R may entail control messages flowing in the reverse direction compared to data traffic.</li>
+            <li>When SCHC F/R is used for both communication directions, at least two RuleID values are needed for fragmentation/reassembly: one per direction of data traffic.
+This is because fragmentation/reassembly may entail control messages flowing in the reverse direction compared to data traffic.</li>
           </ul>
         </li>
       </ul>
@@ -404,7 +383,7 @@ This is because F/R may entail control messages flowing in the reverse direction
     <section anchor="SCHComp" numbered="true" toc="default">
       <name>Compression/Decompression</name>
       <t>Compression with SCHC
-is based on using a set of Rules, called the "Context", to compress or
+is based on using a set of Rules, which constitutes the Context of SCHC C/D, to compress or
       decompress headers. SCHC avoids Context synchronization traffic,
       which consumes considerable bandwidth in other header
       compression mechanisms such as RObust Header Compression (RoHC)
@@ -417,12 +396,12 @@ is based on using a set of Rules, called the "Context", to compress or
         <name>SCHC C/D Rules</name>
         <t>The main idea of the SCHC compression scheme is to transmit the RuleID to the other end instead of sending known field values. This RuleID identifies a Rule that matches the original packet values. Hence, when a value is known by both ends, it is only necessary to send the corresponding RuleID over the LPWAN.
 The manner by which Rules are generated is out of the scope of this document. The Rules <bcp14>MAY</bcp14> be changed at run-time, but the mechanism is out of scope of this document.</t>
-        <t>The Context is a set of Rules.
+        <t>The SCHC C/D Context is a set of Rules.
 See <xref target="Fig-ctxt" format="default"/> for a high-level, abstract representation of the Context.
 The formal specification of the representation of the Rules is outside the scope of this document.</t>
         <t>Each Rule itself contains a list of Field Descriptors composed of a Field Identifier (FID), a Field Length (FL), a Field Position (FP), a Direction Indicator (DI), a Target Value (TV), a Matching Operator (MO), and a Compression/Decompression Action (CDA).</t>
         <figure anchor="Fig-ctxt">
-          <name>A Compression/Decompression Context</name>
+          <name>A SCHC C/D Context</name>
           <artwork name="" type="" align="left" alt=""><![CDATA[
   /-----------------------------------------------------------------\
   |                         Rule N                                  |
@@ -455,29 +434,31 @@ The Field Descriptors describe the header fields with the following entries:</t>
           <li>Field Position (FP): most often, a field only occurs once in a packet header.
 However, some fields may occur multiple times. An example is the uri-path of CoAP.
 FP indicates which occurrence this Field Descriptor applies to.
-If FP is not specified in the Field Descriptor, it takes the default value of 1.
+The default value is 1.
 The value 1 designates the first occurrence.
 The value 0 is special. It means "don't care", see <xref target="PProcessing" format="default"/>.</li>
           <li>
-            <t>A Direction Indicator (DI) indicates the packet direction(s) this Field Descriptor applies to. Three values are possible:  </t>
+            <t>A Direction Indicator (DI) indicates the packet direction(s) this Field Descriptor applies to. It allows for asymmetric processing, using the same Rule. Three values are possible:  </t>
             <dl spacing="normal" newline="true">  
-              <dt>UPLINK (Up):</dt><dd>this Field Descriptor is only applicable to packets sent by the Dev to the App.</dd>
-              <dt>DOWNLINK (Dw):</dt><dd>this Field Descriptor is only applicable to packets sent from the App to the Dev.</dd>
-              <dt>BIDIRECTIONAL (Bi):</dt><dd>this Field Descriptor is applicable to packets traveling both Up and Dw.</dd>
+              <dt>Up:</dt><dd>this Field Descriptor is only applicable to packets traveling Uplink.</dd>
+              <dt>Dw:</dt><dd>this Field Descriptor is only applicable to packets traveling Downlink.</dd>
+              <dt>Bi:</dt><dd>this Field Descriptor is applicable to packets traveling Uplink or Downlink.</dd>
             </dl>
           </li>
           <li>Target Value (TV) is the value used to match against the packet header field. The Target Value can be a scalar value of any type (integer, strings, etc.) or a more complex structure (array, list, etc.). The types and representations are out of scope for this document.</li>
-          <li>Matching Operator (MO) is the operator used to match the Field Value and the Target Value. The Matching Operator may require some parameters. MO is only used during the compression phase. The set of MOs defined in this document can be found in <xref target="chap-MO" format="default"/>.</li>
-          <li>Compression Decompression Action (CDA) describes the compression and decompression processes to be performed after the MO is applied. Some CDAs might use parameter values for their operation. CDAs are used in both the compression and the decompression functions. The set of CDAs defined in this document can be found in <xref target="chap-CDA" format="default"/>.</li>
+          <li>Matching Operator (MO) is the operator used to match the field value and the Target Value. The Matching Operator may require some parameters. MO is only used during the compression phase. The set of MOs defined in this document can be found in <xref target="chap-MO" format="default"/>.</li>
+          <li>Compression/Decompression Action (CDA) describes the pair of actions that are performed at the compressor to compress a header field and at the decompressor to recover the original value of the header field. Some CDAs might use parameter values for their operation. The set of CDAs defined in this document can be found in <xref target="chap-CDA" format="default"/>.</li>
         </ul>
       </section>
+<!--
       <section anchor="IDComp" numbered="true" toc="default">
         <name>RuleID for SCHC C/D</name>
         <t>RuleIDs are sent by the compression function in one side and are received for the decompression function in the other side.
-In SCHC C/D, the RuleIDs are specific to the Context related to one Dev. Hence, multiple Dev instances, which refer to different header compression Contexts, <bcp14>MAY</bcp14> reuse the same RuleID for different Rules.
-On the Network infrastructure side, in order to identify the correct Rule to be applied, the SCHC Decompressor needs to associate the RuleID with the Dev identifier.
-Similarly, the SCHC Compressor on the Network infrastructure side first identifies the destination Dev before looking for the appropriate compression Rule (and associated RuleID) in the Context of that Dev.</t>
+In SCHC C/D, the RuleIDs are specific to the Context related to one Dev. Hence, multiple Dev instances, which refer to different Contexts, <bcp14>MAY</bcp14> reuse the same RuleID for different Rules.
+On the Network Infrastructure side, in order to identify the correct Rule to be applied, the SCHC decompressor needs to associate the RuleID with the Dev identifier.
+Similarly, the SCHC compressor on the Network Infrastructure side first identifies the destination Dev before looking for the appropriate compression Rule (and associated RuleID) in the Context of that Dev.</t>
       </section>
+-->
       <section anchor="PProcessing" numbered="true" toc="default">
         <name>Packet Processing</name>
         <t>The compression/decompression process follows several phases:</t>
@@ -488,12 +469,12 @@ Similarly, the SCHC Compressor on the Network infrastructure side first identifi
 Field Descriptor (given the DI and FP) for all and only those header fields that appear in the packet being compressed.
 The detailed algorithm is the following: </t>
             <ul spacing="normal">
-              <li>The first step is to check the Field Identifiers (FIDs).
+              <li>The first step is to check the FIDs.
 If any header field of the packet being examined cannot be matched with a Field Descriptor with the correct FID, the Rule <bcp14>MUST</bcp14> be disregarded.
 If any Field Descriptor in the Rule has a FID that cannot be matched to one of the header fields of the packet being examined, the Rule <bcp14>MUST</bcp14> be disregarded.</li>
               <li>The next step is to match the Field Descriptors by their direction, using the DI. If any field of the packet header cannot be matched with a Field Descriptor with the correct FID and DI, the Rule <bcp14>MUST</bcp14> be disregarded.</li>
               <li>
-                <t>Then, the Field Descriptors are further selected according to Field Position (FP). If any field of the packet header cannot be matched with a Field Descriptor with the correct FID, DI and FP, the Rule <bcp14>MUST</bcp14> be disregarded.      </t>
+                <t>Then, the Field Descriptors are further selected according to FP. If any field of the packet header cannot be matched with a Field Descriptor with the correct FID, DI and FP, the Rule <bcp14>MUST</bcp14> be disregarded.      </t>
                 <t>
 The value 0 for FP means "don't care", i.e., the comparison of this Field Descriptor's FP with
 the position of the field of the packet header being compressed
@@ -522,7 +503,7 @@ Care needs to be exercised when writing Rules containing FP=0 values.
 Indeed, it may result in decompressed packets having fields ordered differently compared to the original packet.</t>
               </li>
               <li>
-                <t>Once each header field has been associated with a Field Descriptor with matching FID, DI, and FP, each packet field's value is then compared to the corresponding Target Value (TV) stored in the Rule for that specific field, using the Matching Operator (MO).
+                <t>Once each header field has been associated with a Field Descriptor with matching FID, DI, and FP, each packet field's value is then compared to the corresponding TV stored in the Rule for that specific field, using the MO.
 If every field in the packet header satisfies the corresponding MOs of a Rule (i.e., all MO results are True), that Rule is valid for use to compress the header.
 Otherwise, the Rule <bcp14>MUST</bcp14> be disregarded.      </t>
                 <t>
@@ -536,7 +517,7 @@ The entire packet header is the Compression Residue (see <xref target="Fig-SCHCp
 Sending an uncompressed header is likely to require SCHC F/R.</li>
             </ul></dd>
           
-          <dt>Compression:</dt><dd>if a valid Rule were found, each field of the header is compressed according to the Compression/Decompression Actions (CDAs) of the Rule.
+          <dt>Compression:</dt><dd>if a valid Rule is found, each field of the header is compressed according to the CDAs of the Rule.
 The fields are compressed in the order that the Field Descriptors appear in the Rule.
 The compression of each field results in a residue, which may be empty.
 The Compression Residue for the packet header is the concatenation of the non-empty residues for each field of the header, in the order the Field Descriptors appear in the Rule.
@@ -555,7 +536,7 @@ The order in which the Field Descriptors appear in the Rule is therefore semanti
 The way the RuleID is sent will be specified in the Profile and is out of the scope of the present document.
 For example, it could be included in an L2 header or sent as part of the L2 payload.</dd>
           
-            <dt>Decompression:</dt><dd><t>when decompressing, on the Network infrastructure side, the SCHC C/D needs to find the correct Rule based on the L2 address of the Dev; in this way, it can use the DevIID and the RuleID. On the Dev side, only the RuleID is needed to identify the correct Rule since the Dev typically only holds Rules that apply to itself.  </t>
+            <dt>Decompression:</dt><dd><t>when decompressing, on the Network Infrastructure side, the SCHC C/D needs to find the correct Rule based on the L2 address of the Dev; in this way, it can use the DevIID and the RuleID. On the Dev side, only the RuleID is needed to identify the correct Rule since the Dev typically only holds Rules that apply to itself.  </t>
             <t>
 This Rule describes the compressed header format. From this, the decompressor determines the order of the residues, the fixed-size or variable-size nature of each residue (see <xref target="var-length-field" format="default"/>),
 and the size of the fixed-size residues.  </t>
@@ -568,7 +549,7 @@ For each field in the header, the receiver applies the CDA action associated wit
       </section>
       <section anchor="chap-MO" numbered="true" toc="default">
         <name>Matching Operators</name>
-        <t>Matching Operators (MOs) are functions used by both SCHC C/D endpoints. They are not typed and can be applied to integer, string or any other data type. The result of the operation can either be True or False. MOs are defined as follows:</t>
+        <t>MOs are functions used at the compression side of SCHC C/D. They are not typed and can be applied to integer, string or any other data type. The result of the operation can either be True or False. The following MOs are defined:</t>
         <dl spacing="normal">
           <dt>equal:</dt><dd>The match result is True if the field value in the packet matches the TV.</dd>
           <dt>ignore:</dt><dd>No matching is attempted between the
@@ -587,12 +568,12 @@ Perhaps:
 -->
 	  
           <dt>MSB(x):</dt><dd>A match is obtained if the most significant (leftmost) x bits of the packet header field value are equal to the TV in the Rule. The x parameter of the MSB MO indicates how many bits are involved in the comparison. If the FL is described as variable, the x parameter must be a multiple of the FL unit. For example, x must be multiple of 8 if the unit of the variable length is bytes.</dd>
-          <dt>match-mapping:</dt><dd>With match-mapping, the Target Value is a list of values. Each value of the list is identified by an index. Compression is achieved by sending the index instead of the original header field value. This operator matches if the header field value is equal to one of the values in the target list.</dd>
+          <dt>match-mapping:</dt><dd>With match-mapping, TV is a list of values. Each value of the list is identified by an index. Compression is achieved by sending the index instead of the original header field value. This operator matches if the header field value is equal to one of the values in the target list.</dd>
         </dl>
       </section>
       <section anchor="chap-CDA" numbered="true" toc="default">
-        <name>Compression Decompression Actions (CDA)</name>
-        <t>The Compression Decompression Action (CDA) describes the actions taken during the compression of header fields and the inverse action taken by the decompressor to restore the original value.</t>
+        <name>Compression/Decompression Actions (CDA)</name>
+        <t>The CDA describes the actions taken during the compression of header fields and the inverse action taken by the decompressor to restore the original value.</t>
         <table anchor="Fig-function" align="center">
           <name>Compression and Decompression Actions</name>
           <thead>
@@ -620,8 +601,8 @@ Perhaps:
             </tr>
             <tr>
               <td align="left">LSB</td>
-              <td align="left">send least significant bit (LSB)</td>
-              <td align="left">concat. TV and received value</td>
+              <td align="left">send least significant bits (LSB)</td>
+              <td align="left">concatenate TV and received value</td>
             </tr>
             <tr>
               <td align="left">compute-*</td>
@@ -971,7 +952,7 @@ A value of 0 tells that the integrity check was not performed or that it was a f
             </dd>
             
               <dt>Compressed Bitmap:</dt><dd><t>The Compressed Bitmap is used together with windows and Bitmaps (see <xref target="Bitmap" format="default"/>).
-Its presence and size is defined for each F/R mode for each RuleID.  </t>
+Its presence and size is defined for each SCHC F/R mode for each RuleID.  </t>
               <t>
 This field appears in the SCHC ACK message to report on the receiver Bitmap (see <xref target="BitmapTrunc" format="default"/>).</t>
             </dd>
@@ -2103,7 +2084,7 @@ These consequences should be borne in mind when defining profiles for SCHC over 
           <t>Fragmentation is known for potentially allowing one to force through a Network Inspection device (e.g., firewall) packets that would be rejected if unfragmented.
 This involves sending overlapping fragments to rewrite fields whose initial value led the Network Inspection device to allow the flow go through.</t>
           <t>SCHC F/R is expected to be used over one LPWAN link, where no Network Inspection device is expected to sit.
-As described in <xref target="FunctionalMapping" format="default"/>, even if the SCHC F/R on the Network infrastructure side is located
+As described in <xref target="FunctionalMapping" format="default"/>, even if the SCHC F/R on the Network Infrastructure side is located
 in the Internet, a tunnel is to be established between it and the NGW.</t>
         </section>
         <section anchor="privacy-issues-associated-with-schc-header-fields" numbered="true" toc="default">
@@ -2112,7 +2093,7 @@ in the Internet, a tunnel is to be established between it and the NGW.</t>
 Concerns were raised that, if DTag is a wide counter that is incremented in a predictable fashion for each new fragmented SCHC Packet,
 it might lead to a privacy issue, such as enabling tracking of a device across LPWANs.</t>
           <t>However, SCHC F/R is expected to be used over exactly one LPWAN link.
-As described in <xref target="FunctionalMapping" format="default"/>, even if the SCHC F/R on the Network infrastructure side is located
+As described in <xref target="FunctionalMapping" format="default"/>, even if the SCHC F/R on the Network Infrastructure side is located
 in the Internet, a tunnel is to be established between it and the NGW.
 Therefore, assuming the tunnel provides confidentiality, neither the DTag field nor any other SCHC-introduced field is visible over the Internet.</t>
         </section>
@@ -2294,7 +2275,7 @@ Rule 1
       </figure>
       <t><xref target="Fig-fields" format="default"/> to <xref target="Fig-fields2" format="default"/> describe an example of a Rule set.</t>
       <t>In this example, 0 was chosen as the special RuleID that tags packets that cannot be compressed with any compression Rule.</t>
-      <t>All the fields described in Rules 1-3 are present in the IPv6 and UDP headers. The DevIID-DID value is found in the L2 header.</t>
+      <t>All the fields described in Rules 1-3 are present in the IPv6 and UDP headers. The DevIID value is found in the L2 header.</t>
       <t>Rules 2-3 use global addresses. The way the Dev learns the prefix is not in the scope of the document.</t>
       <t>Rule 3 compresses each port number to 4 bits.</t>
     </section>
@@ -2848,7 +2829,7 @@ The specification in <xref target="ACK-on-Error-sender" format="default"/> allow
         <li>Most common uses cases, deployment scenarios.</li>
         <li>Mapping of the SCHC architectural elements onto the LPWAN architecture.</li>
         <li>Assessment of LPWAN integrity checking.</li>
-        <li>Various potential channel conditions for the technology and the corresponding recommended use of SCHC C/D and F/R.</li>
+        <li>Various potential channel conditions for the technology and the corresponding recommended use of SCHC C/D and SCHC F/R.</li>
       </ul>
       <t>This section lists the parameters that need to be defined in the Profile.</t>
       <ul spacing="normal">
