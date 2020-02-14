@@ -573,7 +573,9 @@ Perhaps:
       </section>
       <section anchor="chap-CDA" numbered="true" toc="default">
         <name>Compression/Decompression Actions (CDA)</name>
-        <t>The CDA describes the actions taken during the compression of header fields and the inverse action taken by the decompressor to restore the original value.</t>
+        <t>The CDA specifies the actions taken during the compression of header fields and the inverse action taken by the decompressor to restore the original value.
+        The CDAs defined by this document are described in detail in <xref target="NotSentCDA" format="default"/> to <xref target="compute-" format="default"/>.
+        They are summarized in <xref target="Fig-function" format="default"/>.</t>
         <table anchor="Fig-function" align="center">
           <name>Compression and Decompression Actions</name>
           <thead>
@@ -621,14 +623,14 @@ Perhaps:
             </tr>
           </tbody>
         </table>
-        <t><xref target="Fig-function" format="default"/> summarizes the basic actions that can be used to compress and decompress a field. The first column shows the action's name. The second and third columns show the compression and decompression behaviors for each action.</t>
+        <t>The first column shows the action's name. The second and third columns show the compression and decompression behaviors for each action.</t>
         <section anchor="fixed-length-field" numbered="true" toc="default">
           <name>Processing Fixed-Length Fields</name>
           <t>If the field is identified in the Field Descriptor as being of fixed length, then applying the CDA to compress this field results in a fixed amount of bits.
 The residue for that field is simply the bits resulting from applying the CDA to the field.
 This value may be empty (e.g., not-sent CDA), in which case the field residue is absent from the Compression Residue.</t>
           <figure anchor="Fig-FieldResFixLength">
-            <name>Fixed-Sized Field Residue Structure</name>
+            <name>Fixed-Size Field Residue Structure</name>
             <artwork name="" type="" align="left" alt=""><![CDATA[
 |- field residue -|
 +-----------------+
@@ -645,7 +647,7 @@ or of variable size (e.g., value-sent or LSB).
 In the latter case, the residue for that field is the bits that result from applying the CDA to the field, preceded with the size of the value.
 The most significant bit of the size is stored to the left (leftmost bit of the residue field).</t>
           <figure anchor="Fig-FieldResVarLength">
-            <name>Variable-Sized Field Residue Structure</name>
+            <name>Variable-Size Field Residue Structure</name>
             <artwork name="" type="" align="left" alt=""><![CDATA[
 |--- field residue ---|
 +-------+-------------+
@@ -669,7 +671,7 @@ The most significant bit of the size is stored to the left (leftmost bit of the 
 	  "ignore", there is a risk of having a decompressed field
 	  value that is different from the original field that was compressed.</t>
           <t>The compressor does not send any residue for a field on which not-sent compression is applied.</t>
-          <t>The decompressor restores the field value with the Target Value stored in the matched Rule identified by the received RuleID.</t>
+          <t>The decompressor restores the field value with the TV stored in the matched Rule identified by the received RuleID.</t>
         </section>
         <section anchor="value-sent-cda" numbered="true" toc="default">
           <name>Value-Sent CDA</name>
@@ -679,8 +681,8 @@ The most significant bit of the size is stored to the left (leftmost bit of the 
         </section>
         <section anchor="mapping-sent-cda" numbered="true" toc="default">
           <name>Mapping-Sent CDA</name>
-          <t>The mapping-sent action is used to send an index (the index into the Target Value list of values) instead of the original value. This action is used together with the "match-mapping" MO.</t>
-          <t>On the compressor side, the match-mapping Matching Operator searches the TV for a match with the header field value. The mapping-sent CDA then sends the corresponding index as the field residue.
+          <t>The mapping-sent action is used to send an index (the index into the TV list of values) instead of the original value. This action is used together with the "match-mapping" MO.</t>
+          <t>On the compressor side, the match-mapping MO searches the TV for a match with the header field value. The mapping-sent CDA then sends the corresponding index as the field residue.
 The most significant bit of the index is stored to the left (leftmost bit of the residue field).</t>
           <t>On the decompressor side, the CDA uses the received index to restore the field value by looking up the list in the TV.</t>
           <t>The number of bits sent is the minimal size for coding all the possible indices.</t>
@@ -693,19 +695,19 @@ The most significant bit of the index is stored to the left (leftmost bit of the
 The number of bits sent is the original header field length minus the length specified in the MSB(x) MO.
 The bits appear in the residue in the same bit order as in the original packet header.</t>
           <t>The decompressor concatenates the x most significant bits
-	  of the Target Value and the received residue value.</t>
+	  of the TV and the received residue value.</t>
           <t>If this action is performed on a variable-length field, the size of the residue value (using the units defined in FL) <bcp14>MUST</bcp14> be sent as described in <xref target="var-length-field" format="default"/>.</t>
         </section>
         <section anchor="deviid-appiid-cda" numbered="true" toc="default">
           <name>DevIID, AppIID CDA</name>
-          <t>These actions are used to process respectively the Dev and the App Interface Identifiers (DevIID and AppIID) of the IPv6 addresses. AppIID CDA is less common since most current LPWAN technologies frames contain a single L2 address, which is the Dev's address.</t>
-          <t>The IID value <bcp14>MAY</bcp14> be computed from the Device ID present in the L2 header, or from some other stable identifier. The computation is specific to each Profile and <bcp14>MAY</bcp14> depend on the Device ID size.</t>
-          <t>In the downlink direction (Dw), at the compressor, the DevIID CDA may be used to generate the L2 addresses on the LPWAN, based on the packet's Destination Address.</t>
+          <t>These actions are used to process the DevIID and AppIID of the IPv6 addresses, respectively. AppIID CDA is less common since most current LPWAN technologies frames contain a single L2 address, which is the Dev's address.</t>
+          <t>The DevIID value <bcp14>MAY</bcp14> be computed from the Device ID present in the L2 header, or from some other stable identifier. The computation is specific to each Profile and <bcp14>MAY</bcp14> depend on the Device ID size.</t>
+          <t>In the Downlink direction, at the compressor, the DevIID CDA may be used to generate the L2 addresses on the LPWAN, based on the packet's Destination Address.</t>
         </section>
         <section anchor="compute-" numbered="true" toc="default">
           <name>Compute-*</name>
           <t>Some fields can be elided at the compressor and recomputed locally at the decompressor.</t>
-          <t>Because the field is uniquely identified by its Field ID (e.g., UDP length), the relevant protocol specification unambiguously defines the algorithm for such computation.</t>
+          <t>Because the field is uniquely identified by its FID (e.g., UDP length), the relevant protocol specification unambiguously defines the algorithm for such computation.</t>
           <t>Examples of fields that know how to recompute themselves are UDP length, IPv6 length and UDP checksum.</t>
         </section>
       </section>
