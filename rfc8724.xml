@@ -259,7 +259,7 @@ SCHC comprises two sublayers (i.e., the Compression sublayer and the Fragmentati
              +----------------+]]></artwork>
       </figure>
       <t>Before an upper layer packet (e.g., an IPv6 packet) is transmitted to the underlying layer, header compression is first attempted. The resulting packet is called a "SCHC Packet", whether or not any compression is performed.
-If needed by the underlying layer, the optional SCHC Fragmentation <bcp14>MAY</bcp14> be applied to the SCHC Packet.
+If needed by the underlying layer, the optional SCHC fragmentation <bcp14>MAY</bcp14> be applied to the SCHC Packet.
 The inverse operations take place at the receiver. This process is illustrated in <xref target="Fig-Operations" format="default"/>.</t>
       <figure anchor="Fig-Operations">
         <name>SCHC Operations at the Sender and the Receiver</name>
@@ -286,7 +286,7 @@ A packet (e.g., an IPv6 packet)
 
         Sender                                    Receiver
 
-*: the decision not to use SCHC Fragmentation is left to each Profile
+*: the decision not to use SCHC fragmentation is left to each Profile
 +: optional, depends on Fragmentation mode]]></artwork>
       </figure>
       <section anchor="schc-packet-format" numbered="true" toc="default">
@@ -718,7 +718,7 @@ The bits appear in the residue in the same bit order as in the original packet h
         <name>Overview</name>
         <t>In LPWAN technologies, the L2 MTU typically ranges from tens to hundreds of bytes.
 Some of these technologies do not have an internal fragmentation/reassembly mechanism.</t>
-        <t>The optional SCHC Fragmentation/Reassembly (SCHC F/R) functionality enables such LPWAN technologies to comply with the IPv6 MTU requirement of 1280 bytes <xref target="RFC8200" format="default"/>.
+        <t>The optional SCHC F/R functionality enables such LPWAN technologies to comply with the IPv6 MTU requirement of 1280 bytes <xref target="RFC8200" format="default"/>.
 It is <bcp14>OPTIONAL</bcp14> to implement per this specification, but Profiles may specify that it is <bcp14>REQUIRED</bcp14>.</t>
         <t>This specification includes several SCHC F/R modes, which allow for a range of reliability options such as optional SCHC Fragment retransmission.
 More modes may be defined in the future.</t>
@@ -1006,7 +1006,7 @@ This condition is also met if the SCHC Fragment Header is a multiple of L2 Words
             <t>The All-1 SCHC Fragment format is shown in <xref target="Fig-LastFrag" format="default"/>.
 The sender uses the All-1 SCHC Fragment format for the message that completes the emission of a fragmented SCHC Packet.
 The DTag field, the W field, the RCS field and the Payload are <bcp14>OPTIONAL</bcp14>, their presence is specified by each mode and Profile.
-At least one of RCS field or Payload <bcp14>MUST</bcp14> be present.
+At least one of RCS field or Fragment Payload <bcp14>MUST</bcp14> be present.
 The FCN field is all ones.</t>
             <figure anchor="Fig-LastFrag">
               <name>Detailed Header Format for the All-1 SCHC Fragment</name>
@@ -1016,14 +1016,14 @@ The FCN field is all ones.</t>
 +-- ... -+- ... -+---+- ... -+- ... -+-----...-----+~~~~~~~~~~~~~~~~~
 | RuleID | DTag  | W | 11..1 |  RCS  | FragPayload | pad. (as needed)
 +-- ... -+- ... -+---+- ... -+- ... -+-----...-----+~~~~~~~~~~~~~~~~~
-                        (FCN)]]></artwork>
+                       (FCN)]]></artwork>
             </figure>
             <t>Profiles <bcp14>MUST</bcp14> ensure that
 an All-1 SCHC Fragment message is distinguishable by size,
 even in the presence of padding,
 from a SCHC Sender-Abort message (see <xref target="SenderAbort" format="default"/>) with the same RuleID value and with the same T, M, and N values.
 This condition is met if the RCS is present and is at least the size of an L2 Word
-or if the Payload is present and at least the size an L2 Word.
+or if the Payload is present and is at least the size an L2 Word.
 This condition is also met if the SCHC Sender-Abort Header is a multiple of L2 Words.</t>
           </section>
         </section>
@@ -1085,7 +1085,7 @@ Original:
 +-- ... -+- ... -+---+---+---------------------------------+
 | RuleID |  DTag | W |C=0|1 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1|
 +-- ... -+- ... -+---+---+---------------------------------+
-        next L2 Word boundary ->|]]></artwork>
+       next L2 Word boundary ->|]]></artwork>
             </figure>
             <t><xref target="Fig-transmittedbitmap" format="default"/> shows that the last 14 bits are not sent.</t>
             <figure anchor="Fig-transmittedbitmap">
@@ -1096,7 +1096,7 @@ Original:
 +-- ... -+- ... -+---+---+-----+
 | RuleID |  DTag | W |C=0|1 0 1|
 +-- ... -+- ... -+---+---+-----+
-        next L2 Word boundary ->|]]></artwork>
+       next L2 Word boundary ->|]]></artwork>
             </figure>
             <t><xref target="Fig-Bitmap-Win" format="default"/> shows an example of a SCHC ACK with tile indices ranging from 6 down to 0, where the Bitmap indicates that the second and the fourth tile of the window have not been correctly received.</t>
             <figure anchor="Fig-Bitmap-Win">
@@ -1114,7 +1114,7 @@ Original:
 +--------+-------+---+---+-------------+~~~~+
    next L2 Word boundary ->|<-- L2 Word --->|]]></artwork>
             </figure>
-            <t><xref target="Fig-Bitmap-lastWin" format="default"/> shows an example of a SCHC ACK with FCN ranging from 6 down to 0, where integrity check has not been performed or has failed and the Bitmap indicates that there is no missing tile in that window.</t>
+            <t><xref target="Fig-Bitmap-lastWin" format="default"/> shows an example of a SCHC ACK with tile indices ranging from 6 down to 0, where integrity check has not been performed or has failed and the Bitmap indicates that there is no missing tile in that window.</t>
             <figure anchor="Fig-Bitmap-lastWin">
               <name>Example of a SCHC ACK Message, No Missing Tile</name>
               <artwork name="" type="" align="left" alt=""><![CDATA[
@@ -1216,7 +1216,7 @@ The bits that follow the SCHC Receiver-Abort Header <bcp14>MUST</bcp14> be as fo
         <section anchor="No-ACK-subsection" numbered="true" toc="default">
           <name>No-ACK Mode</name>
           <t>The No-ACK mode has been designed under the assumption that data unit out-of-sequence delivery does not occur between the entity performing fragmentation and the entity performing reassembly.
-This mode supports LPWAN technologies that have a variable MTU.</t>
+This mode supports L2 technologies that have a variable MTU.</t>
           <t>In No-ACK mode, there is no communication from the fragment receiver to the fragment sender.
 The sender transmits all the SCHC Fragments without expecting any acknowledgement.
 Therefore, No-ACK does not require bidirectional links: unidirectional links are just fine.</t>
@@ -1300,10 +1300,10 @@ The fragment sender only advances to the next window of tiles when it has ascert
           <t>The W field <bcp14>MUST</bcp14> be present and its size M <bcp14>MUST</bcp14> be 1 bit.</t>
           <t>Each Profile, for each RuleID value, <bcp14>MUST</bcp14> define:</t>
           <ul spacing="normal">
-            <li>the value of N (size of the FCN field),</li>
+            <li>the value of N,</li>
             <li>the value of WINDOW_SIZE, which <bcp14>MUST</bcp14> be strictly less than 2^N,</li>
             <li>the size and algorithm for the RCS field,</li>
-            <li>the size of the DTag field,</li>
+            <li>the value of T,</li>
             <li>the value of MAX_ACK_REQUESTS,</li>
             <li>the expiration time of the Retransmission Timer, and</li>
             <li>the expiration time of the Inactivity Timer.</li>
@@ -1561,8 +1561,8 @@ and it <bcp14>MAY</bcp14> exit the receive process for that SCHC Packet.</t>
         </section>
         <section anchor="ACK-on-Error-subsection" numbered="true" toc="default">
           <name>ACK-on-Error Mode</name>
-          <t>The ACK-on-Error mode supports LPWAN technologies that have variable MTU and out-of-order delivery.
-It operates with links that provide a feedback path from the reassembler to the fragmenter.
+          <t>The ACK-on-Error mode supports L2 technologies that have variable MTU and out-of-order delivery.
+It requires an L2 that provides a feedback path from the reassembler to the fragmenter.
 See <xref target="AsymLinks" format="default"/> for a discussion on using ACK-on-Error mode on quasi-bidirectional links.</t>
           <t>In ACK-on-Error mode, windows are used.</t>
           <t>All tiles except the last one and the penultimate one <bcp14>MUST</bcp14> be of equal size, hereafter called "regular".
@@ -1587,7 +1587,7 @@ Tile#   | 4 | 3 | 2 | 1 | 0 | 4 | 3 | 2 | 1 | 0 | 4 |     | 0 | 4 |3|
 Window# |-------- 0 --------|-------- 1 --------|- 2  ... 27 -|- 28-|
 
 
-SCHC Fragment msg    |-----------|]]></artwork>
+SCHC Fragment msg   |-----------|]]></artwork>
           </figure>
           <t>The W field is wide enough that it unambiguously represents an absolute window number.
 The fragment receiver sends SCHC ACKs to the fragment sender about windows for which tiles are missing.
@@ -1608,11 +1608,11 @@ and this information has been conveyed back to the sender, or</li>
           <t>Each Profile, for each RuleID value, <bcp14>MUST</bcp14> define:</t>
           <ul spacing="normal">
             <li>the tile size (a tile does not need to be multiple of an L2 Word, but it <bcp14>MUST</bcp14> be at least the size of an L2 Word),</li>
-            <li>the value of M (size of the W field),</li>
-            <li>the value of N (size of the FCN field),</li>
+            <li>the value of M,</li>
+            <li>the value of N,</li>
             <li>the value of WINDOW_SIZE, which <bcp14>MUST</bcp14> be strictly less than 2^N,</li>
             <li>the size and algorithm for the RCS field,</li>
-            <li>the size of the DTag field,</li>
+            <li>the value of T,</li>
             <li>the value of MAX_ACK_REQUESTS,</li>
             <li>the expiration time of the Retransmission Timer,</li>
             <li>the expiration time of the Inactivity Timer,</li>
@@ -1769,7 +1769,7 @@ the size of one regular tile plus the size of an L2 Word, this <bcp14>SHOULD</bc
                   <li>The payload may contain the penultimate tile that, if allowed by the Profile, <bcp14>MAY</bcp14> be exactly one L2 Word shorter than the regular tile size.</li>
                   <li>
                     <t>Otherwise, padding bits <bcp14>MUST</bcp14> be discarded.
-The latter is possible because:</t>
+This is possible because:</t>
                     <ul spacing="normal">
                       <li>the size of the tiles is known a priori,</li>
                       <li>tiles are larger than an L2 Word, and</li>
@@ -1835,7 +1835,7 @@ Original:
       <name>Padding Management</name>
       <t>SCHC C/D and SCHC F/R operate on bits, not bytes. SCHC itself does not have any alignment prerequisite.
 The size of SCHC Packets can be any number of bits.</t>
-      <t>If the layer below SCHC constrains the payload to align to some boundary, called "L2 Words" (for example, bytes),
+      <t>If the L2 constrains the payload to align to coarser boundaries (for example, bytes),
 the SCHC messages <bcp14>MUST</bcp14> be padded.
 When padding occurs, the number of appended bits <bcp14>MUST</bcp14> be strictly less than the L2 Word size.</t>
       <t>If a SCHC Packet is sent unfragmented (see <xref target="Fig-Operations-Pad" format="default"/>), it is padded as needed for transmission.</t>
@@ -1868,7 +1868,7 @@ A packet (e.g., an IPv6 packet)
       </figure>
       <t>Each Profile <bcp14>MUST</bcp14> specify the size of the L2 Word.
 The L2 Word might actually be a single bit, in which case no padding will take place at all.</t>
-      <t>A Profile <bcp14>MAY</bcp14> define the value of the padding bits. The <bcp14>RECOMMENDED</bcp14> value is 0.</t>
+      <t>If the L2 Word is wider than a single bit, a Profile <bcp14>MUST</bcp14> define the value of the padding bits. The <bcp14>RECOMMENDED</bcp14> value is 0.</t>
     </section>
     <section anchor="schc-compression-for-ipv6-and-udp-headers" numbered="true" toc="default">
       <name>SCHC Compression for IPv6 and UDP Headers</name>
@@ -1920,13 +1920,13 @@ this Next Header value, the MO <bcp14>SHOULD</bcp14> be "equal", and the CDA <bc
       </section>
       <section anchor="hop-limit-field" numbered="true" toc="default">
         <name>Hop Limit Field</name>
-        <t>The field behavior for this field is different for uplink (Up) and downlink (Dw).
-In Up, since there is no IP forwarding between the Dev and the SCHC C/D, the value is relatively constant.
-On the other hand, the Dw value depends on Internet routing and can change more frequently.
-The Direction Indicator (DI) can be used to distinguish both directions:</t>
+        <t>The field behavior for this field is different for Uplink and Downlink.
+In Uplink, since there is no IP forwarding between the Dev and the SCHC C/D, the value is relatively constant.
+On the other hand, the Downlink value depends on Internet routing and can change more frequently.
+The DI can be used to distinguish both directions:</t>
         <ul spacing="normal">
-          <li>in the Up, elide the field: the TV in the Field Descriptor is set to the known constant value, the MO is set to "equal" and the CDA is set to "not-sent".</li>
-          <li>in the Dw, the Hop Limit is elided for transmission and forced to 1 at the receiver, by setting TV to 1, MO to "ignore" and CDA to "not-sent". This prevents any further forwarding.</li>
+          <li>in an Up Field Descriptor, elide the field: the TV is set to the known constant value, the MO is set to "equal" and the CDA is set to "not-sent".</li>
+          <li>in a Dw Field Descriptor, the Hop Limit is elided for transmission and forced to 1 at the receiver, by setting TV to 1, MO to "ignore" and CDA to "not-sent". This prevents any further forwarding.</li>
         </ul>
       </section>
       <section anchor="ipv6-addresses-fields" numbered="true" toc="default">
@@ -1942,13 +1942,13 @@ source and destination prefixes contain the values, the MO is set to "equal" and
         </section>
         <section anchor="ipv6-source-and-destination-iid" numbered="true" toc="default">
           <name>IPv6 Source and Destination IID</name>
-          <t>If the Dev or App IID are based on an LPWAN address, then the IID can be reconstructed with information coming from the LPWAN header. In that case, the TV is not set, the MO is set to "ignore" and the CDA is set to "DevIID" or "AppIID".
+          <t>If the Dev or App IID are based on an L2 address, then the IID can be reconstructed with information coming from the L2 header. In that case, the TV is not set, the MO is set to "ignore" and the CDA is set to "DevIID" or "AppIID".
 On LPWAN technologies where the frames carry a single identifier (corresponding to the Dev), AppIID cannot be used.</t>
           <t>As described in <xref target="RFC8065" format="default"/>, it may be undesirable to build the Dev IPv6 IID out of the Dev address. Another static value is used instead.
 In that case, the TV contains the static value, the MO operator is set to "equal" and the CDA is set to "not-sent".</t>
           <t>If several IIDs are possible, then the TV contains the list of possible IIDs, the MO is set to "match-mapping" and the CDA is set to "mapping-sent".</t>
           <t>It may also happen that the IID variability only expresses itself on a few bytes. In that case, the TV is set to the stable part of the IID, the MO is set to "MSB" and the CDA is set to "LSB".</t>
-          <t>Finally, the IID can be sent in its entirety on the LPWAN. In that case, the TV is not set, the MO is set to "ignore", and the CDA is set to "value-sent".</t>
+          <t>Finally, the IID can be sent in its entirety on the L2. In that case, the TV is not set, the MO is set to "ignore", and the CDA is set to "value-sent".</t>
         </section>
       </section>
       <section anchor="ipv6-extension-headers" numbered="true" toc="default">
@@ -1962,7 +1962,7 @@ In that case, the TV contains the static value, the MO operator is set to "equal
 	contains the port number, the MO is set to "equal", and the CDA is set to "not-sent".</t>
         <t>If the port variation is on few bits, the TV contains the stable part of the port number, the MO is set to "MSB", and the CDA is set to "LSB".</t>
         <t>If some well-known values are used,  the TV can contain the list of these values, the MO is set to "match-mapping", and the CDA is set to "mapping-sent".</t>
-        <t>Otherwise, the port numbers are sent over the LPWAN. The TV is not set, the MO is set to "ignore" and the CDA is set to "value-sent".</t>
+        <t>Otherwise, the port numbers are sent over the L2. The TV is not set, the MO is set to "ignore" and the CDA is set to "value-sent".</t>
       </section>
       <section anchor="udp-length-field" numbered="true" toc="default">
         <name>UDP Length Field</name>
@@ -2020,19 +2020,19 @@ into an LPWAN by adding the SCHC functionalities.</t>
         <name>Security Considerations for SCHC Compression/Decompression</name>
         <section anchor="forged-schc-packet" numbered="true" toc="default">
           <name>Forged SCHC Packet</name>
-          <t>Let's assume that an attacker is able to send a forged SCHC Packet to a SCHC Decompressor.</t>
+          <t>Let's assume that an attacker is able to send a forged SCHC Packet to a SCHC decompressor.</t>
           <t>Let's first consider the case where the RuleID contained in that forged SCHC Packet does not correspond to a Rule allocated in the Rule table.
 An implementation should detect that the RuleID is invalid and should silently drop the offending SCHC Packet.</t>
           <t>Let's now consider that the RuleID corresponds to a Rule in the table. With the CDAs defined in this document, the reconstructed packet is, at most, a constant number of bits bigger than the SCHC Packet that was received.
 This assumes that the compute-* decompression actions produce a bounded number of bits, irrespective of the incoming SCHC Packet. This property is true for IPv6 Length, UDP Length, and UDP Checksum, for which the compute-* CDA is recommended by this document.</t>
-          <t>As a consequence, SCHC Decompression does not amplify attacks, beyond adding a bounded number of bits to the SCHC Packet received. This bound is determined by the Rule stored in the receiving device.</t>
-          <t>As a general safety measure, a SCHC Decompressor should never reconstruct a packet larger than MAX_PACKET_SIZE (defined in a Profile, with 1500 bytes as generic default).</t>
+          <t>As a consequence, SCHC decompression does not amplify attacks, beyond adding a bounded number of bits to the SCHC Packet received. This bound is determined by the Rule stored in the receiving device.</t>
+          <t>As a general safety measure, a SCHC decompressor should never reconstruct a packet larger than MAX_PACKET_SIZE (defined in a Profile, with 1500 bytes as generic default).</t>
         </section>
         <section anchor="compressed-packet-size-as-a-side-channel-to-guess-a-secret-token" numbered="true" toc="default">
           <name>Compressed Packet Size as a Side Channel to Guess a Secret Token</name>
           <t>Some packet compression methods are known to be susceptible to attacks, such as BREACH and CRIME.
 The attack involves injecting arbitrary data into the packet and observing the resulting compressed packet size. The observed size potentially reflects correlation between the arbitrary data and some content that was meant to remain secret, such as a security token, thereby allowing the attacker to get at the secret.</t>
-          <t>By contrast, SCHC Compression takes place header field by header field,
+          <t>By contrast, SCHC compression takes place header field by header field,
 with the SCHC Packet being a mere concatenation of the compression residues of each of the individual field.
 Any correlation between header fields does not result in a change in the SCHC Packet size compressed under the same Rule.</t>
           <t>If SCHC C/D is used to compress packets that include a secret information field, such as a token,
@@ -2058,7 +2058,7 @@ these situations may result in the packet being considered corrupt and dropped.<
         <name>Security Considerations for SCHC Fragmentation/Reassembly</name>
         <section anchor="buffer-reservation-attack" numbered="true" toc="default">
           <name>Buffer Reservation Attack</name>
-          <t>Let's assume that an attacker is able to send a forged SCHC Fragment to a SCHC Reassembler.</t>
+          <t>Let's assume that an attacker is able to send a forged SCHC Fragment to a SCHC reassembler.</t>
           <t>A node can perform a buffer reservation attack: the receiver will reserve buffer space for the SCHC Packet. If the implementation has only one buffer, other incoming fragmented SCHC Packets will be dropped while the reassembly buffer is occupied during the reassembly timeout. Once that timeout expires, the attacker can repeat the same procedure, and iterate, thus, creating a denial-of-service attack.
 An implementation may have multiple reassembly buffers. The cost to mount this attack is linear with the number of buffers at the target node.
 Better, the cost for an attacker can be increased if individual
@@ -2069,7 +2069,7 @@ Another mild countermeasure is for the target to abort the fragmentation/reassem
         </section>
         <section anchor="corrupt-fragment-attack" numbered="true" toc="default">
           <name>Corrupt Fragment Attack</name>
-          <t>Let's assume that an attacker is able to send a forged SCHC Fragment to a SCHC Reassembler.
+          <t>Let's assume that an attacker is able to send a forged SCHC Fragment to a SCHC reassembler.
 The malicious node is additionally assumed to be able to hear an incoming communication destined to the target node.</t>
           <t>It can then send a forged SCHC Fragment that looks like it belongs to a SCHC Packet already being reassembled at the target node.
 This can cause the SCHC Packet to be considered corrupt and to be dropped by the receiver.
@@ -2836,7 +2836,7 @@ The specification in <xref target="ACK-on-Error-sender" format="default"/> allow
       <t>This section lists the parameters that need to be defined in the Profile.</t>
       <ul spacing="normal">
         <li>RuleID numbering scheme, fixed-size or variable-size RuleIDs, number of Rules, the way the RuleID is transmitted.</li>
-        <li>maximum packet size that should ever be reconstructed by SCHC Decompression (MAX_PACKET_SIZE). See <xref target="SecConsiderations" format="default"/>.</li>
+        <li>maximum packet size that should ever be reconstructed by SCHC decompression (MAX_PACKET_SIZE). See <xref target="SecConsiderations" format="default"/>.</li>
         <li>Padding: size of the L2 Word (for most LPWAN technologies, this would be a byte; for some technologies, a bit).</li>
         <li>
           <t>Decision to use SCHC fragmentation mechanism or not. If yes, the document must describe:  </t>
