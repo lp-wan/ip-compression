@@ -446,7 +446,7 @@ The value 0 is special. It means "don't care", see <xref target="PProcessing" fo
             </dl>
           </li>
           <li>Target Value (TV) is the value used to match against the packet header field. The Target Value can be a scalar value of any type (integer, strings, etc.) or a more complex structure (array, list, etc.). The types and representations are out of scope for this document.</li>
-          <li>Matching Operator (MO) is the operator used to match the field value and the Target Value. The Matching Operator may require some parameters. MO is only used during the compression phase. The set of MOs defined in this document can be found in <xref target="chap-MO" format="default"/>.</li>
+          <li>Matching Operator (MO) is the operator used to match the field value and the Target Value. The Matching Operator may require some parameters. The set of MOs defined in this document can be found in <xref target="chap-MO" format="default"/>.</li>
           <li>Compression/Decompression Action (CDA) describes the pair of actions that are performed at the compressor to compress a header field and at the decompressor to recover the original value of the header field. Some CDAs might use parameter values for their operation. The set of CDAs defined in this document can be found in <xref target="chap-CDA" format="default"/>.</li>
         </ul>
       </section>
@@ -532,11 +532,11 @@ The order in which the Field Descriptors appear in the Rule is therefore semanti
     +-----------------+-----------------+-----+-----------------+]]></artwork>
         </figure>
         <dl spacing="normal">
-          <dt>Sending:</dt><dd>The RuleID is sent to the other end followed by the Compression Residue (which could be empty) or the uncompressed header, and directly followed by the payload (see <xref target="Fig-SCHCpckt" format="default"/>).
+          <dt>Sending:</dt><dd>The RuleID is sent to the other end jointly with the Compression Residue (which could be empty) or the uncompressed header, and directly followed by the payload (see <xref target="Fig-SCHCpckt" format="default"/>).
 The way the RuleID is sent will be specified in the Profile and is out of the scope of the present document.
 For example, it could be included in an L2 header or sent as part of the L2 payload.</dd>
           
-            <dt>Decompression:</dt><dd><t>when decompressing, on the Network Infrastructure side, the SCHC C/D needs to find the correct Rule based on the L2 address of the Dev; in this way, it can use the DevIID and the RuleID. On the Dev side, only the RuleID is needed to identify the correct Rule since the Dev typically only holds Rules that apply to itself.  </t>
+            <dt>Decompression:</dt><dd><t>when decompressing, on the Network Infrastructure side, the SCHC C/D needs to find the correct Rule based on the L2 address of the Dev. On the Dev side, only the RuleID is needed to identify the correct Rule since the Dev typically only holds Rules that apply to itself.  </t>
             <t>
 This Rule describes the compressed header format. From this, the decompressor determines the order of the residues, the fixed-size or variable-size nature of each residue (see <xref target="var-length-field" format="default"/>),
 and the size of the fixed-size residues.  </t>
@@ -701,7 +701,7 @@ The bits appear in the residue in the same bit order as in the original packet h
         <section anchor="deviid-appiid-cda" numbered="true" toc="default">
           <name>DevIID, AppIID CDA</name>
           <t>These actions are used to process the DevIID and AppIID of the IPv6 addresses, respectively. AppIID CDA is less common since most current LPWAN technologies frames contain a single L2 address, which is the Dev's address.</t>
-          <t>The DevIID value <bcp14>MAY</bcp14> be computed from the Device ID present in the L2 header, or from some other stable identifier. The computation is specific to each Profile and <bcp14>MAY</bcp14> depend on the Device ID size.</t>
+          <t>The DevIID value <bcp14>MAY</bcp14> be computed from the Dev ID present in the L2 header, or from some other stable identifier. The computation is specific to each Profile and <bcp14>MAY</bcp14> depend on the Dev ID size.</t>
           <t>In the Downlink direction, at the compressor, the DevIID CDA may be used to generate the L2 addresses on the LPWAN, based on the packet's Destination Address.</t>
         </section>
         <section anchor="compute-" numbered="true" toc="default">
@@ -1868,7 +1868,7 @@ A packet (e.g., an IPv6 packet)
       </figure>
       <t>Each Profile <bcp14>MUST</bcp14> specify the size of the L2 Word.
 The L2 Word might actually be a single bit, in which case no padding will take place at all.</t>
-      <t>If the L2 Word is wider than a single bit, a Profile <bcp14>MUST</bcp14> define the value of the padding bits. The <bcp14>RECOMMENDED</bcp14> value is 0.</t>
+      <t>A Profile <bcp14>MUST</bcp14> define the value of the padding bits if the L2 Word is wider than a single bit. The <bcp14>RECOMMENDED</bcp14> value is 0.</t>
     </section>
     <section anchor="schc-compression-for-ipv6-and-udp-headers" numbered="true" toc="default">
       <name>SCHC Compression for IPv6 and UDP Headers</name>
@@ -2084,7 +2084,7 @@ These consequences should be borne in mind when defining profiles for SCHC over 
         <section anchor="fragmentation-as-a-way-to-bypass-network-inspection" numbered="true" toc="default">
           <name>Fragmentation as a Way to Bypass Network Inspection</name>
           <t>Fragmentation is known for potentially allowing one to force through a Network Inspection device (e.g., firewall) packets that would be rejected if unfragmented.
-This involves sending overlapping fragments to rewrite fields whose initial value led the Network Inspection device to allow the flow go through.</t>
+This involves sending overlapping fragments to rewrite fields whose initial value led the Network Inspection device to allow the flow to go through.</t>
           <t>SCHC F/R is expected to be used over one LPWAN link, where no Network Inspection device is expected to sit.
 As described in <xref target="FunctionalMapping" format="default"/>, even if the SCHC F/R on the Network Infrastructure side is located
 in the Internet, a tunnel is to be established between it and the NGW.</t>
@@ -2167,8 +2167,7 @@ The last flow is for legacy applications using different ports numbers, the dest
 +------------------------------+
          Dev or NGW]]></artwork>
       </figure>
-      <t>In some LPWAN technologies, only the Devs have a device ID.
-When such technologies are used, it is necessary to statically define an IID for the Link Local address for the SCHC C/D.</t>
+
 
 <!-- [rfced] Figure 26 breaks across pages badly in the PDF file.  See Figure
 26 in the PDF: 
@@ -2199,8 +2198,8 @@ Rule 0
 
 Rule 1
  +----------------+--+--+--+---------+--------+------------++------+
- | Field          |FL|FP|DI| Value   | Match  | Comp Decomp|| Sent |
- |                |  |  |  |         | Opera. | Action     ||[bits]|
+ |       FID      |FL|FP|DI|    TV   |   MO   |     CDA    || Sent |
+ |                |  |  |  |         |        |            ||[bits]|
  +----------------+--+--+--+---------+---------------------++------+
  |IPv6 Version    |4 |1 |Bi|6        | ignore | not-sent   ||      |
  |IPv6 Diffserv   |8 |1 |Bi|0        | equal  | not-sent   ||      |
@@ -2225,8 +2224,8 @@ Rule 1
         <artwork name="" type="" align="left" alt=""><![CDATA[
  Rule 2
  +----------------+--+--+--+---------+--------+------------++------+
- | Field          |FL|FP|DI| Value   | Match  | Action     || Sent |
- |                |  |  |  |         | Opera. | Action     ||[bits]|
+ |       FID      |FL|FP|DI|    TV   |   MO   |     CDA    || Sent |
+ |                |  |  |  |         |        |            ||[bits]|
  +----------------+--+--+--+---------+--------+------------++------+
  |IPv6 Version    |4 |1 |Bi|6        | ignore | not-sent   ||      |
  |IPv6 Diffserv   |8 |1 |Bi|0        | equal  | not-sent   ||      |
@@ -2254,8 +2253,8 @@ Rule 1
         <artwork name="" type="" align="left" alt=""><![CDATA[
  Rule 3
  +----------------+--+--+--+---------+--------+------------++------+
- | Field          |FL|FP|DI| Value   | Match  | Action     || Sent |
- |                |  |  |  |         | Opera. | Action     ||[bits]|
+ |       FID      |FL|FP|DI|    TV   |   MO   |     CDA    || Sent |
+ |                |  |  |  |         |        |            ||[bits]|
  +----------------+--+--+--+---------+--------+------------++------+
  |IPv6 Version    |4 |1 |Bi|6        | ignore | not-sent   ||      |
  |IPv6 Diffserv   |8 |1 |Bi|0        | equal  | not-sent   ||      |
@@ -2277,7 +2276,7 @@ Rule 1
       </figure>
       <t><xref target="Fig-fields" format="default"/> to <xref target="Fig-fields2" format="default"/> describe an example of a Rule set.</t>
       <t>In this example, 0 was chosen as the special RuleID that tags packets that cannot be compressed with any compression Rule.</t>
-      <t>All the fields described in Rules 1-3 are present in the IPv6 and UDP headers. The DevIID value is found in the L2 header.</t>
+      <t>All the fields described in Rules 1-3 are present in the IPv6 and UDP headers. The DevIID value is inferred from the L2 header.</t>
       <t>Rules 2-3 use global addresses. The way the Dev learns the prefix is not in the scope of the document.</t>
       <t>Rule 3 compresses each port number to 4 bits.</t>
     </section>
@@ -2303,7 +2302,7 @@ In the drawings, Bitmaps are shown in their uncompressed form.</t>
           |-----FCN=1 + RCS --->| Integrity check: success
         (End)]]></artwork>
       </figure>
-      <t>In the following examples, N (the size of the FCN field) is 3 bits. The All-1 FCN value is 7.</t>
+      <t>In the following examples, N (the size of the FCN field) is 3 bits. The All-1 FCN value is therefore 7.</t>
       <t><xref target="Fig-Example-Win-NoLoss-NACK" format="default"/> illustrates the transmission in ACK-on-Error mode of a SCHC Packet fragmented in 11 tiles, with one tile per SCHC Fragment, WINDOW_SIZE=7 and no lost SCHC Fragment.</t>
       <figure anchor="Fig-Example-Win-NoLoss-NACK">
         <name>ACK-on-Error Mode, 11 Tiles, One Tile per SCHC Fragment, No Lost SCHC Fragment</name>
@@ -2856,17 +2855,16 @@ The specification in <xref target="ACK-on-Error-sender" format="default"/> allow
             <li>MAX_ACK_REQUESTS value for each RuleID value, if applicable to the SCHC F/R mode.</li>
           </ul>
         </li>
-        <li>if L2 Word is wider than a bit and SCHC fragmentation is used, value of the padding bits (0 or 1). This is needed
-because the padding bits of the last fragment are included in the RCS computation.</li>
+        <li>if L2 Word is wider than a bit and SCHC fragmentation is used, value of the padding bits (0 or 1).</li>
       </ul>
       <t>A Profile may define a delay to be added after each SCHC message transmission for compliance with local regulations or other constraints imposed by the applications.</t>
       <ul spacing="normal">
         <li>In some LPWAN technologies, as part of energy-saving techniques,
-downlink transmission is only possible immediately after an uplink transmission.
-In order to avoid potentially high delay in the downlink transmission of a fragmented SCHC Packet,
-the SCHC Fragment receiver may perform an uplink transmission as soon as possible after reception of a SCHC
+Downlink transmission is only possible immediately after an Uplink transmission.
+In order to avoid potentially high delay in the Downlink transmission of a fragmented SCHC Packet,
+the SCHC Fragment receiver may perform an Uplink transmission as soon as possible after reception of a SCHC
 Fragment that is not the last one.
-Such uplink transmission may be triggered by the L2 (e.g., an L2 ACK sent in response to a SCHC Fragment encapsulated
+Such Uplink transmission may be triggered by the L2 (e.g., an L2 ACK sent in response to a SCHC Fragment encapsulated
 in a L2 PDU that requires an L2 ACK) or it may be triggered from an upper layer. See <xref target="AsymLinks" format="default"/>.</li>
         <li>
           <t>the following parameters need to be addressed in documents other than this one but not necessarily in
@@ -2887,21 +2885,21 @@ the LPWAN technology-specific documents:  </t>
       <t>The ACK-Always and ACK-on-Error modes of SCHC F/R are bidirectional protocols:
 they require a feedback path from the reassembler to the fragmenter.</t>
       <t>Some LPWAN technologies provide quasi-bidirectional connectivity,
-whereby a downlink transmission from the Network Infrastructure can only take place
-right after an uplink transmission by the Dev.</t>
-      <t>When using SCHC F/R to send fragmented SCHC Packets downlink over these quasi-bidirectional links,
-the following situation may arise: if an uplink SCHC ACK is lost,
-the SCHC ACK REQ message by the sender could be stuck indefinitely in the downlink queue
+whereby a Downlink transmission from the Network Infrastructure can only take place
+right after an Uplink transmission by the Dev.</t>
+      <t>When using SCHC F/R to send fragmented SCHC Packets Downlink over these quasi-bidirectional links,
+the following situation may arise: if an Uplink SCHC ACK is lost,
+the SCHC ACK REQ message by the sender could be stuck indefinitely in the Downlink queue
 at the Network Infrastructure, waiting for a transmission opportunity.</t>
       <t>There are many ways by which this deadlock can be avoided.
-The Dev application might be sending recurring uplink messages such as keep-alive,
-or the Dev application stack might be sending other recurring uplink messages as part of its operation.
+The Dev application might be sending recurring Uplink messages such as keep-alive,
+or the Dev application stack might be sending other recurring Uplink messages as part of its operation.
 However, these are out of the control of this generic SCHC specification.</t>
       <t>In order to cope with quasi-bidirectional links, a SCHC-over-foo specification may want to amend
 the SCHC F/R specification to add a timer-based retransmission of the SCHC ACK.
 Below is an example of the suggested behavior for ACK-Always mode.
 Because it is an example, <xref target="RFC2119" format="default"/> language is deliberately not used here.</t>
-      <t>For downlink transmission of a fragmented SCHC Packet in ACK-Always mode, the SCHC Fragment receiver may support timer-based SCHC ACK retransmission. In this mechanism, the SCHC Fragment receiver initializes and starts a timer (the UplinkACK Timer) after the transmission of a SCHC ACK, except when the SCHC ACK is sent in response to the last SCHC Fragment of a packet (All-1 fragment). In the latter case, the SCHC Fragment receiver does not start a timer after transmission of the SCHC ACK.</t>
+      <t>For Downlink transmission of a fragmented SCHC Packet in ACK-Always mode, the SCHC Fragment receiver may support timer-based SCHC ACK retransmission. In this mechanism, the SCHC Fragment receiver initializes and starts a timer (the UplinkACK Timer) after the transmission of a SCHC ACK, except when the SCHC ACK is sent in response to the last SCHC Fragment of a packet (All-1 fragment). In the latter case, the SCHC Fragment receiver does not start a timer after transmission of the SCHC ACK.</t>
       <t>If, after transmission of a SCHC ACK that is not an All-1 fragment, and before expiration of the corresponding UplinkACK timer, the SCHC Fragment receiver receives a SCHC Fragment that belongs to the current window (e.g., a missing SCHC Fragment from the current window) or to the next window, the UplinkACK timer for the SCHC ACK is stopped. However, if the UplinkACK timer expires, the SCHC ACK is resent and the UplinkACK timer is reinitialized and restarted.</t>
       <t>The default initial value for the UplinkACK Timer, as well as the maximum number of retries for a specific SCHC ACK, denoted MAX_ACK_REQUESTS, is to be defined in a Profile.
 The initial value of the UplinkACK timer is expected to be greater than that of the Retransmission timer,
