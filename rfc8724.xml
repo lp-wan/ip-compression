@@ -1616,7 +1616,7 @@ and this information has been conveyed back to the sender, or</li>
             <li>the value of MAX_ACK_REQUESTS,</li>
             <li>the expiration time of the Retransmission Timer,</li>
             <li>the expiration time of the Inactivity Timer,</li>
-            <li>whether the last tile is carried in a Regular SCHC Fragment or an All-1 SCHC Fragment (see <xref target="ACK-on-Error-sender" format="default"/>), and</li>
+            <li>if the last tile is carried in a Regular SCHC Fragment or an All-1 SCHC Fragment (see <xref target="ACK-on-Error-sender" format="default"/>), and</li>
             <li>if the penultimate tile <bcp14>MAY</bcp14> be one L2 Word smaller than the regular tile size. In this case, the regular tile size <bcp14>MUST</bcp14> be at least twice the L2 Word size.</li>
           </ul>
           <t>For each active pair of RuleID and DTag values, the sender <bcp14>MUST</bcp14> maintain:</t>
@@ -1646,7 +1646,7 @@ If more than one tile is carried in one Regular SCHC Fragment:</t>
             <t>Tiles that are not the last one <bcp14>MUST</bcp14> be sent in Regular SCHC Fragments specified in <xref target="NotLastFrag" format="default"/>.
 The FCN field <bcp14>MUST</bcp14> contain the tile index of the first tile sent in that SCHC Fragment.</t>
             <t>In a Regular SCHC Fragment message, the sender <bcp14>MUST</bcp14> fill the W field with the window number of the first tile sent in that SCHC Fragment.</t>
-            <t>Depending on the Profile, the last tile of a SCHC Packet <bcp14>MUST</bcp14> be sent either:</t>
+            <t>A Profile <bcp14>MUST</bcp14> define if the last tile of a SCHC Packet is sent:</t>
             <ul spacing="normal">
               <li>in a Regular SCHC Fragment, alone or as part of a multi-tiles Payload, or</li>
               <li>alone in an All-1 SCHC Fragment.</li>
@@ -1702,6 +1702,7 @@ it <bcp14>MAY</bcp14> exit with an error condition.</li>
                               <li>the fragment sender <bcp14>MUST</bcp14> send SCHC Fragment messages containing all the tiles that are reported missing in the SCHC ACK.</li>
                               <li>if the last of these SCHC Fragment messages is not an All-1 SCHC Fragment,
 then the fragment sender <bcp14>MUST</bcp14> in addition send after it a SCHC ACK REQ with the W field corresponding to the last window.</li>
+                              <li>in doing the two items above, the sender MUST ascertain that the receiver will not receive the last tile through both a Regular SCHC Fragment and an All-1 SCHC Fragment.</li>
                             </ul>
                           </li>
                         </ul>
@@ -2849,6 +2850,8 @@ The specification in <xref target="ACK-on-Error-sender" format="default"/> allow
             <li>number of bits for FCN (N) for each RuleID value.</li>
             <li>what makes an All-0 SCHC Fragment and a SCHC ACK REQ distinguishable (see <xref target="NotLastFrag" format="default"/>).</li>
             <li>what makes an All-1 SCHC Fragment and a SCHC Sender-Abort distinguishable (see <xref target="LastFrag" format="default"/>).</li>
+            <li>for RuleIDs that use ACK-on-Error mode: is the last tile of a SCHC Packet to be sent in a Regular SCHC Fragment or alone in an All-1 SCHC Fragment.</li>
+            <li>for RuleIDs that use ACK-on-Error mode: is the penultimate tile of a SCHC Packet of the regular size or can it be one L2 Word shorter.</li>
             <li>size of RCS and algorithm for its computation, for each RuleID, if different from the default CRC32. Byte fill-up with zeroes or other mechanism, to be specified.</li>
             <li>Retransmission Timer duration for each RuleID value, if applicable to the SCHC F/R mode.</li>
             <li>Inactivity Timer duration for each RuleID value, if applicable to the SCHC F/R mode.</li>
