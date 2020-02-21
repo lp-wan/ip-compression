@@ -1655,6 +1655,7 @@ The FCN field <bcp14>MUST</bcp14> contain the tile index of the first tile sent 
             <t>In an All-1 SCHC Fragment message, the sender <bcp14>MUST</bcp14> fill the W field with the window number of the last tile of the SCHC Packet.</t>
             <t>The fragment sender <bcp14>MUST</bcp14> send SCHC Fragments such that, all together, they contain all the tiles of the fragmented SCHC Packet.</t>
             <t>The fragment sender <bcp14>MUST</bcp14> send at least one All-1 SCHC Fragment.</t>
+            <t>In doing the two items above, the sender <bcp14>MUST</bcp14> ascertain that the receiver will not receive the last tile through both a Regular SCHC Fragment and an All-1 SCHC Fragment.</t>
             <t>The fragment sender <bcp14>MUST</bcp14> listen for SCHC ACK messages after having sent:</t>
             <ul spacing="normal">
               <li>an All-1 SCHC Fragment, or</li>
@@ -1703,7 +1704,7 @@ it <bcp14>MAY</bcp14> exit with an error condition.</li>
                               <li>the fragment sender <bcp14>MUST</bcp14> send SCHC Fragment messages containing all the tiles that are reported missing in the SCHC ACK.</li>
                               <li>if the last of these SCHC Fragment messages is not an All-1 SCHC Fragment,
 then the fragment sender <bcp14>MUST</bcp14> in addition send after it a SCHC ACK REQ with the W field corresponding to the last window.</li>
-                              <li>in doing the two items above, the sender MUST ascertain that the receiver will not receive the last tile through both a Regular SCHC Fragment and an All-1 SCHC Fragment.</li>
+                              <li>in doing the two items above, the sender <bcp14>MUST</bcp14> ascertain that the receiver will not receive the last tile through both a Regular SCHC Fragment and an All-1 SCHC Fragment.</li>
                             </ul>
                           </li>
                         </ul>
@@ -2851,8 +2852,8 @@ The specification in <xref target="ACK-on-Error-sender" format="default"/> allow
             <li>number of bits for FCN (N) for each RuleID value.</li>
             <li>what makes an All-0 SCHC Fragment and a SCHC ACK REQ distinguishable (see <xref target="NotLastFrag" format="default"/>).</li>
             <li>what makes an All-1 SCHC Fragment and a SCHC Sender-Abort distinguishable (see <xref target="LastFrag" format="default"/>).</li>
-            <li>for RuleIDs that use ACK-on-Error mode: is the last tile of a SCHC Packet to be sent in a Regular SCHC Fragment only, alone in an All-1 SCHC Fragment only or with any of these two methods.</li>
-            <li>for RuleIDs that use ACK-on-Error mode: is the penultimate tile of a SCHC Packet of the regular size or can it be one L2 Word shorter.</li>
+            <li>for RuleIDs that use ACK-on-Error mode: when the last tile of a SCHC Packet is to be sent in a Regular SCHC Fragment, alone in an All-1 SCHC Fragment or with any of these two methods.</li>
+            <li>for RuleIDs that use ACK-on-Error mode: if the penultimate tile of a SCHC Packet is of the regular size only or if it can also be one L2 Word shorter.</li>
             <li>size of RCS and algorithm for its computation, for each RuleID, if different from the default CRC32. Byte fill-up with zeroes or other mechanism, to be specified.</li>
             <li>Retransmission Timer duration for each RuleID value, if applicable to the SCHC F/R mode.</li>
             <li>Inactivity Timer duration for each RuleID value, if applicable to the SCHC F/R mode.</li>
